@@ -4,7 +4,7 @@
         <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
 ]> 
 <?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
-<Model ID="39516136" Class="daeModel" Library="DAE.Core" Version="1.0.5">
+<Model ID="40958504" Class="daeModel" Library="DAE.Core" Version="1.0.5">
   <Name>Tutorial_8</Name>
   <Description>This tutorial explains how to create custom data reporters and how to create a composite data reporter which delegates the data processing to other data reporters. </Description>
   <MathMLName>
@@ -19,7 +19,7 @@
   </MathMLName>
   <Domains/>
   <Parameters>
-    <Object ID="38917296" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40359616" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>Q_in</Name>
       <Description>Power of the heater, W</Description>
       <MathMLName>
@@ -35,7 +35,7 @@
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="38917664" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40359984" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>m</Name>
       <Description>Mass of the plate, kg</Description>
       <MathMLName>
@@ -48,7 +48,7 @@
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="39516304" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40958672" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>c_p</Name>
       <Description>Specific heat capacity of the plate, J/kgK</Description>
       <MathMLName>
@@ -66,7 +66,7 @@
     </Object>
   </Parameters>
   <Variables>
-    <Object ID="39516856" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40959224" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
       <Name>T</Name>
       <Description>Temperature of the plate, K</Description>
       <MathMLName>
@@ -82,7 +82,7 @@
   </Variables>
   <Ports/>
   <Equations>
-    <Object ID="38936440" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40378808" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
       <Name>HeatBalance</Name>
       <Description>Integral heat balance equation.</Description>
       <MathMLName>
@@ -101,7 +101,7 @@
           <Left>
             <Function>eMulti</Function>
             <Left>
-              <Parameter ID="38917664">
+              <Parameter ID="40359984">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -113,7 +113,7 @@
               <DomainIterators/>
             </Left>
             <Right>
-              <Parameter ID="39516304">
+              <Parameter ID="40958672">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -129,7 +129,7 @@
             </Right>
           </Left>
           <Right>
-            <Variable ID="39516856">
+            <Variable ID="40959224">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -143,7 +143,7 @@
           </Right>
         </Left>
         <Right>
-          <Parameter ID="38917296">
+          <Parameter ID="40359616">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>

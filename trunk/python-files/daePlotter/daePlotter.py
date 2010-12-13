@@ -32,11 +32,6 @@ try:
 except ImportError, e:
     print '[daePlotter]: Cannot load dae3DPlot module', str(e)
 
-try:
-    from daeMayavi3DPlot import daeMayavi3DPlot
-except ImportError, e:
-    print '[daePlotter]: Cannot load daeMayavi3DPlot module', str(e)
-
 class daeMainWindow(QtGui.QMainWindow):
     def __init__(self, tcpipServer):
         QtGui.QMainWindow.__init__(self)
@@ -84,7 +79,6 @@ class daeMainWindow(QtGui.QMainWindow):
 
         self.toolbar.addAction(plot2D)
         self.toolbar.addAction(plot3D)
-        self.toolbar.addAction(plotMayavi3D)
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
@@ -97,6 +91,11 @@ class daeMainWindow(QtGui.QMainWindow):
         
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
+        try:
+            from daeMayavi3DPlot import daeMayavi3DPlot
+        except ImportError, e:
+            print '[daePlotter]: Cannot load daeMayavi3DPlot module', str(e)
+        
         plot3d = daeMayavi3DPlot(self.tcpipServer)
         if plot3d.newSurface() == False:
             del plot3d

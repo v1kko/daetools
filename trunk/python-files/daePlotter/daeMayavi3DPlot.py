@@ -50,11 +50,11 @@ class daeMayavi3DPlot:
         ymin=numpy.min(yPoints)
         zmin=numpy.min(zPoints)
 
-        warp = 1
-        if((xmax == xmin) or (ymax == ymin) or (zmax == zmin)):
-            warp = 'auto'
-        else:
-            warp = math.sqrt( (xmax-xmin)*(ymax-ymin) ) / (zmax-zmin)
+        warp = 'auto'
+        #if((xmax == xmin) or (ymax == ymin) or (zmax == zmin)):
+        #    warp = 'auto'
+        #else:
+        #    warp = math.sqrt( (xmax-xmin)*(ymax-ymin) ) / (zmax-zmin)
                
         # colormap='gist_earth', 'RdBu'
         stype = 'surface'
@@ -65,7 +65,7 @@ class daeMayavi3DPlot:
             mlab.colorbar(orientation='vertical')
             #mlab.title('polar mesh')
             #mlab.outline()
-            mlab.axes(ranges=[xmin, xmax, ymin, ymax, zmin, zmax], nb_labels=4)
+            mlab.axes(ranges=[xmin, xmax, ymin, ymax, zmin, zmax], nb_labels=3)
 
             mlab.xlabel(xAxisLabel)
             mlab.ylabel(yAxisLabel)
@@ -75,7 +75,7 @@ class daeMayavi3DPlot:
             mlab.colorbar(orientation='vertical')
             #mlab.title('polar mesh')
             #mlab.outline()
-            mlab.axes(ranges=[xmin, xmax, ymin, ymax], nb_labels=4)
+            mlab.axes(ranges=[xmin, xmax, ymin, ymax], nb_labels=3)
 
             mlab.xlabel(xAxisLabel)
             mlab.ylabel(yAxisLabel)

@@ -26,8 +26,7 @@ Project</span></a></h1>
   <li><a href="news.html" id="current">News</a></li>
   <li><a href="downloads.html">Downloads</a></li>
   <li><a href="documentation.html">Documentation</a></li>
-  <li><a href="http://forum.daetools.com/">Forum</a></li>
-  <li><a href="http://code.google.com/p/dae-tools">SVN</a></li>
+  <li><a href="https://sourceforge.net/projects/daetools">Source Forge</a></li>
   <li><a href="contact.html">About</a></li>
 </ul>
 </div>
@@ -48,7 +47,7 @@ Project</span></a></h1>
 <div class="post">
 <h1><a name="2010"></a>2010</h1>
 <h2>Version 1.0-5 released (Sunday, December 12 2010)</h2>
-<pre>* Added opearators + - * / that accept mixed adouble and adouble_array <br>  arguments. As a result, they return an adouble_array of the same size as <br>  the adouble_array argument.<br>* Added functions d {partial derivative} and dt {derivative per time} to <br>  daeModel class. Only opearators + - * / are supported. They take <br>  expression as an argument and evaluate its time or partial derivative.<br>* Added about box to daePlotter and license information.<br>* Added daetools.cfg {in .info file format}. All core libraries use the <br>  settings from that file.<br>* Added two new functions to daeModel:<br>  - SaveModelReport {replaced the global daeSaveModel function}<br>  - SaveRuntimeModelReport to export the runtime information about a <br>    simulation. It is basically equivalent to the model report with <br>    added equations after a discretization.<br>* Added support for initialization of complex models. Values of model <br>  variables now can be exported to a binary file and used later during <br>  the initialization. Two new functions are added to daeSimulation: <br>  Load/StoreInitializationValues<br>  The file format is:<br>  - NoVariables (number of variables): 32 bit unsigned integer;<br>  - Variable values: array of size [NoVariables] of 64 bit <br>    (double precision) floating point numbers;<br>* Fixed functions Pause and Resume in daeDynamicActivity enabling pausing <br>  and resuming of a simulation. Mutexes are not used any more.<br>* Improved daeSimulator to support Pause and Resume functions<br>* Modified installation packages so that the file permissions, owner and <br>  group are fixed.<br>* Updated documentation {installing, getting started and user guide}<br>* All tutorials modified so that they support two execution modes:<br>  - gui (with daeSimulator GUI);<br>  - console<br>  The execution modes are specified at the command line:<br>    python tutorial.py gui<br>    python tutorial.py console<br>  Default is gui.<br>* Added daeSimulator GUI to tutorials<br></pre>
+<pre>* Added opearators + - * / that accept mixed adouble and adouble_array <br>  arguments. As a result, they return an adouble_array of the same size as <br>  the adouble_array argument.<br>* Added functions d {partial derivative} and dt {derivative per time} to <br>  daeModel class. Only opearators + - * / are supported. They take <br>  expression as an argument and evaluate its time or partial derivative.<br>* Added about box to daePlotter and license information.<br>* Added daetools.cfg {in .info file format}. All core libraries use the <br>  settings from that file.<br>* Added two new functions to daeModel:<br>  - SaveModelReport {replaced the global daeSaveModel function}<br>  - SaveRuntimeModelReport to export the runtime information about a <br>    simulation. It is basically equivalent to the model report with <br>    added equations after a discretization.<br>* Added support for initialization of complex models. Values of model <br>  variables now can be exported to a binary file and used later during <br>  the initialization. Two new functions are added to daeSimulation: <br>  Load/StoreInitializationValues<br>  The file format is:<br>  - NoVariables (number of variables): 32 bit unsigned integer;<br>  - Variable values: array of size [NoVariables] of 64 bit <br>    (double precision) floating point numbers;<br>* Fixed functions Pause and Resume in daeDynamicActivity enabling pausing <br>  and resuming of a simulation. Mutexes are not used any more.<br>* Improved daeSimulator to support Pause and Resume functions<br>* Modified installation packages so that the file permissions, owner and <br>  group are fixed.<br>* Updated documentation {installing, getting started and user guide}<br>* All tutorials modified so that they support two execution modes:<br>  - gui (with daeSimulator GUI);<br>  - console<br>  The execution modes are specified at the command line:<br>    python tutorial.py gui<br>    python tutorial.py console<br>  Default is gui.<br>* Added daeSimulator GUI to tutorials<br> * Matplotlib 3D plot replaced by the Mayavi2 surface plot.</pre>
 <p><br>
 </p>
 <h2>Version 1.0-4 released (Wednesday, December 1 2010)</h2>
@@ -102,5 +101,19 @@ Project</span></a></h1>
 </div>
 </div>
 <!-- footer ends here --><!-- wrap ends here --> </div>
+
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://sourceforge.net/apps/piwik/daetools/" : "http://sourceforge.net/apps/piwik/daetools/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1" style="border:0" alt=""/></p></noscript>
+<!-- End Piwik Tag -->
+
 </body>
 </html>
