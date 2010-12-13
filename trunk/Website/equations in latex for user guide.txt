@@ -1,0 +1,62 @@
+{\partial V_{14} \over \partial t} + {V_1 \over V_{14} + 2.5} + sin(3.14 \cdot V_3) = 0
+
+{\partial V_{14}(x,y)) \over \partial t} + {V_1(x,y) \over V_{14}(x,y) + 2.5} + sin(3.14 \cdot V_3(x,y)) = 0; \forall x \in [0, x_n], \forall y \in (0, x_y)
+
+T(x,y) = 500; \forall x \in [0, x_n], y = 0
+
+k \cdot {\partial T(x,y) \over \partial t} - 1E6 = 0; \forall x \in [0, x_n], y = y_n
+
+myVar() - myParam() - 15
+
+myVar(d) = myParam(d) + 15; \forall d \in [0, d_n]
+
+
+myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
+
+myVar = \sum myParam.array( myDomain() )
+myVar = myParam(0) + myParam(1) + ... + myParam(n)
+
+myVar = myParam(0) + myParam(5) + myParam(12)
+myVar = myParam(1) + myParam(3) + ... + myParam(9)
+
+{\partial myVar \over \partial t} = 1
+
+
+{\partial myVar(d) \over \partial myDomain} = 1; \forall d \in (0, d_n)
+
+{\partial^2 myVar(d) \over \partial myDomain^2} = 1; \forall d \in (0, d_n)
+
+
+myVar = \min ( {\partial myVar(0) \over \partial myDomain}, {\partial myVar(1) \over \partial myDomain}, {\partial myVar(3) \over \partial myDomain})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

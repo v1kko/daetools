@@ -1,0 +1,904 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module datareporting</title>
+</head><body bgcolor="#f0f0f8">
+
+    <p><tt>dae.datareporting&nbsp;module&nbsp;consists&nbsp;of&nbsp;two&nbsp;parts:<br>
+&nbsp;1)&nbsp;DataReporter<br>
+&nbsp;2)&nbsp;DataReceiver<br>
+&nbsp;<br>
+DataReporter&nbsp;is&nbsp;used&nbsp;by&nbsp;the&nbsp;running&nbsp;activity&nbsp;to&nbsp;send&nbsp;the&nbsp;information&nbsp;(a&nbsp;client).&nbsp;<br>
+There&nbsp;are&nbsp;two&nbsp;different&nbsp;types&nbsp;of&nbsp;data&nbsp;reporters:&nbsp;Local&nbsp;and&nbsp;Remote.&nbsp;Local&nbsp;do&nbsp;not&nbsp;need&nbsp;the&nbsp;server&nbsp;side&nbsp;(data&nbsp;receiver)&nbsp;and&nbsp;are&nbsp;capable&nbsp;to&nbsp;process&nbsp;<br>
+the&nbsp;received&nbsp;data&nbsp;internally&nbsp;(to&nbsp;save&nbsp;them&nbsp;into&nbsp;a&nbsp;file,&nbsp;for&nbsp;instance).&nbsp;Remote&nbsp;need&nbsp;the&nbsp;server&nbsp;to&nbsp;send&nbsp;the&nbsp;data.&nbsp;<br>
+The&nbsp;main&nbsp;class&nbsp;is&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>&nbsp;which&nbsp;defines&nbsp;interface&nbsp;used&nbsp;to&nbsp;perform&nbsp;the&nbsp;following&nbsp;tasks:<br>
+&nbsp;-&nbsp;Connect/Disconnect&nbsp;to&nbsp;the&nbsp;corresponding&nbsp;DataReceiver&nbsp;(if&nbsp;any).&nbsp;A&nbsp;good&nbsp;example&nbsp;is&nbsp;a&nbsp;tcpip&nbsp;client&nbsp;which&nbsp;connects&nbsp;and&nbsp;sends&nbsp;data&nbsp;to&nbsp;a&nbsp;tcpip&nbsp;server.<br>
+&nbsp;-&nbsp;Send&nbsp;the&nbsp;info&nbsp;about&nbsp;domains&nbsp;and&nbsp;variables&nbsp;in&nbsp;the&nbsp;activity<br>
+&nbsp;-&nbsp;Send&nbsp;the&nbsp;results&nbsp;for&nbsp;specified&nbsp;variables&nbsp;at&nbsp;the&nbsp;given&nbsp;time&nbsp;intervals<br>
+&nbsp;<br>
+DataReceiver&nbsp;is&nbsp;used&nbsp;to&nbsp;receive&nbsp;the&nbsp;information&nbsp;from&nbsp;the&nbsp;activity&nbsp;(a&nbsp;server).&nbsp;The&nbsp;most&nbsp;often&nbsp;it&nbsp;is&nbsp;a&nbsp;tcp/ip&nbsp;server&nbsp;but&nbsp;in&nbsp;general&nbsp;any&nbsp;type&nbsp;of&nbsp;a&nbsp;client/server&nbsp;<br>
+communication&nbsp;can&nbsp;be&nbsp;implemented&nbsp;(pipes,&nbsp;shared&nbsp;memory,&nbsp;etc).<br>
+The&nbsp;main&nbsp;class&nbsp;is&nbsp;<a href="#daeDataReceiver_t">daeDataReceiver_t</a>&nbsp;which&nbsp;defines&nbsp;an&nbsp;interface&nbsp;used&nbsp;to&nbsp;access&nbsp;the&nbsp;received&nbsp;data.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReceiverDomain">daeDataReceiverDomain</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReceiverVariable">daeDataReceiverVariable</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReceiverVariableValue">daeDataReceiverVariableValue</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReceiver_t">daeDataReceiver_t</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterDomain">daeDataReporterDomain</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterProcess">daeDataReporterProcess</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterVariable">daeDataReporterVariable</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterVariableValue">daeDataReporterVariableValue</a>
+</font></dt><dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterFile">daeDataReporterFile</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeTEXTFileDataReporter">daeTEXTFileDataReporter</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterRemote">daeDataReporterRemote</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeTCPIPDataReporter">daeTCPIPDataReporter</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeDelegateDataReporter">daeDelegateDataReporter</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeTCPIPDataReceiverServer">daeTCPIPDataReceiverServer</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReceiverDomain">class <strong>daeDataReceiverDomain</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Type:&nbsp;daeeDomainType&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Points:&nbsp;one-dimensional&nbsp;numpy&nbsp;array&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReceiverDomain-__getitem__"><strong>__getitem__</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverDomain-__init__"><strong>__init__</strong></a>(self, Name, Type, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;Type:&nbsp;daeeDomainType<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverDomain-__setitem__"><strong>__setitem__</strong></a>(self, Index, Value)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+&nbsp;-&nbsp;Value:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReceiverVariable">class <strong>daeDataReceiverVariable</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Domains:&nbsp;list&nbsp;of&nbsp;daeDataReceiverDomains&nbsp;(read-only)<br>
+&nbsp;-&nbsp;TimeValues:&nbsp;multi-dimensional&nbsp;numpy&nbsp;array&nbsp;(read-only)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;available&nbsp;points&nbsp;in&nbsp;time&nbsp;that&nbsp;the&nbsp;data&nbsp;are&nbsp;available&nbsp;for<br>
+&nbsp;-&nbsp;Values:&nbsp;multi-dimensional&nbsp;numpy&nbsp;array&nbsp;(read-only)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;values&nbsp;for&nbsp;all&nbsp;time&nbsp;points<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReceiverVariable-AddDomain"><strong>AddDomain</strong></a>(self, Domain)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReceiverDomain">daeDataReceiverDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverVariable-AddVariableValue"><strong>AddVariableValue</strong></a>(self, VariableValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;VariableValue:&nbsp;<a href="#daeDataReceiverVariableValue">daeDataReceiverVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverVariable-__init__"><strong>__init__</strong></a>(self, Name, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReceiverVariableValue">class <strong>daeDataReceiverVariableValue</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Time:&nbsp;float&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReceiverVariableValue-__getitem__"><strong>__getitem__</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverVariableValue-__init__"><strong>__init__</strong></a>(self, Time, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiverVariableValue-__setitem__"><strong>__setitem__</strong></a>(self, Index, Value)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+&nbsp;-&nbsp;Value:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReceiver_t">class <strong>daeDataReceiver_t</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Abstract&nbsp;class.&nbsp;Defines&nbsp;DataReceiver&nbsp;interface<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReceiver_t-GetProcess"><strong>GetProcess</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a></tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiver_t-Start"><strong>Start</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReceiver_t-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterDomain">class <strong>daeDataReporterDomain</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;used&nbsp;in&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>::RegisterDomain()&nbsp;function&nbsp;to&nbsp;register&nbsp;a&nbsp;domain.<br>
+Contains&nbsp;the&nbsp;information&nbsp;about&nbsp;a&nbsp;domain&nbsp;in&nbsp;the&nbsp;running&nbsp;activity.<br>
+PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Type:&nbsp;daeeDomainType&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Points:&nbsp;list&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporterDomain-__getitem__"><strong>__getitem__</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterDomain-__init__"><strong>__init__</strong></a>(self, Name, Type, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;Type:&nbsp;daeeDomainType<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterDomain-__setitem__"><strong>__setitem__</strong></a>(self, Index, Value)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+&nbsp;-&nbsp;Value:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterFile">class <strong>daeDataReporterFile</strong></a>(<a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Abstract&nbsp;class&nbsp;derived&nbsp;from&nbsp;<a href="#daeDataReporterLocal">daeDataReporterLocal</a>&nbsp;which&nbsp;defines&nbsp;a&nbsp;method&nbsp;to&nbsp;write&nbsp;the&nbsp;data&nbsp;from&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a>&nbsp;into&nbsp;a&nbsp;file.<br>
+<a href="#daeDataReporterFile-WriteDataToFile">WriteDataToFile</a>()&nbsp;method&nbsp;must&nbsp;be&nbsp;implemented&nbsp;in&nbsp;derived&nbsp;classes.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="datareporting.html#daeDataReporterFile">daeDataReporterFile</a></dd>
+<dd><a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a></dd>
+<dd><a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="daeDataReporterFile-WriteDataToFile"><strong>WriteDataToFile</strong></a>(self, Filename)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Filename:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeDataReporterFile-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterFile-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterLocal">class <strong>daeDataReporterLocal</strong></a>(<a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;does&nbsp;not&nbsp;send&nbsp;the&nbsp;data&nbsp;received&nbsp;but&nbsp;stores&nbsp;them&nbsp;into&nbsp;a&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a>&nbsp;object.<br>
+It&nbsp;implements&nbsp;all&nbsp;methods&nbsp;from&nbsp;the&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>&nbsp;interface&nbsp;and&nbsp;it&nbsp;is&nbsp;typically&nbsp;used&nbsp;to&nbsp;process&nbsp;the&nbsp;data&nbsp;<br>
+internally&nbsp;(to&nbsp;save&nbsp;them&nbsp;into&nbsp;a&nbsp;file,&nbsp;for&nbsp;example).&nbsp;<br>
+It&nbsp;defines&nbsp;only&nbsp;one&nbsp;new&nbsp;method&nbsp;used&nbsp;to&nbsp;obtain&nbsp;the&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a>&nbsp;object.<br>
+PROPERTIES:<br>
+&nbsp;-&nbsp;Process:&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a>&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeDataReporterLocal-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterLocal-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterProcess">class <strong>daeDataReporterProcess</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Domains:&nbsp;list&nbsp;of&nbsp;daeDataReceiverDomains&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Variables:&nbsp;list&nbsp;of&nbsp;daeDataReceiverVariables&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporterProcess-FindVariable"><strong>FindVariable</strong></a>(self, Name)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;<a href="#daeDataReceiverVariable">daeDataReceiverVariable</a>&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterProcess-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReceiverDomain">daeDataReceiverDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterProcess-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReceiverVariable">daeDataReceiverVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterRemote">class <strong>daeDataReporterRemote</strong></a>(<a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;which&nbsp;does&nbsp;not&nbsp;keep&nbsp;the&nbsp;data&nbsp;received&nbsp;but&nbsp;sends&nbsp;them&nbsp;immediately&nbsp;to&nbsp;the&nbsp;appropriate&nbsp;server&nbsp;(<a href="#daeDataReceiver_t">daeDataReceiver_t</a>).<br>
+It&nbsp;implements&nbsp;all&nbsp;methods&nbsp;from&nbsp;the&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>&nbsp;interface&nbsp;and&nbsp;it&nbsp;is&nbsp;typically&nbsp;used&nbsp;to&nbsp;send&nbsp;the&nbsp;data&nbsp;to&nbsp;a&nbsp;server.<br>
+It&nbsp;defines&nbsp;one&nbsp;new&nbsp;method&nbsp;to&nbsp;send&nbsp;the&nbsp;received&nbsp;data.&nbsp;The&nbsp;data&nbsp;are&nbsp;formatted&nbsp;by&nbsp;the&nbsp;internal&nbsp;message&nbsp;formatter&nbsp;(in&nbsp;the&nbsp;binary&nbsp;format).<br>
+Derived&nbsp;classes&nbsp;must&nbsp;implement&nbsp;the&nbsp;following&nbsp;methods:<br>
+&nbsp;-&nbsp;Connect<br>
+&nbsp;-&nbsp;Disconnect<br>
+&nbsp;-&nbsp;IsConnected<br>
+&nbsp;-&nbsp;SendMessage<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporterRemote-SendMessage"><strong>SendMessage</strong></a>(self, Message)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Message:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeDataReporterRemote-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterRemote-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterVariable">class <strong>daeDataReporterVariable</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;used&nbsp;in&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>::RegisterVariable()&nbsp;function&nbsp;to&nbsp;register&nbsp;a&nbsp;variable.<br>
+Contains&nbsp;the&nbsp;information&nbsp;about&nbsp;a&nbsp;variable&nbsp;in&nbsp;the&nbsp;running&nbsp;activity.<br>
+PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfDomains:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Domains:&nbsp;list&nbsp;of&nbsp;strings&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporterVariable-AddDomain"><strong>AddDomain</strong></a>(self, Name)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterVariable-__init__"><strong>__init__</strong></a>(self, Name, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporterVariableValue">class <strong>daeDataReporterVariableValue</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;used&nbsp;in&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a>::SendVariable()&nbsp;function&nbsp;to&nbsp;send&nbsp;variable&nbsp;values.<br>
+Contains&nbsp;the&nbsp;information&nbsp;about&nbsp;variable&nbsp;values&nbsp;at&nbsp;the&nbsp;specified&nbsp;time&nbsp;in&nbsp;the&nbsp;running&nbsp;activity.<br>
+PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;Values:&nbsp;list&nbsp;of&nbsp;floats&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporterVariableValue-__getitem__"><strong>__getitem__</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterVariableValue-__init__"><strong>__init__</strong></a>(self, Name, NumberOfPoints)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
+&nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporterVariableValue-__setitem__"><strong>__setitem__</strong></a>(self, Index, Value)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+&nbsp;-&nbsp;Value:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDataReporter_t">class <strong>daeDataReporter_t</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;base&nbsp;data&nbsp;reporter&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDataReporter_t-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDataReporter_t-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDelegateDataReporter">class <strong>daeDelegateDataReporter</strong></a>(<a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;which&nbsp;delegates&nbsp;all&nbsp;method&nbsp;calls&nbsp;to&nbsp;the&nbsp;given&nbsp;list&nbsp;of&nbsp;data&nbsp;reporters.&nbsp;<br>
+For&nbsp;instance,&nbsp;it&nbsp;can&nbsp;be&nbsp;useful&nbsp;for&nbsp;simultaneous&nbsp;sending&nbsp;data&nbsp;to&nbsp;a&nbsp;server&nbsp;and&nbsp;data&nbsp;saving&nbsp;into&nbsp;a&nbsp;file.<br>
+The&nbsp;number&nbsp;of&nbsp;data&nbsp;reporters&nbsp;is&nbsp;unlimited.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDelegateDataReporter-AddDataReporter"><strong>AddDataReporter</strong></a>(self, DataReporter)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;<a href="#daeDataReporter_t">daeDataReporter_t</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeDelegateDataReporter-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeDelegateDataReporter-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeTCPIPDataReceiverServer">class <strong>daeTCPIPDataReceiverServer</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;NumberOfProcesses:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
+&nbsp;-&nbsp;NumberOfDataReceivers:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeTCPIPDataReceiverServer-GetDataReceiver"><strong>GetDataReceiver</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;<a href="#daeDataReceiver_t">daeDataReceiver_t</a></tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReceiverServer-GetProcess"><strong>GetProcess</strong></a>(self, Index)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;<a href="#daeDataReporterProcess">daeDataReporterProcess</a></tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReceiverServer-Start"><strong>Start</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReceiverServer-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReceiverServer-__init__"><strong>__init__</strong></a>(self, Port)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Port:&nbsp;unsigned&nbsp;int</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeTCPIPDataReporter">class <strong>daeTCPIPDataReporter</strong></a>(<a href="datareporting.html#daeDataReporterRemote">daeDataReporterRemote</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;used&nbsp;to&nbsp;send&nbsp;the&nbsp;received&nbsp;data&nbsp;to&nbsp;a&nbsp;server&nbsp;by&nbsp;tcp/ip&nbsp;protocol.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="datareporting.html#daeTCPIPDataReporter">daeTCPIPDataReporter</a></dd>
+<dd><a href="datareporting.html#daeDataReporterRemote">daeDataReporterRemote</a></dd>
+<dd><a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="daeTCPIPDataReporter-__init__"><strong>__init__</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;The&nbsp;connection&nbsp;string&nbsp;is&nbsp;given&nbsp;in&nbsp;the&nbsp;following&nbsp;form:&nbsp;TCPIPAddress:PORT&nbsp;(192.168.0.1:50000&nbsp;for&nbsp;instance)<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporterRemote">daeDataReporterRemote</a>:<br>
+<dl><dt><a name="daeTCPIPDataReporter-SendMessage"><strong>SendMessage</strong></a>(self, Message)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Message:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeTCPIPDataReporter-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTCPIPDataReporter-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeTEXTFileDataReporter">class <strong>daeTEXTFileDataReporter</strong></a>(<a href="datareporting.html#daeDataReporterFile">daeDataReporterFile</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Auxiliary&nbsp;class&nbsp;derived&nbsp;from&nbsp;<a href="#daeDataReporterFile">daeDataReporterFile</a>&nbsp;to&nbsp;save&nbsp;the&nbsp;data&nbsp;in&nbsp;a&nbsp;simple&nbsp;format&nbsp;into&nbsp;a&nbsp;text&nbsp;file.:<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="datareporting.html#daeTEXTFileDataReporter">daeTEXTFileDataReporter</a></dd>
+<dd><a href="datareporting.html#daeDataReporterFile">daeDataReporterFile</a></dd>
+<dd><a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a></dd>
+<dd><a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="daeTEXTFileDataReporter-WriteDataToFile"><strong>WriteDataToFile</strong></a>(self, Filename)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Filename:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeTEXTFileDataReporter-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeTEXTFileDataReporter-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

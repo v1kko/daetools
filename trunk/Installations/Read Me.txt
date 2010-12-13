@@ -1,0 +1,24 @@
+
+Execute command from Installations directory:
+
+#######################################################
+     Debian based .deb
+########################################################
+sh create_linux_package.sh MAJOR MINOR BUILD deb
+
+########################################################
+     RPM based .rpm
+########################################################
+sh create_linux_package.sh MAJOR MINOR BUILD rpm
+
+########################################################
+     Dumb package (tar.gz)
+########################################################
+sh create_linux_package.sh MAJOR MINOR BUILD gztar
+
+########################################################
+     Windows installer
+########################################################
+create_windows_package.cmd MAJOR MINOR BUILD win32
+
+

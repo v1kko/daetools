@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta name="Description" content="">
+  <meta name="Keywords"
+ content="DAE Tools Project, pyDAE, cxxDAE, dynamic modelling, simulation, partial differential equations, dae, pdae, equation-oriented modelling">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta name="Distribution" content="Copyrighted">
+  <meta name="Author" content="Dragan Nikolic - dnikolic@daetools.com">
+  <meta name="Robots" content="index,follow">
+  <link rel="stylesheet" href="images/dae.css" type="text/css">
+  <title>DAE Tools project</title>
+</head>
+<body>
+<!-- wrap starts here -->
+<div id="wrap">
+<div id="header">
+<div id="header-content">
+<h1 id="logo"><a href="index.html" title="">DAE Tools<span class="gray">
+Project</span></a></h1>
+<h2 id="slogan">Model the world freely...</h2>
+<!-- Menu Tabs -->
+<ul>
+  <li><a href="index.html">Home</a></li>
+  <li><a href="news.html" id="current">News</a></li>
+  <li><a href="downloads.html">Downloads</a></li>
+  <li><a href="documentation.html">Documentation</a></li>
+  <li><a href="http://forum.daetools.com/">Forum</a></li>
+  <li><a href="http://code.google.com/p/dae-tools">SVN</a></li>
+  <li><a href="contact.html">About</a></li>
+</ul>
+</div>
+</div>
+<!-- content-wrap starts here -->
+<div id="content-wrap">
+<div id="content">
+<div id="sidebar">
+<div class="sidebox">
+<h1 class="clear">News</h1>
+<ul class="sidemenu">
+  <li><a href="#2010" class="top">2010</a></li>
+</ul>
+</div>
+<br>
+</div>
+<div id="main">
+<div class="post">
+<h1><a name="2010"></a>2010</h1>
+<h2>Version 1.0-5 released (Sunday, December 12 2010)</h2>
+<pre>* Added opearators + - * / that accept mixed adouble and adouble_array <br>  arguments. As a result, they return an adouble_array of the same size as <br>  the adouble_array argument.<br>* Added functions d {partial derivative} and dt {derivative per time} to <br>  daeModel class. Only opearators + - * / are supported. They take <br>  expression as an argument and evaluate its time or partial derivative.<br>* Added about box to daePlotter and license information.<br>* Added daetools.cfg {in .info file format}. All core libraries use the <br>  settings from that file.<br>* Added two new functions to daeModel:<br>  - SaveModelReport {replaced the global daeSaveModel function}<br>  - SaveRuntimeModelReport to export the runtime information about a <br>    simulation. It is basically equivalent to the model report with <br>    added equations after a discretization.<br>* Added support for initialization of complex models. Values of model <br>  variables now can be exported to a binary file and used later during <br>  the initialization. Two new functions are added to daeSimulation: <br>  Load/StoreInitializationValues<br>  The file format is:<br>  - NoVariables (number of variables): 32 bit unsigned integer;<br>  - Variable values: array of size [NoVariables] of 64 bit <br>    (double precision) floating point numbers;<br>* Fixed functions Pause and Resume in daeDynamicActivity enabling pausing <br>  and resuming of a simulation. Mutexes are not used any more.<br>* Improved daeSimulator to support Pause and Resume functions<br>* Modified installation packages so that the file permissions, owner and <br>  group are fixed.<br>* Updated documentation {installing, getting started and user guide}<br>* All tutorials modified so that they support two execution modes:<br>  - gui (with daeSimulator GUI);<br>  - console<br>  The execution modes are specified at the command line:<br>    python tutorial.py gui<br>    python tutorial.py console<br>  Default is gui.<br>* Added daeSimulator GUI to tutorials<br></pre>
+<p><br>
+</p>
+<h2>Version 1.0-4 released (Wednesday, December 1 2010)</h2>
+<span style="text-decoration: underline;"></span>
+<pre>* Fixed functions sum, product, integral, average, min, max that operate on <br>  adouble_array objects<br>* Fixed functions sqrt, exp, log, log10, abs, sin, cos, tan, asin, acos, atan<br>  that operate on adouble_array objects<br>* Installer packages for some of the oses/platforms were not built to <br>  support Trilinos Amesos with SuperLU and Umfpack libraires; fixed now<br>* Added function SetActiveState(string) to daeSTN class in cDAE and pyDAE<br>* Few tutorial updates<br>* Some other minor fixes<br></pre>
+<p><br>
+</p>
+<h2>Version 1.0-3 released (Friday, November 19 2010)</h2>
+<pre>* Added Trilinos Amesos support for Umfpack<br>* Finalized Debian Lenny armel port<br>* pyDAE module separated into four modules: pyCore, pyDataReporting, <br>  pySolver, pyActivity<br>* @QtCore.pyqtSlot (the new slot style) removed; the old slot style is in <br>  use now (because the default qt version in Debian Lenny is 4.4; 4.5+ is <br>  required for the new style)<br>* Added daeSimulator<br>* daeRunExamples adapted to use daeSimulator<br>* Atlas Lapack LA solver removed<br>* Some other minor fixes <br></pre>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</div>
+<!-- content-wrap ends here --> </div>
+</div>
+<!-- footer starts here -->
+<div id="footer">
+<div id="footer-content">
+<div class="col float-left">
+<p> &copy; Copyright: Dragan Nikolic 2010<br>
+</p>
+</div>
+<div class="col float-left">
+<p> <a href="http://www.daetools.com"><strong>DAE Tools Project</strong></a>
+</p>
+</div>
+<div class="col2 float-right">
+<p> Design by: <a href="http://www.styleshout.com/"><strong>Styleshout</strong></a>
+&nbsp; &nbsp; Valid <a
+ href="http://jigsaw.w3.org/css-validator/check/referer"><strong>CSS</strong></a>
+| <a href="http://validator.w3.org/check/referer"><strong>XHTML</strong></a>
+</p>
+</div>
+</div>
+</div>
+<!-- footer ends here --><!-- wrap ends here --> </div>
+</body>
+</html>

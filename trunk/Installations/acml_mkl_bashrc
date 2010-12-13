@@ -1,0 +1,24 @@
+# 1) For a single user
+#    Copy this file to your home folder and add ". $HOME/acml_mkl_bashrc" line at the end of .bashrc file 
+# 2) For all users 
+#    Depending on your platform and architecture put the following lines in /etc/ld.so.conf and execute ldconfig
+#        /opt/intel/mkl/10.2.5.035/lib/em64t
+#        /opt/acml4.4.0/gfortran64_mp/lib
+
+
+echo "Setting LD_LIBRARY_PATH for Amd ACML and Intel MKL:"
+
+export OMP_NUM_THREADS=4
+export MKLARCH=em64t
+export ACMLARCH=64
+export MKLROOT="/opt/intel/mkl/10.2.5.035"
+export ACMLROOT="/opt/acml4.4.0"
+
+if [ -z "${LD_LIBRARY_PATH}" ]
+then
+    export LD_LIBRARY_PATH="${MKLROOT}/lib/${MKLARCH}:${ACMLROOT}/gfortran${ACMLARCH}_mp/lib"
+else
+    export LD_LIBRARY_PATH="${MKLROOT}/lib/${MKLARCH}:${ACMLROOT}/gfortran${ACMLARCH}_mp/lib:$LD_LIBRARY_PATH"
+fi
+
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"

@@ -1,0 +1,1836 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
+       "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd"[ 
+        <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
+]> 
+<?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
+<Model ID="31619880" Class="daeModel" Library="DAE.Core" Version="1.0.5">
+  <Name>Tutorial_2</Name>
+  <Description>This tutorial explains how to define Arrays (discrete distribution domains) and distributed parameters, how to calculate the number of degrees of freedom (NDOF) and how to fix it, and how to set initial guesses of the variables.</Description>
+  <MathMLName>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <msub>
+          <mi mathvariant="italic">Tutorial</mi>
+          <mi mathvariant="italic">2</mi>
+        </msub>
+      </mrow>
+    </math>
+  </MathMLName>
+  <Domains>
+    <Object ID="31615024" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+      <Name>x</Name>
+      <Description>X axis domain</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">x</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eDistributed</Type>
+    </Object>
+    <Object ID="31620064" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+      <Name>y</Name>
+      <Description>Y axis domain</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">y</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eDistributed</Type>
+    </Object>
+    <Object ID="31620384" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+      <Name>Nq</Name>
+      <Description>Number of heat fluxes</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">Nq</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eArray</Type>
+    </Object>
+  </Domains>
+  <Parameters>
+    <Object ID="31621360" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+      <Name>a</Name>
+      <Description>Coefficient for calculation of cp</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">a</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eReal</Type>
+      <DomainRefs/>
+    </Object>
+    <Object ID="31583792" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+      <Name>b</Name>
+      <Description>Coefficient for calculation of cp</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">b</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eReal</Type>
+      <DomainRefs/>
+    </Object>
+    <Object ID="31584832" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+      <Name>Q</Name>
+      <Description>Heat flux array at the edges of the plate (bottom/top), W/m2</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">Q</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eReal</Type>
+      <DomainRefs>
+        <ObjectRef ID="31620384">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">Nq</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        Nq</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="31585264" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+      <Name>&lambda;</Name>
+      <Description>Thermal conductivity of the plate, W/mK</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&lambda;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eReal</Type>
+      <DomainRefs>
+        <ObjectRef ID="31615024">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        x</ObjectRef>
+        <ObjectRef ID="31620064">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        y</ObjectRef>
+      </DomainRefs>
+    </Object>
+  </Parameters>
+  <Variables>
+    <Object ID="31620872" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+      <Name>c_p</Name>
+      <Description>Specific heat capacity of the plate, J/kgK</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">c</mi>
+              <mi mathvariant="italic">p</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Conductivity</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="31615024">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        x</ObjectRef>
+        <ObjectRef ID="31620064">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        y</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="31585656" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+      <Name>&rho;</Name>
+      <Description>Density of the plate, kg/m3</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&rho;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Density</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="31586120" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+      <Name>T</Name>
+      <Description>Temperature of the plate, K</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">T</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Temperature</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="31615024">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        x</ObjectRef>
+        <ObjectRef ID="31620064">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        y</ObjectRef>
+      </DomainRefs>
+    </Object>
+  </Variables>
+  <Ports/>
+  <Equations>
+    <Object ID="31608984" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>HeatBalance</Name>
+      <Description>Heat balance equation. Valid on the open x and y domains</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">HeatBalance</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMulti</Function>
+          <Left>
+            <Function>eMulti</Function>
+            <Left>
+              <Variable ID="31585656">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&rho;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &rho;</Variable>
+              <DomainIterators/>
+            </Left>
+            <Right>
+              <Variable ID="31620872">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">c</mi>
+                        <mi mathvariant="italic">p</mi>
+                      </msub>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              c_p</Variable>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609448">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.x</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.x</DEDI>
+                </Object>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609592">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.y</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.y</DEDI>
+                </Object>
+              </DomainIterators>
+            </Right>
+          </Left>
+          <Right>
+            <Variable ID="31586120">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">T</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            T</Variable>
+            <Degree>1</Degree>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31609448">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mi mathvariant="italic">HeatBalance.x</mi>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                HeatBalance.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31609592">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mi mathvariant="italic">HeatBalance.y</mi>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                HeatBalance.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Right>
+        </Left>
+        <Right>
+          <Function>eMulti</Function>
+          <Left>
+            <Parameter ID="31585264">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">&lambda;</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            &lambda;</Parameter>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31609448">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mi mathvariant="italic">HeatBalance.x</mi>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                HeatBalance.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31609592">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mi mathvariant="italic">HeatBalance.y</mi>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                HeatBalance.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Left>
+          <Right>
+            <Function>ePlus</Function>
+            <Left>
+              <Variable ID="31586120">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">T</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              T</Variable>
+              <Domain ID="31615024">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">x</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              x</Domain>
+              <Degree>2</Degree>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609448">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.x</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.x</DEDI>
+                </Object>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609592">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.y</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.y</DEDI>
+                </Object>
+              </DomainIterators>
+            </Left>
+            <Right>
+              <Variable ID="31586120">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">T</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              T</Variable>
+              <Domain ID="31620064">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">y</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              y</Domain>
+              <Degree>2</Degree>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609448">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.x</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.x</DEDI>
+                </Object>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="31609592">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mi mathvariant="italic">HeatBalance.y</mi>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  HeatBalance.y</DEDI>
+                </Object>
+              </DomainIterators>
+            </Right>
+          </Right>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <mrow>
+                    <mi mathvariant="italic">&rho;</mi>
+                  </mrow>
+                  <mo>&sdot;</mo>
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">c</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                    <mo>(</mo>
+                    <mi mathvariant="italic">x</mi>
+                    <mo>,</mo>
+                    <mi mathvariant="italic">y</mi>
+                    <mo>)</mo>
+                  </mrow>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mfrac>
+                  <mrow>
+                    <mo>d</mo>
+                    <mrow>
+                      <mi mathvariant="italic">T</mi>
+                      <mo>(</mo>
+                      <mi mathvariant="italic">x</mi>
+                      <mo>,</mo>
+                      <mi mathvariant="italic">y</mi>
+                      <mo>)</mo>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mo>d</mo>
+                    <mi>t</mi>
+                  </mrow>
+                </mfrac>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mrow>
+                  <mi mathvariant="italic">&lambda;</mi>
+                  <mo>(</mo>
+                  <mi mathvariant="italic">x</mi>
+                  <mo>,</mo>
+                  <mi mathvariant="italic">y</mi>
+                  <mo>)</mo>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mrow>
+                  <mo>(</mo>
+                  <mrow>
+                    <mfrac>
+                      <mrow>
+                        <msup>
+                          <mo>&PartialD;</mo>
+                          <mn>2</mn>
+                        </msup>
+                        <mrow>
+                          <mi mathvariant="italic">T</mi>
+                          <mo>(</mo>
+                          <mi mathvariant="italic">x</mi>
+                          <mo>,</mo>
+                          <mi mathvariant="italic">y</mi>
+                          <mo>)</mo>
+                        </mrow>
+                      </mrow>
+                      <mrow>
+                        <mo>&PartialD;</mo>
+                        <msup>
+                          <mi mathvariant="italic">x</mi>
+                          <mn>2</mn>
+                        </msup>
+                      </mrow>
+                    </mfrac>
+                    <mo>+</mo>
+                    <mfrac>
+                      <mrow>
+                        <msup>
+                          <mo>&PartialD;</mo>
+                          <mn>2</mn>
+                        </msup>
+                        <mrow>
+                          <mi mathvariant="italic">T</mi>
+                          <mo>(</mo>
+                          <mi mathvariant="italic">x</mi>
+                          <mo>,</mo>
+                          <mi mathvariant="italic">y</mi>
+                          <mo>)</mo>
+                        </mrow>
+                      </mrow>
+                      <mrow>
+                        <mo>&PartialD;</mo>
+                        <msup>
+                          <mi mathvariant="italic">y</mi>
+                          <mn>2</mn>
+                        </msup>
+                      </mrow>
+                    </mfrac>
+                  </mrow>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">x</mi>
+              <mo>&isin;</mo>
+              <mo>(</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>)</mo>
+              <mo>,</mo>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">y</mi>
+              <mo>&isin;</mo>
+              <mo>(</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>)</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="31609448" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eOpenOpen</Type>
+        </Object>
+        <Object ID="31609592" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eOpenOpen</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="32190840" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>BC_bottom</Name>
+      <Description>Boundary conditions for the bottom edge</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">BC</mi>
+              <mi mathvariant="italic">bottom</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMulti</Function>
+          <Left>
+            <Function>eSign</Function>
+            <Node>
+              <Parameter ID="31585264">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&lambda;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &lambda;</Parameter>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="32190984">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">BC</mi>
+                              <mi mathvariant="italic">bottom</mi>
+                            </msub>
+                            <mo>.</mo>
+                            <mi mathvariant="italic">x</mi>
+                          </mrow>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  BC_bottom.x</DEDI>
+                </Object>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="32191208">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">BC</mi>
+                              <mi mathvariant="italic">bottom</mi>
+                            </msub>
+                            <mo>.</mo>
+                            <mi mathvariant="italic">y</mi>
+                          </mrow>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  BC_bottom.y</DEDI>
+                </Object>
+              </DomainIterators>
+            </Node>
+          </Left>
+          <Right>
+            <Variable ID="31586120">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">T</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            T</Variable>
+            <Domain ID="31620064">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">y</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            y</Domain>
+            <Degree>1</Degree>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="32190984">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">BC</mi>
+                            <mi mathvariant="italic">bottom</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">x</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                BC_bottom.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="32191208">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">BC</mi>
+                            <mi mathvariant="italic">bottom</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">y</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                BC_bottom.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Right>
+        </Left>
+        <Right>
+          <Parameter ID="31584832">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">Q</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          Q</Parameter>
+          <DomainIterators>
+            <Object>
+              <Type>eConstantIndex</Type>
+              <Index>0</Index>
+            </Object>
+          </DomainIterators>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <mo>(</mo>
+                  <mrow>
+                    <mo>(</mo>
+                    <mrow>
+                      <mo>-</mo>
+                      <mrow>
+                        <mi mathvariant="italic">&lambda;</mi>
+                        <mo>(</mo>
+                        <mi mathvariant="italic">x</mi>
+                        <mo>,</mo>
+                        <mi mathvariant="italic">y</mi>
+                        <mo>)</mo>
+                      </mrow>
+                    </mrow>
+                    <mo>)</mo>
+                  </mrow>
+                  <mo>)</mo>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mfrac>
+                  <mrow>
+                    <mo>&PartialD;</mo>
+                    <mrow>
+                      <mi mathvariant="italic">T</mi>
+                      <mo>(</mo>
+                      <mi mathvariant="italic">x</mi>
+                      <mo>,</mo>
+                      <mi mathvariant="italic">y</mi>
+                      <mo>)</mo>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mo>&PartialD;</mo>
+                    <mi mathvariant="italic">y</mi>
+                  </mrow>
+                </mfrac>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mi mathvariant="italic">Q</mi>
+                <mo>(</mo>
+                <mi mathvariant="italic">0</mi>
+                <mo>)</mo>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">x</mi>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+              <mo>,</mo>
+              <mi mathvariant="italic">y</mi>
+              <mo>=</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>0</mi>
+              </msub>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="32190984" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+        <Object ID="32191208" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eLowerBound</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="32192024" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>BC_top</Name>
+      <Description>Boundary conditions for the top edge</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">BC</mi>
+              <mi mathvariant="italic">top</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMulti</Function>
+          <Left>
+            <Function>eSign</Function>
+            <Node>
+              <Parameter ID="31585264">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&lambda;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &lambda;</Parameter>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="32192168">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">BC</mi>
+                              <mi mathvariant="italic">top</mi>
+                            </msub>
+                            <mo>.</mo>
+                            <mi mathvariant="italic">x</mi>
+                          </mrow>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  BC_top.x</DEDI>
+                </Object>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="32192392">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">BC</mi>
+                              <mi mathvariant="italic">top</mi>
+                            </msub>
+                            <mo>.</mo>
+                            <mi mathvariant="italic">y</mi>
+                          </mrow>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  BC_top.y</DEDI>
+                </Object>
+              </DomainIterators>
+            </Node>
+          </Left>
+          <Right>
+            <Variable ID="31586120">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">T</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            T</Variable>
+            <Domain ID="31620064">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">y</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            y</Domain>
+            <Degree>1</Degree>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="32192168">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">BC</mi>
+                            <mi mathvariant="italic">top</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">x</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                BC_top.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="32192392">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">BC</mi>
+                            <mi mathvariant="italic">top</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">y</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                BC_top.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Right>
+        </Left>
+        <Right>
+          <Parameter ID="31584832">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">Q</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          Q</Parameter>
+          <DomainIterators>
+            <Object>
+              <Type>eConstantIndex</Type>
+              <Index>1</Index>
+            </Object>
+          </DomainIterators>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <mo>(</mo>
+                  <mrow>
+                    <mo>(</mo>
+                    <mrow>
+                      <mo>-</mo>
+                      <mrow>
+                        <mi mathvariant="italic">&lambda;</mi>
+                        <mo>(</mo>
+                        <mi mathvariant="italic">x</mi>
+                        <mo>,</mo>
+                        <mi mathvariant="italic">y</mi>
+                        <mo>)</mo>
+                      </mrow>
+                    </mrow>
+                    <mo>)</mo>
+                  </mrow>
+                  <mo>)</mo>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mfrac>
+                  <mrow>
+                    <mo>&PartialD;</mo>
+                    <mrow>
+                      <mi mathvariant="italic">T</mi>
+                      <mo>(</mo>
+                      <mi mathvariant="italic">x</mi>
+                      <mo>,</mo>
+                      <mi mathvariant="italic">y</mi>
+                      <mo>)</mo>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mo>&PartialD;</mo>
+                    <mi mathvariant="italic">y</mi>
+                  </mrow>
+                </mfrac>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mi mathvariant="italic">Q</mi>
+                <mo>(</mo>
+                <mi mathvariant="italic">1</mi>
+                <mo>)</mo>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">x</mi>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+              <mo>,</mo>
+              <mi mathvariant="italic">y</mi>
+              <mo>=</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>n</mi>
+              </msub>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="32192168" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+        <Object ID="32192392" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eUpperBound</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="32193480" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>BC_left</Name>
+      <Description>Boundary conditions at the left edge</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">BC</mi>
+              <mi mathvariant="italic">left</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Variable ID="31586120">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">T</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        T</Variable>
+        <Domain ID="31615024">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        x</Domain>
+        <Degree>1</Degree>
+        <DomainIterators>
+          <Object>
+            <Type>eDomainIterator</Type>
+            <DEDI ID="32193624">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">BC</mi>
+                        <mi mathvariant="italic">left</mi>
+                      </msub>
+                      <mo>.</mo>
+                      <mi mathvariant="italic">x</mi>
+                    </mrow>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            BC_left.x</DEDI>
+          </Object>
+          <Object>
+            <Type>eDomainIterator</Type>
+            <DEDI ID="32193848">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">BC</mi>
+                        <mi mathvariant="italic">left</mi>
+                      </msub>
+                      <mo>.</mo>
+                      <mi mathvariant="italic">y</mi>
+                    </mrow>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            BC_left.y</DEDI>
+          </Object>
+        </DomainIterators>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mfrac>
+              <mrow>
+                <mo>&PartialD;</mo>
+                <mrow>
+                  <mi mathvariant="italic">T</mi>
+                  <mo>(</mo>
+                  <mi mathvariant="italic">x</mi>
+                  <mo>,</mo>
+                  <mi mathvariant="italic">y</mi>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+              <mrow>
+                <mo>&PartialD;</mo>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </mfrac>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi mathvariant="italic">x</mi>
+              <mo>=</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>0</mi>
+              </msub>
+              <mo>,</mo>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">y</mi>
+              <mo>&isin;</mo>
+              <mo>(</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>)</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="32193624" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eLowerBound</Type>
+        </Object>
+        <Object ID="32193848" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eOpenOpen</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="32194440" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>BC_right</Name>
+      <Description>Boundary conditions for the right edge</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">BC</mi>
+              <mi mathvariant="italic">right</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Variable ID="31586120">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">T</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        T</Variable>
+        <Domain ID="31615024">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        x</Domain>
+        <Degree>1</Degree>
+        <DomainIterators>
+          <Object>
+            <Type>eDomainIterator</Type>
+            <DEDI ID="32193992">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">BC</mi>
+                        <mi mathvariant="italic">right</mi>
+                      </msub>
+                      <mo>.</mo>
+                      <mi mathvariant="italic">x</mi>
+                    </mrow>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            BC_right.x</DEDI>
+          </Object>
+          <Object>
+            <Type>eDomainIterator</Type>
+            <DEDI ID="32194744">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">BC</mi>
+                        <mi mathvariant="italic">right</mi>
+                      </msub>
+                      <mo>.</mo>
+                      <mi mathvariant="italic">y</mi>
+                    </mrow>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            BC_right.y</DEDI>
+          </Object>
+        </DomainIterators>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mfrac>
+              <mrow>
+                <mo>&PartialD;</mo>
+                <mrow>
+                  <mi mathvariant="italic">T</mi>
+                  <mo>(</mo>
+                  <mi mathvariant="italic">x</mi>
+                  <mo>,</mo>
+                  <mi mathvariant="italic">y</mi>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+              <mrow>
+                <mo>&PartialD;</mo>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </mfrac>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi mathvariant="italic">x</mi>
+              <mo>=</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>,</mo>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">y</mi>
+              <mo>&isin;</mo>
+              <mo>(</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>)</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="32193992" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eUpperBound</Type>
+        </Object>
+        <Object ID="32194744" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eOpenOpen</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="31815640" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+      <Name>C_p</Name>
+      <Description>Equation to calculate the specific heat capacity of the plate as a function of the temperature.</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">C</mi>
+              <mi mathvariant="italic">p</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMinus</Function>
+          <Left>
+            <Variable ID="31620872">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">c</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            c_p</Variable>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31815880">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">C</mi>
+                            <mi mathvariant="italic">p</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">x</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                C_p.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31816536">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">C</mi>
+                            <mi mathvariant="italic">p</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">y</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                C_p.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Left>
+          <Right>
+            <Parameter ID="31621360">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">a</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            a</Parameter>
+            <DomainIterators/>
+          </Right>
+        </Left>
+        <Right>
+          <Function>eMulti</Function>
+          <Left>
+            <Parameter ID="31583792">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">b</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            b</Parameter>
+            <DomainIterators/>
+          </Left>
+          <Right>
+            <Variable ID="31586120">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <mi mathvariant="italic">T</mi>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            T</Variable>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31815880">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">C</mi>
+                            <mi mathvariant="italic">p</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">x</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                C_p.x</DEDI>
+              </Object>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="31816536">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">C</mi>
+                            <mi mathvariant="italic">p</mi>
+                          </msub>
+                          <mo>.</mo>
+                          <mi mathvariant="italic">y</mi>
+                        </mrow>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                C_p.y</DEDI>
+              </Object>
+            </DomainIterators>
+          </Right>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">c</mi>
+                    <mi mathvariant="italic">p</mi>
+                  </msub>
+                  <mo>(</mo>
+                  <mi mathvariant="italic">x</mi>
+                  <mo>,</mo>
+                  <mi mathvariant="italic">y</mi>
+                  <mo>)</mo>
+                </mrow>
+                <mo>-</mo>
+                <mrow>
+                  <mi mathvariant="italic">a</mi>
+                </mrow>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mrow>
+                  <mi mathvariant="italic">b</mi>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mrow>
+                  <mi mathvariant="italic">T</mi>
+                  <mo>(</mo>
+                  <mi mathvariant="italic">x</mi>
+                  <mo>,</mo>
+                  <mi mathvariant="italic">y</mi>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">x</mi>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">x</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+              <mo>,</mo>
+              <mi>&ForAll;</mi>
+              <mi mathvariant="italic">y</mi>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <mi mathvariant="italic">y</mi>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="31815880" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>x</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">x</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31615024">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">x</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          x</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+        <Object ID="31816536" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+          <Name>y</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">y</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="31620064">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">y</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          y</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+  </Equations>
+  <STNs/>
+  <PortConnections/>
+  <Units/>
+  <UnitArrays/>
+  <PortArrays/>
+</Model>

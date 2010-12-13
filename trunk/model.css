@@ -1,0 +1,117 @@
+
+body {
+	font: 78.5%/1.6em "Sans";
+	word-spacing:2px;
+	color:#444;
+	margin:20px;
+}
+
+* {
+	margin:0;
+	padding:0;
+	
+}
+
+p {
+	margin:15px 0;
+	line-height:22px;
+}
+
+h2 {
+		padding: 0 0 .5em 0;
+		text-align: left;
+		font-size: 1.2em;
+		font-weight: bold;
+		text-transform: uppercase;
+		color: #333;
+		background: transparent;
+}
+
+h2 a {
+	color:#79B933;
+	text-decoration:none;
+}
+
+h2 a:hover {
+	color:#5F9128;
+}
+
+
+a {
+	color:#222;
+	text-decoration:none;
+}
+
+a:hover {
+	text-decoration:underline;
+}
+
+h3 {
+	margin:10px 0;
+}
+
+p img {
+	float:left;
+	margin:0 10px 0 0;
+}
+
+blockquote p {
+	font:160% helvetica;
+	color:#aaa;
+	padding:0 10% 0 0;
+	line-height:30px;
+}
+
+table {
+		border-collapse:collapse;
+		border-left:1px solid #686868;
+		border-right:1px solid #686868;
+		font:0.8em/145% helvetica,arial,verdana;
+		color: #333;
+}
+
+td, th {
+		padding:5px;
+}
+
+caption {
+		padding: 0 0 .5em 0;
+		text-align: left;
+		font-size: 1.2em;
+		font-weight: bold;
+		text-transform: uppercase;
+		color: #333;
+		background: transparent;
+		width:100%;
+}
+
+thead th, tfoot th, tfoot td {
+		background-color: gray;
+		color: white
+}
+
+tfoot td {
+		text-align:right
+}
+
+/* =body
+----------------------------------------------- */
+
+tbody th, tbody td {
+		border-bottom: dotted 1px #333;
+}
+
+tbody th {
+		white-space: nowrap;
+}
+
+tbody th a {
+		color:#333;
+}
+
+.odd {}
+
+tbody tr:hover {
+		background:#fafafa
+}
+

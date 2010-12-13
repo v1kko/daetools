@@ -1,0 +1,121 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module solver</title>
+</head><body bgcolor="#f0f0f8">
+
+    <p><tt>dae.solver&nbsp;module&nbsp;implements&nbsp;several&nbsp;types&nbsp;of&nbsp;numerical&nbsp;solvers:<br>
+&nbsp;-&nbsp;For&nbsp;solution&nbsp;of&nbsp;systems&nbsp;of&nbsp;equations:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;linear&nbsp;equations&nbsp;(LA&nbsp;solver)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;nonlinear&nbsp;equations&nbsp;(NLA&nbsp;solver)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;differential&nbsp;and&nbsp;algebraic&nbsp;equations&nbsp;(DAE&nbsp;solver)<br>
+&nbsp;-&nbsp;For&nbsp;optimization&nbsp;of:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Steady-state&nbsp;problems<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Dynamic&nbsp;problems<br>
+Currently&nbsp;only&nbsp;DAE&nbsp;solvers&nbsp;are&nbsp;implemented.<br>
+&nbsp;<br>
+Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;daeeIDALASolverType<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eSundialsLU<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eSundialsGMRES<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eThirdParty</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="solver.html#daeIDASolver">daeIDASolver</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeDAESolver_t">class <strong>daeDAESolver_t</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
+&nbsp;-&nbsp;RelativeTolerance:&nbsp;float<br>
+&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDAESolver_t-Initialize"><strong>Initialize</strong></a>(self, Block, Log, InitialConditionMode)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Block:&nbsp;daeBlock&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
+&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>
+&nbsp;RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDAESolver_t-Reinitialize"><strong>Reinitialize</strong></a>(self, CopyDataFromBlock)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;CopyDataFromBlock:&nbsp;bool<br>
+&nbsp;RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeDAESolver_t-Solve"><strong>Solve</strong></a>(self, Time, StopCriterion)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+&nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Current&nbsp;time:&nbsp;float</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeIDASolver">class <strong>daeIDASolver</strong></a>(<a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Implementation&nbsp;of&nbsp;Sundials&nbsp;IDA&nbsp;DAE&nbsp;solver.<br>
+https://computation.llnl.gov/casc/sundials/main.html<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeIDASolver-SaveMatrixAsPBM"><strong>SaveMatrixAsPBM</strong></a>(self, Filename)</dt><dd><tt>Saves&nbsp;sparse&nbsp;matrix&nbsp;structure&nbsp;in&nbsp;.pbm&nbsp;image&nbsp;format.<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Filename:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeIDASolver-SaveMatrixAsXPM"><strong>SaveMatrixAsXPM</strong></a>(self, Filename)</dt><dd><tt>Saves&nbsp;the&nbsp;sparse&nbsp;matrix&nbsp;structure&nbsp;in&nbsp;.xpm&nbsp;image&nbsp;format.<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Filename:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeIDASolver-SetLASolver"><strong>SetLASolver</strong></a>(self, SolverType, LASolver<font color="#909090">=None</font>)</dt><dd><tt>Currently&nbsp;the&nbsp;following&nbsp;third&nbsp;part&nbsp;LA&nbsp;solvers&nbsp;are&nbsp;available:<br>
+&nbsp;-&nbsp;Dense&nbsp;Lapack&nbsp;(Intel&nbsp;MKL,&nbsp;AMD&nbsp;ACMl,&nbsp;custom)&nbsp;[serial]<br>
+&nbsp;-&nbsp;Sparse&nbsp;Trilinos&nbsp;Amesos&nbsp;[serial]<br>
+&nbsp;-&nbsp;Sparse&nbsp;Intel&nbsp;Pardiso&nbsp;[serial&nbsp;or&nbsp;SMP]<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;SolverType:&nbsp;daeeIDALASolverType<br>
+&nbsp;-&nbsp;LASolver:&nbsp;daeIDALASolver&nbsp;object<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>:<br>
+<dl><dt><a name="daeIDASolver-Initialize"><strong>Initialize</strong></a>(self, Block, Log, InitialConditionMode)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Block:&nbsp;daeBlock&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
+&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>
+&nbsp;RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeIDASolver-Reinitialize"><strong>Reinitialize</strong></a>(self, CopyDataFromBlock)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;CopyDataFromBlock:&nbsp;bool<br>
+&nbsp;RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeIDASolver-Solve"><strong>Solve</strong></a>(self, Time, StopCriterion)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+&nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Current&nbsp;time:&nbsp;float</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

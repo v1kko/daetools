@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial4.py</title>
+</head>
+<body>
+<pre style='color:#141312;background-color:#ffffff;'>
+<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+
+<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
+<i><span style='color:#008000;'>                             tutorial4.py</span></i>
+<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
+<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
+<i><span style='color:#008000;'>***********************************************************************************</span></i>
+<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
+<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
+<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
+<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
+<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
+<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
+<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
+<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
+<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
+<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+
+<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<i><span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span></i>
+<i><span style='color:#008000;'>Here we introduce:</span></i>
+<i><span style='color:#008000;'> - Discontinuous equations (symmetrical state transition networks: daeIF statements)</span></i>
+<i><span style='color:#008000;'> </span></i>
+<i><span style='color:#008000;'>Here we have a very simple heat balance:</span></i>
+<i><span style='color:#008000;'>    ro * cp * dT/dt - Qin = h * A * (T - Tsurr)</span></i>
+
+<i><span style='color:#008000;'>A piece of copper (a plate) is at one side exposed to the source of heat and at the </span></i>
+<i><span style='color:#008000;'>other to the surroundings. The process starts at the temperature of the metal of 283K. </span></i>
+<i><span style='color:#008000;'>The metal is allowed to warm up for 200 seconds and then the heat source is </span></i>
+<i><span style='color:#008000;'>removed and the metal cools down slowly again to the ambient temperature.</span></i>
+
+<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+
+<span style='color:#0000ff;'>import</span> sys
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+
+typeNone         <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;None&quot;</span>,         <span style='color:#bf0303;'>&quot;-&quot;</span>,      <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
+typeTemperature  <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Temperature&quot;</span>,  <span style='color:#bf0303;'>&quot;K&quot;</span>,    <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>300</span>, <span style='color:#c000c0;'>1e-5</span>)
+typeConductivity <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Conductivity&quot;</span>, <span style='color:#bf0303;'>&quot;W/mK&quot;</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
+typeDensity      <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Density&quot;</span>,      <span style='color:#bf0303;'>&quot;kg/m3&quot;</span>,  <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
+typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;HeatCapacity&quot;</span>, <span style='color:#bf0303;'>&quot;J/KgK&quot;</span>,  <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
+typePower        <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Power&quot;</span>,        <span style='color:#bf0303;'>&quot;W&quot;</span>,  <span style='color:#0000ff;'>-</span><span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>None</span>, Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#0000ff;'>self</span>.m     <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;m&quot;</span>,       eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Mass of the copper plate, kg&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.cp    <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,     eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.alpha <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat transfer coefficient, W/m2K&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.A     <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;A&quot;</span>,       eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Area of the plate, m2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Tsurr <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;T_surr&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the surroundings, K&quot;</span>)
+        
+        <span style='color:#0000ff;'>self</span>.Qin  <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>,  typePower,       <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Power of the heater, W&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.time <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;&amp;tau;&quot;</span>, typeNone,        <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Time elapsed in the process, s&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.T    <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>,     typeTemperature, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.m() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.cp() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.dt() <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Qin() <span style='color:#0000ff;'>+</span> <span style='color:#0000ff;'>self</span>.alpha() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.A() <span style='color:#0000ff;'>*</span> (<span style='color:#0000ff;'>self</span>.T() <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Tsurr())
+
+        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Time&quot;</span>, <span style='color:#bf0303;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
+        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.time.dt() <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1.0</span>
+        
+        <i><span style='color:#008000;'># Symmetrical STNs in DAE Tools can be created by using IF/ELSE_IF/ELSE/END_IF statements.</span></i>
+        <i><span style='color:#008000;'># These statements are more or less used as normal if/else if/else blocks in all programming languages.</span></i>
+        <i><span style='color:#008000;'># An important rule is that all states MUST contain the SAME NUMBER OF EQUATIONS.</span></i>
+        <i><span style='color:#008000;'># First start with the call to IF( condition ) function from daeModel class.  </span></i>
+        <i><span style='color:#008000;'># After that call, write equations that will be active if 'condition' is satisfied.</span></i>
+        <i><span style='color:#008000;'># If there are only two states call the function ELSE() and write equations that will be active</span></i>
+        <i><span style='color:#008000;'># if 'condition' is not satisfied.</span></i>
+        <i><span style='color:#008000;'># If there are more than two states, start a new state by calling the function ELSE_IF (condition2)</span></i>
+        <i><span style='color:#008000;'># and write the equations that will be active if 'condition2' is satisfied. And so on...</span></i>
+        <i><span style='color:#008000;'># Finally call the function END_IF() to finalize the state transition network.</span></i>
+        <i><span style='color:#008000;'># There is an optional argument EventTolerance of functions IF and ELSE_IF. It is used by the solver</span></i>
+        <i><span style='color:#008000;'># to control the process of discovering the discontinuities.</span></i>
+        <i><span style='color:#008000;'># Details about the EventTolerance purpose will be given for the condition time &lt; 200, given below.</span></i>
+        <i><span style='color:#008000;'># Conditions like time &lt; 200 will be internally transformed into the following equations:</span></i>
+        <i><span style='color:#008000;'>#        time - 200 - EventTolerance = 0</span></i>
+        <i><span style='color:#008000;'>#        time - 200 = 0</span></i>
+        <i><span style='color:#008000;'>#        time - 200 + EventTolerance = 0</span></i>
+        <i><span style='color:#008000;'># where EventTolerance is used to control how far will solver go after/before discovering a discontinuity.</span></i>
+        <i><span style='color:#008000;'># The default value is 1E-7. Therefore, the above expressions will transform into:</span></i>
+        <i><span style='color:#008000;'>#        time - 199.9999999 = 0</span></i>
+        <i><span style='color:#008000;'>#        time - 200         = 0</span></i>
+        <i><span style='color:#008000;'>#        time - 200.0000001 = 0</span></i>
+        <i><span style='color:#008000;'># For example, if the variable 'time' is increasing from 0 and is approaching the value of 200,</span></i>
+        <i><span style='color:#008000;'># the equation 'Q_on' will be active. As the simulation goes on, the variable 'time' will reach the value </span></i>
+        <i><span style='color:#008000;'># of 199.9999999 and the solver will discover that the expression 'time - 199.9999999' became equal to zero. </span></i>
+        <i><span style='color:#008000;'># Then it will check if the condition 'time &lt; 200' is satisfied. It is, and no state change will occur. </span></i>
+        <i><span style='color:#008000;'># The solver will continue, the variable 'time' will increase to 200 and the solver will discover that </span></i>
+        <i><span style='color:#008000;'># the expression 'time - 200' became equal to zero. It will again check the condition 'time &lt; 200' and </span></i>
+        <i><span style='color:#008000;'># find out that it is not satisfied. Now the state ELSE becomes active, and the solver will use equations </span></i>
+        <i><span style='color:#008000;'># from that state (in this example equation 'Q_off').</span></i>
+        <i><span style='color:#008000;'># But, if we have 'time &gt; 200' condition instead, we can see that when the variable 'time' reaches 200</span></i>
+        <i><span style='color:#008000;'># the expression 'time - 200' becomes equal to zero. The solver will check the condition 'time &gt; 200'</span></i>
+        <i><span style='color:#008000;'># and will find out that it is not satisfied and no state change will occur. However, once the variable </span></i>
+        <i><span style='color:#008000;'># 'time' reaches the value of 200.0000001 the expression 'time - 200.0000001' becomes equal to zero.</span></i>
+        <i><span style='color:#008000;'># The solver will check the condition 'time &gt; 200' and will find out that it is satisfied and it will</span></i>
+        <i><span style='color:#008000;'># go to the state ELSE.</span></i>
+        <i><span style='color:#008000;'># In this example, input power of the heater will be 1500 Watts if the time is less than 200.</span></i>
+        <i><span style='color:#008000;'># Once we reach 200 seconds the heater is switched off (power is 0 W) and the sytem starts to cool down.</span></i>
+        <span style='color:#0000ff;'>self</span>.IF(<span style='color:#0000ff;'>self</span>.time() <span style='color:#0000ff;'>&lt;</span> <span style='color:#c000c0;'>200</span>, EventTolerance <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1E-5</span>)
+
+        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Q_on&quot;</span>, <span style='color:#bf0303;'>&quot;The heater is on&quot;</span>)
+        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.Qin() <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1500</span>
+        
+        <span style='color:#0000ff;'>self</span>.ELSE()
+
+        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Q_off&quot;</span>, <span style='color:#bf0303;'>&quot;The heater is off&quot;</span>)
+        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.Qin()
+
+        <span style='color:#0000ff;'>self</span>.END_IF()
+
+<b>class</b> simTutorial(daeDynamicSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
+        daeDynamicSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;Tutorial_4&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;This tutorial explains how to define and use discontinuous equations: symmetric state transition networks (daeIF). </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <span style='color:#0000ff;'>\</span>
+                              <span style='color:#bf0303;'>&quot;A piece of copper (a plate) is at one side exposed to the source of heat and at the &quot;</span> <span style='color:#0000ff;'>\</span>
+                              <span style='color:#bf0303;'>&quot;other to the surroundings. The process starts at the temperature of the metal of 283K. &quot;</span> <span style='color:#0000ff;'>\</span>
+                              <span style='color:#bf0303;'>&quot;The metal is allowed to warm up for 200 seconds and then the heat source is &quot;</span> <span style='color:#0000ff;'>\</span>
+                              <span style='color:#bf0303;'>&quot;removed and the metal cools down slowly again to the ambient temperature.&quot;</span>
+          
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span>)
+        <span style='color:#0000ff;'>self</span>.m.m.SetValue(<span style='color:#c000c0;'>1</span>)
+        <span style='color:#0000ff;'>self</span>.m.alpha.SetValue(<span style='color:#c000c0;'>200</span>)
+        <span style='color:#0000ff;'>self</span>.m.A.SetValue(<span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.Tsurr.SetValue(<span style='color:#c000c0;'>283</span>)
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(<span style='color:#c000c0;'>283</span>)
+        <span style='color:#0000ff;'>self</span>.m.time.SetInitialCondition(<span style='color:#c000c0;'>0</span>)
+
+<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<b>def</b> guiRun():
+    <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+    app <span style='color:#0000ff;'>=</span> QtGui.QApplication(sys.argv)
+    simulation <span style='color:#0000ff;'>=</span> simTutorial()
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
+    simulation.TimeHorizon       <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>500</span>
+    simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation)
+    simulator.show()
+    app.exec_()
+
+<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<b>def</b> consoleRun():
+    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
+    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
+    simulation   <span style='color:#0000ff;'>=</span> simTutorial()
+
+    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
+    simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>500</span>
+
+    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <i><span style='color:#008000;'># Initialize the simulation</span></i>
+    simulation.Initialize(solver, datareporter, log)
+
+    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+
+    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    simulation.SolveInitial()
+
+    <i><span style='color:#008000;'># Run</span></i>
+    simulation.Run()
+
+<b>if</b> <b><span style='color:#000000;'>__name__</span></b> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    runInGUI <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>True</span>
+    <b>if</b> <b><span style='color:#000000;'>len</span></b>(sys.argv) <span style='color:#0000ff;'>&gt;</span> <span style='color:#c000c0;'>1</span>:
+        <b>if</b>(sys.argv[<span style='color:#c000c0;'>1</span>] <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>'console'</span>):
+            runInGUI <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>False</span>
+    <b>if</b> runInGUI:
+        guiRun()
+    <b>else</b>:
+        consoleRun()
+</pre>
+</body>
+</html>

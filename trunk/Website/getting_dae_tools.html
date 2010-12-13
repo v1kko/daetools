@@ -1,0 +1,455 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <meta name="Description" content="">
+  <meta name="Keywords"
+ content="DAE Tools Project, pyDAE, cxxDAE, dynamic modelling, simulation, partial differential equations, dae, pdae, equation-oriented modelling">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta name="Distribution" content="Copyrighted">
+  <meta name="Author" content="Dragan Nikolic - dnikolic@daetools.com">
+  <meta name="Robots" content="index,follow">
+  <link rel="stylesheet" href="images/dae.css" type="text/css">
+  <title>DAE Tools project</title>
+</head>
+<body>
+<!-- wrap starts here -->
+<div id="wrap">
+<div id="header">
+<div id="header-content">
+<h1 id="logo"><a href="index.html" title="">DAE Tools<span class="gray">
+Project</span></a></h1>
+<h2 id="slogan">Model the world freely...</h2>
+<!-- Menu Tabs -->
+<ul>
+  <li><a href="index.html">Home</a></li>
+  <li><a href="news.html">News</a></li>
+  <li><a href="downloads.html">Downloads</a></li>
+  <li><a href="documentation.html" id="current">Documentation</a></li>
+  <li><a href="http://forum.daetools.com/">Forum</a></li>
+  <li><a href="http://code.google.com/p/dae-tools">SVN</a></li>
+  <li><a href="contact.html">About</a></li>
+</ul>
+</div>
+</div>
+<!-- content-wrap starts here -->
+<div id="content-wrap">
+<div id="content">
+<div id="sidebar">
+<div class="sidebox">
+<h1 class="clear">Getting DAE Tools<br>
+</h1>
+<ul class="sidemenu">
+  <li><a href="#Introduction" class="top">Introduction</a></li>
+  <li><a href="#Requirements">Requirements</a></li>
+  <li><a href="#Getting_the_packages">Getting the packages</a></li>
+  <li><a href="#Installation">Installation</a></li>
+  <li>
+    <p><a href="#Debian_GNULinux">Debian GNU/Linux</a></p>
+    <p><a href="#Red_Hat_GNULinux">Red Hat GNU/Linux</a></p>
+    <p><a href="#Windows">Windows</a></p>
+    <p><a href="#Additional_linear_equation_solvers">Additional linear
+solvers</a></p>
+  </li>
+  <li><a href="#Compiling_from_source">Compiling from source</a></li>
+  <li>
+    <p><a href="#GNULinux_comp">GNU/Linux</a></p>
+    <p><a href="#Windows_comp">Windows</a></p>
+  </li>
+</ul>
+</div>
+</div>
+<div id="main"><!--    -->
+<div class="post">
+<h1>Getting DAE Tools</h1>
+<h2><a name="Introduction"></a>Introduction</h2>
+<p><span style="font-weight: bold;">pyDAE</span> and <span
+ style="font-weight: bold;">cDAE</span> modules come in a single
+package
+installed in <span style="font-weight: bold;">pyDAE</span> folder
+within <span style="font-weight: bold;">site-packages</span> (or <span
+ style="font-weight: bold;">dist-packages</span>) folder <span
+ style="font-weight: bold;"></span><span style="font-weight: bold;"></span>
+under python (tipically /usr/lib/python26/Lib
+or C:\Python2.6\Lib). The
+structure of the folders is the following: <br>
+</p>
+<ul>
+</ul>
+<pre><span style="font-weight: bold;">daetools<br></span><span
+ style="font-weight: bold;">  </span><span style="font-weight: bold;">+ </span><span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">cDAE<br>     + include<br>     + lib<br></span><span
+ style="font-weight: bold;">  </span><span style="font-weight: bold;">+ </span><span
+ style="font-weight: bold;">daePlotter<br>  </span><span
+ style="font-weight: bold;">+ </span><span style="font-weight: bold;"></span><span
+ style="font-weight: bold;">daeSimulator<br></span><span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">  + docs<br>     + api_ref<br>  + examples<br></span><span
+ style="font-weight: bold;">  + pyAmdACML<br></span><span
+ style="font-weight: bold;">  </span><span style="font-weight: bold;">+ </span><span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">pyDAE<br>  + pyIntelMKL<br>  + pyIntelPardiso<br>  + pyLapack<br>  + pyTrilinosAmesos<br></span></pre>
+<ul>
+</ul>
+<p>
+</p>
+<h2><a name="Requirements"></a>Requirements</h2>
+<p>Mandatory packages:<br>
+</p>
+<ul>
+  <li>Python (v2.6.x): <a href="http://www.python.org">www.python.org</a><br>
+  </li>
+  <li>Boost libraries (v1.35+; GNU/Linux only): <a
+ href="http://www.boost.org">www.boost.org</a> </li>
+  <li>Numpy (v1.3+): <a href="http://numpy.scipy.org">numpy.scipy.org </a></li>
+  <li>Matplotlib (v1.0+): <a href="http://matplotlib.sourceforge.net">matplotlib.sourceforge.net</a>
+  </li>
+  <li>pyQt4 (v4.0+): <a
+ href="http://www.riverbankcomputing.co.uk/software/pyqt">www.riverbankcomputing.co.uk/software/pyqt
+
+
+
+    </a></li>
+</ul>
+<p>Optional packages (3rd party linear solvers):<br>
+</p>
+<ul>
+  <li>SuperLU (v3+; GNU/Linux only)</li>
+  <li>Umfpack (v5.4+; GNU/Linux only)<br>
+  </li>
+  <li>Lapack (GNU/Linux only)<br>
+  </li>
+  <li>Intel MKL (v10.2.5.035) - proprietary<br>
+  </li>
+  <li>AMD ACML (v4.4.0) - proprietary </li>
+</ul>
+<p>For more information on how to install packages please refer to the
+documentation for the specific library.
+</p>
+<h2><a name="Getting_the_packages"></a>Getting the packages
+</h2>
+<p>First <a href="downloads.html">download</a> the appropriate
+installer for your operating system (GNU/Linux, Windows) and
+architecture (i386, amd64, arm):
+</p>
+<ul>
+  <li>.deb for Debian GNU/Linux and derivatives</li>
+  <li>.rpm for Red Hat GNU/Linux and derivatives<br>
+  </li>
+  <li>.exe for Windows</li>
+</ul>
+<h2><a name="Installation"></a>Installation </h2>
+<h3><a name="Debian_GNULinux"></a>Debian GNU/Linux (and derivatives)
+</h3>
+<p>First install the mandatory packages. To do so you can use the
+Synaptic Package Manager or type the following
+command:
+</p>
+<pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib<br></pre>
+<p>Optionally you may install some additional free linear solvers:<br>
+</p>
+<pre>$ sudo apt-get install libsuitesparse-dev libsuperlu3 liblapack3gf<br></pre>
+<p>Install <span style="font-weight: bold;">DAE Tools</span> by using
+GDebi package installer or by typing the following shell commands:
+</p>
+<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo dpkg -i daetools_x.x-x_amd64_debian-6.deb<br></pre>
+<p><br>
+</p>
+<h3><a name="Red_Hat_GNULinux"></a>Red Hat GNU/Linux (and derivatives)
+</h3>
+<p>First install themandatory packages. To do so can use the Package
+Manager or type the
+following
+command:
+</p>
+<pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br></pre>
+<p>Optionally you may install some additional free linear solvers:<br>
+</p>
+<pre>$ sudo yum install suitesparse-static superlu lapack<br></pre>
+<p><span style="font-weight: bold;">Note</span>: there is no package <span
+ style="font-weight: bold;">superlu</span> in Fedora GNU/Linux.
+However, you can
+use packages for instance from openSUSE (for Fedora 14 use packages
+from
+openSuse 11.3) <a
+ href="http://download.opensuse.org/distribution/11.3/repo/oss/suse">http://download.opensuse.org/distribution/11.3/repo/oss/suse</a>.
+Look
+for
+your&nbsp;
+architecture
+and
+find the package <span style="font-weight: bold;">superlu</span>.
+Anyway, superlu package is needed only during the compilation
+(pyTrilinosAmesos module is statically linked to superlu.a library).<br>
+</p>
+<p>Install <span style="font-weight: bold;">DAE Tools</span> by using
+Package Installer or by typing the following
+shell commands:
+</p>
+<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo rpm -i daetools_x.x-x_amd64_fedora-14.rpm<br></pre>
+<p><br>
+</p>
+<h3><a name="Windows"></a>Windows
+</h3>
+<p>So far it is tested on Windows XP only. First install the necessary
+dependencies (except the boost library, which is pre-built and comes
+with <span style="font-weight: bold;">DAE Tools</span>) in the
+following order: <span style="font-weight: bold;">python</span>, <span
+ style="font-weight: bold;">numpy</span>, <span
+ style="font-weight: bold;">matplotlib</span>, <span
+ style="font-weight: bold;">pyqt4</span>. As a starting point you can
+use the following links: <br>
+</p>
+<ul>
+  <li>Python 2.6: <a
+ href="http://www.python.org/download/releases/2.6.6">http://www.python.org/download/releases/2.6.6</a></li>
+  <li>Numpy: <a
+ href="http://sourceforge.net/projects/numpy/files/NumPy">http://sourceforge.net/projects/numpy/files/NumPy</a></li>
+  <li>Matplotlib: <a
+ href="http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0">http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0</a></li>
+  <li>PyQt4: <a
+ href="http://www.riverbankcomputing.co.uk/software/pyqt/download">http://www.riverbankcomputing.co.uk/software/pyqt/download</a><br>
+  </li>
+</ul>
+<p>To do so
+follow the
+instructions on the corresponding web sites. You can also try <a
+ href="http://www.pythonxy.com">Python(x,y)</a>. Then install <span
+ style="font-weight: bold;">DAE Tools </span>by double clicking the
+file daetools_x.x-x_win32_winxp_python26.exe and
+follow the instructions.<br>
+</p>
+<p><br>
+</p>
+<h3><a name="Additional_linear_equation_solvers"></a>Additional linear
+equation solvers</h3>
+<p>Optionally you can also install proprietary <a
+ href="http://www.amd.com/acml">AMD ACML</a> and <a
+ href="http://software.intel.com/en-us/intel-mkl/">Intel MKL</a>
+libraries. Please follow the installation procedures in the
+documentation. <span style="font-weight: bold;">pyAmdACML</span> and <span
+ style="font-weight: bold;">pyIntelMKL/pyIntelPardiso</span> modules
+are compiled against ACML 4.4.0 and MKL
+10.2.5.035 respectively. Also have a look on the licensing conditions
+(these
+libraries are <span style="font-weight: bold;">not</span> <a
+ href="http://www.gnu.org/philosophy/free-sw.html">free software</a>).<br>
+</p>
+<p>In order to use AMD ACML and Intel MKL libraries you have to do some
+additional configuration:<br style="font-weight: bold;">
+</p>
+<ol>
+  <li><span style="font-weight: bold;">GNU/Linux</span>: setup for a
+single user<br>
+Copy <a href="acml_mkl_bashrc">this file</a> to your home folder, edit
+it so that it reflects your installation and add the line<br>
+    <span style="font-weight: bold;">. $HOME/acml_mkl_bashrc</span> at
+the end of <span style="font-weight: bold;">$HOME/.bashrc</span> file</li>
+  <li><span style="font-weight: bold;">GNU/Linux</span>: setup for all
+users<br>
+Subject to your machine architecture and library versions (here <span
+ style="font-weight: bold;">x86_64</span> GNU/Linux with <span
+ style="font-weight: bold;">ACML v4.4.0</span> and <span
+ style="font-weight: bold;">MKL v10.2.5.035</span>), put the following
+lines in <span style="font-weight: bold;">/etc/ld.so.conf</span> and
+execute <span style="font-weight: bold;">ldconfig</span>:<br>
+/opt/intel/mkl/10.2.5.035/lib/em64t<br>
+/opt/acml4.4.0/gfortran64_mp/lib<br>
+  </li>
+  <li><span style="font-weight: bold;">Windows XP</span><span
+ style="font-style: italic;"> <br>
+    </span>If not already added, add the following line to your <span
+ style="font-weight: bold;">PATH</span> environment variable (Control
+Panel -&gt; Sytem):<span style="font-style: italic;"><br>
+    </span>c:\AMD\acml4.4.0\ifort32_mp\lib;c:\Intel\MKL\10.2.5.035\ia32\bin\<span
+ style="font-style: italic;"><br>
+    </span></li>
+</ol>
+<p><br>
+</p>
+<h2><a name="Compiling_from_source"></a>Compiling from source<br>
+</h2>
+<h3 style="text-align: left;">Compiling of DAE Tools core libraries and
+python modules</h3>
+<p>To compile the source you need the following:<br>
+</p>
+<ul>
+  <li>Installed boost library headers and
+compiled <span style="font-weight: bold;">boost_system, boost_thread</span>
+and <span style="font-weight: bold;">boost_python</span> libraries</li>
+  <li>Installed python 2.6<br>
+  </li>
+  <li>Installed python numpy module</li>
+  <li>Optionally: Trilinos Amesos, SuperLU, Lapack, Amd ACML and Intel
+MKL libraries. <br>
+  </li>
+</ul>
+<p></p>
+<p>All DAE Tools modules are developed using the QtCreator
+cross-platform
+integrated development environment. If you install the above
+dependecies
+correctly there is no much tweaking needed.<br>
+Check out the source code from the <a
+ href="http://code.google.com/p/dae-tools">Google Code subversion
+repository</a>:<br>
+</p>
+<pre>$ cd "folder where you want the source"<br>$ svn checkout http://dae-tools.googlecode.com/svn dae-tools-read-only<br></pre>
+<p></p>
+<h3><a name="GNULinux_comp"></a>GNU/Linux<br>
+</h3>
+<ul>
+  <li>Install the necessary dependencies (<span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">boost-devel,
+numpy</span><span style="font-weight: bold;"></span><span
+ style="font-weight: bold;"></span>)<br>
+  </li>
+  <li>Install <span style="font-weight: bold;">QtCreator</span></li>
+</ul>
+<p><span style="font-weight: bold;">Debian GNU/Linux</span> based:<br>
+</p>
+<pre>$ sudo apt-get install qtcreator</pre>
+<p><span style="font-weight: bold;">Red Hat GNU/Linux</span> based:<br>
+</p>
+<pre>sudo yum install qtcreator</pre>
+<ul>
+  <li>Check <span style="font-weight: bold;">dae-tools/trunk/dae.pri</span>
+file<br>
+Here you should check the following variables:<br>
+&nbsp; - <span style="font-weight: bold;">PYTHONDIR</span> <br>
+&nbsp;&nbsp;&nbsp; Tipically
+/usr/lib/python2.6 or /usr/lib64/python2.6 depending whether you are
+running <br>
+&nbsp;&nbsp;&nbsp; 32 or 64 bit GNU/Linux. <br>
+&nbsp;&nbsp;&nbsp; Check the python version
+- it can be 2.7 in Fedora 14, for instance.<span
+ style="font-weight: bold;"><br>
+&nbsp;</span> - <span style="font-weight: bold;">PYTHON_SITE_PACKAGES_DIR</span>
+    <br>
+&nbsp;&nbsp;&nbsp; Typically it is <span style="font-weight: bold;">$${PYTHONDIR}\site-packages</span>,
+but
+can
+be
+    <span style="font-weight: bold;">$${PYTHONDIR}\dist-packages<br>
+&nbsp;&nbsp;&nbsp; </span>in Debian GNU/Linux based distributions<span
+ style="font-weight: bold;"></span>.<br>
+&nbsp; - <span style="font-weight: bold;">PYTHON_INCLUDE_DIR</span> <br>
+&nbsp;&nbsp;&nbsp; You might need to add /usr/include/python2.6/numpy
+for Debian Squeeze if the header <br>
+&nbsp;&nbsp;&nbsp; <span style="font-style: italic;">_numpyconfig.h</span>
+is missing: <span style="font-weight: bold;">Bug#589592</span>.<br>
+  </li>
+</ul>
+<ul>
+  <li>Choose the right specification file for your platform (usually it
+is done automatically by the IDE, but double-check it):<br>
+&nbsp; - for 32 bit machines use <span style="font-weight: bold;">-spec
+linux-g++</span><br>
+&nbsp; - for 64 bit machines use <span style="font-weight: bold;">-spec
+linux-g++-64<br>
+    </span></li>
+</ul>
+<ul>
+  <li>Build the project <span style="font-weight: bold;">dae</span>
+through the QtCreator IDE or by the following commands:</li>
+</ul>
+<pre>$ cd "dae-tools/trunk"<br>$ qmake-qt4 dae.pro -r -spec linux-g++-64 CONFIG+=release<br>$ make<span
+ style="font-weight: bold;"><br></span></pre>
+<ul>
+  <li>As a result there should be the following static/dynamic
+libraries in the <span style="font-weight: bold;">debug</span>/<span
+ style="font-weight: bold;">release</span> folders:<br>
+&nbsp; - libCore.a, libSimulation.a, libDataReporters.a, libSolver.a<br>
+&nbsp; - pyCore.so, pyActivity.so, pyDataReporting.so, pySolver.so<br>
+  </li>
+</ul>
+<h3><a name="Windows_comp"></a>Windows</h3>
+<ul>
+  <li>Install the necessary dependencies (<span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">python
+2.6,
+numpy</span><span style="font-weight: bold;"></span><span
+ style="font-weight: bold;"></span>)</li>
+  <li>Install MS Visual Studio 2008 or newer (Express Edition also
+works)<br>
+  </li>
+  <li>Download and unpack the <span style="font-weight: bold;">boost</span>
+library source to <span style="font-weight: bold;">dae-tools/trunk/boost</span>
+folder and build the libraries (look on <a
+ href="http://www.boost.org/doc/tools/build/doc/html/index.html">http://www.boost.org/doc/tools/build/doc/html/index.html</a>
+for the help)<br>
+  </li>
+</ul>
+<ul>
+  <li>Download and install Qt Open Source libraries for windows <a
+ href="http://qt.nokia.com/products">http://qt.nokia.com/products</a>
+(for MS VC++)</li>
+  <li>Check <span style="font-weight: bold;">dae-tools/trunk/dae.pri</span>
+file<br>
+Here you should check the following variables:<br>
+&nbsp; - <span style="font-weight: bold;">PYTHONDIR</span> <br>
+&nbsp;&nbsp;&nbsp; Tipically
+c:\Python26.<span style="font-weight: bold;"><br>
+&nbsp;</span> - <span style="font-weight: bold;">BOOSTDIR</span>, <span
+ style="font-weight: bold;">BOOSTLIBPATH</span> <br>
+&nbsp;&nbsp;&nbsp; If you installed <span style="font-weight: bold;">boost</span>
+library to
+dae-tools/trunk/boost everything is fine; <br>
+&nbsp;&nbsp;&nbsp; otherwise you have to point to the folder with the <span
+ style="font-weight: bold;">boost</span> installation.</li>
+</ul>
+<ul>
+  <li>Build the project <span style="font-weight: bold;">dae</span>
+through the QtCreator IDE or by the following commands:</li>
+</ul>
+<pre>$ cd "to dae-tools\trunk"<br>$ qmake.exe dae.pro -spec win32-msvc2008 -r CONFIG+=release<br>$ make<span
+ style="font-weight: bold;"><br></span></pre>
+<ul>
+  <li>As a result there should be the following static/dynamic
+libraries in the <span style="font-weight: bold;">debug</span>/<span
+ style="font-weight: bold;">release</span> folders:<br>
+&nbsp; - Core.lib, Simulation.lib, DataReporters.lib, Solver.lib<br>
+&nbsp; - pyCore.pyd, pyActivity.pyd, pyDataReporting.pyd, pySolver.pyd </li>
+</ul>
+<p><br>
+<span style="font-weight: bold;">Note:</span> You can also create
+Visual Studio projects. First edit dae.pri file as described above,
+open the <span style="font-weight: bold;">Qt Command Prompt</span> and
+use the following commands:<br>
+</p>
+<pre>$ cd "to dae-tools\trunk"<br>$ qmake -tp vc -r dae.pro<br></pre>
+<p>Now you can open created project in the MS Visual C++ IDE.<br>
+<br>
+</p>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- content-wrap ends here --> </div>
+</div>
+<!-- footer starts here -->
+<div id="footer">
+<div id="footer-content">
+<div class="col float-left">
+<p> &copy; Copyright: Dragan Nikolic 2010<br>
+</p>
+</div>
+<div class="col float-left">
+<p> <a href="http://www.daetools.com"><strong>DAE Tools Project</strong></a>
+</p>
+</div>
+<div class="col2 float-right">
+<p> Design by: <a href="http://www.styleshout.com/"><strong>Styleshout</strong></a>
+&nbsp; &nbsp; Valid <a
+ href="http://jigsaw.w3.org/css-validator/check/referer"><strong>CSS</strong></a>
+| <a href="http://validator.w3.org/check/referer"><strong>XHTML</strong></a>
+</p>
+</div>
+</div>
+</div>
+<!-- footer ends here --><!-- wrap ends here --> </div>
+</div>
+</body>
+</html>

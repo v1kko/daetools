@@ -1,0 +1,1278 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
+       "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd"[ 
+        <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
+]> 
+<?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
+<Model ID="19362440" Class="daeModel" Library="DAE.Core" Version="1000">
+  <Name>Membrane</Name>
+  <Description/>
+  <MathMLName>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi mathvariant="italic">Membrane</mi>
+      </mrow>
+    </math>
+  </MathMLName>
+  <Domains>
+    <Object ID="19362848" Class="daeDomain" Library="DAE.Core" Version="1000">
+      <Name>N_c</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">N</mi>
+              <mi mathvariant="italic">c</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eArray</Type>
+    </Object>
+  </Domains>
+  <Parameters/>
+  <Variables>
+    <Object ID="19363176" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>x_f</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">x</mi>
+              <mi mathvariant="italic">f</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Fraction</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="19362848">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        N_c</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="19363768" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>x_0</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">x</mi>
+              <mi mathvariant="italic">0</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Fraction</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="19362848">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        N_c</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="19364184" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>y_p</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">y</mi>
+              <mi mathvariant="italic">p</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Fraction</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="19362848">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        N_c</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="19364616" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>P_erm</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">P</mi>
+              <mi mathvariant="italic">erm</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Permeability</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="19362848">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        N_c</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="19365032" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>L_0</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">L</mi>
+              <mi mathvariant="italic">0</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Flowrate</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19437848" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>V_p</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">V</mi>
+              <mi mathvariant="italic">p</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Flowrate</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19438088" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>L_f</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">L</mi>
+              <mi mathvariant="italic">f</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Flowrate</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19438472" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>A_m</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">A</mi>
+              <mi mathvariant="italic">m</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Area</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19438856" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>&delta;</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&delta;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Length</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19439336" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>&theta;</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&theta;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Fraction</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19439736" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>P_h</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">P</mi>
+              <mi mathvariant="italic">h</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Pressure</VariableType>
+      <DomainRefs/>
+    </Object>
+    <Object ID="19440120" Class="daeVariable" Library="DAE.Core" Version="1000">
+      <Name>P_l</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">P</mi>
+              <mi mathvariant="italic">l</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>Pressure</VariableType>
+      <DomainRefs/>
+    </Object>
+  </Variables>
+  <Ports/>
+  <Equations>
+    <Object ID="19444896" Class="daeEquation" Library="DAE.Core" Version="1000">
+      <Name>x_f</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">x</mi>
+              <mi mathvariant="italic">f</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMulti</Function>
+          <Left>
+            <Variable ID="19437848">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">V</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            V_p</Variable>
+            <DomainIterators/>
+          </Left>
+          <Right>
+            <Variable ID="19364184">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">y</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            y_p</Variable>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="19445608">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">x</mi>
+                          <msub>
+                            <mi mathvariant="italic">f.N</mi>
+                            <mi mathvariant="italic">c</mi>
+                          </msub>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                x_f.N_c</DEDI>
+              </Object>
+            </DomainIterators>
+          </Right>
+        </Left>
+        <Right>
+          <Function>eMulti</Function>
+          <Left>
+            <Function>eDivide</Function>
+            <Left>
+              <Function>eMulti</Function>
+              <Left>
+                <Variable ID="19364616">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">erm</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                P_erm</Variable>
+                <DomainIterators>
+                  <Object>
+                    <Type>eDomainIterator</Type>
+                    <DEDI ID="19445608">
+                      <ObjectRefMathML>
+                        <math xmlns="http://www.w3.org/1998/Math/MathML">
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">x</mi>
+                              <msub>
+                                <mi mathvariant="italic">f.N</mi>
+                                <mi mathvariant="italic">c</mi>
+                              </msub>
+                            </msub>
+                          </mrow>
+                        </math>
+                      </ObjectRefMathML>
+                    x_f.N_c</DEDI>
+                  </Object>
+                </DomainIterators>
+              </Left>
+              <Right>
+                <Variable ID="19438472">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">A</mi>
+                          <mi mathvariant="italic">m</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                A_m</Variable>
+                <DomainIterators/>
+              </Right>
+            </Left>
+            <Right>
+              <Variable ID="19438856">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&delta;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &delta;</Variable>
+              <DomainIterators/>
+            </Right>
+          </Left>
+          <Right>
+            <Function>eMinus</Function>
+            <Left>
+              <Function>eMulti</Function>
+              <Left>
+                <Variable ID="19439736">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">h</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                P_h</Variable>
+                <DomainIterators/>
+              </Left>
+              <Right>
+                <Variable ID="19363768">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">x</mi>
+                          <mi mathvariant="italic">0</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                x_0</Variable>
+                <DomainIterators>
+                  <Object>
+                    <Type>eDomainIterator</Type>
+                    <DEDI ID="19445608">
+                      <ObjectRefMathML>
+                        <math xmlns="http://www.w3.org/1998/Math/MathML">
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">x</mi>
+                              <msub>
+                                <mi mathvariant="italic">f.N</mi>
+                                <mi mathvariant="italic">c</mi>
+                              </msub>
+                            </msub>
+                          </mrow>
+                        </math>
+                      </ObjectRefMathML>
+                    x_f.N_c</DEDI>
+                  </Object>
+                </DomainIterators>
+              </Right>
+            </Left>
+            <Right>
+              <Function>eMulti</Function>
+              <Left>
+                <Variable ID="19440120">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">l</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                P_l</Variable>
+                <DomainIterators/>
+              </Left>
+              <Right>
+                <Variable ID="19364184">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">y</mi>
+                          <mi mathvariant="italic">p</mi>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                y_p</Variable>
+                <DomainIterators>
+                  <Object>
+                    <Type>eDomainIterator</Type>
+                    <DEDI ID="19445608">
+                      <ObjectRefMathML>
+                        <math xmlns="http://www.w3.org/1998/Math/MathML">
+                          <mrow>
+                            <msub>
+                              <mi mathvariant="italic">x</mi>
+                              <msub>
+                                <mi mathvariant="italic">f.N</mi>
+                                <mi mathvariant="italic">c</mi>
+                              </msub>
+                            </msub>
+                          </mrow>
+                        </math>
+                      </ObjectRefMathML>
+                    x_f.N_c</DEDI>
+                  </Object>
+                </DomainIterators>
+              </Right>
+            </Right>
+          </Right>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">V</mi>
+                    <mi mathvariant="italic">p</mi>
+                  </msub>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">y</mi>
+                    <mi mathvariant="italic">p</mi>
+                  </msub>
+                  <mo>(</mo>
+                  <msub>
+                    <mi mathvariant="italic">N</mi>
+                    <mi mathvariant="italic">c</mi>
+                  </msub>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mrow>
+                  <mfrac>
+                    <mrow>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">erm</mi>
+                        </msub>
+                        <mo>(</mo>
+                        <msub>
+                          <mi mathvariant="italic">N</mi>
+                          <mi mathvariant="italic">c</mi>
+                        </msub>
+                        <mo>)</mo>
+                      </mrow>
+                      <mo>&sdot;</mo>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">A</mi>
+                          <mi mathvariant="italic">m</mi>
+                        </msub>
+                      </mrow>
+                    </mrow>
+                    <mrow>
+                      <mi mathvariant="italic">&delta;</mi>
+                    </mrow>
+                  </mfrac>
+                </mrow>
+                <mo>&sdot;</mo>
+                <mrow>
+                  <mo>(</mo>
+                  <mrow>
+                    <mrow>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">h</mi>
+                        </msub>
+                      </mrow>
+                      <mo>&sdot;</mo>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">x</mi>
+                          <mi mathvariant="italic">0</mi>
+                        </msub>
+                        <mo>(</mo>
+                        <msub>
+                          <mi mathvariant="italic">N</mi>
+                          <mi mathvariant="italic">c</mi>
+                        </msub>
+                        <mo>)</mo>
+                      </mrow>
+                    </mrow>
+                    <mo>-</mo>
+                    <mrow>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">P</mi>
+                          <mi mathvariant="italic">l</mi>
+                        </msub>
+                      </mrow>
+                      <mo>&sdot;</mo>
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">y</mi>
+                          <mi mathvariant="italic">p</mi>
+                        </msub>
+                        <mo>(</mo>
+                        <msub>
+                          <mi mathvariant="italic">N</mi>
+                          <mi mathvariant="italic">c</mi>
+                        </msub>
+                        <mo>)</mo>
+                      </mrow>
+                    </mrow>
+                  </mrow>
+                  <mo>)</mo>
+                </mrow>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <msub>
+                <mi mathvariant="italic">N</mi>
+                <mi mathvariant="italic">c</mi>
+              </msub>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="19445608" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1000">
+          <Name>N_c</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="19362848">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">N</mi>
+                    <mi mathvariant="italic">c</mi>
+                  </msub>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          N_c</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="19450400" Class="daeEquation" Library="DAE.Core" Version="1000">
+      <Name>x_0</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">x</mi>
+              <mi mathvariant="italic">0</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>ePlus</Function>
+        <Left>
+          <Function>eMinus</Function>
+          <Left>
+            <Variable ID="19363768">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">x</mi>
+                      <mi mathvariant="italic">0</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            x_0</Variable>
+            <DomainIterators>
+              <Object>
+                <Type>eDomainIterator</Type>
+                <DEDI ID="19450536">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <msub>
+                          <mi mathvariant="italic">x</mi>
+                          <msub>
+                            <mi mathvariant="italic">0.N</mi>
+                            <mi mathvariant="italic">c</mi>
+                          </msub>
+                        </msub>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                x_0.N_c</DEDI>
+              </Object>
+            </DomainIterators>
+          </Left>
+          <Right>
+            <Function>eDivide</Function>
+            <Left>
+              <Variable ID="19363176">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">x</mi>
+                        <mi mathvariant="italic">f</mi>
+                      </msub>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              x_f</Variable>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="19450536">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">x</mi>
+                            <msub>
+                              <mi mathvariant="italic">0.N</mi>
+                              <mi mathvariant="italic">c</mi>
+                            </msub>
+                          </msub>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  x_0.N_c</DEDI>
+                </Object>
+              </DomainIterators>
+            </Left>
+            <Right>
+              <Function>eMinus</Function>
+              <Left>
+                <Value>1.000000000000000000000000000000</Value>
+              </Left>
+              <Right>
+                <Variable ID="19439336">
+                  <ObjectRefMathML>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                      <mrow>
+                        <mi mathvariant="italic">&theta;</mi>
+                      </mrow>
+                    </math>
+                  </ObjectRefMathML>
+                &theta;</Variable>
+                <DomainIterators/>
+              </Right>
+            </Right>
+          </Right>
+        </Left>
+        <Right>
+          <Function>eDivide</Function>
+          <Left>
+            <Function>eMulti</Function>
+            <Left>
+              <Variable ID="19364184">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">y</mi>
+                        <mi mathvariant="italic">p</mi>
+                      </msub>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              y_p</Variable>
+              <DomainIterators>
+                <Object>
+                  <Type>eDomainIterator</Type>
+                  <DEDI ID="19450536">
+                    <ObjectRefMathML>
+                      <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                          <msub>
+                            <mi mathvariant="italic">x</mi>
+                            <msub>
+                              <mi mathvariant="italic">0.N</mi>
+                              <mi mathvariant="italic">c</mi>
+                            </msub>
+                          </msub>
+                        </mrow>
+                      </math>
+                    </ObjectRefMathML>
+                  x_0.N_c</DEDI>
+                </Object>
+              </DomainIterators>
+            </Left>
+            <Right>
+              <Variable ID="19439336">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&theta;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &theta;</Variable>
+              <DomainIterators/>
+            </Right>
+          </Left>
+          <Right>
+            <Function>eMinus</Function>
+            <Left>
+              <Value>1.000000000000000000000000000000</Value>
+            </Left>
+            <Right>
+              <Variable ID="19439336">
+                <ObjectRefMathML>
+                  <math xmlns="http://www.w3.org/1998/Math/MathML">
+                    <mrow>
+                      <mi mathvariant="italic">&theta;</mi>
+                    </mrow>
+                  </math>
+                </ObjectRefMathML>
+              &theta;</Variable>
+              <DomainIterators/>
+            </Right>
+          </Right>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">x</mi>
+                    <mi mathvariant="italic">0</mi>
+                  </msub>
+                  <mo>(</mo>
+                  <msub>
+                    <mi mathvariant="italic">N</mi>
+                    <mi mathvariant="italic">c</mi>
+                  </msub>
+                  <mo>)</mo>
+                </mrow>
+                <mo>-</mo>
+                <mrow>
+                  <mfrac>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">x</mi>
+                        <mi mathvariant="italic">f</mi>
+                      </msub>
+                      <mo>(</mo>
+                      <msub>
+                        <mi mathvariant="italic">N</mi>
+                        <mi mathvariant="italic">c</mi>
+                      </msub>
+                      <mo>)</mo>
+                    </mrow>
+                    <mrow>
+                      <mn mathvariant="italic">        1.0000000000</mn>
+                      <mo>-</mo>
+                      <mrow>
+                        <mi mathvariant="italic">&theta;</mi>
+                      </mrow>
+                    </mrow>
+                  </mfrac>
+                </mrow>
+              </mrow>
+              <mo>+</mo>
+              <mrow>
+                <mfrac>
+                  <mrow>
+                    <mrow>
+                      <msub>
+                        <mi mathvariant="italic">y</mi>
+                        <mi mathvariant="italic">p</mi>
+                      </msub>
+                      <mo>(</mo>
+                      <msub>
+                        <mi mathvariant="italic">N</mi>
+                        <mi mathvariant="italic">c</mi>
+                      </msub>
+                      <mo>)</mo>
+                    </mrow>
+                    <mo>&sdot;</mo>
+                    <mrow>
+                      <mi mathvariant="italic">&theta;</mi>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mn mathvariant="italic">        1.0000000000</mn>
+                    <mo>-</mo>
+                    <mrow>
+                      <mi mathvariant="italic">&theta;</mi>
+                    </mrow>
+                  </mrow>
+                </mfrac>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+            <mo>;</mo>
+            <mrow>
+              <mi>&ForAll;</mi>
+              <msub>
+                <mi mathvariant="italic">N</mi>
+                <mi mathvariant="italic">c</mi>
+              </msub>
+              <mo>&isin;</mo>
+              <mo>[</mo>
+              <msub>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+                <mi>0</mi>
+              </msub>
+              <mi>,</mi>
+              <msub>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+                <mi>n</mi>
+              </msub>
+              <mo>]</mo>
+            </mrow>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos>
+        <Object ID="19450536" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1000">
+          <Name>N_c</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">N</mi>
+                  <mi mathvariant="italic">c</mi>
+                </msub>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="19362848">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">N</mi>
+                    <mi mathvariant="italic">c</mi>
+                  </msub>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          N_c</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+    <Object ID="19451920" Class="daeEquation" Library="DAE.Core" Version="1000">
+      <Name>sum_yp</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">sum</mi>
+              <mi mathvariant="italic">yp</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eSum</Function>
+          <Node>
+            <Variable ID="19364184">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">y</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            y_p</Variable>
+            <Ranges>
+              <Object>
+                <Type>eRange</Type>
+                <Range/>
+              </Object>
+            </Ranges>
+          </Node>
+        </Left>
+        <Right>
+          <Value>1.000000000000000000000000000000</Value>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mo>(</mo>
+                <mrow>
+                  <mo>&sum;</mo>
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">y</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                    <mo>(</mo>
+                    <mi mathvariant="italic">*</mi>
+                    <mo>)</mo>
+                  </mrow>
+                </mrow>
+                <mo>)</mo>
+              </mrow>
+              <mo>-</mo>
+              <mn mathvariant="italic">        1.0000000000</mn>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos/>
+    </Object>
+    <Object ID="19452304" Class="daeEquation" Library="DAE.Core" Version="1000">
+      <Name>&Theta;</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&Theta;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Variable ID="19439336">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">&theta;</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          &theta;</Variable>
+          <DomainIterators/>
+        </Left>
+        <Right>
+          <Function>eDivide</Function>
+          <Left>
+            <Variable ID="19437848">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">V</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            V_p</Variable>
+            <DomainIterators/>
+          </Left>
+          <Right>
+            <Variable ID="19438088">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">L</mi>
+                      <mi mathvariant="italic">f</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            L_f</Variable>
+            <DomainIterators/>
+          </Right>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mi mathvariant="italic">&theta;</mi>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <mfrac>
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">V</mi>
+                      <mi mathvariant="italic">p</mi>
+                    </msub>
+                  </mrow>
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">L</mi>
+                      <mi mathvariant="italic">f</mi>
+                    </msub>
+                  </mrow>
+                </mfrac>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos/>
+    </Object>
+    <Object ID="19452688" Class="daeEquation" Library="DAE.Core" Version="1000">
+      <Name>L_f</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mi mathvariant="italic">L</mi>
+              <mi mathvariant="italic">f</mi>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
+      <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
+      <Expression>
+        <Function>eMinus</Function>
+        <Left>
+          <Function>eMinus</Function>
+          <Left>
+            <Variable ID="19438088">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">L</mi>
+                      <mi mathvariant="italic">f</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            L_f</Variable>
+            <DomainIterators/>
+          </Left>
+          <Right>
+            <Variable ID="19365032">
+              <ObjectRefMathML>
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <mrow>
+                    <msub>
+                      <mi mathvariant="italic">L</mi>
+                      <mi mathvariant="italic">0</mi>
+                    </msub>
+                  </mrow>
+                </math>
+              </ObjectRefMathML>
+            L_0</Variable>
+            <DomainIterators/>
+          </Right>
+        </Left>
+        <Right>
+          <Variable ID="19437848">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">V</mi>
+                    <mi mathvariant="italic">p</mi>
+                  </msub>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          V_p</Variable>
+          <DomainIterators/>
+        </Right>
+      </Expression>
+      <MathML>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mrow>
+              <mrow>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">L</mi>
+                    <mi mathvariant="italic">f</mi>
+                  </msub>
+                </mrow>
+                <mo>-</mo>
+                <mrow>
+                  <msub>
+                    <mi mathvariant="italic">L</mi>
+                    <mi mathvariant="italic">0</mi>
+                  </msub>
+                </mrow>
+              </mrow>
+              <mo>-</mo>
+              <mrow>
+                <msub>
+                  <mi mathvariant="italic">V</mi>
+                  <mi mathvariant="italic">p</mi>
+                </msub>
+              </mrow>
+            </mrow>
+            <mo>=</mo>
+            <mo>0</mo>
+          </mrow>
+        </math>
+      </MathML>
+      <DistributedDomainInfos/>
+    </Object>
+  </Equations>
+  <STNs/>
+  <PortConnections/>
+  <Units/>
+  <UnitArrays/>
+  <PortArrays/>
+</Model>
