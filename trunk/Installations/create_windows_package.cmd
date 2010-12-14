@@ -13,7 +13,7 @@ SET DEST=daetools
 SET VERSION=%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%
 SET PCKG_TYPE=wininst
 SET PLATFORM=%4
-SET TRUNK=c:\Data\dae-tools
+SET TRUNK=c:\Data\daetools\trunk
 SET INSTALL=%TRUNK%\Installations
 SET ROOT=%INSTALL%\%DEST%
 

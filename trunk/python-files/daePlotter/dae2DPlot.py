@@ -1,23 +1,12 @@
 import sys, numpy
-try:
-    from daetools.pyDAE import *
-    from daeChooseVariable import daeChooseVariable, daeTableDialog
-    from daePlotOptions import *
-except ImportError, e:
-    print '[dae2DPlot]: Cannot load daetools modules', str(e)
-
-try:
-    from PyQt4 import QtCore, QtGui
-except ImportError, e:
-    print '[dae2DPlot]: Cannot load pyQt4 modules', str(e)
-
-try:
-    import matplotlib
-    from matplotlib.figure import Figure
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-except ImportError, e:
-    print '[dae2DPlot]: Cannot load matplotlib modules', str(e)
+from daetools.pyDAE import *
+from daeChooseVariable import daeChooseVariable, daeTableDialog
+from daePlotOptions import *
+from PyQt4 import QtCore, QtGui
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 
 class daePlot2dDefaults:

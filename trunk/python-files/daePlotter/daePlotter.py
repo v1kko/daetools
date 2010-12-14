@@ -1,36 +1,30 @@
 #!/usr/bin/env python
 
 import os, sys
-from subprocess import Popen
-try:
-    from about import AboutDialog
-except ImportError, e:
-    print 'Cannot load about module', str(e)
-
-try:
-    import numpy
-except ImportError, e:
-    print '[daePlotter]: Cannot load numpy module', str(e)
 
 try:
     from PyQt4 import QtCore, QtGui
-except ImportError, e:
-    print '[daePlotter]: Cannot load pyQt4 modules', str(e)
+except Exception, e:
+    print '[daePlotter]: Cannot load pyQt4 modules\n Error: ', str(e)
+    sys.exit()
+
+try:
+    import numpy
+except Exception, e:
+    print '[daePlotter]: Cannot load numpy module\n Error: ', str(e)
+    sys.exit()
 
 try:
     from daetools.pyDAE import *
-except ImportError, e:
-    print '[daePlotter]: Cannot load pyDAE module', str(e)
+except Exception, e:
+    print '[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)
+    sys.exit()
 
 try:
-    from dae2DPlot import dae2DPlot
-except ImportError, e:
-    print '[daePlotter]: Cannot load dae2DPlot module', str(e)
+    from about import AboutDialog
+except Exception, e:
+    print '[daePlotter]: Cannot load about module\n Error: ', str(e)
 
-try:
-    from dae3DPlot import dae3DPlot
-except ImportError, e:
-    print '[daePlotter]: Cannot load dae3DPlot module', str(e)
 
 class daeMainWindow(QtGui.QMainWindow):
     def __init__(self, tcpipServer):
@@ -82,6 +76,12 @@ class daeMainWindow(QtGui.QMainWindow):
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
+        try:
+            from dae2DPlot import dae2DPlot
+        except Exception, e:
+            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
+            return
+            
         plot2d = dae2DPlot(self, self.tcpipServer)
         if plot2d.newCurve() == False:
             plot2d.close()
@@ -93,8 +93,9 @@ class daeMainWindow(QtGui.QMainWindow):
     def slotPlot3D(self):
         try:
             from daeMayavi3DPlot import daeMayavi3DPlot
-        except ImportError, e:
-            print '[daePlotter]: Cannot load daeMayavi3DPlot module', str(e)
+        except Exception, e:
+            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
+            return
         
         plot3d = daeMayavi3DPlot(self.tcpipServer)
         if plot3d.newSurface() == False:

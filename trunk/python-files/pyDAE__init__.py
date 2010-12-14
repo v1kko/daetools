@@ -1,32 +1,39 @@
-try:
-    from pyCore import *
-except ImportError, e:
-    print 'Cannot load pyCore module', str(e)
+from pyCore import *
+from pyActivity import *
+from pySolver import *
+from pyDataReporting import *
+from daetools.daeSimulator import *
+from daeLogs import daePythonStdOutLog
 
-try:
-    from pyActivity import *
-except ImportError, e:
-    print 'Cannot load pyActivity module:', str(e)
+#try:
+    #from pyCore import *
+#except ImportError, e:
+    #print 'Cannot load pyCore module', str(e)
 
-try:
-    from pySolver import *
-except ImportError, e:
-    print 'Cannot load pySolver module', str(e)
+#try:
+    #from pyActivity import *
+#except ImportError, e:
+    #print 'Cannot load pyActivity module:', str(e)
 
-try:
-    from pyDataReporting import *
-except ImportError, e:
-    print 'Cannot load pyDataReporting module', str(e)
+#try:
+    #from pySolver import *
+#except ImportError, e:
+    #print 'Cannot load pySolver module', str(e)
 
-try:
-    from daetools.daeSimulator import *
-except ImportError, e:
-    print 'Cannot load daeSimulator module', str(e)
+#try:
+    #from pyDataReporting import *
+#except ImportError, e:
+    #print 'Cannot load pyDataReporting module', str(e)
 
-try:
-    from daeLogs import daePythonStdOutLog
-except ImportError, e:
-    print 'Cannot load daeLogs module', str(e)
+#try:
+    #from daetools.daeSimulator import *
+#except ImportError, e:
+    #print 'Cannot load daeSimulator module', str(e)
+
+#try:
+    #from daeLogs import daePythonStdOutLog
+#except ImportError, e:
+    #print 'Cannot load daeLogs module', str(e)
 
 
 """

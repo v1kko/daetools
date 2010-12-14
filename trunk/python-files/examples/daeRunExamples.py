@@ -2,26 +2,35 @@ import sys
 from time import localtime, strftime
 
 try:
-    from daetools.pyDAE import *
-except ImportError, e:
-    print '[daeRunExamples]: Cannot pyDAE module', str(e)
+    from PyQt4 import QtCore, QtGui
+except Exception, e:
+    print '[daePlotter]: Cannot load PyQt4 modules\n Error: ', str(e)
+    sys.exit()
 
 try:
-    from PyQt4 import QtCore, QtGui, QtWebKit
-except ImportError, e:
-    print '[daeRunExamples]: Cannot load pyQt4 modules', str(e)
+    import numpy
+except Exception, e:
+    print '[daePlotter]: Cannot load numpy module\n Error: ', str(e)
+    sys.exit()
+
+try:
+    from daetools.pyDAE import *
+except Exception, e:
+    print '[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)
+    sys.exit()
 
 try:
     from RunExamples_ui import Ui_RunExamplesDialog
     from WebView_ui import Ui_WebViewDialog
     import webbrowser
-except ImportError, e:
-    print '[daeRunExamples]: Cannot load ui modules', str(e)
+except Exception, e:
+    print '[daePlotter]: Cannot load UI modules\n Error: ', str(e)
+    sys.exit()
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10
-except ImportError, e:
-    print '[daeRunExamples]: Cannot load tutorial modules', str(e)
+except Exception, e:
+    print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
 
 
 class daeTextEditLog(daeStdOutLog):

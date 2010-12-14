@@ -69,46 +69,88 @@ class daeSimulator(QtGui.QDialog):
             if(self.datareporter.Connect(str(tcpipaddress), simName) == False):
                 QtGui.QMessageBox.warning(None, "DAE Tools Simulator", "Cannot connect data reporter!\nDid you forget to start daePlotter?")
                 raise RuntimeError("Cannot connect daeTCPIPDataReporter")
+                return
             
             lasolverIndex = self.ui.LASolverComboBox.currentIndex()
             if lasolverIndex == 0:
                 pass
+            
             elif lasolverIndex == 1:
-                import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
-                lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
+                    lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 2:
-                import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
-                lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
+                    lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 3:
-                import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
-                lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
+                    lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 4:
-                import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
-                lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
+                    lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 5:
-                import daetools.pyIntelPardiso as pyIntelPardiso
-                lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyIntelPardiso as pyIntelPardiso
+                    lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelPardiso LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 6:
-                import daetools.pyIntelMKL as pyIntelMKL
-                lasolver = pyIntelMKL.daeCreateLapackSolver()
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyIntelMKL as pyIntelMKL
+                    lasolver = pyIntelMKL.daeCreateLapackSolver()
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelMKL LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 7:
-                import daetools.pyAmdACML as pyAmdACML
-                lasolver = pyAmdACML.daeCreateLapackSolver()
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyAmdACML as pyAmdACML
+                    lasolver = pyAmdACML.daeCreateLapackSolver()
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create AmdACML LA solver\nError: " + str(e))
+                    return
+                
             elif lasolverIndex == 8:
-                import daetools.pyLapack as pyLapack
-                lasolver = pyLapack.daeCreateLapackSolver()
-                self.daesolver.SetLASolver(lasolver)
+                try:
+                    import daetools.pyLapack as pyLapack
+                    lasolver = pyLapack.daeCreateLapackSolver()
+                    self.daesolver.SetLASolver(lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Lapack LA solver\nError: " + str(e))
+                    return
+                
             else:
                 raise RuntimeError("Unsupported LA Solver selected")
             

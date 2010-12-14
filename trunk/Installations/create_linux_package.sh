@@ -378,14 +378,14 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "Installed-Size: 11,700 "                                                                    >> ${CONTROL}
   echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                        >> ${CONTROL}
   if [ ${DISTRO} = "Debian-5" ]; then
-    echo "Depends: python2.5, libboost1.35-dev, python-qt4, python-numpy, python-matplotlib, mayavi2, libc6" >> ${CONTROL}
+    echo "Depends: python2.5, libboost1.35-dev, python-qt4, python-numpy, python-matplotlib, libc6" >> ${CONTROL}
   else
-    echo "Depends: python2.6, libboost-all-dev, python-qt4, python-numpy, python-matplotlib, mayavi2, libc6" >> ${CONTROL}
+    echo "Depends: python2.6, libboost-all-dev, python-qt4, python-numpy, python-matplotlib, libc6" >> ${CONTROL}
   fi
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " This package includes pyDAE and cDAE modules. "                                            >> ${CONTROL}
-  echo "Suggests: libsuitesparse-dev, libsuperlu3, liblapack3gf "                                   >> ${CONTROL}
+  echo "Suggests: mayavi2, libsuitesparse-dev, libsuperlu3, liblapack3gf "                          >> ${CONTROL}
   echo "Replaces: libtrilinos"                                                                      >> ${CONTROL}
   echo "Conflicts: libtrilinos"                                                                     >> ${CONTROL}
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
@@ -458,7 +458,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
   echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
-  echo "Requires: boost-devel, PyQt4, numpy, python-matplotlib, Mayavi "            >> ${SPEC}
+  echo "Requires: boost-devel, PyQt4, numpy, python-matplotlib "                    >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
 

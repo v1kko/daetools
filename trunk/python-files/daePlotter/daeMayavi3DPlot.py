@@ -1,26 +1,9 @@
 import sys, math
-
-try:
-    import numpy
-except ImportError, e:
-    print '[daeMayavi3DPlot]: Cannot load numpy module', str(e)
-
-try:
-    from PyQt4 import QtCore, QtGui
-except ImportError, e:
-    print '[daeMayavi3DPlot]: Cannot load pyQt4 modules', str(e)
-
-try:
-    from daetools.pyDAE import *
-    from daeChooseVariable import daeChooseVariable, daeTableDialog
-except ImportError, e:
-    print '[daeMayavi3DPlot]: Cannot load daetools modules', str(e)
-
-try:
-    from enthought.mayavi import mlab, contourf
-except ImportError, e:
-    print '[daeMayavi3DPlot]: Cannot load mayavi module', str(e)
-
+import numpy
+from PyQt4 import QtCore, QtGui
+from daetools.pyDAE import *
+from daeChooseVariable import daeChooseVariable, daeTableDialog
+from enthought.mayavi import mlab
 
 class daeMayavi3DPlot:
     def __init__(self, tcpipServer):
@@ -37,8 +20,6 @@ class daeMayavi3DPlot:
             return False
             
         domainIndexes, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
-        nx = len(xPoints) # no of points in x domain
-        ny = len(yPoints) # no of points in y domain
         xPoints = numpy.array(xPoints)
         yPoints = numpy.array(yPoints)
 

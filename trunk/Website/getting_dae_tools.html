@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta name="Description" content="">
   <meta name="Keywords"
@@ -94,15 +94,21 @@ structure of the folders is the following: <br>
 <p>Mandatory packages:<br>
 </p>
 <ul>
-  <li>Python (v2.6.x): <a href="http://www.python.org">www.python.org</a><br>
+  <li>Python (v2.6<sup>+</sup>): <a href="http://www.python.org">www.python.org</a><br>
   </li>
   <li>Boost libraries (v1.35+; GNU/Linux only): <a
  href="http://www.boost.org">www.boost.org</a> </li>
-  <li>Numpy (v1.3+): <a href="http://numpy.scipy.org">numpy.scipy.org </a></li>
-  <li>Matplotlib (v1.0+): <a href="http://matplotlib.sourceforge.net">matplotlib.sourceforge.net</a>
+  <li>Numpy (v1.3<sup>+</sup>): <a href="http://numpy.scipy.org">numpy.scipy.org
+
+    </a></li>
+  <li>Matplotlib (v0.99<sup>+</sup>): <a
+ href="http://matplotlib.sourceforge.net">matplotlib.sourceforge.net</a>
   </li>
-  <li>pyQt4 (v4.0+): <a
+  <li>pyQt4 (v4.3<sup>+</sup>): <a
  href="http://www.riverbankcomputing.co.uk/software/pyqt">www.riverbankcomputing.co.uk/software/pyqt
+
+
+
 
 
 
@@ -111,8 +117,8 @@ structure of the folders is the following: <br>
 <p>Optional packages (3rd party linear solvers):<br>
 </p>
 <ul>
-  <li>SuperLU (v3+; GNU/Linux only)</li>
-  <li>Umfpack (v5.4+; GNU/Linux only)<br>
+  <li>SuperLU (v3<sup>+</sup>; GNU/Linux only)</li>
+  <li>Umfpack (v5.4<sup>+</sup>; GNU/Linux only)<br>
   </li>
   <li>Lapack (GNU/Linux only)<br>
   </li>
@@ -143,9 +149,10 @@ Synaptic Package Manager or type the following
 command:
 </p>
 <pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib<br></pre>
-<p>Optionally you may install some additional free linear solvers:<br>
+<p>Optionally you may install some additional free linear solvers and
+3D plotting library:<br>
 </p>
-<pre>$ sudo apt-get install libsuitesparse-dev libsuperlu3 liblapack3gf<br></pre>
+<pre>$ sudo apt-get install libsuitesparse-dev libsuperlu3 liblapack3gf<br>$ sudo apt-get install mayavi2<br></pre>
 <p>Install <span style="font-weight: bold;">DAE Tools</span> by using
 GDebi package installer or by typing the following shell commands:
 </p>
@@ -160,9 +167,10 @@ following
 command:
 </p>
 <pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br></pre>
-<p>Optionally you may install some additional free linear solvers:<br>
+<p>Optionally you may install some additional free linear solvers and
+3D plotting library:<br>
 </p>
-<pre>$ sudo yum install suitesparse-static superlu lapack<br></pre>
+<pre>$ sudo yum install suitesparse-static superlu lapack<br>$ sudo yum install Mayavi<br></pre>
 <p><span style="font-weight: bold;">Note</span>: there is no package <span
  style="font-weight: bold;">superlu</span> in Fedora GNU/Linux.
 However, you can
@@ -175,7 +183,10 @@ for
 your&nbsp;
 architecture
 and
-find the package <span style="font-weight: bold;">superlu</span>.
+find
+the
+package
+<span style="font-weight: bold;">superlu</span>.
 Anyway, superlu package is needed only during the compilation
 (pyTrilinosAmesos module is statically linked to superlu.a library).<br>
 </p>
@@ -199,18 +210,24 @@ use the following links: <br>
 </p>
 <ul>
   <li>Python 2.6: <a
- href="http://www.python.org/download/releases/2.6.6">http://www.python.org/download/releases/2.6.6</a></li>
+ href="http://www.python.org/ftp/python/2.6.6/python-2.6.6.msi">download
+link<br>
+    </a></li>
   <li>Numpy: <a
- href="http://sourceforge.net/projects/numpy/files/NumPy">http://sourceforge.net/projects/numpy/files/NumPy</a></li>
+ href="http://sourceforge.net/projects/numpy/files/NumPy/1.5.0/numpy-1.5.0-win32-superpack-python2.6.exe/download"><span
+ style="text-decoration: underline;">download link<br>
+    </span></a></li>
   <li>Matplotlib: <a
- href="http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0">http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0</a></li>
+ href="http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0/matplotlib-1.0.0.win32-py2.6.exe/download">download
+link</a><br>
+  </li>
   <li>PyQt4: <a
- href="http://www.riverbankcomputing.co.uk/software/pyqt/download">http://www.riverbankcomputing.co.uk/software/pyqt/download</a><br>
+ href="http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4/PyQt-Py2.6-gpl-4.8.1-1.exe">download
+link</a><br>
   </li>
 </ul>
-<p>To do so
-follow the
-instructions on the corresponding web sites. You can also try <a
+<p>To be able to create 3D plots you need to install Mayavi2 package. <br>
+Alternatively you can install everything needed through <a
  href="http://www.pythonxy.com">Python(x,y)</a>. Then install <span
  style="font-weight: bold;">DAE Tools </span>by double clicking the
 file daetools_x.x-x_win32_winxp_python26.exe and
@@ -327,6 +344,9 @@ running <br>
 but
 can
 be
+
+
+
     <span style="font-weight: bold;">$${PYTHONDIR}\dist-packages<br>
 &nbsp;&nbsp;&nbsp; </span>in Debian GNU/Linux based distributions<span
  style="font-weight: bold;"></span>.<br>
@@ -450,19 +470,21 @@ use the following commands:<br>
 </div>
 <!-- footer ends here --><!-- wrap ends here --> </div>
 </div>
-
 <!-- Piwik -->
 <script type="text/javascript">
 var pkBaseURL = (("https:" == document.location.protocol) ? "https://sourceforge.net/apps/piwik/daetools/" : "http://sourceforge.net/apps/piwik/daetools/");
 document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
-</script><script type="text/javascript">
+</script>
+<script type="text/javascript">
 try {
 var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
 piwikTracker.trackPageView();
 piwikTracker.enableLinkTracking();
 } catch( err ) {}
-</script><noscript><p><img src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1" style="border:0" alt=""/></p></noscript>
-<!-- End Piwik Tag -->
-
+</script><noscript>
+<p><img
+ src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1"
+ style="border: 0pt none ;" alt=""></p>
+</noscript><!-- End Piwik Tag -->
 </body>
 </html>
