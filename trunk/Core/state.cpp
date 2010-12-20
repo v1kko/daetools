@@ -101,6 +101,54 @@ void daeState::Create(const string& strName, daeSTN* pSTN)
 	m_strShortName	= strName;
 }
 
+void daeState::InitializeStateTransitions(void)
+{
+	size_t i;
+	daeSTN *pSTN;
+	daeStateTransition *pST;
+	
+	for(i = 0; i < m_ptrarrStateTransitions.size(); i++)
+	{
+		pST = m_ptrarrStateTransitions[i];
+		if(!pST)
+			daeDeclareAndThrowException(exInvalidPointer);
+	
+		pST->Initialize();
+	}
+	
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+		pSTN->InitializeStateTransitions();
+	}
+}
+
+void daeState::InitializeDEDIs(void)
+{
+	size_t i;
+	daeSTN *pSTN;
+	daeEquation* pEquation;
+	
+	for(i = 0; i < m_ptrarrEquations.size(); i++)
+	{
+		pEquation = m_ptrarrEquations[i];
+		if(!pEquation)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pEquation->InitializeDEDIs();
+	}
+	
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+		pSTN->InitializeDEDIs();
+	}
+}
+
 daeSTN* daeState::GetSTN(void) const
 {
 	return m_pSTN;

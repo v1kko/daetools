@@ -101,9 +101,12 @@ void daeStateTransition::CreateSTN(const string& strCondition, daeState* pStateF
 	m_pStateTo			= NULL;
 	m_strStateToName	= strStateToName;
 	m_pModel			= pStateFrom->m_pModel;
+	
 // This creates runtime node from setup nodes
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+//	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+	m_Condition			= rCondition;
+
 	m_Condition.m_pModel = m_pStateFrom->m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
 	m_pStateFrom->AddStateTransition(this);
@@ -126,12 +129,29 @@ void daeStateTransition::CreateIF(const string& strCondition, daeState* pStateTo
 	m_pStateTo			= pStateTo;
 	m_strStateToName	= "";
 	m_pModel			= pStateTo->m_pModel;
+	
 // This creates runtime node from setup nodes	
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+//	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+	m_Condition			= rCondition;
+
 	m_Condition.m_pModel = pStateTo->m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
 	pStateTo->AddStateTransition(this);
+}
+
+void daeStateTransition::Initialize(void)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!m_pModel->m_pExecutionContextForGatherInfo)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!m_Condition.m_pConditionNode)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	
+// This creates runtime node from setup nodes	
+// Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
+	m_Condition = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
 }
 
 daeCondition* daeStateTransition::GetCondition(void)

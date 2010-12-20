@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Thu Dec  9 04:07:33 2010
+# Created: Tue Dec 14 13:41:31 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -76,6 +76,10 @@ class Ui_SimulatorDialog(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
+        self.MatrixButton = QtGui.QPushButton(SimulatorDialog)
+        self.MatrixButton.setEnabled(False)
+        self.MatrixButton.setObjectName("MatrixButton")
+        self.horizontalLayout.addWidget(self.MatrixButton)
         self.RunButton = QtGui.QPushButton(SimulatorDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -117,7 +121,7 @@ class Ui_SimulatorDialog(object):
         self.textEdit.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Courier 10 Pitch\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Monospace\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Courier New\';\"></p></body></html>")
         self.textEdit.setObjectName("textEdit")
         self.verticalLayout.addWidget(self.textEdit)
@@ -143,6 +147,7 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.setItemText(8, QtGui.QApplication.translate("SimulatorDialog", "Generic Lapack (dense, sequential)", None, QtGui.QApplication.UnicodeUTF8))
         self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
+        self.MatrixButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Sparse Matrix Preview", None, QtGui.QApplication.UnicodeUTF8))
         self.RunButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Start", None, QtGui.QApplication.UnicodeUTF8))
         self.PauseButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Pause", None, QtGui.QApplication.UnicodeUTF8))
         self.ResumeButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Resume", None, QtGui.QApplication.UnicodeUTF8))

@@ -208,12 +208,12 @@ private:
 };
 
 // Issues with daeModel::min/max
-inline const adouble max_(const adouble &a, const adouble &b)
+inline const adouble __max__(const adouble &a, const adouble &b)
 {
 	return max(a, b);
 }
 
-inline const adouble min_(const adouble &a, const adouble &b)
+inline const adouble __min__(const adouble &a, const adouble &b)
 {
 	return min(a, b);
 }

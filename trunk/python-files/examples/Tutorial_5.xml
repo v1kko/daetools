@@ -4,7 +4,7 @@
         <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
 ]> 
 <?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
-<Model ID="31916856" Class="daeModel" Library="DAE.Core" Version="1.0.5">
+<Model ID="40984120" Class="daeModel" Library="DAE.Core" Version="1.0.5">
   <Name>Tutorial_5</Name>
   <Description>This tutorial explains how to define and use another type of discontinuous equations: non-symmetric state transition networks (daeSTN). 
 A piece of copper (a plate) is at one side exposed to the source of heat and at the other to the surroundings. The process starts at the temperature of the metal of 283K. The metal is allowed to warm up, and then its temperature is kept in the interval [320 - 340] for at least 350 seconds. After 350s the heat source is removed and the metalcools down slowly again to the ambient temperature.</Description>
@@ -20,7 +20,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
   </MathMLName>
   <Domains/>
   <Parameters>
-    <Object ID="31890688" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40978144" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>m</Name>
       <Description>Mass of the copper plate, kg</Description>
       <MathMLName>
@@ -33,7 +33,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="31891056" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40978512" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>c_p</Name>
       <Description>Specific heat capacity of the plate, J/kgK</Description>
       <MathMLName>
@@ -49,7 +49,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="31917024" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40984288" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>&alpha;</Name>
       <Description>Heat transfer coefficient, W/m2K</Description>
       <MathMLName>
@@ -62,7 +62,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="31917328" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40984592" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>A</Name>
       <Description>Area of the plate, m2</Description>
       <MathMLName>
@@ -75,7 +75,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="31917776" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40985040" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
       <Name>T_surr</Name>
       <Description>Temperature of the surroundings, K</Description>
       <MathMLName>
@@ -93,7 +93,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
     </Object>
   </Parameters>
   <Variables>
-    <Object ID="31918376" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40985640" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
       <Name>Q_in</Name>
       <Description>Power of the heater, W</Description>
       <MathMLName>
@@ -109,7 +109,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <VariableType>Power</VariableType>
       <DomainRefs/>
     </Object>
-    <Object ID="31919560" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="40986040" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
       <Name>&tau;</Name>
       <Description>Time elapsed in the process, s</Description>
       <MathMLName>
@@ -122,7 +122,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <VariableType>None</VariableType>
       <DomainRefs/>
     </Object>
-    <Object ID="31920024" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="41034152" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
       <Name>T</Name>
       <Description>Temperature of the plate, K</Description>
       <MathMLName>
@@ -138,7 +138,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
   </Variables>
   <Ports/>
   <Equations>
-    <Object ID="31910296" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="41037960" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
       <Name>HeatBalance</Name>
       <Description>Integral heat balance equation</Description>
       <MathMLName>
@@ -159,7 +159,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             <Left>
               <Function>eMulti</Function>
               <Left>
-                <Parameter ID="31890688">
+                <Parameter ID="40978144">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -171,7 +171,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                 <DomainIterators/>
               </Left>
               <Right>
-                <Parameter ID="31891056">
+                <Parameter ID="40978512">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -187,7 +187,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               </Right>
             </Left>
             <Right>
-              <Variable ID="31920024">
+              <Variable ID="41034152">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -201,7 +201,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </Right>
           </Left>
           <Right>
-            <Variable ID="31918376">
+            <Variable ID="40985640">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -221,7 +221,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
           <Left>
             <Function>eMulti</Function>
             <Left>
-              <Parameter ID="31917024">
+              <Parameter ID="40984288">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -233,7 +233,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               <DomainIterators/>
             </Left>
             <Right>
-              <Parameter ID="31917328">
+              <Parameter ID="40984592">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -248,7 +248,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
           <Right>
             <Function>eMinus</Function>
             <Left>
-              <Variable ID="31920024">
+              <Variable ID="41034152">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -260,7 +260,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               <DomainIterators/>
             </Left>
             <Right>
-              <Parameter ID="31917776">
+              <Parameter ID="40985040">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -354,7 +354,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       </MathML>
       <DistributedDomainInfos/>
     </Object>
-    <Object ID="32489096" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="41042296" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
       <Name>Time</Name>
       <Description>Differential equation to calculate the time elapsed in the process.</Description>
       <MathMLName>
@@ -369,7 +369,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       <Expression>
         <Function>eMinus</Function>
         <Left>
-          <Variable ID="31919560">
+          <Variable ID="40986040">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -413,7 +413,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
     </Object>
   </Equations>
   <STNs>
-    <Object ID="32489248" Class="daeSTN" Library="DAE.Core" Version="1.0.5">
+    <Object ID="41042448" Class="daeSTN" Library="DAE.Core" Version="1.0.5">
       <Name>Regulator</Name>
       <Description/>
       <MathMLName>
@@ -425,7 +425,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
       </MathMLName>
       <Type>eSTN</Type>
       <States>
-        <Object ID="32489496" Class="daeState" Library="DAE.Core" Version="1.0.5">
+        <Object ID="41042696" Class="daeState" Library="DAE.Core" Version="1.0.5">
           <Name>Heating</Name>
           <Description/>
           <MathMLName>
@@ -436,7 +436,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </math>
           </MathMLName>
           <Equations>
-            <Object ID="32489672" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41042872" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
               <Name>Q_in</Name>
               <Description>The heater is on</Description>
               <MathMLName>
@@ -454,7 +454,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               <Expression>
                 <Function>eMinus</Function>
                 <Left>
-                  <Variable ID="31918376">
+                  <Variable ID="40985640">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -495,7 +495,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
           </Equations>
           <STNs/>
           <StateTransitions>
-            <Object ID="32509888" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41043264" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
               <Name>StateTransition_0</Name>
               <Description/>
               <MathMLName>
@@ -508,7 +508,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </mrow>
                 </math>
               </MathMLName>
-              <StateFromRef ID="32489496">
+              <StateFromRef ID="41042696">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -517,7 +517,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Heating</StateFromRef>
-              <StateToRef ID="32491560">
+              <StateToRef ID="41050680">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -526,7 +526,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Cooling</StateToRef>
-              <Condition ID="140734282969040" Class="daeCondition" Library="" Version="1.0.5">
+              <Condition ID="140735051856496" Class="daeCondition" Library="" Version="1.0.5">
                 <Expression>
                   <ConditionType>eLT</ConditionType>
                   <Left>
@@ -552,7 +552,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                 </MathML>
               </Condition>
             </Object>
-            <Object ID="32490176" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41049952" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
               <Name>StateTransition_1</Name>
               <Description/>
               <MathMLName>
@@ -565,7 +565,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </mrow>
                 </math>
               </MathMLName>
-              <StateFromRef ID="32489496">
+              <StateFromRef ID="41042696">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -574,7 +574,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Heating</StateFromRef>
-              <StateToRef ID="32493800">
+              <StateToRef ID="41052920">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -583,7 +583,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.HeaterOff</StateToRef>
-              <Condition ID="140734282969040" Class="daeCondition" Library="" Version="1.0.5">
+              <Condition ID="140735051856496" Class="daeCondition" Library="" Version="1.0.5">
                 <Expression>
                   <ConditionType>eLT</ConditionType>
                   <Left>
@@ -610,7 +610,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               </Condition>
             </Object>
           </StateTransitions>
-          <STN ID="32489248">
+          <STN ID="41042448">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -620,7 +620,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </ObjectRefMathML>
           Regulator</STN>
         </Object>
-        <Object ID="32491560" Class="daeState" Library="DAE.Core" Version="1.0.5">
+        <Object ID="41050680" Class="daeState" Library="DAE.Core" Version="1.0.5">
           <Name>Cooling</Name>
           <Description/>
           <MathMLName>
@@ -631,7 +631,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </math>
           </MathMLName>
           <Equations>
-            <Object ID="32491736" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41050856" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
               <Name>Q_in</Name>
               <Description>The heater is off</Description>
               <MathMLName>
@@ -647,7 +647,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
               <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
               <Expression>
-                <Variable ID="31918376">
+                <Variable ID="40985640">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -680,7 +680,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
           </Equations>
           <STNs/>
           <StateTransitions>
-            <Object ID="32492304" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41051424" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
               <Name>StateTransition_0</Name>
               <Description/>
               <MathMLName>
@@ -693,7 +693,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </mrow>
                 </math>
               </MathMLName>
-              <StateFromRef ID="32491560">
+              <StateFromRef ID="41050680">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -702,7 +702,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Cooling</StateFromRef>
-              <StateToRef ID="32489496">
+              <StateToRef ID="41042696">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -711,7 +711,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Heating</StateToRef>
-              <Condition ID="140734282969040" Class="daeCondition" Library="" Version="1.0.5">
+              <Condition ID="140735051856496" Class="daeCondition" Library="" Version="1.0.5">
                 <Expression>
                   <ConditionType>eGT</ConditionType>
                   <Left>
@@ -737,7 +737,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                 </MathML>
               </Condition>
             </Object>
-            <Object ID="32493104" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41052224" Class="daeStateTransition" Library="DAE.Core" Version="1.0.5">
               <Name>StateTransition_1</Name>
               <Description/>
               <MathMLName>
@@ -750,7 +750,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </mrow>
                 </math>
               </MathMLName>
-              <StateFromRef ID="32491560">
+              <StateFromRef ID="41050680">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -759,7 +759,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.Cooling</StateFromRef>
-              <StateToRef ID="32493800">
+              <StateToRef ID="41052920">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -768,7 +768,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
                   </math>
                 </ObjectRefMathML>
               Regulator.HeaterOff</StateToRef>
-              <Condition ID="140734282969040" Class="daeCondition" Library="" Version="1.0.5">
+              <Condition ID="140735051856496" Class="daeCondition" Library="" Version="1.0.5">
                 <Expression>
                   <ConditionType>eLT</ConditionType>
                   <Left>
@@ -795,7 +795,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               </Condition>
             </Object>
           </StateTransitions>
-          <STN ID="32489248">
+          <STN ID="41042448">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -805,7 +805,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </ObjectRefMathML>
           Regulator</STN>
         </Object>
-        <Object ID="32493800" Class="daeState" Library="DAE.Core" Version="1.0.5">
+        <Object ID="41052920" Class="daeState" Library="DAE.Core" Version="1.0.5">
           <Name>HeaterOff</Name>
           <Description/>
           <MathMLName>
@@ -816,7 +816,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
             </math>
           </MathMLName>
           <Equations>
-            <Object ID="32494056" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+            <Object ID="41053176" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
               <Name>Q_in</Name>
               <Description>The heater is off</Description>
               <MathMLName>
@@ -832,7 +832,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
               <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
               <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
               <Expression>
-                <Variable ID="31918376">
+                <Variable ID="40985640">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -865,7 +865,7 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
           </Equations>
           <STNs/>
           <StateTransitions/>
-          <STN ID="32489248">
+          <STN ID="41042448">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>

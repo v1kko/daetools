@@ -100,6 +100,8 @@ copy daeLogs.py                  %ROOT%\pyDAE\daeLogs.py
 copy pyAmdACML__init__.py        %ROOT%\pyAmdACML\__init__.py
 copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
 copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
+copy WebView_ui.py               %ROOT%\pyDAE\WebView_ui.py
+copy WebViewDialog.py            %ROOT%\pyDAE\WebViewDialog.py
 
 REM daePlotter
 cd daePlotter

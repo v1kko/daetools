@@ -65,7 +65,7 @@ real_t daeVariable::GetADValueAt(size_t nIndex) const
 	if(!pExecutionContext)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "pExecutionContext";
+		e << "Invalid ExecutionContext" << m_strCanonicalName;
 		throw e;
 	}
 

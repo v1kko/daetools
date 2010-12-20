@@ -25,5 +25,12 @@ BOOST_PYTHON_MODULE(pyAmdACML)
 		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
 		;
 
+	class_<daeLapackSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeLapackSolver")
+		.def("Create",		&daeLapackSolver::Create)
+		.def("Reinitialize",&daeLapackSolver::Reinitialize)
+		.def("SaveAsPBM",	&daeLapackSolver::SaveAsPBM)
+		.def("SaveAsXPM",	&daeLapackSolver::SaveAsXPM)
+		;
+
 	def("daeCreateLapackSolver",  daeCreateLapackSolver,  return_value_policy<reference_existing_object>());
 }

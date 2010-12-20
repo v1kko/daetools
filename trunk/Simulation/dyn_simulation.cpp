@@ -21,6 +21,9 @@ daeDynamicSimulation::daeDynamicSimulation(void)
 	m_Integration        = 0;
 	m_eActivityAction    = eAAUnknown;	
 	m_bConditionalIntegrationMode = false;
+	m_bIsInitialized	 = false;
+	m_bIsSolveInitial	 = false;
+	
 
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_dTimeHorizon       = cfg.Get<real_t>("daetools.activity.timeHorizon", 100);
@@ -41,6 +44,11 @@ void daeDynamicSimulation::SetUpVariables()
 
 void daeDynamicSimulation::Resume(void)
 {
+	if(!m_bIsInitialized)
+		return;
+	if(!m_bIsSolveInitial)
+		return;
+	
 // Prevents resuming of the already running simulation
 // or multiple Resume() calls
 	if(m_eActivityAction == eRunActivity)
@@ -59,6 +67,11 @@ void daeDynamicSimulation::Resume(void)
 
 void daeDynamicSimulation::Pause(void)
 {
+	if(!m_bIsInitialized)
+		return;
+	if(!m_bIsSolveInitial)
+		return;
+	
 // Prevents multiple Pause() calls
 	if(m_eActivityAction == ePauseActivity)
 		return;
@@ -81,157 +94,166 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 {
 	time_t start, end;
 
-//	try
-//	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!pDAESolver)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!pDataReporter)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!pLog)
-			daeDeclareAndThrowException(exInvalidPointer);
-	
-	// Check data reporter
-		if(!pDataReporter->IsConnected())
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Data Reporter is not connected \n";
-			throw e;
-		}
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDataReporter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pLog)
+		daeDeclareAndThrowException(exInvalidPointer);
 
-		m_pDAESolver    = pDAESolver;
-		m_pDataReporter	= pDataReporter;
-		m_pLog			= pLog;
-	
-		start = time(NULL);
-	
-		m_pLog->Message(string("*************************************************************************"), 0);
-		m_pLog->Message(string("*                          @@@@@                                        *"), 0);
-		m_pLog->Message(string("*       @                    @                                          *"), 0);
-		m_pLog->Message(string("*       @   @@@@@     @@@@@  @                    DAE Tools             *"), 0);
-		m_pLog->Message(string("*  @@@@@@        @   @     @           Version:   ") + daeVersion() + string("                 *"), 0);
-		m_pLog->Message(string("* @     @   @@@@@@   @@@@@@            Copyright: Dragan Nikolic, 2010  *"), 0);
-		m_pLog->Message(string("* @     @  @     @   @                 E-mail:    dnikolic@daetools.com *"), 0);
-		m_pLog->Message(string("*  @@@@@    @@@@@@    @@@@@            Homepage:  www.daetools.com      *"), 0);
-		m_pLog->Message(string("*                                                                       *"), 0);
-		m_pLog->Message(string("*************************************************************************"), 0);
-		m_pLog->Message(string("* DAE Tools is free software: you can redistribute it and/or modify     *"), 0);
-		m_pLog->Message(string("* it under the terms of the GNU General Public License as published     *"), 0);
-		m_pLog->Message(string("* by the Free Software Foundation; either version 3 of the License,     *"), 0);
-		m_pLog->Message(string("* or (at your option) any later version.                                *"), 0);
-		m_pLog->Message(string("* This program is distributed in the hope that it will be useful,       *"), 0);
-		m_pLog->Message(string("* but WITHOUT ANY WARRANTY; without even the implied warranty of        *"), 0);
-		m_pLog->Message(string("* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          *"), 0);
-		m_pLog->Message(string("* GNU General Public License for more details.                          *"), 0);
-		m_pLog->Message(string("* You should have received a copy of the GNU General Public License     *"), 0);
-		m_pLog->Message(string("* along with this program. If not, see <http://www.gnu.org/licenses/>.  *"), 0);
-		m_pLog->Message(string("*************************************************************************"), 0);
-		m_pLog->Message(string("  "), 0);
-		m_pLog->Message(string("Creating the system... "), 0);
-	
-	// Create params, domains, vars, ports, child models
-		m_pModel->InitializeStage1();
-	
-	// Initialize params and domains
-		SetUpParametersAndDomains();
-	 
-	// Create params, domains, vars, ports
-		m_pModel->InitializeStage2();
-	
-	// Create data storage for variables, derivatives, var. types, tolerances, etc
-		m_pModel->InitializeStage3(m_pLog);
-	
-	// Set initial values, initial conditions, fix variables, set initial guesses, abs tolerances, etc
-		SetUpVariables();
-		
-	// Create equation execution infos in models and stns
-		m_pModel->InitializeStage4();
-	
-	// Set the solver's InitialConditionMode
-		daeeInitialConditionMode eMode = GetInitialConditionMode();
-		m_pDAESolver->SetInitialConditionMode(eMode);
-		if(eMode == eSteadyState)
-			SetInitialConditionsToZero();
+// Check data reporter
+	if(!pDataReporter->IsConnected())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Data Reporter is not connected \n";
+		throw e;
+	}
 
-	// Now I have everything set up and I should check for inconsistences
-		CheckSystem();
+	m_pDAESolver    = pDAESolver;
+	m_pDataReporter	= pDataReporter;
+	m_pLog			= pLog;
+
+	start = time(NULL);
+
+	m_pLog->Message(string("*************************************************************************"), 0);
+	m_pLog->Message(string("*                          @@@@@                                        *"), 0);
+	m_pLog->Message(string("*       @                    @                                          *"), 0);
+	m_pLog->Message(string("*       @   @@@@@     @@@@@  @                    DAE Tools             *"), 0);
+	m_pLog->Message(string("*  @@@@@@        @   @     @           Version:   ") + daeVersion() + string("                 *"), 0);
+	m_pLog->Message(string("* @     @   @@@@@@   @@@@@@            Copyright: Dragan Nikolic, 2010  *"), 0);
+	m_pLog->Message(string("* @     @  @     @   @                 E-mail:    dnikolic@daetools.com *"), 0);
+	m_pLog->Message(string("*  @@@@@    @@@@@@    @@@@@            Homepage:  www.daetools.com      *"), 0);
+	m_pLog->Message(string("*                                                                       *"), 0);
+	m_pLog->Message(string("*************************************************************************"), 0);
+	m_pLog->Message(string("* DAE Tools is free software: you can redistribute it and/or modify     *"), 0);
+	m_pLog->Message(string("* it under the terms of the GNU General Public License as published     *"), 0);
+	m_pLog->Message(string("* by the Free Software Foundation; either version 3 of the License,     *"), 0);
+	m_pLog->Message(string("* or (at your option) any later version.                                *"), 0);
+	m_pLog->Message(string("* This program is distributed in the hope that it will be useful,       *"), 0);
+	m_pLog->Message(string("* but WITHOUT ANY WARRANTY; without even the implied warranty of        *"), 0);
+	m_pLog->Message(string("* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          *"), 0);
+	m_pLog->Message(string("* GNU General Public License for more details.                          *"), 0);
+	m_pLog->Message(string("* You should have received a copy of the GNU General Public License     *"), 0);
+	m_pLog->Message(string("* along with this program. If not, see <http://www.gnu.org/licenses/>.  *"), 0);
+	m_pLog->Message(string("*************************************************************************"), 0);
+	m_pLog->Message(string("  "), 0);
+	m_pLog->Message(string("Creating the system... "), 0);
+
+// Create params, domains, vars, ports, child models
+	m_pModel->InitializeStage1();
+
+// Initialize params and domains
+	SetUpParametersAndDomains();
+ 
+// Create params, domains, vars, ports
+	m_pModel->InitializeStage2();
+
+// Create data storage for variables, derivatives, var. types, tolerances, etc
+	m_pModel->InitializeStage3(m_pLog);
+
+// Set initial values, initial conditions, fix variables, set initial guesses, abs tolerances, etc
+	SetUpVariables();
 	
-	// If everything went fine announce success
-		end = time(NULL);
-		m_ProblemCreation = difftime(end, start);
-		m_pLog->Message(string("The system created successfully in: ") + toStringFormatted<real_t>(real_t(m_ProblemCreation), -1, 3) + string(" s"), 0);
-		m_pLog->Message(string(""), 0);
-//	}
-//	catch(std::exception& e)
-//	{ 
-//		m_pLog->Message(e.what(), 0);
-//		return;
-//	}
+// Create equation execution infos in models and stns
+	m_pModel->InitializeStage4();
+
+// Set the solver's InitialConditionMode
+	daeeInitialConditionMode eMode = GetInitialConditionMode();
+	m_pDAESolver->SetInitialConditionMode(eMode);
+	if(eMode == eSteadyState)
+		SetInitialConditionsToZero();
+
+// Now I have everything set up and I should check for inconsistences
+	CheckSystem();
+
+// Do the block decomposition if needed (at the moment only one block is created)
+	m_ptrarrBlocks.EmptyAndFreeMemory();
+	m_pModel->InitializeStage5(false, m_ptrarrBlocks);
+
+// Initialize solver
+	if(m_ptrarrBlocks.size() != 1)
+		daeDeclareAndThrowException(exInvalidCall);
+	daeBlock_t* pBlock = m_ptrarrBlocks[0];
+	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode());
+
+// Register model
+	m_dCurrentTime = 0;
+	m_pDataReporter->StartRegistration();
+	RegisterModel(m_pModel);
+	m_pDataReporter->EndRegistration();
+	
+// Set the IsInitialized flag to true
+	m_bIsInitialized = true;
+
+// Announce success	
+	end = time(NULL);
+	m_ProblemCreation = difftime(end, start);
+	m_pLog->Message(string("The system created successfully in: ") + toStringFormatted<real_t>(real_t(m_ProblemCreation), -1, 3) + string(" s"), 0);
+	m_pLog->Message(string(""), 0);
 }
 
 void daeDynamicSimulation::SolveInitial(void)
 {
 	clock_t start, end;
 
-//	try
-//	{
-	// Start initialization
-		start = time(NULL);
-		m_pLog->Message(string("Starting initialization of the system..."), 0);
+// Check if initialized
+	if(!m_bIsInitialized)
+		daeDeclareAndThrowException(exInvalidCall);
 	
-	// Check pointers just in case
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pDAESolver)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pDataReporter)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pLog)
-			daeDeclareAndThrowException(exInvalidPointer);
-	
-	// Do the block decomposition if needed (at the moment only one block is created)
-		m_ptrarrBlocks.EmptyAndFreeMemory();
-		m_pModel->InitializeStage5(false, m_ptrarrBlocks);
-	
-	// Initialize solver
-		if(m_ptrarrBlocks.size() != 1)
-			daeDeclareAndThrowException(exInvalidCall);
-		daeBlock_t* pBlock = m_ptrarrBlocks[0];
-		m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode());
-	
-	// Check data reporter
-		if(!m_pDataReporter->IsConnected())
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Data Reporter is not connected \n";
-			throw e;
-		}
-		
-	// Register model and report at TIME=0
-		m_dCurrentTime = 0;
-		m_pDataReporter->StartRegistration();
-		RegisterModel(m_pModel);
-		m_pDataReporter->EndRegistration();
-		ReportData();
-	
-		end = time(NULL);
-		m_Initialization = difftime(end, start);
-		m_pLog->Message(string("Initialization completed. Initialization time: ") + toStringFormatted<real_t>(real_t(m_Initialization), -1, 0) + string(" s"), 0);
-		m_pLog->Message(string("  "), 0);
-//	}
-//	catch(std::exception& e)
-//	{ 
-//		m_pLog->Message(e.what(), 0);
-//		return;
-//	}
+// Check pointers
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDataReporter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pLog)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+// Start initialization
+	start = time(NULL);
+	m_pLog->Message(string("Starting initialization of the system..."), 0);
+
+// Ask DAE solver to initialize the system
+	m_pDAESolver->SolveInitial();
+
+// Report data at TIME=0
+	ReportData();
+
+// Set the SolveInitial flag to true
+	m_bIsSolveInitial = true;
+
+// Announce success	
+	end = time(NULL);
+	m_Initialization = difftime(end, start);
+	m_pLog->Message(string("Initialization completed. Initialization time: ") + toStringFormatted<real_t>(real_t(m_Initialization), -1, 0) + string(" s"), 0);
+	m_pLog->Message(string("  "), 0);
 }
 
 void daeDynamicSimulation::Run(void)
 {
 // Once simulation has started one can change time horizon or reporting interval
 // Is it a good idea?
+
+// Check if initialized and solved initially
+	if(!m_bIsInitialized)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(!m_bIsSolveInitial)
+		daeDeclareAndThrowException(exInvalidCall);
 	
+// Check pointers
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDataReporter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pLog)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// Check for some mistakes
 	if(m_dTimeHorizon <= 0)
 		daeDeclareAndThrowException(exInvalidCall);
 	if(m_dReportingInterval <= 0)
@@ -280,16 +302,60 @@ void daeDynamicSimulation::Run(void)
 		}
 	}
 
-// Notify the receiver that there is no more data, and disconnect it		
-	m_pDataReporter->EndOfData();
-	m_pDataReporter->Disconnect();
-
 // Finalize the simulation		
 	clock_t end = time(NULL);
 	m_Integration = difftime(end, m_Integration);
 	m_pLog->Message(string("Dynamic simulation has finished successfuly"), 0);
 	m_pLog->Message(string("Integration time = ") + toStringFormatted<real_t>(real_t(m_Integration), -1, 0) + string(" s"), 0);
 	m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_ProblemCreation + m_Initialization + m_Integration), -1, 0) + string(" s"), 0);
+}
+
+void daeDynamicSimulation::Finalize(void)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDataReporter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pLog)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// Notify the receiver that there is no more data, and disconnect it		
+	m_pDataReporter->EndOfData();
+	m_pDataReporter->Disconnect();
+
+	m_pModel		= NULL;
+	m_pDAESolver	= NULL;
+	m_pDataReporter = NULL;
+	m_pLog			= NULL;
+	
+	m_ProblemCreation    = 0;
+	m_Initialization     = 0;
+	m_Integration        = 0;
+	m_bIsInitialized	 = false;
+	m_bIsSolveInitial	 = false;
+}
+
+void daeDynamicSimulation::Reset(void)
+{
+	m_dCurrentTime		 = 0;
+	m_ProblemCreation    = 0;
+	m_Initialization     = 0;
+	m_Integration        = 0;
+	m_eActivityAction    = eAAUnknown;	
+
+// Set again the initial conditions, values, tolerances, active states etc
+	SetUpVariables();
+		
+// Reset the DAE solver
+	m_pDAESolver->Reset();
+
+// Set the solver's InitialConditionMode
+//	daeeInitialConditionMode eMode = GetInitialConditionMode();
+//	m_pDAESolver->SetInitialConditionMode(eMode);
+//	if(eMode == eSteadyState)
+//		SetInitialConditionsToZero();
 }
 
 void daeDynamicSimulation::SetInitialConditionsToZero(void)
@@ -337,7 +403,6 @@ void daeDynamicSimulation::CheckSystem(void) const
 		throw e;
 	}
 	
-//	if(GetSteadyStateInitialConditions() == false)
 	if(mi.m_nNumberOfInitialConditions != mi.m_nNumberOfDifferentialVariables)
 	{
 		daeDeclareException(exRuntimeCheck);
@@ -467,7 +532,7 @@ void daeDynamicSimulation::Reinitialize(void)
 void daeDynamicSimulation::EnterConditionalIntegrationMode(void)
 {
 /**************************************************************/
-	daeDeclareAndThrowException(exNotImplemented);
+	daeDeclareAndThrowException(exNotImplemented)
 /**************************************************************/
 	
 	m_bConditionalIntegrationMode = true;
@@ -481,7 +546,7 @@ void daeDynamicSimulation::EnterConditionalIntegrationMode(void)
 real_t daeDynamicSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion)
 {
 /**************************************************************/
-	daeDeclareAndThrowException(exNotImplemented);
+	daeDeclareAndThrowException(exNotImplemented)
 /**************************************************************/
 
 	if(!m_bConditionalIntegrationMode)

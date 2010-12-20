@@ -6,7 +6,7 @@
 #include "../Examples/test_models.h"
 #include "../DataReporters/datareporters.h"
 #include "../Solver/ida_solver.h"
- 
+
 int main(int argc, char *argv[])
 { 
 	try

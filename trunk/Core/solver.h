@@ -48,15 +48,17 @@ public:
 	virtual void						Initialize(daeBlock_t* pBlock, 
 												   daeLog_t* pLog, 
 												   daeeInitialConditionMode eMode)				= 0;
+	virtual void						SolveInitial(void)										= 0;
+	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion)		= 0;
 	virtual void						SetRelativeTolerance(real_t relTol)						= 0;
 	virtual real_t						GetRelativeTolerance(void) const						= 0;
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;
-	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion)		= 0;
 	virtual daeBlock_t*					GetBlock(void) const									= 0;
 	virtual daeLog_t*					GetLog(void) const										= 0;
 	virtual void						RefreshRootFunctions(void)								= 0;
 	virtual void						Reinitialize(bool bCopyDataFromBlock)					= 0;
+	virtual void						Reset(void)												= 0;
 };
 
 /*********************************************************************************************

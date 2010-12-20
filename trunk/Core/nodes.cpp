@@ -649,7 +649,7 @@ adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable,
 adRuntimeVariableNode::adRuntimeVariableNode()
 {
 	m_pVariable = NULL;
-	m_pVariable = NULL;
+	m_pdValue   = NULL;
 	m_nOverallIndex = ULONG_MAX;
 }
 
@@ -668,10 +668,29 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		return tmp;
 	}
 	
-	adouble value(*m_pdValue, //*pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex), 
-	             (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0));
-
-	return value;
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	{
+		// If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
+		// the variable is fixed and its sensitivity derivative per given parameter is 1.
+		// If it is not - it is a normal state variable and its sensitivity derivative is m_pdSValue
+		adouble value;
+		value.setValue(*m_pdValue);
+		
+		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
+			value.setDerivative(1);
+		else
+			value.setDerivative(pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation,
+																		   m_nOverallIndex) );
+		return value;
+	}
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	{
+		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
+	}
+	else
+	{
+		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
+	}
 }
 
 adNode* adRuntimeVariableNode::Clone(void) const
@@ -775,15 +794,15 @@ adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable,
 {
 }
 
-adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode()
+adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(void)
 {	
-	m_pVariable = NULL;
-	m_nDegree   = 0;
-	m_nOverallIndex = ULONG_MAX;
+	m_pVariable        = NULL;
+	m_nDegree          = 0;
+	m_nOverallIndex    = ULONG_MAX;
 	m_pdTimeDerivative = NULL;
 }
 
-adRuntimeTimeDerivativeNode::~adRuntimeTimeDerivativeNode()
+adRuntimeTimeDerivativeNode::~adRuntimeTimeDerivativeNode(void)
 {
 }
 
@@ -798,10 +817,38 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 		return tmp;
 	}
 
-	adouble value(*m_pdTimeDerivative, //*pExecutionContext->m_pDataProxy->GetTimeDerivative(m_nOverallIndex), 
-		         (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? pExecutionContext->m_dInverseTimeStep : 0) );
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	{
+		// Here m_nCurrentVariableIndexForJacobianEvaluation MUST NOT be equal to m_nOverallIndex,
+		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)!! 
+		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
+			daeDeclareAndThrowException(exInvalidCall)
 
-	return value;
+		adouble value;
+		value.setValue(*m_pdTimeDerivative);
+		
+		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
+			value.setDerivative(1);
+		else
+			value.setDerivative(pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation,
+																		    m_nOverallIndex) );
+		return value;
+	}
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	{
+		// Here m_nCurrentVariableIndexForJacobianEvaluation MUST NOT be equal to m_nOverallIndex,
+		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)!! 
+		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
+			daeDeclareAndThrowException(exInvalidCall)
+
+		return adouble(*m_pdTimeDerivative, 0);
+	}
+	else
+	{
+		return adouble(*m_pdTimeDerivative, 
+					  (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? pExecutionContext->m_dInverseTimeStep : 0) );
+
+	}
 }
 
 adNode* adRuntimeTimeDerivativeNode::Clone(void) const

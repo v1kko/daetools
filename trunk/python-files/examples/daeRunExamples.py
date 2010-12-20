@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 from time import localtime, strftime
 
@@ -21,7 +23,8 @@ except Exception, e:
 
 try:
     from RunExamples_ui import Ui_RunExamplesDialog
-    from WebView_ui import Ui_WebViewDialog
+    from daetools.pyDAE.WebViewDialog import WebView
+    #from daetools.WebView_ui import Ui_WebViewDialog
     import webbrowser
 except Exception, e:
     print '[daePlotter]: Cannot load UI modules\n Error: ', str(e)
@@ -45,12 +48,12 @@ class daeTextEditLog(daeStdOutLog):
             self.TextEdit.update()
         self.App.processEvents()
 
-class WebView(QtGui.QDialog):
-    def __init__(self, url):
-        QtGui.QDialog.__init__(self)
-        self.ui = Ui_WebViewDialog()
-        self.ui.setupUi(self)
-        self.ui.webView.load(url)
+#class WebView(QtGui.QDialog):
+#    def __init__(self, url):
+#        QtGui.QDialog.__init__(self)
+#        self.ui = Ui_WebViewDialog()
+#        self.ui.setupUi(self)
+#        self.ui.webView.load(url)
 
 class RunExamples(QtGui.QDialog):
     def __init__(self, app):

@@ -148,14 +148,80 @@ public:
 
 	void SaveMatrixAsXPM(const std::string& strFilename)
 	{
+		size_t i, j;
+		std::ofstream of(strFilename.c_str(), std::ios_base::out);
+		if(!of.is_open())
+			return;
+		
+		char* row  = new char[N+1];
+		row[N]  = '\0';
+	
+		of << "/* XPM */" << std::endl;
+		of << "static char *dummy[]={" << std::endl;
+		of << "\"" << N << " " << N << " " << 2 << " " << 1 << "\"," << std::endl;
+		of << "\"- c #ffffff\"," << std::endl;
+		of << "\"X c #000000\"," << std::endl;
+		
+		int res, NumEntries;
+		double* Values;
+		int* Indices;
+		
+		for(i = 0; i < N; i++)
+		{
+			memset(row, '-', N);
+
+			res = matrix->ExtractMyRowView(i, NumEntries, Values, Indices);
+			if(res == 0)
+			{
+				for(j = 0; j < NumEntries; j++)
+					row[ Indices[j] ] = 'X';			
+			}
+			
+			of << "\"" << row << (i == N-1 ? "\"" : "\",") << std::endl;
+		}
+		of << "};" << std::endl;
+		of.close();
+		delete[] row;
 	}
 	
 	void SaveMatrixAsXPM2(const std::string& strFilename)
 	{
 	}
-	
+
 	void SaveMatrixAsPBM(const std::string& strFilename)
 	{
+		size_t i, j;
+		std::ofstream of(strFilename.c_str(), std::ios_base::out);
+		if(!of.is_open())
+			return;
+		
+		char* row  = new char[2*N+1];
+		row[2*N] = '\0';
+		memset(row, ' ', 2*N);
+		
+		of << "P1" << std::endl;
+		of << N << " " << N << " " << std::endl;
+		
+		int res, NumEntries;
+		double* Values;
+		int* Indices;
+
+		for(i = 0; i < N; i++)
+		{
+			for(j = 0; j < N; j++)
+				row[2*j+1] = '0';
+	
+			res = matrix->ExtractMyRowView(i, NumEntries, Values, Indices);
+			if(res == 0)
+			{
+				for(j = 0; j < NumEntries; j++)
+					row[ 2*Indices[j] + 1] = '1';			
+			}
+			
+			of << row << std::endl;			
+		}
+		of.close();
+		delete[] row;
 	}
 
 protected:

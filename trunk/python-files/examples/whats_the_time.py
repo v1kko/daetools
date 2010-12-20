@@ -190,9 +190,12 @@ def consoleRun():
     #      The DAE system must be first initialized. The function SolveInitial is used for that purpose.
     simulation.SolveInitial()
 
-    # 8.3 Finally, the function Run from the daeDynamicSimulation class is called to start the simulation.
+    # 8.3 Call the function Run from the daeDynamicSimulation class to start the simulation.
     #     It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval number of seconds 
     simulation.Run()
+
+    # 8.4 Finally, call the function Finalize to clean-up.
+    simulation.Finalize()
 
 # This part of the code executes if the python script is executed from a shell
 # 1) If you use: "python whats_the_time.py console" the simulation will be launched from the console

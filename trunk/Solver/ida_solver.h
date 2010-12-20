@@ -25,6 +25,7 @@ public:
 	virtual void						Initialize(daeBlock_t* pBlock, 
 												   daeLog_t* pLog, 
 												   daeeInitialConditionMode eMode);
+	virtual void						SolveInitial(void);
 	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion);
 	virtual void						SetRelativeTolerance(real_t relTol);
 	virtual real_t						GetRelativeTolerance(void) const;
@@ -34,6 +35,7 @@ public:
 	virtual daeLog_t*					GetLog(void) const;
 	virtual void						RefreshRootFunctions(void);
 	virtual void						Reinitialize(bool bCopyDataFromBlock);
+	virtual void						Reset(void);
 
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 
@@ -42,10 +44,11 @@ protected:
 	virtual void Set_InitialConditions_InitialGuesses_AbsRelTolerances(void);
 	virtual void CreateIDA(void);
 	virtual void CreateLinearSolver(void);
-	virtual void SolveInitial(void);
 
 	bool CheckFlag(int flag);
 	string CreateIDAErrorMessage(int flag);
+	
+	void ResetIDASolver(bool bCopyDataFromBlock, real_t t0);
 	
 public:
 //	void GetSparseMatrixData(int& nnz, int** ia, int** ja);

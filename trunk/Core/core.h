@@ -64,7 +64,16 @@ enum daeeEquationCalculationMode
 	eCalculate,
 	eCreateFunctionsIFsSTNs,
 	eCalculateJacobian,
-	eCalculateHesian
+	eCalculateHesian,
+	eCalculateSensitivity,
+	eCalculateGradient
+};
+
+enum daeeModelType
+{
+	eMTUnknown = 0,
+	eSteadyStateModel,
+	eDynamicModel
 };
 
 enum daeeEquationDefinitionMode
@@ -594,6 +603,9 @@ public:
 	
 	virtual void	CalcNonZeroElements(int& NNZ)			   = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
+	
+	virtual real_t	GetCurrentTime(void) const = 0;
+	virtual void	SetCurrentTime(real_t time) = 0;
 };
 
 /******************************************************************

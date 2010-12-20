@@ -679,23 +679,23 @@ adouble adRuntimeSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecu
 	switch(eFunction)
 	{
 	case eSum:
-		tmp = m_pModel->sum(ad);
+		tmp = m_pModel->__sum__(ad);
 		break;
 		
 	case eProduct:
-		tmp = m_pModel->product(ad);
+		tmp = m_pModel->__product__(ad);
 		break;
 		
 	case eAverage:
-		tmp = m_pModel->average(ad);
+		tmp = m_pModel->__average__(ad);
 		break;
 
 	case eMinInArray:
-		tmp = m_pModel->min(ad);
+		tmp = m_pModel->__min__(ad);
 		break;
 		
 	case eMaxInArray:
-		tmp = m_pModel->max(ad);
+		tmp = m_pModel->__max__(ad);
 		break;
 		
 	default:
@@ -919,7 +919,7 @@ adouble adRuntimeIntegralNode::Evaluate(const daeExecutionContext* pExecutionCon
 	adouble_array a;
 	
 	a   = node->Evaluate(pExecutionContext);
-	tmp = m_pModel->calc_integral(a, const_cast<daeDomain*>(m_pDomain), m_narrPoints);
+	tmp = m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), m_narrPoints);
 	
 	return tmp;
 }
@@ -1977,19 +1977,19 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 	switch(eFunction)
 	{
 	case eSum:
-		return m_pModel->sum(node->Evaluate(pExecutionContext));
+		return m_pModel->__sum__(node->Evaluate(pExecutionContext));
 		break;
 	case eProduct:
-		return m_pModel->product(node->Evaluate(pExecutionContext));
+		return m_pModel->__product__(node->Evaluate(pExecutionContext));
 		break;
 	case eAverage:
-		return m_pModel->average(node->Evaluate(pExecutionContext));
+		return m_pModel->__average__(node->Evaluate(pExecutionContext));
 		break;
 	case eMinInArray:
-		return m_pModel->min(node->Evaluate(pExecutionContext));
+		return m_pModel->__min__(node->Evaluate(pExecutionContext));
 		break;
 	case eMaxInArray:
-		return m_pModel->max(node->Evaluate(pExecutionContext));
+		return m_pModel->__max__(node->Evaluate(pExecutionContext));
 		break;
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -2732,13 +2732,13 @@ adSetupIntegralNode::adSetupIntegralNode(daeeIntegralFunctions eFun,
 										 daeModel* pModel,
 										 shared_ptr<adNodeArray> n,
 										 daeDomain* pDomain,
-										 const vector<size_t>& narrPoints)
+										 const daeArrayRange& arrayRange)
 {
 	m_pModel     = pModel;
 	m_pDomain    = pDomain;
 	node         = n;
 	eFunction    = eFun;
-	m_narrPoints = narrPoints;
+	m_ArrayRange = arrayRange;
 }
 
 adSetupIntegralNode::adSetupIntegralNode()
@@ -2755,6 +2755,8 @@ adSetupIntegralNode::~adSetupIntegralNode()
 adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
 	adouble_array a;
+	vector<size_t> narrPoints;
+
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pDomain)
@@ -2765,8 +2767,13 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 	switch(eFunction)
 	{
 	case eSingleIntegral:
+		if(m_ArrayRange.m_eType != eRange)
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		m_ArrayRange.m_Range.GetPoints(narrPoints);
 		a = node->Evaluate(pExecutionContext);
-		return m_pModel->calc_integral(a, const_cast<daeDomain*>(m_pDomain), m_narrPoints);
+		
+		return m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), narrPoints);
 		break;
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);

@@ -126,7 +126,7 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 	adNode::SaveNodeAsMathML(pTag, string("MathML"), m_EquationEvaluationNode.get(), &c, true);
 }
 
-void daeEquationExecutionInfo::GatherInfo()
+void daeEquationExecutionInfo::GatherInfo(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -148,7 +148,7 @@ void daeEquationExecutionInfo::GatherInfo()
 		daeFPU::CreateCommandStack(m_EquationEvaluationNode.get(), m_ptrarrEquationCommands);
 }
 
-void daeEquationExecutionInfo::Residual()
+void daeEquationExecutionInfo::Residual(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -194,7 +194,7 @@ void daeEquationExecutionInfo::Residual()
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 
 		//real_t res;
 		//daeFPU::fpuResidual(&EC, m_ptrarrEquationCommands, res);
@@ -202,11 +202,11 @@ void daeEquationExecutionInfo::Residual()
 	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
 }
 
-void daeEquationExecutionInfo::Jacobian()
+void daeEquationExecutionInfo::Jacobian(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -248,7 +248,7 @@ void daeEquationExecutionInfo::Jacobian()
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 
 		//real_t jacob;
 		//map<size_t, size_t>::iterator iter;
@@ -264,8 +264,53 @@ void daeEquationExecutionInfo::Jacobian()
 	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
+}
+
+void daeEquationExecutionInfo::Sensitivity(void)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pEquation)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeExecutionContext EC;
+	EC.m_pBlock						= m_pBlock;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
+	EC.m_pEquationExecutionInfo		= this;
+	EC.m_eEquationCalculationMode	= eCalculateSensitivity;
+
+	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
+	{
+		adouble __ad;
+		daeDataProxy_t* pDataProxy = m_pModel->m_pDataProxy.get();
+		const std::vector<size_t>& narrOptParamIndexes = pDataProxy->GetOptimizationParametersIndexes();
+
+		for(size_t i = 0; i < narrOptParamIndexes.size(); i++)
+		{
+			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrOptParamIndexes[i];
+			__ad = m_EquationEvaluationNode->Evaluate(&EC);
+			pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
+		}
+	}
+	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+	else
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+}
+
+void daeEquationExecutionInfo::Gradient(void)
+{
 }
 
 void daeEquationExecutionInfo::Hesian()
@@ -302,41 +347,76 @@ daeDistributedEquationDomainInfo::daeDistributedEquationDomainInfo()
 
 daeDistributedEquationDomainInfo::daeDistributedEquationDomainInfo(daeEquation* pEquation, daeDomain* pDomain, daeeDomainBounds eDomainBounds)
 {
+	if(!pEquation)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDomain)
+	{	
+		daeDeclareException(exInvalidCall);
+		e << "Invalid domain in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		throw e;
+	}
+	if(eDomainBounds == eDBUnknown || eDomainBounds == eCustomBound)
+	{	
+		daeDeclareException(exInvalidCall);
+		e << "Invalid domain bounds in DEDI on the domain [ " << m_pDomain->m_strCanonicalName 
+		  << "]; must be on of [eOpenOpen, eOpenClosed, eClosedOpen, eClosedClosed, eLowerBound, eUpperBound]";
+		throw e;
+	}
+
 	m_nCurrentIndex = ULONG_MAX;
 	m_pEquation     = pEquation;
-	Initialize(pDomain, eDomainBounds);
+	m_pDomain       = pDomain;
+	m_pModel		= pDomain->m_pModel;
+	m_eDomainBounds = eDomainBounds;
 }
 
 daeDistributedEquationDomainInfo::daeDistributedEquationDomainInfo(daeEquation* pEquation, daeDomain* pDomain, const vector<size_t>& narrDomainIndexes)
 {
-	m_nCurrentIndex = ULONG_MAX;
-	m_pEquation     = pEquation;
-	Initialize(pDomain, narrDomainIndexes);
+	if(!pEquation)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDomain)
+	{	
+		daeDeclareException(exInvalidCall);
+		e << "Invalid domain in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		throw e;
+	}
+	if(narrDomainIndexes.size() == 0)
+	{	
+		daeDeclareException(exInvalidCall);
+		e << "Number of points cannot be 0 in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		throw e;
+	}
+
+	m_nCurrentIndex    = ULONG_MAX;
+	m_pEquation        = pEquation;
+	m_pDomain          = pDomain;
+	m_pModel		   = pDomain->m_pModel;
+	m_narrDomainPoints = narrDomainIndexes;
+	m_eDomainBounds    = eCustomBound;
 }
 
 daeDistributedEquationDomainInfo::~daeDistributedEquationDomainInfo()
 {
 }
 
-void daeDistributedEquationDomainInfo::Initialize(daeDomain* pDomain, daeeDomainBounds eDomainBounds)
+void daeDistributedEquationDomainInfo::Initialize(void)
 {
 	size_t i, iNoPoints;
-	vector<size_t>::iterator iter;
 
-	if(!pDomain)
+	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
-	iNoPoints = pDomain->m_nNumberOfPoints;
+	
+	iNoPoints = m_pDomain->m_nNumberOfPoints;
 	if(iNoPoints == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in domain [ " << pDomain->m_strCanonicalName << "] is 0; it should be at least 1";
+		e << "Number of points in domain [ " << m_pDomain->m_strCanonicalName << "] is 0; it should be at least 1";
 		throw e;
 	}
 
-	m_pModel		= pDomain->m_pModel;
-	m_pDomain       = pDomain;
-	m_eDomainBounds = eDomainBounds;
-	m_narrDomainPoints.clear();
+	if(m_eDomainBounds != eCustomBound)
+		m_narrDomainPoints.clear();
+	
 	if(m_eDomainBounds == eOpenOpen)
 	{
 		for(i = 1; i < iNoPoints-1; i++)
@@ -365,28 +445,13 @@ void daeDistributedEquationDomainInfo::Initialize(daeDomain* pDomain, daeeDomain
 	{
 		m_narrDomainPoints.push_back(iNoPoints-1);
 	}
+	else if(m_eDomainBounds == eCustomBound)
+	{
+	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
-}
-
-void daeDistributedEquationDomainInfo::Initialize(daeDomain* pDomain, const vector<size_t>& narrDomainIndexes)
-{
-	if(!pDomain)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t iNoPoints = pDomain->m_nNumberOfPoints;
-	if(iNoPoints == 0)
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "Number of points in domain [ " << pDomain->m_strCanonicalName << "] is 0; it should be at least 1";
-		throw e;
-	}
-	m_pModel		   = pDomain->m_pModel;
-	m_pDomain          = pDomain;
-	m_eDomainBounds    = eCustomBound;
-	m_narrDomainPoints = narrDomainIndexes;
 }
 
 daeEquation* daeDistributedEquationDomainInfo::GetEquation(void) const
@@ -594,7 +659,7 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 	}
 	else if(m_eDomainBounds == eFunctor)
 	{
-		daeDeclareAndThrowException(exNotImplemented);
+		daeDeclareAndThrowException(exNotImplemented)
 	}
 	else if(m_eDomainBounds == eCustomBound)
 	{
@@ -631,7 +696,7 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
 	
 	return bCheck;
@@ -1113,6 +1178,19 @@ adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t 
 // Should never be called! (must be overloaded in derived classes)
 	daeDeclareAndThrowException(exInvalidCall);
 	return adouble();
+}
+
+void daeEquation::InitializeDEDIs(void)
+{
+// First initialize all DEDIs (initialize points in them)
+	daeDistributedEquationDomainInfo* pDEDI;
+	for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
+	{
+		pDEDI = m_ptrarrDistributedEquationDomainInfos[i];
+		if(!pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+		pDEDI->Initialize();
+	}
 }
 
 void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, boost::shared_ptr<adNode>& node)

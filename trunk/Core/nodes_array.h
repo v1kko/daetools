@@ -420,7 +420,7 @@ public:
 					    daeModel* pModel,
 						boost::shared_ptr<adNodeArray> n,
 		                daeDomain* pDomain,
-						const vector<size_t>& narrPoints);
+						const daeArrayRange& arrayRange);
 	virtual ~adSetupIntegralNode(void);
 
 public:
@@ -439,7 +439,7 @@ public:
 	boost::shared_ptr<adNodeArray>	node;
 	daeDomain*						m_pDomain;
 	daeeIntegralFunctions			eFunction;
-	vector<size_t>					m_narrPoints;
+	daeArrayRange					m_ArrayRange;
 };
 
 /*********************************************************************************************

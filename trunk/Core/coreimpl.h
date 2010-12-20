@@ -378,6 +378,8 @@ public:
 	void Residual(void);
 	void Jacobian(void);
 	void Hesian(void);
+	void Sensitivity(void);
+	void Gradient(void);
 	void AddVariableInEquation(size_t nIndex);
 
 protected:
@@ -426,10 +428,11 @@ public:
 	daeEquation*	GetEquation(void) const;
 	size_t			GetCurrentIndex(void) const;
 	adouble			operator()(void) const;
+	void			Initialize(void);
 
 protected:
-	void Initialize(daeDomain* pDomain, daeeDomainBounds eDomainBounds);
-	void Initialize(daeDomain* pDomain, const std::vector<size_t>& narrDomainIndexes);
+//	void Initialize(daeDomain* pDomain, daeeDomainBounds eDomainBounds);
+//	void Initialize(daeDomain* pDomain, const std::vector<size_t>& narrDomainIndexes);
 
 protected:
 	daeDomain*			m_pDomain;
@@ -522,6 +525,7 @@ public:
 	daeEquationExecutionInfo*	m_pEquationExecutionInfo;
 	daeeEquationCalculationMode m_eEquationCalculationMode;
 	size_t						m_nCurrentVariableIndexForJacobianEvaluation;
+	size_t						m_nCurrentParameterIndexForSensitivityEvaluation;
 	real_t						m_dInverseTimeStep;
 };
 
@@ -545,38 +549,12 @@ public:
 		m_pLog						= NULL;
 		m_bGatherInfo				= false;
 		m_nTotalNumberOfVariables	= 0;
+		m_nNumberOfParameters		= 0;
+		m_eModelType				= eMTUnknown;
 //		m_pCondition				= NULL;
 	}
 
-	void Initialize(daeModel_t* pTopLevelModel, daeLog_t* pLog, size_t nTotalNumberOfVariables)
-	{
-		m_nTotalNumberOfVariables = nTotalNumberOfVariables;
-
-		m_pdValues			= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
-
-		m_pdTimeDerivatives	= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdTimeDerivatives, 0, m_nTotalNumberOfVariables * sizeof(real_t));
-
-		m_pdInitialConditions	= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdInitialConditions, 0, m_nTotalNumberOfVariables * sizeof(real_t));
-
-		m_pnVariablesTypes			= new int[m_nTotalNumberOfVariables];
-		m_pnVariablesTypesGathered	= new int[m_nTotalNumberOfVariables];
-		memset(m_pnVariablesTypes,         cnNormal, m_nTotalNumberOfVariables * sizeof(int));
-		memset(m_pnVariablesTypesGathered, cnNormal, m_nTotalNumberOfVariables * sizeof(int));
-
-		m_pdAbsoluteTolerances	= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdAbsoluteTolerances, 0, m_nTotalNumberOfVariables * sizeof(real_t));
-
-		m_pExecutionContexts = new daeExecutionContext[m_nTotalNumberOfVariables];
-
-		m_pTopLevelModel = pTopLevelModel;
-		m_pLog           = pLog;
-
-		m_bGatherInfo	 = false;
-	}
-
+	
 	virtual ~daeDataProxy_t(void)
 	{
 		if(m_pdValues)
@@ -621,7 +599,72 @@ public:
 //		}
 	}
 
-public:
+	void Initialize(daeModel_t* pTopLevelModel, daeLog_t* pLog, size_t nTotalNumberOfVariables)
+	{
+		m_nTotalNumberOfVariables = nTotalNumberOfVariables;
+
+		m_pdValues			= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+
+		m_pdTimeDerivatives	= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdTimeDerivatives, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+
+		m_pdInitialConditions	= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdInitialConditions, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+
+		m_pnVariablesTypes			= new int[m_nTotalNumberOfVariables];
+		m_pnVariablesTypesGathered	= new int[m_nTotalNumberOfVariables];
+		memset(m_pnVariablesTypes,         cnNormal, m_nTotalNumberOfVariables * sizeof(int));
+		memset(m_pnVariablesTypesGathered, cnNormal, m_nTotalNumberOfVariables * sizeof(int));
+
+		m_pdAbsoluteTolerances	= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdAbsoluteTolerances, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+
+		m_pExecutionContexts = new daeExecutionContext[m_nTotalNumberOfVariables];
+
+		m_pTopLevelModel = pTopLevelModel;
+		m_pLog           = pLog;
+
+		m_bGatherInfo	 = false;
+
+	}
+
+	void InitializeOptimizationArrays(const std::vector<size_t>& narrOptimizationParametersIndexes)
+	{
+		if(narrOptimizationParametersIndexes.size() > 0)
+			daeDeclareAndThrowException(exInvalidCall)
+		
+		boost::multi_array<real_t, 2>::extent_gen extents;
+		
+		m_nNumberOfParameters               = narrOptimizationParametersIndexes.size();
+		m_narrOptimizationParametersIndexes = narrOptimizationParametersIndexes;
+		
+		if(GetModelType() == eDynamicModel)
+		{
+			m_arrS.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+			m_arrSD.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+			
+			for(size_t i = 0; i < m_nNumberOfParameters; i++)
+			{
+				for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
+				{
+					m_arrS[i][k]  = 0;
+					m_arrSD[i][k] = 0;
+				}
+			}
+		}
+		
+	// This always exists no matter which type of the model is
+		m_arrSRes.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+		for(size_t i = 0; i < m_nNumberOfParameters; i++)
+		{
+			for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
+			{
+				m_arrSRes[i][k] = 0;
+			}
+		}
+	}
+
 	void Load(const std::string& strFileName)
 	{
 		double dValue;
@@ -804,6 +847,111 @@ public:
 		m_pdTimeDerivatives[nIndex] = Value;
 	}
 
+// S value: SD[nParameterIndex][nVariableIndex]
+	real_t GetSValue(size_t nParameterIndex, size_t nVariableIndex) const
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		return m_arrS[nParameterIndex][nVariableIndex];
+	}
+	
+	void SetSValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		m_arrS[nParameterIndex][nVariableIndex] = value;
+	}
+	
+// SD value: SD[nParameterIndex][nVariableIndex]
+	real_t GetSDValue(size_t nParameterIndex, size_t nVariableIndex) const
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		return m_arrSD[nParameterIndex][nVariableIndex];
+	}
+	
+	void GetSDValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		m_arrSD[nParameterIndex][nVariableIndex] = value;
+	}	
+	
+// Sresidual value: Sres[nParameterIndex][nVariableIndex]
+	real_t GetSResValue(size_t nParameterIndex, size_t nVariableIndex) const
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		return m_arrSRes[nParameterIndex][nVariableIndex];
+	}
+	
+	void SetSResValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
+	{
+		if(nParameterIndex >= m_nNumberOfParameters)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		if(nVariableIndex >= m_nTotalNumberOfVariables)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Index out of bounds";
+			throw e;
+		}
+		m_arrSRes[nParameterIndex][nVariableIndex] = value;
+	}	
+
 	real_t* GetInitialCondition(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
@@ -936,7 +1084,36 @@ public:
 		m_eInitialConditionMode = eMode;
 	}
 
-
+	const std::vector<size_t>& GetOptimizationParametersIndexes(void) const
+	{
+		return m_narrOptimizationParametersIndexes;
+	}
+	
+	daeeModelType GetModelType(void)
+	{
+		if(m_eModelType == eMTUnknown)
+		{
+			if(!m_pnVariablesTypesGathered || m_nTotalNumberOfVariables == 0)
+				daeDeclareAndThrowException(exInvalidCall)
+			
+			bool bFoundDiffVariables = false;
+			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
+			{
+				if(m_pnVariablesTypesGathered[i] == cnDifferential)
+				{
+					bFoundDiffVariables = true;
+					break;
+				}
+			}
+			if(bFoundDiffVariables)
+				m_eModelType = eDynamicModel;
+			else
+				m_eModelType = eSteadyStateModel;
+		}
+		
+		return m_eModelType;
+	}
+	
 //	void SetGlobalCondition(daeCondition condition)
 //	{
 //		daeExecutionContext EC;
@@ -965,19 +1142,25 @@ public:
 //	}
 	
 protected:
-//	daeCondition*				m_pCondition;
-	daeLog_t*					m_pLog;
-	daeModel_t*					m_pTopLevelModel;
-	size_t						m_nTotalNumberOfVariables;
-	real_t*						m_pdValues;
-	real_t*						m_pdTimeDerivatives;
-	real_t*						m_pdInitialConditions;
-	real_t*						m_pdAbsoluteTolerances;
-	int*						m_pnVariablesTypes;
-	int*						m_pnVariablesTypesGathered;
-	bool						m_bGatherInfo;
-	daeExecutionContext*		m_pExecutionContexts;
-	daeeInitialConditionMode	m_eInitialConditionMode;
+//	daeCondition*					m_pCondition;
+	daeLog_t*						m_pLog;
+	daeModel_t*						m_pTopLevelModel;
+	size_t							m_nTotalNumberOfVariables;
+	real_t*							m_pdValues;
+	real_t*							m_pdTimeDerivatives;
+	real_t*							m_pdInitialConditions;
+	real_t*							m_pdAbsoluteTolerances;
+	int*							m_pnVariablesTypes;
+	int*							m_pnVariablesTypesGathered;
+	bool							m_bGatherInfo;
+	daeExecutionContext*			m_pExecutionContexts;
+	daeeInitialConditionMode		m_eInitialConditionMode;
+	size_t							m_nNumberOfParameters;
+	daeeModelType					m_eModelType;
+	std::vector<size_t>				m_narrOptimizationParametersIndexes;
+	boost::multi_array<real_t, 2>	m_arrS;
+	boost::multi_array<real_t, 2>	m_arrSD;
+	boost::multi_array<real_t, 2>	m_arrSRes;
 };
 
 /******************************************************************
@@ -1043,6 +1226,9 @@ public:
 	virtual void	CopyTimeDerivativesFromSolver(daeArray<real_t>& arrTimeDerivatives);
 	virtual void	CopyValuesToSolver(daeArray<real_t>& arrValues);
 	virtual void	CopyTimeDerivativesToSolver(daeArray<real_t>& arrTimeDerivatives);
+
+	virtual real_t	GetCurrentTime(void) const;
+	virtual void	SetCurrentTime(real_t time);
 	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;
@@ -1061,9 +1247,6 @@ public:
 
 	real_t	GetHesian(size_t nEquationIndex, size_t nVariableindexInBlock) const;
 	void	SetHesian(size_t nEquationIndex, size_t nVariableindexInBlock, real_t dHesianItem);
-
-	real_t	GetCurrentTime(void) const;
-	void	SetCurrentTime(real_t dTime);
 
 	real_t	GetInverseTimeStep(void) const;
 	void	SetInverseTimeStep(real_t dInverseTimeStep);
@@ -1752,7 +1935,14 @@ public:
 	const adouble max(const adouble_array& a) const;
 	const adouble average(const adouble_array& a) const;
 	const adouble integral(const adouble_array& a) const;
-	const adouble calc_integral(const adouble_array& a, daeDomain* pDomain, const std::vector<size_t>& narrPoints) const;
+
+// Internal functions
+	const adouble __sum__(const adouble_array& a) const;
+	const adouble __product__(const adouble_array& a) const;
+	const adouble __min__(const adouble_array& a) const;
+	const adouble __max__(const adouble_array& a) const;
+	const adouble __average__(const adouble_array& a) const;
+	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<size_t>& narrPoints) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
@@ -1829,7 +2019,9 @@ protected:
 	void		InitializeParameters(void);
 	void		InitializeVariables(void);
 	void		InitializeEquations(void);
+	void		InitializeDEDIs(void);
 	void		InitializePortAndModelArrays(void);
+	void		InitializeSTNs(void);
 	void		DoBlockDecomposition(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
@@ -1948,6 +2140,8 @@ protected:
 	virtual void InitializeParameters(void)																						= 0;
 	virtual void InitializeVariables(void)																						= 0;
 	virtual void InitializeEquations(void)																						= 0;
+	virtual void InitializeSTNs(void)																							= 0;
+	virtual void InitializeDEDIs(void)																		                    = 0;
 	virtual void CreatePortConnectionEquations(void)																			= 0;
 	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)												= 0;
 	virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)										= 0;
@@ -2077,6 +2271,8 @@ public:
 
 protected:
 	void	Create(const string& strName, daeSTN* pSTN);
+	void	InitializeStateTransitions(void);
+	void	InitializeDEDIs(void);
 
 	void	AddStateTransition(daeStateTransition* pStateTransition);
 	void	AddNestedSTN(daeSTN* pSTN);
@@ -2119,6 +2315,7 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	void Initialize(void);
 	void CreateSTN(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
 	void CreateIF(const string& strCondition,  daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
 	bool CheckObject(std::vector<string>& strarrErrors) const;
@@ -2183,6 +2380,9 @@ public:
 	
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
+
+	void			InitializeStateTransitions(void);
+	void			InitializeDEDIs(void);
 
 	bool			CheckState(daeState* pState);
 	void			BuildExpressions(daeBlock* pBlock);
@@ -2272,6 +2472,7 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	void InitializeDEDIs(void);
 
 	virtual size_t	GetNumberOfEquations(void) const;
 

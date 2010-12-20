@@ -24,11 +24,18 @@ public:
 	virtual ~daeActivity_t(void){}
 
 public:
-	virtual daeModel_t*			GetModel(void) const			= 0;
-	virtual void				SetModel(daeModel_t* pModel)	= 0;
-	virtual daeDataReporter_t*	GetDataReporter(void) const		= 0;
-	virtual daeLog_t*			GetLog(void) const				= 0;
-	virtual void				Run(void)						= 0;
+	virtual daeModel_t*			GetModel(void) const											= 0;
+	virtual void				SetModel(daeModel_t* pModel)									= 0;
+	virtual daeDataReporter_t*	GetDataReporter(void) const										= 0;
+	virtual daeLog_t*			GetLog(void) const												= 0;
+	virtual void				SetUpParametersAndDomains(void)									= 0;
+	virtual void				SetUpVariables(void)											= 0;
+	virtual void				Run(void)														= 0;
+	virtual void				Finalize(void)													= 0;
+	virtual void				Reset(void)														= 0;
+	virtual void				ReportData(void)												= 0;
+	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;
+	virtual void				LoadInitializationValues(const std::string& strFileName) const	= 0;
 };
 
 /*********************************************************************
@@ -44,7 +51,6 @@ enum daeeActivityAction
 class daeDynamicActivity_t : public daeActivity_t
 {
 public:
-	virtual void					ReportData(void)								= 0;
 	virtual void					SetTimeHorizon(real_t dTimeHorizon)				= 0;
 	virtual real_t					GetTimeHorizon(void) const						= 0;
 	virtual void					SetReportingInterval(real_t dReportingInterval)	= 0;
@@ -71,8 +77,6 @@ public:
 	virtual real_t				IntegrateForTimeInterval(real_t time_interval)			= 0;
 	virtual real_t				IntegrateUntilTime(real_t time, 
 												   daeeStopCriterion eStopCriterion)	= 0;
-	virtual void				SetUpParametersAndDomains(void)							= 0;
-	virtual void				SetUpVariables(void)									= 0;
 };
 
 /*********************************************************************

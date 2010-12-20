@@ -53,10 +53,8 @@ public:
 		T.DistributeOnDomain(y);
 		
 		Ty.DistributeOnDomain(y);
-	}
-
-	void DeclareEquations(void)
-	{
+		
+		
 		daeDEDI *nx, *ny;
 		daeEquation* eq;
 
@@ -96,13 +94,17 @@ public:
 
         eq = CreateEquation("Tres_array2", "The array function result2");  
 //		eq->SetResidual( Tres_arr2() - ( T(1,1)*T.dt(1,2) + T(1,2)*T.dt(1,1) ) );
-		eq->SetResidual( Tres_arr2() - sum( k() * T.array(xr, yr) ) );
+		eq->SetResidual( Tres_arr2() - sum( k() * T.array(xr, 0) ) );
   
         //eq = CreateEquation("T_ave", "The average temperature of the plate");
         //eq->SetResidual( Tave() - average(T.array(xr, yr)) );
 
         //eq = CreateEquation("T_sum", "The sum of the plate temperatures");
         //eq->SetResidual( Tsum() + k() * sum(T.d_array(y, xr, 0)) );
+	}
+
+	void DeclareEquations(void)
+	{
 	}
 };
 

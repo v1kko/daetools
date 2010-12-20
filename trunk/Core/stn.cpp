@@ -201,6 +201,36 @@ void daeSTN::Initialize()
 	m_bInitialized = true;
 }
 
+void daeSTN::InitializeStateTransitions(void)
+{
+	size_t i;
+	daeState *pState;
+	
+	for(i = 0; i < m_ptrarrStates.size(); i++)
+	{
+		pState = m_ptrarrStates[i];
+		if(!pState)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pState->InitializeStateTransitions();
+	}
+}
+
+void daeSTN::InitializeDEDIs(void)
+{
+	size_t i;
+	daeState *pState;
+	
+	for(i = 0; i < m_ptrarrStates.size(); i++)
+	{
+		pState = m_ptrarrStates[i];
+		if(!pState)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pState->InitializeDEDIs();
+	}
+}
+
 void daeSTN::CreateEquationExecutionInfo(void)
 {
 	size_t i, k, m;

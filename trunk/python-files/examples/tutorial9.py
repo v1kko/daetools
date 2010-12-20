@@ -180,3 +180,4 @@ if __name__ == "__main__":
 
     # Run
     simulation.Run()
+    simulation.Finalize()

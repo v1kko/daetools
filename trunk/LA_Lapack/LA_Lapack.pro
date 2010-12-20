@@ -15,7 +15,7 @@ unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 #                                 SOLVER SPECIFICATION
 # IntelMKL, AmdACML, or Lapack   
 ######################################################################################
-CONFIG += AmdACML
+CONFIG += IntelMKL
 
 ######################################################################################
 #                                 INTEL MKL solver

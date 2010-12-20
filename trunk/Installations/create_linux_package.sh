@@ -162,6 +162,8 @@ cp ../python-files/pyIntelMKL__init__.py         ${PACKAGE_NAME}/pyIntelMKL/__in
 cp ../python-files/pyLapack__init__.py           ${PACKAGE_NAME}/pyLapack/__init__.py
 cp ../python-files/pyIntelPardiso__init__.py     ${PACKAGE_NAME}/pyIntelPardiso/__init__.py
 cp ../python-files/pyTrilinosAmesos__init__.py   ${PACKAGE_NAME}/pyTrilinosAmesos/__init__.py
+cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE/WebView_ui.py
+cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE/WebViewDialog.py
 
 # daeSimulator
 cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator/__init__.py

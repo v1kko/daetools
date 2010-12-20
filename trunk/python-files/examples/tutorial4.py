@@ -178,6 +178,7 @@ def consoleRun():
 
     # Run
     simulation.Run()
+    simulation.Finalize()
 
 if __name__ == "__main__":
     runInGUI = True

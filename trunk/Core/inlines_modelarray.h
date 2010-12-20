@@ -75,6 +75,18 @@ protected:
 		}
 	}
 	
+	virtual void InitializeSTNs(void)
+	{
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->InitializeSTNs();
+	}
+	
+	virtual void InitializeDEDIs(void)
+	{
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->InitializeDEDIs();
+	}
+	
 	virtual void InitializeEquations(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

@@ -170,6 +170,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="MatrixButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Sparse Matrix Preview</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="RunButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

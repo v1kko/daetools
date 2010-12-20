@@ -10,12 +10,13 @@ namespace core
 
 daeExecutionContext::daeExecutionContext()
 {
-	m_pDataProxy				= NULL;
-	m_pBlock					= NULL;
-	m_dInverseTimeStep			= 0;
-	m_pEquationExecutionInfo	= NULL;
-	m_eEquationCalculationMode	= eECMUnknown;
-	m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
+	m_pDataProxy										= NULL;
+	m_pBlock											= NULL;
+	m_dInverseTimeStep									= 0;
+	m_pEquationExecutionInfo							= NULL;
+	m_eEquationCalculationMode							= eECMUnknown;
+	m_nCurrentVariableIndexForJacobianEvaluation		= ULONG_MAX;
+	m_nCurrentParameterIndexForSensitivityEvaluation	= ULONG_MAX;
 }
 
 size_t daeVariable::GetNumberOfPoints() const
@@ -284,7 +285,19 @@ adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges,
 {
 	adouble_array varArray;
 
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid variable array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(ranges[i].m_eType == eRangeDomainIterator)
@@ -327,7 +340,19 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 {
 	adouble_array varArray;
 
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid time derivative array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(ranges[i].m_eType == eRangeDomainIterator)
@@ -371,7 +396,19 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 {
 	adouble_array varArray;
 
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid partial derivative array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(ranges[i].m_eType == eRangeDomainIterator)
@@ -434,7 +471,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 	}
 	else
 	{
-		// If it is NULL then we already initialized 
+		// If it is NULL then we have already initialized 
 		if(m_pModel->m_pExecutionContextForGatherInfo)
 		{
 			pExecutionContext = m_pModel->m_pExecutionContextForGatherInfo;
@@ -482,6 +519,14 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 			tmp.setValue(GetValueAt(nIndex));
 			tmp.setDerivative(GetADValueAt(nIndex));
 		}
+		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+		{
+			daeDeclareAndThrowException(exInvalidCall)
+		}
+		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+		{
+			daeDeclareAndThrowException(exInvalidCall)
+		}
 		else
 		{
 			daeDeclareException(exMiscellanous); 
@@ -493,9 +538,9 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimeVariableNode* node = new adRuntimeVariableNode();
-		node->m_pVariable = const_cast<daeVariable*>(this);
+		node->m_pVariable     = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
-		node->m_pdValue = m_pModel->m_pDataProxy->GetValue(nIndex);
+		node->m_pdValue       = m_pModel->m_pDataProxy->GetValue(nIndex);
 		if(N > 0)
 		{
 			node->m_narrDomains.resize(N);
@@ -510,7 +555,19 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 
 adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const size_t N) const
 {
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid get value call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(indexes[i].m_eType == eDomainIterator)
@@ -540,7 +597,7 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
 	tmp.setGatherInfo(true);
 	return tmp;
 }
-	
+
 adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 {
 	adouble tmp;
@@ -619,6 +676,14 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		else
 			tmp.setDerivative(0.0);
 	}
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	{
+		daeDeclareAndThrowException(exInvalidCall) 
+	}
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
 	else
 	{
 		// Unknown state
@@ -648,7 +713,19 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 
 adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, const size_t N) const
 {
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid time derivative call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(indexes[i].m_eType == eDomainIterator)
@@ -757,7 +834,19 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 
 adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const daeDomain_t& D, const daeDomainIndex* indexes, const size_t N) const
 {
-	// Check if domains in indexes correspond to domains here
+	if(m_ptrDomains.size() != N)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Invalid partial derivative call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		throw e;
+	}
+	if(!m_pModel)
+	{	
+		daeDeclareException(exInvalidPointer); 
+		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		throw e;
+	}
+// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
 		if(indexes[i].m_eType == eDomainIterator)

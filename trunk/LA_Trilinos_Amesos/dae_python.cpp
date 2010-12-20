@@ -29,6 +29,13 @@ BOOST_PYTHON_MODULE(pyTrilinosAmesos)
 		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
 		;
 
+	class_<daeTrilinosAmesosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosAmesosSolver", init<string>())
+		.def("Create",		&daeTrilinosAmesosSolver::Create)
+		.def("Reinitialize",&daeTrilinosAmesosSolver::Reinitialize)
+		.def("SaveAsPBM",	&daeTrilinosAmesosSolver::SaveAsPBM)
+		.def("SaveAsXPM",	&daeTrilinosAmesosSolver::SaveAsXPM)
+		;
+
 	def("daeCreateTrilinosAmesosSolver",      daeCreateTrilinosAmesosSolver,  return_value_policy<reference_existing_object>());
 	def("daeTrilinosAmesosSupportedSolvers",  pydaeTrilinosAmesosSupportedSolvers);
 }

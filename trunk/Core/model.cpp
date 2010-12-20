@@ -887,43 +887,6 @@ void daeModel::DeclareEquations()
 	throw e;
 }
 
-//void daeModel::DeclareDataBase()
-//{
-//	size_t i;
-//	daePort* pPort;
-//	daeModel* pModel;
-//	daePortArray* pPortArray;
-//	daeModelArray* pModelArray;
-//
-//// Create data in ports (including PortArrays)
-//	for(i = 0; i < m_ptrarrPorts.size(); i++)
-//	{
-//		pPort = m_ptrarrPorts[i];
-//		pPort->DeclareData();
-//	}
-//
-//// Create data in child models
-//	for(i = 0; i < m_ptrarrModels.size(); i++)
-//	{
-//		pModel = m_ptrarrModels[i];
-//		pModel->DeclareData();
-//	}
-//	
-//// Next, create data in each portarray
-//	for(i = 0; i < m_ptrarrPortArrays.size(); i++)
-//	{
-//		pPortArray = m_ptrarrPortArrays[i];
-//		pPortArray->DeclareData();
-//	}
-//	
-//// Finally, create data in each modelarray
-//	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
-//	{
-//		pModelArray = m_ptrarrModelArrays[i];
-//		pModelArray->DeclareData();
-//	}
-//}
-
 void daeModel::DeclareEquationsBase()
 {
 	size_t i;
@@ -1411,11 +1374,80 @@ void daeModel::BuildUpSTNsAndEquations()
 	m_pDataProxy->SetGatherInfo(true);
 	PropagateGlobalExecutionContext(&EC);
 		m_ptrarrStackStates.clear();
+	// Declare equations in this model	
 		DeclareEquations();
+	// Declare equations in child models and model arrays
 		DeclareEquationsBase();
 		m_ptrarrStackStates.clear();
+	// Create indexes in DEDIs (they are not created in the moment of declaration!)
+		InitializeDEDIs();
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
+}
+
+void daeModel::InitializeDEDIs(void)
+{
+	size_t i, k;
+	daeSTN* pSTN;
+	daeModel* pModel;
+	daePortConnection* pConnection;
+	daeModelArray* pModelArray;
+	daeEquation* pEquation;
+	
+// First, InitializeDEDIs for equations in this model
+	for(i = 0; i < m_ptrarrEquations.size(); i++)
+	{
+		pEquation = m_ptrarrEquations[i];
+		if(!pEquation)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pEquation->InitializeDEDIs();
+	}
+
+// Then, InitializeDEDIs for port connection equations
+	for(i = 0; i < m_ptrarrPortConnections.size(); i++)
+	{
+		pConnection = m_ptrarrPortConnections[i];
+		if(!pConnection)
+			daeDeclareException(exInvalidPointer); 
+
+		for(k = 0; k < pConnection->m_ptrarrEquations.size(); k++)
+		{
+			pEquation = pConnection->m_ptrarrEquations[k];
+			if(!pEquation)
+				daeDeclareAndThrowException(exInvalidPointer);
+	
+			pEquation->InitializeDEDIs();
+		}
+	}
+
+	// Then, InitializeDEDIs for equations in the STNs
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pSTN->InitializeDEDIs();
+	}
+
+// Next, InitializeDEDIs for equations in each child-model
+	for(i = 0; i < m_ptrarrModels.size(); i++)
+	{
+		pModel = m_ptrarrModels[i];
+		if(!pModel)
+			daeDeclareAndThrowException(exInvalidPointer);
+		pModel->InitializeDEDIs();
+	}
+	
+// Finally, InitializeDEDIs for equations in each modelarray
+	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	{
+		pModelArray = m_ptrarrModelArrays[i];
+		if(!pModelArray)
+			daeDeclareAndThrowException(exInvalidPointer);
+		pModelArray->InitializeDEDIs();
+	}
 }
 
 void daeModel::BuildUpPortConnectionEquations()
@@ -1565,6 +1597,38 @@ void daeModel::InitializeVariables()
 	}
 	
 	m_nTotalNumberOfVariables = _currentVariablesIndex - m_nVariablesStartingIndex;
+}
+
+void daeModel::InitializeSTNs(void)
+{
+	size_t i, k;
+	daeSTN* pSTN;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	
+	// Initialize STNs
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pSTN->InitializeStateTransitions();
+	}
+
+// Next, initialize STNs in each child-model
+	for(i = 0; i < m_ptrarrModels.size(); i++)
+	{
+		pModel = m_ptrarrModels[i];
+		pModel->InitializeSTNs();
+	}
+	
+// Finally, initialize STNs in each modelarray
+	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	{
+		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray->InitializeSTNs();
+	}
 }
 
 void daeModel::InitializeEquations()
@@ -2568,6 +2632,7 @@ void daeModel::InitializeStage4(void)
 // Initialize equations
 	m_pDataProxy->SetGatherInfo(true);
 		InitializeEquations();
+		InitializeSTNs();
 	m_pDataProxy->SetGatherInfo(false);
 }
 

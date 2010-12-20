@@ -69,10 +69,10 @@ daeIDASolver::daeIDASolver(void)
 	m_pLASolver				         = NULL;
 	m_dCurrentTime			         = 0;
 	m_nNumberOfEquations	         = 0;
-	m_dRelTolerance			         = 1e-5;
+	m_dRelTolerance			         = 0;
 	m_timeStart				         = 0;
 	m_dTargetTime			         = 0;
-	m_dNextTimeAfterReinitialization = 1e-2;
+	m_dNextTimeAfterReinitialization = 0;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
 	m_pIDASolverData.reset(new daeIDASolverData);
 
@@ -128,9 +128,6 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialCon
 	
 // Set root function
 	RefreshRootFunctions();
-
-// Try to solve system for the given Initial conditions
-	SolveInitial();
 }
 
 void daeIDASolver::CreateArrays(void)
@@ -252,7 +249,7 @@ void daeIDASolver::CreateLinearSolver(void)
 	}
 	else if(m_eLASolver == eSundialsGMRES)
 	{
-		daeDeclareAndThrowException(exNotImplemented);
+		daeDeclareAndThrowException(exNotImplemented)
 		
 	// Sundials dense GMRES LA Solver	
 		retval = IDASpgmr(m_pIDA, 20);
@@ -320,6 +317,13 @@ void daeIDASolver::RefreshRootFunctions(void)
 void daeIDASolver::SolveInitial(void)
 {
 	int retval = -1;
+
+	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "IDA Solver has not been initialized";
+		throw e;
+	}
 	
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
@@ -336,15 +340,36 @@ void daeIDASolver::SolveInitial(void)
 	}
 }
 
+void daeIDASolver::Reset(void)
+{
+	ResetIDASolver(true, 0);
+}
+
 void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
+{
+	string strMessage = "Reinitializing at time: " + toString<real_t>(m_dCurrentTime);
+	m_pLog->Message(strMessage, 0);
+
+	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
+}
+
+void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 {
 	int retval;
 	size_t N;
 	realtype *pdValues, *pdTimeDerivatives;
 
-	string strMessage = "Reinitializing at time: " + toString<real_t>(m_dCurrentTime);
-	m_pLog->Message(strMessage, 0);
-
+	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "IDA Solver has not been initialized";
+		throw e;
+	}
+	
+// Set the current time
+	m_dCurrentTime = t0;
+	
+// Copy data from the block if requested
 	if(bCopyDataFromBlock)
 	{
 		N = m_pBlock->GetNumberOfEquations();
@@ -377,6 +402,8 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 		throw e;
 	}
 	
+	m_pBlock->SetCurrentTime(t0);
+	
 // Calculate initial conditions again
 // Here we should not use eSteadyState but ONLY eAlgebraicValuesProvided since we already have results
 // Check this !!!!
@@ -386,7 +413,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
 	else
 		daeDeclareAndThrowException(exNotImplemented);
-
+	
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
@@ -403,8 +430,12 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 	size_t nNoRoots;
 	daeeDiscontinuityType eDiscontinuityType;
 
-	if(!m_pBlock) 
-		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "IDA Solver has not been initialized";
+		throw e;
+	}
 	
 	if(dTime <= m_dCurrentTime)
 	{

@@ -3,7 +3,6 @@
 
 #include "activity_class_factory.h"
 #include "../Core/coreimpl.h"
-//#include <boost/thread/mutex.hpp>
 #include "../config.h"
 
 namespace dae
@@ -26,9 +25,13 @@ public:
 	virtual daeDataReporter_t*	GetDataReporter(void) const;
 	virtual daeLog_t*			GetLog(void) const;
 	virtual void				Run(void);
+	virtual void				Finalize(void);
+	virtual void				Reset(void);
+	virtual void				ReportData(void);
+	virtual void				StoreInitializationValues(const std::string& strFileName) const;
+	virtual void				LoadInitializationValues(const std::string& strFileName) const;
 
 // daeDynamicActivity_t
-	virtual void				ReportData(void);
 	virtual void				SetTimeHorizon(real_t dTimeHorizon);
 	virtual real_t				GetTimeHorizon(void) const;
 	virtual void				SetReportingInterval(real_t dReportingInterval);
@@ -47,13 +50,10 @@ public:
 	virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion);
 	virtual void				SetUpParametersAndDomains(void);
 	virtual void				SetUpVariables(void);
-
+	
 	real_t						GetCurrentTime(void) const;
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
-
-	void StoreInitializationValues(const std::string& strFileName) const;
-	void LoadInitializationValues(const std::string& strFileName) const;
 	
 protected:
 	void	SetInitialConditionsToZero(void);
@@ -85,6 +85,8 @@ protected:
 	clock_t						m_Initialization;
 	clock_t						m_Integration;
 	bool						m_bConditionalIntegrationMode;
+	bool						m_bIsInitialized;
+	bool						m_bIsSolveInitial;
 };
 
 

@@ -170,6 +170,7 @@ if __name__ == "__main__":
 
     # Run
     simulation.Run()
+    simulation.Finalize()
 
     # Finally, write the data to a file
     dr1.Write()
