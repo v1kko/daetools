@@ -222,6 +222,11 @@ cp ../release/libSimulation.a       ${PACKAGE_NAME}/cDAE/lib/libSimulation.a
 cp ../release/libSolver.a           ${PACKAGE_NAME}/cDAE/lib/libSolver.a
 cp ../release/libDataReporters.a    ${PACKAGE_NAME}/cDAE/lib/libDataReporters.a
 
+cp ../idas-1.0.0/build/lib/libsundials_idas.a         ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.a
+cp ../idas-1.0.0/build/lib/libsundials_idas.la        ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.la
+cp ../idas-1.0.0/build/lib/libsundials_nvecserial.a   ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.a
+cp ../idas-1.0.0/build/lib/libsundials_nvecserial.la  ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.la
+
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
 echo "from distutils.core import setup " >> setup.py
