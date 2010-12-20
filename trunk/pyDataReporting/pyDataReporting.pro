@@ -7,12 +7,10 @@ INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \
     $${PYTHON_SITE_PACKAGES_DIR}
 
-win32-msvc2008::LIBS += DataReporters.lib
-win32-g++::LIBS += -lDataReporters
-unix::LIBS += -lDataReporters 
-
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
-LIBS +=	$${BOOST_PYTHON_LIB} $${BOOST_LIBS}
+LIBS +=	$${BOOST_PYTHON_LIB} \
+        $${BOOST_LIBS} \
+        $${DAE_DATAREPORTERS_LIB}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \
@@ -24,10 +22,6 @@ HEADERS += stdafx.h \
 
 win32-msvc2008::QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyDataReporting1.dll \
-	$${DAE_DEST_DIR}/pyDataReporting.pyd
-
-win32-g++::QMAKE_POST_LINK =  move /y \
-	$${DAE_DEST_DIR}/$${TARGET}1.dll \
 	$${DAE_DEST_DIR}/pyDataReporting.pyd
 
 unix::QMAKE_POST_LINK = cp -f \

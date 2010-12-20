@@ -6,9 +6,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR}
 
-win32-msvc2008:LIBS += Core.lib
-win32-g++:LIBS      += -lCore
-unix::LIBS          += -lCore
+LIBS += DAE_CORE_LIB
 
 HEADERS += stdafx.h \
     dyn_simulation.h \

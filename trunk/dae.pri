@@ -117,6 +117,19 @@ win32-msvc2008::SUNDIALS_LIBS = sundials_idas.lib sundials_nvecserial.lib
 unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 
 
+#####################################################################################
+#                                  DAE-TOOLS
+#####################################################################################
+win32-msvc2008::DAE_CORE_LIB = Core.lib
+win32-msvc2008::DAE_DATAREPORTERS_LIB = DataReporters.lib
+win32-msvc2008::DAE_SIMULATION_LIB = Simulation.lib
+win32-msvc2008::DAE_SOLVER_LIB = Solver.lib
+
+unix::DAE_CORE_LIB = -lCore
+unix::DAE_DATAREPORTERS_LIB = -lDataReporters
+unix::DAE_SIMULATION_LIB = -lSimulation
+unix::DAE_SOLVER_LIB = -lSolver
+
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 
 HEADERS += \
