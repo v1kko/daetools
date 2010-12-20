@@ -27,7 +27,7 @@ BOOST_PYTHON_MODULE(pySolver)
 		//.add_property("Block",	make_function(&daeDAESolver_t::GetBlock, return_internal_reference<>()))
 		.add_property("RelativeTolerance",	  &daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
 		.add_property("InitialConditionMode", &daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
-   
+     
 		.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
 		.def("Solve",		pure_virtual(&daeDAESolver_t::Solve))
 		;

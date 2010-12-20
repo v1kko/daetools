@@ -16,6 +16,7 @@ SET PLATFORM=%4
 SET TRUNK=c:\Data\daetools\trunk
 SET INSTALL=%TRUNK%\Installations
 SET ROOT=%INSTALL%\%DEST%
+IDAS=..\idas-1.0.0\build
 
 ECHO " "
 ECHO "***************************"
@@ -183,6 +184,9 @@ copy Core.lib           %ROOT%\cDAE\lib\Core.lib
 copy Simulation.lib     %ROOT%\cDAE\lib\Simulation.lib
 copy Solver.lib         %ROOT%\cDAE\lib\Solver.lib
 copy DataReporters.lib  %ROOT%\cDAE\lib\DataReporters.lib
+
+copy %IDAS%\lib\sundials_idas.lib         %ROOT%\cDAE\lib\sundials_idas.lib
+copy %IDAS%\lib\sundials_nvecserial.lib   %ROOT%\cDAE\lib\sundials_nvecserial.lib
 
 REM Config
 cd %TRUNK%

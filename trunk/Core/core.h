@@ -604,8 +604,8 @@ public:
 	virtual void	CalcNonZeroElements(int& NNZ)			   = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
 	
-	virtual real_t	GetCurrentTime(void) const = 0;
-	virtual void	SetCurrentTime(real_t time) = 0;
+	virtual real_t	GetTime(void) const  = 0;
+	virtual void	SetTime(real_t time) = 0;
 };
 
 /******************************************************************

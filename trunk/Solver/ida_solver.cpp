@@ -402,7 +402,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 		throw e;
 	}
 	
-	m_pBlock->SetCurrentTime(t0);
+	m_pBlock->SetTime(t0);
 	
 // Calculate initial conditions again
 // Here we should not use eSteadyState but ONLY eAlgebraicValuesProvided since we already have results

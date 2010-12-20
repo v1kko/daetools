@@ -1227,8 +1227,8 @@ public:
 	virtual void	CopyValuesToSolver(daeArray<real_t>& arrValues);
 	virtual void	CopyTimeDerivativesToSolver(daeArray<real_t>& arrTimeDerivatives);
 
-	virtual real_t	GetCurrentTime(void) const;
-	virtual void	SetCurrentTime(real_t time);
+	virtual real_t	GetTime(void) const;
+	virtual void	SetTime(real_t time);
 	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;

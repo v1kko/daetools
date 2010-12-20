@@ -40,7 +40,7 @@ void daeBlock::CalculateConditions(real_t				dTime,
 	size_t nFnCounter;
 	map<size_t, daeExpressionInfo>::iterator iter;
 
-	SetCurrentTime(dTime);
+	SetTime(dTime);
 	CopyValuesFromSolver(arrValues);
 	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
 
@@ -72,7 +72,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
-	SetCurrentTime(dTime);
+	SetTime(dTime);
 	SetResidualArray(&arrResiduals);
 	CopyValuesFromSolver(arrValues);
 	CopyTimeDerivativesFromSolver(arrTimeDerivatives);	
@@ -116,7 +116,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
-	SetCurrentTime(dTime);
+	SetTime(dTime);
 	SetResidualArray(&arrResiduals);
 	SetJacobianMatrix(&matJacobian); 
 	SetInverseTimeStep(dInverseTimeStep);
@@ -759,12 +759,12 @@ void daeBlock::SetResidualArray(daeArray<real_t>* pResidual)
 	m_parrResidual = pResidual;
 }
 
-real_t daeBlock::GetCurrentTime() const
+real_t daeBlock::GetTime() const
 {
 	return m_dCurrentTime;
 }
 
-void daeBlock::SetCurrentTime(real_t dTime)
+void daeBlock::SetTime(real_t dTime)
 {
 	m_dCurrentTime = dTime;
 }
