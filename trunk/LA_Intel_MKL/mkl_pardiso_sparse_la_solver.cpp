@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
-#include <ida/ida_impl.h>
+#include <idas/idas_impl.h>
 #include "mkl_pardiso_sparse_la_solver.h"
 
 namespace dae

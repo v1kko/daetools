@@ -3,11 +3,11 @@ using namespace std;
 #include "ida_solver.h"
 #include "../Core/helpers.h"
 #include "dae_solvers.h"
-#include <ida/ida.h>
-#include <ida/ida_impl.h>
-#include <ida/ida_dense.h>
-#include <ida/ida_lapack.h>
-#include <ida/ida_spgmr.h>
+#include <idas/idas.h>
+#include <idas/idas_impl.h>
+#include <idas/idas_dense.h>
+//#include <idas/idas_lapack.h>
+#include <idas/idas_spgmr.h>
 
 #define JACOBIAN(A) (A->cols)
  

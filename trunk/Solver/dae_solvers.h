@@ -1,11 +1,11 @@
 #ifndef DAE_SOLVERS_H
 #define DAE_SOLVERS_H
 
-#include <ida/ida.h>
+#include <idas/idas.h>
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
-#include <ida/ida_dense.h>
+#include <idas/idas_dense.h>
 #include "dae_array_matrix.h"
 
 namespace dae

@@ -81,17 +81,15 @@ public:
 };
 
 /*********************************************************************************************
-	adRuntimeDomainIndexNode
+	adDomainIndexNode
 **********************************************************************************************/
-class DAE_CORE_API adRuntimeDomainIndexNode : public adNodeImpl
+class DAE_CORE_API adDomainIndexNode : public adNodeImpl
 {
 public:
-	daeDeclareDynamicClass(adRuntimeDomainIndexNode)
-	adRuntimeDomainIndexNode(void);
-	adRuntimeDomainIndexNode(daeDomain* pDomain, 
-	                         size_t nIndex, 
-							 real_t* pdPoint);
-	virtual ~adRuntimeDomainIndexNode(void);
+	daeDeclareDynamicClass(adDomainIndexNode)
+	adDomainIndexNode(void);
+	adDomainIndexNode(daeDomain* pDomain, size_t nIndex);
+	virtual ~adDomainIndexNode(void);
 
 public:
 	virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
@@ -105,8 +103,6 @@ public:
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
 
 public:
-// Runtime part
-	real_t*		m_pdPoint;
 // Report/GUI part
 	daeDomain*	m_pDomain;
 	size_t		m_nIndex;

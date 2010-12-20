@@ -21,7 +21,7 @@ bool adDoEnclose(const adNode* node)
 
 // If it is simple node DO NOT enclose in brackets
 	if(infoChild == typeid(const adConstantNode)					|| 
-	   infoChild == typeid(const adRuntimeDomainIndexNode)			|| 
+	   infoChild == typeid(const adDomainIndexNode)					|| 
 	   infoChild == typeid(const adRuntimeParameterNode)			|| 
 	   infoChild == typeid(const adRuntimeVariableNode)				|| 
 	   infoChild == typeid(const adRuntimeTimeDerivativeNode)		|| 
@@ -199,9 +199,9 @@ adNode* adNode::CreateNode(const io::xmlTag_t* pTag)
 	{
 		return new adConstantNode();
 	}
-	else if(strClass == "adRuntimeDomainIndexNode")
+	else if(strClass == "adDomainIndexNode")
 	{
-		return new adRuntimeDomainIndexNode();
+		return new adDomainIndexNode();
 	}
 	else if(strClass == "adRuntimeParameterNode")
 	{
@@ -530,31 +530,32 @@ void adRuntimeParameterNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapI
 }
 
 /*********************************************************************************************
-	adRuntimeDomainIndexNode
+	adDomainIndexNode
 **********************************************************************************************/
-adRuntimeDomainIndexNode::adRuntimeDomainIndexNode(daeDomain* pDomain, 
-												   size_t nIndex, 
-												   real_t* pdPoint)
-			     : m_pdPoint(pdPoint),
-				   m_pDomain(pDomain), 
+adDomainIndexNode::adDomainIndexNode(daeDomain* pDomain, size_t nIndex)
+			     : m_pDomain(pDomain), 
 				   m_nIndex(nIndex)				   
 {
 }
 
-adRuntimeDomainIndexNode::adRuntimeDomainIndexNode()
+adDomainIndexNode::adDomainIndexNode()
 {
 	m_pDomain = NULL;
-	m_pdPoint = NULL;
 	m_nIndex  = ULONG_MAX;
 }
 
-adRuntimeDomainIndexNode::~adRuntimeDomainIndexNode()
+adDomainIndexNode::~adDomainIndexNode()
 {
 }
 
-adouble adRuntimeDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in evaluate mode we dont need the value
+// adDomainIndexNode is not consistent with the other nodes.
+// It represents a runtime and a setup node at the same time.
+// Setup nodes should create runtime nodes in its function Evaluate().
+// Here I check if I am inside of the GatherInfo mode and if I am
+// I clone the node (which is an equivalent for creation of a runtime node)
+// If I am not - I return the value of the point for the given index.
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adouble tmp;
@@ -563,44 +564,34 @@ adouble adRuntimeDomainIndexNode::Evaluate(const daeExecutionContext* pExecution
 		return tmp;
 	}
 	
-	//return adouble(m_pDomain->GetPoint(m_nIndex));
-	return adouble(*m_pdPoint);
+	return adouble(m_pDomain->GetPoint(m_nIndex));
 }
 
-adNode* adRuntimeDomainIndexNode::Clone(void) const
+adNode* adDomainIndexNode::Clone(void) const
 {
-	return new adRuntimeDomainIndexNode(*this);
+	return new adDomainIndexNode(*this);
 }
 
-string adRuntimeDomainIndexNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+string adDomainIndexNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
 {
 	string strName  = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
 	string strIndex = toString<size_t>(m_nIndex);
 	return textCreator::Domain(strName, strIndex);
 }
 
-string adRuntimeDomainIndexNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adDomainIndexNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
 	string strName  = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
 	string strIndex = toString<size_t>(m_nIndex);
 	return latexCreator::Domain(strName, strIndex);
 }
 
-void adRuntimeDomainIndexNode::Open(io::xmlTag_t* pTag)
+void adDomainIndexNode::Open(io::xmlTag_t* pTag)
 {
-	string strName;
-
-	//strName = "Name";
-	//pTag->Open(strName, m_pDomain->GetName());
-
-	strName = "Index";
-	pTag->Open(strName, m_nIndex);
-
-	//strName = "Point";
-	//pTag->Open(strName, m_pdPoint);
+	daeDeclareAndThrowException(exNotImplemented)
 }
 
-void adRuntimeDomainIndexNode::Save(io::xmlTag_t* pTag) const
+void adDomainIndexNode::Save(io::xmlTag_t* pTag) const
 {
 	string strName;
 
@@ -609,26 +600,21 @@ void adRuntimeDomainIndexNode::Save(io::xmlTag_t* pTag) const
 
 	strName = "Index";
 	pTag->Save(strName, m_nIndex);
-
-	strName = "Point";
-	pTag->Save(strName, *m_pdPoint);
 }
 
-void adRuntimeDomainIndexNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adDomainIndexNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
-	string strName  = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
-	string strIndex = toString<size_t>(m_nIndex);
-	xmlContentCreator::Domain(pTag, strName, strIndex);
+	daeDeclareAndThrowException(exNotImplemented)
 }
 
-void adRuntimeDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
 	string strName  = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
 	string strIndex = toString<size_t>(m_nIndex);
 	xmlPresentationCreator::Domain(pTag, strName, strIndex);
 }
 
-void adRuntimeDomainIndexNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adDomainIndexNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
 {
 }
 

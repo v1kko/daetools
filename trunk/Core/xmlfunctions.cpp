@@ -382,9 +382,9 @@ xmlTag_t* xmlPresentationCreator::Domain(xmlTag_t* parent,
 		//temp->AddAttribute(string("mathvariant"), string("italic"));
 		xmlPresentationCreator::WrapIdentifier(mrow, name);
 		
-		mrow->AddTag(string("mo"), string("("));
+		mrow->AddTag(string("mo"), string("["));
 		mrow->AddTag(string("mi"), strIndex);
-		mrow->AddTag(string("mo"), string(")"));
+		mrow->AddTag(string("mo"), string("]"));
 
 	return parent;
 }

@@ -9,6 +9,16 @@ namespace dae
 {
 namespace core 
 {
+#define adCheckArrays(left, right)	if((left).GetSize() == 0 || (right).GetSize() == 0)   \
+									{ \
+										daeDeclareAndThrowException(exInvalidCall);   \
+									} \
+									if((left).GetSize() > 1 && (right).GetSize() > 1) \
+									{ \
+										if((left).GetSize() != (right).GetSize()) \
+											daeDeclareAndThrowException(exInvalidCall); \
+									}
+
 /*********************************************************************************************
 	adouble_array
 **********************************************************************************************/
@@ -55,26 +65,56 @@ void adouble_array::operator =(const adouble_array& a)
 
 adouble& adouble_array::operator[](size_t nIndex)
 {
-	if(nIndex >= m_arrValues.size())
-		daeDeclareAndThrowException(exInvalidCall);
-	
-	return m_arrValues[nIndex];
+// This enables operations on an array which has only one element,
+// for instance single variables, parameters and constants
+// They always return its single value (for arbitrary index)
+	if(m_arrValues.size() == 1) 
+	{
+		return m_arrValues[0];
+	}
+	else
+	{
+		if(nIndex >= m_arrValues.size())
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		return m_arrValues[nIndex];
+	}
 }
 
 const adouble& adouble_array::operator[](size_t nIndex) const
 {
-	if(nIndex >= m_arrValues.size())
-		daeDeclareAndThrowException(exInvalidCall);
-	
-	return m_arrValues[nIndex];
+// This enables operations on an array which has only one element,
+// for instance single variables, parameters and constants
+// They always return its single value (for arbitrary index)
+	if(m_arrValues.size() == 1) 
+	{
+		return m_arrValues[0];
+	}
+	else
+	{
+		if(nIndex >= m_arrValues.size())
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		return m_arrValues[nIndex];
+	}
 }
 
 adouble adouble_array::GetItem(size_t nIndex)
 {
-	if(nIndex >= m_arrValues.size())
-		daeDeclareAndThrowException(exInvalidCall);
-	
-	return m_arrValues[nIndex];
+// This enables operations on an array which has only one element,
+// for instance single variables, parameters and constants
+// They always return its single value (for arbitrary index)
+	if(m_arrValues.size() == 1) 
+	{
+		return m_arrValues[0];
+	}
+	else
+	{
+		if(nIndex >= m_arrValues.size())
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		return m_arrValues[nIndex];
+	}
 }
 
 bool adouble_array::getGatherInfo(void) const
@@ -117,8 +157,7 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
 	    return tmp;
 	}
 
-	if(GetSize() != a.GetSize())
-		daeDeclareAndThrowException(exInvalidCall);
+	adCheckArrays(*this, a)
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -135,7 +174,7 @@ const adouble_array adouble_array::operator +(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, node->GetSize() )) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
 	    return tmp;
 	}
 	
@@ -154,8 +193,7 @@ const adouble_array adouble_array::operator +(const adouble& a) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   node->GetSize()) ) ));
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -173,8 +211,7 @@ const adouble_array operator +(const adouble& a, const adouble_array& arr)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   arr.node->GetSize()) ),
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -194,7 +231,7 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, a.node->GetSize())),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -218,8 +255,7 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
 	    return tmp;
 	}
 
-	if(GetSize() != a.GetSize())
-		daeDeclareAndThrowException(exInvalidCall);
+	adCheckArrays(*this, a)
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -236,7 +272,7 @@ const adouble_array adouble_array::operator -(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, node->GetSize())) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
 	    return tmp;
 	}
 	
@@ -255,8 +291,7 @@ const adouble_array adouble_array::operator -(const adouble& a) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   node->GetSize()) ) ));
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -274,8 +309,7 @@ const adouble_array operator -(const adouble& a, const adouble_array& arr)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   arr.node->GetSize()) ),
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -295,7 +329,7 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, a.node->GetSize())),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -306,7 +340,7 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
 		tmp[i] = v - a[i];
 	return tmp;
 }
-
+											
 const adouble_array adouble_array::operator *(const adouble_array& a) const
 {
 	adouble_array tmp;
@@ -319,8 +353,7 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
 	    return tmp;
 	}
 
-	if(GetSize() != a.GetSize())
-		daeDeclareAndThrowException(exInvalidCall);
+	adCheckArrays(*this, a)
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -337,7 +370,7 @@ const adouble_array adouble_array::operator *(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, node->GetSize())) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
 	    return tmp;
 	}
 	
@@ -356,8 +389,7 @@ const adouble_array adouble_array::operator *(const adouble& a) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   node->GetSize()) ) ));
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -375,8 +407,7 @@ const adouble_array operator *(const adouble& a, const adouble_array& arr)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   arr.node->GetSize()) ),
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -396,7 +427,7 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, a.node->GetSize())),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -420,8 +451,7 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 	    return tmp;
 	}
 
-	if(GetSize() != a.GetSize())
-		daeDeclareAndThrowException(exInvalidCall);
+	adCheckArrays(*this, a)
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -438,7 +468,7 @@ const adouble_array adouble_array::operator /(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, node->GetSize())) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
 	    return tmp;
 	}
 	
@@ -457,8 +487,7 @@ const adouble_array adouble_array::operator /(const adouble& a) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   node->GetSize()) ) ));
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -476,8 +505,7 @@ const adouble_array operator /(const adouble& a, const adouble_array& arr)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue()), 
-																											   arr.node->GetSize()) ),
+														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -497,7 +525,7 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, a.node->GetSize())),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}

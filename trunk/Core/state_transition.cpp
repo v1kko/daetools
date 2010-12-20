@@ -151,7 +151,7 @@ void daeStateTransition::Initialize(void)
 	
 // This creates runtime node from setup nodes	
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-	m_Condition = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+	m_Condition.m_pConditionNode = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo).m_pConditionNode;
 }
 
 daeCondition* daeStateTransition::GetCondition(void)

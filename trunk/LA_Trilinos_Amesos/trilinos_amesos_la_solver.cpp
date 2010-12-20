@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
-#include <ida/ida_impl.h>
+#include <idas/idas_impl.h>
 #include "trilinos_amesos_la_solver.h"
 
 #ifdef DAE_SINGLE_PRECISION

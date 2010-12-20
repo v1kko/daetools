@@ -105,8 +105,16 @@ unix::BOOST_LIBS       = -lboost_system -lboost_thread
 #####################################################################################
 #                                   SUNDIALS
 #####################################################################################
-SUNDIALS = ../ida-2.6.0
-SUNDIALS_INCLUDE = $${SUNDIALS}/include $${SUNDIALS}/src
+# ./configure --prefix=/home/ciroki/Data/daetools/trunk/idas-1.0.0/build --disable-mpi \
+#             --enable-examples --enable-static=yes --enable-shared=no --with-pic
+#
+#####################################################################################
+SUNDIALS = ../idas-1.0.0/build
+SUNDIALS_INCLUDE = $${SUNDIALS}/include
+SUNDIALS_LIBDIR = $${SUNDIALS}/lib
+
+win32-msvc2008::SUNDIALS_LIBS = sundials_idas.lib sundials_nvecserial.lib
+unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}

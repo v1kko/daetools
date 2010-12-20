@@ -1381,6 +1381,8 @@ void daeModel::BuildUpSTNsAndEquations()
 		m_ptrarrStackStates.clear();
 	// Create indexes in DEDIs (they are not created in the moment of declaration!)
 		InitializeDEDIs();
+	// Create runtime condition nodes based on setup nodes
+		InitializeSTNs();		
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -2632,7 +2634,6 @@ void daeModel::InitializeStage4(void)
 // Initialize equations
 	m_pDataProxy->SetGatherInfo(true);
 		InitializeEquations();
-		InitializeSTNs();
 	m_pDataProxy->SetGatherInfo(false);
 }
 

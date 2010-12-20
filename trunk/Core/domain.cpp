@@ -386,7 +386,7 @@ adouble_array daeDomain::array(void)
 
 adouble_array daeDomain::array(int start, int end, int step)
 {
-	daeDeclareAndThrowException(exNotImplemented); 
+	daeDeclareAndThrowException(exNotImplemented)
 
 	adouble_array varArray; 
 
@@ -427,8 +427,6 @@ daeIndexRange daeDomain::operator()(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
 
 	return daeIndexRange(this);
 }
@@ -437,13 +435,6 @@ daeIndexRange daeDomain::operator()(int start, int end, int step)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	if(start < 0 || start >= (int)m_darrPoints.size())
-		daeDeclareAndThrowException(exOutOfBounds);
-	if(end <= -2 || end >= (int)m_darrPoints.size())
-		daeDeclareAndThrowException(exOutOfBounds);
 
 	return daeIndexRange(this, start, end, step);
 }
@@ -452,9 +443,6 @@ daeIndexRange daeDomain::operator()(const std::vector<size_t>& narrCustomPoints)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
 	if(narrCustomPoints.empty())
 		daeDeclareAndThrowException(exInvalidCall);
 
@@ -465,22 +453,13 @@ adouble daeDomain::operator[](size_t nIndex) const
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
 
-	if(nIndex >= m_darrPoints.size())
-		daeDeclareAndThrowException(exOutOfBounds);
-
-	adouble tmp(m_darrPoints[nIndex], 0.0);
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimeDomainIndexNode* node = new adRuntimeDomainIndexNode();
-		node->m_pDomain = const_cast<daeDomain*>(this);
-		node->m_nIndex = nIndex;
-		node->m_pdPoint = const_cast<real_t*>(&m_darrPoints[nIndex]);
-		tmp.node = boost::shared_ptr<adNode>(node);
-		tmp.setGatherInfo(true);
-	}
+	adouble tmp;
+	adDomainIndexNode* node = new adDomainIndexNode();
+	node->m_pDomain = const_cast<daeDomain*>(this);
+	node->m_nIndex = nIndex;
+	tmp.node = boost::shared_ptr<adNode>(node);
+	tmp.setGatherInfo(true);
 	return tmp;
 }
 
@@ -491,20 +470,6 @@ real_t daeDomain::GetPoint(size_t nIndex) const
 
 	return m_darrPoints[nIndex];
 }
-
-//void daeDomain::SetPoint(size_t nIndex, real_t value)
-//{
-//	if(m_eDomainType == eArray)
-//	{	
-//		daeDeclareException(exInvalidCall);
-//		e << "Cannot change points of an array, domain [" << m_strCanonicalName << "]";
-//		throw e;
-//	}
-//	if(nIndex >= m_darrPoints.size())
-//		daeDeclareAndThrowException(exOutOfBounds); 
-//
-//	m_darrPoints[nIndex] = value;	
-//}
 
 bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 {

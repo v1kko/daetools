@@ -606,7 +606,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")
 		;
-  
+    
 /**************************************************************
 	daeLog
 ***************************************************************/

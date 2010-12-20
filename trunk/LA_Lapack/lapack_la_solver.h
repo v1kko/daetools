@@ -3,8 +3,8 @@
 
 #include "../Solver/ida_la_solver_interface.h"
 #include "../Solver/solver_class_factory.h"
-#include <ida/ida.h>
-#include <ida/ida_impl.h>
+#include <idas/idas.h>
+#include <idas/idas_impl.h>
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>

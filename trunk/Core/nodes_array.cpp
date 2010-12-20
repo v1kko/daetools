@@ -201,15 +201,13 @@ void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 /*********************************************************************************************
 	adConstantNodeArray
 **********************************************************************************************/
-adConstantNodeArray::adConstantNodeArray(const real_t d, const size_t size)
-	               : m_dValue(d), m_nSize(size)
+adConstantNodeArray::adConstantNodeArray(const real_t d) : m_dValue(d)
 {
 }
 
 adConstantNodeArray::adConstantNodeArray()
 {
 	m_dValue = 0;
-	m_nSize  = 0;
 }
 
 adConstantNodeArray::~adConstantNodeArray()
@@ -218,7 +216,7 @@ adConstantNodeArray::~adConstantNodeArray()
 
 size_t adConstantNodeArray::GetSize(void) const
 {
-	return m_nSize;
+	return 1;
 }
 
 void adConstantNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
@@ -235,12 +233,8 @@ adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutio
 		return tmp;
 	}
 	
-	if(m_nSize == 0)
-		daeDeclareAndThrowException(exInvalidCall); 
-
-	tmp.Resize(m_nSize);
-	for(size_t i = 0; i < m_nSize; i++)
-		tmp[i] = adouble(m_dValue);
+	tmp.Resize(1);
+	tmp[0] = adouble(m_dValue);
 	return tmp;
 }
 
@@ -263,18 +257,12 @@ void adConstantNodeArray::Open(io::xmlTag_t* pTag)
 {
 	string strName = "Value";
 	pTag->Open(strName, m_dValue);
-
-	strName = "Size";
-	pTag->Open(strName, m_nSize);
 }
 
 void adConstantNodeArray::Save(io::xmlTag_t* pTag) const
 {
 	string strName = "Value";
 	pTag->Save(strName, m_dValue);
-
-	strName = "Size";
-	pTag->Save(strName, m_nSize);
 }
 
 void adConstantNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
@@ -2298,9 +2286,9 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 		delete[] indexes;
 		tmp = adres.node;
 	}
-	else if( dynamic_cast<adRuntimeParameterNode*>(adnode)         || 
-			 dynamic_cast<adRuntimeDomainIndexNode*>(adnode)       ||
-			 dynamic_cast<adConstantNode*>(adnode)                  )
+	else if( dynamic_cast<adRuntimeParameterNode*>(adnode)  || 
+			 dynamic_cast<adDomainIndexNode*>(adnode)       ||
+			 dynamic_cast<adConstantNode*>(adnode)           )
 	{
 		tmp = shared_ptr<adNode>(new adConstantNode(0));
 	}
@@ -2574,9 +2562,9 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 			}
 		}
 	}
-	else if( dynamic_cast<adRuntimeParameterNode*>(adnode)         || 
-			 dynamic_cast<adRuntimeDomainIndexNode*>(adnode)       ||
-			 dynamic_cast<adConstantNode*>(adnode)                  )
+	else if( dynamic_cast<adRuntimeParameterNode*>(adnode) || 
+			 dynamic_cast<adDomainIndexNode*>(adnode)	   ||
+			 dynamic_cast<adConstantNode*>(adnode)          )
 	{
 		tmp = shared_ptr<adNode>(new adConstantNode(0));
 	}
@@ -2908,14 +2896,12 @@ void adSetupIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexe
 /*********************************************************************************************
 	adSingleNodeArray
 **********************************************************************************************/
-adSingleNodeArray::adSingleNodeArray(boost::shared_ptr<adNode> n, const size_t size)
-	               : node(n), m_nSize(size)
+adSingleNodeArray::adSingleNodeArray(boost::shared_ptr<adNode> n) : node(n)
 {
 }
 
 adSingleNodeArray::adSingleNodeArray()
 {
-	m_nSize  = 0;
 }
 
 adSingleNodeArray::~adSingleNodeArray()
@@ -2924,7 +2910,7 @@ adSingleNodeArray::~adSingleNodeArray()
 
 size_t adSingleNodeArray::GetSize(void) const
 {
-	return m_nSize;
+	return 1;
 }
 
 void adSingleNodeArray::GetArrayRanges(vector<daeArrayRange>& /*arrRanges*/) const
@@ -2946,13 +2932,9 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 		return tmp;
 	}
 	
-	if(m_nSize == 0)
-		daeDeclareAndThrowException(exInvalidCall); 
-
-	tmp.Resize(m_nSize);
+	tmp.Resize(1);
 	a = node->Evaluate(pExecutionContext);
-	for(size_t i = 0; i < m_nSize; i++)
-		tmp[i] = a;
+	tmp[0] = a;
 	return tmp;
 }
 
@@ -2987,9 +2969,6 @@ void adSingleNodeArray::Save(io::xmlTag_t* pTag) const
 
 	string strName = "Node";
 	adNode::SaveNode(pTag, strName, node.get());
-
-	strName = "Size";
-	pTag->Save(strName, m_nSize);
 }
 
 void adSingleNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const

@@ -151,15 +151,11 @@ daeIndexRange::daeIndexRange(daeDomain* pDomain,
 {
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
-//	if(iStartIndex < 0 || iStartIndex >= (int)pDomain->GetNumberOfPoints())
-//		daeDeclareAndThrowException(exOutOfBounds);
-//	if(iEndIndex <= -2 || iEndIndex >= (int)pDomain->GetNumberOfPoints())
-//		daeDeclareAndThrowException(exOutOfBounds);
 	
 	m_eType		  = eRangeOfIndexes;
 	m_pDomain     = pDomain;
 	m_iStartIndex = iStartIndex;
-	m_iEndIndex   = iEndIndex; //(iEndIndex == -1 ? m_pDomain->GetNumberOfPoints() : iEndIndex);
+	m_iEndIndex   = iEndIndex;
 	m_iStride     = iStride;
 }
 

@@ -12,8 +12,8 @@ win32-msvc2008::LIBS += Solver.lib
 win32-g++::LIBS += -lSolver
 unix::LIBS += -lSolver 
 
-QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
-LIBS +=	$${BOOST_PYTHON_LIB} $${BOOST_LIBS}
+QMAKE_LIBDIR += $${PYTHON_LIB_DIR} $${SUNDIALS_LIBDIR}
+LIBS +=	$${BOOST_PYTHON_LIB} $${BOOST_LIBS} $${SUNDIALS_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

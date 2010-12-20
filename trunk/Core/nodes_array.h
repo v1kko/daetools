@@ -42,7 +42,7 @@ class DAE_CORE_API adConstantNodeArray : public adNodeArrayImpl
 public:
 	daeDeclareDynamicClass(adConstantNodeArray)
 	adConstantNodeArray(void);
-	adConstantNodeArray(real_t d, size_t size);
+	adConstantNodeArray(real_t d);
 	virtual ~adConstantNodeArray(void);
 
 public:
@@ -60,7 +60,6 @@ public:
 
 public:
 	real_t	m_dValue;
-	size_t	m_nSize;
 };
 
 /*********************************************************************************************
@@ -450,7 +449,7 @@ class DAE_CORE_API adSingleNodeArray : public adNodeArrayImpl
 public:
 	daeDeclareDynamicClass(adSingleNodeArray)
 	adSingleNodeArray(void);
-	adSingleNodeArray(boost::shared_ptr<adNode> n, size_t size);
+	adSingleNodeArray(boost::shared_ptr<adNode> n);
 	virtual ~adSingleNodeArray(void);
 
 public:
@@ -468,7 +467,6 @@ public:
 
 public:
 	boost::shared_ptr<adNode>	node;
-	size_t						m_nSize;
 };
 
 /*********************************************************************************************

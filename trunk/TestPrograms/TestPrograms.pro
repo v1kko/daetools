@@ -4,22 +4,22 @@ TARGET = TestPrograms
 CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
-INCLUDEPATH += $${BOOSTDIR} $${SUNDIALS_INCLUDE}
+INCLUDEPATH += $${BOOSTDIR} 
+
+QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
 
 win32-msvc2008:LIBS +=	Core.lib \
 						Simulation.lib \
 						DataReporters.lib \
-						Solver.lib
-win32-g++:LIBS +=	-lCore \
-					-lSimulation \
-					-lDataReporters \
-					-lSolver
+						Solver.lib \
+						$${SUNDIALS_LIBS}
 unix:LIBS += -lCore \
 			 -lSimulation \
 			 -lDataReporters \
-			 -lSolver
+			 -lSolver \
+		     $${SUNDIALS_LIBS} 
 
-LIBS += $${BOOST_LIBS}
+LIBS +=	$${BOOST_LIBS}
 
 SOURCES += main.cpp \
     stdafx.cpp

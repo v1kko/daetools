@@ -146,6 +146,9 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 
 // Initialize params and domains
 	SetUpParametersAndDomains();
+	
+// At this point I can add optimization variables, ojective function and constraints
+	///////////////////////////////////	
  
 // Create params, domains, vars, ports
 	m_pModel->InitializeStage2();

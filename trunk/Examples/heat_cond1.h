@@ -87,7 +87,7 @@ public:
         daeIndexRange yr(&y);
 
         eq = CreateEquation("T_ave", "The average temperature of the plate");
-		eq->SetResidual( Tres() - average( T.array(xr, yr) ) );
+		eq->SetResidual( Tres() - average( T.array(xr, yr) ) - x[0] );
         
         eq = CreateEquation("Tres_array", "The array function result");
 		eq->SetResidual( Tres_arr() - dt(T(1,1) / T(1,2)) );
