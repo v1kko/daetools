@@ -224,9 +224,7 @@ cp ../release/libSolver.a           ${PACKAGE_NAME}/cDAE/lib/libSolver.a
 cp ../release/libDataReporters.a    ${PACKAGE_NAME}/cDAE/lib/libDataReporters.a
 
 cp ${IDAS}/lib/libsundials_idas.a         ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.a
-cp ${IDAS}/lib/libsundials_idas.la        ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.la
 cp ${IDAS}/lib/libsundials_nvecserial.a   ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.a
-cp ${IDAS}/lib/libsundials_nvecserial.la  ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.la
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py

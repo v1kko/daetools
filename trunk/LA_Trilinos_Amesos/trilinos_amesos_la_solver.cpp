@@ -131,12 +131,6 @@ int daeTrilinosAmesosSolver::Reinitialize(void* ida)
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::SaveAsPBM(const std::string& strFileName)
-{
-	m_matJacobian.SaveMatrixAsPBM(strFileName);
-	return IDA_SUCCESS;
-}
-
 int daeTrilinosAmesosSolver::SaveAsXPM(const std::string& strFileName)
 {
 	m_matJacobian.SaveMatrixAsXPM(strFileName);

@@ -65,8 +65,8 @@ enum daeeEquationCalculationMode
 	eCreateFunctionsIFsSTNs,
 	eCalculateJacobian,
 	eCalculateHesian,
-	eCalculateSensitivity,
-	eCalculateGradient
+	eCalculateSensitivities,
+	eCalculateGradients
 };
 
 enum daeeModelType
@@ -562,17 +562,17 @@ public:
 public:
 	virtual void	Initialize(void) = 0;
 
-	virtual void	CalculateResiduals(real_t				dTime, 
-									   daeArray<real_t>&	arrValues, 
-									   daeArray<real_t>&	arrResiduals, 
-									   daeArray<real_t>&	arrTimeDerivatives) = 0;
+	virtual void	CalculateResiduals(real_t			 dTime, 
+									   daeArray<real_t>& arrValues, 
+									   daeArray<real_t>& arrResiduals, 
+									   daeArray<real_t>& arrTimeDerivatives) = 0;
 
-	virtual void	CalculateJacobian(real_t				dTime, 
-									  daeArray<real_t>&		arrValues, 
-									  daeArray<real_t>&		arrResiduals, 
-									  daeArray<real_t>&		arrTimeDerivatives, 
-									  daeMatrix<real_t>&	matJacobian, 
-									  real_t				dInverseTimeStep) = 0;
+	virtual void	CalculateJacobian(real_t			 dTime, 
+									  daeArray<real_t>&	 arrValues, 
+									  daeArray<real_t>&	 arrResiduals, 
+									  daeArray<real_t>&	 arrTimeDerivatives, 
+									  daeMatrix<real_t>& matJacobian, 
+									  real_t			 dInverseTimeStep) = 0;
 
 	virtual void	CalculateHesian(real_t				dTime, 
 								    daeArray<real_t>&	arrValues, 
@@ -581,10 +581,24 @@ public:
 								    daeMatrix<real_t>&	matHesian, 
 								    real_t				dInverseTimeStep) = 0;
 
-	virtual void	CalculateConditions(real_t				dTime, 
-									    daeArray<real_t>&	arrValues, 
-									    daeArray<real_t>&	arrTimeDerivatives, 
-									    std::vector<real_t>&		arrResults) = 0;
+	virtual void	CalculateSensitivities(real_t					  dTime, 
+										   const std::vector<size_t>& narrParameterIndexes,
+										   daeArray<real_t>&		  arrValues, 
+										   daeArray<real_t>&		  arrTimeDerivatives, 
+										   daeMatrix<real_t>&		  matSValues, 
+										   daeMatrix<real_t>&		  matSTimeDerivatives, 
+										   daeMatrix<real_t>&		  matSResiduals) = 0;
+
+	virtual void	CalculateGradients(real_t					  dTime, 
+									   const std::vector<size_t>& narrParameterIndexes,
+									   daeArray<real_t>&		  arrValues, 
+									   daeArray<real_t>&		  arrTimeDerivatives, 
+									   daeMatrix<real_t>&		  matSResiduals) = 0;
+
+	virtual void	CalculateConditions(real_t				 dTime, 
+									    daeArray<real_t>&	 arrValues, 
+									    daeArray<real_t>&	 arrTimeDerivatives, 
+									    std::vector<real_t>& arrResults) = 0;
 
 	virtual void	SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
 		                                                  daeArray<real_t>& arrTimeDerivatives, 
@@ -601,11 +615,13 @@ public:
 	
 	virtual daeeDiscontinuityType CheckDiscontinuities(void) = 0;
 	
-	virtual void	CalcNonZeroElements(int& NNZ)			   = 0;
+	virtual void	CalcNonZeroElements(int& NNZ) = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
 	
 	virtual real_t	GetTime(void) const  = 0;
 	virtual void	SetTime(real_t time) = 0;
+	
+	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const = 0;
 };
 
 /******************************************************************

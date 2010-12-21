@@ -181,7 +181,14 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 	if(m_ptrarrBlocks.size() != 1)
 		daeDeclareAndThrowException(exInvalidCall);
 	daeBlock_t* pBlock = m_ptrarrBlocks[0];
-	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode());
+	
+	vector<size_t> narrParametersIndexes;
+	bool bCalculateSensitivities = true;
+	narrParametersIndexes.push_back(0);
+	narrParametersIndexes.push_back(1);
+	narrParametersIndexes.push_back(2);
+	
+	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), bCalculateSensitivities, narrParametersIndexes);
 
 // Register model
 	m_dCurrentTime = 0;
@@ -325,6 +332,8 @@ void daeDynamicSimulation::Finalize(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
+		
+	m_pDAESolver->GetSensitivities();
 	
 // Notify the receiver that there is no more data, and disconnect it		
 	m_pDataReporter->EndOfData();

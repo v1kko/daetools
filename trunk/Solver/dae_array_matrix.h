@@ -97,7 +97,8 @@ class DAE_SOLVER_API daeDenseMatrix : public daeMatrix<real_t>
 public:
 	daeDenseMatrix(void)
 	{
-		N           = 0;
+		Nrow        = 0;
+		Ncol        = 0;
 		data_access = eColumnWise;
 		data        = NULL;
 	}
@@ -106,57 +107,68 @@ public:
 	}
 
 public:
-	virtual real_t GetItem(size_t i, size_t j) const
+// Nrow is the number of rows
+// Ncol is the number of columns
+// GetItem/GetItem access is always (row, column)
+// That internally translates to :
+//      [row][col] if eRowWise
+//      [col][row] if eColumnWise
+	virtual real_t GetItem(size_t row, size_t col) const
 	{
-		if(!data || i >= N || j >= N) 
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(row >= Nrow || col >= Ncol) 
 			daeDeclareAndThrowException(exOutOfBounds);
 
 		if(data_access == eRowWise)
-			return data[i][j];
+			return data[row][col];
 		else
-			return data[j][i];
+			return data[col][row];
 	}
 
-	virtual void SetItem(size_t i, size_t j, real_t value)
+	virtual void SetItem(size_t row, size_t col, real_t value)
 	{
-		if(!data || i >= N || j >= N) 
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(row >= Nrow || col >= Ncol) 
 			daeDeclareAndThrowException(exOutOfBounds);
 
 		if(data_access == eRowWise)
-			data[i][j] = value;
+			data[row][col] = value;
 		else
-			data[j][i] = value;
+			data[col][row] = value;
 	}
 
-	virtual size_t GetSizeN(void) const
+	virtual size_t GetNrows(void) const
 	{
-		return N;
+		return Nrow;
 	}
 
-	virtual size_t GetSizeM(void) const
+	virtual size_t GetNcols(void) const
 	{
-		return N;
+		return Ncol;
 	}
 
-	void InitMatrix(size_t n, real_t** pData, daeeMatrixAccess access)
+	void InitMatrix(size_t nrows, size_t ncols, real_t** pData, daeeMatrixAccess access)
 	{
-		N = n;
+		Nrow        = nrows;
+		Ncol        = ncols;
 		data_access = access;
-		data = pData;
+		data        = pData;
 	}
 	
 	void Print(bool bStructureOnly = false)
 	{
-		for(size_t i = 0; i < N; i++)
+		for(size_t row = 0; row < Nrow; row++)
 		{
-			for(size_t k = 0; k < N; k++)
+			for(size_t col = 0; col < Ncol; col++)
 			{
-				if(k != 0)
+				if(col != 0)
 					std::cout << " ";
 				if(bStructureOnly)
-					std::cout << (GetItem(i, k) == 0 ? "-" : "X");
+					std::cout << (GetItem(row, col) == 0 ? "-" : "X");
 				else
-					std::cout << dae::toStringFormatted(GetItem(i, k), 12, 5);
+					std::cout << dae::toStringFormatted(GetItem(row, col), 12, 5);
 			}
 			std::cout << std::endl;
 		}
@@ -166,181 +178,44 @@ public:
 	
 	void ClearMatrix(void)
 	{
-		for(size_t i = 0; i < N; i++)
-			for(size_t k = 0; k < N; k++)
-				data[i][k] = 0;
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		if(data_access == eRowWise)
+		{
+			for(size_t row = 0; row < Nrow; row++)
+				for(size_t col = 0; col < Ncol; col++)
+					data[row][col] = 0;
+		}
+		else
+		{
+			for(size_t row = 0; row < Nrow; row++)
+				for(size_t col = 0; col < Ncol; col++)
+					data[col][row] = 0;
+		}
 	}
 
 public:
-	size_t				N;
+	size_t				Nrow;
+	size_t				Ncol;
 	real_t**			data;
 	daeeMatrixAccess	data_access;
 };
 
-/*********************************************************************************************
-	daeUBLASMatrix
-**********************************************************************************************/
-//typedef boost::numeric::ublas::vector<real_t>			    ublasArray;
-//typedef boost::numeric::ublas::compressed_matrix<real_t>	ublasMatrix;
-//
-//class DAE_SOLVER_API daeUBLASMatrix : public daeMatrix<real_t>
-//{
-//public:
-//	daeUBLASMatrix(void)
-//	{
-//		m = NULL;
-//		N = 0;
-//	}
-//	virtual ~daeUBLASMatrix(void)
-//	{
-//	}
-//
-//public:
-//	virtual real_t GetItem(size_t i, size_t j) const
-//	{
-//		if(!m || i >= N || j >= N) 
-//			daeDeclareAndThrowException(exOutOfBounds);
-//
-//		return (*m)(i,j);
-//	}
-//
-//	virtual void SetItem(size_t i, size_t j, real_t value)
-//	{
-//		if(!m || i >= N || j >= N) 
-//			daeDeclareAndThrowException(exOutOfBounds);
-//
-//		(*m)(i,j) = value;
-//	}
-//
-//	virtual size_t GetSizeN(void) const
-//	{
-//		return N;
-//	}
-//
-//	virtual size_t GetSizeM(void) const
-//	{
-//		return N;
-//	}
-//
-//	void InitMatrix(size_t n, ublasMatrix* matrix)
-//	{
-//		N = n;
-//		m = matrix;
-//	}
-//
-//	void Clear(void)
-//	{
-//		(*m).clear();
-//	}
-//
-//	void Print(bool bStructureOnly = false)
-//	{
-//		std::cout << "Jacobian; Capacity = " << (*m).nnz_capacity() << ", Filled = " << (*m).nnz() << std::endl;
-//		for(size_t i = 0; i < N; i++)
-//		{
-//			for(size_t k = 0; k < N; k++)
-//			{
-//				if(k != 0)
-//					std::cout << " ";
-//				if(bStructureOnly)
-//					std::cout << ((*m)(i, k) == 0 ? "-" : "X");
-//				else
-//					std::cout << dae::toStringFormatted((*m)(i, k), 12, 5);
-//			}
-//			std::cout << std::endl;
-//		}
-//		std::cout << std::endl;
-//		std::cout.flush();
-//	}
-//
-//public:
-//	size_t		        N;
-//	ublasMatrix*		m;
-//	daeeMatrixAccess    data_access;
-//};
-
-/*********************************************************************************************
-	daeGNUGSLMatrix
-**********************************************************************************************/
-#ifdef HAS_GNU_GSL
-
-class DAE_SOLVER_API daeGNUGSLMatrix : public daeMatrix<real_t>
-{
-public:
-	daeGNUGSLMatrix(void)
-	{
-		N = 0;
-		matrix = NULL;
-	}
-	virtual ~daeGNUGSLMatrix(void)
-	{
-	}
-
-public:
-	virtual real_t GetItem(size_t i, size_t j) const
-	{
-		if(!matrix || i >= N || j >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-
-		return gsl_matrix_get(matrix, i, j);
-	}
-
-	virtual void SetItem(size_t i, size_t j, real_t value)
-	{
-		if(!matrix || i >= N || j >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-
-		gsl_matrix_set(matrix, i, j, value);
-	}
-
-	virtual size_t GetSizeN(void) const
-	{
-		return N;
-	}
-
-	virtual size_t GetSizeM(void) const
-	{
-		return N;
-	}
-
-	void InitMatrix(size_t n, gsl_matrix* m)
-	{
-		N = n;
-		matrix = m;
-	}
-	
-	void Print(bool bStructureOnly = false)
-	{
-		for(size_t i = 0; i < N; i++)
-		{
-			for(size_t k = 0; k < N; k++)
-			{
-				if(k != 0)
-					std::cout << " ";
-				if(bStructureOnly)
-					std::cout << (GetItem(i, k) == 0 ? "-" : "X");
-				else
-					std::cout << dae::toStringFormatted(GetItem(i, k), 12, 5);
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
-		std::cout.flush();
-	}
-
-public:
-	size_t		N;
-	gsl_matrix*	matrix;
-};
-
-#endif
-
 inline bool CompareMatrices(daeMatrix<real_t>& left, daeMatrix<real_t>& right)
 {
-	size_t N = left.GetSizeN();
+	size_t lNrow = left.GetNrows();
+	size_t lNcol = left.GetNcols();
+	size_t rNrow = right.GetNrows();
+	size_t rNcol = right.GetNcols();
 	
-	for(size_t i = 0; i < N; i++)
-		for(size_t k = 0; k < N; k++)
+	if(lNrow != rNrow)
+		return false;
+	if(lNcol != rNcol)
+		return false;
+	
+	for(size_t i = 0; i < lNrow; i++)
+		for(size_t k = 0; k < lNcol; k++)
 			if(left.GetItem(i, k) != right.GetItem(i, k))
 				return false;
 
@@ -355,7 +230,8 @@ class DAE_SOLVER_API daeLapackMatrix : public daeMatrix<real_t>
 public:
 	daeLapackMatrix(void)
 	{
-		N           = 0;
+		Nrow        = 0;
+		Ncol        = 0;
 		data_access = eColumnWise;
 		data        = NULL;
 	}
@@ -364,50 +240,61 @@ public:
 	}
 
 public:
-	virtual real_t GetItem(size_t i, size_t j) const
+// Nrow is the number of rows
+// Ncol is the number of columns
+// GetItem/GetItem access is always (row, column)
+// That internally translates to :
+//      [row][col] if eRowWise
+//      [col][row] if eColumnWise
+	virtual real_t GetItem(size_t row, size_t col) const
 	{
-		if(!data || i >= N || j >= N) 
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(row >= Nrow || col >= Ncol) 
 			daeDeclareAndThrowException(exOutOfBounds);
 
 		if(data_access == eRowWise)
-			return data[i*N + j];
+			return data[row*Ncol + col];
 		else
-			return data[j*N + i];
+			return data[col*Nrow + row];
 	}
 
-	virtual void SetItem(size_t i, size_t j, real_t value)
+	virtual void SetItem(size_t row, size_t col, real_t value)
 	{
-		if(!data || i >= N || j >= N) 
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(row >= Nrow || col >= Ncol) 
 			daeDeclareAndThrowException(exOutOfBounds);
 
 		if(data_access == eRowWise)
-			data[i*N + j] = value;
+			data[row*Ncol + col] = value;
 		else
-			data[j*N + i] = value;
+			data[col*Nrow + row] = value;
 	}
 
-	virtual size_t GetSizeN(void) const
+	virtual size_t GetNrows(void) const
 	{
-		return N;
+		return Nrow;
 	}
 
-	virtual size_t GetSizeM(void) const
+	virtual size_t GetNcols(void) const
 	{
-		return N;
+		return Ncol;
 	}
 
-	void InitMatrix(size_t n, real_t* pData, daeeMatrixAccess access)
+	void InitMatrix(size_t nrows, size_t ncols, real_t* pData, daeeMatrixAccess access)
 	{
-		N           = n;
+		Nrow        = nrows;
+		Ncol        = ncols;
 		data_access = access;
 		data        = pData;
 	}
 	
 	void Print(bool bStructureOnly = false)
 	{
-		for(size_t i = 0; i < N; i++)
+		for(size_t i = 0; i < Nrow; i++)
 		{
-			for(size_t k = 0; k < N; k++)
+			for(size_t k = 0; k < Ncol; k++)
 			{
 				if(k != 0)
 					std::cout << " ";
@@ -424,99 +311,15 @@ public:
 	
 	void ClearMatrix(void)
 	{
-		::memset(data, 0, N*N*sizeof(real_t));
+		::memset(data, 0, Nrow*Ncol*sizeof(real_t));
 	}
 	
 public:
-	size_t				N;
+	size_t				Nrow;
+	size_t				Ncol;
 	real_t*				data;
 	daeeMatrixAccess	data_access;
 };		
-
-/*********************************************************************************************
-	daeEpetraDenseMatrix
-**********************************************************************************************/
-#ifdef HAS_TRILINOS
-
-// Access is column-major
-class DAE_SOLVER_API daeEpetraDenseMatrix : public daeMatrix<double>
-{
-public:
-	daeEpetraDenseMatrix(void)
-	{
-		N      = 0;
-		matrix = NULL;
-	}
-	virtual ~daeEpetraDenseMatrix(void)
-	{
-	}
-
-public:
-	virtual real_t GetItem(size_t i, size_t j) const
-	{
-		if(!matrix || i >= N || j >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-
-		return (*matrix)(i, j);
-	}
-
-	virtual void SetItem(size_t i, size_t j, real_t value)
-	{
-		if(!matrix || i >= N || j >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-
-		(*matrix)(i, j) = value;
-	}
-
-	virtual size_t GetSizeN(void) const
-	{
-		return N;
-	}
-
-	virtual size_t GetSizeM(void) const
-	{
-		return N;
-	}
-
-	void InitMatrix(size_t n, Epetra_SerialDenseMatrix* m)
-	{
-		N = n;
-		matrix = m;
-	}
-	
-	void ClearMatrix(void)
-	{
-		::memset(matrix->A(), 0, N*N*sizeof(double));
-		//for(size_t i = 0; i < N; i++)
-		//	for(size_t k = 0; k < N; k++)
-		//		(*matrix)(i,j) = 0;
-	}
-
-	void Print(bool bStructureOnly = false)
-	{
-		for(size_t i = 0; i < N; i++)
-		{
-			for(size_t k = 0; k < N; k++)
-			{
-				if(k != 0)
-					std::cout << " ";
-				if(bStructureOnly)
-					std::cout << (GetItem(i, k) == 0 ? "-" : "X");
-				else
-					std::cout << dae::toStringFormatted(GetItem(i, k), 12, 5);
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
-		std::cout.flush();
-	}
-
-public:
-	size_t						N;
-	Epetra_SerialDenseMatrix*	matrix;
-};
-
-#endif
 
 /*********************************************************************************************
 	daeCSRMatrix
@@ -636,12 +439,12 @@ public:
 		A[temp] = val;
 	}
 	
-	size_t GetSizeN(void) const
+	size_t GetNrows(void) const
 	{
 		return N;
 	}
 	
-	size_t GetSizeM(void) const
+	size_t GetNcols(void) const
 	{
 		return N;
 	}
@@ -829,65 +632,6 @@ public:
 		delete[] row;
 	}
 	
-	void SaveMatrixAsXPM2(const std::string& strFilename)
-	{
-		size_t i, j;
-		std::ofstream of(strFilename.c_str(), std::ios_base::out);
-		if(!of.is_open())
-			return;
-		
-		char* row  = new char[N+1];
-		row[N]  = '\0';
-	
-		of << "! XPM2" << std::endl;
-		of << N << " " << N << " " << 2 << " " << 1 << std::endl;
-		of << "- c #ffffff" << std::endl;
-		of << "X c #000000" << std::endl;
-		
-		for(i = 0; i < N; i++)
-		{
-			memset(row, '-', N);
-			for(j = 0; j < N; j++)
-			{				
-				if(CalcIndex(i, j) >= 0)
-					row[j] = 'X';			
-			}
-			of << row << std::endl;
-		}
-		of.close();
-		delete[] row;
-	}
-
-	void SaveMatrixAsPBM(const std::string& strFilename)
-	{
-		size_t i, j;
-		std::ofstream of(strFilename.c_str(), std::ios_base::out);
-		if(!of.is_open())
-			return;
-		
-		char* row  = new char[2*N+1];
-		row[2*N] = '\0';
-		memset(row, ' ', 2*N);
-		
-		of << "P1" << std::endl;
-		of << N << " " << N << " " << std::endl;
-		
-		for(i = 0; i < N; i++)
-		{
-			for(j = 0; j < N; j++)
-				row[2*j+1] = '0';
-	
-			for(j = 0; j < N; j++)
-			{				
-				if(CalcIndex(i, j) >= 0)
-					row[2*j+1] = '1';			
-			}
-			of << row << std::endl;			
-		}
-		of.close();
-		delete[] row;
-	}
-	
 public:
 	int     NNZ;      // no of non-zero elements
 	int     N;        // matrix size
@@ -901,137 +645,6 @@ protected:
 	size_t rowCounter;
 	size_t counter;
 };
-
-#ifdef HAS_TRILINOS
-
-class daeEpetraCSRMatrix : public daeSparseMatrix<real_t>
-{
-public:
-	daeEpetraCSRMatrix(void)
-	{
-		indexing = CSR_C_STYLE;
-	}
-	
-	~daeEpetraCSRMatrix(void)
-	{
-	}
-	
-public:
-	void InitMatrix(size_t n, Epetra_CrsMatrix* m)
-	{
-		N = n;
-		matrix = m;
-	}
-
-	bool GetIndexing(void)
-	{
-		return indexing;
-	}
-	
-	void SetIndexing(bool ind)
-	{
-		indexing = ind;
-	}
-
-	real_t GetItem(size_t i, size_t j) const
-	{
-		daeDeclareException(exNotImplemented);
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-		if(i >= N || j >= N) 
-			daeDeclareException(exOutOfBounds);
-
-//		int indices = j;
-//		double values;
-//		matrix->ExtractGlobalRowCopy((int)i, 1, &values, &indices);
-//		return values;
-		return 0.0;
-	}
-	
-	void SetItem(size_t i, size_t j, real_t val)
-	{
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-		if(i >= N || j >= N) 
-			daeDeclareException(exOutOfBounds);
-
-		int indices = j;
-		double values = val;
-		matrix->ReplaceGlobalValues((int)i, 1, &values, &indices);
-	}
-	
-	void ClearMatrix(void)
-	{
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-		matrix->PutScalar(0.0);
-	}
-
-	size_t GetSizeN(void) const
-	{
-		return N;
-	}
-	
-	size_t GetSizeM(void) const
-	{
-		return N;
-	}
-		
-	void AddRow(const std::map<size_t, size_t>& mapIndexes)
-	{
-		double* values;
-		int i, n, *indexes;
-		std::map<size_t, size_t>::const_iterator iter;
-		
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-
-		n = mapIndexes.size();
-		values  = new double[n];
-		indexes = new int[n];
-		
-		for(i = 0, iter = mapIndexes.begin(); iter != mapIndexes.end(); i++, iter++)
-		{
-			values[i]  = 1.0;
-			indexes[i] = iter->second;			
-		}
-		
-		matrix->InsertGlobalValues(rowCounter, n, values, indexes);
-		
-		delete[] values;
-		delete[] indexes;
-		rowCounter++;
-	}
-
-	void ResetCounters(void)
-	{
-	// Reset the row counter	
-		rowCounter = 0;
-	}
-	
-	void Sort(void)
-	{
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-		matrix->FillComplete(true);
-	}
-	
-	void Print(void) const
-	{
-		if(!matrix)
-			daeDeclareException(exInvalidPointer);
-		std::cout << "Epetra CRS Matrix:" << std::endl;
-		matrix->Print(std::cout);
-	}
-	
-protected:
-	int					N;
-	size_t				rowCounter;
-	Epetra_CrsMatrix*	matrix;
-	bool				indexing; // C style arrays start from 0, FORTRAN from 1
-};
-
-#endif
 
 }
 }

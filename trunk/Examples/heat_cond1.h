@@ -152,4 +152,77 @@ public:
 };
 
 
+
+
+
+const daeVariableType ty1("ty1", "-", -1.0e+100, 1.0e+100,  1.0, 1e-08);
+const daeVariableType ty2("ty2", "-", -1.0e+100, 1.0e+100,  1.0, 1e-14);
+const daeVariableType ty3("ty3", "-", -1.0e+100, 1.0e+100,  1.0, 1e-06);
+
+class modRoberts : public daeModel
+{
+	daeDeclareDynamicClass(modRoberts)
+public:
+	daeVariable	p1, p2, p3, y1, y2, y3;
+
+public:
+	modRoberts(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
+		y1("y1", ty1,     this, ""),
+		y2("y2", ty2,     this, ""),
+		y3("y3", ty3,     this, ""),
+		p1("p1", no_type, this, ""),
+		p2("p2", no_type, this, ""),
+		p3("p3", no_type, this, "")
+	{
+	}
+	
+	void DeclareEquations(void)
+	{
+		daeEquation* eq;
+
+        eq = CreateEquation("Equation1", "");
+        eq->SetResidual( y1.dt() + p1()*y1() - p2()*y2()*y3() );
+
+        eq = CreateEquation("Equation2", "");
+        eq->SetResidual( y2.dt() - p1()*y1() + p2()*y2()*y3() + p3()*y2()*y2() );
+
+        eq = CreateEquation("Equation3", "");
+        eq->SetResidual( y1() + y2() + y3() - 1 );
+
+		// dy1/dt = -p1*y1 + p2*y2*y3
+		// dy2/dt =  p1*y1 - p2*y2*y3 - p3*y2**2
+		//      0 = y1 + y2 + y3 - 1
+	}
+};
+
+class simRoberts : public daeDynamicSimulation
+{
+public:
+	modRoberts m;
+	
+public:
+	simRoberts(void) : m("simRoberts")
+	{
+		SetModel(&m);
+	}
+
+public:
+	void SetUpParametersAndDomains(void)
+	{
+	}
+
+	void SetUpVariables(void)
+	{
+	//	p1=0.04, p2=1e4, p3=3e7
+        m.p1.AssignValue(0.04);
+        m.p2.AssignValue(1e4);
+        m.p3.AssignValue(3e7);
+		
+	// y1 = 1, y2 = y3 = 0
+		m.y1.SetInitialCondition(1);
+		m.y2.SetInitialCondition(0);
+	}
+};
+
+
 #endif

@@ -29,7 +29,6 @@ public:
 public:
 	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
 	int Reinitialize(void* ida);
-	int SaveAsPBM(const std::string& strFileName);
 	int SaveAsXPM(const std::string& strFileName);
 
 	int Init(void* ida);

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeDynamicSimulation_t>		pSimulation(new simTutorial3);  
+		boost::scoped_ptr<daeDynamicSimulation_t>		pSimulation(new simRoberts);  
 		boost::scoped_ptr<daeDataReporter_t>			pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>					pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
 		boost::scoped_ptr<daeLog_t>						pLog(daeCreateStdOutLog());
@@ -41,8 +41,9 @@ int main(int argc, char *argv[])
 		std::cout << cfg.Get<real_t>("daetools.activity.timeHorizon") << std::endl;
 		std::cout << cfg.Get<real_t>("daetools.activity.reportingInterval") << std::endl;
 		
+		pDAESolver->SetRelativeTolerance(1e-6);
         pSimulation->SetReportingInterval(10);
-        pSimulation->SetTimeHorizon(100);
+        pSimulation->SetTimeHorizon(400);
 		pSimulation->GetModel()->SetReportingOn(true);
          
  		pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
  		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
       
  		pSimulation->Run();
+		pSimulation->Finalize();
 	}
 	catch(std::exception& e)
 	{ 

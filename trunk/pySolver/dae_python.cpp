@@ -28,16 +28,15 @@ BOOST_PYTHON_MODULE(pySolver)
 		.add_property("RelativeTolerance",	  &daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
 		.add_property("InitialConditionMode", &daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
      
-		.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
-		.def("Solve",		pure_virtual(&daeDAESolver_t::Solve))
+		//.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
+		//.def("Solve",			pure_virtual(&daeDAESolver_t::Solve))
 		;
  
 	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDASolver")
-		.def("Initialize",					&daeDAESolver_t::Initialize, &daepython::daeIDASolverWrapper::def_Initialize)
-		.def("Solve",						&daeDAESolver_t::Solve,		 &daepython::daeIDASolverWrapper::def_Solve)
+		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
+		//.def("Solve",						&daeIDASolver::Solve)
 		.def("SetLASolver",					&daeIDASolver::SetLASolver) 
 		.def("SaveMatrixAsXPM",				&daeIDASolver::SaveMatrixAsXPM)
-		.def("SaveMatrixAsPBM",				&daeIDASolver::SaveMatrixAsPBM) 
 		;
 
 }

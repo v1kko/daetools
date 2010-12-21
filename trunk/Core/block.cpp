@@ -13,6 +13,9 @@ daeBlock::daeBlock(void)
 	m_parrResidual						= NULL; 
 	m_pmatJacobian						= NULL; 
 	m_pmatHesian						= NULL;
+//	m_pmatSValues						= NULL;
+//	m_pmatSTimeDerivatives				= NULL; 
+//	m_pmatSResiduals					= NULL;
 	m_dCurrentTime						= 0;
 	m_dInverseTimeStep					= 0;
 	m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
@@ -82,11 +85,8 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
 		if(!pEquationExecutionInfo)
-		{	
-			daeDeclareException(exInvalidPointer);
-			e << "pEquationExecutionInfo";
-			throw e;
-		}
+			daeDeclareAndThrowException(exInvalidPointer);
+
 		pEquationExecutionInfo->Residual();
 	}
 
@@ -95,13 +95,9 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	{
 		pSTN = m_ptrarrSTNs[i];
 		if(!pSTN)
-		{	
-			daeDeclareException(exInvalidPointer);
-			e << "pSTN";
-			throw e;
-		}
+			daeDeclareAndThrowException(exInvalidPointer);
 
-		pSTN->CalculateResiduals(dTime);
+		pSTN->CalculateResiduals();
 	}
 }
 
@@ -128,11 +124,8 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
 		if(!pEquationExecutionInfo)
-		{	
-			daeDeclareException(exInvalidPointer);
-			e << "pEquationExecutionInfo";
-			throw e;
-		}
+			daeDeclareAndThrowException(exInvalidPointer);
+		
 		pEquationExecutionInfo->Jacobian();
 	}
 
@@ -141,14 +134,110 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	{
 		pSTN = m_ptrarrSTNs[i];
 		if(!pSTN)
-		{	
-			daeDeclareException(exInvalidPointer);
-			e << "pSTN";
-			throw e;
-		}
+			daeDeclareAndThrowException(exInvalidPointer);
 
-		pSTN->CalculateJacobian(dTime);
+		pSTN->CalculateJacobian();
 	}
+}
+
+// For dynamic models
+void daeBlock::CalculateSensitivities(real_t					 dTime, 
+									  const std::vector<size_t>& narrParameterIndexes,
+									  daeArray<real_t>&			 arrValues, 
+									  daeArray<real_t>&			 arrTimeDerivatives, 
+									  daeMatrix<real_t>&		 matSValues, 
+									  daeMatrix<real_t>&		 matSTimeDerivatives, 
+									  daeMatrix<real_t>&		 matSResiduals)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+
+	SetTime(dTime);
+	CopyValuesFromSolver(arrValues);
+	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
+	
+//	SetSValuesMatrix(&matSValues); 
+//	SetSTimeDerivativesMatrix(&matSTimeDerivatives); 
+//	SetSResidualsMatrix(&matSResiduals); 
+	
+	m_pDataProxy->SetSensitivityMatrixes(&matSValues,
+										 &matSTimeDerivatives,
+										 &matSResiduals);
+	
+// First calculate normal equations (non-STN)
+	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+	{
+		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
+		if(!pEquationExecutionInfo)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		pEquationExecutionInfo->Sensitivities(narrParameterIndexes);
+	}
+
+// Now calculate STN equations
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pSTN->CalculateSensitivities(narrParameterIndexes);
+	}
+	
+	m_pDataProxy->ResetSensitivityMatrixes();
+}
+
+// For steady-state models
+void daeBlock::CalculateGradients(real_t					 dTime, 
+								  const std::vector<size_t>& narrParameterIndexes,
+								  daeArray<real_t>&			 arrValues, 
+								  daeArray<real_t>&			 arrTimeDerivatives, 
+								  daeMatrix<real_t>&		 matSResiduals)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+
+	SetTime(dTime);
+	CopyValuesFromSolver(arrValues);
+	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
+	
+	m_pDataProxy->SetSensitivityMatrixes(NULL, NULL, &matSResiduals);
+	
+// First calculate normal equations (non-STN)
+	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+	{
+		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
+		if(!pEquationExecutionInfo)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		pEquationExecutionInfo->Gradients(narrParameterIndexes);
+	}
+
+// Now calculate STN equations
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pSTN->CalculateGradients(narrParameterIndexes);
+	}
+	
+	m_pDataProxy->ResetSensitivityMatrixes();
+}
+
+void daeBlock::CalculateHesian(real_t				/*dTime*/, 
+							   daeArray<real_t>&	/*arrValues*/, 
+							   daeArray<real_t>&	/*arrResiduals*/, 
+							   daeArray<real_t>&	/*arrTimeDerivatives*/, 
+							   daeMatrix<real_t>&	/*matHesian*/, 
+							   real_t				/*dInverseTimeStep*/)
+{
+	daeDeclareException(exNotImplemented);
+	e << "Calculating Hesian is not implemented yet";
+	throw e;
 }
 
 void daeBlock::CalcNonZeroElements(int& NNZ)
@@ -190,33 +279,6 @@ void daeBlock::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 		pSTN->FillSparseMatrix(pMatrix);
 	}
 }
-
-void daeBlock::CalculateHesian(real_t				/*dTime*/, 
-							   daeArray<real_t>&	/*arrValues*/, 
-							   daeArray<real_t>&	/*arrResiduals*/, 
-							   daeArray<real_t>&	/*arrTimeDerivatives*/, 
-							   daeMatrix<real_t>&	/*matHesian*/, 
-							   real_t				/*dInverseTimeStep*/)
-{
-	daeDeclareException(exNotImplemented);
-	e << "Calculating Hesian is not implemented yet";
-	throw e;
-}
-
-//void daeBlock::CopyDataToBlock(real_t				dTime, 
-//							   daeArray<real_t>&	arrValues, 
-//							   daeArray<real_t>&	arrResiduals, 
-//							   daeArray<real_t>&	arrTimeDerivatives, 
-//							   real_t				dInverseTimeStep)
-//{
-//	SetCurrentTime(dTime);
-//	SetResidualArray(&arrResiduals);
-//	SetJacobianMatrix(&matJacobian); 
-//	SetInverseTimeStep(dInverseTimeStep);
-//	CopyValuesFromSolver(arrValues);
-//	CopyTimeDerivativesFromSolver(arrTimeDerivatives);	
-//}
-
 void daeBlock::FillAbsoluteTolerancesArray(daeArray<real_t>& arrAbsoluteTolerances)
 {
 	size_t nBlockIndex, nOverallIndex;
@@ -270,6 +332,15 @@ void daeBlock::SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues
 		arrTimeDerivatives.SetItem(nBlockIndex, *m_pDataProxy->GetTimeDerivative(nOverallIndex));
 		arrInitialConditionsTypes.SetItem(nBlockIndex, m_pDataProxy->GetVariableType(nOverallIndex));
 	} 
+}
+
+size_t daeBlock::FindVariableBlockIndex(size_t nVariableOverallIndex) const
+{
+	map<size_t, size_t>::const_iterator iter = m_mapVariableIndexes.find(nVariableOverallIndex);
+	if(iter != m_mapVariableIndexes.end()) // if found
+		return iter->second;
+	else
+		return ULONG_MAX;
 }
 
 void daeBlock::CopyValuesFromSolver(daeArray<real_t>& arrValues)
@@ -758,6 +829,45 @@ void daeBlock::SetResidualArray(daeArray<real_t>* pResidual)
 		daeDeclareAndThrowException(exInvalidPointer);
 	m_parrResidual = pResidual;
 }
+
+//void daeBlock::SetSValuesMatrix(daeMatrix<real_t>* pSValues)
+//{
+//	if(!pSValues)
+//		daeDeclareAndThrowException(exInvalidPointer);
+
+//	m_pmatSValues = pSValues;
+//}
+
+//void daeBlock::SetSTimeDerivativesMatrix(daeMatrix<real_t>* pSTimeDerivatives)
+//{
+//	if(!pSTimeDerivatives)
+//		daeDeclareAndThrowException(exInvalidPointer);
+
+//	m_pmatSTimeDerivatives = pSTimeDerivatives; 
+//}
+
+//void daeBlock::SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals)
+//{
+//	if(!pSResiduals)
+//		daeDeclareAndThrowException(exInvalidPointer);
+
+//	m_pmatSResiduals = pSResiduals;
+//}
+
+//daeMatrix<real_t>* daeBlock::GetSValuesMatrix(void) const
+//{
+//	return m_pmatSValues;
+//}
+
+//daeMatrix<real_t>* daeBlock::GetSTimeDerivativesMatrix(void) const
+//{
+//	return m_pmatSTimeDerivatives;
+//}
+
+//daeMatrix<real_t>* daeBlock::GetSResidualsMatrix(void) const
+//{
+//	return m_pmatSResiduals;
+//}
 
 real_t daeBlock::GetTime() const
 {

@@ -17,6 +17,7 @@ daeExecutionContext::daeExecutionContext()
 	m_eEquationCalculationMode							= eECMUnknown;
 	m_nCurrentVariableIndexForJacobianEvaluation		= ULONG_MAX;
 	m_nCurrentParameterIndexForSensitivityEvaluation	= ULONG_MAX;
+	m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = ULONG_MAX;
 }
 
 size_t daeVariable::GetNumberOfPoints() const
@@ -519,11 +520,11 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 			tmp.setValue(GetValueAt(nIndex));
 			tmp.setDerivative(GetADValueAt(nIndex));
 		}
-		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 		{
 			daeDeclareAndThrowException(exInvalidCall)
 		}
-		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
 		{
 			daeDeclareAndThrowException(exInvalidCall)
 		}
@@ -676,11 +677,11 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		else
 			tmp.setDerivative(0.0);
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 	{
 		daeDeclareAndThrowException(exInvalidCall) 
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
 	{
 		daeDeclareAndThrowException(exInvalidCall)
 	}

@@ -378,8 +378,8 @@ public:
 	void Residual(void);
 	void Jacobian(void);
 	void Hesian(void);
-	void Sensitivity(void);
-	void Gradient(void);
+	void Sensitivities(const std::vector<size_t>& narrParameterIndexes);
+	void Gradients(const std::vector<size_t>& narrParameterIndexes);
 	void AddVariableInEquation(size_t nIndex);
 
 protected:
@@ -526,6 +526,7 @@ public:
 	daeeEquationCalculationMode m_eEquationCalculationMode;
 	size_t						m_nCurrentVariableIndexForJacobianEvaluation;
 	size_t						m_nCurrentParameterIndexForSensitivityEvaluation;
+	size_t						m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation;
 	real_t						m_dInverseTimeStep;
 };
 
@@ -552,6 +553,9 @@ public:
 		m_nNumberOfParameters		= 0;
 		m_eModelType				= eMTUnknown;
 //		m_pCondition				= NULL;
+		m_pmatSValues				= NULL;
+		m_pmatSTimeDerivatives		= NULL; 
+		m_pmatSResiduals			= NULL;
 	}
 
 	
@@ -629,41 +633,41 @@ public:
 
 	}
 
-	void InitializeOptimizationArrays(const std::vector<size_t>& narrOptimizationParametersIndexes)
-	{
-		if(narrOptimizationParametersIndexes.size() > 0)
-			daeDeclareAndThrowException(exInvalidCall)
+//	void InitializeOptimizationArrays(const std::vector<size_t>& narrOptimizationParametersIndexes)
+//	{
+//		if(narrOptimizationParametersIndexes.size() > 0)
+//			daeDeclareAndThrowException(exInvalidCall)
 		
-		boost::multi_array<real_t, 2>::extent_gen extents;
+//		boost::multi_array<real_t, 2>::extent_gen extents;
 		
-		m_nNumberOfParameters               = narrOptimizationParametersIndexes.size();
-		m_narrOptimizationParametersIndexes = narrOptimizationParametersIndexes;
+//		m_nNumberOfParameters               = narrOptimizationParametersIndexes.size();
+//		m_narrOptimizationParametersIndexes = narrOptimizationParametersIndexes;
 		
-		if(GetModelType() == eDynamicModel)
-		{
-			m_arrS.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
-			m_arrSD.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+//		if(GetModelType() == eDynamicModel)
+//		{
+//			m_arrS.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+//			m_arrSD.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
 			
-			for(size_t i = 0; i < m_nNumberOfParameters; i++)
-			{
-				for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
-				{
-					m_arrS[i][k]  = 0;
-					m_arrSD[i][k] = 0;
-				}
-			}
-		}
+//			for(size_t i = 0; i < m_nNumberOfParameters; i++)
+//			{
+//				for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
+//				{
+//					m_arrS[i][k]  = 0;
+//					m_arrSD[i][k] = 0;
+//				}
+//			}
+//		}
 		
-	// This always exists no matter which type of the model is
-		m_arrSRes.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
-		for(size_t i = 0; i < m_nNumberOfParameters; i++)
-		{
-			for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
-			{
-				m_arrSRes[i][k] = 0;
-			}
-		}
-	}
+//	// This always exists no matter which type of the model is
+//		m_arrSRes.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
+//		for(size_t i = 0; i < m_nNumberOfParameters; i++)
+//		{
+//			for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
+//			{
+//				m_arrSRes[i][k] = 0;
+//			}
+//		}
+//	}
 
 	void Load(const std::string& strFileName)
 	{
@@ -802,11 +806,7 @@ public:
 	real_t* GetValue(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return &(m_pdValues[nIndex]);
 	}
@@ -814,11 +814,7 @@ public:
 	void SetValue(size_t nIndex, real_t Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pdValues[nIndex] = Value;
 	}
@@ -826,11 +822,7 @@ public:
 	real_t* GetTimeDerivative(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return &(m_pdTimeDerivatives[nIndex]);
 	}
@@ -838,128 +830,54 @@ public:
 	void SetTimeDerivative(size_t nIndex, real_t Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pdTimeDerivatives[nIndex] = Value;
 	}
 
-// S value: SD[nParameterIndex][nVariableIndex]
+// S value: S[nParameterIndex][nVariableIndex]
 	real_t GetSValue(size_t nParameterIndex, size_t nVariableIndex) const
 	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		return m_arrS[nParameterIndex][nVariableIndex];
-	}
-	
-	void SetSValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
-	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		m_arrS[nParameterIndex][nVariableIndex] = value;
+		if(!m_pmatSValues)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		if(nParameterIndex >= m_pmatSValues->GetNrows() ||
+		   nVariableIndex  >= m_pmatSValues->GetNcols()  )
+			daeDeclareAndThrowException(exOutOfBounds)
+
+		return m_pmatSValues->GetItem(nParameterIndex, nVariableIndex);
 	}
 	
 // SD value: SD[nParameterIndex][nVariableIndex]
 	real_t GetSDValue(size_t nParameterIndex, size_t nVariableIndex) const
 	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		return m_arrSD[nParameterIndex][nVariableIndex];
+		if(!m_pmatSTimeDerivatives)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		if(nParameterIndex >= m_pmatSTimeDerivatives->GetNrows() ||
+		   nVariableIndex  >= m_pmatSTimeDerivatives->GetNcols()  )
+			daeDeclareAndThrowException(exOutOfBounds)
+
+		return m_pmatSTimeDerivatives->GetItem(nParameterIndex, nVariableIndex);
 	}
 	
-	void GetSDValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
+// Sresidual value: SRes[nParameterIndex][nEquationIndex]
+	void SetSResValue(size_t nParameterIndex, size_t nEquationIndex, real_t value)
 	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		m_arrSD[nParameterIndex][nVariableIndex] = value;
-	}	
-	
-// Sresidual value: Sres[nParameterIndex][nVariableIndex]
-	real_t GetSResValue(size_t nParameterIndex, size_t nVariableIndex) const
-	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		return m_arrSRes[nParameterIndex][nVariableIndex];
-	}
-	
-	void SetSResValue(size_t nParameterIndex, size_t nVariableIndex, real_t value)
-	{
-		if(nParameterIndex >= m_nNumberOfParameters)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		if(nVariableIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
-		m_arrSRes[nParameterIndex][nVariableIndex] = value;
+		if(!m_pmatSResiduals)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		if(nParameterIndex >= m_pmatSResiduals->GetNrows() ||
+		   nEquationIndex  >= m_pmatSResiduals->GetNcols()  )
+			daeDeclareAndThrowException(exOutOfBounds)
+
+		return m_pmatSResiduals->SetItem(nParameterIndex, nEquationIndex, value);
 	}	
 
 	real_t* GetInitialCondition(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return &(m_pdInitialConditions[nIndex]);
 	}
@@ -967,11 +885,7 @@ public:
 	void SetInitialCondition(size_t nIndex, real_t Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pdInitialConditions[nIndex] = Value;
 	}
@@ -979,11 +893,7 @@ public:
 	int GetVariableType(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return m_pnVariablesTypes[nIndex];
 	}
@@ -991,11 +901,7 @@ public:
 	void SetVariableType(size_t nIndex, int Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pnVariablesTypes[nIndex] = Value;
 	}
@@ -1003,11 +909,7 @@ public:
 	int GetVariableTypeGathered(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return m_pnVariablesTypesGathered[nIndex];
 	}
@@ -1015,11 +917,7 @@ public:
 	void SetVariableTypeGathered(size_t nIndex, int Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pnVariablesTypesGathered[nIndex] = Value;
 	}
@@ -1027,11 +925,7 @@ public:
 	real_t* GetAbsoluteTolerance(size_t nIndex) const
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		return &(m_pdAbsoluteTolerances[nIndex]);
 	}
@@ -1039,11 +933,7 @@ public:
 	void SetAbsoluteTolerance(size_t nIndex, real_t Value)
 	{
 		if(nIndex >= m_nTotalNumberOfVariables)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Index out of bounds";
-			throw e;
-		}
+			daeDeclareAndThrowException(exOutOfBounds)
 
 		m_pdAbsoluteTolerances[nIndex] = Value;
 	}
@@ -1141,6 +1031,26 @@ public:
 //		return m_pCondition;	
 //	}
 	
+	void SetSensitivityMatrixes(daeMatrix<real_t>* pSValues,
+			 				    daeMatrix<real_t>* pSTimeDerivatives,
+								daeMatrix<real_t>* pSResiduals)
+	{
+	// Only SResiduals matrix must not be NULL
+		if(!pSResiduals)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		m_pmatSValues          = pSValues;
+		m_pmatSTimeDerivatives = pSTimeDerivatives; 
+		m_pmatSResiduals       = pSResiduals;
+	}
+	
+	void ResetSensitivityMatrixes(void)
+	{
+		m_pmatSValues          = NULL;
+		m_pmatSTimeDerivatives = NULL; 
+		m_pmatSResiduals       = NULL;
+	}
+	
 protected:
 //	daeCondition*					m_pCondition;
 	daeLog_t*						m_pLog;
@@ -1158,9 +1068,12 @@ protected:
 	size_t							m_nNumberOfParameters;
 	daeeModelType					m_eModelType;
 	std::vector<size_t>				m_narrOptimizationParametersIndexes;
-	boost::multi_array<real_t, 2>	m_arrS;
-	boost::multi_array<real_t, 2>	m_arrSD;
-	boost::multi_array<real_t, 2>	m_arrSRes;
+//	boost::multi_array<real_t, 2>	m_arrS;
+//	boost::multi_array<real_t, 2>	m_arrSD;
+//	boost::multi_array<real_t, 2>	m_arrSRes;
+	daeMatrix<real_t>*	m_pmatSValues;
+	daeMatrix<real_t>*	m_pmatSTimeDerivatives; 
+	daeMatrix<real_t>*	m_pmatSResiduals;
 };
 
 /******************************************************************
@@ -1202,6 +1115,20 @@ public:
 								    daeMatrix<real_t>&	matHesian, 
 								    real_t				dInverseTimeStep);
 
+	virtual void	CalculateSensitivities(real_t					  dTime, 
+										   const std::vector<size_t>& narrParameterIndexes,
+										   daeArray<real_t>&		  arrValues, 
+										   daeArray<real_t>&		  arrTimeDerivatives, 
+										   daeMatrix<real_t>&		  matSValues, 
+										   daeMatrix<real_t>&		  matSTimeDerivatives, 
+										   daeMatrix<real_t>&		  matSResiduals);
+
+	virtual void	CalculateGradients(real_t					  dTime, 
+									   const std::vector<size_t>& narrParameterIndexes,
+									   daeArray<real_t>&		  arrValues, 
+									   daeArray<real_t>&		  arrTimeDerivatives, 
+									   daeMatrix<real_t>&		  matSResiduals);
+
 	virtual void	CalculateConditions(real_t					dTime, 
 									    daeArray<real_t>&		arrValues, 
 									    daeArray<real_t>&		arrTimeDerivatives, 
@@ -1229,6 +1156,8 @@ public:
 
 	virtual real_t	GetTime(void) const;
 	virtual void	SetTime(real_t time);
+
+	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const;
 	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;
@@ -1284,6 +1213,15 @@ protected:
 	void				SetResidualArray(daeArray<real_t>* pResidual);
 	
 	void				RebuildExpressionMap(void);
+	
+	void				SetSValuesMatrix(daeMatrix<real_t>* pSValues);
+	daeMatrix<real_t>*	GetSValuesMatrix(void) const;
+
+	void				SetSTimeDerivativesMatrix(daeMatrix<real_t>* pSTimeDerivatives);
+	daeMatrix<real_t>*	GetSTimeDerivativesMatrix(void) const;
+
+	void				SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals);
+	daeMatrix<real_t>*	GetSResidualsMatrix(void) const;
 
 public:
 	bool	m_bInitializeMode;
@@ -1305,6 +1243,9 @@ public:
 	daeArray<real_t>*	m_parrResidual; 
 	daeMatrix<real_t>*	m_pmatJacobian; 
 	daeMatrix<real_t>*	m_pmatHesian; 
+	daeMatrix<real_t>*	m_pmatSValues;
+	daeMatrix<real_t>*	m_pmatSTimeDerivatives; 
+	daeMatrix<real_t>*	m_pmatSResiduals;
 };
 
 /******************************************************************
@@ -2391,9 +2332,11 @@ protected:
 	void			CollectVariableIndexes(std::map<size_t, size_t>& mapVariableIndexes);
 	void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
 
-	void			CalculateResiduals(real_t dTime);
-	void			CalculateJacobian(real_t dTime);
-	void			CalculateHesian(real_t dTime);
+	void			CalculateResiduals(void);
+	void			CalculateJacobian(void);
+	void			CalculateHesian(void);
+	void			CalculateSensitivities(const std::vector<size_t>& narrParameterIndexes);
+	void			CalculateGradients(const std::vector<size_t>& narrParameterIndexes);
 
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 

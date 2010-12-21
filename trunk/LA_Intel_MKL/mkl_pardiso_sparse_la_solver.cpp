@@ -196,12 +196,6 @@ void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
 	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_FORTRAN_STYLE);
 }
 
-int daeIntelPardisoSolver::SaveAsPBM(const std::string& strFileName)
-{
-	m_matJacobian.SaveMatrixAsPBM(strFileName);
-	return IDA_SUCCESS;
-}
-
 int daeIntelPardisoSolver::SaveAsXPM(const std::string& strFileName)
 {
 	m_matJacobian.SaveMatrixAsXPM(strFileName);

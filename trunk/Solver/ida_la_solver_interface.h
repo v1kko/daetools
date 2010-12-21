@@ -26,7 +26,6 @@ public:
 					   daeDAESolver_t* pDAESolver)			= 0;
 	virtual int Reinitialize(void* ida)						= 0;
 	virtual int Init(void* ida)								= 0;
-	virtual int SaveAsPBM(const std::string& strFileName)	= 0;
 	virtual int SaveAsXPM(const std::string& strFileName)	= 0;
 };
 

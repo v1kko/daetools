@@ -24,7 +24,9 @@ public:
 public:
 	virtual void						Initialize(daeBlock_t* pBlock, 
 												   daeLog_t* pLog, 
-												   daeeInitialConditionMode eMode);
+												   daeeInitialConditionMode eMode,
+												   bool bCalculateSensitivities,
+												   const std::vector<size_t>& narrParametersIndexes);
 	virtual void						SolveInitial(void);
 	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion);
 	virtual void						SetRelativeTolerance(real_t relTol);
@@ -36,6 +38,7 @@ public:
 	virtual void						RefreshRootFunctions(void);
 	virtual void						Reinitialize(bool bCopyDataFromBlock);
 	virtual void						Reset(void);
+	virtual void						GetSensitivities(void);
 
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 
@@ -44,6 +47,7 @@ protected:
 	virtual void Set_InitialConditions_InitialGuesses_AbsRelTolerances(void);
 	virtual void CreateIDA(void);
 	virtual void CreateLinearSolver(void);
+	virtual void SetupSensitivityCalculation(void);
 
 	bool CheckFlag(int flag);
 	string CreateIDAErrorMessage(int flag);
@@ -51,9 +55,7 @@ protected:
 	void ResetIDASolver(bool bCopyDataFromBlock, real_t t0);
 	
 public:
-//	void GetSparseMatrixData(int& nnz, int** ia, int** ja);
 	void SaveMatrixAsXPM(const std::string& strFilename);
-	void SaveMatrixAsPBM(const std::string& strFilename);
 
 public:
 	daeeInitialConditionMode			m_eInitialConditionMode;
@@ -68,11 +70,20 @@ public:
 	real_t								m_dCurrentTime;
 	real_t								m_dTargetTime;
 	real_t								m_dNextTimeAfterReinitialization;
+	
 	daeDenseArray						m_arrValues;
 	daeDenseArray						m_arrTimeDerivatives;
 	daeDenseArray						m_arrResiduals;
 	daeDenseMatrix						m_matJacobian;
+
+	daeDenseMatrix						m_matSValues;
+	daeDenseMatrix						m_matSTimeDerivatives;
+	daeDenseMatrix						m_matSResiduals;
+
 	boost::shared_ptr<daeIDASolverData>	m_pIDASolverData;
+	bool								m_bCalculateSensitivities;
+	std::vector<size_t>					m_narrParametersIndexes;
+	int									m_eSensitivityMethod;
 };
 
 

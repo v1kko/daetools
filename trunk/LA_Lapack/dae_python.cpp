@@ -21,14 +21,12 @@ BOOST_PYTHON_MODULE(pyAmdACML)
 	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
 		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))
 		.def("Reinitialize",pure_virtual(&daeIDALASolver_t::Reinitialize))
-		.def("SaveAsPBM",	pure_virtual(&daeIDALASolver_t::SaveAsPBM))
 		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
 		;
 
 	class_<daeLapackSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeLapackSolver")
 		.def("Create",		&daeLapackSolver::Create)
 		.def("Reinitialize",&daeLapackSolver::Reinitialize)
-		.def("SaveAsPBM",	&daeLapackSolver::SaveAsPBM)
 		.def("SaveAsXPM",	&daeLapackSolver::SaveAsXPM)
 		;
 

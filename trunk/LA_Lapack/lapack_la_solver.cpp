@@ -120,7 +120,7 @@ void daeLapackSolver::AllocateMemory(void)
 		throw e;
 	}
 
-	m_matJacobian.InitMatrix(m_nNoEquations, m_matLAPACK, eColumnWise);
+	m_matJacobian.InitMatrix(m_nNoEquations, m_nNoEquations, m_matLAPACK, eColumnWise);
 }
 
 void daeLapackSolver::FreeMemory(void)

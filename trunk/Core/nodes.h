@@ -137,6 +137,7 @@ public:
 // Runtime part
 	real_t*			m_pdValue;
 	size_t			m_nOverallIndex;
+	size_t			m_nBlockIndex;
 // Report/GUI part
 	daeVariable*	m_pVariable;
 	vector<size_t>	m_narrDomains;
@@ -172,6 +173,7 @@ public:
 // Runtime part
 	real_t*			m_pdTimeDerivative;
 	size_t			m_nOverallIndex;
+	size_t		    m_nBlockIndex;
 	size_t			m_nDegree;
 // Report/GUI part
 	daeVariable*	m_pVariable;

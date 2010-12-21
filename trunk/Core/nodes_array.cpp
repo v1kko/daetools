@@ -2767,6 +2767,7 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 		daeDeclareAndThrowException(exInvalidPointer);
 		return adouble();
 	}
+	return adouble();
 }
 
 adNode* adSetupIntegralNode::Clone(void) const

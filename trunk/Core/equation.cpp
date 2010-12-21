@@ -268,7 +268,7 @@ void daeEquationExecutionInfo::Jacobian(void)
 	}
 }
 
-void daeEquationExecutionInfo::Sensitivity(void)
+void daeEquationExecutionInfo::Sensitivities(const std::vector<size_t>& narrParameterIndexes)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -280,19 +280,18 @@ void daeEquationExecutionInfo::Sensitivity(void)
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateSensitivity;
+	EC.m_eEquationCalculationMode	= eCalculateSensitivities;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{
 		adouble __ad;
-		daeDataProxy_t* pDataProxy = m_pModel->m_pDataProxy.get();
-		const std::vector<size_t>& narrOptParamIndexes = pDataProxy->GetOptimizationParametersIndexes();
-
-		for(size_t i = 0; i < narrOptParamIndexes.size(); i++)
+		for(size_t i = 0; i < narrParameterIndexes.size(); i++)
 		{
-			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrOptParamIndexes[i];
+			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
+			//Used to get the S/SD values 
+			EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
 			__ad = m_EquationEvaluationNode->Evaluate(&EC);
-			pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
+			m_pModel->m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 		}
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
@@ -309,8 +308,42 @@ void daeEquationExecutionInfo::Sensitivity(void)
 	}
 }
 
-void daeEquationExecutionInfo::Gradient(void)
+void daeEquationExecutionInfo::Gradients(const std::vector<size_t>& narrParameterIndexes)
 {
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pEquation)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeExecutionContext EC;
+	EC.m_pBlock						= m_pBlock;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
+	EC.m_pEquationExecutionInfo		= this;
+	EC.m_eEquationCalculationMode	= eCalculateGradients;
+
+	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
+	{
+		adouble __ad;
+		for(size_t i = 0; i < narrParameterIndexes.size(); i++)
+		{
+			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
+			__ad = m_EquationEvaluationNode->Evaluate(&EC);
+			m_pModel->m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
+		}
+	}
+	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+	else
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
 }
 
 void daeEquationExecutionInfo::Hesian()

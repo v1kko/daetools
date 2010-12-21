@@ -630,12 +630,15 @@ adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable,
 				 m_pVariable(pVariable), 
 				 m_narrDomains(narrDomains)
 {
+// This will be calculated at runtime (if needed; it is used only for sensitivity calculation)
+	m_nBlockIndex = ULONG_MAX;
 }
 
 adRuntimeVariableNode::adRuntimeVariableNode()
 {
-	m_pVariable = NULL;
-	m_pdValue   = NULL;
+	m_pVariable     = NULL;
+	m_pdValue       = NULL;
+	m_nBlockIndex   = ULONG_MAX;
 	m_nOverallIndex = ULONG_MAX;
 }
 
@@ -654,7 +657,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		return tmp;
 	}
 	
-	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 	{
 		// If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
 		// the variable is fixed and its sensitivity derivative per given parameter is 1.
@@ -662,14 +665,49 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		adouble value;
 		value.setValue(*m_pdValue);
 		
+		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
+		{
 			value.setDerivative(1);
+		}
 		else
-			value.setDerivative(pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation,
-																		   m_nOverallIndex) );
+		{
+			//If it is fixed variable then its derivative per parameter is 0
+			//Otherwise take the value from the DataProxy
+			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
+			{
+				value.setDerivative(0);
+			}
+			else
+			{
+			//Only for the first encounter:
+			//  - Try to get the variable block index based on its overall index
+			//  - If failed - throw an exception
+				if(m_nBlockIndex == ULONG_MAX)
+				{
+					if(!pExecutionContext || !pExecutionContext->m_pBlock)
+						daeDeclareAndThrowException(exInvalidPointer)
+						
+					//This is a very ugly hack, but there is no other way (at the moment)
+					adRuntimeVariableNode* self = const_cast<adRuntimeVariableNode*>(this);
+					self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
+					
+					if(m_nBlockIndex == ULONG_MAX)
+					{
+						daeDeclareException(exInvalidCall);
+						e << "Cannot obtain block index for the variable [" << m_pVariable->GetCanonicalName() << "]";
+						throw e;
+					}
+				}
+			// Get the derivative value based on the m_nBlockIndex	
+				value.setDerivative(pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation,
+																			   m_nBlockIndex) );
+			}
+		}
+		
 		return value;
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
 	{
 		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
@@ -778,6 +816,8 @@ adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable,
 				 m_pVariable(pVariable),
 				 m_narrDomains(narrDomains)
 {
+// This will be calculated at runtime (if needed; it is used only for sensitivity calculation)
+	m_nBlockIndex = ULONG_MAX;
 }
 
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(void)
@@ -785,6 +825,7 @@ adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(void)
 	m_pVariable        = NULL;
 	m_nDegree          = 0;
 	m_nOverallIndex    = ULONG_MAX;
+	m_nBlockIndex      = ULONG_MAX;
 	m_pdTimeDerivative = NULL;
 }
 
@@ -803,30 +844,45 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 		return tmp;
 	}
 
-	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivity)
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 	{
-		// Here m_nCurrentVariableIndexForJacobianEvaluation MUST NOT be equal to m_nOverallIndex,
-		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)!! 
+		// Here m_nCurrentParameterIndexForSensitivityEvaluation MUST NOT be equal to m_nOverallIndex,
+		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)
+		// which value is fixed!! 
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
 			daeDeclareAndThrowException(exInvalidCall)
 
+		//Only for the first encounter:
+		//  - Try to get the variable block index based on its overall index
+		//  - If failed - throw an exception
+		if(m_nBlockIndex == ULONG_MAX)
+		{
+			if(!pExecutionContext || !pExecutionContext->m_pBlock)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			//This is a very ugly hack, but there is no other way (at the moment)
+			adRuntimeTimeDerivativeNode* self = const_cast<adRuntimeTimeDerivativeNode*>(this);
+			self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
+
+			if(m_nBlockIndex == ULONG_MAX)
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Cannot obtain block index for the (dt) variable [" << m_pVariable->GetCanonicalName() << "]";
+				throw e;
+			}
+		}
+
+		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
 		adouble value;
 		value.setValue(*m_pdTimeDerivative);
-		
-		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
-			value.setDerivative(1);
-		else
-			value.setDerivative(pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation,
-																		    m_nOverallIndex) );
+		value.setDerivative(pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation,
+																		m_nBlockIndex) );
 		return value;
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradient)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
 	{
-		// Here m_nCurrentVariableIndexForJacobianEvaluation MUST NOT be equal to m_nOverallIndex,
-		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)!! 
-		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
-			daeDeclareAndThrowException(exInvalidCall)
-
+		//I can never rich this point, since the model must be steady-state to call CalculateGradients function
+		daeDeclareAndThrowException(exInvalidCall)
 		return adouble(*m_pdTimeDerivative, 0);
 	}
 	else

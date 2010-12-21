@@ -58,50 +58,21 @@ public:
 	{
 	}
 
-	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialConditionMode eMode)
+	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
 	{
-        if(boost::python::override f = this->get_override("Initialize"))
-            f(pBlock, pLog, eMode);
-		else
-			this->daeIDASolver::Initialize(pBlock, pLog, eMode);
+		size_t index;
+		std::vector<size_t> narrParametersIndexes;
+		boost::python::ssize_t n = boost::python::len(l);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			index = boost::python::extract<size_t>(l[i]);
+			narrParametersIndexes.push_back(index);
+		}
+		
+		daeIDASolver::Initialize(pBlock, pLog, eMode, bCalculateSensitivities, narrParametersIndexes);
 	}
-	void def_Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialConditionMode eMode)
-	{
-        this->daeIDASolver::Initialize(pBlock, pLog, eMode);
-	}
+
 	
-	real_t Solve(real_t dTime, daeeStopCriterion eStop)
-	{
-        if(boost::python::override f = this->get_override("Solve"))
-            return f(dTime, eStop);
-		else
-			return this->daeIDASolver::Solve(dTime, eStop);
-	}
-	real_t def_Solve(real_t dTime, daeeStopCriterion eStop)
-	{
-        return this->daeIDASolver::Solve(dTime, eStop);
-	}
-	
-//	boost::python::tuple GetSparseMatrixData(void)
-//	{
-//		boost::python::list ia;
-//		boost::python::list ja;
-//		int i, NNZ;
-//		int *IA, *JA;
-//		
-//		daeIDASolver::GetSparseMatrixData(NNZ, &IA, &JA);
-//
-//		if(NNZ == 0)
-//			return boost::python::make_tuple(0, 0, ia, ja);
-//		
-//		for(i = 0; i < m_nNumberOfEquations+1; i++)
-//			ia.append(IA[i]);
-//
-//		for(i = 0; i < NNZ; i++)
-//			ja.append(JA[i]);
-//
-//		return boost::python::make_tuple(m_nNumberOfEquations, NNZ, ia, ja);
-//	}
 	
 
 };

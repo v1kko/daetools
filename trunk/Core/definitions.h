@@ -307,10 +307,10 @@ public:
 	virtual ~daeMatrix(void){}
 
 public:
-	virtual REAL	GetItem(size_t i, size_t j) const = 0;
-	virtual void	SetItem(size_t i, size_t j, REAL value) = 0;
-	virtual size_t	GetSizeN(void) const = 0;
-	virtual size_t	GetSizeM(void) const = 0;
+	virtual REAL	GetItem(size_t row, size_t col) const       = 0;
+	virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
+	virtual size_t	GetNrows(void) const                        = 0;
+	virtual size_t	GetNcols(void) const                        = 0;
 };
 
 /******************************************************************

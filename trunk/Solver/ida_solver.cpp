@@ -39,6 +39,19 @@ int jacobian(int	    Neq,
 			 N_Vector	vectorTemp2, 
 			 N_Vector	vectorTemp3);
 
+int sens_residuals(int			Ns, 
+				   realtype		time, 
+				   N_Vector		vectorVariables, 
+				   N_Vector		vectorTimeDerivatives, 
+				   N_Vector		vectorResVal, /* WTF ?? */ 
+				   N_Vector*	pvectorSVariables, 
+				   N_Vector*	pvectorSTimeDerivatives, 
+				   N_Vector*	pvectorResidualValues,
+				   void*		pUserData,
+				   N_Vector		vectorTemp1, 
+				   N_Vector		vectorTemp2, 
+				   N_Vector		vectorTemp3);
+
 int setup_preconditioner(realtype	time, 
 						 N_Vector	vectorVariables, 
 						 N_Vector	vectorTimeDerivatives,
@@ -73,6 +86,7 @@ daeIDASolver::daeIDASolver(void)
 	m_timeStart				         = 0;
 	m_dTargetTime			         = 0;
 	m_dNextTimeAfterReinitialization = 0;
+	m_bCalculateSensitivities        = false;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
 	m_pIDASolverData.reset(new daeIDASolverData);
 
@@ -103,16 +117,28 @@ real_t daeIDASolver::GetRelativeTolerance(void) const
 	return m_dRelTolerance;
 }
 
-void daeIDASolver::Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialConditionMode eMode)
+void daeIDASolver::Initialize(daeBlock_t* pBlock, 
+							  daeLog_t* pLog, 
+							  daeeInitialConditionMode eMode, 
+							  bool bCalculateSensitivities,
+							  const std::vector<size_t>& narrParametersIndexes)
 {
 	if(!pBlock)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	m_pLog					= pLog;
 	m_pBlock				= pBlock;
 	m_eInitialConditionMode = eMode;
 	
-	m_nNumberOfEquations = m_pBlock->GetNumberOfEquations();
+	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
+	
+// Sensitivity related data	
+	m_bCalculateSensitivities = bCalculateSensitivities;
+	if(bCalculateSensitivities && narrParametersIndexes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	m_narrParametersIndexes   = narrParametersIndexes;
 
 // Create data IDA vectors etc
 	CreateArrays();
@@ -123,6 +149,10 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialCon
 // Create IDA structure 
 	CreateIDA();
 
+// Sensitivity related data	
+	if(m_bCalculateSensitivities)
+		SetupSensitivityCalculation();
+	
 // Create linear solver 
 	CreateLinearSolver();
 	
@@ -221,6 +251,106 @@ void daeIDASolver::CreateIDA(void)
 		daeDeclareException(exMiscellanous);
 		e << "Unable to set residual data; " << CreateIDAErrorMessage(retval);
 		throw e;
+	}
+}
+
+void daeIDASolver::SetupSensitivityCalculation(void)
+{
+	int	retval;
+	int iSensMethod;
+	bool bErrorControl;
+	string strSensMethod;
+	
+	size_t Ns = m_narrParametersIndexes.size();
+
+	if(!m_bCalculateSensitivities || Ns == 0)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Sensitivity calculation has not been enabled";
+		throw e;
+	}
+		
+	m_pIDASolverData->CreateSensitivityArrays(Ns);
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+	strSensMethod = cfg.Get<string>("daetools.solver.idasSensitivityMethod", "Simultaneous");
+	bErrorControl = cfg.Get<bool>("daetools.solver.idasErrorControl", false);
+	
+	if(strSensMethod == "Simultaneous")
+		iSensMethod = IDA_SIMULTANEOUS;
+	else
+		iSensMethod = IDA_STAGGERED;
+	
+    retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+
+    retval = IDASensEEtolerances(m_pIDA);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+
+    retval = IDASetSensErrCon(m_pIDA, bErrorControl);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+
+//  retval = IDASetSensParams(m_pIDA, data->p, pbar, NULL);
+//	if(!CheckFlag(retval)) 
+//	{
+//		daeDeclareException(exMiscellanous);
+//		e << "Unable to setup sensitivity parameters; " << CreateIDAErrorMessage(retval);
+//		throw e;
+//	}
+}
+
+
+void daeIDASolver::GetSensitivities(void)
+{
+	int	retval;
+
+	size_t Ns = m_narrParametersIndexes.size();
+
+	if(!m_bCalculateSensitivities || Ns == 0)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Sensitivity calculation has not been enabled";
+		throw e;
+	}
+
+	retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to get sensitivity values; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+	
+	realtype* pdSValues;
+	std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
+	for(size_t i = 0; i < Ns; i++)
+	{
+		pdSValues = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
+		if(!pdSValues)
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		for(size_t k = 0; k < m_nNumberOfEquations; k++)
+		{
+			if(k != 0)
+				std::cout << ", ";
+			std::cout << toStringFormatted<real_t>(pdSValues[k], 12, 4, true);
+		}
+		std::cout << std::endl;
 	}
 }
 
@@ -564,12 +694,6 @@ string daeIDASolver::CreateIDAErrorMessage(int flag)
 		case IDA_MEM_FAIL:
 			strError = "IDA_MEM_FAIL";
 			break;
-		case IDA_BAD_T:
-			strError = "IDA_BAD_T";
-			break;
-		case IDA_BAD_EWT:
-			strError = "IDA_BAD_EWT";
-			break;
 		case IDA_FIRST_RES_FAIL:
 			strError = "IDA_FIRST_RES_FAIL";
 			break;
@@ -582,41 +706,43 @@ string daeIDASolver::CreateIDAErrorMessage(int flag)
 		case IDA_RTFUNC_FAIL:
 			strError = "IDA_RTFUNC_FAIL";
 			break;
-	default:
-		strError = "Unknown error";
+		case IDA_BAD_EWT:
+			strError = "IDA_BAD_EWT";
+			break;
+		case IDA_BAD_K:
+			strError = "IDA_BAD_K";
+			break;
+		case IDA_BAD_T:
+			strError = "IDA_BAD_T";
+			break;
+		case IDA_BAD_DKY:
+			strError = "IDA_BAD_DKY";
+			break;
+		case IDA_NO_SENS:
+			strError = "IDA_NO_SENS";
+			break;
+		case IDA_SRES_FAIL:
+			strError = "IDA_SRES_FAIL";
+			break;
+		case IDA_REP_SRES_ERR:
+			strError = "IDA_REP_SRES_ERR";
+			break;
+		case IDA_BAD_IS:
+			strError = "IDA_BAD_IS";
+			break;
+
+		default:
+			strError = "Unknown error";
 	}
 
 	return strError;
 } 
-
-
-//void daeIDASolver::GetSparseMatrixData(int& nnz, int** ia, int** ja)
-//{
-//	nnz = 0;
-//	*ia = NULL;
-//	*ja = NULL;
-//	
-//	if(m_eLASolver != eSparse_MKL_PARDISO_LU)
-//		return;
-//	
-//#ifdef HAS_INTEL_MKL
-//	IDA_sparse_MKL_PARDISO_LU_Get_Matrix_Data(m_pIDA, nnz, ia, ja);
-//#endif
-//}
-
 
 void daeIDASolver::SaveMatrixAsXPM(const std::string& strFilename)
 {
 	if(!m_pLASolver)
 		return;
 	m_pLASolver->SaveAsXPM(strFilename);
-}
-
-void daeIDASolver::SaveMatrixAsPBM(const std::string& strFilename)
-{
-	if(!m_pLASolver)
-		return;
-	m_pLASolver->SaveAsPBM(strFilename);
 }
 
 daeeInitialConditionMode daeIDASolver::GetInitialConditionMode(void) const
@@ -738,7 +864,7 @@ int jacobian(int	    Neq,
 	pSolver->m_arrValues.InitArray(N, pdValues);
 	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	pSolver->m_arrResiduals.InitArray(N, pdResiduals);
-	pSolver->m_matJacobian.InitMatrix(N, ppdJacobian, eColumnWise);
+	pSolver->m_matJacobian.InitMatrix(N, N, ppdJacobian, eColumnWise);
 
 	pBlock->CalculateJacobian(time, 
 		                      pSolver->m_arrValues, 
@@ -747,6 +873,68 @@ int jacobian(int	    Neq,
 							  pSolver->m_matJacobian, 
 							  dInverseTimeStep);
 	
+	return 0;
+}
+
+int sens_residuals(int		 Ns, 
+				   realtype	 time, 
+				   N_Vector	 vectorVariables, 
+				   N_Vector	 vectorTimeDerivatives, 
+				   N_Vector	 vectorResVal, /* WTF ?? */ 
+				   N_Vector* pvectorSVariables, 
+				   N_Vector* pvectorSTimeDerivatives, 
+				   N_Vector* pvectorResidualValues,
+				   void*	 pUserData,
+				   N_Vector	 vectorTemp1, 
+				   N_Vector	 vectorTemp2, 
+				   N_Vector	 vectorTemp3)
+{
+	realtype *pdValues, *pdTimeDerivatives, **ppdSValues, **ppdSDValues, **ppdSensResiduals;
+
+	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
+	if(!pSolver || !pSolver->m_pIDASolverData)
+		return -1;
+
+	daeBlock_t* pBlock = pSolver->m_pBlock;
+	if(!pBlock)
+		return -1;
+
+	size_t N  = pBlock->GetNumberOfEquations();
+	if(N == 0 || Ns == 0)
+		return -1;
+	
+	pdValues			= NV_DATA_S(vectorVariables); 
+	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
+	
+	ppdSValues       = new realtype*[Ns];
+	ppdSDValues      = new realtype*[Ns];
+	ppdSensResiduals = new realtype*[Ns];
+	for(int i = 0; i < Ns; i++)
+	{
+		ppdSValues[i]       = NV_DATA_S(pvectorSVariables[i]);
+		ppdSDValues[i]      = NV_DATA_S(pvectorSTimeDerivatives[i]);
+		ppdSensResiduals[i] = NV_DATA_S(pvectorResidualValues[i]);
+	}
+	
+	pSolver->m_arrValues.InitArray         (N, pdValues);
+	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
+	
+	pSolver->m_matSValues.InitMatrix         (Ns, N, ppdSValues,       eRowWise);
+	pSolver->m_matSTimeDerivatives.InitMatrix(Ns, N, ppdSDValues,      eRowWise);
+	pSolver->m_matSResiduals.InitMatrix      (Ns, N, ppdSensResiduals, eRowWise);
+	
+	pBlock->CalculateSensitivities(time, 
+								   pSolver->m_narrParametersIndexes,
+								   pSolver->m_arrValues, 
+								   pSolver->m_arrTimeDerivatives,
+								   pSolver->m_matSValues,
+								   pSolver->m_matSTimeDerivatives,
+								   pSolver->m_matSResiduals);
+
+	delete[] ppdSValues;
+	delete[] ppdSDValues;
+	delete[] ppdSensResiduals;
+
 	return 0;
 }
 
@@ -782,7 +970,7 @@ int setup_preconditioner(realtype	time,
 	pSolver->m_arrValues.InitArray(Neq, pdValues);
 	pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
 	pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
-	pSolver->m_matJacobian.InitMatrix(Neq, ppdJacobian, eColumnWise);
+	pSolver->m_matJacobian.InitMatrix(Neq, Neq, ppdJacobian, eColumnWise);
 	
 	SetToZero(pSolver->m_pIDASolverData->m_matKrylov);
 
