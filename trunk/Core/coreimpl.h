@@ -1051,6 +1051,17 @@ public:
 		m_pmatSResiduals       = NULL;
 	}
 	
+	bool IsModelDynamic() const
+	{
+		if(!m_pnVariablesTypesGathered)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
+			if(m_pnVariablesTypesGathered[i] == cnDifferential)
+				return true;
+		return false;		
+	}
+	
 protected:
 //	daeCondition*					m_pCondition;
 	daeLog_t*						m_pLog;
@@ -1123,10 +1134,8 @@ public:
 										   daeMatrix<real_t>&		  matSTimeDerivatives, 
 										   daeMatrix<real_t>&		  matSResiduals);
 
-	virtual void	CalculateGradients(real_t					  dTime, 
-									   const std::vector<size_t>& narrParameterIndexes,
+	virtual void	CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
 									   daeArray<real_t>&		  arrValues, 
-									   daeArray<real_t>&		  arrTimeDerivatives, 
 									   daeMatrix<real_t>&		  matSResiduals);
 
 	virtual void	CalculateConditions(real_t					dTime, 
@@ -1848,6 +1857,8 @@ public:
 	
 	virtual void StoreInitializationValues(const std::string& strFileName) const;
 	virtual void LoadInitializationValues(const std::string& strFileName) const;
+	
+	virtual bool IsModelDynamic() const;
 
 public:	
 	void Open(io::xmlTag_t* pTag);

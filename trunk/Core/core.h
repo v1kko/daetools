@@ -589,10 +589,8 @@ public:
 										   daeMatrix<real_t>&		  matSTimeDerivatives, 
 										   daeMatrix<real_t>&		  matSResiduals) = 0;
 
-	virtual void	CalculateGradients(real_t					  dTime, 
-									   const std::vector<size_t>& narrParameterIndexes,
+	virtual void	CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
 									   daeArray<real_t>&		  arrValues, 
-									   daeArray<real_t>&		  arrTimeDerivatives, 
 									   daeMatrix<real_t>&		  matSResiduals) = 0;
 
 	virtual void	CalculateConditions(real_t				 dTime, 
@@ -674,6 +672,7 @@ public:
 
 	virtual void	SaveModelReport(const string& strFileName) const		= 0;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
+	virtual bool IsModelDynamic() const										= 0;
 
 	virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName)		= 0;

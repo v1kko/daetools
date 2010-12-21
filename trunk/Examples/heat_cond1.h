@@ -4,7 +4,7 @@
 #include "variable_types.h"
 
 /******************************************************************
-	HeatConduction1 model
+	modTutorial3 model
 *******************************************************************/
 const size_t Nx = 10;
 
@@ -52,9 +52,11 @@ public:
 		T.DistributeOnDomain(x);
 		T.DistributeOnDomain(y);
 		
-		Ty.DistributeOnDomain(y);
-		
-		
+		Ty.DistributeOnDomain(y);		
+	}
+
+	void DeclareEquations(void)
+	{
 		daeDEDI *nx, *ny;
 		daeEquation* eq;
 
@@ -102,15 +104,8 @@ public:
         //eq = CreateEquation("T_sum", "The sum of the plate temperatures");
         //eq->SetResidual( Tsum() + k() * sum(T.d_array(y, xr, 0)) );
 	}
-
-	void DeclareEquations(void)
-	{
-	}
 };
 
-/******************************************************************
-	Simulation simTutorial3
-*******************************************************************/
 class simTutorial3 : public daeDynamicSimulation
 {
 public:
@@ -153,8 +148,9 @@ public:
 
 
 
-
-
+/******************************************************************
+	modRoberts model
+*******************************************************************/
 const daeVariableType ty1("ty1", "-", -1.0e+100, 1.0e+100,  1.0, 1e-08);
 const daeVariableType ty2("ty2", "-", -1.0e+100, 1.0e+100,  1.0, 1e-14);
 const daeVariableType ty3("ty3", "-", -1.0e+100, 1.0e+100,  1.0, 1e-06);
@@ -224,5 +220,66 @@ public:
 	}
 };
 
+
+
+/******************************************************************
+	modGradients model
+*******************************************************************/
+class modGradients : public daeModel
+{
+	daeDeclareDynamicClass(modGradients)
+public:
+	daeVariable	p1, p2, p3, y1, y2, y3;
+
+public:
+	modGradients(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
+		y1("y1", ty1,     this, ""),
+		y2("y2", ty2,     this, ""),
+		y3("y3", ty3,     this, ""),
+		p1("p1", no_type, this, ""),
+		p2("p2", no_type, this, ""),
+		p3("p3", no_type, this, "")
+	{
+	}
+	
+	void DeclareEquations(void)
+	{
+		daeEquation* eq;
+
+        eq = CreateEquation("Equation1", "");
+        eq->SetResidual( y1() - 1*p1() - 2*p2() - 3*p3() );
+
+        eq = CreateEquation("Equation2", "");
+        eq->SetResidual( y2() - 4*p1() - 5*p2() - 6*p3() );
+
+        eq = CreateEquation("Equation3", "");
+        eq->SetResidual( y3() - 7*p1() - 8*p2() - 9*p3() );
+	}
+};
+
+class simGradients : public daeDynamicSimulation
+{
+public:
+	modGradients m;
+	
+public:
+	simGradients(void) : m("simGradients")
+	{
+		SetModel(&m);
+	}
+
+public:
+	void SetUpParametersAndDomains(void)
+	{
+	}
+
+	void SetUpVariables(void)
+	{
+        m.p1.AssignValue(0.1);
+        m.p2.AssignValue(0.01);
+        m.p3.AssignValue(0.001);
+		
+	}
+};
 
 #endif

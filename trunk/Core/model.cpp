@@ -2659,6 +2659,14 @@ void daeModel::LoadInitializationValues(const std::string& strFileName) const
 	m_pDataProxy->Load(strFileName);
 }
 
+bool daeModel::IsModelDynamic() const
+{
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+		
+	return m_pDataProxy->IsModelDynamic();		
+}
+
 void daeModel::SetInitialConditions(real_t value)
 {
 	if(!m_pDataProxy)

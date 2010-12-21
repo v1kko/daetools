@@ -49,6 +49,8 @@ protected:
 	virtual void CreateLinearSolver(void);
 	virtual void SetupSensitivityCalculation(void);
 
+	int CalculateGradients(void);
+
 	bool CheckFlag(int flag);
 	string CreateIDAErrorMessage(int flag);
 	
@@ -81,6 +83,7 @@ public:
 	daeDenseMatrix						m_matSResiduals;
 
 	boost::shared_ptr<daeIDASolverData>	m_pIDASolverData;
+	bool								m_bIsModelDynamic;
 	bool								m_bCalculateSensitivities;
 	std::vector<size_t>					m_narrParametersIndexes;
 	int									m_eSensitivityMethod;

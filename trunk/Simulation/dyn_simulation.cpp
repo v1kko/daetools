@@ -186,7 +186,7 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 	bool bCalculateSensitivities = true;
 	narrParametersIndexes.push_back(0);
 	narrParametersIndexes.push_back(1);
-	narrParametersIndexes.push_back(2);
+	narrParametersIndexes.push_back(4);
 	
 	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), bCalculateSensitivities, narrParametersIndexes);
 
@@ -246,9 +246,6 @@ void daeDynamicSimulation::SolveInitial(void)
 
 void daeDynamicSimulation::Run(void)
 {
-// Once simulation has started one can change time horizon or reporting interval
-// Is it a good idea?
-
 // Check if initialized and solved initially
 	if(!m_bIsInitialized)
 		daeDeclareAndThrowException(exInvalidCall);
@@ -264,6 +261,10 @@ void daeDynamicSimulation::Run(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
+
+// If the model is not dynamic there is no point in running
+	if(!m_pModel->IsModelDynamic())
+		return;
 	
 // Check for some mistakes
 	if(m_dTimeHorizon <= 0)

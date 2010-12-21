@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeDynamicSimulation_t>		pSimulation(new simRoberts);  
+		boost::scoped_ptr<daeDynamicSimulation_t>		pSimulation(new simGradients);  
 		boost::scoped_ptr<daeDataReporter_t>			pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>					pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
 		boost::scoped_ptr<daeLog_t>						pLog(daeCreateStdOutLog());
@@ -35,11 +35,11 @@ int main(int argc, char *argv[])
 		if(!pDataReporter->Connect(string(""), simName))
 			daeDeclareAndThrowException(exInvalidCall); 
     
-		daeConfig& cfg = daeConfig::GetConfig();
-		std::cout << cfg.Get<string>("daetools.version") << std::endl;
-		std::cout << cfg.Get<real_t>("daetools.core.eventTolerance") << std::endl;
-		std::cout << cfg.Get<real_t>("daetools.activity.timeHorizon") << std::endl;
-		std::cout << cfg.Get<real_t>("daetools.activity.reportingInterval") << std::endl;
+//		daeConfig& cfg = daeConfig::GetConfig();
+//		std::cout << cfg.Get<string>("daetools.version") << std::endl;
+//		std::cout << cfg.Get<real_t>("daetools.core.eventTolerance") << std::endl;
+//		std::cout << cfg.Get<real_t>("daetools.activity.timeHorizon") << std::endl;
+//		std::cout << cfg.Get<real_t>("daetools.activity.reportingInterval") << std::endl;
 		
 		pDAESolver->SetRelativeTolerance(1e-6);
         pSimulation->SetReportingInterval(10);
@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
          
  		pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
 		pSimulation->SolveInitial();
+		
  		pSimulation->GetModel()->SaveModelReport("simTest.xml");
  		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
       

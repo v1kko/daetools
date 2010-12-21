@@ -87,6 +87,7 @@ daeIDASolver::daeIDASolver(void)
 	m_dTargetTime			         = 0;
 	m_dNextTimeAfterReinitialization = 0;
 	m_bCalculateSensitivities        = false;
+	m_bIsModelDynamic				 = false;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
 	m_pIDASolverData.reset(new daeIDASolverData);
 
@@ -133,23 +134,28 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 	m_eInitialConditionMode = eMode;
 	
 	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
-	
-// Sensitivity related data	
-	m_bCalculateSensitivities = bCalculateSensitivities;
-	if(bCalculateSensitivities && narrParametersIndexes.empty())
-		daeDeclareAndThrowException(exInvalidCall);
-	m_narrParametersIndexes   = narrParametersIndexes;
 
 // Create data IDA vectors etc
 	CreateArrays();
 
 // Setting initial conditions and initial values, and set rel. and abs. tolerances
+// and determine if the model is dynamic or steady-state
 	Set_InitialConditions_InitialGuesses_AbsRelTolerances();
 
 // Create IDA structure 
 	CreateIDA();
 
 // Sensitivity related data	
+	m_bCalculateSensitivities = bCalculateSensitivities;	
+	m_narrParametersIndexes   = narrParametersIndexes;
+
+	if(bCalculateSensitivities && narrParametersIndexes.empty())
+	{
+		daeDeclareException(exInvalidPointer);
+		e << "In order to calculate sensitivities the list of parameters must be given.";
+		throw e;
+	}
+
 	if(m_bCalculateSensitivities)
 		SetupSensitivityCalculation();
 	
@@ -193,6 +199,18 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 
 	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
 
+//Determine if there is any differential variable; if true set the model as dynamic
+	m_bIsModelDynamic = false;
+	for(size_t i = 0; i < m_nNumberOfEquations; i++)
+	{
+		if(pInitialConditionsTypes[i] == cnDifferential)
+		{
+			m_bIsModelDynamic = true;
+			break;
+		}
+	}
+	std::cout << "Model is " << (m_bIsModelDynamic ? "dynamic" : "steady-state") << std::endl;
+
 // Absolute tolerances
 	pAbsoluteTolerances = NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
 	memset(pAbsoluteTolerances, 0, sizeof(real_t) * m_nNumberOfEquations);
@@ -214,17 +232,14 @@ void daeIDASolver::CreateIDA(void)
 		throw e;
 	}
 
-	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
+	retval = IDASetId(m_pIDA, m_pIDASolverData->m_vectorInitialConditionsTypes);
+	if(!CheckFlag(retval)) 
 	{
-		retval = IDASetId(m_pIDA, m_pIDASolverData->m_vectorInitialConditionsTypes);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to set initial condition types; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+		daeDeclareException(exMiscellanous);
+		e << "Unable to set initial condition types; " << CreateIDAErrorMessage(retval);
+		throw e;
 	}
-	
+		
 	retval = IDAInit(m_pIDA, 
 					 residuals, 
 					 m_timeStart, 
@@ -270,48 +285,55 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		throw e;
 	}
 		
-	m_pIDASolverData->CreateSensitivityArrays(Ns);
+// If the model is dynamic then matrixes S, SD and Sres will be created
+// Otherwise only the S matrix will be created
+	m_pIDASolverData->CreateSensitivityArrays(Ns, m_bIsModelDynamic);
 	
-	daeConfig& cfg = daeConfig::GetConfig();
-	strSensMethod = cfg.Get<string>("daetools.solver.idasSensitivityMethod", "Simultaneous");
-	bErrorControl = cfg.Get<bool>("daetools.solver.idasErrorControl", false);
+// Only if the model is dynamic setup IDAS to create sensitivities
+// Otherwise the gradients will be calculated after the call tof SolveInitial()
+	if(m_bIsModelDynamic)
+	{
+		daeConfig& cfg = daeConfig::GetConfig();
+		strSensMethod = cfg.Get<string>("daetools.solver.idasSensitivityMethod", "Simultaneous");
+		bErrorControl = cfg.Get<bool>("daetools.solver.idasErrorControl", false);
+		
+		if(strSensMethod == "Simultaneous")
+			iSensMethod = IDA_SIMULTANEOUS;
+		else
+			iSensMethod = IDA_STAGGERED;
+		
+		retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
 	
-	if(strSensMethod == "Simultaneous")
-		iSensMethod = IDA_SIMULTANEOUS;
-	else
-		iSensMethod = IDA_STAGGERED;
+		retval = IDASensEEtolerances(m_pIDA);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
 	
-    retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
-		throw e;
+		retval = IDASetSensErrCon(m_pIDA, bErrorControl);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
+	
+	//  retval = IDASetSensParams(m_pIDA, data->p, pbar, NULL);
+	//	if(!CheckFlag(retval)) 
+	//	{
+	//		daeDeclareException(exMiscellanous);
+	//		e << "Unable to setup sensitivity parameters; " << CreateIDAErrorMessage(retval);
+	//		throw e;
+	//	}
 	}
-
-    retval = IDASensEEtolerances(m_pIDA);
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
-		throw e;
-	}
-
-    retval = IDASetSensErrCon(m_pIDA, bErrorControl);
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
-		throw e;
-	}
-
-//  retval = IDASetSensParams(m_pIDA, data->p, pbar, NULL);
-//	if(!CheckFlag(retval)) 
-//	{
-//		daeDeclareException(exMiscellanous);
-//		e << "Unable to setup sensitivity parameters; " << CreateIDAErrorMessage(retval);
-//		throw e;
-//	}
 }
 
 
@@ -328,16 +350,23 @@ void daeIDASolver::GetSensitivities(void)
 		throw e;
 	}
 
-	retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
-	if(!CheckFlag(retval)) 
+	if(m_bCalculateSensitivities && m_bIsModelDynamic)
 	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to get sensitivity values; " << CreateIDAErrorMessage(retval);
-		throw e;
+		retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to get sensitivity values; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
 	}
 	
 	realtype* pdSValues;
-	std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
+	if(m_bIsModelDynamic)
+		std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
+	else
+		std::cout << "Gradients: " << std::endl;
+		
 	for(size_t i = 0; i < Ns; i++)
 	{
 		pdSValues = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
@@ -345,11 +374,7 @@ void daeIDASolver::GetSensitivities(void)
 			daeDeclareAndThrowException(exInvalidCall);
 		
 		for(size_t k = 0; k < m_nNumberOfEquations; k++)
-		{
-			if(k != 0)
-				std::cout << ", ";
-			std::cout << toStringFormatted<real_t>(pdSValues[k], 12, 4, true);
-		}
+			std::cout << toStringFormatted<real_t>(pdSValues[k], 14, 4, true);
 		std::cout << std::endl;
 	}
 }
@@ -468,6 +493,31 @@ void daeIDASolver::SolveInitial(void)
 		e << "Unable to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+
+// Here I have a problem. If the model is staedy-state then IDACalcIC does nothing!
+// The system is not solved!! I have to do something?
+// I can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
+// But what if IDASolve fails?
+	if(!m_bIsModelDynamic)
+	{
+		retval = IDASolve(m_pIDA, 
+						  m_dNextTimeAfterReinitialization, 
+						  &m_dCurrentTime, 
+						  m_pIDASolverData->m_vectorVariables, 
+						  m_pIDASolverData->m_vectorTimeDerivatives, 
+						  IDA_ONE_STEP);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
+	}
+	
+// Only if sensitivities are enabled and the model is steady-state calculate gradients
+// and store the results in the same matrix: SValues[Ns][Neq]
+	if(m_bCalculateSensitivities && !m_bIsModelDynamic)
+		CalculateGradients();
 }
 
 void daeIDASolver::Reset(void)
@@ -755,6 +805,45 @@ void daeIDASolver::SetInitialConditionMode(daeeInitialConditionMode eMode)
 	m_eInitialConditionMode = eMode;
 }
 
+int daeIDASolver::CalculateGradients(void)
+{
+	realtype *pdValues, *pdTimeDerivatives;
+
+	if(!m_bCalculateSensitivities || m_bIsModelDynamic)
+		return -1;
+	if(!m_pIDASolverData)
+		return -1;
+	if(!m_pBlock)
+		return -1;
+
+	size_t N  = m_pIDASolverData->m_N;
+	size_t Ns = m_pIDASolverData->m_Ns;
+	if(N == 0 || Ns == 0)
+		return -1;
+	
+	pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
+	pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
+	
+	if(!m_pIDASolverData->ppdSValues)
+		return -1;
+	if(!m_pIDASolverData->m_pvectorSVariables)
+		return -1;
+		
+	for(int i = 0; i < Ns; i++)
+		m_pIDASolverData->ppdSValues[i] = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
+	
+	m_arrValues.InitArray(N, pdValues);
+	m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
+	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
+	
+	m_pBlock->CalculateGradients(m_narrParametersIndexes,
+							     m_arrValues, 
+							     m_matSValues);
+
+	return 0;
+}
+
+
 
 int residuals(realtype	time, 
 			  N_Vector	vectorVariables, 
@@ -889,7 +978,7 @@ int sens_residuals(int		 Ns,
 				   N_Vector	 vectorTemp2, 
 				   N_Vector	 vectorTemp3)
 {
-	realtype *pdValues, *pdTimeDerivatives, **ppdSValues, **ppdSDValues, **ppdSensResiduals;
+	realtype *pdValues, *pdTimeDerivatives;
 
 	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
 	if(!pSolver || !pSolver->m_pIDASolverData)
@@ -906,22 +995,24 @@ int sens_residuals(int		 Ns,
 	pdValues			= NV_DATA_S(vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
 	
-	ppdSValues       = new realtype*[Ns];
-	ppdSDValues      = new realtype*[Ns];
-	ppdSensResiduals = new realtype*[Ns];
+	if(!pSolver->m_pIDASolverData->ppdSValues      ||
+	   !pSolver->m_pIDASolverData->ppdSDValues     ||
+	   !pSolver->m_pIDASolverData->ppdSensResiduals )
+		return -1;
+		
 	for(int i = 0; i < Ns; i++)
 	{
-		ppdSValues[i]       = NV_DATA_S(pvectorSVariables[i]);
-		ppdSDValues[i]      = NV_DATA_S(pvectorSTimeDerivatives[i]);
-		ppdSensResiduals[i] = NV_DATA_S(pvectorResidualValues[i]);
+		pSolver->m_pIDASolverData->ppdSValues[i]       = NV_DATA_S(pvectorSVariables[i]);
+		pSolver->m_pIDASolverData->ppdSDValues[i]      = NV_DATA_S(pvectorSTimeDerivatives[i]);
+		pSolver->m_pIDASolverData->ppdSensResiduals[i] = NV_DATA_S(pvectorResidualValues[i]);
 	}
 	
 	pSolver->m_arrValues.InitArray         (N, pdValues);
 	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	
-	pSolver->m_matSValues.InitMatrix         (Ns, N, ppdSValues,       eRowWise);
-	pSolver->m_matSTimeDerivatives.InitMatrix(Ns, N, ppdSDValues,      eRowWise);
-	pSolver->m_matSResiduals.InitMatrix      (Ns, N, ppdSensResiduals, eRowWise);
+	pSolver->m_matSValues.InitMatrix         (Ns, N, pSolver->m_pIDASolverData->ppdSValues,       eRowWise);
+	pSolver->m_matSTimeDerivatives.InitMatrix(Ns, N, pSolver->m_pIDASolverData->ppdSDValues,      eRowWise);
+	pSolver->m_matSResiduals.InitMatrix      (Ns, N, pSolver->m_pIDASolverData->ppdSensResiduals, eRowWise);
 	
 	pBlock->CalculateSensitivities(time, 
 								   pSolver->m_narrParametersIndexes,
@@ -930,10 +1021,6 @@ int sens_residuals(int		 Ns,
 								   pSolver->m_matSValues,
 								   pSolver->m_matSTimeDerivatives,
 								   pSolver->m_matSResiduals);
-
-	delete[] ppdSValues;
-	delete[] ppdSDValues;
-	delete[] ppdSensResiduals;
 
 	return 0;
 }

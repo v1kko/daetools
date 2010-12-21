@@ -30,6 +30,9 @@ public:
 		
 		m_pvectorSVariables				= NULL;
 		m_pvectorSTimeDerivatives		= NULL;
+		ppdSValues						= NULL;
+		ppdSDValues						= NULL;
+		ppdSensResiduals				= NULL;
 	}
 	
 	~daeIDASolverData(void)
@@ -52,6 +55,12 @@ public:
 			N_VDestroyVectorArray_Serial(m_pvectorSVariables, m_Ns);
 		if(m_pvectorSTimeDerivatives)
 			N_VDestroyVectorArray_Serial(m_pvectorSTimeDerivatives, m_Ns);
+		if(ppdSValues)
+			delete[] ppdSValues;
+		if(ppdSDValues)
+			delete[] ppdSDValues;
+		if(ppdSensResiduals)
+			delete[] ppdSensResiduals;
 		
 		if(m_vectorPivot)
 			free(m_vectorPivot);
@@ -104,7 +113,7 @@ public:
 		}
 	}
 
-	void CreateSensitivityArrays(size_t Ns)
+	void CreateSensitivityArrays(size_t Ns, bool bIsModelDynamic)
 	{
 		if(Ns == 0) 
 		{
@@ -120,27 +129,36 @@ public:
 		}
 
 		m_Ns = Ns;
-		
+	
+	// This arrays will be always created, no matter if the model is dynamic or steady-state
+		ppdSValues = new realtype*[m_Ns];
 		m_pvectorSVariables = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
 		if(!m_pvectorSVariables) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate pvectorSVariables array";
+			e << "Unable to allocate vectorSVariables array";
 			throw e;
 		}
-		
-		m_pvectorSTimeDerivatives = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
-		if(!m_pvectorSTimeDerivatives) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate pvectorSTimeDerivatives array";
-			throw e;
-		}
-		
+	// Initialize m_pvectorSVariables to 0
 		for(size_t i = 0; i < m_Ns; i++)
-		{
 			N_VConst(0, m_pvectorSVariables[i]);
-			N_VConst(0, m_pvectorSTimeDerivatives[i]);
+
+	// If the model is dynamic then SD will be created - otherwise not!
+		if(bIsModelDynamic)
+		{
+			ppdSDValues      = new realtype*[m_Ns];
+			ppdSensResiduals = new realtype*[m_Ns];
+			
+			m_pvectorSTimeDerivatives = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
+			if(!m_pvectorSTimeDerivatives) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorSTimeDerivatives array";
+				throw e;
+			}
+		// Initialize m_pvectorSTimeDerivatives to 0
+			for(size_t i = 0; i < m_Ns; i++)
+				N_VConst(0, m_pvectorSTimeDerivatives[i]);
 		}
 	}
 	
@@ -175,6 +193,9 @@ public:
 	int*					m_vectorPivot;
 	real_t*					m_vectorInvMaxElements;
 	DlsMat					m_matKrylov;
+	realtype**				ppdSValues;
+	realtype**				ppdSDValues;
+	realtype**				ppdSensResiduals;
 };
 	
 //int IDA_uBLAS(void* ida, size_t n, void* pUserData);

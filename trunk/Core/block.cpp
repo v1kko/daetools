@@ -165,7 +165,6 @@ void daeBlock::CalculateSensitivities(real_t					 dTime,
 										 &matSTimeDerivatives,
 										 &matSResiduals);
 	
-// First calculate normal equations (non-STN)
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
@@ -175,7 +174,7 @@ void daeBlock::CalculateSensitivities(real_t					 dTime,
 		pEquationExecutionInfo->Sensitivities(narrParameterIndexes);
 	}
 
-// Now calculate STN equations
+// In general, neither objective function nor constraints can be within an STN
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
@@ -189,23 +188,17 @@ void daeBlock::CalculateSensitivities(real_t					 dTime,
 }
 
 // For steady-state models
-void daeBlock::CalculateGradients(real_t					 dTime, 
-								  const std::vector<size_t>& narrParameterIndexes,
+void daeBlock::CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
 								  daeArray<real_t>&			 arrValues, 
-								  daeArray<real_t>&			 arrTimeDerivatives, 
 								  daeMatrix<real_t>&		 matSResiduals)
 {
 	size_t i;
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
-	SetTime(dTime);
 	CopyValuesFromSolver(arrValues);
-	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
-	
 	m_pDataProxy->SetSensitivityMatrixes(NULL, NULL, &matSResiduals);
 	
-// First calculate normal equations (non-STN)
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
@@ -215,7 +208,7 @@ void daeBlock::CalculateGradients(real_t					 dTime,
 		pEquationExecutionInfo->Gradients(narrParameterIndexes);
 	}
 
-// Now calculate STN equations
+// In general, neither objective function nor constraints can be within an STN
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
