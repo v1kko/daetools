@@ -10,16 +10,15 @@ namespace dae
 namespace activity
 {
 /*********************************************************************************************
-	daeDynamicSimulation
+	daeSimulation
 **********************************************************************************************/
-class DAE_ACTIVITY_API daeDynamicSimulation : public daeDynamicSimulation_t
+class DAE_ACTIVITY_API daeSimulation : virtual public daeSimulation_t
 {
 public:
-	daeDynamicSimulation(void);
-	virtual ~daeDynamicSimulation(void);
+	daeSimulation(void);
+	virtual ~daeSimulation(void);
 
 public:
-// daeActivity_t
 	virtual daeModel_t*			GetModel(void) const;
 	virtual void				SetModel(daeModel_t* pModel);
 	virtual daeDataReporter_t*	GetDataReporter(void) const;
@@ -31,7 +30,6 @@ public:
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
 
-// daeDynamicActivity_t
 	virtual void				SetTimeHorizon(real_t dTimeHorizon);
 	virtual real_t				GetTimeHorizon(void) const;
 	virtual void				SetReportingInterval(real_t dReportingInterval);
@@ -40,8 +38,9 @@ public:
 	virtual void				Pause(void);
 	virtual daeeActivityAction	GetActivityAction(void) const;
 
-// daeDynamicSimulation_t
-	virtual void				Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				InitSimulation(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				InitOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
 	virtual daeDAESolver_t*		GetDAESolver(void) const;
@@ -50,19 +49,26 @@ public:
 	virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion);
 	virtual void				SetUpParametersAndDomains(void);
 	virtual void				SetUpVariables(void);
+	virtual void				SetUpOptimization(void);
 	
 	real_t						GetCurrentTime(void) const;
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 	
+	daeOptimizationConstraint* CreateConstraint(real_t LB, real_t UB, string strDescription = "");
+	daeOptimizationConstraint* CreateConstraint(real_t EqualTo, string strDescription = "");
+	
+	void SetOptimizationVariable(const daeVariable& variable, real_t LB, real_t UB);
+	
 protected:
+	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
+	void	SetupSolver(void);
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
 	
-private:
 	void	RegisterModel(daeModel_t* pModel);
 	void	RegisterPort(daePort_t* pPort);
 	void	RegisterVariable(daeVariable_t* pVariable);
@@ -87,6 +93,11 @@ protected:
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
+// Optimization related data	
+	bool														m_bSetupOptimization;
+	boost::shared_ptr<daeObjectiveFunction>						m_pObjectiveFunction;
+	std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
+	std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
 };
 
 

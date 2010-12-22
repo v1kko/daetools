@@ -93,7 +93,7 @@ public:
 /******************************************************************
 	Simulation CSTR
 *******************************************************************/
-class simCSTR : public daeDynamicSimulation
+class simCSTR : public daeSimulation
 {
 public:
 	simCSTR(void) : cb("CSTR")

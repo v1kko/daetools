@@ -88,9 +88,9 @@ class modTutorial(daeModel):
         # ports dont have to be of the same type but must contain the same number of parameters and variables.
         self.ConnectPorts(self.mpout.Pout, self.mpin.Pin)
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_6")
         self.m.Description = "This tutorial explains how to define and connect ports. \n" \
                              "A simple port type 'portSimple' is defined which contains only one variable 't'. " \
@@ -137,7 +137,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
     
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

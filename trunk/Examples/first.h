@@ -390,7 +390,7 @@ public:
 /******************************************************************
 	Simulation SimulateSlab
 *******************************************************************/
-class SimulateSlab : public daeDynamicSimulation
+class SimulateSlab : public daeSimulation
 {
 public:
 	SimulateSlab(void) : s("Slab")

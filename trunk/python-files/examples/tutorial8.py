@@ -114,9 +114,9 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation.")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin()
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_8")
         self.m.Description = "This tutorial explains how to create custom data reporters and how to create a composite data reporter which delegates " \
                              "the data processing to other data reporters. "
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

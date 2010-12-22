@@ -195,18 +195,10 @@ TYPE* daeOpenObject(const xmlTag* m_pCurrentTag, daeOnOpenObjectDelegate_t<DELEG
 		else if(dynamic_cast<daePortConnection*>(pObject))
 			pObject = dynamic_cast<TYPE*>(pCFManager->CreatePortConnection(strClass, strVersion));
 
-		else if(dynamic_cast<daeDynamicSimulation_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateDynamicSimulation(strClass, strVersion));
-		else if(dynamic_cast<daeDynamicOptimization_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateDynamicOptimization(strClass, strVersion));
-		else if(dynamic_cast<daeDynamicParameterEstimation_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateDynamicParameterEstimation(strClass, strVersion));
-		else if(dynamic_cast<daeSteadyStateSimulation_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateSteadyStateSimulation(strClass, strVersion));
-		else if(dynamic_cast<daeSteadyStateOptimization_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateSteadyStateOptimization(strClass, strVersion));
-		else if(dynamic_cast<daeSteadyStateParameterEstimation_t*>(pObject))
-			pObject = dynamic_cast<TYPE*>(pCFManager->CreateSteadyStateParameterEstimation(strClass, strVersion));
+		else if(dynamic_cast<daeSimulation_t*>(pObject))
+			pObject = dynamic_cast<TYPE*>(pCFManager->CreateSimulation(strClass, strVersion));
+		else if(dynamic_cast<daeOptimization_t*>(pObject))
+			pObject = dynamic_cast<TYPE*>(pCFManager->CreateOptimization(strClass, strVersion));
 
 		else if(dynamic_cast<daeDataReceiver_t*>(pObject))
 			pObject = dynamic_cast<TYPE*>(pCFManager->CreateDataReceiver(strClass, strVersion));

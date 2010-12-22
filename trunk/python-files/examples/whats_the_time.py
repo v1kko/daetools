@@ -98,12 +98,12 @@ class modTutorial(daeModel):
  
 # 4. Define a simulation
 #    Simulations are derived from the base daeDynamicSimulation class
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
         # 4.1 First, the base class constructor has to be called, and then the model for the simulation has to be instantiated.
         #     daeDynamicSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.
         #     They are absolutely equivalent, and user can choose which one to use. For clarity, I prefer the shortest one: m.
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("WhatsTheTime")
         self.m.Description = "What is the time? (AKA Hello world) is the simplest simulation. It shows the basic structure of the model and the simulation classes. " \
                              "The basic 8 steps are explained: \n" \
@@ -181,7 +181,7 @@ def consoleRun():
     #      The function SaveModelReport exports the model report in the XML format which can be opened in a web browser 
     #      (like Mozilla Firefox, or others that support XHTML+MathMl standard).
     #      The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

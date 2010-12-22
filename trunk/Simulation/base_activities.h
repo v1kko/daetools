@@ -5,7 +5,7 @@
 using namespace dae::activity;
 
 
-//daeDynamicSimulation_t* _createDynamicSimulation(void);
+//daeSimulation_t* _createSimulation(void);
 
 
 #endif

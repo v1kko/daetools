@@ -186,7 +186,7 @@ class daeSimulator(QtGui.QDialog):
             self.ui.ReportingIntervalDoubleSpinBox.setEnabled(False)
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
 
-            self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
+            self.simulation.InitSimulation(self.daesolver, self.datareporter, self.log)
             self.simulation.SolveInitial()
             self.simulation.Run()
             self.simulation.Finalize()

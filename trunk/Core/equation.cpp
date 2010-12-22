@@ -368,6 +368,13 @@ void daeEquationExecutionInfo::AddVariableInEquation(size_t nIndex)
 	m_mapIndexes.insert(value);
 }
 
+void daeEquationExecutionInfo::GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const
+{
+	std::map<size_t, size_t>::const_iterator iter;
+	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
+		narrVariableIndexes.push_back(iter->first);
+}
+
 /******************************************************************
 	daeDistributedEquationDomainInfo
 *******************************************************************/

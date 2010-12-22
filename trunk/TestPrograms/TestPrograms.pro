@@ -7,19 +7,12 @@ TEMPLATE = app
 INCLUDEPATH += $${BOOSTDIR} 
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
-
-win32-msvc2008:LIBS +=	Core.lib \
-						Simulation.lib \
-						DataReporters.lib \
-						Solver.lib \
-						$${SUNDIALS_LIBS}
-unix:LIBS += -lCore \
-			 -lSimulation \
-			 -lDataReporters \
-			 -lSolver \
-		     $${SUNDIALS_LIBS} 
-
-LIBS +=	$${BOOST_LIBS}
+LIBS += $${DAE_SIMULATION_LIB} \
+        $${DAE_DATAREPORTERS_LIB} \
+        $${DAE_CORE_LIB} \
+        $${DAE_SOLVER_LIB} \
+        $${SUNDIALS_LIBS} \
+        $${BOOST_LIBS}
 
 SOURCES += main.cpp \
     stdafx.cpp

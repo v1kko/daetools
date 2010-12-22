@@ -381,6 +381,7 @@ public:
 	void Sensitivities(const std::vector<size_t>& narrParameterIndexes);
 	void Gradients(const std::vector<size_t>& narrParameterIndexes);
 	void AddVariableInEquation(size_t nIndex);
+	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
 
 protected:
 	daeBlock*						m_pBlock;
@@ -1676,6 +1677,7 @@ protected:
 	friend class adSetupPartialDerivativeNodeArray;
 	friend class adSetupExpressionDerivativeNode;
 	friend class adSetupExpressionPartialDerivativeNode;
+	friend class daeOptimizationVariable;
 };	
 
 /******************************************************************
@@ -1898,6 +1900,8 @@ public:
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
+	daeEquation* CreateEquation(const string& strName, string strDescription = "");
+
 	void AddEquation(daeEquation* pEquation);
 	void AddDomain(daeDomain* pDomain);
 	void AddVariable(daeVariable* pVariable);
@@ -1937,8 +1941,6 @@ protected:
 	daeState* STATE(const string& strState);
 	void      END_STN(void);
 	void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
-
-	daeEquation* CreateEquation(const string& strName, string strDescription = "");
 
 	template<typename Model>
 		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));
@@ -2050,6 +2052,7 @@ protected:
 	friend class daeEquation;
 	friend class daeEquationExecutionInfo;
 	friend class daeDistributedEquationDomainInfo;
+	friend class daeOptimizationVariable;
 };
 
 /******************************************************************
@@ -2464,6 +2467,8 @@ protected:
 	
 	friend class daeModel;
 	friend class daeEquationExecutionInfo;
+	friend class daeOptimizationConstraint;
+	friend class daeObjectiveFunction;
 };
 
 /******************************************************************
@@ -2507,6 +2512,84 @@ public:
 	}
 	const daeModel*		m_pModel;
 	std::vector<daeDEDI*>	m_ptrarrDEDIs;
+};
+
+
+/******************************************************************
+	daeObjectiveFunction
+*******************************************************************/
+class DAE_CORE_API daeObjectiveFunction : public daeObject
+{
+public:
+	daeDeclareDynamicClass(daeObjectiveFunction)
+	daeObjectiveFunction(daeModel* pModel, real_t abstol);
+	virtual ~daeObjectiveFunction(void);
+
+public:
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void	 SetResidual(adouble res);
+	adouble	 GetResidual(void) const;
+	
+public:
+	daeModel*	                   m_pModel;
+	boost::shared_ptr<daeVariable> m_pObjectiveVariable;
+	daeEquation*                   m_pObjectiveFunction;
+};
+
+/******************************************************************
+	daeOptimizationConstraint
+*******************************************************************/
+class DAE_CORE_API daeOptimizationConstraint : public daeObject
+{
+public:
+	daeDeclareDynamicClass(daeOptimizationConstraint)
+	daeOptimizationConstraint(daeModel* pModel, real_t LB, real_t UB, real_t abstol, size_t N, string strDescription);
+	daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription);
+	virtual ~daeOptimizationConstraint(void);
+
+public:
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void	 SetResidual(adouble res);
+	adouble	 GetResidual(void) const;
+
+public:
+	daeeConstraintType				m_eConstraintType;
+	real_t							m_dLB;
+	real_t							m_dUB;
+	real_t							m_dValue;
+	daeModel*						m_pModel;
+	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
+	daeEquation*					m_pConstraintFunction;
+};
+
+/******************************************************************
+	daeOptimizationVariable
+*******************************************************************/
+class DAE_CORE_API daeOptimizationVariable : public daeObject
+{
+public:
+	daeDeclareDynamicClass(daeOptimizationVariable)
+	daeOptimizationVariable(const daeVariable* pVariable, real_t LB, real_t UB);
+	virtual ~daeOptimizationVariable(void);
+	
+public:
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	size_t GetIndex(void) const;
+	
+public:
+	const daeVariable*	m_pVariable;
+	real_t				m_dLB;
+	real_t				m_dUB;
 };
 
 /******************************************************************

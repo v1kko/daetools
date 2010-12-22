@@ -106,9 +106,9 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = self.cp(x,y) - self.a() - self.b() * self.T(x, y)        
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_2")
         self.m.Description = "This tutorial explains how to define Arrays (discrete distribution domains) and " \
                              "distributed parameters, how to calculate the number of degrees of freedom (NDOF) " \
@@ -189,7 +189,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

@@ -27,12 +27,8 @@ namespace activity
 /******************************************************************
 	daeActivityClassFactory_t
 *******************************************************************/
-typedef daeCreateObjectDelegate<daeDynamicSimulation_t>*				pfnCreateDynamicSimulation;
-typedef daeCreateObjectDelegate<daeDynamicOptimization_t>*				pfnCreateDynamicOptimization;
-typedef daeCreateObjectDelegate<daeDynamicParameterEstimation_t>*		pfnCreateDynamicParameterEstimation;
-typedef daeCreateObjectDelegate<daeSteadyStateSimulation_t>*			pfnCreateSteadyStateSimulation;
-typedef daeCreateObjectDelegate<daeSteadyStateOptimization_t>*			pfnCreateSteadyStateOptimization;
-typedef daeCreateObjectDelegate<daeSteadyStateParameterEstimation_t>*	pfnCreateSteadyStateParameterEstimation;
+typedef daeCreateObjectDelegate<daeSimulation_t>*				pfnCreateSimulation;
+typedef daeCreateObjectDelegate<daeOptimization_t>*				pfnCreateOptimization;
 
 class DAE_ACTIVITY_API daeActivityClassFactory : public daeActivityClassFactory_t
 {
@@ -47,26 +43,14 @@ public:
     string   GetLicenceInfo(void) const;
     string   GetVersion(void) const;
 
-	daeDynamicSimulation_t*					CreateDynamicSimulation(const string& strClass);
-	daeDynamicOptimization_t*				CreateDynamicOptimization(const string& strClass);
-	daeDynamicParameterEstimation_t*		CreateDynamicParameterEstimation(const string& strClass);
-	daeSteadyStateSimulation_t*				CreateSteadyStateSimulation(const string& strClass);
-	daeSteadyStateOptimization_t*			CreateSteadyStateOptimization(const string& strClass);
-	daeSteadyStateParameterEstimation_t*	CreateSteadyStateParameterEstimation(const string& strClass);
+	daeSimulation_t*	CreateSimulation(const string& strClass);
+	daeOptimization_t*	CreateOptimization(const string& strClass);
 
-	void SupportedDynamicSimulations(std::vector<string>& strarrClasses);
-	void SupportedDynamicOptimizations(std::vector<string>& strarrClasses);
-	void SupportedDynamicParameterEstimations(std::vector<string>& strarrClasses);
-	void SupportedSteadyStateSimulations(std::vector<string>& strarrClasses);
-	void SupportedSteadyStateOptimizations(std::vector<string>& strarrClasses);
-	void SupportedSteadyStateParameterEstimations(std::vector<string>& strarrClasses);
+	void SupportedSimulations(std::vector<string>& strarrClasses);
+	void SupportedOptimizations(std::vector<string>& strarrClasses);
 
-	bool RegisterDynamicSimulation(string strClass, pfnCreateDynamicSimulation pfn);
-	bool RegisterDynamicOptimization(string strClass, pfnCreateDynamicOptimization pfn);
-	bool RegisterDynamicParameterEstimation(string strClass, pfnCreateDynamicParameterEstimation pfn);
-	bool RegisterSteadyStateSimulation(string strClass, pfnCreateSteadyStateSimulation pfn);
-	bool RegisterSteadyStateOptimization(string strClass, pfnCreateSteadyStateOptimization pfn);
-	bool RegisterSteadyStateParameterEstimation(string strClass, pfnCreateSteadyStateParameterEstimation pfn);
+	bool RegisterSimulation(string strClass,   pfnCreateSimulation pfn);
+	bool RegisterOptimization(string strClass, pfnCreateOptimization pfn);
 
 public:
     string   m_strName;
@@ -75,12 +59,8 @@ public:
     string   m_strLicenceInfo;
     string   m_strVersion;
 
-	daePtrMap<string, pfnCreateDynamicSimulation>				m_mapCreateDynamicSimulation;
-	daePtrMap<string, pfnCreateDynamicOptimization>				m_mapCreateDynamicOptimization;
-	daePtrMap<string, pfnCreateDynamicParameterEstimation>		m_mapCreateDynamicParameterEstimation;
-	daePtrMap<string, pfnCreateSteadyStateSimulation>			m_mapCreateSteadyStateSimulation;
-	daePtrMap<string, pfnCreateSteadyStateOptimization>			m_mapCreateSteadyStateOptimization;
-	daePtrMap<string, pfnCreateSteadyStateParameterEstimation>	m_mapCreateSteadyStateParameterEstimation;
+	daePtrMap<string, pfnCreateSimulation>		m_mapCreateSimulation;
+	daePtrMap<string, pfnCreateOptimization>	m_mapCreateOptimization;
 };
 
 

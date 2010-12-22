@@ -31,7 +31,7 @@
 
 #define daeRegisterModel(CLASS)					static bool _bRetCreate##CLASS = g_ModelClassFactory.RegisterModel(               string(#CLASS), new dae::daeCreateObjectDelegateDerived<CLASS, dae::core::daeModel>());
 
-#define daeRegisterDynamicSimulation(CLASS)		static bool _bRetCreate##CLASS = g_ActivityClassFactory.RegisterDynamicSimulation(string(#CLASS), new dae::daeCreateObjectDelegateDerived<CLASS, dae::activity::daeDynamicSimulation_t>());
+#define daeRegisterDynamicSimulation(CLASS)		static bool _bRetCreate##CLASS = g_ActivityClassFactory.RegisterDynamicSimulation(string(#CLASS), new dae::daeCreateObjectDelegateDerived<CLASS, dae::activity::daeSimulation_t>());
 
 #define daeRegisterDataReporter(CLASS)			static bool _bRetCreate##CLASS = g_DataReportingClassFactory.RegisterDataReporter(string(#CLASS), new dae::daeCreateObjectDelegateDerived<CLASS, dae::datareporting::daeDataReporter_t>());
 

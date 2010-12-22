@@ -183,9 +183,9 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_1")
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
@@ -252,7 +252,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

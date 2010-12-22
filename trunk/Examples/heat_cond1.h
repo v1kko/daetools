@@ -106,7 +106,7 @@ public:
 	}
 };
 
-class simTutorial3 : public daeDynamicSimulation
+class simTutorial3 : public daeSimulation
 {
 public:
 	modTutorial3 m;
@@ -191,7 +191,7 @@ public:
 	}
 };
 
-class simRoberts : public daeDynamicSimulation
+class simRoberts : public daeSimulation
 {
 public:
 	modRoberts m;
@@ -218,6 +218,28 @@ public:
 		m.y1.SetInitialCondition(1);
 		m.y2.SetInitialCondition(0);
 	}
+	
+	void SetUpOptimization(void)
+	{
+	// Set the objective function (min)
+		m_pObjectiveFunction->SetResidual( m.y1() + m.y2() );
+		
+	// Set the constraints (inequality, equality)
+		daeOptimizationConstraint* c1 = CreateConstraint(-1, 1, "Constraint 1");
+		c1->SetResidual( m.p1() );
+		
+		daeOptimizationConstraint* c2 = CreateConstraint(-2, 2, "Constraint 2");
+		c2->SetResidual( m.p2() );
+		
+		daeOptimizationConstraint* c3 = CreateConstraint(-1, 1, "Constraint 3");
+		c3->SetResidual( m.p3() );
+		
+	// Set the optimization variables and their lower and upper bounds
+		SetOptimizationVariable(m.p1, -1E5, 1E5);
+		SetOptimizationVariable(m.p2, -2E5, 2E5);
+		SetOptimizationVariable(m.p3, -3E5, 3E5);
+	}
+
 };
 
 
@@ -257,7 +279,7 @@ public:
 	}
 };
 
-class simGradients : public daeDynamicSimulation
+class simGradients : public daeSimulation
 {
 public:
 	modGradients m;

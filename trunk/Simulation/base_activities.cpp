@@ -2,7 +2,7 @@
 #include "base_activities.h"
 #include "dyn_simulation.h"
 
-//daeDynamicSimulation_t* _createDynamicSimulation(void)
+//daeSimulation_t* _createSimulation(void)
 //{
-//	return new daeDynamicSimulation;
+//	return new daeSimulation;
 //}

@@ -113,9 +113,9 @@ class modTutorial(daeModel):
 
         self.END_IF()
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_4")
         self.m.Description = "This tutorial explains how to define and use discontinuous equations: symmetric state transition networks (daeIF). \n" \
                               "A piece of copper (a plate) is at one side exposed to the source of heat and at the " \
@@ -167,7 +167,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

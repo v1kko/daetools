@@ -66,7 +66,7 @@ public:
 /******************************************************************
 	simTest
 *******************************************************************/
-class simPython : public daeDynamicSimulation
+class simPython : public daeSimulation
 {
 public:
 	simPython(void) : m("testModel")

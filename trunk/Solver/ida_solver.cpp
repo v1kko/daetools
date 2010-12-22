@@ -209,7 +209,7 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 			break;
 		}
 	}
-	std::cout << "Model is " << (m_bIsModelDynamic ? "dynamic" : "steady-state") << std::endl;
+	m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
 
 // Absolute tolerances
 	pAbsoluteTolerances = NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
@@ -344,11 +344,7 @@ void daeIDASolver::GetSensitivities(void)
 	size_t Ns = m_narrParametersIndexes.size();
 
 	if(!m_bCalculateSensitivities || Ns == 0)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Sensitivity calculation has not been enabled";
-		throw e;
-	}
+		return;
 
 	if(m_bCalculateSensitivities && m_bIsModelDynamic)
 	{
@@ -494,7 +490,7 @@ void daeIDASolver::SolveInitial(void)
 		throw e;
 	}
 
-// Here I have a problem. If the model is staedy-state then IDACalcIC does nothing!
+// Here I have a problem. If the model is steady-state then IDACalcIC does nothing!
 // The system is not solved!! I have to do something?
 // I can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
 // But what if IDASolve fails?

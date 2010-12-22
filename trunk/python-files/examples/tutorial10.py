@@ -90,9 +90,9 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_int", "Integral of the heat flux per x domain; just an example of the integral function")
         eq.Residual = self.Q_int() - self.integral( -self.k() * self.T.d_array(self.y, xr, 0) )
               
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_10")
         self.m.Description = "This tutorial explains how to use daeModel functions d() and dt() " \
                              "that calculate time- and partial-derivative of an expression (not of a single variable), " \
@@ -153,7 +153,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

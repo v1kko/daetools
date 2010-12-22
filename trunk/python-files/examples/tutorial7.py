@@ -83,9 +83,9 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_7")
         self.m.Description = "This tutorial explains how to create custom operating procedures, how to re-set the values of " \
                              "assigned variables and how to re-set the initial conditions. "
@@ -182,7 +182,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

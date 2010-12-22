@@ -96,7 +96,7 @@ public:
 /******************************************************************
 	Simulation CopperBlock
 *******************************************************************/
-class simCopperBlock : public daeDynamicSimulation
+class simCopperBlock : public daeSimulation
 {
 public:
 	simCopperBlock(void) : cb("CopperBlock")

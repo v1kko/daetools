@@ -113,9 +113,9 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("T_sum", "The sum of the plate temperatures")
         eq.Residual = self.Tsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
         
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_3")
         self.m.Description = "This tutorial explains how to define arrays of variable values and " \
                              "functions that operate on these arrays, and how to define a non-uniform domain grid."
@@ -182,7 +182,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

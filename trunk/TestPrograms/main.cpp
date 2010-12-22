@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeDynamicSimulation_t>		pSimulation(new simGradients);  
-		boost::scoped_ptr<daeDataReporter_t>			pDataReporter(daeCreateTCPIPDataReporter());
-		boost::scoped_ptr<daeIDASolver>					pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
-		boost::scoped_ptr<daeLog_t>						pLog(daeCreateStdOutLog());
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simRoberts);  
+		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
+		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
+		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 
@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
         pSimulation->SetTimeHorizon(400);
 		pSimulation->GetModel()->SetReportingOn(true);
          
- 		pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
+// 		pSimulation->InitSimulation(pDAESolver.get(), pDataReporter.get(), pLog.get());
+ 		pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());
 		pSimulation->SolveInitial();
 		
  		pSimulation->GetModel()->SaveModelReport("simTest.xml");

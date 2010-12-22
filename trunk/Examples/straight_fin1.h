@@ -96,7 +96,7 @@ public:
 /******************************************************************
 	Simulation StraightFin1
 *******************************************************************/
-class simStraightFin1 : public daeDynamicSimulation
+class simStraightFin1 : public daeSimulation
 {
 public:
 	simStraightFin1(void) : sf("StraightFin1")

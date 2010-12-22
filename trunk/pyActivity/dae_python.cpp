@@ -27,74 +27,60 @@ BOOST_PYTHON_MODULE(pyActivity)
     ;
      
 /**************************************************************
-    daeActivity
+    daeSimulation_t
 ***************************************************************/
-    class_<daepython::daeActivityWrapper, boost::noncopyable>("daeActivity_t", no_init)
-        .add_property("DataReporter",       make_function(&daeActivity_t::GetDataReporter, return_internal_reference<>()))
-        .add_property("Log",                make_function(&daeActivity_t::GetLog, return_internal_reference<>()))
-
-        .def("GetModel",                    pure_virtual(&daeActivity_t::GetModel), return_internal_reference<>())
-        .def("SetModel",                    pure_virtual(&daeActivity_t::SetModel))
-        .def("SetUpParametersAndDomains",   pure_virtual(&daeActivity_t::SetUpParametersAndDomains))
-        .def("SetUpVariables",              pure_virtual(&daeActivity_t::SetUpVariables))
-        .def("Run",                         pure_virtual(&daeActivity_t::Run))
-        .def("Finalize",                    pure_virtual(&daeActivity_t::Finalize))
-        .def("Reset",                       pure_virtual(&daeActivity_t::Reset))
-        .def("ReportData",                  pure_virtual(&daeActivity_t::ReportData))
-        .def("StoreInitializationValues",   pure_virtual(&daeActivity_t::StoreInitializationValues))
-        .def("LoadInitializationValues",    pure_virtual(&daeActivity_t::LoadInitializationValues))
-        ;
-
-    class_<daepython::daeDynamicActivityWrapper, bases<daeActivity_t>, boost::noncopyable>("daeDynamicActivity_t", no_init)
-        .add_property("TimeHorizon",        &daeDynamicActivity_t::GetTimeHorizon,          &daeDynamicActivity_t::SetTimeHorizon)
-        .add_property("ReportingInterval",  &daeDynamicActivity_t::GetReportingInterval,    &daeDynamicActivity_t::SetReportingInterval)
-        .add_property("ActivityAction",     &daeDynamicActivity_t::GetActivityAction)
+    class_<daepython::daeDefaultSimulationWrapper, boost::noncopyable>("daeSimulation")
+        .add_property("Model",                  make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
+                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
+        .add_property("model",                  make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
+                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
+        .add_property("m",                      make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
+                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
         
-        .def("Pause",                       pure_virtual(&daeDynamicActivity_t::Pause))
-        .def("Resume",                      pure_virtual(&daeDynamicActivity_t::Resume))
-        ;
-  
-    class_<daepython::daeDynamicSimulationWrapper, bases<daeDynamicActivity_t>, boost::noncopyable>("daeDynamicSimulation_t", no_init)
-        .add_property("DAESolver",          make_function(&daeDynamicSimulation_t::GetDAESolver, return_internal_reference<>()))
-        
-        .def("Initialize",                  pure_virtual(&daeDynamicSimulation_t::Initialize))
-        .def("Reinitialize",                pure_virtual(&daeDynamicSimulation_t::Reinitialize))
-        .def("SolveInitial",                pure_virtual(&daeDynamicSimulation_t::SolveInitial))
-        .def("Integrate",                   pure_virtual(&daeDynamicSimulation_t::Integrate))
-        .def("IntegrateForTimeInterval",    pure_virtual(&daeDynamicSimulation_t::IntegrateForTimeInterval))
-        .def("IntegrateUntilTime",          pure_virtual(&daeDynamicSimulation_t::IntegrateUntilTime))
-        ;  
+        .add_property("DataReporter",       make_function(&daeSimulation::GetDataReporter, return_internal_reference<>()))
+        .add_property("Log",                make_function(&daeSimulation::GetLog,          return_internal_reference<>()))
+        .add_property("DAESolver",          make_function(&daeSimulation::GetDAESolver,    return_internal_reference<>()))
 
-    class_<daepython::daeDefaultDynamicSimulationWrapper, bases<daeDynamicSimulation_t>, boost::noncopyable>("daeDynamicSimulation")
-        .add_property("Model",                  make_function(&daepython::daeDefaultDynamicSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultDynamicSimulationWrapper::SetModel_))
-        .add_property("model",                  make_function(&daepython::daeDefaultDynamicSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultDynamicSimulationWrapper::SetModel_))
-        .add_property("m",                      make_function(&daepython::daeDefaultDynamicSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultDynamicSimulationWrapper::SetModel_))
-        .add_property("CurrentTime",            make_function(&daeDynamicSimulation::GetCurrentTime))       
-        .add_property("InitialConditionMode",   &daeDynamicSimulation::GetInitialConditionMode,  &daeDynamicSimulation::SetInitialConditionMode)
+        .add_property("TimeHorizon",        &daeSimulation::GetTimeHorizon,          &daeSimulation::SetTimeHorizon)
+        .add_property("ReportingInterval",  &daeSimulation::GetReportingInterval,    &daeSimulation::SetReportingInterval)
+        .add_property("ActivityAction",     &daeSimulation::GetActivityAction)
+        
+        .add_property("CurrentTime",            make_function(&daeSimulation::GetCurrentTime))       
+        .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,  &daeSimulation::SetInitialConditionMode)
+
+        .def("GetModel",                    &daeSimulation::GetModel, return_internal_reference<>())
+        .def("SetModel",                    &daeSimulation::SetModel)
  
-        .def("SetUpParametersAndDomains",   &daeDynamicSimulation_t::SetUpParametersAndDomains, &daepython::daeDefaultDynamicSimulationWrapper::def_SetUpParametersAndDomains)
-        .def("SetUpVariables",              &daeDynamicSimulation_t::SetUpVariables,            &daepython::daeDefaultDynamicSimulationWrapper::def_SetUpVariables)
-        .def("Run",                         &daeActivity_t::Run,   &daepython::daeDefaultDynamicSimulationWrapper::def_Run)
-        .def("Reset",                       &daeDynamicSimulation::Reset)
-        .def("Finalize",                    &daeDynamicSimulation::Finalize)
-        .def("ReportData",                  &daeDynamicSimulation::ReportData)
-        .def("StoreInitializationValues",   &daeDynamicSimulation::StoreInitializationValues)
-        .def("LoadInitializationValues",    &daeDynamicSimulation::LoadInitializationValues)
+        .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains)
+        .def("SetUpVariables",              &daeSimulation::SetUpVariables,            &daepython::daeDefaultSimulationWrapper::def_SetUpVariables)
+        .def("SetUpOptimization",			&daeSimulation::SetUpOptimization,		   &daepython::daeDefaultSimulationWrapper::def_SetUpOptimization)
+        .def("Run",                         &daeSimulation::Run,                       &daepython::daeDefaultSimulationWrapper::def_Run)
 
-        .def("Pause",                       &daeDynamicSimulation::Pause)
-        .def("Resume",                      &daeDynamicSimulation::Resume)
+        .def("Reset",                       &daeSimulation::Reset)
+        .def("Finalize",                    &daeSimulation::Finalize)
+        .def("ReportData",                  &daeSimulation::ReportData)
+        .def("StoreInitializationValues",   &daeSimulation::StoreInitializationValues)
+        .def("LoadInitializationValues",    &daeSimulation::LoadInitializationValues)
 
-        .def("Initialize",                  &daeDynamicSimulation::Initialize)
-        .def("Reinitialize",                &daeDynamicSimulation::Reinitialize)
-        .def("SolveInitial",                &daeDynamicSimulation::SolveInitial)
-        .def("Integrate",                   &daeDynamicSimulation::Integrate)
-        .def("IntegrateForTimeInterval",    &daeDynamicSimulation::IntegrateForTimeInterval)
-        .def("IntegrateUntilTime",          &daeDynamicSimulation::IntegrateUntilTime)
+        .def("Pause",                       &daeSimulation::Pause)
+        .def("Resume",                      &daeSimulation::Resume)
+
+        .def("InitSimulation",              &daeSimulation::InitSimulation)
+        .def("InitOptimization",            &daeSimulation::InitOptimization)
+        .def("Reinitialize",                &daeSimulation::Reinitialize)
+        .def("SolveInitial",                &daeSimulation::SolveInitial)
+        .def("Integrate",                   &daeSimulation::Integrate)
+        .def("IntegrateForTimeInterval",    &daeSimulation::IntegrateForTimeInterval)
+        .def("IntegrateUntilTime",          &daeSimulation::IntegrateUntilTime)
   
-        //.def("EnterConditionalIntegrationMode",   &daeDynamicSimulation::EnterConditionalIntegrationMode)
-        //.def("IntegrateUntilConditionSatisfied",  &daeDynamicSimulation::IntegrateUntilConditionSatisfied)
+        //.def("EnterConditionalIntegrationMode",   &daeSimulation::EnterConditionalIntegrationMode)
+        //.def("IntegrateUntilConditionSatisfied",  &daeSimulation::IntegrateUntilConditionSatisfied)
+        ; 
+    
+    class_<daepython::daeIPOPTWrapper, boost::noncopyable>("daeIPOPT")
+        .def("Initialize", &daeIPOPT::Initialize)
         ;
+
+    
+    
 }

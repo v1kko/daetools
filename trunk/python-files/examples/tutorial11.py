@@ -190,9 +190,9 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = - self.k() * self.time.dt() - 1.0
 
-class simTutorial(daeDynamicSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
-        daeDynamicSimulation.__init__(self)
+        daeSimulation.__init__(self)
         self.m = modTutorial("Tutorial_1")
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
@@ -262,7 +262,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.InitSimulation(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

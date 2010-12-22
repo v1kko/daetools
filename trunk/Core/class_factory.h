@@ -39,12 +39,7 @@ public:
 //	virtual daeStateTransition_t* CreateStateTransition(const string& strClass, const string& strVersion) const = 0;
 //	virtual daePortConnection_t* CreatePortConnection(const string& strClass, const string& strVersion) const = 0;
 
-	virtual daeDynamicSimulation_t* CreateDynamicSimulation(const string& strClass, const string& strVersion) const = 0;
-	virtual daeDynamicOptimization_t* CreateDynamicOptimization(const string& strClass, const string& strVersion) const = 0;
-	virtual daeDynamicParameterEstimation_t* CreateDynamicParameterEstimation(const string& strClass, const string& strVersion) const = 0;
-	virtual daeSteadyStateSimulation_t* CreateSteadyStateSimulation(const string& strClass, const string& strVersion) const = 0;
-	virtual daeSteadyStateOptimization_t* CreateSteadyStateOptimization(const string& strClass, const string& strVersion) const = 0;
-	virtual daeSteadyStateParameterEstimation_t* CreateSteadyStateParameterEstimation(const string& strClass, const string& strVersion) const = 0;
+//	virtual daeSimulation_t* CreateSimulation(const string& strClass, const string& strVersion) const = 0;
 
 	virtual daeDataReceiver_t*	CreateDataReceiver(const string& strClass, const string& strVersion) const = 0;
 	virtual daeDataReporter_t*	CreateDataReporter(const string& strClass, const string& strVersion) const = 0;

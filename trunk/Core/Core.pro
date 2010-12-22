@@ -45,7 +45,8 @@ SOURCES += xmlreadstream.cpp \
     stdafx.cpp \
     dllmain.cpp \
     global_functions.cpp \
-    tcpiplog.cpp
+    tcpiplog.cpp \
+    objfun_constraints.cpp
 HEADERS += xmlfunctions.h \
     xmlfile.h \
     stdafx.h \

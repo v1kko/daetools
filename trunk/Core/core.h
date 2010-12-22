@@ -228,6 +228,12 @@ enum daeIndexRangeType
 	eCustomRange
 };
 
+enum daeeConstraintType
+{
+	eInequalityConstraint = 0,
+	eEqualityConstraint	
+};
+
 /******************************************************************
 	daeObject_t
 *******************************************************************/

@@ -7,7 +7,7 @@ namespace dae
 {
 namespace activity
 {
-daeDynamicSimulation::daeDynamicSimulation(void)
+daeSimulation::daeSimulation(void)
 {
 	m_dCurrentTime		 = 0;
 	m_dTimeHorizon		 = 0;
@@ -23,26 +23,30 @@ daeDynamicSimulation::daeDynamicSimulation(void)
 	m_bConditionalIntegrationMode = false;
 	m_bIsInitialized	 = false;
 	m_bIsSolveInitial	 = false;
-	
+	m_bSetupOptimization = false;
 
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_dTimeHorizon       = cfg.Get<real_t>("daetools.activity.timeHorizon", 100);
 	m_dReportingInterval = cfg.Get<real_t>("daetools.activity.reportingInterval", 10);
 }
 
-daeDynamicSimulation::~daeDynamicSimulation(void)
+daeSimulation::~daeSimulation(void)
 {
 }
 
-void daeDynamicSimulation::SetUpParametersAndDomains()
+void daeSimulation::SetUpParametersAndDomains()
 {
 }
 
-void daeDynamicSimulation::SetUpVariables()
+void daeSimulation::SetUpVariables()
 {
 }
 
-void daeDynamicSimulation::Resume(void)
+void daeSimulation::SetUpOptimization(void)
+{
+}
+
+void daeSimulation::Resume(void)
 {
 	if(!m_bIsInitialized)
 		return;
@@ -65,7 +69,7 @@ void daeDynamicSimulation::Resume(void)
 	Run();
 }
 
-void daeDynamicSimulation::Pause(void)
+void daeSimulation::Pause(void)
 {
 	if(!m_bIsInitialized)
 		return;
@@ -85,12 +89,24 @@ void daeDynamicSimulation::Pause(void)
 	m_eActivityAction = ePauseActivity;
 }
 
-daeeActivityAction daeDynamicSimulation::GetActivityAction(void) const
+daeeActivityAction daeSimulation::GetActivityAction(void) const
 {
 	return m_eActivityAction;
 }
 
-void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+void daeSimulation::InitSimulation(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+{
+	m_bSetupOptimization = false;
+	Init(pDAESolver, pDataReporter, pLog);
+}
+
+void daeSimulation::InitOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+{
+	m_bSetupOptimization = true;
+	Init(pDAESolver, pDataReporter, pLog);
+}
+
+void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
 {
 	time_t start, end;
 
@@ -117,27 +133,27 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 
 	start = time(NULL);
 
-	m_pLog->Message(string("*************************************************************************"), 0);
-	m_pLog->Message(string("*                          @@@@@                                        *"), 0);
-	m_pLog->Message(string("*       @                    @                                          *"), 0);
-	m_pLog->Message(string("*       @   @@@@@     @@@@@  @                    DAE Tools             *"), 0);
-	m_pLog->Message(string("*  @@@@@@        @   @     @           Version:   ") + daeVersion() + string("                 *"), 0);
-	m_pLog->Message(string("* @     @   @@@@@@   @@@@@@            Copyright: Dragan Nikolic, 2010  *"), 0);
-	m_pLog->Message(string("* @     @  @     @   @                 E-mail:    dnikolic@daetools.com *"), 0);
-	m_pLog->Message(string("*  @@@@@    @@@@@@    @@@@@            Homepage:  www.daetools.com      *"), 0);
-	m_pLog->Message(string("*                                                                       *"), 0);
-	m_pLog->Message(string("*************************************************************************"), 0);
-	m_pLog->Message(string("* DAE Tools is free software: you can redistribute it and/or modify     *"), 0);
-	m_pLog->Message(string("* it under the terms of the GNU General Public License as published     *"), 0);
-	m_pLog->Message(string("* by the Free Software Foundation; either version 3 of the License,     *"), 0);
-	m_pLog->Message(string("* or (at your option) any later version.                                *"), 0);
-	m_pLog->Message(string("* This program is distributed in the hope that it will be useful,       *"), 0);
-	m_pLog->Message(string("* but WITHOUT ANY WARRANTY; without even the implied warranty of        *"), 0);
-	m_pLog->Message(string("* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          *"), 0);
-	m_pLog->Message(string("* GNU General Public License for more details.                          *"), 0);
-	m_pLog->Message(string("* You should have received a copy of the GNU General Public License     *"), 0);
-	m_pLog->Message(string("* along with this program. If not, see <http://www.gnu.org/licenses/>.  *"), 0);
-	m_pLog->Message(string("*************************************************************************"), 0);
+	m_pLog->Message(string("***********************************************************************"), 0);
+	m_pLog->Message(string("                          @@@@@                                        "), 0);
+	m_pLog->Message(string("       @                    @                                          "), 0);
+	m_pLog->Message(string("       @   @@@@@     @@@@@  @                DAE Tools                 "), 0);
+	m_pLog->Message(string("  @@@@@@        @   @     @       Version:   ") + daeVersion(),            0);
+	m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2010      "), 0);
+	m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
+	m_pLog->Message(string("  @@@@@    @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
+	m_pLog->Message(string("                                                                       "), 0);
+	m_pLog->Message(string("***********************************************************************"), 0);
+	m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
+	m_pLog->Message(string(" it under the terms of the GNU General Public License as published     "), 0);
+	m_pLog->Message(string(" by the Free Software Foundation; either version 3 of the License,     "), 0);
+	m_pLog->Message(string(" or (at your option) any later version.                                "), 0);
+	m_pLog->Message(string(" This program is distributed in the hope that it will be useful,       "), 0);
+	m_pLog->Message(string(" but WITHOUT ANY WARRANTY; without even the implied warranty of        "), 0);
+	m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          "), 0);
+	m_pLog->Message(string(" GNU General Public License for more details.                          "), 0);
+	m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
+	m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
+	m_pLog->Message(string("***********************************************************************"), 0);
 	m_pLog->Message(string("  "), 0);
 	m_pLog->Message(string("Creating the system... "), 0);
 
@@ -146,11 +162,17 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 
 // Initialize params and domains
 	SetUpParametersAndDomains();
-	
-// At this point I can add optimization variables, ojective function and constraints
-	///////////////////////////////////	
 
-	
+// Define the optimization problem: objective function and constraints
+	if(m_bSetupOptimization)
+	{
+		daeConfig& cfg = daeConfig::GetConfig();
+		real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
+		daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
+		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(pModel, dAbsTolerance));
+		
+		SetUpOptimization();
+	}
 	
 // Create params, domains, vars, ports
 	m_pModel->InitializeStage2();
@@ -177,19 +199,9 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 	m_ptrarrBlocks.EmptyAndFreeMemory();
 	m_pModel->InitializeStage5(false, m_ptrarrBlocks);
 
-// Initialize solver
-	if(m_ptrarrBlocks.size() != 1)
-		daeDeclareAndThrowException(exInvalidCall);
-	daeBlock_t* pBlock = m_ptrarrBlocks[0];
+// Setup DAE solver and sensitivities
+	SetupSolver();
 	
-	vector<size_t> narrParametersIndexes;
-	bool bCalculateSensitivities = true;
-	narrParametersIndexes.push_back(0);
-	narrParametersIndexes.push_back(1);
-	narrParametersIndexes.push_back(4);
-	
-	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), bCalculateSensitivities, narrParametersIndexes);
-
 // Register model
 	m_dCurrentTime = 0;
 	m_pDataReporter->StartRegistration();
@@ -206,7 +218,109 @@ void daeDynamicSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporte
 	m_pLog->Message(string(""), 0);
 }
 
-void daeDynamicSimulation::SolveInitial(void)
+void daeSimulation::SetupSolver(void)
+{
+	size_t i;
+	vector<size_t> narrVariableIndexes;
+	vector<size_t> narrParametersIndexes;
+	daeBlock_t* pBlock;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+	daeEquation* pEquation;
+	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
+	boost::shared_ptr<daeOptimizationConstraint> pConstraint;
+	vector<string> strarrErrors;
+
+	if(m_ptrarrBlocks.size() != 1)
+		daeDeclareAndThrowException(exInvalidCall);
+	pBlock = m_ptrarrBlocks[0];
+	
+	if(m_bSetupOptimization)
+	{
+	// First check ObjFunction, Constraints and optimization variables
+		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
+		{
+			pOptVariable = m_arrOptimizationVariables[i];
+			if(!pOptVariable)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			if(!pOptVariable->CheckObject(strarrErrors))
+			{
+				daeDeclareException(exRuntimeCheck);
+				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+					e << *it << "\n";
+				throw e;
+			}
+		}		
+		for(i = 0; i < m_arrConstraints.size(); i++)
+		{
+			pConstraint = m_arrConstraints[i];
+			if(!pConstraint)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			if(!pConstraint->CheckObject(strarrErrors))
+			{
+				daeDeclareException(exRuntimeCheck);
+				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+					e << *it << "\n";
+				throw e;
+			}
+		}
+		if(!m_pObjectiveFunction)
+			daeDeclareAndThrowException(exInvalidPointer)
+		if(!m_pObjectiveFunction->CheckObject(strarrErrors))
+		{
+			daeDeclareException(exRuntimeCheck);
+			for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+				e << *it << "\n";
+			throw e;
+		}
+		
+	// Fill the parameters indexes (optimization variables)
+		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
+		{
+			pOptVariable = m_arrOptimizationVariables[i];
+			if(!pOptVariable)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			narrParametersIndexes.push_back(pOptVariable->GetIndex());
+		}
+
+	// Set the constraints
+//		for(i = 0; i < m_arrConstraints.size(); i++)
+//		{
+//			pConstraint = m_arrConstraints[i];
+//			if(!pConstraint)
+//				daeDeclareAndThrowException(exInvalidPointer)
+				
+//			pEquation = pConstraint->m_pConstraintFunction;
+//			if(!pEquation)
+//				daeDeclareAndThrowException(exInvalidPointer)
+				
+//			if(pEquation->m_ptrarrEquationExecutionInfos.size() != 1)
+//			{
+//				daeDeclareException(exInvalidCall);
+//				e << "Constraint cannot be a distributed function";
+//				throw e;
+//			}
+			
+//			pEquationExecutionInfo = pEquation->m_ptrarrEquationExecutionInfos[0];
+//			if(!pEquationExecutionInfo)
+//				daeDeclareAndThrowException(exInvalidPointer)
+			
+//			narrVariableIndexes.clear();
+//			pEquationExecutionInfo->GetVariableIndexes(narrVariableIndexes);
+//		}
+	}
+
+//	narrParametersIndexes.push_back(0);
+//	narrParametersIndexes.push_back(1);
+//	narrParametersIndexes.push_back(2);
+//	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), true, narrParametersIndexes);
+
+	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bSetupOptimization, narrParametersIndexes);
+}
+
+void daeSimulation::SolveInitial(void)
 {
 	clock_t start, end;
 
@@ -244,7 +358,7 @@ void daeDynamicSimulation::SolveInitial(void)
 	m_pLog->Message(string("  "), 0);
 }
 
-void daeDynamicSimulation::Run(void)
+void daeSimulation::Run(void)
 {
 // Check if initialized and solved initially
 	if(!m_bIsInitialized)
@@ -323,7 +437,7 @@ void daeDynamicSimulation::Run(void)
 	m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_ProblemCreation + m_Initialization + m_Integration), -1, 0) + string(" s"), 0);
 }
 
-void daeDynamicSimulation::Finalize(void)
+void daeSimulation::Finalize(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -352,7 +466,7 @@ void daeDynamicSimulation::Finalize(void)
 	m_bIsSolveInitial	 = false;
 }
 
-void daeDynamicSimulation::Reset(void)
+void daeSimulation::Reset(void)
 {
 	m_dCurrentTime		 = 0;
 	m_ProblemCreation    = 0;
@@ -373,14 +487,42 @@ void daeDynamicSimulation::Reset(void)
 //		SetInitialConditionsToZero();
 }
 
-void daeDynamicSimulation::SetInitialConditionsToZero(void)
+daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t LB, real_t UB, string strDescription)
+{
+	daeConfig& cfg = daeConfig::GetConfig();
+	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
+
+	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, LB, UB, dAbsTolerance, m_arrConstraints.size(), strDescription));
+	m_arrConstraints.push_back(pConstraint);
+	return pConstraint.get();
+}
+
+daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t EqualTo, string strDescription)
+{
+	daeConfig& cfg = daeConfig::GetConfig();
+	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
+
+	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, EqualTo, dAbsTolerance, m_arrConstraints.size(), strDescription));
+	m_arrConstraints.push_back(pConstraint);
+	return pConstraint.get();
+}
+
+void daeSimulation::SetOptimizationVariable(const daeVariable& variable, real_t LB, real_t UB)
+{
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, LB, UB));
+	m_arrOptimizationVariables.push_back(pVar);	
+}
+
+void daeSimulation::SetInitialConditionsToZero(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer)
 	m_pModel->SetInitialConditions(0);
 }
 
-void daeDynamicSimulation::CheckSystem(void) const
+void daeSimulation::CheckSystem(void) const
 {
 // The most important thing is to check:
 //	- total number of variables
@@ -428,26 +570,26 @@ void daeDynamicSimulation::CheckSystem(void) const
 	}
 }
 
-real_t daeDynamicSimulation::GetCurrentTime(void) const
+real_t daeSimulation::GetCurrentTime(void) const
 {
 	return m_dCurrentTime;
 }
 
-void daeDynamicSimulation::SetInitialConditionMode(daeeInitialConditionMode eMode)
+void daeSimulation::SetInitialConditionMode(daeeInitialConditionMode eMode)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer)
 	m_pModel->SetInitialConditionMode(eMode);
 }
 
-daeeInitialConditionMode daeDynamicSimulation::GetInitialConditionMode(void) const
+daeeInitialConditionMode daeSimulation::GetInitialConditionMode(void) const
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer)
 	return m_pModel->GetInitialConditionMode();
 }
 
-void daeDynamicSimulation::StoreInitializationValues(const std::string& strFileName) const
+void daeSimulation::StoreInitializationValues(const std::string& strFileName) const
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -455,7 +597,7 @@ void daeDynamicSimulation::StoreInitializationValues(const std::string& strFileN
 	m_pModel->StoreInitializationValues(strFileName);
 }
 
-void daeDynamicSimulation::LoadInitializationValues(const std::string& strFileName) const
+void daeSimulation::LoadInitializationValues(const std::string& strFileName) const
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -463,32 +605,32 @@ void daeDynamicSimulation::LoadInitializationValues(const std::string& strFileNa
 	m_pModel->LoadInitializationValues(strFileName);
 }
 
-void daeDynamicSimulation::SetTimeHorizon(real_t dTimeHorizon)
+void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)
 {
 	if(dTimeHorizon <= 0)
 		return;
 	m_dTimeHorizon = dTimeHorizon;
 }
 
-real_t daeDynamicSimulation::GetTimeHorizon(void) const
+real_t daeSimulation::GetTimeHorizon(void) const
 {
 	return m_dTimeHorizon;
 }
 
-void daeDynamicSimulation::SetReportingInterval(real_t dReportingInterval)
+void daeSimulation::SetReportingInterval(real_t dReportingInterval)
 {
 	if(dReportingInterval <= 0)
 		return;
 	m_dReportingInterval = dReportingInterval;
 }
 
-real_t daeDynamicSimulation::GetReportingInterval(void) const
+real_t daeSimulation::GetReportingInterval(void) const
 {
 	return m_dReportingInterval;
 }
 
 // Integrates until the stopping criterion is reached or the time horizon of simulation
-real_t daeDynamicSimulation::Integrate(daeeStopCriterion eStopCriterion)
+real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -502,7 +644,7 @@ real_t daeDynamicSimulation::Integrate(daeeStopCriterion eStopCriterion)
 }
 
 // Integrates for the given time interval
-real_t daeDynamicSimulation::IntegrateForTimeInterval(real_t time_interval)
+real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -516,7 +658,7 @@ real_t daeDynamicSimulation::IntegrateForTimeInterval(real_t time_interval)
 }
 
 // Integrates until the stopping criterion or time is reached
-real_t daeDynamicSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion)
+real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -529,7 +671,7 @@ real_t daeDynamicSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion e
 	return m_dCurrentTime;
 }
 
-void daeDynamicSimulation::Reinitialize(void)
+void daeSimulation::Reinitialize(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -544,7 +686,7 @@ void daeDynamicSimulation::Reinitialize(void)
 	m_pDAESolver->Reinitialize(true);
 }
 
-void daeDynamicSimulation::EnterConditionalIntegrationMode(void)
+void daeSimulation::EnterConditionalIntegrationMode(void)
 {
 /**************************************************************/
 	daeDeclareAndThrowException(exNotImplemented)
@@ -558,7 +700,7 @@ void daeDynamicSimulation::EnterConditionalIntegrationMode(void)
 }
 
 // Integrates until the stopping condition or final time is reached
-real_t daeDynamicSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion)
+real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion)
 {
 /**************************************************************/
 	daeDeclareAndThrowException(exNotImplemented)
@@ -593,7 +735,7 @@ real_t daeDynamicSimulation::IntegrateUntilConditionSatisfied(daeCondition rCond
 	return m_dCurrentTime;
 }
 
-void daeDynamicSimulation::RegisterModel(daeModel_t* pModel)
+void daeSimulation::RegisterModel(daeModel_t* pModel)
 {
 	size_t i;
 	daeVariable_t* pVariable;
@@ -637,7 +779,7 @@ void daeDynamicSimulation::RegisterModel(daeModel_t* pModel)
 	}
 }
 
-void daeDynamicSimulation::RegisterPort(daePort_t* pPort)
+void daeSimulation::RegisterPort(daePort_t* pPort)
 {
 	size_t i;
 	daeVariable_t* pVariable;
@@ -663,7 +805,7 @@ void daeDynamicSimulation::RegisterPort(daePort_t* pPort)
 	}
 }
 
-void daeDynamicSimulation::RegisterVariable(daeVariable_t* pVariable)
+void daeSimulation::RegisterVariable(daeVariable_t* pVariable)
 {
 	size_t i;
 	daeDomain_t* pDomain;
@@ -690,7 +832,7 @@ void daeDynamicSimulation::RegisterVariable(daeVariable_t* pVariable)
 	}
 }
 
-void daeDynamicSimulation::RegisterDomain(daeDomain_t* pDomain)
+void daeSimulation::RegisterDomain(daeDomain_t* pDomain)
 {
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -714,7 +856,7 @@ void daeDynamicSimulation::RegisterDomain(daeDomain_t* pDomain)
 	}
 }
 
-void daeDynamicSimulation::ReportData(void)
+void daeSimulation::ReportData(void)
 {
 	if(!m_pDataReporter)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -729,7 +871,7 @@ void daeDynamicSimulation::ReportData(void)
 	ReportModel(m_pModel, m_dCurrentTime);
 }
 
-void daeDynamicSimulation::ReportModel(daeModel_t* pModel, real_t time)
+void daeSimulation::ReportModel(daeModel_t* pModel, real_t time)
 {
 	size_t i;
 	daeVariable_t* pVariable;
@@ -764,7 +906,7 @@ void daeDynamicSimulation::ReportModel(daeModel_t* pModel, real_t time)
 	}
 }
 
-void daeDynamicSimulation::ReportPort(daePort_t* pPort, real_t time)
+void daeSimulation::ReportPort(daePort_t* pPort, real_t time)
 {
 	size_t i;
 	daeVariable_t* pVariable;
@@ -781,7 +923,7 @@ void daeDynamicSimulation::ReportPort(daePort_t* pPort, real_t time)
 	}
 }
 
-void daeDynamicSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
+void daeSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
 {
 	real_t* pd;
 	daeDataReporterVariableValue var;
@@ -809,29 +951,29 @@ void daeDynamicSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
 	}
 }
 
-daeModel_t* daeDynamicSimulation::GetModel(void) const
+daeModel_t* daeSimulation::GetModel(void) const
 {
 	return m_pModel;
 }
 
-void daeDynamicSimulation::SetModel(daeModel_t* pModel)
+void daeSimulation::SetModel(daeModel_t* pModel)
 {
 	if(!pModel)
 		return;
 	m_pModel = pModel;
 }
 
-daeDataReporter_t* daeDynamicSimulation::GetDataReporter(void) const
+daeDataReporter_t* daeSimulation::GetDataReporter(void) const
 {
 	return m_pDataReporter;
 }
 
-daeLog_t* daeDynamicSimulation::GetLog(void) const
+daeLog_t* daeSimulation::GetLog(void) const
 {
 	return m_pLog;
 }
 
-daeDAESolver_t* daeDynamicSimulation::GetDAESolver(void) const
+daeDAESolver_t* daeSimulation::GetDAESolver(void) const
 {
 	return m_pDAESolver;
 }
