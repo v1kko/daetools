@@ -77,6 +77,8 @@ public:
 							daeDAESolver_t* pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t* pLog)						= 0;
+	virtual void Run(void)										= 0;
+	virtual void Finalize(void)									= 0;
 };
 
 

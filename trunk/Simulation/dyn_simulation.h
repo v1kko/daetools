@@ -51,14 +51,25 @@ public:
 	virtual void				SetUpVariables(void);
 	virtual void				SetUpOptimization(void);
 	
+	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint*>& ptrarrConstraints) const;
+	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable*>&   ptrarrOptVariables) const;
+	virtual daeObjectiveFunction* GetObjectiveFunction(void) const;
+
+//	void GetOptimizationConstraints(std::vector< boost::shared_ptr<daeOptimizationConstraint> >& ptrarrConstraints);
+//	void GetOptimizationVariables  (std::vector< boost::shared_ptr<daeOptimizationVariable> >&   ptrarrOptVariables);
+//	boost::shared_ptr<daeObjectiveFunction> GetObjectiveFunction(void);
+
 	real_t						GetCurrentTime(void) const;
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 	
+//	void AddOptimizationConstraint(daeOptimizationConstraint& constraint);
+//	void AddOptimizationVariable(daeOptimizationVariable& optVariable);
+
 	daeOptimizationConstraint* CreateConstraint(real_t LB, real_t UB, string strDescription = "");
 	daeOptimizationConstraint* CreateConstraint(real_t EqualTo, string strDescription = "");
 	
-	void SetOptimizationVariable(const daeVariable& variable, real_t LB, real_t UB);
+	void SetOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
 	
 protected:
 	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);

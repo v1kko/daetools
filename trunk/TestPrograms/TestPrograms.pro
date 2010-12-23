@@ -4,15 +4,19 @@ TARGET = TestPrograms
 CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
-INCLUDEPATH += $${BOOSTDIR} 
+INCLUDEPATH += $${BOOSTDIR} \
+               $${IPOPT_INCLUDE}
 
-QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
+QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
+                $${IPOPT_LIBDIR}
+
 LIBS += $${DAE_SIMULATION_LIB} \
         $${DAE_DATAREPORTERS_LIB} \
         $${DAE_CORE_LIB} \
         $${DAE_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
-        $${BOOST_LIBS}
+        $${BOOST_LIBS} \
+        $${IPOPT_LIBS}
 
 SOURCES += main.cpp \
     stdafx.cpp

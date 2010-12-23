@@ -6,15 +6,17 @@
 #include "../Examples/test_models.h"
 #include "../DataReporters/datareporters.h"
 #include "../Solver/ida_solver.h"
+#include "../Simulation/optimization.h"
 
 int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simRoberts);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simHS71);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
+		boost::scoped_ptr<daeOptimization_t>	pOptimization(new daeIPOPT());
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 
@@ -46,15 +48,23 @@ int main(int argc, char *argv[])
         pSimulation->SetTimeHorizon(400);
 		pSimulation->GetModel()->SetReportingOn(true);
          
-// 		pSimulation->InitSimulation(pDAESolver.get(), pDataReporter.get(), pLog.get());
  		pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());
-		pSimulation->SolveInitial();
+		pSimulation->GetModel()->SaveModelReport("simTest.xml");
+		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+
+ 		pOptimization->Initialize(pSimulation.get(), NULL, pDAESolver.get(), pDataReporter.get(), pLog.get());
 		
- 		pSimulation->GetModel()->SaveModelReport("simTest.xml");
- 		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
-      
- 		pSimulation->Run();
+ 		pOptimization->Run();
 		pSimulation->Finalize();
+
+//		pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());
+//		pSimulation->SolveInitial();
+		
+//		pSimulation->GetModel()->SaveModelReport("simTest.xml");
+//		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+	  
+//		pSimulation->Run();
+//		pSimulation->Finalize();
 	}
 	catch(std::exception& e)
 	{ 

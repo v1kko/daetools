@@ -235,9 +235,9 @@ public:
 		c3->SetResidual( m.p3() );
 		
 	// Set the optimization variables and their lower and upper bounds
-		SetOptimizationVariable(m.p1, -1E5, 1E5);
-		SetOptimizationVariable(m.p2, -2E5, 2E5);
-		SetOptimizationVariable(m.p3, -3E5, 3E5);
+		SetOptimizationVariable(m.p1, -1E5, 1E5, 0);
+		SetOptimizationVariable(m.p2, -2E5, 2E5, 0);
+		SetOptimizationVariable(m.p3, -3E5, 3E5, 0);
 	}
 
 };
@@ -303,5 +303,93 @@ public:
 		
 	}
 };
+
+
+
+
+
+
+
+
+
+
+
+/******************************************************************
+	modHS71 model
+*******************************************************************/
+const daeVariableType typex("typex", "-", -1.0e+100, 1.0e+100,  1.0, 1e-06);
+
+class modHS71 : public daeModel
+{
+	daeDeclareDynamicClass(modRoberts)
+public:
+	daeVariable	x1, x2, x3, x4, dummy;
+
+public:
+	modHS71(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
+		x1("x1", typex,     this, ""),
+		x2("x2", typex,     this, ""),
+		x3("x3", typex,     this, ""),
+		x4("x4", typex,     this, ""),
+		dummy("dummy", typex,     this, "")
+	{
+	}
+	
+	void DeclareEquations(void)
+	{
+		daeEquation* eq;
+
+        eq = CreateEquation("Equation1", "");
+        eq->SetResidual( dummy() - 1 );
+	}
+};
+
+class simHS71 : public daeSimulation
+{
+public:
+	modHS71 m;
+	
+public:
+	simHS71(void) : m("simHS71")
+	{
+		SetModel(&m);
+	}
+
+public:
+	void SetUpParametersAndDomains(void)
+	{
+	}
+
+	void SetUpVariables(void)
+	{
+		m.x1.AssignValue(1);
+		m.x2.AssignValue(5);
+		m.x3.AssignValue(5);
+		m.x4.AssignValue(1);
+	}
+	
+	void SetUpOptimization(void)
+	{
+	// Set the objective function (min)
+		m_pObjectiveFunction->SetResidual( m.x1() * m.x4() * (m.x1() + m.x2() + m.x3()) + m.x3() );
+		
+	// Set the constraints (inequality, equality)
+		daeOptimizationConstraint* c1 = CreateConstraint(25, 2E19, "Constraint 1");
+		c1->SetResidual( m.x1() * m.x2() * m.x3() * m.x4() );
+		
+		daeOptimizationConstraint* c2 = CreateConstraint(40, "Constraint 2");
+		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() );
+				
+	// Set the optimization variables and their lower and upper bounds
+		SetOptimizationVariable(m.x1, 1, 5, 1);
+		SetOptimizationVariable(m.x2, 1, 5, 5);
+		SetOptimizationVariable(m.x3, 1, 5, 5);
+		SetOptimizationVariable(m.x4, 1, 5, 1);
+	}
+
+};
+
+
+
 
 #endif

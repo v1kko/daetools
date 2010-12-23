@@ -383,6 +383,9 @@ public:
 	void AddVariableInEquation(size_t nIndex);
 	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
 
+	size_t GetEquationIndexInBlock(void) const;
+	boost::shared_ptr<adNode> GetEquationEvaluationNode(void) const;
+	
 protected:
 	daeBlock*						m_pBlock;
 	daeModel*						m_pModel;
@@ -2432,6 +2435,8 @@ public:
 	void InitializeDEDIs(void);
 
 	virtual size_t	GetNumberOfEquations(void) const;
+	
+	void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const;
 
 protected:
     virtual adouble		Calculate(void);
@@ -2510,10 +2515,31 @@ public:
 		: m_pModel(pModel), m_ptrarrDEDIs(ptrarrDEDIs)
 	{
 	}
-	const daeModel*		m_pModel;
+	const daeModel*			m_pModel;
 	std::vector<daeDEDI*>	m_ptrarrDEDIs;
 };
 
+
+/******************************************************************
+	daeOptimizationVariable
+*******************************************************************/
+class DAE_CORE_API daeOptimizationVariable : public daeObject
+{
+public:
+	daeDeclareDynamicClass(daeOptimizationVariable)
+	daeOptimizationVariable(daeVariable* pVariable, real_t LB, real_t UB, real_t defaultValue);
+	virtual ~daeOptimizationVariable(void);
+	
+public:
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	size_t GetIndex(void) const;
+	
+public:
+	daeVariable*	m_pVariable;
+	real_t			m_dLB;
+	real_t			m_dUB;
+	real_t			m_dDefaultValue;
+};
 
 /******************************************************************
 	daeObjectiveFunction
@@ -2535,10 +2561,14 @@ public:
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
 	
+	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables);
+	
 public:
-	daeModel*	                   m_pModel;
-	boost::shared_ptr<daeVariable> m_pObjectiveVariable;
-	daeEquation*                   m_pObjectiveFunction;
+	daeModel*						m_pModel;
+	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
+	daeEquation*					m_pObjectiveFunction;
+	size_t							m_nEquationIndexInBlock;
+	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 
 /******************************************************************
@@ -2561,6 +2591,8 @@ public:
 
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
+	
+	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables);
 
 public:
 	daeeConstraintType				m_eConstraintType;
@@ -2568,28 +2600,10 @@ public:
 	real_t							m_dUB;
 	real_t							m_dValue;
 	daeModel*						m_pModel;
+	size_t							m_nEquationIndexInBlock;
 	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
 	daeEquation*					m_pConstraintFunction;
-};
-
-/******************************************************************
-	daeOptimizationVariable
-*******************************************************************/
-class DAE_CORE_API daeOptimizationVariable : public daeObject
-{
-public:
-	daeDeclareDynamicClass(daeOptimizationVariable)
-	daeOptimizationVariable(const daeVariable* pVariable, real_t LB, real_t UB);
-	virtual ~daeOptimizationVariable(void);
-	
-public:
-	bool CheckObject(std::vector<string>& strarrErrors) const;
-	size_t GetIndex(void) const;
-	
-public:
-	const daeVariable*	m_pVariable;
-	real_t				m_dLB;
-	real_t				m_dUB;
+	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 
 /******************************************************************

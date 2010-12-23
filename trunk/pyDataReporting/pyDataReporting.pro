@@ -4,8 +4,8 @@ QT -= core \
 TARGET = pyDataReporting
 TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
-    $${PYTHON_INCLUDE_DIR} \
-    $${PYTHON_SITE_PACKAGES_DIR}
+               $${PYTHON_INCLUDE_DIR} \
+               $${PYTHON_SITE_PACKAGES_DIR}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS +=	$${BOOST_PYTHON_LIB} \

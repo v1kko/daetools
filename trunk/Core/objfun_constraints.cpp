@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include <algorithm>
 
 namespace dae 
 {
@@ -14,8 +15,9 @@ daeObjectiveFunction::daeObjectiveFunction(daeModel* pModel, real_t abstol)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
 	const daeVariableType typeObjectiveFunction("typeObjectiveFunction", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
-	m_pModel			 = pModel;
-	m_pObjectiveVariable = boost::shared_ptr<daeVariable>(new daeVariable("V_obj", typeObjectiveFunction, pModel, "Objective value"));
+	m_pModel				= pModel;
+	m_nEquationIndexInBlock = ULONG_MAX;
+	m_pObjectiveVariable	= boost::shared_ptr<daeVariable>(new daeVariable("V_obj", typeObjectiveFunction, pModel, "Objective value"));
 	m_pObjectiveVariable->SetReportingOn(true);
 	m_pObjectiveFunction = pModel->CreateEquation("F_obj", "Objective function");
 }
@@ -56,6 +58,58 @@ void daeObjectiveFunction::OpenRuntime(io::xmlTag_t* pTag)
 void daeObjectiveFunction::SaveRuntime(io::xmlTag_t* pTag) const
 {
 	daeObject::SaveRuntime(pTag);
+}
+
+void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables)
+{
+	size_t i;
+	map<size_t, size_t> mapVariableIndexes;
+	map<size_t, size_t>::iterator iter;
+	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
+
+	if(!m_pObjectiveFunction)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	m_pObjectiveFunction->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+	if(ptrarrEquationExecutionInfos.size() != 1)
+		daeDeclareAndThrowException(exInvalidCall)
+		
+	pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
+	if(!pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+// 1. Set the equation index in the block it belongs
+	m_nEquationIndexInBlock = pEquationExecutionInfo->GetEquationIndexInBlock();
+
+// 2a. Add all optimization variables indexes that are found in this constraint
+//     This requires some iterating over the arrays of indexes
+	m_narrOptimizationVariablesIndexes.clear();
+	
+	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
+	node->AddVariableIndexToArray(mapVariableIndexes);
+	
+	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
+	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+		std::cout << iter->first << " ";
+	std::cout << std::endl;
+
+	for(i = 0; i < arrOptimizationVariables.size(); i++)
+	{
+		pOptVariable = arrOptimizationVariables[i];
+	// If I find the index in the optimization variable within the constraint - add it to the array
+		if( mapVariableIndexes.find(pOptVariable->GetIndex()) != mapVariableIndexes.end() )
+			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetIndex());
+	}
+	
+// 2b. Sort the array
+	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
+
+	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
+	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+	std::cout << std::endl;
 }
 
 bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
@@ -128,6 +182,7 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Va
 	m_dLB					= 0;
 	m_dUB					= 0;
 	m_dValue				= Value;
+	m_nEquationIndexInBlock = ULONG_MAX;
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
 	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
 }
@@ -170,6 +225,57 @@ void daeOptimizationConstraint::SaveRuntime(io::xmlTag_t* pTag) const
 	daeObject::SaveRuntime(pTag);
 }
 
+void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables)
+{
+	size_t i;
+	map<size_t, size_t> mapVariableIndexes;
+	map<size_t, size_t>::iterator iter;
+	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
+
+	if(!m_pConstraintFunction)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	m_pConstraintFunction->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+	if(ptrarrEquationExecutionInfos.size() != 1)
+		daeDeclareAndThrowException(exInvalidCall)
+		
+	pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
+	if(!pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+// 1. Set the equation index in the block it belongs
+	m_nEquationIndexInBlock = pEquationExecutionInfo->GetEquationIndexInBlock();
+	
+// 2a. Add all optimization variables indexes that are found in this constraint
+	m_narrOptimizationVariablesIndexes.clear();
+	
+	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
+	node->AddVariableIndexToArray(mapVariableIndexes);
+	
+	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
+	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+		std::cout << iter->first << " ";
+	std::cout << std::endl;
+
+	for(i = 0; i < arrOptimizationVariables.size(); i++)
+	{
+		pOptVariable = arrOptimizationVariables[i];
+	// If I find the index in the optimization variable within the constraint - add it to the array
+		if( mapVariableIndexes.find(pOptVariable->GetIndex()) != mapVariableIndexes.end() )
+			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetIndex());
+	}
+	
+// 2b. Sort the array
+	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
+	
+	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
+	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+	std::cout << std::endl;
+}
+
 bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
@@ -206,13 +312,15 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 /******************************************************************
 	daeOptimizationVariable
 *******************************************************************/
-daeOptimizationVariable::daeOptimizationVariable(const daeVariable* pVariable, real_t LB, real_t UB) : m_pVariable(pVariable)
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, real_t LB, real_t UB, real_t defaultValue)
 {
-	if(!m_pVariable)
+	if(!pVariable)
 		daeDeclareAndThrowException(exInvalidPointer)
 			
-	m_dLB = LB;
-	m_dUB = UB;
+	m_pVariable     = pVariable;
+	m_dLB           = LB;
+	m_dUB           = UB;
+	m_dDefaultValue = defaultValue;
 }
 
 daeOptimizationVariable::~daeOptimizationVariable(void)
@@ -261,6 +369,19 @@ bool daeOptimizationVariable::CheckObject(vector<string>& strarrErrors) const
 	if(type != cnFixed)
 	{
 		strError = "Optimization variable [" + m_pVariable->GetCanonicalName() + "] must be assigned (cannot be a state-variable)";
+		strarrErrors.push_back(strError);
+		bCheck = false;
+	}
+	
+	if(m_dDefaultValue < m_dLB)
+	{
+		strError = "The default value of the optimization variable [" + m_pVariable->GetCanonicalName() + "] is lower than the lower bound";
+		strarrErrors.push_back(strError);
+		bCheck = false;
+	}
+	if(m_dDefaultValue > m_dUB)
+	{
+		strError = "The default value of the optimization variable [" + m_pVariable->GetCanonicalName() + "] is greater than the upper bound";
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}

@@ -52,6 +52,7 @@ public:
 												   const std::vector<size_t>& narrParametersIndexes)= 0;
 	virtual void						SolveInitial(void)											= 0;
 	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion)			= 0;
+	virtual size_t						GetNumberOfVariables(void) const                            = 0;
 	virtual void						SetRelativeTolerance(real_t relTol)							= 0;
 	virtual real_t						GetRelativeTolerance(void) const							= 0;
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const							= 0;
@@ -61,9 +62,8 @@ public:
 	virtual void						RefreshRootFunctions(void)									= 0;
 	virtual void						Reinitialize(bool bCopyDataFromBlock)						= 0;
 	virtual void						Reset(void)													= 0;
-	virtual void						GetSensitivities(void)										= 0;
+	virtual daeMatrix<real_t>&			GetSensitivities(void)										= 0;
 };
-
 
 /*********************************************************************************************
 	daeDAESolver

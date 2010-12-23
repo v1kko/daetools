@@ -19,6 +19,6 @@ if [ ! -d $BUILD ]; then
 fi
 cd $BUILD
 
-$IPOPT/configure --enable-static=yes --enable-shared=no --with-mumps-lib="$MUMPS/lib/libdmumps.a $MUMPS/lib/libmumps_common.a $MUMPS/libseq/libmpiseq.a $MUMPS/lib/libpord.a " --with-mumps-incdir=$MUMPS/include
+$IPOPT/configure --with-pic --enable-static=yes --enable-shared=no --with-mumps-lib="$MUMPS/lib/libdmumps.a $MUMPS/lib/libmumps_common.a $MUMPS/libseq/libmpiseq.a $MUMPS/lib/libpord.a " --with-mumps-incdir=$MUMPS/include
 
 cd $BUILD

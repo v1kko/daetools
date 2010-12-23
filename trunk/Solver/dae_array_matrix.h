@@ -102,6 +102,15 @@ public:
 		data_access = eColumnWise;
 		data        = NULL;
 	}
+
+	daeDenseMatrix(const daeDenseMatrix& matrix)
+	{
+		Nrow        = matrix.Nrow;
+		Ncol        = matrix.Ncol;
+		data_access = matrix.data_access;
+		data        = matrix.data;
+	}
+
 	virtual ~daeDenseMatrix(void)
 	{
 	}

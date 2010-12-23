@@ -30,6 +30,7 @@ public:
 	virtual void						SolveInitial(void);
 	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion);
 	virtual void						SetRelativeTolerance(real_t relTol);
+	virtual size_t						GetNumberOfVariables(void) const;
 	virtual real_t						GetRelativeTolerance(void) const;
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode);
@@ -38,7 +39,11 @@ public:
 	virtual void						RefreshRootFunctions(void);
 	virtual void						Reinitialize(bool bCopyDataFromBlock);
 	virtual void						Reset(void);
-	virtual void						GetSensitivities(void);
+	virtual daeMatrix<real_t>&			GetSensitivities(void);
+	
+//	virtual void						GetSensitivities(size_t nEquationIndexInBlock,
+//														 const std::vector<size_t>& narrOptimizationVariablesIndexes,
+//														 real_t* pSensitivityValues) const;
 
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 

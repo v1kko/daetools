@@ -108,6 +108,11 @@ void daeIDASolver::SetLASolver(daeIDALASolver_t* pLASolver)
 	m_pLASolver = pLASolver;
 }
 
+size_t daeIDASolver::GetNumberOfVariables(void) const
+{
+	return m_nNumberOfEquations;
+}
+
 void daeIDASolver::SetRelativeTolerance(real_t relTol)
 {
 	m_dRelTolerance = relTol;
@@ -337,15 +342,13 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 }
 
 
-void daeIDASolver::GetSensitivities(void)
+daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 {
 	int	retval;
 
-	size_t Ns = m_narrParametersIndexes.size();
-
-	if(!m_bCalculateSensitivities || Ns == 0)
-		return;
-
+	if(!m_bCalculateSensitivities)
+		daeDeclareAndThrowException(exInvalidCall)
+		
 	if(m_bCalculateSensitivities && m_bIsModelDynamic)
 	{
 		retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
@@ -356,6 +359,22 @@ void daeIDASolver::GetSensitivities(void)
 			throw e;
 		}
 	}
+	
+	if(!m_pIDASolverData->ppdSValues)
+		daeDeclareAndThrowException(exInvalidPointer)
+	if(!m_pIDASolverData->m_pvectorSVariables)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	size_t N  = m_pIDASolverData->m_N;
+	size_t Ns = m_pIDASolverData->m_Ns;
+
+	for(int i = 0; i < Ns; i++)
+		m_pIDASolverData->ppdSValues[i] = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
+	
+	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
+
+
+
 	
 	realtype* pdSValues;
 	if(m_bIsModelDynamic)
@@ -373,6 +392,13 @@ void daeIDASolver::GetSensitivities(void)
 			std::cout << toStringFormatted<real_t>(pdSValues[k], 14, 4, true);
 		std::cout << std::endl;
 	}
+	
+	
+	
+	
+	
+	
+	return m_matSValues;
 }
 
 void daeIDASolver::CreateLinearSolver(void)

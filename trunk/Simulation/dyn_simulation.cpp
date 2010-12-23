@@ -250,7 +250,8 @@ void daeSimulation::SetupSolver(void)
 					e << *it << "\n";
 				throw e;
 			}
-		}		
+		}	
+		
 		for(i = 0; i < m_arrConstraints.size(); i++)
 		{
 			pConstraint = m_arrConstraints[i];
@@ -265,6 +266,7 @@ void daeSimulation::SetupSolver(void)
 				throw e;
 			}
 		}
+		
 		if(!m_pObjectiveFunction)
 			daeDeclareAndThrowException(exInvalidPointer)
 		if(!m_pObjectiveFunction->CheckObject(strarrErrors))
@@ -284,7 +286,24 @@ void daeSimulation::SetupSolver(void)
 				
 			narrParametersIndexes.push_back(pOptVariable->GetIndex());
 		}
-
+		std::cout << "Optimization variables indexes: ";
+		for(i = 0; i < narrParametersIndexes.size(); i++)
+			std::cout << narrParametersIndexes[i] << " ";
+		std::cout << std::endl;
+		
+	// Initialize the objective function
+		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables);
+		
+	// Initialize the constraints
+		for(i = 0; i < m_arrConstraints.size(); i++)
+		{
+			pConstraint = m_arrConstraints[i];
+			if(!pConstraint)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			pConstraint->Initialize(m_arrOptimizationVariables);
+		}
+				
 	// Set the constraints
 //		for(i = 0; i < m_arrConstraints.size(); i++)
 //		{
@@ -448,8 +467,6 @@ void daeSimulation::Finalize(void)
 	if(!m_pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
 		
-	m_pDAESolver->GetSensitivities();
-	
 // Notify the receiver that there is no more data, and disconnect it		
 	m_pDataReporter->EndOfData();
 	m_pDataReporter->Disconnect();
@@ -509,9 +526,9 @@ daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t EqualTo, strin
 	return pConstraint.get();
 }
 
-void daeSimulation::SetOptimizationVariable(const daeVariable& variable, real_t LB, real_t UB)
+void daeSimulation::SetOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 {
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, LB, UB));
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
 }
 
@@ -568,6 +585,23 @@ void daeSimulation::CheckSystem(void) const
 		e << string("Number of initial conditions: ")     + toString(mi.m_nNumberOfInitialConditions)     + string("\n");
 		throw e;
 	}
+}
+
+void daeSimulation::GetOptimizationConstraints(std::vector<daeOptimizationConstraint*>& ptrarrConstraints) const
+{
+	for(size_t i = 0; i < m_arrConstraints.size(); i++)
+		ptrarrConstraints.push_back(m_arrConstraints[i].get());
+}
+
+void daeSimulation::GetOptimizationVariables(std::vector<daeOptimizationVariable*>& ptrarrOptVariables) const
+{
+	for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
+		ptrarrOptVariables.push_back(m_arrOptimizationVariables[i].get());
+}
+
+daeObjectiveFunction* daeSimulation::GetObjectiveFunction(void) const
+{
+	return m_pObjectiveFunction.get();
 }
 
 real_t daeSimulation::GetCurrentTime(void) const

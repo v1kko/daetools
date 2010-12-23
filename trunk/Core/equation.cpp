@@ -375,6 +375,16 @@ void daeEquationExecutionInfo::GetVariableIndexes(std::vector<size_t>& narrVaria
 		narrVariableIndexes.push_back(iter->first);
 }
 
+size_t daeEquationExecutionInfo::GetEquationIndexInBlock(void) const
+{
+	return m_nEquationIndexInBlock;	
+}
+
+boost::shared_ptr<adNode> daeEquationExecutionInfo::GetEquationEvaluationNode(void) const
+{
+	return m_EquationEvaluationNode;	
+}
+
 /******************************************************************
 	daeDistributedEquationDomainInfo
 *******************************************************************/
@@ -1580,6 +1590,13 @@ void daeEquation::GetDomainDefinitions(vector<daeDistributedEquationDomainInfo_t
 	arrDistributedEquationDomainInfo.clear();
 	for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
 		arrDistributedEquationDomainInfo.push_back(m_ptrarrDistributedEquationDomainInfos[i]);
+}
+
+void daeEquation::GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const
+{
+	ptrarrEquationExecutionInfos.clear();
+	for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+		ptrarrEquationExecutionInfos.push_back(m_ptrarrEquationExecutionInfos[i]);
 }
 
 void daeEquation::SetModelAndCanonicalName(daeObject* pObject)

@@ -4,15 +4,19 @@ QT -= core \
 TARGET = pySolver
 TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
-    $${PYTHON_INCLUDE_DIR} \
-    $${PYTHON_SITE_PACKAGES_DIR} \
-    $${SUNDIALS_INCLUDE}
+               $${PYTHON_INCLUDE_DIR} \
+               $${PYTHON_SITE_PACKAGES_DIR} \
+               $${SUNDIALS_INCLUDE}
 
-QMAKE_LIBDIR += $${PYTHON_LIB_DIR} $${SUNDIALS_LIBDIR}
+QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
+                $${SUNDIALS_LIBDIR} \
+                $${IPOPT_LIBDIR}
+
 LIBS +=	$${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${DAE_SOLVER_LIB} \
-        $${SUNDIALS_LIBS} 
+        $${SUNDIALS_LIBS} \
+        $${IPOPT_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

@@ -78,7 +78,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         ; 
     
     class_<daepython::daeIPOPTWrapper, boost::noncopyable>("daeIPOPT")
-        .def("Initialize", &daeIPOPT::Initialize)
+        .def("Initialize",	&daeIPOPT::Initialize)
+        .def("Run",			&daeIPOPT::Run)
+        .def("Finalize",	&daeIPOPT::Finalize)
         ;
 
     
