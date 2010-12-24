@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <IpIpoptApplication.hpp>
+using namespace std;
 
 namespace dae
 {
@@ -20,112 +21,85 @@ daeNLP::daeNLP(daeSimulation_t*   pSimulation,
 	m_pDAESolver		 = pDAESolver;
 	m_pDataReporter		 = pDataReporter;
 	m_pLog			     = pLog;
+	
+	m_iRunCounter = 0;
 }
 
 daeNLP::~daeNLP(void)
 {
 }
 
-// returns the size of the problem
 bool daeNLP::get_nlp_info(Index& n, 
-							Index& m, 
-							Index& nnz_jac_g,
-							Index& nnz_h_lag, 
-							IndexStyleEnum& index_style)
+						  Index& m, 
+						  Index& nnz_jac_g,
+						  Index& nnz_h_lag, 
+						  IndexStyleEnum& index_style)
 {
 	size_t i;
-	daeObjectiveFunction* pObjectiveFunction;
 	daeOptimizationConstraint* pConstraint;
 	daeOptimizationVariable* pOptVariable;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
-	std::vector<daeOptimizationVariable*> ptrarrOptVariables;
 	
 	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
 	if(!pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-	pSimulation->GetOptimizationVariables(ptrarrOptVariables);
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
-		
-// Set the indexes of the optimizationvariables 
+// Get the objective function, opt. variables and constraints from the simulation 
+	pSimulation->GetOptimizationConstraints(m_ptrarrConstraints);
+	pSimulation->GetOptimizationVariables(m_ptrarrOptVariables);
+	m_pObjectiveFunction = pSimulation->GetObjectiveFunction();
+
+	if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
+		return false;
+				
+// Generate the array of opt. variables indexes
 	m_narrOptimizationVariableIndexes.clear();
-	for(i = 0; i < ptrarrOptVariables.size(); i++)
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
-		pOptVariable = ptrarrOptVariables[i];
-		if(!pOptVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
+		pOptVariable = m_ptrarrOptVariables[i];
 			
 		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetIndex());
 	}	
-	
+			
 // Set the number of opt. variables and constraints
 	n = m_narrOptimizationVariableIndexes.size();
-	m = ptrarrConstraints.size();
+	m = m_ptrarrConstraints.size();
 	index_style = TNLP::C_STYLE;
 	
 // Set the jacobian number of non-zeroes
 	nnz_jac_g = 0;
 	nnz_h_lag = 0;
-	for(i = 0; i < ptrarrConstraints.size(); i++)
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
-		pConstraint = ptrarrConstraints[i];
-		if(!pConstraint)
-			daeDeclareAndThrowException(exInvalidPointer)
+		pConstraint = m_ptrarrConstraints[i];
 	
 		nnz_jac_g += pConstraint->m_narrOptimizationVariablesIndexes.size();
 	}
 	
-//	Index idx=0;
-//	for (Index row = 0; row < 4; row++)
-//	{
-//		for (Index col = 0; col <= row; col++)
-//		{
-//			iRow[idx] = row;
-//			jCol[idx] = col;
-//			idx++;
-//		}
-//	}
-	
 	return true;
 }
 
-// returns the variable bounds
 bool daeNLP::get_bounds_info(Index n, 
-							   Number* x_l, Number* x_u,
-							   Index m, 
-							   Number* g_l, Number* g_u)
+							 Number* x_l, 
+							 Number* x_u,
+							 Index m, 
+							 Number* g_l, 
+							 Number* g_u)
 {
 	size_t i, j;
 	daeOptimizationConstraint* pConstraint;
 	daeOptimizationVariable* pOptVariable;
-	daeObjectiveFunction* pObjectiveFunction;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
-	std::vector<daeOptimizationVariable*> ptrarrOptVariables;
 
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-	pSimulation->GetOptimizationVariables(ptrarrOptVariables);
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
-
-	for(i = 0; i < ptrarrOptVariables.size(); i++)
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
-		pOptVariable = ptrarrOptVariables[i];
-		if(!pOptVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
+		pOptVariable = m_ptrarrOptVariables[i];
 			
 		x_l[i] = pOptVariable->m_dLB;
 		x_u[i] = pOptVariable->m_dUB;
 	}	
 
-	for(i = 0; i < ptrarrConstraints.size(); i++)
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
-		pConstraint = ptrarrConstraints[i];
-		if(!pConstraint)
-			daeDeclareAndThrowException(exInvalidPointer)
+		pConstraint = m_ptrarrConstraints[i];
 	
 		if(pConstraint->m_eConstraintType == eInequalityConstraint)
 		{
@@ -146,67 +120,47 @@ bool daeNLP::get_bounds_info(Index n,
 	return true;
 }
 
-// returns the initial point for the problem
 bool daeNLP::get_starting_point(Index n, 
-								  bool init_x,
-								  Number* x,
-								  bool init_z, 
-								  Number* z_L, 
-								  Number* z_U,
-								  Index m, 
-								  bool init_lambda,
-								  Number* lambda)
+								bool init_x,
+								Number* x,
+								bool init_z, 
+								Number* z_L, 
+								Number* z_U,
+								Index m, 
+								bool init_lambda,
+								Number* lambda)
 {
-//	// Here, we assume we only have starting values for x, if you code
-//	// your own NLP, you can provide starting values for the dual variables
-//	// if you wish
-//	assert(init_x == true);
-//	assert(init_z == false);
-//	assert(init_lambda == false);
-	
 	size_t i;
 	daeOptimizationVariable* pOptVariable;
-	daeObjectiveFunction* pObjectiveFunction;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
-	std::vector<daeOptimizationVariable*> ptrarrOptVariables;
 
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-	pSimulation->GetOptimizationVariables(ptrarrOptVariables);
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
-
-	for(i = 0; i < ptrarrOptVariables.size(); i++)
+// I am interested ONLY in initial values for opt. variables (x) 
+	if(init_x)
 	{
-		pOptVariable = ptrarrOptVariables[i];
-		if(!pOptVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
-			
-		x[i] = pOptVariable->m_dDefaultValue;
-	}	
-	
-	return true;
+		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+		{
+			pOptVariable = m_ptrarrOptVariables[i];
+				
+			x[i] = pOptVariable->m_dDefaultValue;
+		}	
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
-// returns the value of the objective function
 bool daeNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
 {
-	daeObjectiveFunction* pObjectiveFunction;
-	
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
-	
 	try
 	{
-		if(!new_x)
+		if(new_x)
+		{
 			CopyOptimizationVariablesToSimulationAndRun(x);
+			m_iRunCounter++;
+		}
 		
-		obj_value = pObjectiveFunction->m_pObjectiveVariable->GetValue();
+		obj_value = m_pObjectiveFunction->m_pObjectiveVariable->GetValue();
 	}
 	catch(std::exception& e)
 	{
@@ -217,41 +171,42 @@ bool daeNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
 	return true;
 }
 
-// return the gradient of the objective function grad_{x} f(x)
 bool daeNLP::eval_grad_f(Index n, 
-						   const Number* x, 
-						   bool new_x, 
-						   Number* grad_f)
+						 const Number* x, 
+						 bool new_x, 
+						 Number* grad_f)
 {
 	size_t j;
-	daeObjectiveFunction* pObjectiveFunction;
-	
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
 
 	try
 	{
-		if(!new_x)
+		if(new_x)
+		{
 			CopyOptimizationVariablesToSimulationAndRun(x);
+			m_iRunCounter++;
+		}
 
 		daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
-		if(n != matSens.GetNcols())
+		if(n != matSens.GetNrows())
 			daeDeclareAndThrowException(exInvalidCall)
 		
 		// Set all values to 0
 		::memset(grad_f, 0, n * sizeof(Number));
 		
 		// Iterate and set only the values for the opt. variable indexes in the objective function
-		for(j = 0; j < pObjectiveFunction->m_narrOptimizationVariablesIndexes.size(); j++)
-			grad_f[j] = matSens.GetItem(pObjectiveFunction->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
-								        pObjectiveFunction->m_nEquationIndexInBlock);              // Equation index
-		
-//		m_pDAESolver->GetSensitivities(pObjectiveFunction->m_nEquationIndexInBlock, // Indef of the equation in the block 
-//									   m_narrOptimizationVariableIndexes,           // Variable indexes to get the sensitivities for 
-//									   grad_f);                                     // Pointer on the first value 
+		for(j = 0; j < m_pObjectiveFunction->m_narrOptimizationVariablesIndexes.size(); j++)
+		{
+			grad_f[j] = matSens.GetItem(m_pObjectiveFunction->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
+								        m_pObjectiveFunction->m_nEquationIndexInBlock);              // Equation index
+		}
+		/*
+		cout << endl;
+		cout << "Gradient Fobj: ";
+		for(j = 0; j < n; j++)
+			cout << toStringFormatted<real_t>(grad_f[j], 14, 4, true) << " ";
+		cout << endl;
+		cout.flush();
+		*/
 	}
 	catch(std::exception& e)
 	{
@@ -262,36 +217,29 @@ bool daeNLP::eval_grad_f(Index n,
 	return true;
 }
 
-// return the value of the constraints: g(x)
 bool daeNLP::eval_g(Index n, 
-					  const Number* x, 
-					  bool new_x, 
-					  Index m, 
-					  Number* g)
+					const Number* x, 
+					bool new_x, 
+					Index m, 
+					Number* g)
 {
 	size_t i;
 	daeOptimizationConstraint* pConstraint;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
 
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-
-	if(m != ptrarrConstraints.size())
+	if(m != m_ptrarrConstraints.size())
 		daeDeclareAndThrowException(exInvalidCall)
 
 	try
 	{
-		if(!new_x)
-			CopyOptimizationVariablesToSimulationAndRun(x);
-
-		for(i = 0; i < ptrarrConstraints.size(); i++)
+		if(new_x)
 		{
-			pConstraint = ptrarrConstraints[i];
-			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer)
+			CopyOptimizationVariablesToSimulationAndRun(x);
+			m_iRunCounter++;
+		}
+
+		for(i = 0; i < m_ptrarrConstraints.size(); i++)
+		{
+			pConstraint = m_ptrarrConstraints[i];
 				
 			g[i] = pConstraint->m_pConstraintVariable->GetValue();
 		}
@@ -305,29 +253,17 @@ bool daeNLP::eval_g(Index n,
 	return true;
 }
 
-// return the structure or values of the jacobian
 bool daeNLP::eval_jac_g(Index n, 
-						  const Number* x, 
-						  bool new_x,
-						  Index m, 
-						  Index nele_jac, 
-						  Index* iRow, 
-						  Index *jCol,
-						  Number* values)
+						const Number* x, 
+						bool new_x,
+						Index m, 
+						Index nele_jac, 
+						Index* iRow, 
+						Index *jCol,
+						Number* values)
 {
 	size_t i, j, counter;
-	daeObjectiveFunction* pObjectiveFunction;
 	daeOptimizationConstraint* pConstraint;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
-	std::vector<daeOptimizationVariable*> ptrarrOptVariables;
-
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-	pSimulation->GetOptimizationVariables(ptrarrOptVariables);
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
 
 	try
 	{
@@ -335,11 +271,9 @@ bool daeNLP::eval_jac_g(Index n,
 		{
 		// Return the structure only
 			counter = 0;
-			for(i = 0; i < ptrarrConstraints.size(); i++)
+			for(i = 0; i < m_ptrarrConstraints.size(); i++)
 			{
-				pConstraint = ptrarrConstraints[i];
-				if(!pConstraint)
-					daeDeclareAndThrowException(exInvalidPointer)
+				pConstraint = m_ptrarrConstraints[i];
 					
 			// Add indexes for the current constraint
 			// Achtung: m_narrOptimizationVariablesIndexes must previously be sorted (in function Initialize)
@@ -357,20 +291,23 @@ bool daeNLP::eval_jac_g(Index n,
 		else
 		{
 		// Return the values
-			if(!new_x)
+			if(new_x)
+			{
 				CopyOptimizationVariablesToSimulationAndRun(x);
+				m_iRunCounter++;
+			}
 	
 			daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
-			if(n != matSens.GetNcols())
+			if(n != matSens.GetNrows())
 				daeDeclareAndThrowException(exInvalidCall)
 
 			// Set all values to 0
 			::memset(values, 0, nele_jac * sizeof(Number));
 
 			counter = 0;
-			for(i = 0; i < ptrarrConstraints.size(); i++)
+			for(i = 0; i < m_ptrarrConstraints.size(); i++)
 			{
-				pConstraint = ptrarrConstraints[i];
+				pConstraint = m_ptrarrConstraints[i];
 				if(!pConstraint)
 					daeDeclareAndThrowException(exInvalidPointer)
 											
@@ -383,6 +320,14 @@ bool daeNLP::eval_jac_g(Index n,
 			}
 			if(nele_jac != counter)
 				daeDeclareAndThrowException(exInvalidCall)
+			/*	
+			cout << endl;
+			cout << "Jacobian constraints: ";
+			for(j = 0; j < nele_jac; j++)
+				cout << toStringFormatted<real_t>(values[j], 14, 4, true) << " ";
+			cout << endl;
+			cout.flush();
+			*/
 		}
 	}
 	catch(std::exception& e)
@@ -394,68 +339,85 @@ bool daeNLP::eval_jac_g(Index n,
 	return true;
 }
 
-//return the structure or values of the hessian
 bool daeNLP::eval_h(Index n, 
-					  const Number* x, 
-					  bool new_x,
-					  Number obj_factor, 
-					  Index m, 
-					  const Number* lambda,
-					  bool new_lambda, 
-					  Index nele_hess, 
-					  Index* iRow,
-					  Index* jCol, 
-					  Number* values)
+					const Number* x, 
+					bool new_x,
+					Number obj_factor, 
+					Index m, 
+					const Number* lambda,
+					bool new_lambda, 
+					Index nele_hess, 
+					Index* iRow,
+					Index* jCol, 
+					Number* values)
 {
-	daeDeclareAndThrowException(exNotImplemented)
+	return false;
+}
 
-	size_t i, j, counter, Ns;
-	daeObjectiveFunction* pObjectiveFunction;
-	daeOptimizationConstraint* pConstraint;
-	std::vector<daeOptimizationConstraint*> ptrarrConstraints;
+bool daeNLP::intermediate_callback( AlgorithmMode mode,
+									Index iter, 
+									Number obj_value,
+									Number inf_pr, 
+									Number inf_du,
+									Number mu, 
+									Number d_norm,
+									Number regularization_size,
+									Number alpha_du, 
+									Number alpha_pr,
+									Index ls_trials,
+									const IpoptData* ip_data,
+									IpoptCalculatedQuantities* ip_cq)
+{
+	string strError;
 
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
+//	cout << "Iteration: " << iter << endl;
 	
-	pSimulation->GetOptimizationConstraints(ptrarrConstraints);
-	pObjectiveFunction = pSimulation->GetObjectiveFunction();
-
-	try
-	{
-	// Return the structure only
-		if(values == NULL) 
-		{
-			for(i = 0; i < ptrarrConstraints.size(); i++)
-			{
-				pConstraint = ptrarrConstraints[i];
-				if(!pConstraint)
-					daeDeclareAndThrowException(exInvalidPointer)
-					
-//				counter = 0;
-//				Ns = pConstraint->m_narrOptimizationVariablesIndexes.size();
-//				for(j = 0; j < Ns; j++)
-//				{
-//					iRow[counter] = 0;
-//					jCol[counter] = 0;
-//					counter++;
-//				}
-			}
-		}
-		else
-		{
-			if(!new_x)
-				CopyOptimizationVariablesToSimulationAndRun(x);
+//	cout << "Mode: " << iter;
+//	if(mode == Solve_Succeeded)
+//		strError = "Solve_Succeeded.";	
+//	else if(mode == Solved_To_Acceptable_Level)
+//		strError = "Solved_To_Acceptable_Level.";	
+//	else if(mode == Infeasible_Problem_Detected)
+//		strError = "Infeasible_Problem_Detected.";	
+//	else if(mode ==  Search_Direction_Becomes_Too_Small)
+//		strError = "Search_Direction_Becomes_Too_Small.";	
+//	else if(mode ==  Diverging_Iterates)
+//		strError = "Diverging_Iterates.";	
+//	else if(mode ==  User_Requested_Stop)
+//		strError = "User_Requested_Stop.";	
+//	else if(mode ==  Feasible_Point_Found)
+//		strError = "Feasible_Point_Found.";	
+//	else if(mode ==  Maximum_Iterations_Exceeded)
+//		strError = "Maximum_Iterations_Exceeded.";	
+//	else if(mode ==  Restoration_Failed)
+//		strError = "Restoration_Failed.";	
+//	else if(mode ==  Error_In_Step_Computation)
+//		strError = "Error_In_Step_Computation.";	
+//	else if(mode ==  Maximum_CpuTime_Exceeded)
+//		strError = "Maximum_CpuTime_Exceeded.";	
+//	else if(mode ==  Not_Enough_Degrees_Of_Freedom)
+//		strError = "Not_Enough_Degrees_Of_Freedom.";	
+//	else if(mode ==  Invalid_Problem_Definition)
+//		strError = "Invalid_Problem_Definition.";	
+//	else if(mode ==  Invalid_Option)
+//		strError = "Invalid_Option.";	
+//	else if(mode ==  Invalid_Number_Detected)
+//		strError = "Invalid_Number_Detected.";	
+//	else if(mode ==  Unrecoverable_Exception)
+//		strError = "Unrecoverable_Exception.";	
+//	else if(mode ==  NonIpopt_Exception_Thrown)
+//		strError = "NonIpopt_Exception_Thrown.";	
+//	else if(mode ==  Insufficient_Memory)
+//		strError = "Insufficient_Memory.";	
+//	else if(mode ==  Internal_Error)
+//		strError = "Internal_Error.";	
+//	else
+//		strError = "Unknown.";	
+		
+//	cout << endl;
 	
-		}
-	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeIPOPT: ") + e.what(), 0);
-		return false;
-	}
-
-
+//	cout << "obj_value: " << obj_value << endl;
+	
 	return true;
 }
 
@@ -471,60 +433,92 @@ void daeNLP::finalize_solution(SolverReturn status,
 								 const IpoptData* ip_data,
 								 IpoptCalculatedQuantities* ip_cq)
 {
-	// here is where we would store the solution to variables, or write to a file, etc
-	// so we could use the solution.
+	size_t i;
+	string strMessage;
+	daeOptimizationVariable* pOptVariable;
+	daeOptimizationConstraint* pConstraint;
+		
+	if(status == SUCCESS)
+		strMessage = "Optimal Solution Found!";	
+	else if(status == MAXITER_EXCEEDED)
+		strMessage = "Optimization failed: Maximum number of iterations exceeded.";
+	else if(status == STOP_AT_TINY_STEP)
+		strMessage = "Optimization failed: Algorithm proceeds with very little progress.";
+	else if(status ==  STOP_AT_ACCEPTABLE_POINT)
+		strMessage = "Optimization failed: Algorithm stopped at a point that was converged, not to “desired” tolerances, but to “acceptable” tolerances (see the acceptable-... options).";
+	else if(status ==  LOCAL_INFEASIBILITY)
+		strMessage = "Optimization failed: Algorithm converged to a point of local infeasibility. Problem may be infeasible.";
+	else if(status ==  USER_REQUESTED_STOP)
+		strMessage = "Optimization failed: The user call-back function intermediate callback (see Section 3.3.4) returned false, i.e., the user code requested a premature termination of the optimization.";
+	else if(status ==  DIVERGING_ITERATES)
+		strMessage = "Optimization failed: It seems that the iterates diverge.";
+	else if(status ==  RESTORATION_FAILURE)
+		strMessage = "Optimization failed: Restoration phase failed, algorithm doesn’t know how to proceed.";
+	else if(status ==  ERROR_IN_STEP_COMPUTATION)
+		strMessage = "Optimization failed: An unrecoverable error occurred while Ipopt tried to compute the search direction.";
+	else if(status ==  INVALID_NUMBER_DETECTED)
+		strMessage = "Optimization failed: Algorithm received an invalid number (such as NaN or Inf) from the NLP; see also option check derivatives for naninf.";
+	else if(status ==  INTERNAL_ERROR)
+		strMessage = "Optimization failed: An unknown internal error occurred. Please contact the Ipopt authors through the mailing list.";
 	
-	// For this example, we write the solution to the console
-	printf("\n\nSolution of the primal variables, x\n");
-	for (Index i=0; i<n; i++) {
-		printf("x[%d] = %e\n", i, x[i]);
-	}
+	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string(" "), 0);
 	
-	printf("\n\nSolution of the bound multipliers, z_L and z_U\n");
-	for (Index i=0; i<n; i++) {
-		printf("z_L[%d] = %e\n", i, z_L[i]);
-	}
-	for (Index i=0; i<n; i++) {
-		printf("z_U[%d] = %e\n", i, z_U[i]);
-	}
-	
-	printf("\n\nObjective value\n");
-	printf("f(x*) = %e\n", obj_value);
-	
-	printf("\nFinal value of the constraints:\n");
-	for (Index i=0; i<m ;i++) {
-		printf("g(%d) = %e\n", i, g[i]);
-	}
+	strMessage = "Objective function value = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
+	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string(" "), 0);
+
+	m_pLog->Message(string("Optimization variables values:"), 0);
+	for(i = 0; i < n; i++)
+	{
+		pOptVariable = m_ptrarrOptVariables[i];
+		if(!pOptVariable || !pOptVariable->m_pVariable)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		strMessage = pOptVariable->m_pVariable->GetName() + " = " + toStringFormatted<real_t>(x[i], -1, 10, true);
+		m_pLog->Message(strMessage, 0);
+	}	
+	m_pLog->Message(string(" "), 0);
+
+	m_pLog->Message(string("Final values of the constraints:"), 0);
+	for(i = 0; i < m; i++)
+	{
+		pConstraint = m_ptrarrConstraints[i];
+		if(!pConstraint)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		strMessage = pConstraint->m_pConstraintVariable->GetName() + " = " + toStringFormatted<real_t>(g[i], -1, 10, true);
+		m_pLog->Message(strMessage, 0);
+	}	
+	m_pLog->Message(string(" "), 0);
 }
 
 void daeNLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 {
 	size_t i, j;
 	daeOptimizationVariable* pOptVariable;
-	std::vector<daeOptimizationVariable*> ptrarrOptVariables;
 
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
+// 1. Set again the initial conditions, values, tolerances, active states etc
+	m_pSimulation->SetUpVariables();
 	
-	pSimulation->GetOptimizationVariables(ptrarrOptVariables);
-
-// 1. First reset the simulation and DAE solver in it
-	pSimulation->Reset();
-
 // 2. Re-assign the optimization variables
-	for(i = 0; i < ptrarrOptVariables.size(); i++)
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
-		pOptVariable = ptrarrOptVariables[i];
+		pOptVariable = m_ptrarrOptVariables[i];
 		if(!pOptVariable || !pOptVariable->m_pVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
 		pOptVariable->m_pVariable->ReAssignValue(x[i]);
 	}	
-	  
-// I should check which function to call here (or to call both) !!!???
-	pSimulation->SolveInitial();
-	pSimulation->Run();
+	
+// 3. Reset simulation and DAE solver
+	m_pSimulation->Reset();
+
+// 4. Calculate initial conditions
+	m_pSimulation->SolveInitial();
+
+// 5. Run the simulation
+	m_pSimulation->Run();
 }
 
 
@@ -585,7 +579,7 @@ void daeIPOPT::Run(void)
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 	
 	app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-	app->Options()->SetNumericValue("tol", 1e-7);
+	app->Options()->SetNumericValue("tol", 1e-5);
 	app->Options()->SetStringValue("linear_solver", "mumps");
 	app->Options()->SetStringValue("mu_strategy", "adaptive");
 	app->Options()->SetStringValue("output_file", "ipopt.out");
@@ -598,19 +592,15 @@ void daeIPOPT::Run(void)
 	status = app->Initialize();
 	if(status != Solve_Succeeded) 
 	{
-		m_pLog->Message("*** Error during initialization!", 0);
+		m_pLog->Message("Error during initialization!", 0);
 		daeDeclareAndThrowException(exInvalidCall)
 	}
 	
 // Ask Ipopt to solve the problem
 	status = app->OptimizeTNLP(m_NLP);
-	if(status == Solve_Succeeded) 
+	if(status != Solve_Succeeded) 
 	{
-		m_pLog->Message("*** The problem solved!", 0);
-	}
-	else
-	{
-		m_pLog->Message("*** The problem FAILED!", 0);
+		m_pLog->Message("The problem FAILED!", 0);
 	}
 }
 

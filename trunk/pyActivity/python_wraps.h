@@ -24,6 +24,122 @@
 
 namespace daepython
 {
+class daeSimulationWrapper : public daeSimulation_t,
+							 public boost::python::wrapper<daeSimulation_t>
+{
+public:
+	daeModel_t* GetModel(void) const
+	{
+		return this->get_override("GetModel")();
+	}
+
+	void SetModel(daeModel_t* pModel)
+	{
+		this->get_override("SetModel")(pModel);
+	}
+
+	daeDataReporter_t* GetDataReporter(void) const
+	{
+		return this->get_override("GetDataReporter")();
+	}
+
+	daeLog_t* GetLog(void) const
+	{
+		return this->get_override("GetLog")();
+	}
+
+	void Run(void)
+	{
+		this->get_override("Run")();
+	}
+
+	void ReportData(void) const
+	{
+		this->get_override("ReportData")();
+	}
+
+	void SetTimeHorizon(real_t dTimeHorizon)
+	{
+		this->get_override("SetTimeHorizon")(dTimeHorizon);
+	}
+	
+	real_t GetTimeHorizon(void) const
+	{
+		return this->get_override("GetTimeHorizon")();
+	}
+	
+	void SetReportingInterval(real_t dReportingInterval)
+	{
+		this->get_override("SetReportingInterval")(dReportingInterval);
+	}
+	
+	real_t GetReportingInterval(void) const
+	{
+		return this->get_override("GetReportingInterval")();
+	}
+	
+	void Pause(void)
+	{
+		this->get_override("Pause")();
+	}
+
+	void Resume(void)
+	{
+		this->get_override("Resume")();
+	}
+
+	void Stop(void)
+	{
+		this->get_override("Stop")();
+	}
+
+	void Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+	{
+		this->get_override("Initialize")(pDAESolver, pDataReporter, pLog);
+	}
+	
+	void Reinitialize(void)
+	{
+		this->get_override("Reinitialize")();
+	}
+
+	void SolveInitial(void)
+	{
+		this->get_override("SolveInitial")();
+	}
+	
+	daeDAESolver_t* GetDAESolver(void) const
+	{
+		return this->get_override("GetDAESolver")();
+	}
+	
+	void SetUpParametersAndDomains(void)
+	{
+		this->get_override("SetUpParametersAndDomains")();
+	}
+
+	void SetUpVariables(void)
+	{
+		this->get_override("SetUpVariables")();
+	}
+	
+	real_t Integrate(daeeStopCriterion eStopCriterion)
+	{
+		return this->get_override("Integrate")(eStopCriterion);
+	}
+	
+	real_t IntegrateForTimeInterval(real_t time_interval)
+	{
+		return this->get_override("IntegrateForTimeInterval")(time_interval);
+	}
+	
+	real_t IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion)
+	{
+		return this->get_override("IntegrateUntilTime")(time, eStopCriterion);
+	}
+	
+};
+	
 class daeDefaultSimulationWrapper : public daeSimulation,
 	                                public boost::python::wrapper<daeSimulation>
 {

@@ -30,7 +30,7 @@ void daeObjectiveFunction::SetResidual(adouble res)
 {
 	if(!m_pObjectiveFunction)
 		daeDeclareAndThrowException(exInvalidPointer)
-	m_pObjectiveFunction->SetResidual( (*m_pObjectiveVariable )() - res);
+	m_pObjectiveFunction->SetResidual( res - (*m_pObjectiveVariable )() );
 }
 
 adouble daeObjectiveFunction::GetResidual(void) const
@@ -90,10 +90,11 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
 	node->AddVariableIndexToArray(mapVariableIndexes);
 	
-	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
-	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-		std::cout << iter->first << " ";
-	std::cout << std::endl;
+//	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
+//	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+//		std::cout << iter->first << " ";
+//	std::cout << std::endl;
+//	std::cout.flush();	
 
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
@@ -106,10 +107,11 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
 
-	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
-	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-	std::cout << std::endl;
+//	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
+//	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+//		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+//	std::cout << std::endl;
+//	std::cout.flush();	
 }
 
 bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
@@ -195,7 +197,7 @@ void daeOptimizationConstraint::SetResidual(adouble res)
 {
 	if(!m_pConstraintFunction)
 		daeDeclareAndThrowException(exInvalidPointer)
-	m_pConstraintFunction->SetResidual( (*m_pConstraintVariable )() - res);
+	m_pConstraintFunction->SetResidual( res - (*m_pConstraintVariable )() );
 }
 
 adouble daeOptimizationConstraint::GetResidual(void) const
@@ -254,10 +256,11 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
 	node->AddVariableIndexToArray(mapVariableIndexes);
 	
-	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
-	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-		std::cout << iter->first << " ";
-	std::cout << std::endl;
+//	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
+//	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+//		std::cout << iter->first << " ";
+//	std::cout << std::endl;
+//	std::cout.flush();
 
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
@@ -270,10 +273,11 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
 	
-	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
-	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-	std::cout << std::endl;
+//	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
+//	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+//		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+//	std::cout << std::endl;
+//	std::cout.flush();
 }
 
 bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const

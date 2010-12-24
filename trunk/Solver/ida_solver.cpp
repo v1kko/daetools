@@ -373,9 +373,7 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 	
 	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
 
-
-
-	
+/*	
 	realtype* pdSValues;
 	if(m_bIsModelDynamic)
 		std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
@@ -392,12 +390,7 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 			std::cout << toStringFormatted<real_t>(pdSValues[k], 14, 4, true);
 		std::cout << std::endl;
 	}
-	
-	
-	
-	
-	
-	
+*/	
 	return m_matSValues;
 }
 
@@ -549,10 +542,29 @@ void daeIDASolver::Reset(void)
 
 void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 {
+	int retval;
 	string strMessage = "Reinitializing at time: " + toString<real_t>(m_dCurrentTime);
 	m_pLog->Message(strMessage, 0);
 
 	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
+	
+// Calculate initial conditions again
+// Here we should not use eSteadyState but ONLY eAlgebraicValuesProvided since we already have results
+// Check this !!!!
+	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
+		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
+	else if(m_eInitialConditionMode == eSteadyState)
+		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+	
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to re-initialize the system at TIME = " << m_dCurrentTime << "; " 
+		  << CreateIDAErrorMessage(retval);
+		throw e;
+	}
 }
 
 void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
@@ -570,6 +582,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	
 // Set the current time
 	m_dCurrentTime = t0;
+	m_pBlock->SetTime(t0);
 	
 // Copy data from the block if requested
 	if(bCopyDataFromBlock)
@@ -600,26 +613,6 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	{
 		daeDeclareException(exMiscellanous);
 		e << "Unable to re-init IDA solver at TIME = " << m_dCurrentTime << "; " 
-		  << CreateIDAErrorMessage(retval);
-		throw e;
-	}
-	
-	m_pBlock->SetTime(t0);
-	
-// Calculate initial conditions again
-// Here we should not use eSteadyState but ONLY eAlgebraicValuesProvided since we already have results
-// Check this !!!!
-	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
-		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eSteadyState)
-		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else
-		daeDeclareAndThrowException(exNotImplemented);
-	
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to re-initialize the system at TIME = " << m_dCurrentTime << "; " 
 		  << CreateIDAErrorMessage(retval);
 		throw e;
 	}

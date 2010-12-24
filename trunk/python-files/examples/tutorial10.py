@@ -118,17 +118,17 @@ class simTutorial(daeSimulation):
                 self.m.T.SetInitialCondition(x, y, 300)
         
         # Load initialization file previously saved after the successful initialization phase (see below)
-        self.LoadInitializationValues("tutorial10.init")
+        #self.LoadInitializationValues("tutorial10.init")
 
 # Use daeSimulator class
 def guiRun():
     from PyQt4 import QtCore, QtGui
     app = QtGui.QApplication(sys.argv)
-    simulation = simTutorial()
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon       = 1000
-    simulator  = daeSimulator(app, simulation)
+    sim = simTutorial()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 1000
+    simulator  = daeSimulator(app, simulation=sim)
     simulator.show()
     app.exec_()
 

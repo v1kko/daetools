@@ -102,7 +102,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("GetFloat",	   &daepython::GetFloat)
 		.def("GetInteger",	   &daepython::GetInteger)
 		.def("GetString",	   &daepython::GetString)
-		
+
 		.def("Reload",         &daeConfig::Reload)
 	;
 
@@ -603,6 +603,14 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("SetActiveState",				&daepython::daeSTNWrapper::SetActState)
         ;
+
+	class_<daeObjectiveFunction, bases<daeObject>, boost::noncopyable>("daeObjectiveFunction", no_init)
+		.add_property("Residual",	&daeObjectiveFunction::GetResidual,  &daeObjectiveFunction::SetResidual)
+		;
+
+	class_<daeOptimizationConstraint, bases<daeObject>, boost::noncopyable>("daeOptimizationConstraint", no_init)
+		.add_property("Residual",	&daeOptimizationConstraint::GetResidual,  &daeOptimizationConstraint::SetResidual)
+		;
 
 	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")
 		;

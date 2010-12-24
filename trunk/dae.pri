@@ -120,36 +120,26 @@ unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 #####################################################################################
 #                                   IPOPT
 #####################################################################################
-#----Compiling MUMPS on GNU/Linux
-# 0) Unpack MUMPS to daetools/trunk/mumps
-# 1) cd mumps
-# 2) cp Make.inc/Makefile.gfortran.SEQ Makefile.inc
-# 3) make -jN
-# 4) cd examples
-# 5) ./c_example
-#
-#----Compiling IPOPT on GNU/Linux
+#    Compiling IPOPT on GNU/Linux
 # 0) Unpack IPOPT to daetools/trunk/ipopt
-# 1) cd ipopt
-# 2) configure_ipopt.sh "path to daetools/trunk"
-# 3) cd build
-# 4) make -jN
-# 5) make test
-# 6) make install
+# 1) cd ipopt/ThirdParty/Mumps
+#    sh get.Mumps
+# 2) cd ipopt/ThirdParty/Metis
+#    sh get.Metis
+# 3) cd ipopt
+#    mkdir build
+# 4) cd build
+# 5) ../configure
+# 6) make -jN
+# 7) make test
+# 8) make install
 #####################################################################################
-IPOPT_ROOT  = /home/ciroki/Data/daetools/trunk
-IPOPT       = $${IPOPT_ROOT}/ipopt
-MUMPS       = $${IPOPT_ROOT}/mumps
-IPOPT_BUILD = $${IPOPT}/build
+unix::IPOPT = ../ipopt/build
 
-unix::IPOPT_INCLUDE = $${IPOPT_BUILD}/include/coin
-unix::IPOPT_LIBDIR  = $${IPOPT_BUILD}/lib
-unix::IPOPT_LIBS    = -ldl -lblas -llapack \
-		   	          $${IPOPT_BUILD}/lib/coin/libipopt.a \
-			          $${MUMPS}/lib/libdmumps.a \
-			          $${MUMPS}/lib/libmumps_common.a \ 
-			          $${MUMPS}/libseq/libmpiseq.a \
-			          $${MUMPS}/lib/libpord.a
+unix::IPOPT_INCLUDE = $${IPOPT}/include/coin
+unix::IPOPT_LIBDIR  = $${IPOPT}/lib/coin \
+                      $${IPOPT}/lib/coin/ThirdParty
+unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
 
 
 #####################################################################################

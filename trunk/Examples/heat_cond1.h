@@ -225,13 +225,13 @@ public:
 		m_pObjectiveFunction->SetResidual( m.y1() + m.y2() );
 		
 	// Set the constraints (inequality, equality)
-		daeOptimizationConstraint* c1 = CreateConstraint(-1, 1, "Constraint 1");
+		daeOptimizationConstraint* c1 = CreateInequalityConstraint(-1, 1, "Constraint 1");
 		c1->SetResidual( m.p1() );
 		
-		daeOptimizationConstraint* c2 = CreateConstraint(-2, 2, "Constraint 2");
+		daeOptimizationConstraint* c2 = CreateInequalityConstraint(-2, 2, "Constraint 2");
 		c2->SetResidual( m.p2() );
 		
-		daeOptimizationConstraint* c3 = CreateConstraint(-1, 1, "Constraint 3");
+		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-1, 1, "Constraint 3");
 		c3->SetResidual( m.p3() );
 		
 	// Set the optimization variables and their lower and upper bounds
@@ -323,7 +323,7 @@ class modHS71 : public daeModel
 {
 	daeDeclareDynamicClass(modRoberts)
 public:
-	daeVariable	x1, x2, x3, x4, dummy;
+	daeVariable	x1, x2, x3, x4, dummy, time;
 
 public:
 	modHS71(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
@@ -331,7 +331,8 @@ public:
 		x2("x2", typex,     this, ""),
 		x3("x3", typex,     this, ""),
 		x4("x4", typex,     this, ""),
-		dummy("dummy", typex,     this, "")
+		dummy("dummy", typex,     this, ""),
+		time("&tau;", typex,     this, "")
 	{
 	}
 	
@@ -341,6 +342,9 @@ public:
 
         eq = CreateEquation("Equation1", "");
         eq->SetResidual( dummy() - 1 );
+
+        eq = CreateEquation("time", "");
+        eq->SetResidual( time.dt() - 1 );
 	}
 };
 
@@ -366,6 +370,7 @@ public:
 		m.x2.AssignValue(5);
 		m.x3.AssignValue(5);
 		m.x4.AssignValue(1);
+		m.time.SetInitialCondition(0);
 	}
 	
 	void SetUpOptimization(void)
@@ -374,10 +379,10 @@ public:
 		m_pObjectiveFunction->SetResidual( m.x1() * m.x4() * (m.x1() + m.x2() + m.x3()) + m.x3() );
 		
 	// Set the constraints (inequality, equality)
-		daeOptimizationConstraint* c1 = CreateConstraint(25, 2E19, "Constraint 1");
+		daeOptimizationConstraint* c1 = CreateInequalityConstraint(25, 2E19, "Constraint 1");
 		c1->SetResidual( m.x1() * m.x2() * m.x3() * m.x4() );
 		
-		daeOptimizationConstraint* c2 = CreateConstraint(40, "Constraint 2");
+		daeOptimizationConstraint* c2 = CreateEqualityConstraint(40, "Constraint 2");
 		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() );
 				
 	// Set the optimization variables and their lower and upper bounds

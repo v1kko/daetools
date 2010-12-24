@@ -41,6 +41,7 @@ DISTRO=$5
 BOOST=boost_$5
 PYTHON_VERSION=$6
 IDAS=../idas-1.0.0/build
+IPOPT=../ipopt/build
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -324,14 +325,21 @@ cp ../daetools.cfg ${BUILD_DIR}/etc/daetools/daetools.cfg
 chmod go-wx ${BUILD_DIR}/etc/daetools/daetools.cfg
 
 if [ -e ${TRILINOS}/libamesos.so ]; then
-    cp ${TRILINOS}/libamesos.so         ${BUILD_DIR}/usr/${LIB}/libamesos.so
-    cp ${TRILINOS}/libepetra.so         ${BUILD_DIR}/usr/${LIB}/libepetra.so
-    cp ${TRILINOS}/libtriutils.so       ${BUILD_DIR}/usr/${LIB}/libtriutils.so
-    cp ${TRILINOS}/libgaleri.so         ${BUILD_DIR}/usr/${LIB}/libgaleri.so
-    cp ${TRILINOS}/libepetraext.so      ${BUILD_DIR}/usr/${LIB}/libepetraext.so
-    cp ${TRILINOS}/libzoltan.so         ${BUILD_DIR}/usr/${LIB}/libzoltan.so
-    cp ${TRILINOS}/libsimpi.so          ${BUILD_DIR}/usr/${LIB}/libsimpi.so
-    cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}/libteuchos.so
+  cp ${TRILINOS}/libamesos.so         ${BUILD_DIR}/usr/${LIB}/libamesos.so
+  cp ${TRILINOS}/libepetra.so         ${BUILD_DIR}/usr/${LIB}/libepetra.so
+  cp ${TRILINOS}/libtriutils.so       ${BUILD_DIR}/usr/${LIB}/libtriutils.so
+  cp ${TRILINOS}/libgaleri.so         ${BUILD_DIR}/usr/${LIB}/libgaleri.so
+  cp ${TRILINOS}/libepetraext.so      ${BUILD_DIR}/usr/${LIB}/libepetraext.so
+  cp ${TRILINOS}/libzoltan.so         ${BUILD_DIR}/usr/${LIB}/libzoltan.so
+  cp ${TRILINOS}/libsimpi.so          ${BUILD_DIR}/usr/${LIB}/libsimpi.so
+  cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}/libteuchos.so
+fi
+
+if [ -e ${IPOPT}/lib/coin/libipopt.so ]; then
+  cp -d ${IPOPT}/lib/coin/libipopt.so*                 ${BUILD_DIR}/usr/${LIB}
+  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinmetis.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinmumps.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinhsl.so*    ${BUILD_DIR}/usr/${LIB}
 fi
 
 mkdir ${BUILD_DIR}/usr/share/applications

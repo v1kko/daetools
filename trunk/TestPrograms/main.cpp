@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 //		std::cout << cfg.Get<real_t>("daetools.activity.reportingInterval") << std::endl;
 		
 		pDAESolver->SetRelativeTolerance(1e-6);
-        pSimulation->SetReportingInterval(10);
-        pSimulation->SetTimeHorizon(400);
+        pSimulation->SetReportingInterval(1);
+        pSimulation->SetTimeHorizon(2);
 		pSimulation->GetModel()->SetReportingOn(true);
          
  		pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());

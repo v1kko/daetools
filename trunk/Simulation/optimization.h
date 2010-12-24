@@ -88,6 +88,20 @@ public:
 						Index* iRow,
 						Index* jCol, 
 						Number* values);
+	
+	virtual bool intermediate_callback( AlgorithmMode mode,
+										Index iter, 
+										Number obj_value,
+										Number inf_pr, 
+										Number inf_du,
+										Number mu, 
+										Number d_norm,
+										Number regularization_size,
+										Number alpha_du, 
+										Number alpha_pr,
+										Index ls_trials,
+										const IpoptData* ip_data,
+										IpoptCalculatedQuantities* ip_cq);
   
 	virtual void finalize_solution(SolverReturn status,
 								   Index n, 
@@ -110,6 +124,12 @@ public:
 	daeLog_t*			m_pLog;
 	daeDataReporter_t*	m_pDataReporter;
 	std::vector<size_t>	m_narrOptimizationVariableIndexes;
+	
+	daeObjectiveFunction*					 m_pObjectiveFunction;
+	std::vector<daeOptimizationConstraint*>  m_ptrarrConstraints;
+	std::vector<daeOptimizationVariable*>    m_ptrarrOptVariables;
+	
+	int m_iRunCounter;
 };
 
 /******************************************************************

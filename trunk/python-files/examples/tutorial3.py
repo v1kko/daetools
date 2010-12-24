@@ -153,11 +153,11 @@ class simTutorial(daeSimulation):
 def guiRun():
     from PyQt4 import QtCore, QtGui
     app = QtGui.QApplication(sys.argv)
-    simulation = simTutorial()
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 5
-    simulation.TimeHorizon       = 200
-    simulator  = daeSimulator(app, simulation)
+    sim = simTutorial()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 5
+    sim.TimeHorizon       = 200
+    simulator  = daeSimulator(app, simulation=sim)
     simulator.show()
     app.exec_()
 

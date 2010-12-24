@@ -37,6 +37,7 @@ public:
 	virtual void				SetUpOptimization(void)											= 0;
 	virtual void				Run(void)														= 0;
 	virtual void				Finalize(void)													= 0;
+	virtual void				ReRun(void)													    = 0;
 	virtual void				Reset(void)														= 0;
 	virtual void				ReportData(void)												= 0;
 	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;

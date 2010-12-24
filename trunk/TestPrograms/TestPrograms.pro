@@ -8,7 +8,7 @@ INCLUDEPATH += $${BOOSTDIR} \
                $${IPOPT_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
-                $${IPOPT_LIBDIR}
+                $${IPOPT_LIBDIR} 
 
 LIBS += $${DAE_SIMULATION_LIB} \
         $${DAE_DATAREPORTERS_LIB} \

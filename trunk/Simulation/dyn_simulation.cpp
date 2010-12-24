@@ -132,31 +132,37 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	m_pLog			= pLog;
 
 	start = time(NULL);
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+	bool bPrintInfo = cfg.Get<bool>("daetools.activity.printInfo", true);
+	if(bPrintInfo)
+	{
+		m_pLog->Message(string("***********************************************************************"), 0);
+		m_pLog->Message(string("                          @@@@@                                        "), 0);
+		m_pLog->Message(string("       @                    @                                          "), 0);
+		m_pLog->Message(string("       @   @@@@@     @@@@@  @                DAE Tools                 "), 0);
+		m_pLog->Message(string("  @@@@@@        @   @     @       Version:   ") + daeVersion(),            0);
+		m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2010      "), 0);
+		m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
+		m_pLog->Message(string("  @@@@@    @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
+		m_pLog->Message(string("                                                                       "), 0);
+		m_pLog->Message(string("***********************************************************************"), 0);
+		m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
+		m_pLog->Message(string(" it under the terms of the GNU General Public License as published     "), 0);
+		m_pLog->Message(string(" by the Free Software Foundation; either version 3 of the License,     "), 0);
+		m_pLog->Message(string(" or (at your option) any later version.                                "), 0);
+		m_pLog->Message(string(" This program is distributed in the hope that it will be useful,       "), 0);
+		m_pLog->Message(string(" but WITHOUT ANY WARRANTY; without even the implied warranty of        "), 0);
+		m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          "), 0);
+		m_pLog->Message(string(" GNU General Public License for more details.                          "), 0);
+		m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
+		m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
+		m_pLog->Message(string("***********************************************************************"), 0);
+		m_pLog->Message(string("  "), 0);
+	}
 
-	m_pLog->Message(string("***********************************************************************"), 0);
-	m_pLog->Message(string("                          @@@@@                                        "), 0);
-	m_pLog->Message(string("       @                    @                                          "), 0);
-	m_pLog->Message(string("       @   @@@@@     @@@@@  @                DAE Tools                 "), 0);
-	m_pLog->Message(string("  @@@@@@        @   @     @       Version:   ") + daeVersion(),            0);
-	m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2010      "), 0);
-	m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
-	m_pLog->Message(string("  @@@@@    @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
-	m_pLog->Message(string("                                                                       "), 0);
-	m_pLog->Message(string("***********************************************************************"), 0);
-	m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
-	m_pLog->Message(string(" it under the terms of the GNU General Public License as published     "), 0);
-	m_pLog->Message(string(" by the Free Software Foundation; either version 3 of the License,     "), 0);
-	m_pLog->Message(string(" or (at your option) any later version.                                "), 0);
-	m_pLog->Message(string(" This program is distributed in the hope that it will be useful,       "), 0);
-	m_pLog->Message(string(" but WITHOUT ANY WARRANTY; without even the implied warranty of        "), 0);
-	m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          "), 0);
-	m_pLog->Message(string(" GNU General Public License for more details.                          "), 0);
-	m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
-	m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
-	m_pLog->Message(string("***********************************************************************"), 0);
-	m_pLog->Message(string("  "), 0);
 	m_pLog->Message(string("Creating the system... "), 0);
-
+	
 // Create params, domains, vars, ports, child models
 	m_pModel->InitializeStage1();
 
@@ -236,7 +242,7 @@ void daeSimulation::SetupSolver(void)
 	
 	if(m_bSetupOptimization)
 	{
-	// First check ObjFunction, Constraints and optimization variables
+	// 1. First check ObjFunction, Constraints and optimization variables
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			pOptVariable = m_arrOptimizationVariables[i];
@@ -277,7 +283,7 @@ void daeSimulation::SetupSolver(void)
 			throw e;
 		}
 		
-	// Fill the parameters indexes (optimization variables)
+	// 2. Fill the parameters indexes (optimization variables)
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			pOptVariable = m_arrOptimizationVariables[i];
@@ -286,55 +292,24 @@ void daeSimulation::SetupSolver(void)
 				
 			narrParametersIndexes.push_back(pOptVariable->GetIndex());
 		}
-		std::cout << "Optimization variables indexes: ";
-		for(i = 0; i < narrParametersIndexes.size(); i++)
-			std::cout << narrParametersIndexes[i] << " ";
-		std::cout << std::endl;
+		//std::cout << "Optimization variables indexes: ";
+		//for(i = 0; i < narrParametersIndexes.size(); i++)
+		//	std::cout << narrParametersIndexes[i] << " ";
+		//std::cout << std::endl;
 		
-	// Initialize the objective function
+	// 3. Initialize the objective function
 		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables);
 		
-	// Initialize the constraints
+	// 4. Initialize the constraints
 		for(i = 0; i < m_arrConstraints.size(); i++)
-		{
+		{  
 			pConstraint = m_arrConstraints[i];
 			if(!pConstraint)
 				daeDeclareAndThrowException(exInvalidPointer)
 				
 			pConstraint->Initialize(m_arrOptimizationVariables);
 		}
-				
-	// Set the constraints
-//		for(i = 0; i < m_arrConstraints.size(); i++)
-//		{
-//			pConstraint = m_arrConstraints[i];
-//			if(!pConstraint)
-//				daeDeclareAndThrowException(exInvalidPointer)
-				
-//			pEquation = pConstraint->m_pConstraintFunction;
-//			if(!pEquation)
-//				daeDeclareAndThrowException(exInvalidPointer)
-				
-//			if(pEquation->m_ptrarrEquationExecutionInfos.size() != 1)
-//			{
-//				daeDeclareException(exInvalidCall);
-//				e << "Constraint cannot be a distributed function";
-//				throw e;
-//			}
-			
-//			pEquationExecutionInfo = pEquation->m_ptrarrEquationExecutionInfos[0];
-//			if(!pEquationExecutionInfo)
-//				daeDeclareAndThrowException(exInvalidPointer)
-			
-//			narrVariableIndexes.clear();
-//			pEquationExecutionInfo->GetVariableIndexes(narrVariableIndexes);
-//		}
 	}
-
-//	narrParametersIndexes.push_back(0);
-//	narrParametersIndexes.push_back(1);
-//	narrParametersIndexes.push_back(2);
-//	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), true, narrParametersIndexes);
 
 	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bSetupOptimization, narrParametersIndexes);
 }
@@ -419,8 +394,15 @@ void daeSimulation::Run(void)
 	}
 	m_eActivityAction = eRunActivity;
 
-	for(real_t t = m_dCurrentTime + m_dReportingInterval; t <= m_dTimeHorizon; t += m_dReportingInterval)
+//	for(real_t t = m_dCurrentTime + m_dReportingInterval; t <= m_dTimeHorizon; t += m_dReportingInterval)
+	real_t t;
+	
+	while(m_dCurrentTime < m_dTimeHorizon)
 	{
+		t = m_dCurrentTime + m_dReportingInterval;
+		if(t > m_dTimeHorizon)
+			t = m_dTimeHorizon;
+		
 	// If the flag is set - terminate
 		if(m_eActivityAction == ePauseActivity)
 		{
@@ -446,6 +428,8 @@ void daeSimulation::Run(void)
 			m_dCurrentTime = IntegrateUntilTime(t, eStopAtModelDiscontinuity);
 			ReportData();
 		}
+		
+		m_dCurrentTime = t;
 	}
 
 // Finalize the simulation		
@@ -491,20 +475,18 @@ void daeSimulation::Reset(void)
 	m_Integration        = 0;
 	m_eActivityAction    = eAAUnknown;	
 
-// Set again the initial conditions, values, tolerances, active states etc
-	SetUpVariables();
-		
-// Reset the DAE solver
 	m_pDAESolver->Reset();
-
-// Set the solver's InitialConditionMode
-//	daeeInitialConditionMode eMode = GetInitialConditionMode();
-//	m_pDAESolver->SetInitialConditionMode(eMode);
-//	if(eMode == eSteadyState)
-//		SetInitialConditionsToZero();
 }
 
-daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t LB, real_t UB, string strDescription)
+void daeSimulation::ReRun(void)
+{
+	SetUpVariables();
+	Reset();
+	SolveInitial();
+	Run();
+}
+
+daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(real_t LB, real_t UB, string strDescription)
 {
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
@@ -515,7 +497,7 @@ daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t LB, real_t UB,
 	return pConstraint.get();
 }
 
-daeOptimizationConstraint* daeSimulation::CreateConstraint(real_t EqualTo, string strDescription)
+daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(real_t EqualTo, string strDescription)
 {
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);

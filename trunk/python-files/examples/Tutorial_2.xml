@@ -4,7 +4,7 @@
         <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
 ]> 
 <?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
-<Model ID="20710000" Class="daeModel" Library="DAE.Core" Version="1.0.5">
+<Model ID="34443336" Class="daeModel" Library="DAE.Core" Version="1.1.0">
   <Name>Tutorial_2</Name>
   <Description>This tutorial explains how to define Arrays (discrete distribution domains) and distributed parameters, how to calculate the number of degrees of freedom (NDOF) and how to fix it, and how to set initial guesses of the variables.</Description>
   <MathMLName>
@@ -18,7 +18,7 @@
     </math>
   </MathMLName>
   <Domains>
-    <Object ID="20703904" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34443520" Class="daeDomain" Library="DAE.Core" Version="1.1.0">
       <Name>x</Name>
       <Description>X axis domain</Description>
       <MathMLName>
@@ -30,7 +30,7 @@
       </MathMLName>
       <Type>eDistributed</Type>
     </Object>
-    <Object ID="20710176" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34435696" Class="daeDomain" Library="DAE.Core" Version="1.1.0">
       <Name>y</Name>
       <Description>Y axis domain</Description>
       <MathMLName>
@@ -42,7 +42,7 @@
       </MathMLName>
       <Type>eDistributed</Type>
     </Object>
-    <Object ID="20710496" Class="daeDomain" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34436016" Class="daeDomain" Library="DAE.Core" Version="1.1.0">
       <Name>Nq</Name>
       <Description>Number of heat fluxes</Description>
       <MathMLName>
@@ -56,7 +56,7 @@
     </Object>
   </Domains>
   <Parameters>
-    <Object ID="20711472" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34492704" Class="daeParameter" Library="DAE.Core" Version="1.1.0">
       <Name>a</Name>
       <Description>Coefficient for calculation of cp</Description>
       <MathMLName>
@@ -69,7 +69,7 @@
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="20711856" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34493104" Class="daeParameter" Library="DAE.Core" Version="1.1.0">
       <Name>b</Name>
       <Description>Coefficient for calculation of cp</Description>
       <MathMLName>
@@ -82,7 +82,7 @@
       <Type>eReal</Type>
       <DomainRefs/>
     </Object>
-    <Object ID="20759216" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34494192" Class="daeParameter" Library="DAE.Core" Version="1.1.0">
       <Name>Q</Name>
       <Description>Heat flux array at the edges of the plate (bottom/top), W/m2</Description>
       <MathMLName>
@@ -94,7 +94,7 @@
       </MathMLName>
       <Type>eReal</Type>
       <DomainRefs>
-        <ObjectRef ID="20710496">
+        <ObjectRef ID="34436016">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -105,7 +105,7 @@
         Nq</ObjectRef>
       </DomainRefs>
     </Object>
-    <Object ID="20759456" Class="daeParameter" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34494624" Class="daeParameter" Library="DAE.Core" Version="1.1.0">
       <Name>&lambda;</Name>
       <Description>Thermal conductivity of the plate, W/mK</Description>
       <MathMLName>
@@ -117,7 +117,7 @@
       </MathMLName>
       <Type>eReal</Type>
       <DomainRefs>
-        <ObjectRef ID="20703904">
+        <ObjectRef ID="34443520">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -126,7 +126,7 @@
             </math>
           </ObjectRefMathML>
         x</ObjectRef>
-        <ObjectRef ID="20710176">
+        <ObjectRef ID="34435696">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -139,7 +139,7 @@
     </Object>
   </Parameters>
   <Variables>
-    <Object ID="20710984" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34492152" Class="daeVariable" Library="DAE.Core" Version="1.1.0">
       <Name>c_p</Name>
       <Description>Specific heat capacity of the plate, J/kgK</Description>
       <MathMLName>
@@ -154,7 +154,7 @@
       </MathMLName>
       <VariableType>Conductivity</VariableType>
       <DomainRefs>
-        <ObjectRef ID="20703904">
+        <ObjectRef ID="34443520">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -163,7 +163,7 @@
             </math>
           </ObjectRefMathML>
         x</ObjectRef>
-        <ObjectRef ID="20710176">
+        <ObjectRef ID="34435696">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -174,7 +174,7 @@
         y</ObjectRef>
       </DomainRefs>
     </Object>
-    <Object ID="20759864" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34495032" Class="daeVariable" Library="DAE.Core" Version="1.1.0">
       <Name>&rho;</Name>
       <Description>Density of the plate, kg/m3</Description>
       <MathMLName>
@@ -187,7 +187,7 @@
       <VariableType>Density</VariableType>
       <DomainRefs/>
     </Object>
-    <Object ID="20760328" Class="daeVariable" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34495496" Class="daeVariable" Library="DAE.Core" Version="1.1.0">
       <Name>T</Name>
       <Description>Temperature of the plate, K</Description>
       <MathMLName>
@@ -199,7 +199,7 @@
       </MathMLName>
       <VariableType>Temperature</VariableType>
       <DomainRefs>
-        <ObjectRef ID="20703904">
+        <ObjectRef ID="34443520">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -208,7 +208,7 @@
             </math>
           </ObjectRefMathML>
         x</ObjectRef>
-        <ObjectRef ID="20710176">
+        <ObjectRef ID="34435696">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -222,7 +222,7 @@
   </Variables>
   <Ports/>
   <Equations>
-    <Object ID="20763560" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34499016" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>HeatBalance</Name>
       <Description>Heat balance equation. Valid on the open x and y domains</Description>
       <MathMLName>
@@ -241,7 +241,7 @@
           <Left>
             <Function>eMulti</Function>
             <Left>
-              <Variable ID="20759864">
+              <Variable ID="34495032">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -253,7 +253,7 @@
               <DomainIterators/>
             </Left>
             <Right>
-              <Variable ID="20710984">
+              <Variable ID="34492152">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -268,7 +268,7 @@
               <DomainIterators>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20770776">
+                  <DEDI ID="34496136">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -280,7 +280,7 @@
                 </Object>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20763736">
+                  <DEDI ID="34499256">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -294,7 +294,7 @@
             </Right>
           </Left>
           <Right>
-            <Variable ID="20760328">
+            <Variable ID="34495496">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -307,7 +307,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20770776">
+                <DEDI ID="34496136">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -319,7 +319,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20763736">
+                <DEDI ID="34499256">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -335,7 +335,7 @@
         <Right>
           <Function>eMulti</Function>
           <Left>
-            <Parameter ID="20759456">
+            <Parameter ID="34494624">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -347,7 +347,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20770776">
+                <DEDI ID="34496136">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -359,7 +359,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20763736">
+                <DEDI ID="34499256">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -374,7 +374,7 @@
           <Right>
             <Function>ePlus</Function>
             <Left>
-              <Variable ID="20760328">
+              <Variable ID="34495496">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -383,7 +383,7 @@
                   </math>
                 </ObjectRefMathML>
               T</Variable>
-              <Domain ID="20703904">
+              <Domain ID="34443520">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -396,7 +396,7 @@
               <DomainIterators>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20770776">
+                  <DEDI ID="34496136">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -408,7 +408,7 @@
                 </Object>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20763736">
+                  <DEDI ID="34499256">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -421,7 +421,7 @@
               </DomainIterators>
             </Left>
             <Right>
-              <Variable ID="20760328">
+              <Variable ID="34495496">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -430,7 +430,7 @@
                   </math>
                 </ObjectRefMathML>
               T</Variable>
-              <Domain ID="20710176">
+              <Domain ID="34435696">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -443,7 +443,7 @@
               <DomainIterators>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20770776">
+                  <DEDI ID="34496136">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -455,7 +455,7 @@
                 </Object>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20763736">
+                  <DEDI ID="34499256">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -615,7 +615,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20770776" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34496136" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -625,7 +625,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -636,7 +636,7 @@
           x</Domain>
           <Type>eOpenOpen</Type>
         </Object>
-        <Object ID="20763736" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34499256" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -646,7 +646,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -659,7 +659,7 @@
         </Object>
       </DistributedDomainInfos>
     </Object>
-    <Object ID="20910008" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34657272" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>BC_bottom</Name>
       <Description>Boundary conditions for the bottom edge</Description>
       <MathMLName>
@@ -681,7 +681,7 @@
           <Left>
             <Function>eSign</Function>
             <Node>
-              <Parameter ID="20759456">
+              <Parameter ID="34494624">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -693,7 +693,7 @@
               <DomainIterators>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20910152">
+                  <DEDI ID="34657416">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -712,7 +712,7 @@
                 </Object>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20910376">
+                  <DEDI ID="34657640">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -733,7 +733,7 @@
             </Node>
           </Left>
           <Right>
-            <Variable ID="20760328">
+            <Variable ID="34495496">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -742,7 +742,7 @@
                 </math>
               </ObjectRefMathML>
             T</Variable>
-            <Domain ID="20710176">
+            <Domain ID="34435696">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -755,7 +755,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20910152">
+                <DEDI ID="34657416">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -774,7 +774,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20910376">
+                <DEDI ID="34657640">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -795,7 +795,7 @@
           </Right>
         </Left>
         <Right>
-          <Parameter ID="20759216">
+          <Parameter ID="34494192">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -893,7 +893,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20910152" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34657416" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -903,7 +903,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -914,7 +914,7 @@
           x</Domain>
           <Type>eClosedClosed</Type>
         </Object>
-        <Object ID="20910376" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34657640" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -924,7 +924,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -937,7 +937,7 @@
         </Object>
       </DistributedDomainInfos>
     </Object>
-    <Object ID="20910888" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34658152" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>BC_top</Name>
       <Description>Boundary conditions for the top edge</Description>
       <MathMLName>
@@ -959,7 +959,7 @@
           <Left>
             <Function>eSign</Function>
             <Node>
-              <Parameter ID="20759456">
+              <Parameter ID="34494624">
                 <ObjectRefMathML>
                   <math xmlns="http://www.w3.org/1998/Math/MathML">
                     <mrow>
@@ -971,7 +971,7 @@
               <DomainIterators>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20911032">
+                  <DEDI ID="34658296">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -990,7 +990,7 @@
                 </Object>
                 <Object>
                   <Type>eDomainIterator</Type>
-                  <DEDI ID="20911256">
+                  <DEDI ID="34658520">
                     <ObjectRefMathML>
                       <math xmlns="http://www.w3.org/1998/Math/MathML">
                         <mrow>
@@ -1011,7 +1011,7 @@
             </Node>
           </Left>
           <Right>
-            <Variable ID="20760328">
+            <Variable ID="34495496">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1020,7 +1020,7 @@
                 </math>
               </ObjectRefMathML>
             T</Variable>
-            <Domain ID="20710176">
+            <Domain ID="34435696">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1033,7 +1033,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20911032">
+                <DEDI ID="34658296">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1052,7 +1052,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20911256">
+                <DEDI ID="34658520">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1073,7 +1073,7 @@
           </Right>
         </Left>
         <Right>
-          <Parameter ID="20759216">
+          <Parameter ID="34494192">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1171,7 +1171,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20911032" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34658296" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -1181,7 +1181,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1192,7 +1192,7 @@
           x</Domain>
           <Type>eClosedClosed</Type>
         </Object>
-        <Object ID="20911256" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34658520" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -1202,7 +1202,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1215,7 +1215,7 @@
         </Object>
       </DistributedDomainInfos>
     </Object>
-    <Object ID="20912040" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34659304" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>BC_left</Name>
       <Description>Boundary conditions at the left edge</Description>
       <MathMLName>
@@ -1231,7 +1231,7 @@
       <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
       <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
       <Expression>
-        <Variable ID="20760328">
+        <Variable ID="34495496">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -1240,7 +1240,7 @@
             </math>
           </ObjectRefMathML>
         T</Variable>
-        <Domain ID="20703904">
+        <Domain ID="34443520">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -1253,7 +1253,7 @@
         <DomainIterators>
           <Object>
             <Type>eDomainIterator</Type>
-            <DEDI ID="20912184">
+            <DEDI ID="34659448">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1272,7 +1272,7 @@
           </Object>
           <Object>
             <Type>eDomainIterator</Type>
-            <DEDI ID="20912408">
+            <DEDI ID="34659672">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1341,7 +1341,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20912184" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34659448" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -1351,7 +1351,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1362,7 +1362,7 @@
           x</Domain>
           <Type>eLowerBound</Type>
         </Object>
-        <Object ID="20912408" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34659672" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -1372,7 +1372,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1385,7 +1385,7 @@
         </Object>
       </DistributedDomainInfos>
     </Object>
-    <Object ID="20912584" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34659848" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>BC_right</Name>
       <Description>Boundary conditions for the right edge</Description>
       <MathMLName>
@@ -1401,7 +1401,7 @@
       <EquationDefinitionMode>eResidualNode</EquationDefinitionMode>
       <EquationEvaluationMode>eResidualNodeEvaluation</EquationEvaluationMode>
       <Expression>
-        <Variable ID="20760328">
+        <Variable ID="34495496">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -1410,7 +1410,7 @@
             </math>
           </ObjectRefMathML>
         T</Variable>
-        <Domain ID="20703904">
+        <Domain ID="34443520">
           <ObjectRefMathML>
             <math xmlns="http://www.w3.org/1998/Math/MathML">
               <mrow>
@@ -1423,7 +1423,7 @@
         <DomainIterators>
           <Object>
             <Type>eDomainIterator</Type>
-            <DEDI ID="20912808">
+            <DEDI ID="34660072">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1442,7 +1442,7 @@
           </Object>
           <Object>
             <Type>eDomainIterator</Type>
-            <DEDI ID="20913032">
+            <DEDI ID="34660296">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1511,7 +1511,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20912808" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34660072" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -1521,7 +1521,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1532,7 +1532,7 @@
           x</Domain>
           <Type>eUpperBound</Type>
         </Object>
-        <Object ID="20913032" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34660296" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -1542,7 +1542,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1555,7 +1555,7 @@
         </Object>
       </DistributedDomainInfos>
     </Object>
-    <Object ID="20913624" Class="daeEquation" Library="DAE.Core" Version="1.0.5">
+    <Object ID="34660888" Class="daeEquation" Library="DAE.Core" Version="1.1.0">
       <Name>C_p</Name>
       <Description>Equation to calculate the specific heat capacity of the plate as a function of the temperature.</Description>
       <MathMLName>
@@ -1575,7 +1575,7 @@
         <Left>
           <Function>eMinus</Function>
           <Left>
-            <Variable ID="20710984">
+            <Variable ID="34492152">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1590,7 +1590,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20913864">
+                <DEDI ID="34661128">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1609,7 +1609,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20914056">
+                <DEDI ID="34661320">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1629,7 +1629,7 @@
             </DomainIterators>
           </Left>
           <Right>
-            <Parameter ID="20711472">
+            <Parameter ID="34492704">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1644,7 +1644,7 @@
         <Right>
           <Function>eMulti</Function>
           <Left>
-            <Parameter ID="20711856">
+            <Parameter ID="34493104">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1656,7 +1656,7 @@
             <DomainIterators/>
           </Left>
           <Right>
-            <Variable ID="20760328">
+            <Variable ID="34495496">
               <ObjectRefMathML>
                 <math xmlns="http://www.w3.org/1998/Math/MathML">
                   <mrow>
@@ -1668,7 +1668,7 @@
             <DomainIterators>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20913864">
+                <DEDI ID="34661128">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1687,7 +1687,7 @@
               </Object>
               <Object>
                 <Type>eDomainIterator</Type>
-                <DEDI ID="20914056">
+                <DEDI ID="34661320">
                   <ObjectRefMathML>
                     <math xmlns="http://www.w3.org/1998/Math/MathML">
                       <mrow>
@@ -1783,7 +1783,7 @@
         </math>
       </MathML>
       <DistributedDomainInfos>
-        <Object ID="20913864" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34661128" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>x</Name>
           <Description/>
           <MathMLName>
@@ -1793,7 +1793,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20703904">
+          <Domain ID="34443520">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>
@@ -1804,7 +1804,7 @@
           x</Domain>
           <Type>eClosedClosed</Type>
         </Object>
-        <Object ID="20914056" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.0.5">
+        <Object ID="34661320" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.1.0">
           <Name>y</Name>
           <Description/>
           <MathMLName>
@@ -1814,7 +1814,7 @@
               </mrow>
             </math>
           </MathMLName>
-          <Domain ID="20710176">
+          <Domain ID="34435696">
             <ObjectRefMathML>
               <math xmlns="http://www.w3.org/1998/Math/MathML">
                 <mrow>

@@ -651,8 +651,6 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 // If we are in evaluate mode we dont need the value
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		daeDeclareAndThrowException(exInvalidCall)
-
 		adouble tmp;
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNode>( Clone() );
@@ -840,8 +838,6 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 // If we are in evaluate mode we dont need the value
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		daeDeclareAndThrowException(exInvalidCall)
-
 		adouble tmp;
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNode>( Clone() );

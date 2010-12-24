@@ -26,6 +26,7 @@ public:
 	virtual void				Run(void);
 	virtual void				Finalize(void);
 	virtual void				Reset(void);
+	virtual void				ReRun(void);
 	virtual void				ReportData(void);
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
@@ -63,12 +64,8 @@ public:
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 	
-//	void AddOptimizationConstraint(daeOptimizationConstraint& constraint);
-//	void AddOptimizationVariable(daeOptimizationVariable& optVariable);
-
-	daeOptimizationConstraint* CreateConstraint(real_t LB, real_t UB, string strDescription = "");
-	daeOptimizationConstraint* CreateConstraint(real_t EqualTo, string strDescription = "");
-	
+	daeOptimizationConstraint* CreateInequalityConstraint(real_t LB, real_t UB, string strDescription = "");
+	daeOptimizationConstraint* CreateEqualityConstraint(real_t EqualTo, string strDescription = "");
 	void SetOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
 	
 protected:

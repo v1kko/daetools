@@ -38,32 +38,43 @@ class daeImageViewer(QtGui.QDialog):
         self.ui.label.adjustSize()
 
 class daeSimulator(QtGui.QDialog):
-    def __init__(self, app, simulation, datareporter = None, log = None, daesolver = None):
+    def __init__(self, app, **kwargs):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
-
-        self.app          = app
-        self.simulation   = simulation
-        self.datareporter = datareporter
-        self.log          = log
-        self.daesolver    = daesolver
-        self.lasolver     = None
-       
-        self.ui.SimulationLineEdit.insert(simulation.m.Name)
-        self.ui.ReportingIntervalDoubleSpinBox.setValue(self.simulation.ReportingInterval)
-        self.ui.TimeHorizonDoubleSpinBox.setValue(self.simulation.TimeHorizon)
         
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
         self.connect(self.ui.PauseButton,  QtCore.SIGNAL('clicked()'), self.slotPause)
         self.connect(self.ui.MatrixButton, QtCore.SIGNAL('clicked()'), self.slotOpenSparseMatrixImage)
         
+        self.app          = app
+        self.simulation   = kwargs.get('simulation',   None)
+        self.optimization = kwargs.get('optimization', None)
+        self.datareporter = kwargs.get('datareporter', None)
+        self.log          = kwargs.get('log',          None)
+        self.daesolver    = kwargs.get('daesolver',    None)
+        self.lasolver     = kwargs.get('lasolver',     None)
+        
+        if self.app == None:
+            raise RuntimeError('daeSimulator: app object must not be None')
+        if self.simulation == None:
+            raise RuntimeError('daeSimulator: simulation object must not be None')
+
+        if self.optimization == None:
+            self.ui.simulationLabel.setText('Simulation')
+        else:
+            self.ui.simulationLabel.setText('Optimization')
+        self.ui.SimulationLineEdit.insert(self.simulation.m.Name)
+            
+        self.ui.ReportingIntervalDoubleSpinBox.setValue(self.simulation.ReportingInterval)
+        self.ui.TimeHorizonDoubleSpinBox.setValue(self.simulation.TimeHorizon)
+        
         cfg = daeGetConfig()
         tcpip = cfg.GetString("daetools.datareporting.tcpipDataReceiverAddress", "127.0.0.1")
         port  = cfg.GetInteger("daetools.datareporting.tcpipDataReceiverPort", 50000)
         self.ui.DataReporterTCPIPAddressLineEdit.setText( tcpip + ':' + str(port) )
-        
+
     #@QtCore.pyqtSlot()
     def slotResume(self):
         self.simulation.Resume()
@@ -186,10 +197,16 @@ class daeSimulator(QtGui.QDialog):
             self.ui.ReportingIntervalDoubleSpinBox.setEnabled(False)
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
 
-            self.simulation.InitSimulation(self.daesolver, self.datareporter, self.log)
-            self.simulation.SolveInitial()
-            self.simulation.Run()
-            self.simulation.Finalize()
+            if self.optimization == None:
+                self.simulation.InitSimulation(self.daesolver, self.datareporter, self.log)
+                self.simulation.SolveInitial()
+                self.simulation.Run()
+                self.simulation.Finalize()
+            else:
+                self.simulation.InitOptimization(self.daesolver, self.datareporter, self.log)
+                self.optimization.Initialize(self.simulation, None, self.daesolver, self.datareporter, self.log)
+                self.optimization.Run()
+                self.optimization.Finalize()                
             
         except Exception, error:
             self.ui.textEdit.append(str(error))

@@ -3,7 +3,6 @@
 
 #include <boost/smart_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/multi_array.hpp>
 #include <boost/cstdint.hpp>
 
 #include "../config.h"
@@ -637,42 +636,6 @@ public:
 
 	}
 
-//	void InitializeOptimizationArrays(const std::vector<size_t>& narrOptimizationParametersIndexes)
-//	{
-//		if(narrOptimizationParametersIndexes.size() > 0)
-//			daeDeclareAndThrowException(exInvalidCall)
-		
-//		boost::multi_array<real_t, 2>::extent_gen extents;
-		
-//		m_nNumberOfParameters               = narrOptimizationParametersIndexes.size();
-//		m_narrOptimizationParametersIndexes = narrOptimizationParametersIndexes;
-		
-//		if(GetModelType() == eDynamicModel)
-//		{
-//			m_arrS.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
-//			m_arrSD.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
-			
-//			for(size_t i = 0; i < m_nNumberOfParameters; i++)
-//			{
-//				for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
-//				{
-//					m_arrS[i][k]  = 0;
-//					m_arrSD[i][k] = 0;
-//				}
-//			}
-//		}
-		
-//	// This always exists no matter which type of the model is
-//		m_arrSRes.resize(extents[m_nNumberOfParameters][m_nTotalNumberOfVariables]);
-//		for(size_t i = 0; i < m_nNumberOfParameters; i++)
-//		{
-//			for(size_t k = 0; k < m_nTotalNumberOfVariables; k++)
-//			{
-//				m_arrSRes[i][k] = 0;
-//			}
-//		}
-//	}
-
 	void Load(const std::string& strFileName)
 	{
 		double dValue;
@@ -1083,12 +1046,9 @@ protected:
 	size_t							m_nNumberOfParameters;
 	daeeModelType					m_eModelType;
 	std::vector<size_t>				m_narrOptimizationParametersIndexes;
-//	boost::multi_array<real_t, 2>	m_arrS;
-//	boost::multi_array<real_t, 2>	m_arrSD;
-//	boost::multi_array<real_t, 2>	m_arrSRes;
-	daeMatrix<real_t>*	m_pmatSValues;
-	daeMatrix<real_t>*	m_pmatSTimeDerivatives; 
-	daeMatrix<real_t>*	m_pmatSResiduals;
+	daeMatrix<real_t>*				m_pmatSValues;
+	daeMatrix<real_t>*				m_pmatSTimeDerivatives; 
+	daeMatrix<real_t>*				m_pmatSResiduals;
 };
 
 /******************************************************************

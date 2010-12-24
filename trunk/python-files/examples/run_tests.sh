@@ -10,4 +10,7 @@ python tutorial7.py console
 python tutorial8.py console
 python tutorial9.py console
 python tutorial10.py console
+python tutorial11.py console
 python whats_the_time.py console
+
+python opt_tutorial1.py console
