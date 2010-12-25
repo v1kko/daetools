@@ -28,7 +28,7 @@ namespace dae
 {
 using std::string;
 
-const string daeAuthorInfo  =	"Dragan Nikolic, 2009 DAE Tools project, dnikolic@daetools.com";
+const string daeAuthorInfo  =	"Dragan Nikolic, 2009 DAE Tools project, dnikolic at daetools.com";
 const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute it and/or modify "
 								"it under the terms of the GNU General Public License version 3 "
 								"as published by the Free Software Foundation. \n\n"
@@ -42,7 +42,7 @@ const size_t FREE = ULONG_MAX;
 inline string daeVersion(void)
 {
 	char dae__version[20];
-	::sprintf (dae__version, "%d.%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
+	::sprintf(dae__version, "%d.%d-%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
 	return string(dae__version);
 }
 

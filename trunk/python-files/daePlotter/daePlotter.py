@@ -35,7 +35,7 @@ class daeMainWindow(QtGui.QMainWindow):
         self.move(0, 0)
         self.resize(400, 200)
         self.setWindowIcon(QtGui.QIcon('images/app.png'))
-        self.setWindowTitle('DAE Plotter')
+        self.setWindowTitle("DAE Plotter v" + daeVersion())
 
         exit = QtGui.QAction(QtGui.QIcon('images/close.png'), 'Exit', self)
         exit.setShortcut('Ctrl+Q')

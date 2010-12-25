@@ -43,6 +43,8 @@ class daeSimulator(QtGui.QDialog):
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
         
+        self.setWindowTitle("DAE Tools Simulator v" + daeVersion())
+
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
         self.connect(self.ui.PauseButton,  QtCore.SIGNAL('clicked()'), self.slotPause)

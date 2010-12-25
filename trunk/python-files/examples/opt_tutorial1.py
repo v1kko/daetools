@@ -118,6 +118,8 @@ def consoleRun():
     # Run
     optimization.Run()
     optimization.Finalize()
+    
+    print "dae version:", daeVersion()
 
 if __name__ == "__main__":
     runInGUI = True
