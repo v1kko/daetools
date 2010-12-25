@@ -45,7 +45,7 @@ linux-g++::LAPACK_LIBS = -L$${INTEL_LIBS} \
 						  $${INTEL_LIBS}/libmkl_intel_thread.a \
 						  $${INTEL_LIBS}/libmkl_core.a \
 						-Wl,--end-group \
-						-liomp5 -lpthread -lgfortran
+						-liomp5 -lpthread
 
 linux-g++-64::LAPACK_LIBS = -L$${INTEL_LIBS} \
 							$${INTEL_LIBS}/libmkl_solver_lp64.a \
@@ -54,7 +54,7 @@ linux-g++-64::LAPACK_LIBS = -L$${INTEL_LIBS} \
 							  $${INTEL_LIBS}/libmkl_intel_thread.a \
 							  $${INTEL_LIBS}/libmkl_core.a \
 							-Wl,--end-group \
-							-liomp5 -lpthread -lgfortran
+							-liomp5 -lpthread
 
 pyObject = pyIntelMKL
 }

@@ -1,8 +1,8 @@
-VERSION=1.1.0
+VERSION=1.1.1
 
 QMAKE_CXXFLAGS += -DDAE_MAJOR=1
 QMAKE_CXXFLAGS += -DDAE_MINOR=1
-QMAKE_CXXFLAGS += -DDAE_BUILD=0
+QMAKE_CXXFLAGS += -DDAE_BUILD=1
 
 CONFIG(debug, debug|release){
 	DAE_DEST_DIR = ../debug
@@ -129,6 +129,7 @@ unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 # 3) cd ipopt
 #    mkdir build
 # 4) cd build
+#    export LDFLAGS='-s'  (to strip binary: lintian test)
 # 5) ../configure
 # 6) make -jN
 # 7) make test
@@ -140,6 +141,40 @@ unix::IPOPT_INCLUDE = $${IPOPT}/include/coin
 unix::IPOPT_LIBDIR  = $${IPOPT}/lib/coin \
                       $${IPOPT}/lib/coin/ThirdParty
 unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
+
+
+#####################################################################################
+#                                   BONMIN
+#####################################################################################
+#    Compiling BONMIN on GNU/Linux
+# 0) Unpack BONMIN to daetools/trunk/bonmin
+# 1) cd bonmin/ThirdParty/Mumps
+#    sh get.Mumps
+# 2) cd bonmin/ThirdParty/Metis
+#    sh get.Metis
+# 3) mkdir build
+#    export LDFLAGS='-s'  (to strip binary: lintian test)
+# 4) cd build
+# 5) ../configure
+# 6) make -jN
+# 7) make test
+# 8) make install
+#####################################################################################
+unix::BONMIN = ../bonmin/build
+
+unix::BONMIN_INCLUDE = $${BONMIN}/include/coin
+unix::BONMIN_LIBDIR  = $${BONMIN}/lib
+unix::BONMIN_LIBS    = -ldl -lblas -llapack \
+						-lbonmin \
+						-lCbc \
+						-lCbcSolver \
+						-lCgl \
+						-lClp \
+						-lCoinUtils \
+						-lipopt \
+						-lOsiCbc \
+						-lOsiClp \
+						-lOsi
 
 
 #####################################################################################

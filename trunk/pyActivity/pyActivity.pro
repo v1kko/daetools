@@ -6,10 +6,10 @@ TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               $${IPOPT_INCLUDE}
+               $${BONMIN_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
-                $${IPOPT_LIBDIR}
+                $${BONMIN_LIBDIR}
 
 LIBS += $${DAE_CORE_LIB} \
         $${DAE_DATAREPORTERS_LIB} \
@@ -17,7 +17,7 @@ LIBS += $${DAE_CORE_LIB} \
         $${DAE_SOLVER_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
-        $${IPOPT_LIBS}
+        $${BONMIN_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

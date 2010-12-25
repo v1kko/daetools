@@ -31,7 +31,7 @@ BOOST_PYTHON_MODULE(pySolver)
 		//.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
 		//.def("Solve",			pure_virtual(&daeDAESolver_t::Solve))
 		;
- 
+   
 	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDASolver")
 		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
 		//.def("Solve",						&daeIDASolver::Solve)

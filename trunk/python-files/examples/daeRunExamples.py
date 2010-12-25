@@ -32,6 +32,7 @@ except Exception, e:
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10
+    import opt_tutorial1
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
 
@@ -67,6 +68,31 @@ class RunExamples(QtGui.QDialog):
         self.connect(self.ui.toolButtonModelReport,        QtCore.SIGNAL('clicked()'), self.slotShowModelReport)
         self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
         
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(0, "whats_the_time")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(1, "tutorial1")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(2, "tutorial2")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(3, "tutorial3")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(4, "tutorial4")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(5, "tutorial5")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(6, "tutorial6")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(7, "tutorial7")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(8, "tutorial8")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(9, "tutorial9")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(10, "tutorial10")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(11, "opt_tutorial1")
+        
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
@@ -100,6 +126,9 @@ class RunExamples(QtGui.QDialog):
         elif simName == "tutorial10":
             url   = QtCore.QUrl("tutorial10.html")
             title = "tutorial10.py"
+        elif simName == "opt_tutorial1":
+            url   = QtCore.QUrl("opt_tutorial1.html")
+            title = "tutorial10.py"
         else:
             url   = QtCore.QUrl("whats_the_time.html")
             title = "whats_the_time.py"
@@ -130,6 +159,8 @@ class RunExamples(QtGui.QDialog):
             url   = "Tutorial_9.xml"
         elif simName == "tutorial10":
             url   = "Tutorial_10.xml"
+        elif simName == "opt_tutorial1":
+            url   = "OptTutorial_1.xml"
         else:
             url   = "WhatsTheTime.xml"
         webbrowser.open_new(url)
@@ -157,6 +188,8 @@ class RunExamples(QtGui.QDialog):
             url   = "Tutorial_9-rt.xml"
         elif simName == "tutorial10":
             url   = "Tutorial_10-rt.xml"
+        elif simName == "opt_tutorial1":
+            url   = "OptTutorial_1-rt.xml"
         else:
             url   = "WhatsTheTime-rt.xml"
         webbrowser.open_new(url)
@@ -166,6 +199,9 @@ class RunExamples(QtGui.QDialog):
         simName = str(self.ui.comboBoxExample.currentText())
         TimeHorizon       = 1000
         ReportingInterval = 10
+        
+        simulation   = None
+        optimization = None
         if simName == "tutorial1":
             simulation = tutorial1.simTutorial()
         elif simName == "tutorial2":
@@ -198,6 +234,11 @@ class RunExamples(QtGui.QDialog):
             simulation = tutorial9.simTutorial()
         elif simName == "tutorial10":
             simulation = tutorial10.simTutorial()
+        elif simName == "opt_tutorial1":
+            simulation   = opt_tutorial1.simTutorial()
+            optimization = daeIPOPT()
+            TimeHorizon       = 1
+            ReportingInterval = 1
         else:
             simulation = whats_the_time.simTutorial()
             TimeHorizon       = 500
@@ -228,8 +269,11 @@ class RunExamples(QtGui.QDialog):
                 simulator.exec_()
                 dr1.Write()
                 QtGui.QMessageBox.information(None, "Tutorial 8", "Now check daePlotter and file: [" + filename + "] for the results.\nThey should both contain the same data.")
+            elif simName == "opt_tutorial1":
+                simulator = daeSimulator(self.app, simulation=simulation, optimization=optimization)
+                simulator.exec_()
             else:
-                simulator = daeSimulator(self.app, simulation)
+                simulator = daeSimulator(self.app, simulation=simulation)
                 simulator.exec_()
         except RuntimeError:
             pass

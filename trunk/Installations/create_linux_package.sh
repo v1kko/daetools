@@ -41,7 +41,7 @@ DISTRO=$5
 BOOST=boost_$5
 PYTHON_VERSION=$6
 IDAS=../idas-1.0.0/build
-IPOPT=../ipopt/build
+BONMIN=../bonmin/build
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -154,6 +154,10 @@ mkdir ${PACKAGE_NAME}/pyTrilinosAmesos
 if [ -e ../release/pyTrilinosAmesos.so ]; then
   cp ../release/pyTrilinosAmesos.so   ${PACKAGE_NAME}/pyTrilinosAmesos/pyTrilinosAmesos.so
 fi
+
+# Licences
+cp ../licence*                                   ${PACKAGE_NAME}
+cp ../ReadMe.txt                                 ${PACKAGE_NAME}
 
 # Python files
 cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE/daeLogs.py
@@ -272,8 +276,8 @@ fi
 find ${BUILD_DIR} -name \*.pyc | xargs rm
 
 # Set execute flag to all python files except __init__.py
-find ${BUILD_DIR} -name \*.py        | xargs chmod +x 
-find ${BUILD_DIR} -name \__init__.py | xargs chmod -x 
+#find ${BUILD_DIR} -name \*.py        | xargs chmod +x 
+#find ${BUILD_DIR} -name \__init__.py | xargs chmod -x 
 
 # If python is installed in /usr/lib then copy files there; otherwise to /usr/lib64
 if [ -d ${BUILD_DIR}/usr/lib ]; then
@@ -335,12 +339,11 @@ if [ -e ${TRILINOS}/libamesos.so ]; then
   cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}/libteuchos.so
 fi
 
-if [ -e ${IPOPT}/lib/coin/libipopt.so ]; then
-  cp -d ${IPOPT}/lib/coin/libipopt.so*                 ${BUILD_DIR}/usr/${LIB}
-  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinmetis.so*  ${BUILD_DIR}/usr/${LIB}
-  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinmumps.so*  ${BUILD_DIR}/usr/${LIB}
-  cp -d ${IPOPT}/lib/coin/ThirdParty/libcoinhsl.so*    ${BUILD_DIR}/usr/${LIB}
+if [ -d ${BONMIN}/lib ]; then
+  cp -d ${BONMIN}/lib/*.so*            ${BUILD_DIR}/usr/${LIB}
 fi
+chmod -R -x ${BUILD_DIR}/usr/${LIB}/* 
+find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip 
 
 mkdir ${BUILD_DIR}/usr/share/applications
 
@@ -451,6 +454,18 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "esac "                                                                                 >> ${POSTINST}
   echo "chmod -R o+w ${DAE_TOOLS_DIR}/examples"                                                >> ${POSTINST}
   chmod 0755 ${POSTINST}
+
+  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+  echo "libbonmin 0 libonmin.so.0 (>= 0:0.0.0)"                                           > ${SHLIBS}
+  echo "libCbc 0 libCbc.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
+  echo "libCbcSolver 0 libCbcSolver.so.0 (>= 0:0.0.0)"                                   >> ${SHLIBS}
+  echo "libCgl 0 libCgl.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
+  echo "libClp 0 libClp.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
+  echo "libCoinUtils 0 libCoinUtils.so.0 (>= 0:0.0.0)"                                   >> ${SHLIBS}
+  echo "libipopt 0 libipopt.so.0 (>= 0:0.0.0)"                                           >> ${SHLIBS}
+  echo "libOsiCbc 0 libOsiCbc.so.0 (>= 0:0.0.0)"                                         >> ${SHLIBS}
+  echo "libOsiClp 0 libOsiClp.so.0 (>= 0:0.0.0)"                                         >> ${SHLIBS}
+  echo "libOsi 0 libOsi.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
 
   fakeroot dpkg -b ${BUILD_DIR}
 

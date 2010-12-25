@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RunExamples.ui'
 #
-# Created: Sat Dec 11 13:00:00 2010
+# Created: Sat Dec 25 13:13:06 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,27 +48,6 @@ class Ui_RunExamplesDialog(object):
         sizePolicy.setHeightForWidth(self.comboBoxExample.sizePolicy().hasHeightForWidth())
         self.comboBoxExample.setSizePolicy(sizePolicy)
         self.comboBoxExample.setObjectName("comboBoxExample")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(0, "whats_the_time")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(1, "tutorial1")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(2, "tutorial2")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(3, "tutorial3")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(4, "tutorial4")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(5, "tutorial5")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(6, "tutorial6")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(7, "tutorial7")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(8, "tutorial8")
-        self.comboBoxExample.addItem("")
-        self.comboBoxExample.setItemText(9, "tutorial9")
-        self.comboBoxExample.addItem("")
         self.horizontalLayout.addWidget(self.comboBoxExample)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -126,7 +105,6 @@ class Ui_RunExamplesDialog(object):
     def retranslateUi(self, RunExamplesDialog):
         RunExamplesDialog.setWindowTitle(QtGui.QApplication.translate("RunExamplesDialog", "DAE Tools Tutorials", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("RunExamplesDialog", "Choose tutorial:", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBoxExample.setItemText(10, QtGui.QApplication.translate("RunExamplesDialog", "tutorial10", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButtonCode.setText(QtGui.QApplication.translate("RunExamplesDialog", "Show code...", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButtonRun.setText(QtGui.QApplication.translate("RunExamplesDialog", "Run...", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButtonModelReport.setText(QtGui.QApplication.translate("RunExamplesDialog", "Show model report ... *", None, QtGui.QApplication.UnicodeUTF8))

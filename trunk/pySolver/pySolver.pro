@@ -9,14 +9,12 @@ INCLUDEPATH += $${BOOSTDIR} \
                $${SUNDIALS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
-                $${SUNDIALS_LIBDIR} \
-                $${IPOPT_LIBDIR}
+                $${SUNDIALS_LIBDIR}
 
 LIBS +=	$${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${DAE_SOLVER_LIB} \
-        $${SUNDIALS_LIBS} \
-        $${IPOPT_LIBS}
+        $${SUNDIALS_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

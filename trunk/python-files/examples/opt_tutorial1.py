@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """********************************************************************************
-                             tutorial1.py
+                             opt_tutorial1.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -43,7 +43,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("OptimizationTutorial_1")
+        self.m = modTutorial("OptTutorial_1")
         self.m.Description = "This tutorial explains how to define a simple optimization problem. Here we use the steady-state test HS-71 ()"
           
     def SetUpParametersAndDomains(self):
@@ -77,11 +77,11 @@ def guiRun():
     from PyQt4 import QtCore, QtGui
     app = QtGui.QApplication(sys.argv)
     simulation   = simTutorial()
-    optimization = daeIPOPT()
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon       = 5
-    simulator  = daeSimulator(app, simulation=simulation, optimization=optimization)
+    opt = daeIPOPT()
+    simu.m.SetReportingOn(True)
+    sim.ReportingInterval = 1
+    sim.TimeHorizon       = 5
+    simulator  = daeSimulator(app, simulation=sim, optimization=opt)
     simulator.show()
     app.exec_()
 

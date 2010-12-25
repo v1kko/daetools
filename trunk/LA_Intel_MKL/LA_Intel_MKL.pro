@@ -33,7 +33,7 @@ linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
                               $${MKL_LIBS}/libmkl_intel_thread.a \
                               $${MKL_LIBS}/libmkl_core.a \
                           -Wl,--end-group \
-                          -liomp5 -lpthread -lgfortran
+                          -liomp5 -lpthread
 
 linux-g++-64::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
 								$${MKL_LIBS}/libmkl_solver_lp64.a \
@@ -42,7 +42,7 @@ linux-g++-64::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
 								    $${MKL_LIBS}/libmkl_intel_thread.a \
 								    $${MKL_LIBS}/libmkl_core.a \
 								-Wl,--end-group \
-								-liomp5 -lpthread -lgfortran
+								-liomp5 -lpthread
 
 ####################################################################################
 #                       Suppress some warnings

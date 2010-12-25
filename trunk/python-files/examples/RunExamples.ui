@@ -69,61 +69,6 @@
              <verstretch>1</verstretch>
             </sizepolicy>
            </property>
-           <item>
-            <property name="text">
-             <string notr="true">whats_the_time</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial1</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial3</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial4</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial5</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial6</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial7</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial8</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string notr="true">tutorial9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>tutorial10</string>
-            </property>
-           </item>
           </widget>
          </item>
         </layout>

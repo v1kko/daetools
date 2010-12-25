@@ -5,10 +5,10 @@ TARGET = Simulation
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
-               $${IPOPT_INCLUDE}
+               $${BONMIN_INCLUDE}
 
 LIBS += $${DAE_CORE_LIB} \
-        $${IPOPT_LIBS}
+        $${BONMIN_LIBS}
 
 HEADERS += stdafx.h \
     dyn_simulation.h \

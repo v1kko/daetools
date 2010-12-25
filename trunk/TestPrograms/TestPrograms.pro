@@ -5,10 +5,10 @@ CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
 INCLUDEPATH += $${BOOSTDIR} \
-               $${IPOPT_INCLUDE}
+               $${BONMIN_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
-                $${IPOPT_LIBDIR} 
+                $${BONMIN_LIBDIR} 
 
 LIBS += $${DAE_SIMULATION_LIB} \
         $${DAE_DATAREPORTERS_LIB} \
@@ -16,7 +16,7 @@ LIBS += $${DAE_SIMULATION_LIB} \
         $${DAE_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
-        $${IPOPT_LIBS}
+        $${BONMIN_LIBS}
 
 SOURCES += main.cpp \
     stdafx.cpp
