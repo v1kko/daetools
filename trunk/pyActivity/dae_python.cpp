@@ -106,11 +106,14 @@ BOOST_PYTHON_MODULE(pyActivity)
         //.def("EnterConditionalIntegrationMode",   &daeSimulation::EnterConditionalIntegrationMode)
         //.def("IntegrateUntilConditionSatisfied",  &daeSimulation::IntegrateUntilConditionSatisfied)
         ; 
-    
+      
     class_<daepython::daeIPOPTWrapper, boost::noncopyable>("daeIPOPT")
         .def("Initialize",	&daeIPOPT::Initialize)
         .def("Run",			&daeIPOPT::Run)
         .def("Finalize",	&daeIPOPT::Finalize)
+        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionS)
+        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionN)
+        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionI) 
         ;
 
     

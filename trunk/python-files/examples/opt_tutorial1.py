@@ -111,6 +111,12 @@ def consoleRun():
     simulation.InitOptimization(solver, datareporter, log)
     optimization.Initialize(simulation, nlpsolver, solver, datareporter, log)
 
+    optimization.SetOption('print_level', 0);
+    optimization.SetOption('hessian_approximation', 'limited-memory');
+    optimization.SetOption('tol', 1e-7);
+    optimization.SetOption('linear_solver', 'mumps');
+    optimization.SetOption('mu_strategy', 'adaptive');
+
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
@@ -119,8 +125,6 @@ def consoleRun():
     optimization.Run()
     optimization.Finalize()
     
-    print "dae version:", daeVersion()
-
 if __name__ == "__main__":
     runInGUI = True
     if len(sys.argv) > 1:

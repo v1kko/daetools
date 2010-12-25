@@ -2,7 +2,6 @@
 #include "optimization.h"
 #include <stdio.h>
 #include <time.h>
-#include <IpIpoptApplication.hpp>
 using namespace std;
 
 namespace dae
@@ -17,6 +16,15 @@ daeNLP::daeNLP(daeSimulation_t*   pSimulation,
 			   daeDataReporter_t* pDataReporter, 
 			   daeLog_t*          pLog)
 {
+	if(!pSimulation)
+		daeDeclareAndThrowException(exInvalidPointer)
+	if(!pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer)
+	if(!pDataReporter)
+		daeDeclareAndThrowException(exInvalidPointer)
+	if(!pLog)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
 	m_pSimulation	     = pSimulation;
 	m_pDAESolver		 = pDAESolver;
 	m_pDataReporter		 = pDataReporter;
@@ -532,6 +540,22 @@ daeIPOPT::daeIPOPT(void)
 	m_pDAESolver		 = NULL;
 	m_pDataReporter		 = NULL;
 	m_pLog			     = NULL;
+	
+	m_Application = IpoptApplicationFactory();
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+
+	real_t tol                   = cfg.Get<real_t>("daetools.activity.ipopt_tol",                   1E-6);
+	real_t print_level           = cfg.Get<int>("daetools.activity.ipopt_print_level",              0);
+	string linear_solver         = cfg.Get<string>("daetools.activity.ipopt_linear_solver",         "mumps");
+	string mu_strategy           = cfg.Get<string>("daetools.activity.ipopt_mu_strategy",           "adaptive");
+	string hessian_approximation = cfg.Get<string>("daetools.activity.ipopt_hessian_approximation", "limited-memory");
+
+	SetOption("hessian_approximation", hessian_approximation);
+	SetOption("tol",			       tol);
+	SetOption("linear_solver",         linear_solver);
+	SetOption("mu_strategy",           mu_strategy);
+	SetOption("print_level",           print_level);
 }
 
 daeIPOPT::~daeIPOPT(void)
@@ -570,26 +594,22 @@ void daeIPOPT::Initialize(daeSimulation_t* pSimulation,
 	m_pDAESolver    = pDAESolver;
 	m_pDataReporter	= pDataReporter;
 	m_pLog			= pLog;
-
+	
 	m_NLP = new daeNLP(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 }
 
 void daeIPOPT::Run(void)
 {
-	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
-	
-	app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-	app->Options()->SetNumericValue("tol", 1e-5);
-	app->Options()->SetStringValue("linear_solver", "mumps");
-	app->Options()->SetStringValue("mu_strategy", "adaptive");
-	app->Options()->SetStringValue("output_file", "ipopt.out");
-
-// The following overwrites the default name (ipopt.opt) of the options file
-// app->Options()->SetStringValue("option_file_name", "hs071.opt");
-	
+	if(IsNull(m_Application) || IsNull(m_NLP))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT object has not been initialized.";
+		throw e;
+	}
+		
 // Intialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
-	status = app->Initialize();
+	status = m_Application->Initialize();
 	if(status != Solve_Succeeded) 
 	{
 		m_pLog->Message("Error during initialization!", 0);
@@ -597,7 +617,7 @@ void daeIPOPT::Run(void)
 	}
 	
 // Ask Ipopt to solve the problem
-	status = app->OptimizeTNLP(m_NLP);
+	status = m_Application->OptimizeTNLP(m_NLP);
 	if(status != Solve_Succeeded) 
 	{
 		m_pLog->Message("The problem FAILED!", 0);
@@ -608,8 +628,42 @@ void daeIPOPT::Finalize(void)
 {
 }
 
+void daeIPOPT::SetOption(const string& strOptionName, const string& strValue)
+{
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT object has not been initialized.";
+		throw e;
+	}
+	
+	m_Application->Options()->SetStringValue(strOptionName, strValue);
+}
 
 
+void daeIPOPT::SetOption(const string& strOptionName, real_t dValue)
+{
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT object has not been initialized.";
+		throw e;
+	}
+	
+	m_Application->Options()->SetNumericValue(strOptionName, dValue);
+}
+
+void daeIPOPT::SetOption(const string& strOptionName, int iValue)
+{
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT object has not been initialized.";
+		throw e;
+	}
+	
+	m_Application->Options()->SetIntegerValue(strOptionName, iValue);
+}
 
 
 }

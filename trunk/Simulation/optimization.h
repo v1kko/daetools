@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <IpTNLP.hpp>
+#include <IpIpoptApplication.hpp>
 
 using namespace dae::core;
 using namespace dae::solver;
@@ -150,13 +151,18 @@ public:
 	virtual void Run(void);
 	virtual void Finalize(void);
 	
+	void SetOption(const string& strOptionName, const string& strValue);
+	void SetOption(const string& strOptionName, real_t dValue);
+	void SetOption(const string& strOptionName, int iValue);
+	
 protected:
-	daeSimulation_t*	m_pSimulation;
-	daeNLPSolver_t*		m_pNLPSolver;
-	daeDAESolver_t*		m_pDAESolver;
-	daeLog_t*			m_pLog;
-	daeDataReporter_t*	m_pDataReporter;
-	SmartPtr<TNLP>      m_NLP;	
+	daeSimulation_t*			m_pSimulation;
+	daeNLPSolver_t*				m_pNLPSolver;
+	daeDAESolver_t*				m_pDAESolver;
+	daeLog_t*					m_pLog;
+	daeDataReporter_t*			m_pDataReporter;
+	SmartPtr<TNLP>				m_NLP;	
+	SmartPtr<IpoptApplication>	m_Application;
 };
 
 }

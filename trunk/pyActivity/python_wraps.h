@@ -221,9 +221,23 @@ public:
     daeIPOPTWrapper(void)
     {
     }
+	
+	void SetOptionS(const string& strOptionName, const string& strValue)
+	{
+		daeIPOPT::SetOption(strOptionName, strValue);
+	}
+	    
+	void SetOptionN(const string& strOptionName, real_t dValue)
+	{
+		daeIPOPT::SetOption(strOptionName, dValue);
+	}
     
-   
+	void SetOptionI(const string& strOptionName, int iValue)
+	{
+		daeIPOPT::SetOption(strOptionName, iValue);
+	}   
 };
+
 
 }
 
