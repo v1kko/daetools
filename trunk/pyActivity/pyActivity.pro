@@ -5,19 +5,17 @@ TARGET = pyActivity
 TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
-               $${PYTHON_SITE_PACKAGES_DIR} \
-               $${BONMIN_INCLUDE}
+               $${PYTHON_SITE_PACKAGES_DIR}
 
-QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
-                $${BONMIN_LIBDIR}
+QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${DAE_CORE_LIB} \
         $${DAE_DATAREPORTERS_LIB} \
         $${DAE_SIMULATION_LIB} \
         $${DAE_SOLVER_LIB} \
+        $${DAE_NLPSOLVER_LIB} \
         $${BOOST_PYTHON_LIB} \
-        $${BOOST_LIBS} \
-        $${BONMIN_LIBS}
+        $${BOOST_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

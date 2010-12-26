@@ -4,17 +4,14 @@ QT -= core gui
 TARGET = Simulation
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += $${BOOSTDIR} \
-               $${BONMIN_INCLUDE}
+INCLUDEPATH += $${BOOSTDIR}
 
-LIBS += $${DAE_CORE_LIB} \
-        $${BONMIN_LIBS}
+LIBS += $${DAE_CORE_LIB} 
 
 HEADERS += stdafx.h \
     dyn_simulation.h \
     activity_class_factory.h \
-    base_activities.h \
-    optimization.h
+    base_activities.h 
 SOURCES += stdafx.cpp \
     dyn_simulation.cpp \
     dllmain.cpp \

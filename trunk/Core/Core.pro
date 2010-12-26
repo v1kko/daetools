@@ -74,4 +74,5 @@ HEADERS += xmlfunctions.h \
     base_logging.h \
     inlines_varparam_array.h \
     nodes_array.h \
-    tcpiplog.h
+    tcpiplog.h \
+    optimization.h

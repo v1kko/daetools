@@ -3,12 +3,13 @@ CONFIG += ordered
 SUBDIRS = Core \
     DataReporters \
     Simulation \
-    Solver \
-#	daepython \
+    Solver \ 
+	NLPSolver \
 	pyCore \
 	pyActivity \
 	pyDataReporting \
-	pySolver
+	pySolver \
+	pyIPOPT
 
 HEADERS += dae.h \
     dae_develop.h

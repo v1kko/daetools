@@ -27,8 +27,7 @@ namespace activity
 /******************************************************************
 	daeActivityClassFactory_t
 *******************************************************************/
-typedef daeCreateObjectDelegate<daeSimulation_t>*				pfnCreateSimulation;
-typedef daeCreateObjectDelegate<daeOptimization_t>*				pfnCreateOptimization;
+typedef daeCreateObjectDelegate<daeSimulation_t>* pfnCreateSimulation;
 
 class DAE_ACTIVITY_API daeActivityClassFactory : public daeActivityClassFactory_t
 {
@@ -44,13 +43,10 @@ public:
     string   GetVersion(void) const;
 
 	daeSimulation_t*	CreateSimulation(const string& strClass);
-	daeOptimization_t*	CreateOptimization(const string& strClass);
 
 	void SupportedSimulations(std::vector<string>& strarrClasses);
-	void SupportedOptimizations(std::vector<string>& strarrClasses);
 
 	bool RegisterSimulation(string strClass,   pfnCreateSimulation pfn);
-	bool RegisterOptimization(string strClass, pfnCreateOptimization pfn);
 
 public:
     string   m_strName;
@@ -60,7 +56,6 @@ public:
     string   m_strVersion;
 
 	daePtrMap<string, pfnCreateSimulation>		m_mapCreateSimulation;
-	daePtrMap<string, pfnCreateOptimization>	m_mapCreateOptimization;
 };
 
 

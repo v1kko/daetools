@@ -57,6 +57,7 @@ class daeSimulator(QtGui.QDialog):
         self.log          = kwargs.get('log',          None)
         self.daesolver    = kwargs.get('daesolver',    None)
         self.lasolver     = kwargs.get('lasolver',     None)
+        self.nlpsolver    = kwargs.get('nlpsolver',    None)
         
         if self.app == None:
             raise RuntimeError('daeSimulator: app object must not be None')
@@ -200,13 +201,14 @@ class daeSimulator(QtGui.QDialog):
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
 
             if self.optimization == None:
-                self.simulation.InitSimulation(self.daesolver, self.datareporter, self.log)
+                self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
                 self.simulation.SolveInitial()
                 self.simulation.Run()
                 self.simulation.Finalize()
             else:
-                self.simulation.InitOptimization(self.daesolver, self.datareporter, self.log)
-                self.optimization.Initialize(self.simulation, None, self.daesolver, self.datareporter, self.log)
+                if self.nlpsolver == None:
+                    self.nlpsolver = daeIPOPT()
+                self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
                 self.optimization.Run()
                 self.optimization.Finalize()                
             

@@ -65,13 +65,6 @@ void daeActivityClassFactory::SupportedSimulations(vector<string>& strarrClasses
 		strarrClasses.push_back((*it).first);
 }
 
-void daeActivityClassFactory::SupportedOptimizations(vector<string>& strarrClasses)
-{
-	map<string, pfnCreateOptimization>::iterator it;
-	for(it = m_mapCreateOptimization.begin(); it != m_mapCreateOptimization.end(); it++)
-		strarrClasses.push_back((*it).first);
-}
-
 daeSimulation_t* daeActivityClassFactory::CreateSimulation(const string& strClass)
 {
 	map<string, pfnCreateSimulation>::iterator it = m_mapCreateSimulation.find(strClass);
@@ -80,28 +73,11 @@ daeSimulation_t* daeActivityClassFactory::CreateSimulation(const string& strClas
 	return (*it).second->Create();
 }
 
-daeOptimization_t* daeActivityClassFactory::CreateOptimization(const string& strClass)
-{
-	map<string, pfnCreateOptimization>::iterator it = m_mapCreateOptimization.find(strClass);
-	if(it == m_mapCreateOptimization.end())
-		return NULL;
-	return (*it).second->Create();
-}
-
-
 bool daeActivityClassFactory::RegisterSimulation(string strClass, pfnCreateSimulation pfn)
 {
 	pair<string, pfnCreateSimulation> p(strClass, pfn);
 	pair<map<string, pfnCreateSimulation>::iterator, bool> ret;
 	ret = m_mapCreateSimulation.insert(p);
-	return ret.second;
-}
-
-bool daeActivityClassFactory::RegisterOptimization(string strClass, pfnCreateOptimization pfn)
-{
-	pair<string, pfnCreateOptimization> p(strClass, pfn);
-	pair<map<string, pfnCreateOptimization>::iterator, bool> ret;
-	ret = m_mapCreateOptimization.insert(p);
 	return ret.second;
 }
 

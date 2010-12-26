@@ -238,7 +238,7 @@ class RunExamples(QtGui.QDialog):
             simulation = tutorial10.simTutorial()
         elif simName == "opt_tutorial1":
             simulation   = opt_tutorial1.simTutorial()
-            optimization = daeIPOPT()
+            optimization = daeOptimization()
             TimeHorizon       = 1
             ReportingInterval = 1
         else:

@@ -160,11 +160,11 @@ unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
 # 7) make test
 # 8) make install
 #####################################################################################
-unix::BONMIN = ../bonmin/build
+NLPSOLVER         = ../bonmin/build
+NLPSOLVER_INCLUDE = $${NLPSOLVER}/include/coin
+NLPSOLVER_LIBDIR  = $${NLPSOLVER}/lib
 
-unix::BONMIN_INCLUDE = $${BONMIN}/include/coin
-unix::BONMIN_LIBDIR  = $${BONMIN}/lib
-unix::BONMIN_LIBS    = -ldl -lblas -llapack \
+unix::NLPSOLVER_LIBS =  -ldl -lblas -llapack \
 						-lbonmin \
 						-lCbc \
 						-lCbcSolver \
@@ -176,19 +176,31 @@ unix::BONMIN_LIBS    = -ldl -lblas -llapack \
 						-lOsiClp \
 						-lOsi
 
+win32-msvc2008::NLPSOLVER_LIBS = libbonmin.lib \
+                                 libCbc.lib \
+                                 libCbcSolver.lib \
+                                 libCgl.lib \
+                                 libClp.lib \
+                                 libCoinUtils.lib \
+                                 libipopt.lib \
+                                 libOsiCbc.lib \
+                                 libOsiClp.lib \
+                                 libOsi.lib
 
 #####################################################################################
 #                                  DAE-TOOLS
 #####################################################################################
-win32-msvc2008::DAE_CORE_LIB = Core.lib
+win32-msvc2008::DAE_CORE_LIB          = Core.lib
 win32-msvc2008::DAE_DATAREPORTERS_LIB = DataReporters.lib
-win32-msvc2008::DAE_SIMULATION_LIB = Simulation.lib
-win32-msvc2008::DAE_SOLVER_LIB = Solver.lib
+win32-msvc2008::DAE_SIMULATION_LIB    = Simulation.lib
+win32-msvc2008::DAE_SOLVER_LIB        = Solver.lib
+win32-msvc2008::DAE_NLPSOLVER_LIB     = NLPSolver.lib
 
-unix::DAE_CORE_LIB = -lCore
+unix::DAE_CORE_LIB          = -lCore
 unix::DAE_DATAREPORTERS_LIB = -lDataReporters
-unix::DAE_SIMULATION_LIB = -lSimulation
-unix::DAE_SOLVER_LIB = -lSolver
+unix::DAE_SIMULATION_LIB    = -lSimulation
+unix::DAE_SOLVER_LIB        = -lSolver
+unix::DAE_NLPSOLVER_LIB     = -lNLPSolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 

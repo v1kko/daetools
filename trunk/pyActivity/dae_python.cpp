@@ -25,7 +25,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .value("ePauseActivity",    dae::activity::ePauseActivity)
         .export_values()
     ;
-     
+	
 /**************************************************************
     daeSimulation_t
 ***************************************************************/
@@ -44,8 +44,8 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       pure_virtual(&daeSimulation_t::Pause))
         .def("Resume",                      pure_virtual(&daeSimulation_t::Resume))
         
-        .def("InitSimulation",              pure_virtual(&daeSimulation_t::InitSimulation))
-        .def("InitOptimization",            pure_virtual(&daeSimulation_t::InitOptimization))
+        .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize))
+        .def("InitializeOptimization",      pure_virtual(&daeSimulation_t::InitializeOptimization))
         .def("Reinitialize",                pure_virtual(&daeSimulation_t::Reinitialize))
         .def("SolveInitial",                pure_virtual(&daeSimulation_t::SolveInitial))
         .def("Integrate",                   pure_virtual(&daeSimulation_t::Integrate))
@@ -91,8 +91,8 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       &daeSimulation::Pause)
         .def("Resume",                      &daeSimulation::Resume)
     
-        .def("InitSimulation",              &daeSimulation::InitSimulation)
-        .def("InitOptimization",            &daeSimulation::InitOptimization)
+        .def("Initialize",					&daeSimulation::Initialize)
+        .def("InitializeOptimization",		&daeSimulation::InitializeOptimization)
         .def("Reinitialize",                &daeSimulation::Reinitialize)
         .def("SolveInitial",                &daeSimulation::SolveInitial)
         .def("Integrate",                   &daeSimulation::Integrate)
@@ -107,14 +107,20 @@ BOOST_PYTHON_MODULE(pyActivity)
         //.def("IntegrateUntilConditionSatisfied",  &daeSimulation::IntegrateUntilConditionSatisfied)
         ; 
       
-    class_<daepython::daeIPOPTWrapper, boost::noncopyable>("daeIPOPT")
-        .def("Initialize",	&daeIPOPT::Initialize)
-        .def("Run",			&daeIPOPT::Run)
-        .def("Finalize",	&daeIPOPT::Finalize)
-        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionS)
-        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionN)
-        .def("SetOption",	&daepython::daeIPOPTWrapper::SetOptionI) 
-        ;
+/**************************************************************
+	daeOptimization_t
+***************************************************************/
+	class_<daepython::daeOptimizationWrapper, boost::noncopyable>("daeOptimization_t", no_init)
+		.def("Initialize",             pure_virtual(&daeOptimization_t::Initialize))
+		.def("Run",                    pure_virtual(&daeOptimization_t::Run))
+		.def("Finalize",               pure_virtual(&daeOptimization_t::Finalize))
+	;
+	
+	class_<daeOptimization, bases<daeSimulation_t>, boost::noncopyable>("daeOptimization")
+		.def("Initialize",             &daeOptimization::Initialize)
+		.def("Run",                    &daeOptimization::Run)
+		.def("Finalize",               &daeOptimization::Finalize)
+	 ;
 
     
     

@@ -17,7 +17,6 @@
 #include "../dae_develop.h"
 #include "../DataReporters/datareporters.h"
 #include "../Simulation/dyn_simulation.h"
-#include "../Simulation/optimization.h"
 #include "../Solver/ida_solver.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
@@ -214,28 +213,28 @@ public:
 
 
 
-class daeIPOPTWrapper : public daeIPOPT,
-                        public boost::python::wrapper<daeIPOPT>
+class daeOptimizationWrapper : public daeOptimization_t,
+							   public boost::python::wrapper<daeOptimization_t>
 {
 public:
-    daeIPOPTWrapper(void)
-    {
-    }
+	void Initialize(daeSimulation_t*   pSimulation,
+			        daeNLPSolver_t*    pNLPSolver, 
+					daeDAESolver_t*    pDAESolver, 
+					daeDataReporter_t* pDataReporter, 
+					daeLog_t*          pLog)
+	{
+		this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog);
+	}
 	
-	void SetOptionS(const string& strOptionName, const string& strValue)
+	void Run(void)
 	{
-		daeIPOPT::SetOption(strOptionName, strValue);
+		this->get_override("Run")();
 	}
-	    
-	void SetOptionN(const string& strOptionName, real_t dValue)
+	
+	void Finalize(void)
 	{
-		daeIPOPT::SetOption(strOptionName, dValue);
+		this->get_override("Run")();
 	}
-    
-	void SetOptionI(const string& strOptionName, int iValue)
-	{
-		daeIPOPT::SetOption(strOptionName, iValue);
-	}   
 };
 
 

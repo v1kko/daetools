@@ -159,7 +159,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Initialize the simulation
-    simulation.InitSimulation(solver, datareporter, log)
+    simulation.Initialize(solver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

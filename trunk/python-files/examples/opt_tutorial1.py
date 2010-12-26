@@ -76,12 +76,13 @@ class simTutorial(daeSimulation):
 def guiRun():
     from PyQt4 import QtCore, QtGui
     app = QtGui.QApplication(sys.argv)
-    simulation   = simTutorial()
-    opt = daeIPOPT()
-    simu.m.SetReportingOn(True)
+    sim = simTutorial()
+    opt = daeOptimization()
+    nlp = daeIPOPT()
+    sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
-    simulator  = daeSimulator(app, simulation=sim, optimization=opt)
+    simulator = daeSimulator(app, simulation=sim, optimization=opt, nlpsolver=nlp)
     simulator.show()
     app.exec_()
 
@@ -90,10 +91,10 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     solver       = daeIDASolver()
-    nlpsolver    = None
+    nlpsolver    = daeIPOPT()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
-    optimization = daeIPOPT()
+    optimization = daeOptimization()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -108,14 +109,13 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    simulation.InitOptimization(solver, datareporter, log)
     optimization.Initialize(simulation, nlpsolver, solver, datareporter, log)
 
-    optimization.SetOption('print_level', 0);
-    optimization.SetOption('hessian_approximation', 'limited-memory');
-    optimization.SetOption('tol', 1e-7);
-    optimization.SetOption('linear_solver', 'mumps');
-    optimization.SetOption('mu_strategy', 'adaptive');
+    nlpsolver.SetOption('print_level', 0);
+    nlpsolver.SetOption('hessian_approximation', 'limited-memory');
+    nlpsolver.SetOption('tol', 1e-7);
+    nlpsolver.SetOption('linear_solver', 'mumps');
+    nlpsolver.SetOption('mu_strategy', 'adaptive');
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

@@ -4,6 +4,7 @@
 #include "activity_class_factory.h"
 #include "../Core/coreimpl.h"
 #include "../config.h"
+#include "../Core/optimization.h"
 
 namespace dae
 {
@@ -12,7 +13,7 @@ namespace activity
 /*********************************************************************************************
 	daeSimulation
 **********************************************************************************************/
-class DAE_ACTIVITY_API daeSimulation : virtual public daeSimulation_t
+class DAE_ACTIVITY_API daeSimulation : public daeSimulation_t
 {
 public:
 	daeSimulation(void);
@@ -39,8 +40,8 @@ public:
 	virtual void				Pause(void);
 	virtual daeeActivityAction	GetActivityAction(void) const;
 
-	virtual void				InitSimulation(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
-	virtual void				InitOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -108,6 +109,32 @@ protected:
 	std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
 };
 
+/*********************************************************************************************
+	daeOptimization
+**********************************************************************************************/
+class DAE_ACTIVITY_API daeOptimization :  public daeOptimization_t
+{
+public:
+	daeOptimization(void);
+	virtual ~daeOptimization(void);
+
+public:
+	virtual void Initialize(daeSimulation_t*   pSimulation,
+					        daeNLPSolver_t*    pNLPSolver, 
+							daeDAESolver_t*    pDAESolver, 
+							daeDataReporter_t* pDataReporter, 
+							daeLog_t*          pLog);
+	virtual void Run(void);
+	virtual void Finalize(void);
+	
+protected:
+	daeSimulation_t*			m_pSimulation;
+	daeLog_t*					m_pLog;
+	daeNLPSolver_t*				m_pNLPSolver;
+	daeDataReporter_t*			m_pDataReporter;
+	daeDAESolver_t*				m_pDAESolver;
+	bool						m_bIsInitialized;
+};
 
 
 }

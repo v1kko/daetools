@@ -2,6 +2,7 @@ from pyCore import *
 from pyActivity import *
 from pySolver import *
 from pyDataReporting import *
+from pyIPOPT import *
 from daetools.daeSimulator import *
 from daeLogs import daePythonStdOutLog
 

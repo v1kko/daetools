@@ -129,6 +129,7 @@ cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE/pyCore.so
 cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE/pyActivity.so
 cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE/pyDataReporting.so
 cp ../release/pySolver.so           ${PACKAGE_NAME}/pyDAE/pySolver.so
+cp ../release/pyIPOPT.so            ${PACKAGE_NAME}/pyDAE/pyIPOPT.so
 
 mkdir ${PACKAGE_NAME}/pyAmdACML
 if [ -e ../release/pyAmdACML.so ]; then

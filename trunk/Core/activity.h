@@ -51,12 +51,12 @@ public:
 	virtual void				Pause(void)										= 0;
 	virtual daeeActivityAction	GetActivityAction(void) const					= 0;
 
-	virtual void				InitSimulation(daeDAESolver_t* pDAESolver, 
-										       daeDataReporter_t* pDataReporter, 
-										       daeLog_t* pLog)							= 0;
-	virtual void				InitOptimization(daeDAESolver_t* pDAESolver, 
-										         daeDataReporter_t* pDataReporter, 
-										         daeLog_t* pLog)						= 0;
+	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
+										   daeDataReporter_t* pDataReporter, 
+										   daeLog_t* pLog)						    	= 0;
+	virtual void				InitializeOptimization(daeDAESolver_t* pDAESolver, 
+										               daeDataReporter_t* pDataReporter, 
+										               daeLog_t* pLog)					= 0;
 	virtual void				Reinitialize(void)										= 0;
 	virtual void				SolveInitial(void)										= 0;
 	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;
@@ -66,22 +66,6 @@ public:
 	virtual real_t				IntegrateUntilTime(real_t time, 
 												   daeeStopCriterion eStopCriterion)	= 0;
 };
-
-/*********************************************************************
-	daeOptimization_t
-*********************************************************************/
-class daeOptimization_t
-{
-public:
-	virtual void Initialize(daeSimulation_t* pSimulation,
-					        daeNLPSolver_t* pNLPSolver, 
-							daeDAESolver_t* pDAESolver, 
-							daeDataReporter_t* pDataReporter, 
-							daeLog_t* pLog)						= 0;
-	virtual void Run(void)										= 0;
-	virtual void Finalize(void)									= 0;
-};
-
 
 /******************************************************************
 	daeActivityClassFactory_t
@@ -99,10 +83,8 @@ public:
     virtual string   GetVersion(void) const			= 0;
 
 	virtual daeSimulation_t*	CreateSimulation(const string& strClass)	= 0;
-	virtual daeOptimization_t*	CreateOptimization(const string& strClass)	= 0;
 
 	virtual void SupportedSimulations(std::vector<string>& strarrClasses)	= 0;
-	virtual void SupportedOptimizations(std::vector<string>& strarrClasses)	= 0;
 };
 typedef daeActivityClassFactory_t* (*pfnGetActivityClassFactory)(void);
 

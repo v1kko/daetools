@@ -94,14 +94,28 @@ daeeActivityAction daeSimulation::GetActivityAction(void) const
 	return m_eActivityAction;
 }
 
-void daeSimulation::InitSimulation(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
 {
+	if(m_bIsInitialized)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation has already been initialized";
+		throw e;
+	}
+		
 	m_bSetupOptimization = false;
 	Init(pDAESolver, pDataReporter, pLog);
 }
 
-void daeSimulation::InitOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+void daeSimulation::InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
 {
+	if(m_bIsInitialized)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation has already been initialized";
+		throw e;
+	}
+	
 	m_bSetupOptimization = true;
 	Init(pDAESolver, pDataReporter, pLog);
 }
@@ -320,7 +334,11 @@ void daeSimulation::SolveInitial(void)
 
 // Check if initialized
 	if(!m_bIsInitialized)
-		daeDeclareAndThrowException(exInvalidCall);
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation has not been initialized";
+		throw e;
+	}
 	
 // Check pointers
 	if(!m_pModel)
@@ -354,11 +372,19 @@ void daeSimulation::SolveInitial(void)
 
 void daeSimulation::Run(void)
 {
-// Check if initialized and solved initially
+// Check if initialized
 	if(!m_bIsInitialized)
-		daeDeclareAndThrowException(exInvalidCall);
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation has not been initialized";
+		throw e;
+	}
 	if(!m_bIsSolveInitial)
-		daeDeclareAndThrowException(exInvalidCall);
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation function SolveInitial() must be called prior a call to Run()";
+		throw e;
+	}
 	
 // Check pointers
 	if(!m_pModel)
