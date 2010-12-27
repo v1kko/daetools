@@ -86,6 +86,8 @@ copy pySolver.pyd                   %ROOT%\pyDAE\pySolver.pyd
 copy pyAmdACML.pyd                  %ROOT%\pyAmdACML\pyAmdACML.pyd
 copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL\pyIntelMKL.pyd
 copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso\pyIntelPardiso.pyd
+copy pyIPOPT.pyd                    %ROOT%\pyDAE\pyIPOPT.pyd
+copy IPOPT39.dll                    %ROOT%\pyDAE\IPOPT39.dll
 
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE\boost_python-vc90-mt-1_43.dll
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyAmdACML\boost_python-vc90-mt-1_43.dll

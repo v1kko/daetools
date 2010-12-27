@@ -160,7 +160,9 @@ unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
 # 7) make test
 # 8) make install
 #####################################################################################
-NLPSOLVER         = ../bonmin/build
+unix::NLPSOLVER           = ../bonmin/build
+win32-msvc2008::NLPSOLVER = ../ipopt/build
+
 NLPSOLVER_INCLUDE = $${NLPSOLVER}/include/coin
 NLPSOLVER_LIBDIR  = $${NLPSOLVER}/lib
 
@@ -176,16 +178,11 @@ unix::NLPSOLVER_LIBS =  -ldl -lblas -llapack \
 						-lOsiClp \
 						-lOsi
 
-win32-msvc2008::NLPSOLVER_LIBS = libbonmin.lib \
-                                 libCbc.lib \
-                                 libCbcSolver.lib \
-                                 libCgl.lib \
-                                 libClp.lib \
-                                 libCoinUtils.lib \
-                                 libipopt.lib \
-                                 libOsiCbc.lib \
-                                 libOsiClp.lib \
-                                 libOsi.lib
+# Pre-buiilt windows binaries: http://www.coin-or.org/Binaries/Bonmin/Bonmin-1.4.0-win32-msvc9.7z
+win32-msvc2008::NLPSOLVER_LIBS = Ipopt.lib
+#win32-msvc2008::NLPSOLVER_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+#                                 libCoinHSL.lib \
+#                                 libipopt.lib
 
 #####################################################################################
 #                                  DAE-TOOLS
