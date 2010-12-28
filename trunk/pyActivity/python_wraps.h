@@ -15,9 +15,9 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
-#include "../DataReporters/datareporters.h"
-#include "../Simulation/dyn_simulation.h"
-#include "../Solver/ida_solver.h"
+#include "../DataReporting/datareporters.h"
+#include "../Activity/simulation.h"
+#include "../IDAS_DAESolver/ida_solver.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
 

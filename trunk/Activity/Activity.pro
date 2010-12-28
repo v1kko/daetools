@@ -9,12 +9,12 @@ INCLUDEPATH += $${BOOSTDIR}
 LIBS += $${DAE_CORE_LIB} 
 
 HEADERS += stdafx.h \
-    dyn_simulation.h \
+    simulation.h \
     activity_class_factory.h \
     base_activities.h 
 SOURCES += stdafx.cpp \
-    dyn_simulation.cpp \
-    dllmain.cpp \
+    simulation.cpp \
+    dllmain.cpp \ 
     class_factory.cpp \
     base_activities.cpp \
     optimization.cpp

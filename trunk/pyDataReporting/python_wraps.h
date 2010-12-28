@@ -15,7 +15,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
-#include "../DataReporters/datareporters.h"
+#include "../DataReporting/datareporters.h"
 
 namespace daepython
 {

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "dyn_simulation.h"
+#include "simulation.h"
 #include <stdio.h>
 #include <time.h>
 

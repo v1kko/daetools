@@ -119,9 +119,9 @@ mkdir ${PACKAGE_NAME}/daeSimulator/images
 mkdir ${PACKAGE_NAME}/cDAE
 mkdir ${PACKAGE_NAME}/cDAE/include
 mkdir ${PACKAGE_NAME}/cDAE/include/Core
-mkdir ${PACKAGE_NAME}/cDAE/include/Simulation
-mkdir ${PACKAGE_NAME}/cDAE/include/DataReporters
-mkdir ${PACKAGE_NAME}/cDAE/include/Solver
+mkdir ${PACKAGE_NAME}/cDAE/include/Activity
+mkdir ${PACKAGE_NAME}/cDAE/include/DataReporting
+mkdir ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver
 mkdir ${PACKAGE_NAME}/cDAE/lib
 
 # Python extension modules and LA solvers
@@ -214,14 +214,14 @@ cp ../Core/macros.h         ${PACKAGE_NAME}/cDAE/include/Core/macros.h
 cp ../Core/class_factory.h  ${PACKAGE_NAME}/cDAE/include/Core/class_factory.h
 cp ../Core/coreimpl.h       ${PACKAGE_NAME}/cDAE/include/Core/coreimpl.h
 
-cp ../Simulation/base_activities.h  ${PACKAGE_NAME}/cDAE/include/Simulation/base_activities.h
-cp ../Simulation/dyn_simulation.h   ${PACKAGE_NAME}/cDAE/include/Simulation/dyn_simulation.h
+cp ../Activity/base_activities.h  ${PACKAGE_NAME}/cDAE/include/Activity/base_activities.h
+cp ../Activity/simulation.h       ${PACKAGE_NAME}/cDAE/include/Activity/simulation.h
 
-cp ../DataReporters/datareporters.h                 ${PACKAGE_NAME}/cDAE/include/DataReporters/datareporters.h
-cp ../DataReporters/base_data_reporters_receivers.h ${PACKAGE_NAME}/cDAE/include/DataReporters/base_data_reporters_receivers.h
+cp ../DataReporting/datareporters.h                 ${PACKAGE_NAME}/cDAE/include/DataReporting/datareporters.h
+cp ../DataReporting/base_data_reporters_receivers.h ${PACKAGE_NAME}/cDAE/include/DataReporting/base_data_reporters_receivers.h
 
-cp ../Solver/base_solvers.h ${PACKAGE_NAME}/cDAE/include/Solver/base_solvers.h
-cp ../Solver/ida_solver.h ${PACKAGE_NAME}/cDAE/include/Solver/ida_solver.h
+cp ../IDAS_DAESolver/base_solvers.h  ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver/base_solvers.h
+cp ../IDAS_DAESolver/ida_solver.h    ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver/ida_solver.h
 
 # Lib
 cp ../release/libcdaeCore.a              ${PACKAGE_NAME}/cDAE/lib/libcdaeCore.a

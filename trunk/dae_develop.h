@@ -19,11 +19,11 @@
 using namespace dae::xml;
 #include "Core/coreimpl.h"
 using namespace dae::core;
-#include "Simulation/base_activities.h"
-#include "Simulation/dyn_simulation.h"
+#include "Activity/base_activities.h"
+#include "Activity/simulation.h"
 using namespace dae::activity;
-#include "DataReporters/datareporters.h"
-#include "DataReporters/base_data_reporters_receivers.h"
+#include "DataReporting/datareporters.h"
+#include "DataReporting/base_data_reporters_receivers.h"
 using namespace dae::datareporting;
 #include "Core/helpers.h"
 using namespace dae;

@@ -39,10 +39,13 @@ const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute 
 								"You should have received a copy of the GNU General Public License "
 								"along with this program. If not, see <http://www.gnu.org/licenses/>.";
 const size_t FREE = ULONG_MAX;
-inline string daeVersion(void)
+inline string daeVersion(bool bGetRevision = false)
 {
 	char dae__version[20];
-	::sprintf(dae__version, "%d.%d-%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
+	if(bGetRevision)
+		::sprintf(dae__version, "%d.%d-%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
+	else
+		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
 	return string(dae__version);
 }
 

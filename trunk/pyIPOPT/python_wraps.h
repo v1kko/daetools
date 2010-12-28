@@ -15,8 +15,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
-#include "../DataReporters/datareporters.h"
-#include "../NLPSolver/nlpsolver.h"
+#include "../DataReporting/datareporters.h"
+#include "../IPOPT_NLPSolver/nlpsolver.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
 
