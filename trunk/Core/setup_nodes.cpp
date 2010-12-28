@@ -54,7 +54,7 @@ adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionCont
 		}
 		else
 		{
-			daeDeclareAndThrowException(exInvalidCall);
+			daeDeclareAndThrowException(exInvalidCall)
 		}
 	}
 
@@ -117,6 +117,16 @@ void adSetupParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const da
 
 void adSetupParameterNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
 {
+}
+
+bool adSetupParameterNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adSetupParameterNode::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -193,6 +203,16 @@ void adSetupDomainIteratorNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
 
 void adSetupDomainIteratorNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
 {
+}
+
+bool adSetupDomainIteratorNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adSetupDomainIteratorNode::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -302,6 +322,11 @@ void adSetupVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 
 void adSetupVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
 {
+}
+
+bool adSetupVariableNode::IsLinear(void) const
+{
+	return true;
 }
 
 /*********************************************************************************************

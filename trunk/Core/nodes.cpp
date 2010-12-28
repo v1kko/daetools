@@ -348,6 +348,19 @@ void adNodeImpl::ExportAsLatex(string strFileName)
 	file.close();
 }
 
+bool adNodeImpl::IsLinear(void) const
+{
+// All nodes are non-linear if I dont explicitly state that they are!
+	return false;
+}
+
+bool adNodeImpl::IsFunctionOfVariables(void) const
+{
+// All nodes are functions of variables if I dont explicitly state that they aint!
+	return true;
+}
+
+
 /*********************************************************************************************
 	adConstantNode
 **********************************************************************************************/
@@ -415,6 +428,16 @@ void adConstantNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveA
 
 void adConstantNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
 {
+}
+
+bool adConstantNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adConstantNode::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -529,6 +552,16 @@ void adRuntimeParameterNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapI
 {
 }
 
+bool adRuntimeParameterNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adRuntimeParameterNode::IsFunctionOfVariables(void) const
+{
+	return false;
+}
+
 /*********************************************************************************************
 	adDomainIndexNode
 **********************************************************************************************/
@@ -616,6 +649,16 @@ void adDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSa
 
 void adDomainIndexNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
 {
+}
+
+bool adDomainIndexNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adDomainIndexNode::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -800,6 +843,11 @@ void adRuntimeVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapInde
 {
 	pair<size_t, size_t> mapPair(m_nOverallIndex, mapIndexes.size());
 	mapIndexes.insert(mapPair);
+}
+
+bool adRuntimeVariableNode::IsLinear(void) const
+{
+	return true;
 }
 
 /*********************************************************************************************
@@ -1681,6 +1729,50 @@ void adUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
 	node->AddVariableIndexToArray(mapIndexes);
 }
 
+bool adUnaryNode::IsLinear(void) const
+{
+	bool lin   = node->IsLinear();
+	bool isFun = node->IsFunctionOfVariables();
+
+	Linearity type;
+	
+	if(lin && (!isFun))
+		type = LIN;
+	else if(lin && isFun)
+		type = LIN_FUN;
+	else
+		type = NON_LIN;
+	
+// If node is linear and not a function of variable: return linear
+	if(type == LIN) 
+	{
+		return true;
+	}
+	else if(type == NON_LIN) 
+	{
+		return false;
+	}
+	else if(type == LIN_FUN) 
+	{
+	// If the argument is a function of variables then I should check the function
+		if(eFunction == eSign)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool adUnaryNode::IsFunctionOfVariables(void) const
+{
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsFunctionOfVariables();
+}
+
 /*********************************************************************************************
 	adBinaryNode
 **********************************************************************************************/
@@ -1927,7 +2019,7 @@ void adBinaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathML
 void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
 	bool bDoEncloseLeft, bDoEncloseRight;
-	string strName, strValue, strLeft, strRight;
+	string strName, strValue;
 	io::xmlTag_t *mrowout, *mfrac, *mrowleft, *mrowright;
 
 	strName  = "mrow";
@@ -1996,10 +2088,17 @@ void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsM
 	case ePower:
 		strValue = "";
 		if(eFunction == eDivide)
+		{
 			strName = "mfrac";
+			mfrac = mrowout->AddTag(strName, strValue);
+		}
 		else if(eFunction == ePower)
+		{
+		// I should always enclose left
+			bDoEncloseLeft = true;
 			strName = "msup";
-		mfrac = mrowout->AddTag(strName, strValue);
+			mfrac = mrowout->AddTag(strName, strValue);
+		}
 
 		if(bDoEncloseLeft)
 		{
@@ -2074,133 +2173,6 @@ void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsM
 	}
 }
 
-
-//void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
-//{
-//	string strName, strValue, strLeft, strRight;
-//	io::xmlTag_t *mrowout, *mfrac, *mrowleft, *mrowright;
-//
-//	strName  = "mrow";
-//	strValue = "";
-//	mrowout = pTag->AddTag(strName, strValue);
-//
-//	switch(eFunction)
-//	{
-//	case ePlus:
-//	case eMinus:
-//	case eMulti:
-//		if(adDoEnclose(left.get()))
-//		{
-//			strName  = "mrow";
-//			strValue = "";
-//			mrowleft = mrowout->AddTag(strName, strValue);
-//				strName  = "mo";
-//				strValue = "(";
-//				mrowleft->AddTag(strName, strValue);
-//
-//				left->SaveAsPresentationMathML(mrowleft, c);
-//
-//				strName  = "mo";
-//				strValue = ")";
-//				mrowleft->AddTag(strName, strValue);
-//		}
-//		else
-//		{
-//			left->SaveAsPresentationMathML(mrowout, c);
-//		}
-//
-//		strName  = "mo";
-//		if(eFunction == ePlus)
-//			strValue = "+";
-//		else if(eFunction == eMinus)
-//			strValue = "-";
-//		else if(eFunction == eMulti)
-//			strValue = "&InvisibleTimes;"; //"&#x00D7;";
-//		mrowout->AddTag(strName, strValue);
-//
-//		if(adDoEnclose(right.get()))
-//		{
-//			strName  = "mrow";
-//			strValue = "";
-//			mrowright = mrowout->AddTag(strName, strValue);
-//				strName  = "mo";
-//				strValue = "(";
-//				mrowright->AddTag(strName, strValue);
-//
-//				right->SaveAsPresentationMathML(mrowright, c);
-//
-//				strName  = "mo";
-//				strValue = ")";
-//				mrowright->AddTag(strName, strValue);
-//		}
-//		else
-//		{
-//			right->SaveAsPresentationMathML(mrowout, c);
-//		}
-//		break;
-//	case eDivide:
-//	case ePower:
-//		strValue = "";
-//		if(eFunction == eDivide)
-//			strName = "mfrac";
-//		else if(eFunction == ePower)
-//			strName = "msup";
-//		mfrac = mrowout->AddTag(strName, strValue);
-//
-//		if(adDoEnclose(left.get()))
-//		{
-//			strName  = "mrow";
-//			strValue = "";
-//			mrowleft = mfrac->AddTag(strName, strValue);
-//				strName  = "mo";
-//				strValue = "(";
-//				mrowleft->AddTag(strName, strValue);
-//
-//				left->SaveAsPresentationMathML(mrowleft, c);
-//
-//				strName  = "mo";
-//				strValue = ")";
-//				mrowleft->AddTag(strName, strValue);
-//		}
-//		else
-//		{
-//			left->SaveAsPresentationMathML(mfrac, c);
-//		}
-//
-//		if(adDoEnclose(right.get()))
-//		{
-//			strName  = "mrow";
-//			strValue = "";
-//			mrowright = mfrac->AddTag(strName, strValue);
-//				strName  = "mo";
-//				strValue = "(";
-//				mrowright->AddTag(strName, strValue);
-//
-//				right->SaveAsPresentationMathML(mrowright, c);
-//
-//				strName  = "mo";
-//				strValue = ")";
-//				mrowright->AddTag(strName, strValue);
-//		}
-//		else
-//		{
-//			right->SaveAsPresentationMathML(mfrac, c);
-//		}
-//		break;
-//
-//	case eMin:
-//		daeDeclareAndThrowException(exNotImplemented);
-//		break;
-//
-//	case eMax:
-//		daeDeclareAndThrowException(exNotImplemented);
-//		break;
-//
-//	default:
-//		daeDeclareAndThrowException(exInvalidPointer);
-//	}
-//}
-
 void adBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
 {
 	if(!left)
@@ -2211,6 +2183,100 @@ void adBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
 	right->AddVariableIndexToArray(mapIndexes);
 }
 
+bool adBinaryNode::IsLinear(void) const
+{
+	bool l = left->IsLinear();
+	bool r = right->IsLinear();
+
+	bool lisFun = left->IsFunctionOfVariables();
+	bool risFun = right->IsFunctionOfVariables();
+
+	Linearity l_type, r_type;
+	
+	if(l && (!lisFun))
+		l_type = LIN;
+	else if(l && lisFun)
+		l_type = LIN_FUN;
+	else
+		l_type = NON_LIN;
+
+	if(r && (!risFun))
+		r_type = LIN;
+	else if(r && risFun)
+		r_type = LIN_FUN;
+	else
+		r_type = NON_LIN;
+	
+// If both are linear and not a function of variables then the expression is linear
+// c = constant/parameter; lf = linear-function; nl = non-linear-function; 
+// Cases: c + c, c - c, c * c, c / c
+	if( l_type == LIN && r_type == LIN )
+		return true;
+
+// If any of these is not linear then the expression is non-linear
+// Cases: nl + lf, nl - lf, nl * lf, nl / lf
+	if( l_type == NON_LIN || r_type == NON_LIN )
+		return false;
+	
+// If either left or right (or both) IS a function of variables then I should check the function;
+// Ohterwise the expression is non-linear
+	if(l_type == LIN_FUN || r_type == LIN_FUN)
+	{
+		switch(eFunction)
+		{
+		case ePlus:
+		case eMinus:
+		// If both are linear or linear functions then the expression is linear
+		// (no matter if both are functions of variables)
+		// Cases: c + lf, lf + c, lf + lf
+			if(l_type != NON_LIN && r_type != NON_LIN) 
+				return true;
+			else 
+				return false;
+			break;
+		case eMulti:
+		// If LEFT is linear (can be a function of variables) AND RIGHT is linear and not a function of variables
+		// or if LEFT is linear and not a function of of variables AND RIGHT is linear (can be a function of variables)
+		// Cases: c * lf, lf * c
+			if( l_type == LIN && r_type == LIN_FUN ) 
+				return true;
+			else if( l_type == LIN_FUN && r_type == LIN ) 
+				return true;
+			else 
+				return false;
+			break;
+		case eDivide:
+		// If LEFT is linear function and RIGHT is linear
+		// Cases: lf / c
+			if( l_type == LIN_FUN && r_type == LIN ) 
+				return true;
+			else 
+				return false;
+			break;
+		default:
+			return false;
+		}
+	}
+// Eihter LEFT or RIGHT are non-linear so return false
+	else
+	{
+		return false;
+	}
+	
+// Just in case I somehow rich this point	
+	return false;
+}
+
+bool adBinaryNode::IsFunctionOfVariables(void) const
+{
+	if(!left)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!right)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// If ANY of these two nodes is a function of variables return true
+	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables() );
+}
 
 }
 }

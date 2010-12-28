@@ -20,6 +20,8 @@ class DAE_CORE_API adNodeImpl : public adNode
 public:
 	void	ExportAsPlainText(string strFileName);
 	void	ExportAsLatex(string strFileName);
+	bool	IsLinear(void) const;
+	bool	IsFunctionOfVariables(void) const;
 };
 
 /*********************************************************************************************
@@ -43,6 +45,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	real_t m_dValue;
@@ -71,6 +75,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 // Runtime part
@@ -101,6 +107,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 // Report/GUI part
@@ -132,6 +140,7 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
 
 public:
 // Runtime part
@@ -239,6 +248,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	boost::shared_ptr<adNode>	node;
@@ -266,6 +277,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	boost::shared_ptr<adNode>	left;
@@ -398,6 +411,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	daeParameter*			m_pParameter;
@@ -425,6 +440,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	daeDistributedEquationDomainInfo* m_pDEDI;
@@ -452,6 +469,7 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
 
 public:
 	daeVariable*			m_pVariable;

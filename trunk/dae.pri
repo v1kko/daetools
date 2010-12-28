@@ -118,33 +118,7 @@ unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 
 
 #####################################################################################
-#                                   IPOPT
-#####################################################################################
-#    Compiling IPOPT on GNU/Linux
-# 0) Unpack IPOPT to daetools/trunk/ipopt
-# 1) cd ipopt/ThirdParty/Mumps
-#    sh get.Mumps
-# 2) cd ipopt/ThirdParty/Metis
-#    sh get.Metis
-# 3) cd ipopt
-#    mkdir build
-# 4) cd build
-#    export LDFLAGS='-s'  (to strip binary: lintian test)
-# 5) ../configure
-# 6) make -jN
-# 7) make test
-# 8) make install
-#####################################################################################
-unix::IPOPT = ../ipopt/build
-
-unix::IPOPT_INCLUDE = $${IPOPT}/include/coin
-unix::IPOPT_LIBDIR  = $${IPOPT}/lib/coin \
-                      $${IPOPT}/lib/coin/ThirdParty
-unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
-
-
-#####################################################################################
-#                                   BONMIN
+#                                   BONMIN / IPOPT
 #####################################################################################
 #    Compiling BONMIN on GNU/Linux
 # 0) Unpack BONMIN to daetools/trunk/bonmin
@@ -153,7 +127,6 @@ unix::IPOPT_LIBS    = -ldl -lblas -llapack -lipopt -lcoinmumps -lcoinmetis
 # 2) cd bonmin/ThirdParty/Metis
 #    sh get.Metis
 # 3) mkdir build
-#    export LDFLAGS='-s'  (to strip binary: lintian test)
 # 4) cd build
 # 5) ../configure
 # 6) make -jN
@@ -178,6 +151,7 @@ unix::NLPSOLVER_LIBS =  -ldl -lblas -llapack \
 						-lOsiClp \
 						-lOsi
 
+# Currently only IPOPT 3.9.1 compiles on windows 
 # Pre-buiilt windows binaries: http://www.coin-or.org/Binaries/Bonmin/Bonmin-1.4.0-win32-msvc9.7z
 win32-msvc2008::NLPSOLVER_LIBS = Ipopt.lib
 #win32-msvc2008::NLPSOLVER_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \

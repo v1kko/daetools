@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simHS71);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simToy);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
 		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
 
  		pOptimization->Initialize(pSimulation.get(), pNLPSolver.get(), pDAESolver.get(), pDataReporter.get(), pLog.get());
+		pSimulation->GetModel()->SaveModelReport("simTest.xml");
+		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
 		
  		pOptimization->Run();
 		pOptimization->Finalize();

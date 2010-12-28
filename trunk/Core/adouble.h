@@ -358,6 +358,8 @@ public:
 		                                     const daeSaveAsMathMLContext* c) const	= 0;
 
 	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes)	= 0;
+	virtual bool	IsLinear(void) const											= 0;
+	virtual bool	IsFunctionOfVariables(void) const								= 0;
 
 	static adNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
@@ -367,6 +369,13 @@ public:
 									 const adNode* node, 
 									 const daeSaveAsMathMLContext* c, 
 									 bool bAppendEqualToZero = false);
+	
+	enum Linearity
+	{
+		LIN = 0,
+		LIN_FUN,
+		NON_LIN
+	};
 };
 
 #define CLONE_NODE(NODE, VALUE) (  boost::shared_ptr<adNode>(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )

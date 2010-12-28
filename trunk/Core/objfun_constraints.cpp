@@ -139,11 +139,13 @@ bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
 	if(m_pObjectiveFunction->GetEquationDefinitionMode() == eEDMUnknown ||
 	   m_pObjectiveFunction->GetEquationEvaluationMode() == eEEMUnknown)
 	{	
-		strError = "Constraint residual not specified [" + m_pObjectiveFunction->GetCanonicalName() + "]";
+		strError = "Objective function residual not specified [" + m_pObjectiveFunction->GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		return false;
 	}
 	
+	cout << "Objective function is: " << (m_pObjectiveFunction->GetResidual().node->IsLinear() ? "linear" : "non-linear") << endl;
+
 	return bCheck;
 }
 
@@ -310,6 +312,8 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 	
+	cout << "Constraint [" << m_pConstraintFunction->GetName() << "] is: " << (m_pConstraintFunction->GetResidual().node->IsLinear() ? "linear" : "non-linear") << endl;
+
 	return bCheck;
 }
 

@@ -305,15 +305,6 @@ public:
 };
 
 
-
-
-
-
-
-
-
-
-
 /******************************************************************
 	modHS71 model
 *******************************************************************/
@@ -321,7 +312,7 @@ const daeVariableType typex("typex", "-", -1.0e+100, 1.0e+100,  1.0, 1e-06);
 
 class modHS71 : public daeModel
 {
-	daeDeclareDynamicClass(modRoberts)
+	daeDeclareDynamicClass(modHS71)
 public:
 	daeVariable	x1, x2, x3, x4, dummy, time;
 
@@ -385,6 +376,9 @@ public:
 		daeOptimizationConstraint* c2 = CreateEqualityConstraint(40, "Constraint 2");
 		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() );
 				
+		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-1E5, +1E5, "Constraint 3");
+		c3->SetResidual( - m.x1() + m.x2() / 5 - 2 * m.x3() + sin(1) );
+		
 	// Set the optimization variables and their lower and upper bounds
 		SetOptimizationVariable(m.x1, 1, 5, 1);
 		SetOptimizationVariable(m.x2, 1, 5, 5);
@@ -395,6 +389,99 @@ public:
 };
 
 
+/******************************************************************
+	modToy model
+*******************************************************************/
+class modToy : public daeModel
+{
+	daeDeclareDynamicClass(modToy)
+public:
+	daeVariable	x, y1, y2, z, dummy, time;
 
+public:
+	modToy(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
+		x("x", no_type, this, ""),
+		y1("y1", no_type, this, ""),
+		y2("y2", no_type, this, ""),
+		z("z", no_type, this, ""),
+		dummy("dummy", no_type, this, ""),
+		time("&tau;",  no_type, this, "")
+	{
+	}
+	
+	void DeclareEquations(void)
+	{
+		daeEquation* eq;
+
+        eq = CreateEquation("Equation1", "");
+        eq->SetResidual( dummy() - 1 );
+
+        eq = CreateEquation("time", "");
+        eq->SetResidual( time.dt() - 1 );
+	}
+};
+/*
+   var x binary;
+   var z integer >= 0 <= 5;
+   var y{1..2} >=0;
+   minimize cost:
+       - x - y[1] - y[2] ;
+
+   subject to
+       c1: ( y[1] - 1/2 )^2 + (y[2] - 1/2)^2 <= 1/4 ;
+       c2: x - y[1] <= 0 ;
+       c3: x + y[2] + z <= 2;
+*/ 
+class simToy : public daeSimulation
+{
+public:
+	modToy m;
+	
+public:
+	simToy(void) : m("simHS71")
+	{
+		SetModel(&m);
+	}
+
+public:
+	void SetUpParametersAndDomains(void)
+	{
+	}
+
+	void SetUpVariables(void)
+	{
+	// x is BINARY variable
+		m.x.AssignValue(0);
+	// y is BINARY variable
+		m.y1.AssignValue(1);
+		m.y2.AssignValue(1);
+	// x is INTEGER variable
+		m.z.AssignValue(1);
+		m.time.SetInitialCondition(0);
+	}
+	
+	void SetUpOptimization(void)
+	{
+	// Set the objective function (min)
+		m_pObjectiveFunction->SetResidual( -m.x() - m.y1() - m.y2() );
+		
+	// Set the constraints (inequality, equality)
+		daeOptimizationConstraint* c1 = CreateInequalityConstraint(-2E19, 0.25, "Constraint 1");
+		c1->SetResidual(pow(m.y1() - 0.5, 2) + pow(m.y2() - 0.5, 2));
+		
+		daeOptimizationConstraint* c2 = CreateInequalityConstraint(-2E19, 0, "Constraint 2");
+		c2->SetResidual( m.x() - m.y1() );
+				
+		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-2E19, 2, "Constraint 3");
+		c3->SetResidual( m.x() + m.y2() + m.z() );
+		
+	// Set the optimization variables and their lower and upper bounds
+		SetOptimizationVariable(m.x,  0,    1, 0.5);
+		SetOptimizationVariable(m.y1, 0, 2e19,   1);
+		SetOptimizationVariable(m.y2, 0, 2e19,   1);
+		SetOptimizationVariable(m.z,  0,    5,   1);
+	}
+
+};
 
 #endif
