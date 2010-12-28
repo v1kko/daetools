@@ -45,7 +45,7 @@ inline string daeVersion(bool bGetRevision = false)
 	if(bGetRevision)
 		::sprintf(dae__version, "%d.%d-%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
 	else
-		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
+		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR);
 	return string(dae__version);
 }
 

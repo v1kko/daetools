@@ -27,8 +27,8 @@ using namespace dae::activity;
 using namespace dae::datareporting;
 #include "Core/helpers.h"
 using namespace dae;
-#include "Solver/base_solvers.h"
-#include "Solver/ida_solver.h"
+#include "IDAS_DAESolver/base_solvers.h"
+#include "IDAS_DAESolver/ida_solver.h"
 using namespace dae::solver;
 #include "Core/base_logging.h"
 using namespace dae::logging;
