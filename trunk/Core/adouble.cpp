@@ -266,7 +266,7 @@ const adouble operator *(const adouble& a, const real_t v)
     tmp.m_dDeriv = a.m_dDeriv * v;
     return tmp;
 }
-
+  
 const adouble adouble::operator * (const adouble& a) const 
 {
     adouble tmp;

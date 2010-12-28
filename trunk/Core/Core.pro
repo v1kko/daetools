@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core \
     gui
-TARGET = Core
+TARGET = cdaeCore
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR}

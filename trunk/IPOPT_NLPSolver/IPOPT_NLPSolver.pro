@@ -1,7 +1,7 @@
 include(../dae.pri)
 
 QT -= core gui
-TARGET = NLPSolver
+TARGET = cdaeIPOPT_NLPSolver
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \

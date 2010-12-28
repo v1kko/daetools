@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core \
     gui
-TARGET = DataReporters
+TARGET = cdaeDataReporting
 CONFIG += staticlib
 TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR}

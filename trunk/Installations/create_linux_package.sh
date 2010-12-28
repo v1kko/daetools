@@ -128,7 +128,7 @@ mkdir ${PACKAGE_NAME}/cDAE/lib
 cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE/pyCore.so
 cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE/pyActivity.so
 cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE/pyDataReporting.so
-cp ../release/pySolver.so           ${PACKAGE_NAME}/pyDAE/pySolver.so
+cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE/pyIDAS.so
 cp ../release/pyIPOPT.so            ${PACKAGE_NAME}/pyDAE/pyIPOPT.so
 
 mkdir ${PACKAGE_NAME}/pyAmdACML
@@ -224,10 +224,11 @@ cp ../Solver/base_solvers.h ${PACKAGE_NAME}/cDAE/include/Solver/base_solvers.h
 cp ../Solver/ida_solver.h ${PACKAGE_NAME}/cDAE/include/Solver/ida_solver.h
 
 # Lib
-cp ../release/libCore.a             ${PACKAGE_NAME}/cDAE/lib/libCore.a
-cp ../release/libSimulation.a       ${PACKAGE_NAME}/cDAE/lib/libSimulation.a
-cp ../release/libSolver.a           ${PACKAGE_NAME}/cDAE/lib/libSolver.a
-cp ../release/libDataReporters.a    ${PACKAGE_NAME}/cDAE/lib/libDataReporters.a
+cp ../release/libcdaeCore.a              ${PACKAGE_NAME}/cDAE/lib/libcdaeCore.a
+cp ../release/libcdaeActivity.a          ${PACKAGE_NAME}/cDAE/lib/libcdaeActivity.a
+cp ../release/libcdaeIDAS_DAESolver.a    ${PACKAGE_NAME}/cDAE/lib/libcdaeIDAS_DAESolver.a
+cp ../release/libcdaeDataReporting.a     ${PACKAGE_NAME}/cDAE/lib/libcdaeDataReporting.a
+cp ../release/libcdaeIPOPT_NLPSolver.a   ${PACKAGE_NAME}/cDAE/lib/libcdaeIPOPT_NLPSolver.a
 
 cp ${IDAS}/lib/libsundials_idas.a         ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.a
 cp ${IDAS}/lib/libsundials_nvecserial.a   ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.a

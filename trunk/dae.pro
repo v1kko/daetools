@@ -1,15 +1,15 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = Core \
-    DataReporters \
-    Simulation \
-    Solver \ 
-	NLPSolver \
+    DataReporting \
+    Activity \
+    IDAS_DAESolver \ 
+	IPOPT_NLPSolver \
 	pyCore \
 	pyActivity \
 	pyDataReporting \
-	pySolver \
+	pyIDAS \
 	pyIPOPT
-
+ 
 HEADERS += dae.h \
     dae_develop.h

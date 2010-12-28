@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core \
 	gui
-TARGET = pySolver
+TARGET = pyIDAS
 TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
@@ -25,9 +25,9 @@ HEADERS += stdafx.h \
     python_wraps.h
 
 win32-msvc2008::QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pySolver1.dll \
-	$${DAE_DEST_DIR}/pySolver.pyd
+	$${DAE_DEST_DIR}/pyIDAS1.dll \
+	$${DAE_DEST_DIR}/pyIDAS.pyd
 
 unix::QMAKE_POST_LINK = cp -f \
 	$${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-	$${DAE_DEST_DIR}/pySolver.so
+	$${DAE_DEST_DIR}/pyIDAS.so

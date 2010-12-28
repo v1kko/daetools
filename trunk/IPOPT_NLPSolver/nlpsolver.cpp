@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "nlpsolver.h"
-#include "../Simulation/dyn_simulation.h"
+#include "../Activity/dyn_simulation.h"
 #include <stdio.h>
 #include <time.h>
 using namespace std;

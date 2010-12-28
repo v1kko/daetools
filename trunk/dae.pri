@@ -161,17 +161,17 @@ win32-msvc2008::NLPSOLVER_LIBS = Ipopt.lib
 #####################################################################################
 #                                  DAE-TOOLS
 #####################################################################################
-win32-msvc2008::DAE_CORE_LIB          = Core.lib
-win32-msvc2008::DAE_DATAREPORTERS_LIB = DataReporters.lib
-win32-msvc2008::DAE_SIMULATION_LIB    = Simulation.lib
-win32-msvc2008::DAE_SOLVER_LIB        = Solver.lib
-win32-msvc2008::DAE_NLPSOLVER_LIB     = NLPSolver.lib
+win32-msvc2008::DAE_CORE_LIB          = cdaeCore.lib
+win32-msvc2008::DAE_DATAREPORTERS_LIB = cdaeDataReporting.lib
+win32-msvc2008::DAE_SIMULATION_LIB    = cdaeActivity.lib
+win32-msvc2008::DAE_SOLVER_LIB        = cdaeIDAS_DAESolver.lib
+win32-msvc2008::DAE_NLPSOLVER_LIB     = cdaeIPOPT_NLPSolver.lib
 
-unix::DAE_CORE_LIB          = -lCore
-unix::DAE_DATAREPORTERS_LIB = -lDataReporters
-unix::DAE_SIMULATION_LIB    = -lSimulation
-unix::DAE_SOLVER_LIB        = -lSolver
-unix::DAE_NLPSOLVER_LIB     = -lNLPSolver
+unix::DAE_CORE_LIB          = -lcdaeCore
+unix::DAE_DATAREPORTERS_LIB = -lcdaeDataReporting
+unix::DAE_SIMULATION_LIB    = -lcdaeActivity
+unix::DAE_SOLVER_LIB        = -lcdaeIDAS_DAESolver
+unix::DAE_NLPSOLVER_LIB     = -lcdaeIPOPT_NLPSolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 
