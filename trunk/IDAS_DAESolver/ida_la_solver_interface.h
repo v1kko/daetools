@@ -1,7 +1,7 @@
 #ifndef IDA_LA_SOLVER_INTERFACE_H
 #define IDA_LA_SOLVER_INTERFACE_H
 
-#include "../Solver/solver_class_factory.h"
+#include "../IDAS_DAESolver/solver_class_factory.h"
 #include <string>
 
 namespace dae
