@@ -181,7 +181,6 @@ cp ../python-files/examples/*.html       ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.xsl        ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.xml        ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.py         ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.out        ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.png        ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.init       ${PACKAGE_NAME}/examples
 cp ../python-files/examples/images/*.*   ${PACKAGE_NAME}/examples/images

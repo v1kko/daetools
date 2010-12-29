@@ -34,14 +34,31 @@ Section "daetools (required)"
   
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
-  
-  ; Put file there
-  File /r "daetools\*.*"
-  
-  ; Config file
+  File    "daetools\*.*"
+  File /r "daetools\pyDAE\*.*"
+  File /r "daetools\pyAmdACML\*.*"
+  File /r "daetools\pyIntelMKL\*.*"
+  File /r "daetools\pyLapack\*.*"
+  File /r "daetools\pyTrilinosAmesos\*.*"
+  File /r "daetools\pyIntelPardiso\*.*"
+  File /r "daetools\daePlotter\*.*"
+  File /r "daetools\daeSimulator\*.*"
+  File /r "daetools\docs\*.*"
+  File /r "daetools\examples\*.*"
+
+ ; Headers and libs
   CreateDirectory c:\daetools
+  CreateDirectory c:\daetools\include
+  CreateDirectory c:\daetools\lib
+
+  SetOutPath c:\daetools\include
+  File /r "daetools\cDAE\*.*"
+
+  ; Config file
   CopyFiles $INSTDIR\daetools_cfg  c:\daetools\daetools.cfg
   CopyFiles $INSTDIR\bonmin_cfg    c:\daetools\bonmin.cfg
+  Delete $INSTDIR\daetools_cfg
+  Delete $INSTDIR\bonmin_cfg
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_daetools "Install_Dir" "$INSTDIR"

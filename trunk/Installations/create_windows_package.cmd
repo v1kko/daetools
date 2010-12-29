@@ -132,7 +132,6 @@ copy *.html             %ROOT%\examples
 copy *.xsl              %ROOT%\examples
 copy *.xml              %ROOT%\examples
 copy *.py               %ROOT%\examples
-copy *.out              %ROOT%\examples
 copy *.png              %ROOT%\examples
 copy *.init             %ROOT%\examples
 copy daeRunExamples.py  %ROOT%\examples\daeRunExamples.pyw
