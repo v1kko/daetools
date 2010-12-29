@@ -4,12 +4,13 @@ SUBDIRS = Core \
     DataReporting \
     Activity \
     IDAS_DAESolver \ 
-	IPOPT_NLPSolver \
+    BONMIN_MINLPSolver \
 	pyCore \
 	pyActivity \
 	pyDataReporting \
 	pyIDAS \
-	pyIPOPT
+	pyIPOPT \ 
+	pyBONMIN
  
 HEADERS += dae.h \
     dae_develop.h

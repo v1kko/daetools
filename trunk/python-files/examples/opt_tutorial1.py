@@ -67,10 +67,10 @@ class simTutorial(daeSimulation):
         c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4()
                 
         # Set the optimization variables and their lower and upper bounds
-        self.SetOptimizationVariable(self.m.x1, 1, 5, 1);
-        self.SetOptimizationVariable(self.m.x2, 1, 5, 5);
-        self.SetOptimizationVariable(self.m.x3, 1, 5, 5);
-        self.SetOptimizationVariable(self.m.x4, 1, 5, 1);
+        self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 1);
+        self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 5);
+        self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 5);
+        self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 1);
 
 # Use daeSimulator class
 def guiRun():
@@ -78,7 +78,7 @@ def guiRun():
     app = QtGui.QApplication(sys.argv)
     sim = simTutorial()
     opt = daeOptimization()
-    nlp = daeIPOPT()
+    nlp = daeBONMIN()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
@@ -91,7 +91,7 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     solver       = daeIDASolver()
-    nlpsolver    = daeIPOPT()
+    nlpsolver    = daeBONMIN()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
     optimization = daeOptimization()

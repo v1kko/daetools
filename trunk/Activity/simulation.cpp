@@ -534,7 +534,19 @@ daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(real_t EqualT
 	return pConstraint.get();
 }
 
-void daeSimulation::SetOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+void daeSimulation::SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+{
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, LB, UB, defaultValue));
+	m_arrOptimizationVariables.push_back(pVar);	
+}
+
+void daeSimulation::SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue)
+{
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, defaultValue));
+	m_arrOptimizationVariables.push_back(pVar);	
+}
+
+void daeSimulation::SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue)
 {
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	

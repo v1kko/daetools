@@ -2488,6 +2488,8 @@ class DAE_CORE_API daeOptimizationVariable : public daeObject
 public:
 	daeDeclareDynamicClass(daeOptimizationVariable)
 	daeOptimizationVariable(daeVariable* pVariable, real_t LB, real_t UB, real_t defaultValue);
+	daeOptimizationVariable(daeVariable* pVariable, int LB, int UB, int defaultValue);
+	daeOptimizationVariable(daeVariable* pVariable, bool defaultValue);
 	virtual ~daeOptimizationVariable(void);
 	
 public:
@@ -2495,10 +2497,11 @@ public:
 	size_t GetIndex(void) const;
 	
 public:
-	daeVariable*	m_pVariable;
-	real_t			m_dLB;
-	real_t			m_dUB;
-	real_t			m_dDefaultValue;
+	daeVariable*					m_pVariable;
+	real_t							m_dLB;
+	real_t							m_dUB;
+	real_t							m_dDefaultValue;
+	daeeOptimizationVariableType	m_eType;
 };
 
 /******************************************************************

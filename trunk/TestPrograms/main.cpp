@@ -4,10 +4,10 @@
 #include <iostream>
 #include <ctime>
 #include "../Examples/test_models.h"
-#include "../DataReporters/datareporters.h"
-#include "../Solver/ida_solver.h"
-#include "../Simulation/dyn_simulation.h"
-#include "../NLPSolver/nlpsolver.h"
+#include "../DataReporting/datareporters.h"
+#include "../IDAS_DAESolver/ida_solver.h"
+#include "../Activity/simulation.h"
+#include "../BONMIN_MINLPSolver/nlpsolver.h"
 
 int main(int argc, char *argv[])
 { 
@@ -15,10 +15,10 @@ int main(int argc, char *argv[])
 	{
 		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simToy);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
-		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver()); //daeCreateIDASolver());
+		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
 		boost::scoped_ptr<daeOptimization_t>	pOptimization(new daeOptimization());
-		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(new daeIPOPTSolver());
+		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(new daeBONMINSolver());
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 

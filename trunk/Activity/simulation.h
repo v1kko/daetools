@@ -67,7 +67,10 @@ public:
 	
 	daeOptimizationConstraint* CreateInequalityConstraint(real_t LB, real_t UB, string strDescription = "");
 	daeOptimizationConstraint* CreateEqualityConstraint(real_t EqualTo, string strDescription = "");
-	void SetOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
+
+	void SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
+	void SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);
+	void SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue);
 	
 protected:
 	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);

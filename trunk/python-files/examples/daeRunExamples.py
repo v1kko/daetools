@@ -63,7 +63,7 @@ class RunExamples(QtGui.QDialog):
         self.ui.setupUi(self)
         self.app = app
         
-        self.setWindowTitle("DAE Tools Tutorials v" + daeVersion())
+        self.setWindowTitle("DAE Tools Tutorials v" + daeVersion(True))
 
         self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)
         self.connect(self.ui.toolButtonCode,               QtCore.SIGNAL('clicked()'), self.slotShowCode)

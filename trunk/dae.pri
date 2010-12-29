@@ -1,4 +1,4 @@
-VERSION=1.1.1
+VERSION = 1.1.1
 
 QMAKE_CXXFLAGS += -DDAE_MAJOR=1
 QMAKE_CXXFLAGS += -DDAE_MINOR=1
@@ -21,6 +21,9 @@ CONFIG(debug, debug|release){
 CONFIG(release, debug|release){
     OBJECTS_DIR = release
 }
+
+# Cross compiling:
+# configure --prefix=/usr/i586-mingw32msvc --host=i586-mingw32msvc --build=x86_64-linux
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -165,13 +168,13 @@ win32-msvc2008::DAE_CORE_LIB          = cdaeCore.lib
 win32-msvc2008::DAE_DATAREPORTERS_LIB = cdaeDataReporting.lib
 win32-msvc2008::DAE_SIMULATION_LIB    = cdaeActivity.lib
 win32-msvc2008::DAE_SOLVER_LIB        = cdaeIDAS_DAESolver.lib
-win32-msvc2008::DAE_NLPSOLVER_LIB     = cdaeIPOPT_NLPSolver.lib
+win32-msvc2008::DAE_NLPSOLVER_LIB     = cdaeBONMIN_MINLPSolver.lib
 
 unix::DAE_CORE_LIB          = -lcdaeCore
 unix::DAE_DATAREPORTERS_LIB = -lcdaeDataReporting
 unix::DAE_SIMULATION_LIB    = -lcdaeActivity
 unix::DAE_SOLVER_LIB        = -lcdaeIDAS_DAESolver
-unix::DAE_NLPSOLVER_LIB     = -lcdaeIPOPT_NLPSolver
+unix::DAE_NLPSOLVER_LIB     = -lcdaeBONMIN_MINLPSolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 

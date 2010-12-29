@@ -43,7 +43,7 @@ class daeSimulator(QtGui.QDialog):
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
         
-        self.setWindowTitle("DAE Tools Simulator v" + daeVersion())
+        self.setWindowTitle("DAE Tools Simulator v" + daeVersion(True))
 
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
@@ -207,7 +207,7 @@ class daeSimulator(QtGui.QDialog):
                 self.simulation.Finalize()
             else:
                 if self.nlpsolver == None:
-                    self.nlpsolver = daeIPOPT()
+                    self.nlpsolver = daeBONMIN()
                 self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
                 self.optimization.Run()
                 self.optimization.Finalize()                

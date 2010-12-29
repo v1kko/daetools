@@ -129,7 +129,7 @@ cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE/pyCore.so
 cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE/pyActivity.so
 cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE/pyDataReporting.so
 cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE/pyIDAS.so
-cp ../release/pyIPOPT.so            ${PACKAGE_NAME}/pyDAE/pyIPOPT.so
+cp ../release/pyBONMIN.so           ${PACKAGE_NAME}/pyDAE/pyBONMIN.so
 
 mkdir ${PACKAGE_NAME}/pyAmdACML
 if [ -e ../release/pyAmdACML.so ]; then
@@ -224,11 +224,11 @@ cp ../IDAS_DAESolver/base_solvers.h  ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver
 cp ../IDAS_DAESolver/ida_solver.h    ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver/ida_solver.h
 
 # Lib
-cp ../release/libcdaeCore.a              ${PACKAGE_NAME}/cDAE/lib/libcdaeCore.a
-cp ../release/libcdaeActivity.a          ${PACKAGE_NAME}/cDAE/lib/libcdaeActivity.a
-cp ../release/libcdaeIDAS_DAESolver.a    ${PACKAGE_NAME}/cDAE/lib/libcdaeIDAS_DAESolver.a
-cp ../release/libcdaeDataReporting.a     ${PACKAGE_NAME}/cDAE/lib/libcdaeDataReporting.a
-cp ../release/libcdaeIPOPT_NLPSolver.a   ${PACKAGE_NAME}/cDAE/lib/libcdaeIPOPT_NLPSolver.a
+cp ../release/libcdaeCore.a                ${PACKAGE_NAME}/cDAE/lib/libcdaeCore.a
+cp ../release/libcdaeActivity.a            ${PACKAGE_NAME}/cDAE/lib/libcdaeActivity.a
+cp ../release/libcdaeIDAS_DAESolver.a      ${PACKAGE_NAME}/cDAE/lib/libcdaeIDAS_DAESolver.a
+cp ../release/libcdaeDataReporting.a       ${PACKAGE_NAME}/cDAE/lib/libcdaeDataReporting.a
+cp ../release/libcdaeBONMIN_MINLPSolver.a  ${PACKAGE_NAME}/cDAE/lib/libcdaeBONMIN_MINLPSolver.a
 
 cp ${IDAS}/lib/libsundials_idas.a         ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.a
 cp ${IDAS}/lib/libsundials_nvecserial.a   ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.a

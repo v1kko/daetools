@@ -235,9 +235,9 @@ public:
 		c3->SetResidual( m.p3() );
 		
 	// Set the optimization variables and their lower and upper bounds
-		SetOptimizationVariable(m.p1, -1E5, 1E5, 0);
-		SetOptimizationVariable(m.p2, -2E5, 2E5, 0);
-		SetOptimizationVariable(m.p3, -3E5, 3E5, 0);
+		SetContinuousOptimizationVariable(m.p1, -1E5, 1E5, 0);
+		SetContinuousOptimizationVariable(m.p2, -2E5, 2E5, 0);
+		SetContinuousOptimizationVariable(m.p3, -3E5, 3E5, 0);
 	}
 
 };
@@ -380,10 +380,10 @@ public:
 		c3->SetResidual( - m.x1() + m.x2() / 5 - 2 * m.x3() + sin(1) );
 		
 	// Set the optimization variables and their lower and upper bounds
-		SetOptimizationVariable(m.x1, 1, 5, 1);
-		SetOptimizationVariable(m.x2, 1, 5, 5);
-		SetOptimizationVariable(m.x3, 1, 5, 5);
-		SetOptimizationVariable(m.x4, 1, 5, 1);
+		SetContinuousOptimizationVariable(m.x1, 1, 5, 1);
+		SetContinuousOptimizationVariable(m.x2, 1, 5, 5);
+		SetContinuousOptimizationVariable(m.x3, 1, 5, 5);
+		SetContinuousOptimizationVariable(m.x4, 1, 5, 1);
 	}
 
 };
@@ -452,7 +452,7 @@ public:
 	{
 	// x is BINARY variable
 		m.x.AssignValue(0);
-	// y is BINARY variable
+	// y is CONTINUOUS variable
 		m.y1.AssignValue(1);
 		m.y2.AssignValue(1);
 	// x is INTEGER variable
@@ -476,10 +476,10 @@ public:
 		c3->SetResidual( m.x() + m.y2() + m.z() );
 		
 	// Set the optimization variables and their lower and upper bounds
-		SetOptimizationVariable(m.x,  0,    1, 0.5);
-		SetOptimizationVariable(m.y1, 0, 2e19,   1);
-		SetOptimizationVariable(m.y2, 0, 2e19,   1);
-		SetOptimizationVariable(m.z,  0,    5,   1);
+		SetBinaryOptimizationVariable(m.x, 0);
+		SetContinuousOptimizationVariable(m.y1, 0, 2e19, 1);
+		SetContinuousOptimizationVariable(m.y2, 0, 2e19, 1);
+		SetIntegerOptimizationVariable(m.z, 0, 5, 1);
 	}
 
 };

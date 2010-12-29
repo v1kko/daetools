@@ -312,6 +312,7 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 	
+	// Here I access SetupNode!! Is it wise??
 	cout << "Constraint [" << m_pConstraintFunction->GetName() << "] is: " << (m_pConstraintFunction->GetResidual().node->IsLinear() ? "linear" : "non-linear") << endl;
 
 	return bCheck;
@@ -329,6 +330,31 @@ daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, real_t 
 	m_dLB           = LB;
 	m_dUB           = UB;
 	m_dDefaultValue = defaultValue;
+	m_eType         = eContinuousVariable;
+}
+
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, int LB, int UB, int defaultValue)
+{
+	if(!pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+			
+	m_pVariable     = pVariable;
+	m_dLB           = LB;
+	m_dUB           = UB;
+	m_dDefaultValue = defaultValue;
+	m_eType         = eIntegerVariable;
+}
+
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, bool defaultValue)
+{
+	if(!pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+			
+	m_pVariable     = pVariable;
+	m_dLB           = 0;
+	m_dUB           = 1;
+	m_dDefaultValue = (defaultValue ? 1 : 0);
+	m_eType         = eBinaryVariable;
 }
 
 daeOptimizationVariable::~daeOptimizationVariable(void)

@@ -234,6 +234,13 @@ enum daeeConstraintType
 	eEqualityConstraint	
 };
 
+enum daeeOptimizationVariableType
+{
+	eIntegerVariable = 0,
+	eBinaryVariable,
+	eContinuousVariable
+};
+
 /******************************************************************
 	daeObject_t
 *******************************************************************/

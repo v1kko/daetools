@@ -101,7 +101,10 @@ BOOST_PYTHON_MODULE(pyActivity)
   
         .def("CreateEqualityConstraint",    &daeSimulation::CreateEqualityConstraint, return_internal_reference<>())
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>())
-        .def("SetOptimizationVariable",     &daeSimulation::SetOptimizationVariable)
+
+        .def("SetContinuousOptimizationVariable",	&daeSimulation::SetContinuousOptimizationVariable)
+        .def("SetIntegerOptimizationVariable",		&daeSimulation::SetIntegerOptimizationVariable)
+        .def("SetBinaryOptimizationVariable",		&daeSimulation::SetBinaryOptimizationVariable)
 
         //.def("EnterConditionalIntegrationMode",   &daeSimulation::EnterConditionalIntegrationMode)
         //.def("IntegrateUntilConditionSatisfied",  &daeSimulation::IntegrateUntilConditionSatisfied)
