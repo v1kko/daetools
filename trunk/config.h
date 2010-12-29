@@ -12,29 +12,7 @@ class daeConfig
 public:
 	daeConfig(void)
 	{
-/*
-		std::string strHOME;
-		char* pPath;
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-		pPath = getenv("\\%HOMEDRIVE%\\%HOMEPATH\\%");
-#else
-		pPath = getenv("HOME");
-#endif
-		if(!pPath) 
-		{
-			daeDeclareException(dae::exUnknown);
-			e << "Cannot get the $HOME folder path";
-			throw e;
-		}
-		strHOME = pPath;
-		configfile = strHOME + "/.daetools/daetools.cfg";
-		Reload();
-*/
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-		configfile = "c:\\daetools\\daetools.cfg";
-#else
-		configfile = "/etc/daetools/daetools.cfg";
-#endif
+		configfile = daeConfig::GetConfigFolder() + "daetools.cfg";
 		Reload();
 	}
 	
@@ -65,6 +43,39 @@ public:
 	{
 		static daeConfig config;
 		return config;
+	}
+	
+	static std::string GetBONMINOptionsFile()
+	{
+		return daeConfig::GetConfigFolder() + "bonmin.cfg";
+	}
+
+	static std::string GetConfigFolder()
+	{
+/*
+		std::string strHOME;
+		char* pPath;
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+		pPath = getenv("\\%HOMEDRIVE%\\%HOMEPATH\\%");
+#else
+		pPath = getenv("HOME");
+#endif
+		if(!pPath) 
+		{
+			daeDeclareException(dae::exUnknown);
+			e << "Cannot get the $HOME folder path";
+			throw e;
+		}
+		strHOME = pPath;
+		configfile = strHOME + "/.daetools/daetools.cfg";
+		Reload();
+*/
+	
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+		return std::string("c:\\daetools\\");
+#else
+		return std::string("/etc/daetools/");
+#endif
 	}
 	
 protected:

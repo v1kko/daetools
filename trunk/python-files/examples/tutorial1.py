@@ -186,7 +186,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("Tutorial_1")
+        self.m = modTutorial("tutorial1")
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
                              "their boundary and initial conditions."
@@ -220,16 +220,13 @@ class simTutorial(daeSimulation):
                 self.m.T.SetInitialCondition(x, y, 300)
 
 # Use daeSimulator class
-def guiRun():
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
+def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
     simulator  = daeSimulator(app, simulation=sim)
-    simulator.show()
-    app.exec_()
+    simulator.exec_()
 
 # Setup everything manually and run in a console
 def consoleRun():
@@ -271,6 +268,8 @@ if __name__ == "__main__":
         if(sys.argv[1] == 'console'):
             runInGUI = False
     if runInGUI:
-        guiRun()
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
     else:
         consoleRun()

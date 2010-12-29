@@ -17,9 +17,15 @@ BOOST_PYTHON_MODULE(pyBONMIN)
     class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeBONMIN")
 		.def("Initialize",	&daeBONMINSolver::Initialize)
 		.def("Solve",	    &daeBONMINSolver::Solve)
+		
         .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionS)
         .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionN)
         .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionI) 
-        ;
-     
+		
+        .def("ClearOptions",		&daeBONMINSolver::ClearOptions) 
+        .def("PrintOptions",		&daeBONMINSolver::PrintOptions) 
+        .def("PrintUserOptions",	&daeBONMINSolver::PrintUserOptions) 
+        .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile) 
+        ; 
 }
+

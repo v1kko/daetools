@@ -105,10 +105,10 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
 
-<b>class</b> simTutorial(daeDynamicSimulation):
+<b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeDynamicSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;Tutorial_9&quot;</span>)
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;tutorial9&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;This tutorial explains how to create 3rd part linear solvers. &quot;</span>
           
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
@@ -190,6 +190,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
 
     <i><span style='color:#008000;'># Run</span></i>
     simulation.Run()
+    simulation.Finalize()
 </pre>
 </body>
 </html>

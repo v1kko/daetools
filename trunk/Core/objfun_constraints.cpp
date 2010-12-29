@@ -166,7 +166,8 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB
 	m_eConstraintType		= eInequalityConstraint;
 	m_dLB					= LB;
 	m_dUB					= UB;
-	m_dValue				= 0;
+	m_dValue				= -1E20;
+	m_nEquationIndexInBlock = ULONG_MAX;
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
 	m_pConstraintVariable->SetReportingOn(true);
 	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
@@ -183,11 +184,12 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Va
 
 	m_pModel				= pModel;
 	m_eConstraintType		= eEqualityConstraint;
-	m_dLB					= 0;
-	m_dUB					= 0;
+	m_dLB					= Value;
+	m_dUB					= Value;
 	m_dValue				= Value;
 	m_nEquationIndexInBlock = ULONG_MAX;
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
+	m_pConstraintVariable->SetReportingOn(true);
 	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
 }
 

@@ -109,7 +109,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("Tutorial_2")
+        self.m = modTutorial("tutorial2")
         self.m.Description = "This tutorial explains how to define Arrays (discrete distribution domains) and " \
                              "distributed parameters, how to calculate the number of degrees of freedom (NDOF) " \
                              "and how to fix it, and how to set initial guesses of the variables."
@@ -157,16 +157,13 @@ class simTutorial(daeSimulation):
                 self.m.T.SetInitialCondition(x, y, 300)
 
 # Use daeSimulator class
-def guiRun():
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
+def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
     simulator  = daeSimulator(app, simulation=sim)
-    simulator.show()
-    app.exec_()
+    simulator.exec_()
 
 # Setup everything manually and run in a console
 def consoleRun():
@@ -208,6 +205,8 @@ if __name__ == "__main__":
         if(sys.argv[1] == 'console'):
             runInGUI = False
     if runInGUI:
-        guiRun()
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
     else:
         consoleRun()

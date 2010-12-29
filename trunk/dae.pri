@@ -102,13 +102,14 @@ win32-msvc2008::BOOST_LIBS       =
 unix::BOOSTDIR         = /usr/include/boost
 unix::BOOSTLIBPATH     = 
 unix::BOOST_PYTHON_LIB = -lboost_python
-unix::BOOST_LIBS       = -lboost_system -lboost_thread
+unix::BOOST_LIBS       = -lboost_system \
+                         -lboost_thread
 
 
 #####################################################################################
 #                                   SUNDIALS
 #####################################################################################
-# ./configure --prefix=/home/ciroki/Data/daetools/trunk/idas-1.0.0/build --disable-mpi \
+# ./configure --prefix=/home/ciroki/Data/daetools/trunk/idas-1.0.0/build --disable-mpi
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
 #
 #####################################################################################
@@ -116,8 +117,10 @@ SUNDIALS = ../idas-1.0.0/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
-win32-msvc2008::SUNDIALS_LIBS = sundials_idas.lib sundials_nvecserial.lib
-unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
+win32-msvc2008::SUNDIALS_LIBS = sundials_idas.lib \
+                                sundials_nvecserial.lib
+unix::SUNDIALS_LIBS = -lsundials_idas \
+                      -lsundials_nvecserial
 
 
 #####################################################################################
@@ -136,7 +139,7 @@ unix::SUNDIALS_LIBS = -lsundials_idas -lsundials_nvecserial
 # 7) make test
 # 8) make install
 #####################################################################################
-unix::NLPSOLVER           = ../bonmin/build
+unix::NLPSOLVER           = ../bonmin/build-static
 win32-msvc2008::NLPSOLVER = ../ipopt/build
 
 NLPSOLVER_INCLUDE = $${NLPSOLVER}/include/coin

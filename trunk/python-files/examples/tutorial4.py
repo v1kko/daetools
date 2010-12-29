@@ -116,7 +116,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("Tutorial_4")
+        self.m = modTutorial("tutorial4")
         self.m.Description = "This tutorial explains how to define and use discontinuous equations: symmetric state transition networks (daeIF). \n" \
                               "A piece of copper (a plate) is at one side exposed to the source of heat and at the " \
                               "other to the surroundings. The process starts at the temperature of the metal of 283K. " \
@@ -135,16 +135,13 @@ class simTutorial(daeSimulation):
         self.m.time.SetInitialCondition(0)
 
 # Use daeSimulator class
-def guiRun():
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
+def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=sim)
-    simulator.show()
-    app.exec_()
+    simulator.exec_()
 
 # Setup everything manually and run in a console
 def consoleRun():
@@ -186,6 +183,8 @@ if __name__ == "__main__":
         if(sys.argv[1] == 'console'):
             runInGUI = False
     if runInGUI:
-        guiRun()
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
     else:
         consoleRun()

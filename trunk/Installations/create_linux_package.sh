@@ -116,44 +116,37 @@ mkdir ${PACKAGE_NAME}/examples/images
 mkdir ${PACKAGE_NAME}/pyDAE
 mkdir ${PACKAGE_NAME}/daeSimulator
 mkdir ${PACKAGE_NAME}/daeSimulator/images
-mkdir ${PACKAGE_NAME}/cDAE
-mkdir ${PACKAGE_NAME}/cDAE/include
-mkdir ${PACKAGE_NAME}/cDAE/include/Core
-mkdir ${PACKAGE_NAME}/cDAE/include/Activity
-mkdir ${PACKAGE_NAME}/cDAE/include/DataReporting
-mkdir ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver
-mkdir ${PACKAGE_NAME}/cDAE/lib
 
 # Python extension modules and LA solvers
-cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE/pyCore.so
-cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE/pyActivity.so
-cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE/pyDataReporting.so
-cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE/pyIDAS.so
-cp ../release/pyBONMIN.so           ${PACKAGE_NAME}/pyDAE/pyBONMIN.so
+cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
+cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
+cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyBONMIN.so           ${PACKAGE_NAME}/pyDAE
 
 mkdir ${PACKAGE_NAME}/pyAmdACML
 if [ -e ../release/pyAmdACML.so ]; then
-  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/pyAmdACML/pyAmdACML.so
+  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/pyAmdACML
 fi
 
 mkdir ${PACKAGE_NAME}/pyIntelMKL
 if [ -e ../release/pyIntelMKL.so ]; then
-  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/pyIntelMKL/pyIntelMKL.so
+  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/pyIntelMKL
 fi
 
 mkdir ${PACKAGE_NAME}/pyLapack
 if [ -e ../release/pyLapack.so ]; then
-  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack/pyLapack.so
+  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack
 fi
 
 mkdir ${PACKAGE_NAME}/pyIntelPardiso
 if [ -e ../release/pyIntelPardiso.so ]; then
-  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso/pyIntelPardiso.so
+  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
 fi
 
 mkdir ${PACKAGE_NAME}/pyTrilinosAmesos
 if [ -e ../release/pyTrilinosAmesos.so ]; then
-  cp ../release/pyTrilinosAmesos.so   ${PACKAGE_NAME}/pyTrilinosAmesos/pyTrilinosAmesos.so
+  cp ../release/pyTrilinosAmesos.so   ${PACKAGE_NAME}/pyTrilinosAmesos
 fi
 
 # Licences
@@ -161,7 +154,7 @@ cp ../licence*                                   ${PACKAGE_NAME}
 cp ../ReadMe.txt                                 ${PACKAGE_NAME}
 
 # Python files
-cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE/daeLogs.py
+cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
 cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
 cp ../python-files/pyAmdACML__init__.py          ${PACKAGE_NAME}/pyAmdACML/__init__.py
@@ -169,13 +162,13 @@ cp ../python-files/pyIntelMKL__init__.py         ${PACKAGE_NAME}/pyIntelMKL/__in
 cp ../python-files/pyLapack__init__.py           ${PACKAGE_NAME}/pyLapack/__init__.py
 cp ../python-files/pyIntelPardiso__init__.py     ${PACKAGE_NAME}/pyIntelPardiso/__init__.py
 cp ../python-files/pyTrilinosAmesos__init__.py   ${PACKAGE_NAME}/pyTrilinosAmesos/__init__.py
-cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE/WebView_ui.py
-cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE/WebViewDialog.py
+cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
+cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
 
 # daeSimulator
-cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator/__init__.py
-cp ../python-files/daeSimulator/daeSimulator.py  ${PACKAGE_NAME}/daeSimulator/daeSimulator.py
-cp ../python-files/daeSimulator/Simulator_ui.py  ${PACKAGE_NAME}/daeSimulator/Simulator_ui.py
+cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator
+cp ../python-files/daeSimulator/daeSimulator.py  ${PACKAGE_NAME}/daeSimulator
+cp ../python-files/daeSimulator/Simulator_ui.py  ${PACKAGE_NAME}/daeSimulator
 cp ../python-files/daeSimulator/images/*.*       ${PACKAGE_NAME}/daeSimulator/images
 
 # daePlotter
@@ -201,37 +194,6 @@ cp ../Website/images/*.jpg    ${PACKAGE_NAME}/docs/images
 cp ../Website/*.html          ${PACKAGE_NAME}/docs                
 cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref           
 rm ${PACKAGE_NAME}/docs/downloads.html
-
-# Include
-cp ../dae.h         ${PACKAGE_NAME}/cDAE/include/dae.h
-cp ../dae_develop.h ${PACKAGE_NAME}/cDAE/include/dae_develop.h
-
-cp ../Core/definitions.h    ${PACKAGE_NAME}/cDAE/include/Core/definitions.h
-cp ../Core/xmlfile.h        ${PACKAGE_NAME}/cDAE/include/Core/xmlfile.h
-cp ../Core/helpers.h        ${PACKAGE_NAME}/cDAE/include/Core/helpers.h
-cp ../Core/base_logging.h   ${PACKAGE_NAME}/cDAE/include/Core/base_logging.h
-cp ../Core/macros.h         ${PACKAGE_NAME}/cDAE/include/Core/macros.h
-cp ../Core/class_factory.h  ${PACKAGE_NAME}/cDAE/include/Core/class_factory.h
-cp ../Core/coreimpl.h       ${PACKAGE_NAME}/cDAE/include/Core/coreimpl.h
-
-cp ../Activity/base_activities.h  ${PACKAGE_NAME}/cDAE/include/Activity/base_activities.h
-cp ../Activity/simulation.h       ${PACKAGE_NAME}/cDAE/include/Activity/simulation.h
-
-cp ../DataReporting/datareporters.h                 ${PACKAGE_NAME}/cDAE/include/DataReporting/datareporters.h
-cp ../DataReporting/base_data_reporters_receivers.h ${PACKAGE_NAME}/cDAE/include/DataReporting/base_data_reporters_receivers.h
-
-cp ../IDAS_DAESolver/base_solvers.h  ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver/base_solvers.h
-cp ../IDAS_DAESolver/ida_solver.h    ${PACKAGE_NAME}/cDAE/include/IDAS_DAESolver/ida_solver.h
-
-# Lib
-cp ../release/libcdaeCore.a                ${PACKAGE_NAME}/cDAE/lib/libcdaeCore.a
-cp ../release/libcdaeActivity.a            ${PACKAGE_NAME}/cDAE/lib/libcdaeActivity.a
-cp ../release/libcdaeIDAS_DAESolver.a      ${PACKAGE_NAME}/cDAE/lib/libcdaeIDAS_DAESolver.a
-cp ../release/libcdaeDataReporting.a       ${PACKAGE_NAME}/cDAE/lib/libcdaeDataReporting.a
-cp ../release/libcdaeBONMIN_MINLPSolver.a  ${PACKAGE_NAME}/cDAE/lib/libcdaeBONMIN_MINLPSolver.a
-
-cp ${IDAS}/lib/libsundials_idas.a         ${PACKAGE_NAME}/cDAE/lib/libsundials_idas.a
-cp ${IDAS}/lib/libsundials_nvecserial.a   ${PACKAGE_NAME}/cDAE/lib/libsundials_nvecserial.a
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
@@ -321,32 +283,85 @@ gzip -c -9 ../daetools.1 > ${BUILD_DIR}/usr/share/man/man1/daetools.1.gz
 # Changelog file
 mkdir ${BUILD_DIR}/usr/share/doc
 mkdir ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
-cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/copyright
+cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
 gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
 
 # Config
 mkdir ${BUILD_DIR}/etc
 mkdir ${BUILD_DIR}/etc/daetools
-cp ../daetools.cfg ${BUILD_DIR}/etc/daetools/daetools.cfg
-chmod go-wx ${BUILD_DIR}/etc/daetools/daetools.cfg
 
+cp ../daetools.cfg  ${BUILD_DIR}/etc/daetools
+cp ../bonmin.cfg    ${BUILD_DIR}/etc/daetools
+chmod go-wx ${BUILD_DIR}/etc/daetools/daetools.cfg
+chmod go-wx ${BUILD_DIR}/etc/daetools/bonmin.cfg
+
+# cDAE Files
+mkdir ${BUILD_DIR}/usr/include
+mkdir ${BUILD_DIR}/usr/include/daetools
+mkdir ${BUILD_DIR}/usr/include/daetools/Core
+mkdir ${BUILD_DIR}/usr/include/daetools/Activity
+mkdir ${BUILD_DIR}/usr/include/daetools/DataReporting
+mkdir ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
+mkdir ${BUILD_DIR}/usr/include/daetools/BONMIN_MINLPSolver
+
+mkdir ${BUILD_DIR}/usr/${LIB}/daetools
+
+# Include files
+cp ../config.h       ${BUILD_DIR}/usr/include/daetools
+cp ../dae.h          ${BUILD_DIR}/usr/include/daetools
+cp ../dae_develop.h  ${BUILD_DIR}/usr/include/daetools
+
+cp ../Core/definitions.h    ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/xmlfile.h        ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/helpers.h        ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/base_logging.h   ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/macros.h         ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/class_factory.h  ${BUILD_DIR}/usr/include/daetools/Core
+cp ../Core/coreimpl.h       ${BUILD_DIR}/usr/include/daetools/Core
+
+cp ../Activity/base_activities.h  ${BUILD_DIR}/usr/include/daetools/Activity
+cp ../Activity/simulation.h       ${BUILD_DIR}/usr/include/daetools/Activity
+
+cp ../DataReporting/datareporters.h                 ${BUILD_DIR}/usr/include/daetools/DataReporting
+cp ../DataReporting/base_data_reporters_receivers.h ${BUILD_DIR}/usr/include/daetools/DataReporting
+
+cp ../IDAS_DAESolver/base_solvers.h  ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
+cp ../IDAS_DAESolver/ida_solver.h    ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
+
+cp ../BONMIN_MINLPSolver/nlpsolver.h    ${BUILD_DIR}/usr/include/daetools/BONMIN_MINLPSolver
+
+# Static libraries
+cp ../release/libcdaeCore.a                ${BUILD_DIR}/usr/${LIB}/daetools
+cp ../release/libcdaeActivity.a            ${BUILD_DIR}/usr/${LIB}/daetools
+cp ../release/libcdaeDataReporting.a       ${BUILD_DIR}/usr/${LIB}/daetools
+cp ../release/libcdaeIDAS_DAESolver.a      ${BUILD_DIR}/usr/${LIB}/daetools
+cp ../release/libcdaeBONMIN_MINLPSolver.a  ${BUILD_DIR}/usr/${LIB}/daetools
+cp ${IDAS}/lib/libsundials_idas.a          ${BUILD_DIR}/usr/${LIB}/daetools
+cp ${IDAS}/lib/libsundials_nvecserial.a    ${BUILD_DIR}/usr/${LIB}/daetools
+
+# Trilinos Amesos libraries
 if [ -e ${TRILINOS}/libamesos.so ]; then
-  cp ${TRILINOS}/libamesos.so         ${BUILD_DIR}/usr/${LIB}/libamesos.so
-  cp ${TRILINOS}/libepetra.so         ${BUILD_DIR}/usr/${LIB}/libepetra.so
-  cp ${TRILINOS}/libtriutils.so       ${BUILD_DIR}/usr/${LIB}/libtriutils.so
-  cp ${TRILINOS}/libgaleri.so         ${BUILD_DIR}/usr/${LIB}/libgaleri.so
-  cp ${TRILINOS}/libepetraext.so      ${BUILD_DIR}/usr/${LIB}/libepetraext.so
-  cp ${TRILINOS}/libzoltan.so         ${BUILD_DIR}/usr/${LIB}/libzoltan.so
-  cp ${TRILINOS}/libsimpi.so          ${BUILD_DIR}/usr/${LIB}/libsimpi.so
-  cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}/libteuchos.so
+  cp ${TRILINOS}/libamesos.so         ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libepetra.so         ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libtriutils.so       ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libgaleri.so         ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libepetraext.so      ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libzoltan.so         ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libsimpi.so          ${BUILD_DIR}/usr/${LIB}
+  cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}
 fi
 
+# Bonmin libraries
 if [ -d ${BONMIN}/lib ]; then
   cp -d ${BONMIN}/lib/*.so*            ${BUILD_DIR}/usr/${LIB}
 fi
-chmod -R -x ${BUILD_DIR}/usr/${LIB}/* 
+
+# Change permissions and strip .so libraries (Trilinos Amesos and Bonmin)
+chmod -x ${BUILD_DIR}/usr/${LIB}/*.so* 
+chmod -x ${BUILD_DIR}/usr/${LIB}/daetools/*.a* 
 find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip 
 
+# Shortcuts
 mkdir ${BUILD_DIR}/usr/share/applications
 
 daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
@@ -410,7 +425,8 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
  
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
-  echo "/etc/daetools/daetools.cfg"     > ${CONFFILES}
+  echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
+  echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
   mkdir ${BUILD_DIR}/usr/share/menu
 
@@ -511,6 +527,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
 
   echo "%config(noreplace)"                                                 >> ${SPEC}
   echo "/etc/daetools/daetools.cfg"                                         >> ${SPEC}
+  echo "/etc/daetools/bonmin.cfg"                                           >> ${SPEC}
 
   echo "%clean"                                                             >> ${SPEC}
   echo "rm -rf %{buildroot}"                                                >> ${SPEC}

@@ -18,7 +18,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 //		.value("eThirdParty",		dae::solver::eThirdParty)
 //		.export_values()
 //	;
-
+    
 /**************************************************************
 	daeSolver
 ***************************************************************/

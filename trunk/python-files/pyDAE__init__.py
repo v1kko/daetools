@@ -2,7 +2,8 @@ from pyCore import *
 from pyActivity import *
 from pyDataReporting import *
 from pyIDAS import *
-from pyIPOPT import *
+from pyBONMIN import *
+
 from daetools.daeSimulator import *
 from daeLogs import daePythonStdOutLog
 

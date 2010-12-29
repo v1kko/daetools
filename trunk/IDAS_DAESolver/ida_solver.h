@@ -92,6 +92,9 @@ public:
 	bool								m_bCalculateSensitivities;
 	std::vector<size_t>					m_narrParametersIndexes;
 	int									m_eSensitivityMethod;
+	std::string							m_strSensitivityMethod;
+	bool								m_bErrorControl;
+	bool								m_bPrintInfo;
 };
 
 

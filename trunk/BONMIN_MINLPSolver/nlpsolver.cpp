@@ -59,7 +59,10 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 		pOptVariable = m_ptrarrOptVariables[i];
 			
 		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetIndex());
-	}	
+	}
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+	m_bPrintInfo = cfg.Get<bool>("daetools.minlpsolver.printInfo", false);
 }
 
 daeMINLP::~daeMINLP(void)
@@ -84,7 +87,10 @@ bool daeMINLP::get_variables_types(Index n,
 			var_types[i] = CONTINUOUS;
 		else
 			daeDeclareAndThrowException(exNotImplemented)
-	}	
+	}
+			
+	if(m_bPrintInfo) 
+		PrintVariablesTypes();
 
 	return true;
 }
@@ -107,7 +113,10 @@ bool daeMINLP::get_variables_linearity(Index n,
 			var_types[i] = Ipopt::TNLP::NON_LINEAR;
 		else
 			daeDeclareAndThrowException(exNotImplemented)
-	}	
+	}
+	
+	if(m_bPrintInfo) 
+		PrintVariablesLinearity();
 	
 	return true;
 }
@@ -129,6 +138,10 @@ bool daeMINLP::get_constraints_linearity(Index m,
 		else
 			const_types[i] = Ipopt::TNLP::NON_LINEAR;
 	}
+	
+	if(m_bPrintInfo) 
+		PrintConstraintsLinearity();
+	
 	return true;
 }
 
@@ -226,6 +239,9 @@ bool daeMINLP::get_bounds_info(Index n,
 			daeDeclareAndThrowException(exNotImplemented)
 		}
 	}
+	
+	if(m_bPrintInfo) 
+		PrintBoundsInfo();
 
 	return true;
 }
@@ -251,7 +267,11 @@ bool daeMINLP::get_starting_point(Index n,
 			pOptVariable = m_ptrarrOptVariables[i];
 				
 			x[i] = pOptVariable->m_dDefaultValue;
-		}	
+		}
+		
+		if(m_bPrintInfo) 
+			PrintStartingPoint();
+		
 		return true;
 	}
 	else
@@ -274,6 +294,13 @@ bool daeMINLP::eval_f(Index n,
 		}
 		
 		obj_value = m_pObjectiveFunction->m_pObjectiveVariable->GetValue();
+		
+		if(m_bPrintInfo) 
+		{
+			string strMessage = "Fobj: ";
+			strMessage += toStringFormatted<real_t>(obj_value, -1, 10, true);
+			m_pLog->Message(strMessage, 0);
+		}
 	}
 	catch(std::exception& e)
 	{
@@ -312,14 +339,15 @@ bool daeMINLP::eval_grad_f(Index n,
 			grad_f[j] = matSens.GetItem(m_pObjectiveFunction->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
 								        m_pObjectiveFunction->m_nEquationIndexInBlock);              // Equation index
 		}
-		/*
-		cout << endl;
-		cout << "Gradient Fobj: ";
-		for(j = 0; j < n; j++)
-			cout << toStringFormatted<real_t>(grad_f[j], 14, 4, true) << " ";
-		cout << endl;
-		cout.flush();
-		*/
+		
+		if(m_bPrintInfo) 
+		{
+			string strMessage;
+			m_pLog->Message("Fobj gradient: ", 0);
+			for(j = 0; j < n; j++)
+				strMessage += toStringFormatted<real_t>(grad_f[j], -1, 10, true) + " ";
+			m_pLog->Message(strMessage, 0);
+		}
 	}
 	catch(std::exception& e)
 	{
@@ -355,6 +383,15 @@ bool daeMINLP::eval_g(Index n,
 			pConstraint = m_ptrarrConstraints[i];
 				
 			g[i] = pConstraint->m_pConstraintVariable->GetValue();
+		}
+		
+		if(m_bPrintInfo) 
+		{
+			string strMessage;
+			m_pLog->Message("Constraints values: ", 0);
+			for(size_t j = 0; j < m; j++)
+				strMessage += toStringFormatted<real_t>(g[j], -1, 10, true) + " ";
+			m_pLog->Message(strMessage, 0);
 		}
 	}
 	catch(std::exception& e)
@@ -463,14 +500,15 @@ bool daeMINLP::eval_jac_g(Index n,
 			}
 			if(nele_jac != counter)
 				daeDeclareAndThrowException(exInvalidCall)
-			/*	
-			cout << endl;
-			cout << "Jacobian constraints: ";
-			for(j = 0; j < nele_jac; j++)
-				cout << toStringFormatted<real_t>(values[j], 14, 4, true) << " ";
-			cout << endl;
-			cout.flush();
-			*/
+			
+			if(m_bPrintInfo) 
+			{
+				string strMessage;
+				m_pLog->Message("Constraints Jacobian: ", 0);
+				for(j = 0; j < nele_jac; j++)
+					strMessage += toStringFormatted<real_t>(values[j], -1, 10, true) + " ";
+				m_pLog->Message(strMessage, 0);
+			}
 		}
 	}
 	catch(std::exception& e)
@@ -548,14 +586,15 @@ bool daeMINLP::eval_grad_gi(Index n,
 
 			if(nele_grad_gi != counter)
 				daeDeclareAndThrowException(exInvalidCall)
-			/*	
-			cout << endl;
-			cout << "Jacobian constraints: ";
-			for(j = 0; j < nele_grad_gi; j++)
-				cout << toStringFormatted<real_t>(values[j], 14, 4, true) << " ";
-			cout << endl;
-			cout.flush();
-			*/
+				
+			if(m_bPrintInfo) 
+			{
+				string strMessage;
+				m_pLog->Message("Constraints gradient: ", 0);
+				for(j = 0; j < nele_grad_gi; j++)
+					strMessage += " " + toStringFormatted<real_t>(values[j], -1, 10, true);
+				m_pLog->Message(strMessage , 0);
+			}
 		}
 	}
 	catch(std::exception& e)
@@ -645,6 +684,12 @@ bool daeMINLP::intermediate_callback(AlgorithmMode mode,
 //	cout << endl;
 	
 //	cout << "obj_value: " << obj_value << endl;
+	if(m_bPrintInfo) 
+	{
+		PrintObjectiveFunction();
+		PrintOptimizationVariables();
+		PrintConstraints();
+	}
 	
 	return true;
 }
@@ -703,32 +748,236 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	m_pLog->Message(string(" "), 0);
 }
 
-void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
+void daeMINLP::PrintObjectiveFunction(void)
 {
-	size_t i, j;
+	string strMessage;
+	real_t obj_value = m_pObjectiveFunction->m_pObjectiveVariable->GetValue();
+	strMessage = "Fobj = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
+	m_pLog->Message(strMessage, 0);
+}
+
+void daeMINLP::PrintOptimizationVariables(void)
+{
+	size_t i;
+	string strMessage;
 	daeOptimizationVariable* pOptVariable;
 
-// 1. Set again the initial conditions, values, tolerances, active states etc
-	m_pSimulation->SetUpVariables();
-	
-// 2. Re-assign the optimization variables
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		if(!pOptVariable || !pOptVariable->m_pVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		pOptVariable->m_pVariable->ReAssignValue(x[i]);
+		strMessage = pOptVariable->m_pVariable->GetName() + 
+					 " = " + 
+					 toStringFormatted<real_t>(pOptVariable->m_pVariable->GetValue(), -1, 10, true);
+		m_pLog->Message(strMessage, 0);
 	}	
+}
+
+void daeMINLP::PrintConstraints(void)
+{
+	size_t i;
+	string strMessage;
+	daeOptimizationConstraint* pConstraint;
+
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
+	{
+		pConstraint = m_ptrarrConstraints[i];
+		if(!pConstraint)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		strMessage = pConstraint->m_pConstraintVariable->GetName() + " = " + 
+					 toStringFormatted<real_t>(pConstraint->m_pConstraintVariable->GetValue(), -1, 10, true);
+		m_pLog->Message(strMessage, 0);
+	}	
+}
+
+void daeMINLP::PrintVariablesTypes(void)
+{
+	size_t i;
+	string strMessage;
+	daeOptimizationVariable* pOptVariable;
 	
-// 3. Reset simulation and DAE solver
-	m_pSimulation->Reset();
+	m_pLog->Message(string("Variable types:"), 0);
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+	{
+		pOptVariable = m_ptrarrOptVariables[i];
+		
+		if(pOptVariable->m_eType == eIntegerVariable)
+			strMessage = "INTEGER";
+		else if(pOptVariable->m_eType == eBinaryVariable)
+			strMessage = "BINARY";
+		else if(pOptVariable->m_eType == eContinuousVariable)
+			strMessage = "CONTINUOUS";
+		else
+			daeDeclareAndThrowException(exNotImplemented)
+					
+		m_pLog->Message(pOptVariable->m_pVariable->GetName() + " = " + strMessage, 0);
+	}	
+}
 
-// 4. Calculate initial conditions
-	m_pSimulation->SolveInitial();
+void daeMINLP::PrintVariablesLinearity(void)
+{
+	size_t i;
+	string strMessage;
+	daeOptimizationVariable* pOptVariable;
+	
+	m_pLog->Message(string("Variable linearity:"), 0);
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+	{
+		pOptVariable = m_ptrarrOptVariables[i];
+		
+		if(pOptVariable->m_eType == eIntegerVariable)
+			strMessage = "LINEAR";
+		else if(pOptVariable->m_eType == eBinaryVariable)
+			strMessage = "LINEAR";
+		else if(pOptVariable->m_eType == eContinuousVariable)
+			strMessage = "NON_LINEAR";
+		else
+			daeDeclareAndThrowException(exNotImplemented)
+					
+		m_pLog->Message(pOptVariable->m_pVariable->GetName() + " = " + strMessage, 0);
+	}	
+}
 
-// 5. Run the simulation
-	m_pSimulation->Run();
+
+void daeMINLP::PrintConstraintsLinearity(void)
+{
+	size_t i;
+	string strMessage;
+	daeOptimizationConstraint* pConstraint;
+	
+	m_pLog->Message(string("Constraints linearity:"), 0);
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
+	{
+		pConstraint = m_ptrarrConstraints[i];
+	
+	// Here I access SetupNode!! Is it wise??
+		if(pConstraint->m_pConstraintFunction->GetResidual().node->IsLinear())
+			strMessage = "LINEAR";
+		else
+			strMessage = "NON_LINEAR";
+		
+		m_pLog->Message(pConstraint->m_pConstraintFunction->GetName() + " = " + strMessage, 0);
+	}
+}
+
+void daeMINLP::PrintBoundsInfo(void)
+{
+	size_t i;
+	string strMessage;
+	daeOptimizationConstraint* pConstraint;
+	daeOptimizationVariable* pOptVariable;
+
+	m_pLog->Message(string("Variables bounds:"), 0);
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+	{
+		pOptVariable = m_ptrarrOptVariables[i];
+			
+		strMessage = pOptVariable->m_pVariable->GetName() + " bounds = [" + 
+					 toStringFormatted<real_t>(pOptVariable->m_dLB, -1, 10, true) + 
+					 ", " + 
+					 toStringFormatted<real_t>(pOptVariable->m_dUB, -1, 10, true) + 
+					 "]";
+		m_pLog->Message(strMessage, 0);
+	}	
+
+	m_pLog->Message(string("Constraints bounds:"), 0);
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
+	{
+		pConstraint = m_ptrarrConstraints[i];
+	
+		strMessage = pConstraint->m_pConstraintFunction->GetName() + " bounds = [" + 
+					 toStringFormatted<real_t>(pConstraint->m_dLB, -1, 10, true) + 
+					 ", " + 
+					 toStringFormatted<real_t>(pConstraint->m_dUB, -1, 10, true) + 
+					 "]";
+		m_pLog->Message(strMessage, 0);
+	}
+}
+
+void daeMINLP::PrintStartingPoint(void)
+{
+	size_t i;
+	daeOptimizationVariable* pOptVariable;
+
+	m_pLog->Message(string("Starting point:"), 0);
+	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+	{
+		pOptVariable = m_ptrarrOptVariables[i];
+			
+		m_pLog->Message(pOptVariable->m_pVariable->GetName() + 
+						" = " + 
+						toStringFormatted<real_t>(pOptVariable->m_dDefaultValue, -1, 10, true), 0);
+	}	
+}
+
+void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
+{
+	size_t i, j;
+	daeOptimizationVariable* pOptVariable;
+	
+// Print before Run
+	if(m_bPrintInfo) 
+	{
+		m_pLog->Message("**** Before Run", 0);
+		PrintObjectiveFunction();
+		PrintOptimizationVariables();
+		PrintConstraints();
+	}
+	
+	if(m_iRunCounter == 0)
+	{
+	// 1. Re-assign the optimization variables
+		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+		{
+			pOptVariable = m_ptrarrOptVariables[i];
+			if(!pOptVariable || !pOptVariable->m_pVariable)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			pOptVariable->m_pVariable->ReAssignValue(x[i]);
+		}
+		
+	// 2. Calculate initial conditions
+		m_pSimulation->SolveInitial();
+		
+	// 3. Run the simulation
+		m_pSimulation->Run();
+	}
+	else
+	{		
+	// 1. Set again the initial conditions, values, tolerances, active states etc
+		m_pSimulation->SetUpVariables();
+		
+	// 2. Re-assign the optimization variables
+		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+		{
+			pOptVariable = m_ptrarrOptVariables[i];
+			if(!pOptVariable || !pOptVariable->m_pVariable)
+				daeDeclareAndThrowException(exInvalidPointer)
+				
+			pOptVariable->m_pVariable->ReAssignValue(x[i]);
+		}
+			
+	// 3. Reset simulation and DAE solver
+		m_pSimulation->Reset();
+	
+	// 4. Calculate initial conditions
+		m_pSimulation->SolveInitial();
+	
+	// 5. Run the simulation
+		m_pSimulation->Run();
+	}
+	
+// Print After Run
+	if(m_bPrintInfo) 
+	{
+		m_pLog->Message("**** After Run", 0);
+		PrintObjectiveFunction();
+		PrintOptimizationVariables();
+		PrintConstraints();
+	}
 }
 
 const TMINLP::SosInfo* daeMINLP::sosConstraints() const
@@ -751,30 +1000,17 @@ daeBONMINSolver::daeBONMINSolver(void)
 	m_pDataReporter		 = NULL;
 	m_pLog			     = NULL;
 	
-	daeConfig& cfg = daeConfig::GetConfig();
-
-	real_t tol                   = cfg.Get<real_t>("daetools.activity.ipopt_tol",                   1E-6);
-	int print_level              = cfg.Get<int>("daetools.activity.ipopt_print_level",              0);
-	string linear_solver         = cfg.Get<string>("daetools.activity.ipopt_linear_solver",         "mumps");
-	string mu_strategy           = cfg.Get<string>("daetools.activity.ipopt_mu_strategy",           "adaptive");
-	string hessian_approximation = cfg.Get<string>("daetools.activity.ipopt_hessian_approximation", "limited-memory");
-
 	m_Bonmin.initializeOptionsAndJournalist();
 	
-	SetOption("hessian_approximation", hessian_approximation);
-//	SetOption("tol",			       tol);
-//	SetOption("linear_solver",         linear_solver);
-//	SetOption("mu_strategy",           mu_strategy);
-//	SetOption("print_level",           print_level);
-	SetOption("print_level",           5);
+// IPOPT options	
+	string strValue;
+	daeConfig& cfg = daeConfig::GetConfig();
 
-	SetOption("bonmin.time_limit", 5.0);
-	SetOption("mu_oracle", "loqo");
-	
-	//m_Bonmin.readOptionsFile("Mybonmin.opt");
-	m_Bonmin.readOptionsFile();
-	
-	SetOption("bonmin.algorithm", "B-BB");
+	strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.linearSolver", "mumps");
+	SetOption("linear_solver", strValue);
+
+	strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.hessianApproximation", "limited-memory");
+	SetOption("hessian_approximation", strValue);
 }
 
 daeBONMINSolver::~daeBONMINSolver(void)
@@ -864,6 +1100,38 @@ void daeBONMINSolver::SetOption(const string& strOptionName, int iValue)
 {
 	m_Bonmin.options()->SetIntegerValue(strOptionName, iValue);
 }
+
+void daeBONMINSolver::ClearOptions(void)
+{
+	m_Bonmin.options()->clear();
+}
+
+void daeBONMINSolver::PrintOptions(void)
+{	
+	string strOptions;
+	m_Bonmin.options()->PrintList(strOptions);
+	m_pLog->Message(string("BONMIN options:"), 0);
+	m_pLog->Message(strOptions, 0);
+}
+
+void daeBONMINSolver::PrintUserOptions(void)
+{
+	string strOptions;
+	m_Bonmin.options()->PrintUserOptions(strOptions);
+	m_pLog->Message(string("BONMIN options set by user:"), 0);
+	m_pLog->Message(strOptions, 0);
+}
+
+void daeBONMINSolver::LoadOptionsFile(const string& strOptionsFile)
+{	
+	if(strOptionsFile.empty())
+		m_Bonmin.readOptionsFile(daeConfig::GetBONMINOptionsFile());
+	else
+		m_Bonmin.readOptionsFile(strOptionsFile);
+}
+
+
+
 
 
 }

@@ -44,7 +44,7 @@
 <i><span style='color:#008000;'>some other ways). </span></i>
 <i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
 
-<span style='color:#0000ff;'>import</span> sys
+<span style='color:#0000ff;'>import</span> sys, tempfile
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 
@@ -66,11 +66,14 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
 <i><span style='color:#008000;'>#  - IsConnected</span></i>
 <i><span style='color:#008000;'>#    Check if the data reporter is connected or not.</span></i>
 <i><span style='color:#008000;'># In this example we use the first argument of the function Connect as a file name to open </span></i>
-<i><span style='color:#008000;'># a text file and implement a new function Write to write the data into the file.</span></i>
-<i><span style='color:#008000;'># In the function Write we iterate over all variables and write their values into a file.</span></i>
+<i><span style='color:#008000;'># a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write </span></i>
+<i><span style='color:#008000;'># the data into the file. In the function MakeString we iterate over all variables and write </span></i>
+<i><span style='color:#008000;'># their values into a string which will be saved in the function Write.</span></i>
+<i><span style='color:#008000;'># The content of the file (/tmp/tutorial8.out) will also be printed to the console.</span></i>
 <b>class</b> MyDataReporter(daeDataReporterLocal):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeDataReporterLocal.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.ProcessName <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;&quot;</span>
 
     <b>def</b> Connect(<span style='color:#0000ff;'>self</span>, ConnectionString, ProcessName):
         <span style='color:#0000ff;'>self</span>.ProcessName <span style='color:#0000ff;'>=</span> ProcessName
@@ -81,33 +84,41 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <b>return</b> <span style='color:#0000ff;'>True</span>
         
     <b>def</b> Disconnect(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.Write()
         <b>return</b> <span style='color:#0000ff;'>True</span>
 
+    <b>def</b> MakeString(<span style='color:#0000ff;'>self</span>):
+        s <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;Process name: &quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#0000ff;'>self</span>.ProcessName <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+        variables <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.Process.Variables
+        <b>for</b> var <span style='color:#0000ff;'>in</span> variables:
+            values  <span style='color:#0000ff;'>=</span> var.Values
+            domains <span style='color:#0000ff;'>=</span> var.Domains
+            times   <span style='color:#0000ff;'>=</span> var.TimeValues
+            s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot; - Variable: &quot;</span> <span style='color:#0000ff;'>+</span> var.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+            s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot;    - Domains:&quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+            <b>for</b> domain <span style='color:#0000ff;'>in</span> domains:
+                s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot;       - &quot;</span> <span style='color:#0000ff;'>+</span> domain.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+            s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot;    - Values:&quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+            <b>for</b> i <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<b><span style='color:#000000;'>len</span></b>(times)):
+                s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot;      - Time: &quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(times[i]) <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+                s <span style='color:#0000ff;'>+=</span> <span style='color:#bf0303;'>&quot;        &quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(values[i, ...]) <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>
+
+        <b>return</b> s
+        
     <b>def</b> Write(<span style='color:#0000ff;'>self</span>):
         <b>try</b>:
-            <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;Process name: &quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#0000ff;'>self</span>.ProcessName <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-            variables <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.Process.Variables
-            <b>for</b> var <span style='color:#0000ff;'>in</span> variables:
-                values  <span style='color:#0000ff;'>=</span> var.Values
-                domains <span style='color:#0000ff;'>=</span> var.Domains
-                times   <span style='color:#0000ff;'>=</span> var.TimeValues
-                <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot; - Variable: &quot;</span> <span style='color:#0000ff;'>+</span> var.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-                <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;    - Domains:&quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-                <b>for</b> domain <span style='color:#0000ff;'>in</span> domains:
-                    <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;       - &quot;</span> <span style='color:#0000ff;'>+</span> domain.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-                <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;    - Values:&quot;</span> <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-                <b>for</b> i <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<b><span style='color:#000000;'>len</span></b>(times)):
-                    <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;      - Time: &quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(times[i]) <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-                    <span style='color:#0000ff;'>self</span>.f.write(<span style='color:#bf0303;'>&quot;        &quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(values[i, ...]) <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span>)
-
+            content <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.MakeString()
+            <b>print</b> content
+            <span style='color:#0000ff;'>self</span>.f.write(content)
             <span style='color:#0000ff;'>self</span>.f.close()
 
         <b>except</b> <b><span style='color:#054d00;'>IOError</span></b>:
             <span style='color:#0000ff;'>self</span>.f.close()
             <b>return</b> <span style='color:#0000ff;'>False</span>
-        
+
     <b>def</b> IsConnected(<span style='color:#0000ff;'>self</span>):
         <b>return</b> <span style='color:#0000ff;'>True</span>
+
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>None</span>, Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;&quot;</span>):
@@ -124,11 +135,12 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Integral heat balance equation.&quot;</span>)
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.m() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.cp() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.dt() <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Qin()
 
-<b>class</b> simTutorial(daeDynamicSimulation):
+<b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeDynamicSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;Tutorial_8&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;This tutorial explains how to create custom data reporters and how to create a composite data reporter which delegates &quot;</span> <span style='color:#0000ff;'>\</span>
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;tutorial8&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;This tutorial explains how to create custom data reporters and how to &quot;</span> <span style='color:#0000ff;'>\</span>
+                             <span style='color:#bf0303;'>&quot;create a composite data reporter which delegates &quot;</span> <span style='color:#0000ff;'>\</span>
                              <span style='color:#bf0303;'>&quot;the data processing to other data reporters. &quot;</span>
           
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
@@ -139,12 +151,10 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(<span style='color:#c000c0;'>300</span>)
 
-<b>if</b> <b><span style='color:#000000;'>__name__</span></b> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
-    log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
-    simulation   <span style='color:#0000ff;'>=</span> simTutorial()
-
+<i><span style='color:#008000;'># This function does not work!!</span></i>
+<i><span style='color:#008000;'># It seems the class daeDelegateDataReporter cant iterate over</span></i>
+<i><span style='color:#008000;'># data reporters!!???</span></i>
+<b>def</b> setupDataReporters(simulationName):
     <i><span style='color:#008000;'># Create daeDelegateDataReporter and the add 2 data reporters:</span></i>
     <i><span style='color:#008000;'># - MyDataReporterLocal (to write data to the file 'tutorial8.out')</span></i>
     <i><span style='color:#008000;'># - daeTCPIPDataReporter (to send data to the daePlotter)</span></i>
@@ -154,19 +164,47 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
 
+    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    simName <span style='color:#0000ff;'>=</span> simulationName <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    filename <span style='color:#0000ff;'>=</span> tempfile.gettempdir() <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;/tutorial8.out&quot;</span>
+    <b>if</b>(dr1.Connect(filename, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+    <b>if</b>(dr2.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+    
+    <b>return</b> datareporter
+   
+<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<b>def</b> guiRun(app):
+    sim <span style='color:#0000ff;'>=</span> simTutorial()
+    dr  <span style='color:#0000ff;'>=</span> MyDataReporter()
+    filename <span style='color:#0000ff;'>=</span> tempfile.gettempdir() <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;/tutorial8.out&quot;</span>
+    <b>if</b>(dr.Connect(filename, sim.m.Name) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    sim.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
+    sim.TimeHorizon       <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>100</span>
+    simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim, datareporter<span style='color:#0000ff;'>=</span>dr)
+    simulator.exec_()
+    
+<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<b>def</b> consoleRun():
+    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
+    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    simulation   <span style='color:#0000ff;'>=</span> simTutorial()
+    datareporter <span style='color:#0000ff;'>=</span> MyDataReporter()
+    
+    filename <span style='color:#0000ff;'>=</span> tempfile.gettempdir() <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;/tutorial8.out&quot;</span>
+    <b>if</b>(datareporter.Connect(filename, simulation.m.Name) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
     <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>100</span>
-
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
-    simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(dr1.Connect(<span style='color:#bf0303;'>&quot;tutorial8.out&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
-        sys.exit()
-    <b>if</b>(dr2.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
-        sys.exit()
 
     <i><span style='color:#008000;'># Initialize the simulation</span></i>
     simulation.Initialize(solver, datareporter, log)
@@ -180,9 +218,19 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
 
     <i><span style='color:#008000;'># Run</span></i>
     simulation.Run()
+    simulation.Finalize()
 
-    <i><span style='color:#008000;'># Finally, write the data to a file</span></i>
-    dr1.Write()
+<b>if</b> <b><span style='color:#000000;'>__name__</span></b> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    runInGUI <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>True</span>
+    <b>if</b> <b><span style='color:#000000;'>len</span></b>(sys.argv) <span style='color:#0000ff;'>&gt;</span> <span style='color:#c000c0;'>1</span>:
+        <b>if</b>(sys.argv[<span style='color:#c000c0;'>1</span>] <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>'console'</span>):
+            runInGUI <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>False</span>
+    <b>if</b> runInGUI:
+        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        app <span style='color:#0000ff;'>=</span> QtGui.QApplication(sys.argv)
+        guiRun(app)
+    <b>else</b>:
+        consoleRun()
 </pre>
 </body>
 </html>

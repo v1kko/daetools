@@ -392,6 +392,23 @@ const adouble pow(const adouble &a, const adouble &b)
 														CLONE_NODE(b.node, b.m_dValue) )); 
 	    return tmp;
 	}
+
+	if(b.m_dDeriv == 0)
+	{
+	// In order to avoid logarithm of a negative number here I work as if I have: pow(adouble, const)!!
+	// It is useful if I want (expression)^2 for instance, so that expression MAY take negative numbers
+		return pow(a, b.m_dValue);
+	}
+	else if(a.m_dValue <= 0)
+	{
+		daeDeclareException(exRuntimeCheck);
+		e << "Power function called for a negative base: " 
+	      << toStringFormatted<real_t>(a.m_dValue, -1, 5, true) 
+		  << " ^ " 
+		  << toStringFormatted<real_t>(b.m_dValue, -1, 5, true);
+		throw e;
+	}
+	
     tmp.m_dValue = ::pow(a.m_dValue, b.m_dValue);
     real_t tmp2 = b.m_dValue * ::pow(a.m_dValue, b.m_dValue-1);
     real_t tmp3 = ::log(a.m_dValue) * tmp.m_dValue;
@@ -410,9 +427,21 @@ const adouble pow(real_t v, const adouble &a)
 														CLONE_NODE(a.node, a.m_dValue) )); 
 	    return tmp;
 	}
-    tmp.m_dValue = ::pow(v, a.m_dValue);
-    real_t tmp2 = tmp.m_dValue * ::log(v);
-    
+	
+// ACHTUNG, ACHTUNG!!!	
+// log(number) = NaN if the number is <= 0
+	if(v <= 0)
+	{
+		daeDeclareException(exRuntimeCheck);
+		e << "Power function called for a negative base: " 
+		  << toStringFormatted<real_t>(v, -1, 5, true) 
+		  << " ^ " 
+		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true);
+		throw e;
+	}
+
+	tmp.m_dValue = ::pow(v, a.m_dValue);
+    real_t tmp2 = tmp.m_dValue * ::log(v);    
     tmp.m_dDeriv = tmp2 * a.m_dDeriv;
     return tmp;
 }
@@ -427,6 +456,18 @@ const adouble log10(const adouble &a)
 													   CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
+	
+// ACHTUNG, ACHTUNG!!!	
+// log10(number) = NaN if the number is <= 0
+	if(a.m_dValue <= 0)
+	{
+		daeDeclareException(exRuntimeCheck);
+		e << "Log10 function called for a negative base: log10(" 
+	      << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
+		  << ")";
+		throw e;
+	}
+
     tmp.m_dValue = ::log10(a.m_dValue);
     real_t tmp2 = ::log((real_t)10) * a.m_dValue;
     tmp.m_dDeriv = a.m_dDeriv / tmp2;
@@ -458,12 +499,27 @@ const adouble log(const adouble &a)
 													   CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
+	
+// ACHTUNG, ACHTUNG!!!	
+// log(number) = NaN if the number is <= 0
+	if(a.m_dValue <= 0)
+	{
+		daeDeclareException(exRuntimeCheck);
+		e << "Log function called for a negative base: log(" 
+		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
+		  << ")";
+		throw e;
+	}
+
     tmp.m_dValue = ::log(a.m_dValue);
-    if (a.m_dValue > 0 || a.m_dValue == 0 && a.m_dDeriv >= 0)  // ????????????????????
-		tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
-    else 
-		tmp.m_dDeriv = makeNaN();
-    return tmp;
+	tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+	return tmp;
+	
+// The original code:
+//    if (a.m_dValue > 0 || a.m_dValue == 0 && a.m_dDeriv >= 0)
+//		tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+//    else 
+//		tmp.m_dDeriv = makeNaN();
 }
 
 const adouble sqrt(const adouble &a) 
@@ -476,12 +532,34 @@ const adouble sqrt(const adouble &a)
 													   CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-	tmp.m_dValue = ::sqrt(a.m_dValue);
-	if(a.m_dValue > 0 || a.m_dValue == 0 && a.m_dDeriv >= 0)  // ????????????????????
+	
+// ACHTUNG, ACHTUNG!!!	
+// sqrt(number) = NaN if the number is < 0
+	if(a.m_dValue > 0)
+	{
+		tmp.m_dValue = ::sqrt(a.m_dValue);
 		tmp.m_dDeriv = a.m_dDeriv / tmp.m_dValue / 2;
-	else 
-		tmp.m_dDeriv = makeNaN();
+	}
+	else if(a.m_dValue == 0)
+	{
+		tmp.m_dValue = 0; // sqrt(0) = 0
+		tmp.m_dDeriv = 0; // number/0 = 0 (Is it??) 
+	}
+	else
+	{
+		daeDeclareException(exRuntimeCheck);
+		e << "Sqrt function called with a negative argument: sqrt(" 
+		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
+		  << ")";
+		throw e;
+	}
 	return tmp;
+
+// The original code:
+//	if(a.m_dValue > 0 || a.m_dValue == 0 && a.m_dDeriv >= 0)  // ????????????????????
+//		tmp.m_dDeriv = a.m_dDeriv / tmp.m_dValue / 2;
+//	else 
+//		tmp.m_dDeriv = makeNaN();
 }
 
 const adouble abs(const adouble &a) 
@@ -625,6 +703,7 @@ const adouble atan(const adouble &a)
     return tmp;
 }
 
+// ceil is non-differentiable: should I remove it?
 const adouble ceil(const adouble &a) 
 {
     adouble tmp;
@@ -641,6 +720,7 @@ const adouble ceil(const adouble &a)
     return tmp;
 }
 
+// floor is non-differentiable: should I remove it?
 const adouble floor(const adouble &a) 
 {
     adouble tmp;

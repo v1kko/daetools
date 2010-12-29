@@ -3,8 +3,6 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 from PyQt4 import QtCore, QtGui
 from Simulator_ui import Ui_SimulatorDialog
-
-#from ImageViewer_ui import Ui_ImageViewerDialog
 from daetools.pyDAE.WebViewDialog import WebView
 
 class daeTextEditLog(daeStdOutLog):
@@ -18,24 +16,6 @@ class daeTextEditLog(daeStdOutLog):
         if self.TextEdit.isVisible() == True:
             self.TextEdit.update()
         self.App.processEvents()
-
-class daeImageViewer(QtGui.QDialog):
-    def __init__(self, fileName):
-        QtGui.QDialog.__init__(self)
-        self.ui = Ui_ImageViewerDialog()
-        self.ui.setupUi(self)
-        
-        #filename = str(QtGui.QFileDialog.getSaveFileName(None, "Insert the file name for text data reporter", "tutorial8.out", "Text files (*.txt)"))
-        if fileName == "":
-            return
-            
-        self.image = QtGui.QImage(fileName);
-        if(self.image.isNull()):
-            QtGui.QMessageBox.warning(None, "DAE Tools Simulator", "Cannot load image ")
-            return
-        
-        self.ui.label.setPixmap(QtGui.QPixmap.fromImage(self.image))
-        self.ui.label.adjustSize()
 
 class daeSimulator(QtGui.QDialog):
     def __init__(self, app, **kwargs):
@@ -97,16 +77,15 @@ class daeSimulator(QtGui.QDialog):
 
             if self.datareporter == None:
                 self.datareporter = daeTCPIPDataReporter()
+                simName = self.simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+                if(self.datareporter.Connect(str(tcpipaddress), simName) == False):
+                    QtGui.QMessageBox.warning(None, "DAE Tools Simulator", "Cannot connect data reporter!\nDid you forget to start daePlotter?")
+                    raise RuntimeError("Cannot connect daeTCPIPDataReporter")
+                    return
             if self.log == None:
                 self.log = daeTextEditLog(self.ui.textEdit, self.app)
             if self.daesolver == None:
                 self.daesolver = daeIDASolver()
-            
-            simName = self.simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-            if(self.datareporter.Connect(str(tcpipaddress), simName) == False):
-                QtGui.QMessageBox.warning(None, "DAE Tools Simulator", "Cannot connect data reporter!\nDid you forget to start daePlotter?")
-                raise RuntimeError("Cannot connect daeTCPIPDataReporter")
-                return
             
             self.lasolver = None
             lasolverIndex = self.ui.LASolverComboBox.currentIndex()

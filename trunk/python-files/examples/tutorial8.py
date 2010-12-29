@@ -34,7 +34,7 @@ time, to send the results to the daePlotter and save them into a file (or proces
 some other ways). 
 """
 
-import sys
+import sys, tempfile
 from daetools.pyDAE import *
 from time import localtime, strftime
 
@@ -56,11 +56,14 @@ typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
 #  - IsConnected
 #    Check if the data reporter is connected or not.
 # In this example we use the first argument of the function Connect as a file name to open 
-# a text file and implement a new function Write to write the data into the file.
-# In the function Write we iterate over all variables and write their values into a file.
+# a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write 
+# the data into the file. In the function MakeString we iterate over all variables and write 
+# their values into a string which will be saved in the function Write.
+# The content of the file (/tmp/tutorial8.out) will also be printed to the console.
 class MyDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
 
     def Connect(self, ConnectionString, ProcessName):
         self.ProcessName = ProcessName
@@ -71,33 +74,41 @@ class MyDataReporter(daeDataReporterLocal):
         return True
         
     def Disconnect(self):
+        self.Write()
         return True
 
+    def MakeString(self):
+        s = "Process name: " + self.ProcessName + "\n"
+        variables = self.Process.Variables
+        for var in variables:
+            values  = var.Values
+            domains = var.Domains
+            times   = var.TimeValues
+            s += " - Variable: " + var.Name + "\n"
+            s += "    - Domains:" + "\n"
+            for domain in domains:
+                s += "       - " + domain.Name + "\n"
+            s += "    - Values:" + "\n"
+            for i in range(len(times)):
+                s += "      - Time: " + str(times[i]) + "\n"
+                s += "        " + str(values[i, ...]) + "\n"
+
+        return s
+        
     def Write(self):
         try:
-            self.f.write("Process name: " + self.ProcessName + "\n")
-            variables = self.Process.Variables
-            for var in variables:
-                values  = var.Values
-                domains = var.Domains
-                times   = var.TimeValues
-                self.f.write(" - Variable: " + var.Name + "\n")
-                self.f.write("    - Domains:" + "\n")
-                for domain in domains:
-                    self.f.write("       - " + domain.Name + "\n")
-                self.f.write("    - Values:" + "\n")
-                for i in range(len(times)):
-                    self.f.write("      - Time: " + str(times[i]) + "\n")
-                    self.f.write("        " + str(values[i, ...]) + "\n")
-
+            content = self.MakeString()
+            print content
+            self.f.write(content)
             self.f.close()
 
         except IOError:
             self.f.close()
             return False
-        
+
     def IsConnected(self):
         return True
+
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -117,8 +128,9 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("Tutorial_8")
-        self.m.Description = "This tutorial explains how to create custom data reporters and how to create a composite data reporter which delegates " \
+        self.m = modTutorial("tutorial8")
+        self.m.Description = "This tutorial explains how to create custom data reporters and how to " \
+                             "create a composite data reporter which delegates " \
                              "the data processing to other data reporters. "
           
     def SetUpParametersAndDomains(self):
@@ -129,12 +141,10 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.T.SetInitialCondition(300)
 
-if __name__ == "__main__":
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
-    simulation   = simTutorial()
-
+# This function does not work!!
+# It seems the class daeDelegateDataReporter cant iterate over
+# data reporters!!???
+def setupDataReporters(simulationName):
     # Create daeDelegateDataReporter and the add 2 data reporters:
     # - MyDataReporterLocal (to write data to the file 'tutorial8.out')
     # - daeTCPIPDataReporter (to send data to the daePlotter)
@@ -144,19 +154,47 @@ if __name__ == "__main__":
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
 
+    # Connect data reporter
+    simName = simulationName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    filename = tempfile.gettempdir() + "/tutorial8.out"
+    if(dr1.Connect(filename, simName) == False):
+        sys.exit()
+    if(dr2.Connect("", simName) == False):
+        sys.exit()
+    
+    return datareporter
+   
+# Use daeSimulator class
+def guiRun(app):
+    sim = simTutorial()
+    dr  = MyDataReporter()
+    filename = tempfile.gettempdir() + "/tutorial8.out"
+    if(dr.Connect(filename, sim.m.Name) == False):
+        sys.exit()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 100
+    simulator  = daeSimulator(app, simulation=sim, datareporter=dr)
+    simulator.exec_()
+    
+# Setup everything manually and run in a console
+def consoleRun():
+    # Create Log, Solver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    solver       = daeIDASolver()
+    simulation   = simTutorial()
+    datareporter = MyDataReporter()
+    
+    filename = tempfile.gettempdir() + "/tutorial8.out"
+    if(datareporter.Connect(filename, simulation.m.Name) == False):
+        sys.exit()
+
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
     simulation.TimeHorizon = 100
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(dr1.Connect("tutorial8.out", simName) == False):
-        sys.exit()
-    if(dr2.Connect("", simName) == False):
-        sys.exit()
 
     # Initialize the simulation
     simulation.Initialize(solver, datareporter, log)
@@ -172,5 +210,14 @@ if __name__ == "__main__":
     simulation.Run()
     simulation.Finalize()
 
-    # Finally, write the data to a file
-    dr1.Write()
+if __name__ == "__main__":
+    runInGUI = True
+    if len(sys.argv) > 1:
+        if(sys.argv[1] == 'console'):
+            runInGUI = False
+    if runInGUI:
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
+    else:
+        consoleRun()

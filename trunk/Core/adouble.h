@@ -136,9 +136,11 @@ public:
     friend DAE_CORE_API const adouble pow(real_t v, const adouble &a);
     friend DAE_CORE_API const adouble log10(const adouble &a);
 
-    friend DAE_CORE_API const adouble abs(const adouble &a);
+// ceil/floor are non-differentiable: should I remove them?
     friend DAE_CORE_API const adouble ceil(const adouble &a);
     friend DAE_CORE_API const adouble floor(const adouble &a);
+
+    friend DAE_CORE_API const adouble abs(const adouble &a);
     friend DAE_CORE_API const adouble max(const adouble &a, const adouble &b);
     friend DAE_CORE_API const adouble max(real_t v, const adouble &a);
     friend DAE_CORE_API const adouble max(const adouble &a, real_t v);

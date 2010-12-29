@@ -404,8 +404,8 @@ public:
 		y1("y1", no_type, this, ""),
 		y2("y2", no_type, this, ""),
 		z("z", no_type, this, ""),
-		dummy("dummy", no_type, this, ""),
-		time("&tau;",  no_type, this, "")
+		dummy("dummy", no_type, this, "")
+//		time("&tau;",  no_type, this, "")
 	{
 	}
 	
@@ -416,8 +416,8 @@ public:
         eq = CreateEquation("Equation1", "");
         eq->SetResidual( dummy() - 1 );
 
-        eq = CreateEquation("time", "");
-        eq->SetResidual( time.dt() - 1 );
+//        eq = CreateEquation("time", "");
+//        eq->SetResidual( time.dt() - 1 );
 	}
 };
 /*
@@ -438,7 +438,7 @@ public:
 	modToy m;
 	
 public:
-	simToy(void) : m("simHS71")
+	simToy(void) : m("simToy")
 	{
 		SetModel(&m);
 	}
@@ -453,11 +453,11 @@ public:
 	// x is BINARY variable
 		m.x.AssignValue(0);
 	// y is CONTINUOUS variable
-		m.y1.AssignValue(1);
-		m.y2.AssignValue(1);
+		m.y1.AssignValue(0);
+		m.y2.AssignValue(0);
 	// x is INTEGER variable
-		m.z.AssignValue(1);
-		m.time.SetInitialCondition(0);
+		m.z.AssignValue(0);
+//		m.time.SetInitialCondition(0);
 	}
 	
 	void SetUpOptimization(void)
@@ -477,9 +477,9 @@ public:
 		
 	// Set the optimization variables and their lower and upper bounds
 		SetBinaryOptimizationVariable(m.x, 0);
-		SetContinuousOptimizationVariable(m.y1, 0, 2e19, 1);
-		SetContinuousOptimizationVariable(m.y2, 0, 2e19, 1);
-		SetIntegerOptimizationVariable(m.z, 0, 5, 1);
+		SetContinuousOptimizationVariable(m.y1, 0, 2e19, 0);
+		SetContinuousOptimizationVariable(m.y2, 0, 2e19, 0);
+		SetIntegerOptimizationVariable(m.z, 0, 5, 0);
 	}
 
 };

@@ -91,7 +91,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("Tutorial_6")
+        self.m = modTutorial("tutorial6")
         self.m.Description = "This tutorial explains how to define and connect ports. \n" \
                              "A simple port type 'portSimple' is defined which contains only one variable 't'. " \
                              "Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'. " \
@@ -105,16 +105,13 @@ class simTutorial(daeSimulation):
         self.m.mpout.time.SetInitialCondition(0)
     
 # Use daeSimulator class
-def guiRun():
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
+def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
     simulator  = daeSimulator(app, simulation=sim)
-    simulator.show()
-    app.exec_()
+    simulator.exec_()
 
 # Setup everything manually and run in a console
 def consoleRun():
@@ -156,6 +153,8 @@ if __name__ == "__main__":
         if(sys.argv[1] == 'console'):
             runInGUI = False
     if runInGUI:
-        guiRun()
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
     else:
         consoleRun()

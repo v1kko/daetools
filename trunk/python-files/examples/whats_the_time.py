@@ -104,7 +104,7 @@ class simTutorial(daeSimulation):
         #     daeDynamicSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.
         #     They are absolutely equivalent, and user can choose which one to use. For clarity, I prefer the shortest one: m.
         daeSimulation.__init__(self)
-        self.m = modTutorial("WhatsTheTime")
+        self.m = modTutorial("whats_the_time")
         self.m.Description = "What is the time? (AKA Hello world) is the simplest simulation. It shows the basic structure of the model and the simulation classes. " \
                              "The basic 8 steps are explained: \n" \
                              "1. How to import pyDAE module \n" \
@@ -130,16 +130,13 @@ class simTutorial(daeSimulation):
         self.m.time.SetInitialCondition(0)
 
 # Use daeSimulator class
-def guiRun():
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
+def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
     simulator  = daeSimulator(app, simulation=sim)
-    simulator.show()
-    app.exec_()
+    simulator.exec_()
 
 # Setup everything manually and run in a console
 def consoleRun():
@@ -207,6 +204,8 @@ if __name__ == "__main__":
         if(sys.argv[1] == 'console'):
             runInGUI = False
     if runInGUI:
-        guiRun()
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
     else:
         consoleRun()

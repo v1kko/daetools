@@ -162,6 +162,14 @@ public:
 	
 protected:
 	void CopyOptimizationVariablesToSimulationAndRun(const Number* x);
+	void PrintObjectiveFunction(void);
+	void PrintOptimizationVariables(void);
+	void PrintConstraints(void);
+	void PrintVariablesTypes(void);
+	void PrintVariablesLinearity(void);
+	void PrintConstraintsLinearity(void);
+	void PrintStartingPoint(void);
+	void PrintBoundsInfo(void);
 
 public:
 	daeSimulation_t*	m_pSimulation;
@@ -174,7 +182,8 @@ public:
 	std::vector<daeOptimizationConstraint*>  m_ptrarrConstraints;
 	std::vector<daeOptimizationVariable*>    m_ptrarrOptVariables;
 	
-	int m_iRunCounter;
+	int  m_iRunCounter;
+	bool m_bPrintInfo;
 };
 
 /******************************************************************
@@ -197,6 +206,11 @@ public:
 	void SetOption(const string& strOptionName, real_t dValue);
 	void SetOption(const string& strOptionName, int iValue);
 	
+    void ClearOptions(void);
+    void PrintOptions(void);
+    void PrintUserOptions(void);
+	void LoadOptionsFile(const string& strOptionsFile);
+
 protected:
 	daeSimulation_t*	m_pSimulation;
 	daeDAESolver_t*		m_pDAESolver;

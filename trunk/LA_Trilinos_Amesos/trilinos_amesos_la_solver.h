@@ -1,9 +1,9 @@
 #ifndef TRILINOS_AMESOS_LA_SOLVER_H
 #define TRILINOS_AMESOS_LA_SOLVER_H
 
-#include "../Solver/ida_la_solver_interface.h"
-#include "../Solver/solver_class_factory.h"
-#include "../Solver/dae_array_matrix.h"
+#include "../IDAS_DAESolver/ida_la_solver_interface.h"
+#include "../IDAS_DAESolver/solver_class_factory.h"
+#include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <idas/idas.h>
 #include <idas/idas_impl.h>
 #include <nvector/nvector_serial.h>

@@ -65,9 +65,9 @@ mkdir lib
 mkdir include
 cd include
 mkdir Core
-mkdir Simulation
-mkdir DataReporters
-mkdir Solver
+mkdir Activity
+mkdir DataReporting
+mkdir IDAS_DAESolver
 cd ..
 cd ..
 
@@ -82,12 +82,13 @@ cd %TRUNK%\release
 copy pyCore.pyd                     %ROOT%\pyDAE\pyCore.pyd
 copy pyActivity.pyd                 %ROOT%\pyDAE\pyActivity.pyd
 copy pyDataReporting.pyd            %ROOT%\pyDAE\pyDataReporting.pyd
-copy pySolver.pyd                   %ROOT%\pyDAE\pySolver.pyd
+copy pyIDAS.pyd                     %ROOT%\pyDAE\pyIDAS.pyd
+copy pyBONMIN.pyd                   %ROOT%\pyDAE\pyBONMIN.pyd
+copy IPOPT39.dll                    %ROOT%\pyDAE\IPOPT39.dll
+
 copy pyAmdACML.pyd                  %ROOT%\pyAmdACML\pyAmdACML.pyd
 copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL\pyIntelMKL.pyd
 copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso\pyIntelPardiso.pyd
-copy pyIPOPT.pyd                    %ROOT%\pyDAE\pyIPOPT.pyd
-copy IPOPT39.dll                    %ROOT%\pyDAE\IPOPT39.dll
 
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE\boost_python-vc90-mt-1_43.dll
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyAmdACML\boost_python-vc90-mt-1_43.dll
@@ -168,31 +169,33 @@ copy macros.h           %ROOT%\cDAE\include\Core\macros.h
 copy class_factory.h    %ROOT%\cDAE\include\Core\class_factory.h
 copy coreimpl.h         %ROOT%\cDAE\include\Core\coreimpl.h
 
-cd %TRUNK%\Simulation
-copy base_activities.h  %ROOT%\cDAE\include\Simulation\base_activities.h
-copy dyn_simulation.h   %ROOT%\cDAE\include\Simulation\dyn_simulation.h
+cd %TRUNK%\Activity
+copy base_activities.h  %ROOT%\cDAE\include\Activity\base_activities.h
+copy simulation.h       %ROOT%\cDAE\include\Activity\simulation.h
 
-cd %TRUNK%\DataReporters
-copy datareporters.h                    %ROOT%\cDAE\include\DataReporters\datareporters.h
-copy base_data_reporters_receivers.h    %ROOT%\cDAE\include\DataReporters\base_data_reporters_receivers.h
+cd %TRUNK%\DataReporting
+copy datareporters.h                    %ROOT%\cDAE\include\DataReporting\datareporters.h
+copy base_data_reporters_receivers.h    %ROOT%\cDAE\include\DataReporting\base_data_reporters_receivers.h
 
-cd %TRUNK%\Solver
-copy base_solvers.h     %ROOT%\cDAE\include\Solver\base_solvers.h
-copy ida_solver.h       %ROOT%\cDAE\include\Solver\ida_solver.h
+cd %TRUNK%\IDAS_DAESolver
+copy base_solvers.h     %ROOT%\cDAE\include\IDAS_DAESolver\base_solvers.h
+copy ida_solver.h       %ROOT%\cDAE\include\IDAS_DAESolver\ida_solver.h
 
 REM Lib
 cd %TRUNK%\release
-copy Core.lib           %ROOT%\cDAE\lib\Core.lib
-copy Simulation.lib     %ROOT%\cDAE\lib\Simulation.lib
-copy Solver.lib         %ROOT%\cDAE\lib\Solver.lib
-copy DataReporters.lib  %ROOT%\cDAE\lib\DataReporters.lib
+copy cdaeCore.lib                %ROOT%\cDAE\lib\cdaeCore.lib
+copy cdaeActivity.lib            %ROOT%\cDAE\lib\cdaeActivity.lib
+copy cdaeIDAS_DAESolver.lib      %ROOT%\cDAE\lib\cdaeIDAS_DAESolver.lib
+copy cdaeDataReporting.lib       %ROOT%\cDAE\lib\cdaeDataReporting.lib
+copy cdaeBONMIN_MINLPSolver.lib  %ROOT%\cDAE\lib\cdaeBONMIN_MINLPSolver.lib
 
 copy %IDAS%\lib\sundials_idas.lib         %ROOT%\cDAE\lib\sundials_idas.lib
 copy %IDAS%\lib\sundials_nvecserial.lib   %ROOT%\cDAE\lib\sundials_nvecserial.lib
 
 REM Config
 cd %TRUNK%
-copy daetools.cfg %ROOT%\daetools_cfg 
+copy daetools.cfg  %ROOT%\daetools_cfg 
+copy bonmin.cfg    %ROOT%\bonmin_cfg 
 
 cd %INSTALL%
 rem ECHO cd C:\Python%PYTHON_VERSION%\Lib\site-packages\%PACKAGE_NAME%\daePlotter > %ROOT%\daeplotter.cmd

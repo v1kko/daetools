@@ -49,26 +49,29 @@ int main(int argc, char *argv[])
         pSimulation->SetReportingInterval(1);
         pSimulation->SetTimeHorizon(2);
 		pSimulation->GetModel()->SetReportingOn(true);
-         
- 		//pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());
-		pSimulation->GetModel()->SaveModelReport("simTest.xml");
-		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
-
- 		pOptimization->Initialize(pSimulation.get(), pNLPSolver.get(), pDAESolver.get(), pDataReporter.get(), pLog.get());
-		pSimulation->GetModel()->SaveModelReport("simTest.xml");
-		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
 		
- 		pOptimization->Run();
-		pOptimization->Finalize();
-
-//		pSimulation->InitOptimization(pDAESolver.get(), pDataReporter.get(), pLog.get());
-//		pSimulation->SolveInitial();
+		bool bRunOptimization = true;
 		
-//		pSimulation->GetModel()->SaveModelReport("simTest.xml");
-//		pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
-	  
-//		pSimulation->Run();
-//		pSimulation->Finalize();
+		if(bRunOptimization)
+		{	
+			pOptimization->Initialize(pSimulation.get(), pNLPSolver.get(), pDAESolver.get(), pDataReporter.get(), pLog.get());
+			pSimulation->GetModel()->SaveModelReport("simTest.xml");
+			pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+			
+			pOptimization->Run();
+			pOptimization->Finalize();
+		}
+		else
+		{
+			pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
+			pSimulation->SolveInitial();
+			
+			pSimulation->GetModel()->SaveModelReport("simTest.xml");
+			pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+		  
+			pSimulation->Run();
+			pSimulation->Finalize();
+		}
 	}
 	catch(std::exception& e)
 	{ 

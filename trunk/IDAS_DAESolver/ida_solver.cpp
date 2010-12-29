@@ -82,18 +82,20 @@ daeIDASolver::daeIDASolver(void)
 	m_pLASolver				         = NULL;
 	m_dCurrentTime			         = 0;
 	m_nNumberOfEquations	         = 0;
-	m_dRelTolerance			         = 0;
 	m_timeStart				         = 0;
 	m_dTargetTime			         = 0;
-	m_dNextTimeAfterReinitialization = 0;
 	m_bCalculateSensitivities        = false;
 	m_bIsModelDynamic				 = false;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
+	
 	m_pIDASolverData.reset(new daeIDASolverData);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	m_dRelTolerance                  = cfg.Get<real_t>("daetools.solver.relativeTolerance", 1e-5);
-	m_dNextTimeAfterReinitialization = cfg.Get<real_t>("daetools.solver.nextTimeAfterReinitialization", 1e-2);
+	m_dRelTolerance                  = cfg.Get<real_t>("daetools.IDAS.relativeTolerance",             1e-5);
+	m_dNextTimeAfterReinitialization = cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization", 1e-2);
+	m_strSensitivityMethod           = cfg.Get<string>("daetools.IDAS.sensitivityMethod",             "Simultaneous");
+	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.errorControl",                  false);
+	m_bPrintInfo                     = cfg.Get<bool>  ("daetools.IDAS.printInfo",                     false);
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -298,11 +300,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 // Otherwise the gradients will be calculated after the call tof SolveInitial()
 	if(m_bIsModelDynamic)
 	{
-		daeConfig& cfg = daeConfig::GetConfig();
-		strSensMethod = cfg.Get<string>("daetools.solver.idasSensitivityMethod", "Simultaneous");
-		bErrorControl = cfg.Get<bool>("daetools.solver.idasErrorControl", false);
-		
-		if(strSensMethod == "Simultaneous")
+		if(m_strSensitivityMethod == "Simultaneous")
 			iSensMethod = IDA_SIMULTANEOUS;
 		else
 			iSensMethod = IDA_STAGGERED;
@@ -323,7 +321,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 			throw e;
 		}
 	
-		retval = IDASetSensErrCon(m_pIDA, bErrorControl);
+		retval = IDASetSensErrCon(m_pIDA, m_bErrorControl);
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
@@ -855,10 +853,15 @@ int daeIDASolver::CalculateGradients(void)
 							     m_arrValues, 
 							     m_matSValues);
 
+	if(m_bPrintInfo)
+	{
+		cout << "CalculateGradients function:" << endl;
+		cout << "Gradients matrix:" << endl;
+		m_matSValues.Print();
+	}
+	
 	return 0;
 }
-
-
 
 int residuals(realtype	time, 
 			  N_Vector	vectorVariables, 
@@ -894,6 +897,13 @@ int residuals(realtype	time,
 							   pSolver->m_arrResiduals, 
 							   pSolver->m_arrTimeDerivatives);
 
+	if(pSolver->m_bPrintInfo)
+	{
+		cout << "Residuals function:" << endl;
+		cout << "Variable values:" << endl;
+		pSolver->m_arrValues.Print();
+	}
+	
 	return 0;
 }
 
@@ -976,7 +986,14 @@ int jacobian(int	    Neq,
 							  pSolver->m_arrTimeDerivatives, 
 							  pSolver->m_matJacobian, 
 							  dInverseTimeStep);
-	
+	if(pSolver->m_bPrintInfo)
+	{
+		cout << "Jacobian function:" << endl;
+		cout << "Variable values:" << endl;
+		pSolver->m_arrValues.Print();
+		cout << "Jacobian matrix:" << endl;
+		pSolver->m_matJacobian.Print();
+	}
 	return 0;
 }
 
@@ -1036,6 +1053,17 @@ int sens_residuals(int		 Ns,
 								   pSolver->m_matSValues,
 								   pSolver->m_matSTimeDerivatives,
 								   pSolver->m_matSResiduals);
+
+	if(pSolver->m_bPrintInfo)
+	{
+		cout << "Sensitivity residuals function:" << endl;
+		cout << "S values:" << endl;
+		pSolver->m_matSValues.Print();
+		cout << "SD values:" << endl;
+		pSolver->m_matSTimeDerivatives.Print();
+		cout << "S residuals:" << endl;
+		pSolver->m_matSResiduals.Print();
+	}
 
 	return 0;
 }

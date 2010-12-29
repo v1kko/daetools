@@ -40,7 +40,8 @@ Section "daetools (required)"
   
   ; Config file
   CreateDirectory c:\daetools
-  CopyFiles $INSTDIR\daetools_cfg c:\daetools\daetools.cfg
+  CopyFiles $INSTDIR\daetools_cfg  c:\daetools\daetools.cfg
+  CopyFiles $INSTDIR\bonmin_cfg    c:\daetools\bonmin.cfg
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_daetools "Install_Dir" "$INSTDIR"
