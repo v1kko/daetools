@@ -40,7 +40,6 @@ mkdir examples
 mkdir docs
 mkdir daePlotter
 mkdir daeSimulator
-mkdir cDAE
 mkdir pyDAE
 
 cd examples
@@ -61,21 +60,11 @@ mkdir images
 cd..
 
 
-cd cDAE
-mkdir lib
-mkdir include
-cd include
-mkdir Core
-mkdir Activity
-mkdir DataReporting
-mkdir IDAS_DAESolver
-cd ..
-cd ..
-
 REM Python modules
 mkdir pyAmdACML
 mkdir pyIntelMKL
 mkdir pyIntelPardiso
+mkdir pyTrilinosAmesos
 
 echo on
 
@@ -91,6 +80,7 @@ REM copy IPOPT39.dll                %ROOT%\pyDAE
 copy pyAmdACML.pyd                  %ROOT%\pyAmdACML
 copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL
 copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso
+copy pyTrilinosAmesos.pyd           %ROOT%\pyTrilinosAmesos
 
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
 
@@ -106,6 +96,7 @@ copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
 copy pyAmdACML__init__.py        %ROOT%\pyAmdACML\__init__.py
 copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
 copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
+copy pyTrilinosAmesos__init__.py %ROOT%\pyTrilinosAmesos\__init__.py
 
 REM daePlotter
 cd daePlotter
@@ -154,50 +145,6 @@ cd ..\api_ref
 copy *.html   %ROOT%\docs\api_ref
 cd %ROOT%
 
-REM Include
-cd %TRUNK%
-copy dae.h           %ROOT%\cDAE\include
-copy dae_develop.h   %ROOT%\cDAE\include
-
-cd %TRUNK%\Core
-copy definitions.h      %ROOT%\cDAE\include\Core
-copy xmlfile.h          %ROOT%\cDAE\include\Core
-copy helpers.h          %ROOT%\cDAE\include\Core
-copy base_logging.h     %ROOT%\cDAE\include\Core
-copy macros.h           %ROOT%\cDAE\include\Core
-copy class_factory.h    %ROOT%\cDAE\include\Core
-copy coreimpl.h         %ROOT%\cDAE\include\Core
-
-cd %TRUNK%\Activity
-copy base_activities.h  %ROOT%\cDAE\include\Activity
-copy simulation.h       %ROOT%\cDAE\include\Activity
-
-cd %TRUNK%\DataReporting
-copy datareporters.h                    %ROOT%\cDAE\include\DataReporting
-copy base_data_reporters_receivers.h    %ROOT%\cDAE\include\DataReporting
-
-cd %TRUNK%\IDAS_DAESolver
-copy base_solvers.h     %ROOT%\cDAE\include\IDAS_DAESolver
-copy ida_solver.h       %ROOT%\cDAE\include\IDAS_DAESolver
-
-xcopy %IDAS%\include %ROOT%\cDAE\include /E
-xcopy %BONMIN%\include %ROOT%\cDAE\include /E
-
-REM Lib
-cd %TRUNK%\release
-copy cdaeCore.lib                %ROOT%\cDAE\lib
-copy cdaeActivity.lib            %ROOT%\cDAE\lib
-copy cdaeIDAS_DAESolver.lib      %ROOT%\cDAE\lib
-copy cdaeDataReporting.lib       %ROOT%\cDAE\lib
-copy cdaeBONMIN_MINLPSolver.lib  %ROOT%\cDAE\lib
-
-cd %IDAS%\lib
-copy *.lib         %ROOT%\cDAE\lib
-
-cd %BONMIN%\lib
-copy *.lib         %ROOT%\cDAE\lib
-copy *.dll         %ROOT%\cDAE\lib
-
 REM Config
 cd %TRUNK%
 copy daetools.cfg  %ROOT%
@@ -213,7 +160,7 @@ ECHO from distutils.core import setup >> setup.py
 ECHO setup(name='%PACKAGE_NAME%',  >> setup.py
 ECHO       version='%VERSION%',  >> setup.py
 ECHO       description='DAE Tools',  >> setup.py
-ECHO       long_description='DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE and cDAE modules).',  >> setup.py
+ECHO       long_description='DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules).',  >> setup.py
 ECHO       author='Dragan Nikolic',  >> setup.py
 ECHO       author_email='dnikolic@daetools.com',  >> setup.py
 ECHO       url='http:\\www.daetools.com',  >> setup.py
@@ -221,7 +168,7 @@ ECHO       license='GNU GPL v3',  >> setup.py
 ECHO       platforms='%PLATFORM%',  >> setup.py
 ECHO       packages=['%PACKAGE_NAME%'],  >> setup.py
 ECHO       package_dir={'%PACKAGE_NAME%': '%DEST%'},  >> setup.py
-ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'cDAE/include/*.*', 'cDAE/include/Core/*.*', 'cDAE/include/DataReporters/*.*', 'cDAE/include/Simulation/*.*', 'cDAE/include/Solver/*.*', 'cDAE/lib/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} >> setup.py
+ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} >> setup.py
 ECHO       )  >> setup.py
 
 SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%-%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe

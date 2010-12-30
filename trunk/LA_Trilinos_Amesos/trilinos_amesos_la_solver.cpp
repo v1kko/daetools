@@ -4,6 +4,7 @@
 #include <idas/idas_impl.h>
 #include "trilinos_amesos_la_solver.h"
 
+
 #ifdef DAE_SINGLE_PRECISION
 #error Trilinos Amesos LA Solver does not support single precision floating point values
 #endif
@@ -161,21 +162,21 @@ void daeTrilinosAmesosSolver::AllocateMemory(void)
 	Amesos Factory;
 	if(!Factory.Query(m_strSolverName.c_str()))
 	{
-		std::cout << "Warning: the solver: [" << m_strSolverName << "] is not supported!" << std:: endl;
-		std::cout << "Selected default one: [Amesos_Klu]" << std::endl;
-		std::cout << "Supported Amesos solvers: " << std::endl;
-		std::cout << "   * Amesos_Klu: "         << (Factory.Query("Amesos_Klu")         ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Lapack: "      << (Factory.Query("Amesos_Lapack")      ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Scalapack: "   << (Factory.Query("Amesos_Scalapack")   ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Umfpack: "     << (Factory.Query("Amesos_Umfpack")     ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Pardiso: "     << (Factory.Query("Amesos_Pardiso")     ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Taucs: "       << (Factory.Query("Amesos_Taucs")       ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Superlu: "     << (Factory.Query("Amesos_Superlu")     ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Superludist: " << (Factory.Query("Amesos_Superludist") ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Dscpack: "     << (Factory.Query("Amesos_Dscpack")     ? "true" : "false") << std::endl;
-		std::cout << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << std::endl;
+		daeDeclareException(exRuntimeCheck);
+		e << "Error: the solver: [" << m_strSolverName << "] is not supported!" << "\n"
+		  << "Supported Amesos solvers: " << "\n"
+		  << "   * Amesos_Klu: "         << (Factory.Query("Amesos_Klu")         ? "true" : "false") << "\n"
+		  << "   * Amesos_Lapack: "      << (Factory.Query("Amesos_Lapack")      ? "true" : "false") << "\n"
+		  << "   * Amesos_Scalapack: "   << (Factory.Query("Amesos_Scalapack")   ? "true" : "false") << "\n"
+		  << "   * Amesos_Umfpack: "     << (Factory.Query("Amesos_Umfpack")     ? "true" : "false") << "\n"
+		  << "   * Amesos_Pardiso: "     << (Factory.Query("Amesos_Pardiso")     ? "true" : "false") << "\n"
+		  << "   * Amesos_Taucs: "       << (Factory.Query("Amesos_Taucs")       ? "true" : "false") << "\n"
+		  << "   * Amesos_Superlu: "     << (Factory.Query("Amesos_Superlu")     ? "true" : "false") << "\n"
+		  << "   * Amesos_Superludist: " << (Factory.Query("Amesos_Superludist") ? "true" : "false") << "\n"
+		  << "   * Amesos_Dscpack: "     << (Factory.Query("Amesos_Dscpack")     ? "true" : "false") << "\n"
+		  << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << "\n";
 
-		m_strSolverName = "Amesos_Klu";
+		throw e;
 	}
 	
 	m_map.reset(new Epetra_Map(m_nNoEquations, 0, m_Comm));

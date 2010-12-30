@@ -201,7 +201,7 @@ echo " " >> setup.py
 echo "setup(name='${PACKAGE_NAME}', " >> setup.py
 echo "      version='${VERSION}', " >> setup.py
 echo "      description='DAE Tools', " >> setup.py
-echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE and cDAE modules).', " >> setup.py
+echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', " >> setup.py
 echo "      author='Dragan Nikolic', " >> setup.py
 echo "      author_email='dnikolic@daetools.com', " >> setup.py
 echo "      url='http://www.daetools.com', " >> setup.py
@@ -209,7 +209,7 @@ echo "      license='GNU GPL v3', " >> setup.py
 echo "      platforms='${ARCH}', " >> setup.py
 echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'cDAE/include/*.*', 'cDAE/include/Core/*.*', 'cDAE/include/DataReporters/*.*', 'cDAE/include/Simulation/*.*', 'cDAE/include/Solver/*.*', 'cDAE/lib/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} " >> setup.py
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} " >> setup.py
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
@@ -294,72 +294,6 @@ cp ../bonmin.cfg    ${BUILD_DIR}/etc/daetools
 chmod go-wx ${BUILD_DIR}/etc/daetools/daetools.cfg
 chmod go-wx ${BUILD_DIR}/etc/daetools/bonmin.cfg
 
-# cDAE Files
-mkdir ${BUILD_DIR}/usr/include
-mkdir ${BUILD_DIR}/usr/include/daetools
-mkdir ${BUILD_DIR}/usr/include/daetools/Core
-mkdir ${BUILD_DIR}/usr/include/daetools/Activity
-mkdir ${BUILD_DIR}/usr/include/daetools/DataReporting
-mkdir ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
-mkdir ${BUILD_DIR}/usr/include/daetools/BONMIN_MINLPSolver
-
-mkdir ${BUILD_DIR}/usr/${LIB}/daetools
-
-# Include files
-cp ../config.h       ${BUILD_DIR}/usr/include/daetools
-cp ../dae.h          ${BUILD_DIR}/usr/include/daetools
-cp ../dae_develop.h  ${BUILD_DIR}/usr/include/daetools
-
-cp ../Core/definitions.h    ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/xmlfile.h        ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/helpers.h        ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/base_logging.h   ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/macros.h         ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/class_factory.h  ${BUILD_DIR}/usr/include/daetools/Core
-cp ../Core/coreimpl.h       ${BUILD_DIR}/usr/include/daetools/Core
-
-cp ../Activity/base_activities.h  ${BUILD_DIR}/usr/include/daetools/Activity
-cp ../Activity/simulation.h       ${BUILD_DIR}/usr/include/daetools/Activity
-
-cp ../DataReporting/datareporters.h                 ${BUILD_DIR}/usr/include/daetools/DataReporting
-cp ../DataReporting/base_data_reporters_receivers.h ${BUILD_DIR}/usr/include/daetools/DataReporting
-
-cp ../IDAS_DAESolver/base_solvers.h  ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
-cp ../IDAS_DAESolver/ida_solver.h    ${BUILD_DIR}/usr/include/daetools/IDAS_DAESolver
-
-cp ../BONMIN_MINLPSolver/nlpsolver.h    ${BUILD_DIR}/usr/include/daetools/BONMIN_MINLPSolver
-
-# Static libraries
-cp ../release/libcdaeCore.a                ${BUILD_DIR}/usr/${LIB}/daetools
-cp ../release/libcdaeActivity.a            ${BUILD_DIR}/usr/${LIB}/daetools
-cp ../release/libcdaeDataReporting.a       ${BUILD_DIR}/usr/${LIB}/daetools
-cp ../release/libcdaeIDAS_DAESolver.a      ${BUILD_DIR}/usr/${LIB}/daetools
-cp ../release/libcdaeBONMIN_MINLPSolver.a  ${BUILD_DIR}/usr/${LIB}/daetools
-cp ${IDAS}/lib/libsundials_idas.a          ${BUILD_DIR}/usr/${LIB}/daetools
-cp ${IDAS}/lib/libsundials_nvecserial.a    ${BUILD_DIR}/usr/${LIB}/daetools
-
-# Trilinos Amesos libraries
-if [ -e ${TRILINOS}/libamesos.so ]; then
-  cp ${TRILINOS}/libamesos.so         ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libepetra.so         ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libtriutils.so       ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libgaleri.so         ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libepetraext.so      ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libzoltan.so         ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libsimpi.so          ${BUILD_DIR}/usr/${LIB}
-  cp ${TRILINOS}/libteuchos.so        ${BUILD_DIR}/usr/${LIB}
-fi
-
-# Bonmin libraries
-if [ -d ${BONMIN}/lib ]; then
-  cp -d ${BONMIN}/lib/*.so*            ${BUILD_DIR}/usr/${LIB}
-fi
-
-# Change permissions and strip .so libraries (Trilinos Amesos and Bonmin)
-chmod -x ${BUILD_DIR}/usr/${LIB}/*.so* 
-chmod -x ${BUILD_DIR}/usr/${LIB}/daetools/*.a* 
-find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip 
-
 # Shortcuts
 mkdir ${BUILD_DIR}/usr/share/applications
 
@@ -417,8 +351,8 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   fi
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
-  echo " This package includes pyDAE and cDAE modules. "                                            >> ${CONTROL}
-  echo "Suggests: mayavi2, libsuitesparse-dev, libsuperlu3, liblapack3gf "                          >> ${CONTROL}
+  echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
+  echo "Suggests: mayavi2, libsuperlu3, libumfpack, libamd, libblas3gf, liblapack3gf "              >> ${CONTROL}
   echo "Replaces: libtrilinos"                                                                      >> ${CONTROL}
   echo "Conflicts: libtrilinos"                                                                     >> ${CONTROL}
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
@@ -472,18 +406,6 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "chmod -R o+w ${DAE_TOOLS_DIR}/examples"                                                >> ${POSTINST}
   chmod 0755 ${POSTINST}
 
-  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  echo "libbonmin 0 libonmin.so.0 (>= 0:0.0.0)"                                           > ${SHLIBS}
-  echo "libCbc 0 libCbc.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
-  echo "libCbcSolver 0 libCbcSolver.so.0 (>= 0:0.0.0)"                                   >> ${SHLIBS}
-  echo "libCgl 0 libCgl.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
-  echo "libClp 0 libClp.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
-  echo "libCoinUtils 0 libCoinUtils.so.0 (>= 0:0.0.0)"                                   >> ${SHLIBS}
-  echo "libipopt 0 libipopt.so.0 (>= 0:0.0.0)"                                           >> ${SHLIBS}
-  echo "libOsiCbc 0 libOsiCbc.so.0 (>= 0:0.0.0)"                                         >> ${SHLIBS}
-  echo "libOsiClp 0 libOsiClp.so.0 (>= 0:0.0.0)"                                         >> ${SHLIBS}
-  echo "libOsi 0 libOsi.so.0 (>= 0:0.0.0)"                                               >> ${SHLIBS}
-
   fakeroot dpkg -b ${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
@@ -496,7 +418,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0) "         >> ${SPEC}
   echo "%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0) "     >> ${SPEC}
 
-  echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE and cDAE modules). " >> ${SPEC}
+  echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
   echo "Name: ${PACKAGE_NAME}"                                                      >> ${SPEC}
   echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                         >> ${SPEC}
   echo "Release: ${VER_BUILD}"                                                      >> ${SPEC}
@@ -509,7 +431,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "Group: Development/Tools"                                                   >> ${SPEC}
 
   echo "%description"                                                               >> ${SPEC}
-  echo "DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE and cDAE modules). " >> ${SPEC}
+  echo "DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
 
   echo "%prep"                                                              >> ${SPEC}
   echo "%build"                                                             >> ${SPEC}

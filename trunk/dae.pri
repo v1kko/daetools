@@ -113,7 +113,7 @@ unix::BOOST_LIBS       = -lboost_system \
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
 #
 #####################################################################################
-SUNDIALS = ../idas-1.0.0/build
+SUNDIALS = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
@@ -139,7 +139,7 @@ unix::SUNDIALS_LIBS = -lsundials_idas \
 # 7) make test
 # 8) make install
 #####################################################################################
-unix::NLPSOLVER           = ../bonmin/build-static
+unix::NLPSOLVER           = ../bonmin/build
 win32-msvc2008::NLPSOLVER = ../ipopt/build
 
 NLPSOLVER_INCLUDE = $${NLPSOLVER}/include/coin

@@ -36,24 +36,13 @@ Section "daetools (required)"
   SetOutPath $INSTDIR
   File /r   "daetools\*.*"
 
- ; Headers and libs
-  CreateDirectory c:\daetools
-  CreateDirectory c:\daetools\include
-  CreateDirectory c:\daetools\lib
-
-  SetOutPath c:\daetools\include
-  File /r "daetools\cDAE\include\*.*"
-  
-  SetOutPath c:\daetools\lib
-  File /r "daetools\cDAE\lib\*.*"
-
-  RMDir /r $INSTDIR\cDAE
-
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyAmdACML
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelMKL
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelPardiso
+  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyTrilinosAmesos
 
   ; Config file
+  CreateDirectory c:\daetools
   CopyFiles $INSTDIR\daetools.cfg  c:\daetools
   CopyFiles $INSTDIR\bonmin.cfg    c:\daetools
   Delete $INSTDIR\daetools.cfg
