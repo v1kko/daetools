@@ -16,7 +16,8 @@ SET PLATFORM=%4
 SET TRUNK=c:\Data\daetools\trunk
 SET INSTALL=%TRUNK%\Installations
 SET ROOT=%INSTALL%\%DEST%
-IDAS=..\idas-1.0.0\build
+SET IDAS=%TRUNK%\idas-1.0.0\build
+SET BONMIN=%TRUNK%\bonmin\build
 
 ECHO " "
 ECHO "***************************"
@@ -79,33 +80,32 @@ mkdir pyIntelPardiso
 echo on
 
 cd %TRUNK%\release
-copy pyCore.pyd                     %ROOT%\pyDAE\pyCore.pyd
-copy pyActivity.pyd                 %ROOT%\pyDAE\pyActivity.pyd
-copy pyDataReporting.pyd            %ROOT%\pyDAE\pyDataReporting.pyd
-copy pyIDAS.pyd                     %ROOT%\pyDAE\pyIDAS.pyd
-copy pyBONMIN.pyd                   %ROOT%\pyDAE\pyBONMIN.pyd
-copy IPOPT39.dll                    %ROOT%\pyDAE\IPOPT39.dll
+copy pyCore.pyd                     %ROOT%\pyDAE
+copy pyActivity.pyd                 %ROOT%\pyDAE
+copy pyDataReporting.pyd            %ROOT%\pyDAE
+copy pyIDAS.pyd                     %ROOT%\pyDAE
+REM copy pyBONMIN.pyd               %ROOT%\pyDAE
+REM copy pyIPOPT.pyd                %ROOT%\pyDAE
+REM copy IPOPT39.dll                %ROOT%\pyDAE
 
-copy pyAmdACML.pyd                  %ROOT%\pyAmdACML\pyAmdACML.pyd
-copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL\pyIntelMKL.pyd
-copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso\pyIntelPardiso.pyd
+copy pyAmdACML.pyd                  %ROOT%\pyAmdACML
+copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL
+copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso
 
-copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE\boost_python-vc90-mt-1_43.dll
-copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyAmdACML\boost_python-vc90-mt-1_43.dll
-copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyIntelMKL\boost_python-vc90-mt-1_43.dll
-copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyIntelPardiso\boost_python-vc90-mt-1_43.dll
+copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
 
 cd ..\python-files
 
 REM Python files
+copy daeLogs.py                  %ROOT%\pyDAE
+copy WebView_ui.py               %ROOT%\pyDAE
+copy WebViewDialog.py            %ROOT%\pyDAE
+
 copy daetools__init__.py         %ROOT%\__init__.py
 copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
-copy daeLogs.py                  %ROOT%\pyDAE\daeLogs.py
 copy pyAmdACML__init__.py        %ROOT%\pyAmdACML\__init__.py
 copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
 copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
-copy WebView_ui.py               %ROOT%\pyDAE\WebView_ui.py
-copy WebViewDialog.py            %ROOT%\pyDAE\WebViewDialog.py
 
 REM daePlotter
 cd daePlotter
@@ -136,7 +136,7 @@ copy *.png              %ROOT%\examples
 copy *.init             %ROOT%\examples
 copy daeRunExamples.py  %ROOT%\examples\daeRunExamples.pyw
 cd images
-copy *.*               %ROOT%\examples\images
+copy *.*                %ROOT%\examples\images
 cd ..
 cd ..
 
@@ -156,45 +156,52 @@ cd %ROOT%
 
 REM Include
 cd %TRUNK%
-copy dae.h           %ROOT%\cDAE\include\dae.h
-copy dae_develop.h   %ROOT%\cDAE\include\dae_develop.h
+copy dae.h           %ROOT%\cDAE\include
+copy dae_develop.h   %ROOT%\cDAE\include
 
 cd %TRUNK%\Core
-copy definitions.h      %ROOT%\cDAE\include\Core\definitions.h
-copy xmlfile.h          %ROOT%\cDAE\include\Core\xmlfile.h
-copy helpers.h          %ROOT%\cDAE\include\Core\helpers.h
-copy base_logging.h     %ROOT%\cDAE\include\Core\base_logging.h
-copy macros.h           %ROOT%\cDAE\include\Core\macros.h
-copy class_factory.h    %ROOT%\cDAE\include\Core\class_factory.h
-copy coreimpl.h         %ROOT%\cDAE\include\Core\coreimpl.h
+copy definitions.h      %ROOT%\cDAE\include\Core
+copy xmlfile.h          %ROOT%\cDAE\include\Core
+copy helpers.h          %ROOT%\cDAE\include\Core
+copy base_logging.h     %ROOT%\cDAE\include\Core
+copy macros.h           %ROOT%\cDAE\include\Core
+copy class_factory.h    %ROOT%\cDAE\include\Core
+copy coreimpl.h         %ROOT%\cDAE\include\Core
 
 cd %TRUNK%\Activity
-copy base_activities.h  %ROOT%\cDAE\include\Activity\base_activities.h
-copy simulation.h       %ROOT%\cDAE\include\Activity\simulation.h
+copy base_activities.h  %ROOT%\cDAE\include\Activity
+copy simulation.h       %ROOT%\cDAE\include\Activity
 
 cd %TRUNK%\DataReporting
-copy datareporters.h                    %ROOT%\cDAE\include\DataReporting\datareporters.h
-copy base_data_reporters_receivers.h    %ROOT%\cDAE\include\DataReporting\base_data_reporters_receivers.h
+copy datareporters.h                    %ROOT%\cDAE\include\DataReporting
+copy base_data_reporters_receivers.h    %ROOT%\cDAE\include\DataReporting
 
 cd %TRUNK%\IDAS_DAESolver
-copy base_solvers.h     %ROOT%\cDAE\include\IDAS_DAESolver\base_solvers.h
-copy ida_solver.h       %ROOT%\cDAE\include\IDAS_DAESolver\ida_solver.h
+copy base_solvers.h     %ROOT%\cDAE\include\IDAS_DAESolver
+copy ida_solver.h       %ROOT%\cDAE\include\IDAS_DAESolver
+
+xcopy %IDAS%\include %ROOT%\cDAE\include /E
+xcopy %BONMIN%\include %ROOT%\cDAE\include /E
 
 REM Lib
 cd %TRUNK%\release
-copy cdaeCore.lib                %ROOT%\cDAE\lib\cdaeCore.lib
-copy cdaeActivity.lib            %ROOT%\cDAE\lib\cdaeActivity.lib
-copy cdaeIDAS_DAESolver.lib      %ROOT%\cDAE\lib\cdaeIDAS_DAESolver.lib
-copy cdaeDataReporting.lib       %ROOT%\cDAE\lib\cdaeDataReporting.lib
-copy cdaeBONMIN_MINLPSolver.lib  %ROOT%\cDAE\lib\cdaeBONMIN_MINLPSolver.lib
+copy cdaeCore.lib                %ROOT%\cDAE\lib
+copy cdaeActivity.lib            %ROOT%\cDAE\lib
+copy cdaeIDAS_DAESolver.lib      %ROOT%\cDAE\lib
+copy cdaeDataReporting.lib       %ROOT%\cDAE\lib
+copy cdaeBONMIN_MINLPSolver.lib  %ROOT%\cDAE\lib
 
-copy %IDAS%\lib\sundials_idas.lib         %ROOT%\cDAE\lib\sundials_idas.lib
-copy %IDAS%\lib\sundials_nvecserial.lib   %ROOT%\cDAE\lib\sundials_nvecserial.lib
+cd %IDAS%\lib
+copy *.lib         %ROOT%\cDAE\lib
+
+cd %BONMIN%\lib
+copy *.lib         %ROOT%\cDAE\lib
+copy *.dll         %ROOT%\cDAE\lib
 
 REM Config
 cd %TRUNK%
-copy daetools.cfg  %ROOT%\daetools_cfg 
-copy bonmin.cfg    %ROOT%\bonmin_cfg 
+copy daetools.cfg  %ROOT%
+copy bonmin.cfg    %ROOT% 
 
 cd %INSTALL%
 rem ECHO cd C:\Python%PYTHON_VERSION%\Lib\site-packages\%PACKAGE_NAME%\daePlotter > %ROOT%\daeplotter.cmd
