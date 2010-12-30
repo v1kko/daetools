@@ -241,11 +241,8 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 void daeSimulation::SetupSolver(void)
 {
 	size_t i;
-	vector<size_t> narrVariableIndexes;
 	vector<size_t> narrParametersIndexes;
 	daeBlock_t* pBlock;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
-	daeEquation* pEquation;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
 	boost::shared_ptr<daeOptimizationConstraint> pConstraint;
 	vector<string> strarrErrors;

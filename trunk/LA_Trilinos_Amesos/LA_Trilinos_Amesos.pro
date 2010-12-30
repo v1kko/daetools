@@ -14,8 +14,8 @@ unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 # ####################################################################################
 # TRILINOS Amesos solvers
 # ####################################################################################
-linux-g++::TRILINOS_DIR = ../trilinos-10.4.0-Source/build-extras
-linux-g++-64::TRILINOS_DIR = ../trilinos-10.4.0-Source/build-extras
+linux-g++::TRILINOS_DIR = ../trilinos/build
+linux-g++-64::TRILINOS_DIR = ../trilinos/build
 
 TRILINOS_INCLUDE = $${TRILINOS_DIR}/include
 
@@ -23,8 +23,10 @@ linux-g++::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib \
     -lamesos \
     -lepetra
 linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib \
-    -lamesos \
-    -lepetra
+    -lblas -llapack -lsuperlu -lumfpack -lamd \
+    -lamesos -lepetra -lepetraext -lgaleri \
+    -lsimpi -lzoltan -lteuchos -ltriutils
+  
 
 INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \

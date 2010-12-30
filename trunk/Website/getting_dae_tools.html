@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <meta name="Description" content="">
   <meta name="Keywords"
@@ -100,12 +100,14 @@ structure of the folders is the following: <br>
  href="http://www.boost.org">www.boost.org</a> </li>
   <li>Numpy (v1.3<sup>+</sup>): <a href="http://numpy.scipy.org">numpy.scipy.org
 
+
     </a></li>
   <li>Matplotlib (v0.99<sup>+</sup>): <a
  href="http://matplotlib.sourceforge.net">matplotlib.sourceforge.net</a>
   </li>
   <li>pyQt4 (v4.3<sup>+</sup>): <a
  href="http://www.riverbankcomputing.co.uk/software/pyqt">www.riverbankcomputing.co.uk/software/pyqt
+
 
 
 
@@ -146,13 +148,13 @@ architecture (i386, amd64, arm):
 </h3>
 <p>First install the mandatory packages. To do so you can use the
 Synaptic Package Manager or type the following
-command:
+commands:
 </p>
-<pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib<br></pre>
+<pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib<br>$ sudo apt-get install libblas3gf liblapack3gf<br></pre>
 <p>Optionally you may install some additional free linear solvers and
 3D plotting library:<br>
 </p>
-<pre>$ sudo apt-get install libsuitesparse-dev libsuperlu3 liblapack3gf<br>$ sudo apt-get install mayavi2<br></pre>
+<pre>$ sudo apt-get install libsuperlu3<br>$ sudo apt-get install libamd2.2.0 libumfpack5.4.0<br>$ sudo apt-get install mayavi2<br></pre>
 <p>Install <span style="font-weight: bold;">DAE Tools</span> by using
 GDebi package installer or by typing the following shell commands:
 </p>
@@ -164,13 +166,13 @@ GDebi package installer or by typing the following shell commands:
 <p>First install themandatory packages. To do so can use the Package
 Manager or type the
 following
-command:
+commands:
 </p>
-<pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br></pre>
+<pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br>$ sudo yum install blas lapack<br></pre>
 <p>Optionally you may install some additional free linear solvers and
 3D plotting library:<br>
 </p>
-<pre>$ sudo yum install suitesparse-static superlu lapack<br>$ sudo yum install Mayavi<br></pre>
+<pre>$ sudo yum install suitesparse superlu<br>$ sudo yum install Mayavi<br></pre>
 <p><span style="font-weight: bold;">Note</span>: there is no package <span
  style="font-weight: bold;">superlu</span> in Fedora GNU/Linux.
 However, you can
@@ -245,8 +247,8 @@ documentation. <span style="font-weight: bold;">pyAmdACML</span> and <span
  style="font-weight: bold;">pyIntelMKL/pyIntelPardiso</span> modules
 are compiled against ACML 4.4.0 and MKL
 10.2.5.035 respectively. Also have a look on the licensing conditions
-(these
-libraries are <span style="font-weight: bold;">not</span> <a
+(<span style="font-weight: bold;">these
+libraries are not</span> <a style="font-weight: bold;"
  href="http://www.gnu.org/philosophy/free-sw.html">free software</a>).<br>
 </p>
 <p>In order to use AMD ACML and Intel MKL libraries you have to do some
@@ -347,6 +349,7 @@ be
 
 
 
+
     <span style="font-weight: bold;">$${PYTHONDIR}\dist-packages<br>
 &nbsp;&nbsp;&nbsp; </span>in Debian GNU/Linux based distributions<span
  style="font-weight: bold;"></span>.<br>
@@ -376,8 +379,11 @@ through the QtCreator IDE or by the following commands:</li>
   <li>As a result there should be the following static/dynamic
 libraries in the <span style="font-weight: bold;">debug</span>/<span
  style="font-weight: bold;">release</span> folders:<br>
-&nbsp; - libCore.a, libSimulation.a, libDataReporters.a, libSolver.a<br>
-&nbsp; - pyCore.so, pyActivity.so, pyDataReporting.so, pySolver.so<br>
+&nbsp; - libcdaeCore.a, libcdaeActivity.a, libcdaeDataReporting.a,
+libcdaeIDAS_DAESolver.a, <br>
+&nbsp;&nbsp;&nbsp; libcdaeBONMIN_MINLPSolver.a<br>
+&nbsp; - pyCore.so, pyActivity.so, pyDataReporting.so, pyIDAS.so,
+pyBONMIN.so<br>
   </li>
 </ul>
 <h3><a name="Windows_comp"></a>Windows</h3>
