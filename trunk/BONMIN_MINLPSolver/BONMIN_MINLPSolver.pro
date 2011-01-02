@@ -5,10 +5,11 @@ TARGET = cdaeBONMIN_MINLPSolver
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
-               $${NLPSOLVER_INCLUDE}
+               $${BONMIN_INCLUDE}
 
 LIBS += $${DAE_CORE_LIB} \
-        $${NLPSOLVER_LIBS}
+        $${BONMIN_LIBS} \
+        $${MUMPS_LIBS}
 
 HEADERS += stdafx.h \ 
     nlpsolver_class_factory.h \

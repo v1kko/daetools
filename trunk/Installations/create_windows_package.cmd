@@ -73,7 +73,7 @@ copy pyCore.pyd                     %ROOT%\pyDAE
 copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
-REM copy pyBONMIN.pyd               %ROOT%\pyDAE
+copy pyBONMIN.pyd                   %ROOT%\pyDAE
 REM copy pyIPOPT.pyd                %ROOT%\pyDAE
 REM copy IPOPT39.dll                %ROOT%\pyDAE
 

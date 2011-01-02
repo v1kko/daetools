@@ -92,27 +92,29 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.y.AssignValue(0) 
         
-        self.m.theta1.AssignValue(0.1) 
-        self.m.theta2.AssignValue(0.3) 
-        self.m.theta3.AssignValue(10)
+        self.m.theta1.AssignValue(1) 
+        self.m.theta2.AssignValue(1) 
+        self.m.theta3.AssignValue(1)
         
         self.m.gamma1.SetInitialCondition(self.m.theta3.GetValue())
         self.m.gamma2.SetInitialCondition(0)
         
     def Run(self):
+        print 'th1 =', self.m.theta1.GetValue(), 'th2 =', self.m.theta2.GetValue(), 'th3 =', self.m.theta3.GetValue()
         for i in range(self.m.t.NumberOfPoints):
+            if i > 0:
+                self.Reinitialize()
             time = self.IntegrateUntilTime(self.m.time.GetValue(i), eDoNotStopAtDiscontinuity)
             self.ReportData()
-            self.m.y.ReAssignValue(self.m.y.GetValue() + (self.m.gamma_m.GetValue(i) - self.m.gamma2.GetValue()) ** 2 )
+            self.m.y.ReAssignValue(self.m.gamma_m.GetValue(i))
             print 'time    =', self.m.time.GetValue(i)
             print 'y       =', self.m.y.GetValue()
-            print 'gamma_m =', self.m.gamma_m.GetValue(i)
-            print 'gamma2  =', self.m.gamma2.GetValue()
-            #self.Reinitialize()
+            #print 'gamma_m =', self.m.gamma_m.GetValue(i)
+            #print 'gamma2  =', self.m.gamma2.GetValue()
 
     def SetUpOptimization(self):
         # Set the objective function (min)
-        self.ObjectiveFunction.Residual = self.m.y()
+        self.ObjectiveFunction.Residual = Pow( self.m.y() - self.m.gamma2(), 2)
         
         # Set the optimization variables and their lower and upper bounds
         self.SetContinuousOptimizationVariable(self.m.theta1, 1e-6, 1,  0.1)
@@ -145,8 +147,8 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 20
+    simulation.ReportingInterval = 16
+    simulation.TimeHorizon = 16
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

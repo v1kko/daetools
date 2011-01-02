@@ -51,7 +51,7 @@ class daeTextEditLog(daeStdOutLog):
 
 class RunExamples(QtGui.QDialog):
     def __init__(self, app):
-        #QtGui.QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         self.ui = Ui_RunExamplesDialog()
         self.ui.setupUi(self)
         self.app = app
@@ -114,7 +114,6 @@ class RunExamples(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):
         simName = str(self.ui.comboBoxExample.currentText())
-        simulation.m.SetReportingOn(True)
         
         try:
             if simName == "tutorial1":

@@ -499,10 +499,12 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 				daeDeclareAndThrowException(exInvalidPointer); 
 	
 			daeEquationExecutionInfo* pEquationExecutionInfo = pExecutionContext->m_pEquationExecutionInfo;
-			if(!pEquationExecutionInfo)
-				daeDeclareAndThrowException(exInvalidPointer);
-			
-			pEquationExecutionInfo->AddVariableInEquation(nIndex);
+		// StateTransitions CreateRuntimeNode call ends up here 
+		// In that case we dont have pEquationExecutionInfo nor we need it
+			if(pEquationExecutionInfo && pExecutionContext->m_eEquationCalculationMode == eGatherInfo)
+			{
+				pEquationExecutionInfo->AddVariableInEquation(nIndex);
+			}
 		}
 	}
 	
@@ -669,12 +671,29 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		if(!pExecutionContext)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		daeEquationExecutionInfo* pEquationExecutionInfo = pExecutionContext->m_pEquationExecutionInfo;
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
 		m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);
-		pEquationExecutionInfo->AddVariableInEquation(nIndex);
+		
+		daeEquationExecutionInfo* pEquationExecutionInfo = pExecutionContext->m_pEquationExecutionInfo;
+	// StateTransitions::CreateRuntimeNode call may end up here 
+	// In that case we dont have pEquationExecutionInfo nor we need it
+		if(pEquationExecutionInfo)
+		{
+			if(pExecutionContext->m_eEquationCalculationMode == eGatherInfo)
+			{
+				pEquationExecutionInfo->AddVariableInEquation(nIndex);
+			}
+			else
+			{
+			// If the mode is eGatherInfo I dont have to check whether variable is differential 
+			// since I dont know the variable types yet! Otherwise I do the check.
+				if(m_pModel->m_pDataProxy->GetVariableTypeGathered(nIndex) != cnDifferential)
+				{	
+					daeDeclareException(exInvalidCall); 
+					e << "Cannot get time derivative for non differential variable [" << m_strCanonicalName;
+					throw e;
+				}
+			}
+		}
 	}
 	
 /**************************************************************************************

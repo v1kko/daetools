@@ -37,7 +37,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-#import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+import daetools.pyTrilinosAmesos as pyTrilinosAmesos
 #import daetools.pyIntelPardiso   as pyIntelPardiso
 #import daetools.pyAmdACML        as pyAmdACML
 #import daetools.pyIntelMKL       as pyIntelMKL
@@ -119,10 +119,20 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)
 
-if __name__ == "__main__":
+# Use daeSimulator class
+def guiRun(app):
+    sim = simTutorial()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 1000
+    simulator  = daeSimulator(app, simulation=sim)
+    simulator.exec_()
+    
+# Setup everything manually and run in a console
+def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDAS()
+    daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
@@ -143,10 +153,9 @@ if __name__ == "__main__":
     # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
 
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    #
-    #print "Supported Trilinos Amesos 3rd party LA solvers:", str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers())
+    print "Supported Trilinos Amesos 3rd party LA solvers:", str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers())
     #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
-    #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
+    lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
     #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
     #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
@@ -154,7 +163,7 @@ if __name__ == "__main__":
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
     #lasolver     = pyAtlas.daeCreateLapackSolver()
-    #solver.SetLASolver(lasolver)
+    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -169,7 +178,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Initialize the simulation
-    simulation.Initialize(solver, datareporter, log)
+    simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

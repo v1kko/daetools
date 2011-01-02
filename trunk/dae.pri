@@ -65,13 +65,21 @@ unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 #                                   PYTHON
 #####################################################################################
 # Numpy must be installed
-# OS-specific:
-#     Debian:  python 2.5-6, site-packages, /usr/lib or /usr/lib64
-#     Ubuntu:  python 2.6,   dist-packages, /usr/lib or /usr/lib64
-#     Fedora:  python 2.6,   site-packages, /usr/lib or /usr/lib64
-#     Windows: python 2.6,   site-packages, C:\PythonXY
+# OS-specific stuff (python version and a location of site specific packages):
+#     Debian:  Lenny          Squeeze
+#              2.5            2.6
+#              site-packages  dist-packages
+#     Ubuntu:  10.4           10.10
+#              2.6            2.6
+#              site-packages  dist-packages
+#     Fedora:  13             14
+#              2.6            2.7
+#              site-packages  site-packages
+#     Windows: WinXP
+#              2.6            
+#              site-packages  
 #
-# Under Debian Squeeze sometimes there are problems with _numpyconfig.h
+# Debian Squeeze: sometimes there are problems with _numpyconfig.h
 # Add /usr/include/python2.6/numpy to PYTHON_INCLUDE_DIR
 #####################################################################################
 win32-msvc2008::PYTHONDIR                = C:\Python26
@@ -107,7 +115,7 @@ unix::BOOST_LIBS       = -lboost_system \
 
 
 #####################################################################################
-#                                   SUNDIALS
+#                                 SUNDIALS IDAS
 #####################################################################################
 # ./configure --prefix=/home/ciroki/Data/daetools/trunk/idas-1.0.0/build --disable-mpi
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
@@ -124,7 +132,7 @@ unix::SUNDIALS_LIBS = -lsundials_idas \
 
 
 #####################################################################################
-#                                   BONMIN / IPOPT
+#                                  BONMIN / IPOPT
 #####################################################################################
 #    Compiling BONMIN on GNU/Linux
 # 0) Unpack BONMIN to daetools/trunk/bonmin
@@ -139,13 +147,15 @@ unix::SUNDIALS_LIBS = -lsundials_idas \
 # 7) make test
 # 8) make install
 #####################################################################################
-unix::NLPSOLVER           = ../bonmin/build
-win32-msvc2008::NLPSOLVER = ../ipopt/build
+BONMIN_DIR = ../bonmin/build
+MUMPS_DIR  = ../mumps
 
-NLPSOLVER_INCLUDE = $${NLPSOLVER}/include/coin
-NLPSOLVER_LIBDIR  = $${NLPSOLVER}/lib
+BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
+BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
+MUMPS_LIBDIR   = $${MUMPS_DIR}/lib \
+                 $${MUMPS_DIR}/libseq
 
-unix::NLPSOLVER_LIBS =  -ldl -lblas -llapack \
+unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
 						-lbonmin \
 						-lCbc \
 						-lCbcSolver \
@@ -157,12 +167,24 @@ unix::NLPSOLVER_LIBS =  -ldl -lblas -llapack \
 						-lOsiClp \
 						-lOsi
 
-# Currently only IPOPT 3.9.1 compiles on windows 
-# Pre-buiilt windows binaries: http://www.coin-or.org/Binaries/Bonmin/Bonmin-1.4.0-win32-msvc9.7z
-win32-msvc2008::NLPSOLVER_LIBS = Ipopt.lib
-#win32-msvc2008::NLPSOLVER_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-#                                 libCoinHSL.lib \
-#                                 libipopt.lib
+win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+                              libCoinHSL.lib \
+                              libBonmin.lib \
+                              libIpopt.lib \
+                              libCbc.lib \
+                              libCgl.lib \
+                              libClp.lib \
+                              libCoinUtils.lib \
+                              libOsiCbc.lib \
+                              libOsiClp.lib \
+                              libOsi.lib
+
+unix::MUMPS_LIBS =
+win32-msvc2008::MUMPS_LIBS = libmpiseq.lib \
+                             libdmumps.lib \
+                             libmumps_common.lib \
+                             libpord.lib
+
 
 #####################################################################################
 #                                  DAE-TOOLS

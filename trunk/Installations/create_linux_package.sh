@@ -362,9 +362,9 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
-  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "              >> ${CONTROL}
-# echo "Replaces: libtrilinos"                                                                      >> ${CONTROL}
-# echo "Conflicts: libtrilinos"                                                                     >> ${CONTROL}
+  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                           >> ${CONTROL}
+  echo "Provides: libsuperlu4.1"                                                                    >> ${CONTROL}
+  echo "Conflicts: libsuperlu4.1"                                                                   >> ${CONTROL}
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
  
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
@@ -372,7 +372,7 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
   SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  echo "libsuperlu 4 libsuperlu.so.4 (>= 4:4.1)"              > ${SHLIBS}
+  echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
