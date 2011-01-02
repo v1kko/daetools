@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """********************************************************************************
-                             opt_tutorial1.py
+                             opt_tutorial2.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -90,7 +90,7 @@ def guiRun(app):
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
+    daesolver    = daeIDAS()
     nlpsolver    = daeBONMIN()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
@@ -109,7 +109,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    optimization.Initialize(simulation, nlpsolver, solver, datareporter, log)
+    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
     #nlpsolver.PrintOptions()
     #nlpsolver.PrintUserOptions()

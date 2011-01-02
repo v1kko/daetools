@@ -789,36 +789,6 @@ void daeSTN::CalculateJacobian(void)
 	}
 }
 
-void daeSTN::CalculateHesian(void)
-{
-	size_t i;
-	daeSTN* pSTN;
-	daeState* pState;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
-
-	pState = m_pActiveState;
-	if(!pState)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	for(i = 0; i < pState->m_ptrarrEquationExecutionInfos.size(); i++)
-	{
-		pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
-		pEquationExecutionInfo->Hesian();
-	}
-// Nested STNs
-	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
-	{
-		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
-		pSTN->CalculateHesian();
-	}
-
-}
-
 void daeSTN::CalculateSensitivities(const std::vector<size_t>& narrParameterIndexes)
 {
 	size_t i;

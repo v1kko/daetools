@@ -259,7 +259,7 @@ adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionConte
 		}
 		else
 		{
-			daeDeclareAndThrowException(exInvalidCall);
+			daeDeclareAndThrowException(exInvalidCall)
 		}
 	}
 

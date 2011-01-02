@@ -12,7 +12,6 @@ daeBlock::daeBlock(void)
 	m_pDataProxy						= NULL;
 	m_parrResidual						= NULL; 
 	m_pmatJacobian						= NULL; 
-	m_pmatHesian						= NULL;
 //	m_pmatSValues						= NULL;
 //	m_pmatSTimeDerivatives				= NULL; 
 //	m_pmatSResiduals					= NULL;
@@ -219,18 +218,6 @@ void daeBlock::CalculateGradients(const std::vector<size_t>& narrParameterIndexe
 	}
 	
 	m_pDataProxy->ResetSensitivityMatrixes();
-}
-
-void daeBlock::CalculateHesian(real_t				/*dTime*/, 
-							   daeArray<real_t>&	/*arrValues*/, 
-							   daeArray<real_t>&	/*arrResiduals*/, 
-							   daeArray<real_t>&	/*arrTimeDerivatives*/, 
-							   daeMatrix<real_t>&	/*matHesian*/, 
-							   real_t				/*dInverseTimeStep*/)
-{
-	daeDeclareException(exNotImplemented);
-	e << "Calculating Hesian is not implemented yet";
-	throw e;
 }
 
 void daeBlock::CalcNonZeroElements(int& NNZ)
@@ -773,20 +760,6 @@ void daeBlock::SetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock, 
 	m_pmatJacobian->SetItem(nEquationIndex, nVariableindexInBlock, dJacobianItem);
 }
 
-real_t daeBlock::GetHesian(size_t nEquationIndex, size_t nVariableindexInBlock) const
-{
-	if(!m_pmatHesian)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	return m_pmatHesian->GetItem(nEquationIndex, nVariableindexInBlock);
-}
-
-void daeBlock::SetHesian(size_t nEquationIndex, size_t nVariableindexInBlock, real_t dHesianItem)
-{
-	if(!m_pmatHesian)
-		daeDeclareAndThrowException(exInvalidPointer);
-	m_pmatHesian->SetItem(nEquationIndex, nVariableindexInBlock, dHesianItem);
-}
-
 daeMatrix<real_t>* daeBlock::GetJacobianMatrix() const
 {
 	return m_pmatJacobian;
@@ -797,18 +770,6 @@ void daeBlock::SetJacobianMatrix(daeMatrix<real_t>* pJacobian)
 	if(!pJacobian)
 		daeDeclareAndThrowException(exInvalidPointer);
 	m_pmatJacobian = pJacobian;
-}
-
-daeMatrix<real_t>* daeBlock::GetHesianMatrix() const
-{
-	return m_pmatHesian;
-}
-
-void daeBlock::SetHesianMatrix(daeMatrix<real_t>* pHesian)
-{
-	if(!pHesian)
-		daeDeclareAndThrowException(exInvalidPointer);
-	m_pmatHesian = pHesian;
 }
 
 daeArray<real_t>* daeBlock::GetResidualArray() const

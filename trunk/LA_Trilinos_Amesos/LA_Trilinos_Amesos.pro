@@ -12,7 +12,7 @@ unix::QMAKE_CXXFLAGS += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
 
 # ####################################################################################
-# TRILINOS Amesos solvers
+#                       TRILINOS Amesos solvers
 # ####################################################################################
 SUPERLU_DIR      = ../superlu
 TRILINOS_DIR     = ../trilinos/build
@@ -22,15 +22,22 @@ win32-msvc2008::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
 linux-g++::BLAS_LAPACK_LIBDIR      = /usr/lib/atlas
 linux-g++-64::BLAS_LAPACK_LIBDIR   = /usr/lib/atlas
 
-win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} \
+win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
                                 BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
+                                superlu.lib \
                                 amesos.lib epetra.lib teuchos.lib
 
-linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} \
+linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
 							  -lblas -llapack \
 							  -lsuperlu \
 							  -lumfpack -lamd \
-							  -lamesos -lepetra -lepetraext -lgaleri -lsimpi -lzoltan -lteuchos -ltriutils
+							  -lamesos -lepetra -lepetraext -lteuchos
+
+linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
+							  -lblas -llapack \
+							  -lcdaesuperlu \
+							  -lumfpack -lamd \
+							  -lamesos -lepetra -lepetraext -lteuchos
 
 INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \

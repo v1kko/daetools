@@ -64,7 +64,6 @@ enum daeeEquationCalculationMode
 	eCalculate,
 	eCreateFunctionsIFsSTNs,
 	eCalculateJacobian,
-	eCalculateHesian,
 	eCalculateSensitivities,
 	eCalculateGradients
 };
@@ -586,13 +585,6 @@ public:
 									  daeArray<real_t>&	 arrTimeDerivatives, 
 									  daeMatrix<real_t>& matJacobian, 
 									  real_t			 dInverseTimeStep) = 0;
-
-	virtual void	CalculateHesian(real_t				dTime, 
-								    daeArray<real_t>&	arrValues, 
-								    daeArray<real_t>&	arrResiduals, 
-								    daeArray<real_t>&	arrTimeDerivatives, 
-								    daeMatrix<real_t>&	matHesian, 
-								    real_t				dInverseTimeStep) = 0;
 
 	virtual void	CalculateSensitivities(real_t					  dTime, 
 										   const std::vector<size_t>& narrParameterIndexes,

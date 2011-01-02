@@ -376,7 +376,6 @@ public:
 	void GatherInfo(void);
 	void Residual(void);
 	void Jacobian(void);
-	void Hesian(void);
 	void Sensitivities(const std::vector<size_t>& narrParameterIndexes);
 	void Gradients(const std::vector<size_t>& narrParameterIndexes);
 	void AddVariableInEquation(size_t nIndex);
@@ -548,7 +547,7 @@ public:
 		m_pnVariablesTypes			= NULL;
 		m_pnVariablesTypesGathered	= NULL;
 		m_pdAbsoluteTolerances		= NULL;
-		m_pExecutionContexts		= NULL;
+		//m_pExecutionContexts		= NULL;
 		m_pTopLevelModel			= NULL;
 		m_pLog						= NULL;
 		m_bGatherInfo				= false;
@@ -593,12 +592,14 @@ public:
 		{
 			delete[] m_pdAbsoluteTolerances;
 			m_pdAbsoluteTolerances = NULL;
-		}	
+		}
+		/*
 		if(m_pExecutionContexts)
 		{
 			delete[] m_pExecutionContexts;
 			m_pExecutionContexts = NULL;
-		}	
+		}
+		*/
 //		if(m_pCondition)
 //		{
 //			delete m_pCondition;
@@ -627,7 +628,7 @@ public:
 		m_pdAbsoluteTolerances	= new real_t[m_nTotalNumberOfVariables];
 		memset(m_pdAbsoluteTolerances, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
-		m_pExecutionContexts = new daeExecutionContext[m_nTotalNumberOfVariables];
+		//m_pExecutionContexts = new daeExecutionContext[m_nTotalNumberOfVariables];
 
 		m_pTopLevelModel = pTopLevelModel;
 		m_pLog           = pLog;
@@ -926,10 +927,10 @@ public:
 		m_bGatherInfo = bGatherInfo;
 	}
 
-	daeExecutionContext* GetExecutionContext(size_t nIndex) const
-	{
-		return &(m_pExecutionContexts[nIndex]);
-	}
+//	daeExecutionContext* GetExecutionContext(size_t nIndex) const
+//	{
+//		return &(m_pExecutionContexts[nIndex]);
+//	}
 	
 	daeeInitialConditionMode GetInitialConditionMode(void) const
 	{
@@ -1041,7 +1042,7 @@ protected:
 	int*							m_pnVariablesTypes;
 	int*							m_pnVariablesTypesGathered;
 	bool							m_bGatherInfo;
-	daeExecutionContext*			m_pExecutionContexts;
+	//daeExecutionContext*			m_pExecutionContexts;
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
 	daeeModelType					m_eModelType;
@@ -1082,13 +1083,6 @@ public:
 									  daeArray<real_t>&		arrTimeDerivatives, 
 									  daeMatrix<real_t>&	matJacobian, 
 									  real_t				dInverseTimeStep);
-
-	virtual void	CalculateHesian(real_t				dTime, 
-								    daeArray<real_t>&	arrValues, 
-								    daeArray<real_t>&	arrResiduals, 
-								    daeArray<real_t>&	arrTimeDerivatives, 
-								    daeMatrix<real_t>&	matHesian, 
-								    real_t				dInverseTimeStep);
 
 	virtual void	CalculateSensitivities(real_t					  dTime, 
 										   const std::vector<size_t>& narrParameterIndexes,
@@ -1147,9 +1141,6 @@ public:
 	real_t	GetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock) const;
 	void	SetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock, real_t dJacobianItem);
 
-	real_t	GetHesian(size_t nEquationIndex, size_t nVariableindexInBlock) const;
-	void	SetHesian(size_t nEquationIndex, size_t nVariableindexInBlock, real_t dHesianItem);
-
 	real_t	GetInverseTimeStep(void) const;
 	void	SetInverseTimeStep(real_t dInverseTimeStep);
 
@@ -1178,9 +1169,6 @@ protected:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian
 	daeMatrix<real_t>*	GetJacobianMatrix(void) const;
 	void				SetJacobianMatrix(daeMatrix<real_t>* pJacobian);
-
-	daeMatrix<real_t>*	GetHesianMatrix(void) const;
-	void				SetHesianMatrix(daeMatrix<real_t>* pHesian);
 
 	daeArray<real_t>*	GetResidualArray(void) const;
 	void				SetResidualArray(daeArray<real_t>* pResidual);
@@ -1215,7 +1203,6 @@ public:
 	real_t				m_dInverseTimeStep;
 	daeArray<real_t>*	m_parrResidual; 
 	daeMatrix<real_t>*	m_pmatJacobian; 
-	daeMatrix<real_t>*	m_pmatHesian; 
 	daeMatrix<real_t>*	m_pmatSValues;
 	daeMatrix<real_t>*	m_pmatSTimeDerivatives; 
 	daeMatrix<real_t>*	m_pmatSResiduals;
@@ -1598,7 +1585,7 @@ public:
 		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-
+	
 protected:
 	adouble	Create_adouble(const size_t* indexes, const size_t N) const;
 	adouble	Calculate_dt(const size_t* indexes, const size_t N) const;
@@ -1613,15 +1600,17 @@ protected:
 	adouble_array CreateSetupVariableArray(const daeArrayRange* ranges, const size_t N) const;
 	adouble_array CreateSetupTimeDerivativeArray(const daeArrayRange* ranges, const size_t N) const;
 	adouble_array CreateSetupPartialDerivativeArray(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const;
-
-	size_t	CalculateIndex(const size_t* indexes, size_t N) const; 
-	real_t	GetValueAt(size_t nIndex) const;
-	real_t	GetADValueAt(size_t nIndex) const;
+	
+//	real_t	GetValueAt(size_t nIndex) const;
+//	real_t	GetADValueAt(size_t nIndex) const;
 	void	SetVariableType(const daeVariableType& VariableType);
 	real_t 	GetInitialCondition(const size_t* indexes, const size_t N);
 	void	Fill_adouble_array(std::vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
 	void	Fill_dt_array(std::vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
 	void	Fill_partial_array(std::vector<adouble>& arrValues, size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
+
+	size_t	CalculateIndex(const size_t* indexes, size_t N) const; 
+	size_t	CalculateIndex(const std::vector<size_t>& narrDomainIndexes) const;
 
 protected:
 	size_t					m_nOverallIndex;
@@ -2311,7 +2300,6 @@ protected:
 
 	void			CalculateResiduals(void);
 	void			CalculateJacobian(void);
-	void			CalculateHesian(void);
 	void			CalculateSensitivities(const std::vector<size_t>& narrParameterIndexes);
 	void			CalculateGradients(const std::vector<size_t>& narrParameterIndexes);
 
@@ -2399,21 +2387,19 @@ public:
 	void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const;
 
 protected:
-    virtual adouble		Calculate(void);
-    virtual adouble		Calculate(size_t nDomain1);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7);
-    virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8);
+//  virtual adouble		Calculate(void);
+//  virtual adouble		Calculate(size_t nDomain1);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7);
+//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8);
 
-protected:
 	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, boost::shared_ptr<adNode>& node);
-	void Residual  (const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC);
-	void Jacobian  (const std::vector<size_t>& narrDomainIndexes, const std::map<size_t, size_t>& mapVariableIndexesInEquation, daeExecutionContext& EC);
-	void Hesian    (const std::vector<size_t>& narrDomainIndexes, const std::map<size_t, size_t>& mapVariableIndexesInEquation, daeExecutionContext& EC);
+//	void Residual  (const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC);
+//	void Jacobian  (const std::vector<size_t>& narrDomainIndexes, const std::map<size_t, size_t>& mapVariableIndexesInEquation, daeExecutionContext& EC);
 
 	void SetResidualValue(size_t nEquationIndex, real_t dResidual, daeBlock* pBlock);
 	void SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock);
@@ -2487,14 +2473,18 @@ class DAE_CORE_API daeOptimizationVariable : public daeObject
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationVariable)
-	daeOptimizationVariable(daeVariable* pVariable, real_t LB, real_t UB, real_t defaultValue);
-	daeOptimizationVariable(daeVariable* pVariable, int LB, int UB, int defaultValue);
-	daeOptimizationVariable(daeVariable* pVariable, bool defaultValue);
+	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, real_t LB, real_t UB, real_t defaultValue);
+	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, int LB, int UB, int defaultValue);
+	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, bool defaultValue);
 	virtual ~daeOptimizationVariable(void);
 	
 public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-	size_t GetIndex(void) const;
+	size_t GetOverallIndex(void) const;
+	size_t GetOptimizationVariableIndex(void) const;
+	void SetValue(real_t value);
+	real_t GetValue(void) const;
+	std::string GetName(void) const;
 	
 public:
 	daeVariable*					m_pVariable;
@@ -2502,6 +2492,8 @@ public:
 	real_t							m_dUB;
 	real_t							m_dDefaultValue;
 	daeeOptimizationVariableType	m_eType;
+	size_t							m_nOptimizationVariableIndex; // index in the array of opt. variables: 0 - Nopt.vars. 
+	std::vector<size_t>				m_narrDomainIndexes;
 };
 
 /******************************************************************

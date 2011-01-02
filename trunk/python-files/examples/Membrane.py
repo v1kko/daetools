@@ -109,7 +109,7 @@ class simMembrane(daeDynamicSimulation):
 
 # Create Log, Solver, DataReporter and Simulation object
 log          = daePythonStdOutLog()
-solver       = daeIDASolver()
+daesolver    = daeIDAS()
 datareporter = daeTCPIPDataReporter()
 simulation   = simMembrane()
 
@@ -125,7 +125,7 @@ simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
 if(datareporter.Connect("", simName) == False):
     sys.exit()
 
-simulation.Initialize(solver, datareporter, log)
+simulation.Initialize(daesolver, datareporter, log)
 daeSaveModel(simulation.m, simulation.m.Name + ".xml")
 
 # Solve at time=0 (initialization)

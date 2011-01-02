@@ -100,8 +100,8 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	{
 		pOptVariable = arrOptimizationVariables[i];
 	// If I find the index in the optimization variable within the constraint - add it to the array
-		if( mapVariableIndexes.find(pOptVariable->GetIndex()) != mapVariableIndexes.end() )
-			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetIndex());
+		if( mapVariableIndexes.find(pOptVariable->GetOverallIndex()) != mapVariableIndexes.end() )
+			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
 	}
 	
 // 2b. Sort the array
@@ -270,8 +270,8 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	{
 		pOptVariable = arrOptimizationVariables[i];
 	// If I find the index in the optimization variable within the constraint - add it to the array
-		if( mapVariableIndexes.find(pOptVariable->GetIndex()) != mapVariableIndexes.end() )
-			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetIndex());
+		if( mapVariableIndexes.find(pOptVariable->GetOverallIndex()) != mapVariableIndexes.end() )
+			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
 	}
 	
 // 2b. Sort the array
@@ -323,54 +323,211 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 /******************************************************************
 	daeOptimizationVariable
 *******************************************************************/
-daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, real_t LB, real_t UB, real_t defaultValue)
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, real_t LB, real_t UB, real_t defaultValue)
 {
 	if(!pVariable)
 		daeDeclareAndThrowException(exInvalidPointer)
 			
-	m_pVariable     = pVariable;
-	m_dLB           = LB;
-	m_dUB           = UB;
-	m_dDefaultValue = defaultValue;
-	m_eType         = eContinuousVariable;
+	m_pVariable						= pVariable;
+	m_dLB							= LB;
+	m_dUB							= UB;
+	m_dDefaultValue					= defaultValue;
+	m_eType							= eContinuousVariable;
+	m_narrDomainIndexes 			= narrDomainIndexes;
+	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
 }
 
-daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, int LB, int UB, int defaultValue)
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, int LB, int UB, int defaultValue)
 {
 	if(!pVariable)
 		daeDeclareAndThrowException(exInvalidPointer)
 			
-	m_pVariable     = pVariable;
-	m_dLB           = LB;
-	m_dUB           = UB;
-	m_dDefaultValue = defaultValue;
-	m_eType         = eIntegerVariable;
+	m_pVariable						= pVariable;
+	m_dLB							= LB;
+	m_dUB							= UB;
+	m_dDefaultValue					= defaultValue;
+	m_eType							= eIntegerVariable;
+	m_narrDomainIndexes 			= narrDomainIndexes;
+	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
 }
 
-daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, bool defaultValue)
+daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, bool defaultValue)
 {
 	if(!pVariable)
 		daeDeclareAndThrowException(exInvalidPointer)
 			
-	m_pVariable     = pVariable;
-	m_dLB           = 0;
-	m_dUB           = 1;
-	m_dDefaultValue = (defaultValue ? 1 : 0);
-	m_eType         = eBinaryVariable;
+	m_pVariable						= pVariable;
+	m_dLB							= 0;
+	m_dUB							= 1;
+	m_dDefaultValue					= (defaultValue ? 1 : 0);
+	m_eType							= eBinaryVariable;
+	m_narrDomainIndexes				= narrDomainIndexes;
+	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
 }
 
 daeOptimizationVariable::~daeOptimizationVariable(void)
 {
 }
 
-size_t daeOptimizationVariable::GetIndex(void) const
+size_t daeOptimizationVariable::GetOverallIndex(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
-	return m_pVariable->m_nOverallIndex;	
+	size_t index = m_pVariable->m_nOverallIndex + 
+				   m_pVariable->CalculateIndex(m_narrDomainIndexes);
+	return index;	
 }
 
+size_t daeOptimizationVariable::GetOptimizationVariableIndex(void) const
+{
+	return m_nOptimizationVariableIndex;	
+}
+
+std::string daeOptimizationVariable::GetName(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+
+	string strName = m_pVariable->GetName();
+	if(m_narrDomainIndexes.empty())
+		return strName;
+	
+	strName += "("; 
+	for(size_t i = 0; i < m_narrDomainIndexes.size(); i++)
+	{
+		if(i != 0)
+			strName += ",";
+		strName += toString<size_t>(m_narrDomainIndexes[i]);
+	}
+	strName += ")";
+	return strName;
+}
+
+void daeOptimizationVariable::SetValue(real_t value)
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	size_t n = m_narrDomainIndexes.size();
+	
+	if(n == 0)
+		m_pVariable->ReAssignValue(value);
+	else if(n == 1)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   value);
+	else if(n == 2)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   value);
+	else if(n == 3)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   value);
+	else if(n == 4)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   value);
+	else if(n == 5)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   value);
+	else if(n == 6)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   value);
+	else if(n == 7)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   m_narrDomainIndexes[6],
+								   value);
+	else if(n == 8)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   m_narrDomainIndexes[6],
+								   m_narrDomainIndexes[7],
+								   value);
+	else
+		daeDeclareAndThrowException(exInvalidCall)
+}
+
+real_t daeOptimizationVariable::GetValue(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	size_t n = m_narrDomainIndexes.size();
+	
+	if(n == 0)
+		return m_pVariable->GetValue();
+	else if(n == 1)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0]);
+	else if(n == 2)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1]);
+	else if(n == 3)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2]);
+	else if(n == 4)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3]);
+	else if(n == 5)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4]);
+	else if(n == 6)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5]);
+	else if(n == 7)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5],
+									 m_narrDomainIndexes[6]);
+	else if(n == 8)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5],
+									 m_narrDomainIndexes[6],
+									 m_narrDomainIndexes[7]);
+	else
+		daeDeclareAndThrowException(exInvalidCall)
+				
+	return 0;
+}
+			
 bool daeOptimizationVariable::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
@@ -394,14 +551,16 @@ bool daeOptimizationVariable::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 			
-	if(!m_pVariable->m_ptrDomains.empty())
+	if(m_pVariable->m_ptrDomains.size() != m_narrDomainIndexes.size())
 	{
-		strError = "Optimization variable [" + m_pVariable->GetCanonicalName() + "] cannot be distributed";
+		strError = "Wrong number of indexes in the optimization variable [" + m_pVariable->GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}
   
-	int type = m_pVariable->m_pModel->m_pDataProxy->GetVariableType(m_pVariable->m_nOverallIndex);
+	size_t index = GetOverallIndex();
+	int type = m_pVariable->m_pModel->m_pDataProxy->GetVariableType(index);
+
 	if(type != cnFixed)
 	{
 		strError = "Optimization variable [" + m_pVariable->GetCanonicalName() + "] must be assigned (cannot be a state-variable)";

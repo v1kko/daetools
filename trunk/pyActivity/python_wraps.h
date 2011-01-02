@@ -206,6 +206,36 @@ public:
     {
         this->daeSimulation::SetUpOptimization();
     }
+	
+	void SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+	{
+        this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);
+	}
+	
+	void SetBinaryOptimizationVariable1(daeVariable& variable, bool defaultValue)
+	{
+        this->daeSimulation::SetBinaryOptimizationVariable(variable, defaultValue);
+	}
+	
+	void SetIntegerOptimizationVariable1(daeVariable& variable, int LB, int UB, int defaultValue)
+	{
+        this->daeSimulation::SetIntegerOptimizationVariable(variable, LB, UB, defaultValue);
+	}
+	
+	void SetContinuousOptimizationVariable2(adouble a, real_t LB, real_t UB, real_t defaultValue)
+	{
+        this->daeSimulation::SetContinuousOptimizationVariable(a, LB, UB, defaultValue);
+	}
+	
+	void SetBinaryOptimizationVariable2(adouble a, bool defaultValue)
+	{
+        this->daeSimulation::SetBinaryOptimizationVariable(a, defaultValue);
+	}
+	
+	void SetIntegerOptimizationVariable2(adouble a, int LB, int UB, int defaultValue)
+	{
+        this->daeSimulation::SetIntegerOptimizationVariable(a, LB, UB, defaultValue);
+	}
     
 public:
 	boost::python::object model;	

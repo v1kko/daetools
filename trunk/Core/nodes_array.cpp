@@ -2185,6 +2185,16 @@ void adSetupSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& ma
 	node->AddVariableIndexToArray(mapIndexes);
 }
 
+bool adSetupSpecialFunctionNode::IsLinear(void) const
+{
+	return false;
+}
+
+bool adSetupSpecialFunctionNode::IsFunctionOfVariables(void) const
+{
+	return true;
+}
+
 /*********************************************************************************************
 	adSetupExpressionDerivativeNode
 **********************************************************************************************/
@@ -2926,10 +2936,17 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+// Achtung!! The node that I have is a setup node!!!
+// During GatherInfo I have to transform it into the runtime node.
+// Thus here I have to call node->Evaluate() and to store this value to cloned node
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
+		adSingleNodeArray* clone = new adSingleNodeArray(*this);
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = shared_ptr<adNodeArray>( clone );
+
+		clone->node = node->Evaluate(pExecutionContext).node;
+
 		return tmp;
 	}
 	

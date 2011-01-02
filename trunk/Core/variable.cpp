@@ -43,6 +43,7 @@ daeVariable::~daeVariable()
 {
 }
 
+/*
 real_t daeVariable::GetValueAt(size_t nIndex) const
 {
 	if(!m_pModel)
@@ -74,6 +75,7 @@ real_t daeVariable::GetADValueAt(size_t nIndex) const
 	else
 		return 0.0;
 }
+*/
 
 void daeVariable::Open(io::xmlTag_t* pTag)
 {

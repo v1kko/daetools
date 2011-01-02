@@ -122,7 +122,7 @@ class simTutorial(daeSimulation):
 if __name__ == "__main__":
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
+    solver       = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 

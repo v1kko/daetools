@@ -205,7 +205,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(adouble() - self)
 		.def(adouble() * self)
 		.def(adouble() / self)
-		;    
+		; 
 	def("Exp",		&daepython::adarr_exp);
 	def("Log",		&daepython::adarr_log);
 	def("Sqrt",		&daepython::adarr_sqrt);

@@ -169,16 +169,23 @@ void daeEquationExecutionInfo::Residual(void)
 		adouble __ad = m_EquationEvaluationNode->Evaluate(&EC);
 		m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
 		
-		//      This was before:
-		//m_pEquation->SetResidual(m_nEquationIndexInBlock, __ad.getValue(), m_pBlock);
+		/* Old code:
+		m_pEquation->SetResidual(m_nEquationIndexInBlock, __ad.getValue(), m_pBlock);
 
-		//real_t res;
-		//daeFPU::fpuResidual(&EC, m_ptrarrEquationCommands, res);
-		//if(res != __ad.getValue())
-		//	daeDeclareAndThrowException(exInvalidCall);
+		real_t res;
+		daeFPU::fpuResidual(&EC, m_ptrarrEquationCommands, res);
+		if(res != __ad.getValue())
+			daeDeclareAndThrowException(exInvalidCall);
+		*/
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
 	{
+		daeDeclareAndThrowException(exInvalidCall)
+				
+		/* Old code 
+		I think I dont need this evaluation mode anymore
+		What about foreign objects??
+		
 		daeExecutionContext* pEC;
 		map<size_t, size_t>::iterator iter;
 		for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
@@ -191,6 +198,7 @@ void daeEquationExecutionInfo::Residual(void)
 			pEC->m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
 		}
 		m_pEquation->Residual(m_narrDomainIndexes, EC);
+		*/
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
@@ -244,7 +252,9 @@ void daeEquationExecutionInfo::Jacobian(void)
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
 	{
-		m_pEquation->Jacobian(m_narrDomainIndexes, m_mapIndexes, EC);
+		daeDeclareAndThrowException(exInvalidCall)
+		
+		//m_pEquation->Jacobian(m_narrDomainIndexes, m_mapIndexes, EC);
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
@@ -344,22 +354,6 @@ void daeEquationExecutionInfo::Gradients(const std::vector<size_t>& narrParamete
 	{
 		daeDeclareAndThrowException(exInvalidCall)
 	}
-}
-
-void daeEquationExecutionInfo::Hesian()
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pEquation)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	daeExecutionContext EC;
-	EC.m_pBlock						= m_pBlock;
-	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateHesian;
-
-	m_pEquation->Hesian(m_narrDomainIndexes, m_mapIndexes, EC);
 }
 
 void daeEquationExecutionInfo::AddVariableInEquation(size_t nIndex)
@@ -1154,7 +1148,7 @@ void daeEquation::SetEquationEvaluationMode(daeeEquationEvaluationMode eMode)
 	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
 
 	m_eEquationEvaluationMode = eMode;
@@ -1167,68 +1161,70 @@ void daeEquation::SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, 
 	pBlock->SetJacobian(nEquationIndex, nVariableIndex, dJacobValue);
 }
 
+/*
 adouble daeEquation::Calculate()
 {
 // Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
+	daeDeclareAndThrowException(exInvalidCall)
 	return adouble();
 }
 
-adouble daeEquation::Calculate(size_t /*nDomain1*/)
+adouble daeEquation::Calculate(size_t nDomain1)
+{
+// Should never be called! (must be overloaded in derived classes)
+	daeDeclareAndThrowException(exInvalidCall)
+	return adouble();
+}
+
+adouble daeEquation::Calculate(size_t nDomain1, size_t nDomain2)
+{
+// Should never be called! (must be overloaded in derived classes)
+	daeDeclareAndThrowException(exInvalidCall)
+	return adouble();
+}
+
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3)
+{
+// Should never be called! (must be overloaded in derived classes)
+	daeDeclareAndThrowException(exInvalidCall)
+	return adouble();
+}
+
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4)
 {
 // Should never be called! (must be overloaded in derived classes)
 	daeDeclareAndThrowException(exInvalidCall);
 	return adouble();
 }
 
-adouble daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/)
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5)
 {
 // Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
+	daeDeclareAndThrowException(exInvalidCall)
 	return adouble();
 }
 
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/)
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6)
 {
 // Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
+	daeDeclareAndThrowException(exInvalidCall)
 	return adouble();
 }
 
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/, size_t /*nDomain4*/)
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7)
 {
 // Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
+	daeDeclareAndThrowException(exInvalidCall)
 	return adouble();
 }
 
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/, size_t /*nDomain4*/, size_t /*nDomain5*/)
+adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8)
 {
 // Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
+	daeDeclareAndThrowException(exInvalidCall)
 	return adouble();
 }
-
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/, size_t /*nDomain4*/, size_t /*nDomain5*/, size_t /*nDomain6*/)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/, size_t /*nDomain4*/, size_t /*nDomain5*/, size_t /*nDomain6*/, size_t /*nDomain7*/)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t /*nDomain1*/, size_t /*nDomain2*/, size_t /*nDomain3*/, size_t /*nDomain4*/, size_t /*nDomain5*/, size_t /*nDomain6*/, size_t /*nDomain7*/, size_t /*nDomain8*/)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
-	return adouble();
-}
+*/
 
 void daeEquation::InitializeDEDIs(void)
 {
@@ -1257,102 +1253,101 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 		throw e;
 	}
 
-	if(m_eEquationDefinitionMode == eMemberFunctionPointer)
-	{
-		if(nNumberOfDomains == 0)
-		{
-			ad = Calculate();
-		}
-		else if(nNumberOfDomains == 1)
-		{
-			ad = Calculate(narrDomainIndexes[0]);
-		}
-		else if(nNumberOfDomains == 2)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1]);
-		}
-		else if(nNumberOfDomains == 3)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2]);
-		}
-		else if(nNumberOfDomains == 4)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2], 
-						   narrDomainIndexes[3]);
-		}
-		else if(nNumberOfDomains == 5)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2], 
-						   narrDomainIndexes[3], 
-						   narrDomainIndexes[4]);
-		}
-		else if(nNumberOfDomains == 6)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2], 
-						   narrDomainIndexes[3], 
-						   narrDomainIndexes[4], 
-						   narrDomainIndexes[5]);
-		}
-		else if(nNumberOfDomains == 7)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2], 
-						   narrDomainIndexes[3], 
-						   narrDomainIndexes[4], 
-						   narrDomainIndexes[5], 
-						   narrDomainIndexes[6]);
-		}
-		else if(nNumberOfDomains == 8)
-		{
-			ad = Calculate(narrDomainIndexes[0], 
-						   narrDomainIndexes[1], 
-						   narrDomainIndexes[2], 
-						   narrDomainIndexes[3], 
-						   narrDomainIndexes[4], 
-						   narrDomainIndexes[5], 
-						   narrDomainIndexes[6], 
-						   narrDomainIndexes[7]);
-		}
-		else
-		{	
-			daeDeclareException(exInvalidCall);
-			e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
-			throw e;
-		}
-
-		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
-			node = ad.node;
-		else if(m_eEquationEvaluationMode == eCommandStackEvaluation)
-			node = ad.node;
-	}
-	else if(m_eEquationDefinitionMode == eResidualNode)
+	if(m_eEquationDefinitionMode == eResidualNode)
 	{
 		for(size_t i = 0; i < nNumberOfDomains; i++)
 			m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = narrDomainIndexes[i];
 
 		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
 			node = m_pResidualNode->Evaluate(&EC).node;
-		else if(m_eEquationEvaluationMode == eCommandStackEvaluation)
-			node = m_pResidualNode->Evaluate(&EC).node;
 		else
-			daeDeclareAndThrowException(exInvalidPointer);
+			daeDeclareAndThrowException(exInvalidCall)
+	}
+	else if(m_eEquationDefinitionMode == eMemberFunctionPointer)
+	{
+//		if(nNumberOfDomains == 0)
+//		{
+//			ad = Calculate();
+//		}
+//		else if(nNumberOfDomains == 1)
+//		{
+//			ad = Calculate(narrDomainIndexes[0]);
+//		}
+//		else if(nNumberOfDomains == 2)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1]);
+//		}
+//		else if(nNumberOfDomains == 3)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2]);
+//		}
+//		else if(nNumberOfDomains == 4)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2], 
+//						   narrDomainIndexes[3]);
+//		}
+//		else if(nNumberOfDomains == 5)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2], 
+//						   narrDomainIndexes[3], 
+//						   narrDomainIndexes[4]);
+//		}
+//		else if(nNumberOfDomains == 6)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2], 
+//						   narrDomainIndexes[3], 
+//						   narrDomainIndexes[4], 
+//						   narrDomainIndexes[5]);
+//		}
+//		else if(nNumberOfDomains == 7)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2], 
+//						   narrDomainIndexes[3], 
+//						   narrDomainIndexes[4], 
+//						   narrDomainIndexes[5], 
+//						   narrDomainIndexes[6]);
+//		}
+//		else if(nNumberOfDomains == 8)
+//		{
+//			ad = Calculate(narrDomainIndexes[0], 
+//						   narrDomainIndexes[1], 
+//						   narrDomainIndexes[2], 
+//						   narrDomainIndexes[3], 
+//						   narrDomainIndexes[4], 
+//						   narrDomainIndexes[5], 
+//						   narrDomainIndexes[6], 
+//						   narrDomainIndexes[7]);
+//		}
+//		else
+//		{	
+//			daeDeclareException(exInvalidCall);
+//			e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
+//			throw e;
+//		}
+
+//		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
+//			node = ad.node;
+//		else if(m_eEquationEvaluationMode == eCommandStackEvaluation)
+//			node = ad.node;
 	}
 	else
 	{
-		daeDeclareAndThrowException(exInvalidPointer);
+		daeDeclareAndThrowException(exInvalidCall)
 	}
 }
 
+/*
 void daeEquation::Residual(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC)
 {
 	if(!m_pModel)
@@ -1553,19 +1548,7 @@ void daeEquation::Jacobian(const vector<size_t>& narrDomainIndexes, const map<si
 		SetJacobianItem(nEquationIndex, nVariableindexInBlock, __ad.getDerivative(), EC.m_pBlock);
 	}
 }
-
-void daeEquation::Hesian(const vector<size_t>& narrDomainIndexes, const map<size_t, size_t>& /*mapVariableIndexesInEquation*/, daeExecutionContext& /*EC*/)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	size_t nNumberOfDomains = m_ptrarrDistributedEquationDomainInfos.size();
-	if(nNumberOfDomains != narrDomainIndexes.size())
-	{	
-		daeDeclareException(exInvalidCall); 
-		e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
-		throw e;
-	}
-}
+*/
 
 daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds)
 {

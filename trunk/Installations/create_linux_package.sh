@@ -42,6 +42,7 @@ BOOST=boost_$5
 PYTHON_VERSION=$6
 IDAS=../idas-1.0.0/build
 BONMIN=../bonmin/build
+SUPERLU=../superlu
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -258,6 +259,15 @@ if [ ! -d ${BUILD_DIR}/usr/${LIB} ]; then
 fi
 mkdir ${BUILD_DIR}/usr/bin
 
+# SuperLU 4.1 libraries
+if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
+  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+fi
+# Change permissions and strip .so libraries
+chmod -x ${BUILD_DIR}/usr/${LIB}/*.so* 
+find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip 
+
+
 USRBIN=${BUILD_DIR}/usr/bin
 DAE_TOOLS_DIR=${USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
@@ -352,17 +362,19 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
-  echo "Suggests: mayavi2, libsuperlu3, libumfpack, libamd, libblas3gf, liblapack3gf "              >> ${CONTROL}
-  echo "Replaces: libtrilinos"                                                                      >> ${CONTROL}
-  echo "Conflicts: libtrilinos"                                                                     >> ${CONTROL}
+  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "              >> ${CONTROL}
+# echo "Replaces: libtrilinos"                                                                      >> ${CONTROL}
+# echo "Conflicts: libtrilinos"                                                                     >> ${CONTROL}
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
  
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
-  mkdir ${BUILD_DIR}/usr/share/menu
+  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+  echo "libsuperlu 4 libsuperlu.so.4 (>= 4:4.1)"              > ${SHLIBS}
 
+  mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
   echo "?package(${PACKAGE_NAME}):\\"                         > ${MENU}
   echo "    needs=\"x11\" \\"                                >> ${MENU}

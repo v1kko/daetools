@@ -85,7 +85,7 @@ class daeSimulator(QtGui.QDialog):
             if self.log == None:
                 self.log = daeTextEditLog(self.ui.textEdit, self.app)
             if self.daesolver == None:
-                self.daesolver = daeIDASolver()
+                self.daesolver = daeIDAS()
             
             self.lasolver = None
             lasolverIndex = self.ui.LASolverComboBox.currentIndex()
@@ -95,7 +95,6 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 1:
                 try:
                     import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
                     self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
@@ -105,7 +104,6 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 2:
                 try:
                     import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
                     self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
@@ -115,7 +113,6 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 3:
                 try:
                     import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
                     self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
@@ -125,7 +122,6 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 4:
                 try:
                     import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.log.Message("Supported TrilinosAmesos 3rd party LA solvers: " + str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers()), 0)
                     self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:

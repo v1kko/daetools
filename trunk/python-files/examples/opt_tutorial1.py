@@ -87,7 +87,7 @@ def guiRun(app):
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
+    daesolver    = daeIDAS()
     nlpsolver    = daeBONMIN()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
@@ -106,7 +106,7 @@ def consoleRun():
         sys.exit()
 
     # Initialize the simulation
-    optimization.Initialize(simulation, nlpsolver, solver, datareporter, log)
+    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
     nlpsolver.SetOption('print_level', 0)
     nlpsolver.SetOption('hessian_approximation', 'limited-memory')

@@ -32,7 +32,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 		//.def("Solve",			pure_virtual(&daeDAESolver_t::Solve))
 		;
    
-	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDASolver")
+	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDAS")
 		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
 		//.def("Solve",						&daeIDASolver::Solve)
 		.def("SetLASolver",					&daeIDASolver::SetLASolver) 

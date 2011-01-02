@@ -29,9 +29,9 @@ CONFIG(release, debug|release){
 # Remove all symbol table and relocation information from the executable.
 # Necessary to pass lintian test in debian  
 ####################################################################################
-CONFIG(release, debug|release){
-    unix:QMAKE_LFLAGS += -s
-}
+#CONFIG(release, debug|release){
+#    unix:QMAKE_LFLAGS += -s
+#}
 
 ####################################################################################
 #                       Suppress some warnings

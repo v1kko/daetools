@@ -71,6 +71,10 @@ public:
 	void SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
 	void SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);
 	void SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue);
+
+	void SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue);
+	void SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
+	void SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
 protected:
 	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
@@ -88,6 +92,8 @@ protected:
 	void	ReportModel(daeModel_t* pModel, real_t time);
 	void	ReportPort(daePort_t* pPort, real_t time);
 	void	ReportVariable(daeVariable_t* pVariable, real_t time);
+	
+	void	GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const;
 
 protected:
 	real_t						m_dCurrentTime;

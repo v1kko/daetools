@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simToy);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simHS71);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());

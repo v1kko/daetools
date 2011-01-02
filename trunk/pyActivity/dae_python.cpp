@@ -90,7 +90,7 @@ BOOST_PYTHON_MODULE(pyActivity)
 
         .def("Pause",                       &daeSimulation::Pause)
         .def("Resume",                      &daeSimulation::Resume)
-    
+   
         .def("Initialize",					&daeSimulation::Initialize)
         .def("InitializeOptimization",		&daeSimulation::InitializeOptimization)
         .def("Reinitialize",                &daeSimulation::Reinitialize)
@@ -102,10 +102,14 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("CreateEqualityConstraint",    &daeSimulation::CreateEqualityConstraint, return_internal_reference<>())
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>())
 
-        .def("SetContinuousOptimizationVariable",	&daeSimulation::SetContinuousOptimizationVariable)
-        .def("SetIntegerOptimizationVariable",		&daeSimulation::SetIntegerOptimizationVariable)
-        .def("SetBinaryOptimizationVariable",		&daeSimulation::SetBinaryOptimizationVariable)
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable1)
+        .def("SetIntegerOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetIntegerOptimizationVariable1)
+        .def("SetBinaryOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetBinaryOptimizationVariable1)
 
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable2)
+        .def("SetIntegerOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetIntegerOptimizationVariable2)
+        .def("SetBinaryOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetBinaryOptimizationVariable2)
+		
         //.def("EnterConditionalIntegrationMode",   &daeSimulation::EnterConditionalIntegrationMode)
         //.def("IntegrateUntilConditionSatisfied",  &daeSimulation::IntegrateUntilConditionSatisfied)
         ; 

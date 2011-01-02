@@ -232,7 +232,7 @@ def guiRun(app):
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
+    daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 

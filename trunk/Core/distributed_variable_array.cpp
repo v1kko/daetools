@@ -41,6 +41,28 @@ size_t daeVariable::GetNumberOfPoints() const
 	return nTotalNumberOfVariables;
 }
 
+size_t daeVariable::CalculateIndex(const std::vector<size_t>& narrDomainIndexes) const
+{
+	size_t* indexes;
+	size_t i, N, index;
+
+	N = narrDomainIndexes.size();
+	if(N == 0)
+	{
+		index = CalculateIndex(NULL, 0);
+	}
+	else
+	{
+		indexes = new size_t[N];
+		for(i = 0; i < N; i++)
+			indexes[i] = narrDomainIndexes[i];
+		
+		index = CalculateIndex(indexes, N);
+		delete[] indexes;
+	}
+	return index;
+}
+
 size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 {
 	size_t		i, j, nIndex, temp;
@@ -465,6 +487,29 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 	nIndexWithinVariable = CalculateIndex(indexes, N);
 	nIndex = m_nOverallIndex + nIndexWithinVariable;
 
+/**************************************************************************************
+  New code; just we need is to add variable indexes to the equation
+**************************************************************************************/
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	{
+		if(m_pModel->m_pExecutionContextForGatherInfo)
+		{
+			pExecutionContext = m_pModel->m_pExecutionContextForGatherInfo;
+			if(!pExecutionContext)
+				daeDeclareAndThrowException(exInvalidPointer); 
+	
+			daeEquationExecutionInfo* pEquationExecutionInfo = pExecutionContext->m_pEquationExecutionInfo;
+			if(!pEquationExecutionInfo)
+				daeDeclareAndThrowException(exInvalidPointer);
+			
+			pEquationExecutionInfo->AddVariableInEquation(nIndex);
+		}
+	}
+	
+/**************************************************************************************
+  Old code; all this seems non necessary (we dont need values in this function)
+  Just we need is to add variable indexes to the equation
+***************************************************************************************   
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnFixed)
 	{
 		tmp.setValue(GetValueAt(nIndex));
@@ -515,11 +560,6 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 			//tmp.setValue(0);
 			//tmp.setDerivative(0);
 		}
-		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateHesian)
-		{
-			tmp.setValue(GetValueAt(nIndex));
-			tmp.setDerivative(GetADValueAt(nIndex));
-		}
 		else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 		{
 			daeDeclareAndThrowException(exInvalidCall)
@@ -535,6 +575,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 			throw e;
 		}
 	}
+*/
 
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
@@ -619,6 +660,26 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		throw e;
 	}
 
+/*********************************************************************************************
+  New code; just I need is to set variable type and to add variable indexes to the equation
+**********************************************************************************************/
+	if(m_pModel->m_pExecutionContextForGatherInfo)
+	{
+		pExecutionContext = m_pModel->m_pExecutionContextForGatherInfo;
+		if(!pExecutionContext)
+			daeDeclareAndThrowException(exInvalidPointer); 
+
+		daeEquationExecutionInfo* pEquationExecutionInfo = pExecutionContext->m_pEquationExecutionInfo;
+		if(!pEquationExecutionInfo)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);
+		pEquationExecutionInfo->AddVariableInEquation(nIndex);
+	}
+	
+/**************************************************************************************
+  Old code; all this seems non necessary (we dont need values in this function)
+***************************************************************************************   
 	if(m_pModel->m_pExecutionContextForGatherInfo)
 		pExecutionContext = m_pModel->m_pExecutionContextForGatherInfo;
 	else
@@ -669,14 +730,6 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		//tmp.setValue(0);
 		//tmp.setDerivative(0);
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateHesian)
-	{
-		tmp.setValue(*m_pModel->m_pDataProxy->GetTimeDerivative(nIndex));
-		if(pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == nIndex)
-			tmp.setDerivative(pExecutionContext->m_dInverseTimeStep);
-		else
-			tmp.setDerivative(0.0);
-	}
 	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
 	{
 		daeDeclareAndThrowException(exInvalidCall) 
@@ -692,7 +745,8 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		e << "Unknown function evaluation mode for variable [" << m_strCanonicalName;
 		throw e;
 	}
-
+*/
+	
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimeTimeDerivativeNode* node = new adRuntimeTimeDerivativeNode();

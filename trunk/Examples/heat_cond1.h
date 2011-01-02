@@ -95,7 +95,6 @@ public:
 		eq->SetResidual( Tres_arr() - dt(T(1,1) / T(1,2)) );
 
         eq = CreateEquation("Tres_array2", "The array function result2");  
-//		eq->SetResidual( Tres_arr2() - ( T(1,1)*T.dt(1,2) + T(1,2)*T.dt(1,1) ) );
 		eq->SetResidual( Tres_arr2() - sum( k() * T.array(xr, 0) ) );
   
         //eq = CreateEquation("T_ave", "The average temperature of the plate");

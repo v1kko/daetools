@@ -337,6 +337,8 @@ public:
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	daeModel*						m_pModel;

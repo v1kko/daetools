@@ -147,7 +147,7 @@ def consoleRun():
     #    - datareporter is used to send the data from the solver to daePlotter
     #    - simulation object
     log          = daePythonStdOutLog()
-    solver       = daeIDASolver()
+    daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
@@ -178,7 +178,7 @@ def consoleRun():
     #      The function SaveModelReport exports the model report in the XML format which can be opened in a web browser 
     #      (like Mozilla Firefox, or others that support XHTML+MathMl standard).
     #      The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
-    simulation.Initialize(solver, datareporter, log)
+    simulation.Initialize(daesolver, datareporter, log)
 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

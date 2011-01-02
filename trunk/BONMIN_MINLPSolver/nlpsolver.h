@@ -176,7 +176,7 @@ public:
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;
 	daeDataReporter_t*	m_pDataReporter;
-	std::vector<size_t>	m_narrOptimizationVariableIndexes;
+	//std::vector<size_t>	m_narrOptimizationVariableIndexes;
 	
 	daeObjectiveFunction*					 m_pObjectiveFunction;
 	std::vector<daeOptimizationConstraint*>  m_ptrarrConstraints;

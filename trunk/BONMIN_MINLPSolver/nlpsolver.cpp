@@ -53,13 +53,13 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 		daeDeclareAndThrowException(exInvalidPointer)
 				
 // Generate the array of opt. variables indexes
-	m_narrOptimizationVariableIndexes.clear();
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
+//	m_narrOptimizationVariableIndexes.clear();
+//	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+//	{
+//		pOptVariable = m_ptrarrOptVariables[i];
 			
-		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetIndex());
-	}
+//		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetOverallIndex());
+//	}
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_bPrintInfo = cfg.Get<bool>("daetools.minlpsolver.printInfo", false);
@@ -184,7 +184,7 @@ bool daeMINLP::get_nlp_info(Index& n,
 */
 	
 // Set the number of opt. variables and constraints
-	n = m_narrOptimizationVariableIndexes.size();
+	n = m_ptrarrOptVariables.size();
 	m = m_ptrarrConstraints.size();
 	index_style = TNLP::C_STYLE;
 	
@@ -304,7 +304,7 @@ bool daeMINLP::eval_f(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_gf: ") + e.what(), 0);
 		return false;
 	}
 	
@@ -351,7 +351,7 @@ bool daeMINLP::eval_grad_f(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_grad_f): ") + e.what(), 0);
 		return false;
 	}
 
@@ -396,7 +396,7 @@ bool daeMINLP::eval_g(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_g): ") + e.what(), 0);
 		return false;
 	}
 
@@ -426,7 +426,7 @@ bool daeMINLP::eval_gi(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_gi): ") + e.what(), 0);
 		return false;
 	}
 
@@ -513,7 +513,7 @@ bool daeMINLP::eval_jac_g(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_jac_g): ") + e.what(), 0);
 		return false;
 	}
 
@@ -599,7 +599,7 @@ bool daeMINLP::eval_grad_gi(Index n,
 	}
 	catch(std::exception& e)
 	{
-		m_pLog->Message(string("Exception occured in daeBONMIN: ") + e.what(), 0);
+		m_pLog->Message(string("Exception occured in daeBONMIN (eval_grad_gi): ") + e.what(), 0);
 		return false;
 	}
 
@@ -707,29 +707,31 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	if(status == TMINLP::SUCCESS)
 		strMessage = "Optimal Solution Found!";	
 	else if(status == TMINLP::INFEASIBLE)
-		strMessage = "Optimization failed: Infeasible.";
+		strMessage = "Optimization failed: Infeasible problem";
 	else if(status == TMINLP::CONTINUOUS_UNBOUNDED)
-		strMessage = "Optimization failed: CONTINUOUS_UNBOUNDED.";
+		strMessage = "Optimization failed: CONTINUOUS_UNBOUNDED";
 	else if(status == TMINLP::LIMIT_EXCEEDED)
-		strMessage = "Optimization failed: LIMIT_EXCEEDED.";
+		strMessage = "Optimization failed: Limit exceeded";
 	else if(status == TMINLP::MINLP_ERROR)
-		strMessage = "Optimization failed: MINLP_ERROR.";
+		strMessage = "Optimization failed: MINLP error";
 	
-	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string("################################################################"), 0);
+	m_pLog->Message("          " + strMessage, 0);
+	m_pLog->Message(string("################################################################"), 0);
 	m_pLog->Message(string(" "), 0);
 	
-	strMessage = "Objective function value = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
+	strMessage = "Objective function = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
 	m_pLog->Message(strMessage, 0);
 	m_pLog->Message(string(" "), 0);
 
-	m_pLog->Message(string("Optimization variables values:"), 0);
+	m_pLog->Message(string("Optimization variables:"), 0);
 	for(i = 0; i < n; i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
-		if(!pOptVariable || !pOptVariable->m_pVariable)
+		if(!pOptVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = pOptVariable->m_pVariable->GetName() + " = " + toStringFormatted<real_t>(x[i], -1, 10, true);
+		strMessage = pOptVariable->GetName() + " = " + toStringFormatted<real_t>(x[i], -1, 10, true);
 		m_pLog->Message(strMessage, 0);
 	}	
 	m_pLog->Message(string(" "), 0);
@@ -746,6 +748,7 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 		m_pLog->Message(strMessage, 0);
 	}	
 	m_pLog->Message(string(" "), 0);
+	m_pLog->Message(string("################################################################"), 0);
 }
 
 void daeMINLP::PrintObjectiveFunction(void)
@@ -765,12 +768,12 @@ void daeMINLP::PrintOptimizationVariables(void)
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
-		if(!pOptVariable || !pOptVariable->m_pVariable)
+		if(!pOptVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = pOptVariable->m_pVariable->GetName() + 
+		strMessage = pOptVariable->GetName() + 
 					 " = " + 
-					 toStringFormatted<real_t>(pOptVariable->m_pVariable->GetValue(), -1, 10, true);
+					 toStringFormatted<real_t>(pOptVariable->GetValue(), -1, 10, true);
 		m_pLog->Message(strMessage, 0);
 	}	
 }
@@ -813,7 +816,7 @@ void daeMINLP::PrintVariablesTypes(void)
 		else
 			daeDeclareAndThrowException(exNotImplemented)
 					
-		m_pLog->Message(pOptVariable->m_pVariable->GetName() + " = " + strMessage, 0);
+		m_pLog->Message(pOptVariable->GetName() + " = " + strMessage, 0);
 	}	
 }
 
@@ -837,7 +840,7 @@ void daeMINLP::PrintVariablesLinearity(void)
 		else
 			daeDeclareAndThrowException(exNotImplemented)
 					
-		m_pLog->Message(pOptVariable->m_pVariable->GetName() + " = " + strMessage, 0);
+		m_pLog->Message(pOptVariable->GetName() + " = " + strMessage, 0);
 	}	
 }
 
@@ -875,7 +878,7 @@ void daeMINLP::PrintBoundsInfo(void)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 			
-		strMessage = pOptVariable->m_pVariable->GetName() + " bounds = [" + 
+		strMessage = pOptVariable->GetName() + " bounds = [" + 
 					 toStringFormatted<real_t>(pOptVariable->m_dLB, -1, 10, true) + 
 					 ", " + 
 					 toStringFormatted<real_t>(pOptVariable->m_dUB, -1, 10, true) + 
@@ -907,7 +910,7 @@ void daeMINLP::PrintStartingPoint(void)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 			
-		m_pLog->Message(pOptVariable->m_pVariable->GetName() + 
+		m_pLog->Message(pOptVariable->GetName() + 
 						" = " + 
 						toStringFormatted<real_t>(pOptVariable->m_dDefaultValue, -1, 10, true), 0);
 	}	
@@ -933,10 +936,10 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
-			if(!pOptVariable || !pOptVariable->m_pVariable)
+			if(!pOptVariable)
 				daeDeclareAndThrowException(exInvalidPointer)
 				
-			pOptVariable->m_pVariable->ReAssignValue(x[i]);
+			pOptVariable->SetValue(x[i]);
 		}
 		
 	// 2. Calculate initial conditions
@@ -954,10 +957,10 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
-			if(!pOptVariable || !pOptVariable->m_pVariable)
+			if(!pOptVariable)
 				daeDeclareAndThrowException(exInvalidPointer)
 				
-			pOptVariable->m_pVariable->ReAssignValue(x[i]);
+			pOptVariable->SetValue(x[i]);
 		}
 			
 	// 3. Reset simulation and DAE solver
