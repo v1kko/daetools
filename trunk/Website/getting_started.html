@@ -41,8 +41,8 @@ Project</span></a></h1>
   <li><a href="#Programming_language">Programming language</a></li>
   <li><a href="#The_main_concepts">The main concepts</a></li>
   <li><a href="#Running_a_simulation">Running a simulation</a></li>
-  <li><a href="#1._Model_Development" class="top">Modelling<br>
-    </a></li>
+  <li><a href="#Running_an_optimization">Running an optimization</a></li>
+  <li><a href="#Modelling" class="top">Modelling</a></li>
   <li>
     <p><a href="#Models" id="current">Models</a></p>
     <p><a href="#Distribution_domains">Distribution Domains</a></p>
@@ -52,8 +52,9 @@ Project</span></a></h1>
     <p><a href="#State_transition_networks">STNs</a></p>
     <p><a href="#Ports">Ports</a></p>
   </li>
-  <li><a href="#2._Definition_of_a_simulation">Simulation</a></li>
-  <li><a href="#3._Processing_of_the_results">Processing the
+  <li><a href="#Simulation">Simulation</a></li>
+  <li><a href="#Optimization">Optimization</a></li>
+  <li><a href="#Processing_of_the_results">Processing the
 results</a></li>
 </ul>
 </div>
@@ -63,14 +64,15 @@ results</a></li>
 <h1><a name="Getting_Started"></a>Getting Started</h1>
 <p>This chapter gives the basic
 information about what is needed to develop a model of a
-process, how to simulate it and&nbsp; how to obtain and plot
-the results of a process simulation. In general,&nbsp;<span
- style="font-weight: bold;"></span>the simulation of a process consists
+process, how to simulate /optimize it and how to obtain and plot
+the results of a process simulation/optimization. In general,&nbsp;<span
+ style="font-weight: bold;"></span>the simulation/optimization of a
+process consists
 of three tasks:</p>
 <ol>
   <li>Modelling of a proces<br>
   </li>
-  <li>Defining a simulation</li>
+  <li>Defining a simulation/optimization</li>
   <li>Processing the results</li>
 </ol>
 <h2><a name="Programming_language"></a>Programming language</h2>
@@ -165,7 +167,10 @@ conditions.
 They
 are
 composed
-of a finite number of <span style="font-style: italic;">states.</span><br>
+of
+a
+finite
+number of <span style="font-style: italic;">states.</span><br>
     </li>
     <li style="font-weight: bold;">State<br>
       <span style="font-weight: normal;">States can be defined as a set
@@ -195,33 +200,57 @@ fixing the degrees of freedom by assigning values to certain variables,
 setting the initial conditions and many other (setting the initial
 guesses,
 absolute tolerances, etc).</span></li>
+  <li style="font-weight: bold;"><span style="font-weight: normal;"><span
+ style="font-weight: bold;">Optimization</span><br>
+Process optimization can be considered as a process adjustment so as to
+minimize or maximize&nbsp; a specified goal while satisfying imposed
+set of constraints. The most common goals are minimizing cost,
+maximizing throughput, and/or efficiency. In general there are
+three&nbsp; types of parameters that can be adjusted to affect optimal
+performance:<br>
+&nbsp; - Equipment optimization<br>
+&nbsp; - Operating procedures<br>
+&nbsp; - Control optimization <br>
+    </span></li>
   <li><span style="font-weight: bold;">Solver</span><br>
 Solver is a set of mathematical procedures/algorithms necessary to
 solve a given set of equations. There are several types of solvers:
-Linear algebraic solvers (<span style="font-weight: bold;">LA</span>),
+Linear Algebraic solvers (<span style="font-weight: bold;">LA</span>),
 used to solve linear systems of equations; Nonlinear
 Algebraic solvers (<span style="font-weight: bold;">NLA</span>), used
 to solve non-linear systems of equations;&nbsp; Differential
 Algebraic solvers (<span style="font-weight: bold;">DAE</span>), used
 to solve mixed systems of differential and algebraic
-equations. In <span style="font-weight: bold;">DAE Tools</span> it is
+equations; Nonlinear Programming solvers (<span
+ style="font-weight: bold;">NLP</span>), used
+to solve nonlinear optimization problems;&nbsp; Mixed-integer Nonlinear
+Programming solvers (<span style="font-weight: bold;">MINLP</span>),
+used
+to solve mixed-integer nonlinear optimization problems. In <span
+ style="font-weight: bold;">DAE Tools</span> it is
 possible to choose <span style="font-weight: bold;">DAE</span>
-(curently only <a
+(currently only <a
  href="https://computation.llnl.gov/casc/sundials/main.html">Sundials
-IDA</a>) and <span style="font-weight: bold;">LA</span> solvers
-(currently built-in Sundials LA solvers, <a
- href="http://software.intel.com/en-us/intel-mkl/">Intel MKL</a>, <a
- href="http://www.amd.com/acml">AMD ACML</a>, <a
- href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a>,
+IDAS</a>), <span style="font-weight: bold;">NLP/MINLP</span>
+(currently only <a href="https://projects.coin-or.org/Bonmin">IPOPT/BONMIN</a>),
 and
-Lapack).
-&nbsp;
 
+    <span style="font-weight: bold;">LA</span> solvers
+(built-in Sundials LA solvers; <a
+ href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a>:
 
+    <a href="http://crd.lbl.gov/%7Exiaoye/SuperLU/index.html">SuperLU</a>,
+
+    <a href="http://www.cise.ufl.edu/research/sparse/umfpack">Umfpack</a>,
+or
+    <a href="http://www.netlib.org/Lapack">Lapack</a>; <a
+ href="http://software.intel.com/en-us/intel-mkl/">Intel MKL</a>; <a
+ href="http://www.amd.com/acml">AMD ACML</a>).<br>
   </li>
   <li style="font-weight: bold;">Data Reporter<br>
     <span style="font-weight: normal;">Data reporter is defined as
-an object used to report the results of the simulation. They can either
+an object used to report the results of a simulation/optimization. They
+can either
 keep the results internally (and export them into a file, for instance)
 or send them
 via TCP/IP protocol to the <span style="font-weight: bold;">DAE Tools</span>
@@ -236,7 +265,7 @@ These data can be later plotted or processed in some other ways.</span><br>
 Log is defined as an object used to send messages from the various
 parts
 of <span style="font-weight: bold;">DAE Tools</span> framework
-(messages from a solver or simulation).<br>
+(messages from solvers or simulation).<br>
   </li>
 </ul>
 <h2><a name="Running_a_simulation"></a>Running a simulation<br>
@@ -294,8 +323,8 @@ program to try some examples:</li>
 <p>In general, simulations are started by typing the following shell
 commands (GNU/Linux and Windows):</p>
 <pre>$ cd "directory where simulation file is located"<br>$ python mySimulation.py<br></pre>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The main window of <span
- style="font-weight: bold;">DAE Tools Examples</span> application is
+<p>The main window of <span style="font-weight: bold;">DAE Tools
+Examples</span> application is
 given in <span style="font-weight: bold;">Figure 2a.</span> while the
 output from the simulation run in<span style="font-weight: bold;"> </span><span
  style="font-weight: bold;">Figure 2b. </span>Users can select one of
@@ -319,21 +348,18 @@ main
 window<br>
 <br>
 </span><span style="font-weight: bold;"><img
- style="width: 570px; height: 582px;" alt=""
+ style="width: 602px; height: 674px;" alt=""
  src="images/Screenshot-DAEToolsTutorials-Run.png"></span><br>
 <span style="font-weight: bold;"></span></div>
 <div style="text-align: center;"><span style="font-weight: bold;">Figure
 2b.
-Simulation&nbsp;
-output
+A
+typical
+optimization output
 from
 DAE
-Tools
-Examples
-program</span><br>
+Tools</span><br>
 <span style="font-weight: bold;"></span></div>
-<p></p>
-<p></p>
 <p><br>
 </p>
 <p>The simulation can also be started from the shell. The sample output
@@ -346,7 +372,6 @@ is given in<span style="font-weight: bold;"> </span><span
  style="width: 404px; height: 600px;" alt=""
  src="images/Screenshot-RunningSimulation.png"><br>
 </div>
-<p></p>
 <div style="text-align: center;"><span style="font-weight: bold;">Figure
 3.
 Shell
@@ -357,9 +382,13 @@ simulation<br>
 </span><span style="font-weight: bold;"></span>
 </div>
 <p><br>
-<br>
 </p>
-<h2><a name="1._Model_Development"></a>Modelling</h2>
+<h2><a name="Running_an_optimization"></a>Running an optimization<br>
+</h2>
+<p>Running the optimization problems is analogous to running a
+simulation.<br>
+</p>
+<h2><a name="Modelling"></a>Modelling</h2>
 <p>In general, three approaches to process modelling exist <a
  href="#1_Morton_W._Equation-oriented"><sup>[1]</sup></a>:<br>
 </p>
@@ -881,7 +910,7 @@ forget to have a look on <a href="tutorials.html">tutorials</a>.<br>
 </p>
 <p>
 </p>
-<h2><a name="2._Definition_of_a_simulation"></a>Simulation</h2>
+<h2><a name="Simulation"></a>Simulation</h2>
 <p>As it was mentione above, simulation of a process can be considered
 as the model run for
 certain
@@ -917,14 +946,13 @@ can be defined
 by the following
 construct:<br>
 </p>
-<pre>class mySimulation(daeDynamicSimulation):<br>    def __init__(self):<br>        daeDynamicSimulation.__init__(self)<br>        self.m = myModel("myModel", "Description") <br>          <br>    def SetUpParametersAndDomains(self):<br>        ... (here we set up domains and parameters)<br>    <br>    def SetUpVariables(self):<br>        ... (here we set up degrees of freedom, initial conditions, initial guesses, etc)<br><br>    def Run(self):<br>        ... (here goes a custom operating procedure, if needed)<br></pre>
+<pre>class mySimulation(daeSimulation):<br>    def __init__(self):<br>        daeSimulation.__init__(self)<br>        self.m = myModel("myModel", "Description") <br>          <br>    def SetUpParametersAndDomains(self):<br>        ... (here we set up domains and parameters)<br>    <br>    def SetUpVariables(self):<br>        ... (here we set up degrees of freedom, initial conditions, initial guesses, etc)<br><br>    def Run(self):<br>        ... (here goes a custom operating procedure, if needed)<br></pre>
 <p>while in <span style="font-weight: bold;">cDAE</span>
 by:</p>
-<pre>class mySimulation : public daeDynamicSimulation<br>{<br>public:<br>    mySimulation(void) : m("myModel", "Description")<br>    {<br>        SetModel(&amp;m);<br>    }<br><br>public:<br>    void SetUpParametersAndDomains(void)<br>    {<br>        ... (here we set up domains and parameters)<br>    }<br><br>    void SetUpVariables(void)<br>    {<br>        ... (here we set up degrees of freedom, initial conditions, initial guesses, etc)<br>    }<br>    <br>    void Run(void)<br>    {<br>        ... (here goes a custom operating procedure, if needed)<br>    }<br>    <br>public:<br>    myModel m;<br>};</pre>
+<pre>class mySimulation : public daeSimulation<br>{<br>public:<br>    mySimulation(void) : m("myModel", "Description")<br>    {<br>        SetModel(&amp;m);<br>    }<br><br>public:<br>    void SetUpParametersAndDomains(void)<br>    {<br>        ... (here we set up domains and parameters)<br>    }<br><br>    void SetUpVariables(void)<br>    {<br>        ... (here we set up degrees of freedom, initial conditions, initial guesses, etc)<br>    }<br>    <br>    void Run(void)<br>    {<br>        ... (here goes a custom operating procedure, if needed)<br>    }<br>    <br>public:<br>    myModel m;<br>};</pre>
 <h3>Running a simulation</h3>
 <p>Simulations in <span style="font-weight: bold;">pyDAE</span> can be
-run
-by in two modes:<br>
+run in two modes:<br>
 </p>
 <ol>
   <li>By using PyQt4 graphical user interface (GUI)</li>
@@ -935,7 +963,7 @@ by in two modes:<br>
 <p>1) Running a simulation from the GUI (<span
  style="font-weight: bold;">pyDAE</span> only):<br>
 </p>
-<pre># Import modules<br>import sys<br>from time import localtime, strftime<br>from PyQt4 import QtCore, QtGui<br><br># Create QtApplication object<br>app = QtGui.QApplication(sys.argv)<br><br># Create simulation object<br>simulation = simTutorial()<br><br># Report ALL variables in the model<br>simulation.m.SetReportingOn(True)<br><br># Show the daeSimulator window<br>simulator  = daeSimulator(app, simulation)<br>simulator.show()<br><br># Execute applications main loop<br>app.exec_()</pre>
+<pre># Import modules<br>import sys<br>from time import localtime, strftime<br>from PyQt4 import QtCore, QtGui<br><br># Create QtApplication object<br>app = QtGui.QApplication(sys.argv)<br><br># Create simulation object<br>sim = simTutorial()<br><br># Report ALL variables in the model<br>sim.m.SetReportingOn(True)<br><br># Show the daeSimulator window to choose the other information needed for simulation<br>simulator  = daeSimulator(app, simulation=sim)<br>simulator.show()<br><br># Execute applications main loop<br>app.exec_()</pre>
 <p>Here the default log, and data reporter objects will be used, while
 the user can choose DAE and LA solvers and specify time horizon and
 reporting interval.<br>
@@ -946,15 +974,14 @@ reporting interval.<br>
 </p>
 <p>In <span style="font-weight: bold;">pyDAE</span>:<br>
 </p>
-<p></p>
-<pre># Import modules<br>import sys<br>from time import localtime, strftime<br><br># Create Log, Solver, DataReporter and Simulation object<br>log          = daeStdOutLog()<br>solver       = daeIDASolver()<br>datareporter = daeTCPIPDataReporter()<br>simulation   = simTutorial()<br><br># Set the linear solver (optional)<br>lasolver     = pyTrilinosAmesos.CreateTrilinosAmesosSolver("Amesos_Superlu")<br>solver.SetLASolver(eThirdParty, lasolver)<br><br># Report ALL variables in the model<br>simulation.m.SetReportingOn(True)<br><br># Set the time horizon (1000 seconds) and the reporting interval (10 seconds)<br>simulation.SetReportingInterval(10)<br>simulation.SetTimeHorizon(1000)<br><br># Connect data reporter (use the default TCP/IP connection string)<br>simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())<br>if(datareporter.Connect("", simName) == False):<br>    sys.exit()<br><br># Initialize the simulation<br>simulation.Initialize(solver, datareporter, log)<br><br># Solve at time = 0 (initialization)<br>simulation.SolveInitial()<br><br># Run<br>simulation.Run()<br></pre>
+<pre># Import modules<br>import sys<br>from time import localtime, strftime<br><br># Create Log, Solver, DataReporter and Simulation object<br>log          = daeStdOutLog()<br>solver       = daeIDAS()<br>datareporter = daeTCPIPDataReporter()<br>simulation   = simTutorial()<br><br># Set the linear solver (optional)<br>lasolver     = pyTrilinosAmesos.CreateTrilinosAmesosSolver("Amesos_Superlu")<br>solver.SetLASolver(eThirdParty, lasolver)<br><br># Report ALL variables in the model<br>simulation.m.SetReportingOn(True)<br><br># Set the time horizon (1000 seconds) and the reporting interval (10 seconds)<br>simulation.SetReportingInterval(10)<br>simulation.SetTimeHorizon(1000)<br><br># Connect data reporter (use the default TCP/IP connection string)<br>simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())<br>if(datareporter.Connect("", simName) == False):<br>    sys.exit()<br><br># Initialize the simulation<br>simulation.Initialize(solver, datareporter, log)<br><br># Solve at time = 0 (initialization)<br>simulation.SolveInitial()<br><br># Run<br>simulation.Run()<br>simulation.Finalize()<br></pre>
 <p>while in <span style="font-weight: bold;">cDAE</span>
 by:</p>
-<pre>// Create Log, Solver, DataReporter and Simulation object<br>boost::scoped_ptr&lt;daeDynamicSimulation_t&gt; pSimulation(new simTutorial);  <br>boost::scoped_ptr&lt;daeDataReporter_t&gt;      pDataReporter(daeCreateTCPIPDataReporter());<br>boost::scoped_ptr&lt;daeIDASolver&gt;	          pDAESolver(daeCreateIDASolver());<br>boost::scoped_ptr&lt;daeLog_t&gt;               pLog(daeCreateStdOutLog());<br><br>// Report ALL variables in the model<br>pSimulation-&gt;GetModel()-&gt;SetReportingOn(true);<br><br>// Set the time horizon and the reporting interval<br>pSimulation-&gt;SetReportingInterval(10);<br>pSimulation-&gt;SetTimeHorizon(100);<br> <br>// Connect data reporter<br>string strName = pSimulation-&gt;GetModel()-&gt;GetName();<br>if(!pDataReporter-&gt;Connect(strName, string("Tutorial1")))<br>    return;<br><br>// Initialize the simulation<br>pSimulation-&gt;Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());<br><br>// Solve at time = 0 (initialization)<br>pSimulation-&gt;SolveInitial();<br><br>// Run<br>pSimulation-&gt;Run();<br></pre>
+<pre>// Create Log, Solver, DataReporter and Simulation object<br>boost::scoped_ptr&lt;daeSimulation_t&gt;    pSimulation(new simTutorial);  <br>boost::scoped_ptr&lt;daeDataReporter_t&gt;  pDataReporter(daeCreateTCPIPDataReporter());<br>boost::scoped_ptr&lt;daeIDASolver&gt;	      pDAESolver(daeCreateIDASolver());<br>boost::scoped_ptr&lt;daeLog_t&gt;           pLog(daeCreateStdOutLog());<br><br>// Report ALL variables in the model<br>pSimulation-&gt;GetModel()-&gt;SetReportingOn(true);<br><br>// Set the time horizon and the reporting interval<br>pSimulation-&gt;SetReportingInterval(10);<br>pSimulation-&gt;SetTimeHorizon(100);<br> <br>// Connect data reporter<br>string strName = pSimulation-&gt;GetModel()-&gt;GetName();<br>if(!pDataReporter-&gt;Connect("", strName))<br>    return;<br><br>// Initialize the simulation<br>pSimulation-&gt;Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());<br><br>// Solve at time = 0 (initialization)<br>pSimulation-&gt;SolveInitial();<br><br>// Run<br>pSimulation-&gt;Run();<br>pSimulation-&gt;Finalize();<br></pre>
 <p><br>
 More information about simulation can be found in <a
  href="pydae_user_guide.html">pyDAE User Guide</a> and <a
- href="api_ref/activity.html#daeDynamicSimulation">pyDAE API Reference</a>.
+ href="api_ref/activity.html#daeSimulation">pyDAE API Reference</a>.
 Also,
 do
 not
@@ -966,9 +993,132 @@ look
 on
 <a href="tutorials.html">tutorials</a>.<br>
 </p>
+<p><br>
+</p>
+<h2><a name="Optimization"></a>Optimization</h2>
+<p>To define an optimization problem it is first necessary to develop a
+model of the process and to define a simulation&nbsp; (as explained
+above). Having done these tasks (working model and simulation) the
+optimization in <span style="font-weight: bold;">DAE Tools</span>
+can be defined by specifying the objective function, optimization
+variables and optimization constraints. It is intentionally chosen to
+keep
+simulation and optimization tightly coupled. The optimization problem
+is
+specified in the function <span style="font-weight: bold;">SetUpOptimization</span>
+in the <span style="font-weight: bold;">daeSimulation</span> class.
+The tasks have
+to be done are:<br>
+</p>
+<p>1. Specify the objective function<br>
+</p>
+<ul>
+  <li>Objective function is defined by specifying its residual
+(similarly to specifying an equation residual);<br>
+Internally the framework will create a new variable (V_obj) and a new
+equation (F_obj). <br>
+  </li>
+</ul>
+<p>2. Specify optimization variables<br>
+</p>
+<ul>
+  <li>The optimization variables have to be already defined in the
+model and their values assigned in the simulation; they can be either
+non-distributed or distributed.</li>
+  <li>Specify a type of optimization variable values. The variables can
+be <span style="font-weight: bold;">continuous</span> (floating point
+values in the given range), <span style="font-weight: bold;">integer</span>
+(set of integer values in the given range) or <span
+ style="font-weight: bold;">binary</span> (integer value: 0 or 1).</li>
+  <li>Specify the starting point (within the range)<br>
+  </li>
+</ul>
+<p>3. Specify optimization constraints</p>
+<ul>
+  <li>Two types of constraints exist in DAE Tools: <span
+ style="font-weight: bold;">equality</span> and <span
+ style="font-weight: bold;">inequality</span> constraints<br>
+To define an <span style="font-weight: bold;">equality</span>
+constraint its residual and the value has to be specified;<br>
+To define an <span style="font-weight: bold;">inequality</span>
+constraint its residual, the lower and upper bounds have to be
+specified;<br>
+Internally the framework will create a new variable (V_constraint[N])
+and a new equation (F_constraint[N]) for each defined constraint, where
+N is the ordinal number of the constraint.<br>
+  </li>
+</ul>
+<p>4. Specify NLP/MINLP solver <br>
+</p>
+<ul>
+  <li>Currently only <span style="font-weight: bold;">BONMIN</span>
+MINLP solver is supported; internally it
+uses <span style="font-weight: bold;">IPOPT</span> NLP solver to solve
+NLP problems</li>
+</ul>
+<p>5. Specify DAE and LA solvers<br>
+6. Specify a data reporter and a data receiver, and connect them<br>
+7. Set a time horizon, reporting interval, etc</p>
+<p>8. Set the options of the MINLP solver<br>
+9. Initialize the optimization<br>
+10. Save model report and/or runtime model report (to inspect expanded
+equations etc)<br>
+11. Run the optimization </p>
+<p>SetUpOptimization function is declared in <span
+ style="font-weight: bold;">pyDAE</span>
+as the following:<br>
+</p>
+<pre>class mySimulation(daeSimulation):<br>    ... (here we set up a simulation)<br><br>    def SetUpOptimization(self):<br>        ... (here goes a declaration of the obj. function, opt. variables and constraints)<br></pre>
+<p>while in <span style="font-weight: bold;">cDAE</span>
+by:</p>
+<pre>class mySimulation : public daeSimulation<br>{<br>    ... (here we set up a simulation)<br><br>    void SetUpOptimization(void)<br>    {<br>        ... (here goes a declaration of the obj. function, opt. variables and constraints)<br>    }<br>};</pre>
+<h3>Running the optimization<br>
+</h3>
+<p>Optimizations, like simulations in <span style="font-weight: bold;">pyDAE</span>
+can be
+run in two modes:<br>
+</p>
+<ol>
+  <li>By using PyQt4 graphical user interface (GUI)</li>
+  <li>From the shell</li>
+</ol>
+<p><br>
+</p>
+<p>1) Running an optimization from the GUI (<span
+ style="font-weight: bold;">pyDAE</span> only):<br>
+</p>
+<pre># Import modules<br>import sys<br>from time import localtime, strftime<br>from PyQt4 import QtCore, QtGui<br><br># Create QtApplication object<br>app = QtGui.QApplication(sys.argv)<br><br># Create simulation object<br>sim = simTutorial()<br>nlp = daeBONMIN()<br><br># Report ALL variables in the model<br>sim.m.SetReportingOn(True)<br><br># Show the daeSimulator window to choose the other information needed for optimization<br>simulator = daeSimulator(app, simulation=sim, nlpsolver=nlp)<br>simulator.show()<br><br># Execute applications main loop<br>app.exec_()</pre>
+<p>Here the default log, and data reporter objects will be used, while
+the user can choose NLP, DAE and LA solvers and specify time horizon
+and
+reporting interval.<br>
+</p>
+<p><br>
+</p>
+<p>2) Running a simulation from the shell:<br>
+</p>
+<p>In <span style="font-weight: bold;">pyDAE</span>:<br>
+</p>
+<pre># Import modules<br>import sys<br>from time import localtime, strftime<br><br># Create Log, NLPSolver, DAESolver, DataReporter, Simulation and Optimization objects<br>log          = daePythonStdOutLog()<br>daesolver    = daeIDAS()<br>nlpsolver    = daeBONMIN()<br>datareporter = daeTCPIPDataReporter()<br>simulation   = simTutorial()<br>optimization = daeOptimization()<br><br># Enable reporting of all variables<br>simulation.m.SetReportingOn(True)<br><br># Set the time horizon and the reporting interval<br>simulation.ReportingInterval = 10<br>simulation.TimeHorizon = 100<br><br># Connect data reporter<br>simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())<br>if(datareporter.Connect("", simName) == False):<br>    sys.exit()<br><br># Initialize the simulation<br>optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)<br><br># Set the MINLP solver options (optional)<br>#nlpsolver.SetOption('OPTION', VALUE)<br>#nlpsolver.LoadOptionsFile("")<br><br># Save the model report and the runtime model report <br>simulation.m.SaveModelReport(simulation.m.Name + ".xml")<br>simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")<br><br># Run<br>optimization.Run()<br>optimization.Finalize()<br></pre>
+<p>while in <span style="font-weight: bold;">cDAE</span>
+by:</p>
+<pre>// Create Log, NLPSolver, DAESolver, DataReporter, Simulation and Optimization objects<br>boost::scoped_ptr&lt;daeSimulation_t&gt;        pSimulation(new simTutorial);  <br>boost::scoped_ptr&lt;daeDataReporter_t&gt;      pDataReporter(daeCreateTCPIPDataReporter());<br>boost::scoped_ptr&lt;daeIDASolver&gt;	          pDAESolver(daeCreateIDASolver());<br>boost::scoped_ptr&lt;daeLog_t&gt;               pLog(daeCreateStdOutLog());<br>boost::scoped_ptr&lt;daeNLPSolver_t&gt;         pNLPSolver(new daeBONMINSolver());<br>boost::scoped_ptr&lt;daeOptimization_t&gt;      pOptimization(new daeOptimization());<br><br>// Report ALL variables in the model<br>pSimulation-&gt;GetModel()-&gt;SetReportingOn(true);<br><br>// Set the time horizon and the reporting interval<br>pSimulation-&gt;SetReportingInterval(10);<br>pSimulation-&gt;SetTimeHorizon(100);<br> <br>// Connect data reporter<br>string strName = pSimulation-&gt;GetModel()-&gt;GetName();<br>if(!pDataReporter-&gt;Connect("", strName))<br>    return;<br><br>// Initialize the simulation<br>pOptimization-&gt;Initialize(pSimulation.get(), <br>                          pNLPSolver.get(), <br>                          pDAESolver.get(), <br>                          pDataReporter.get(), <br>                          pLog.get());<br><br>// Run<br>pOptimization.Run();<br>pOptimization.Finalize();<br></pre>
+<p>More information about simulation can be found in <a
+ href="pydae_user_guide.html">pyDAE User Guide</a> and <a
+ href="api_ref/activity.html#daeOptimization">pyDAE API Reference</a>.
+Also,
+do
+not
+forget
+to
+have
+a
+look
+on
+<a href="tutorials.html">tutorials</a>.</p>
 <h2><a name="3._Processing_of_the_results"></a>Processing the
 results</h2>
-<p>The simulation results can be easily plotted by using <span
+<p>The simulation/optimization results can be easily plotted by using <span
  style="font-weight: bold;">DAE Plotter</span> application. It is
 possible to choose between 2D and 3D plots. After choosing a desired
 type, a <span style="font-weight: bold;">Choose variable</span> (given
@@ -992,7 +1142,9 @@ Choose
 variable
 dialog
 for
-a 2D plot<br>
+a
+2D
+plot<br>
 </span></div>
 <p><br>
 </p>
@@ -1006,7 +1158,9 @@ a 2D plot<br>
 Example
 2D
 plot
-(produced by Matplotlib)<br>
+(produced
+by
+Matplotlib)<br>
 </span></div>
 <p><br>
 <br>
@@ -1018,7 +1172,10 @@ plot
 7.
 Example
 3D
-plot (produced by Mayavi2)<br>
+plot
+(produced
+by
+Mayavi2)<br>
 </span></div>
 <p><br>
 </p>

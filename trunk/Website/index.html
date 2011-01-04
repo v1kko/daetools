@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta name="y_key" content="5b97e435dbf14830">
   <meta name="Description" content="">
@@ -55,7 +55,7 @@ Project</span></a></h1>
 <h1>What is DAE Tools?</h1>
 <p>
 <strong>DAE Tools</strong> is a collection of software tools for
-modelling and simulation of real-world processes. Process
+modelling, simulation and optimization of real-world processes. Process
 modelling and simulation can be defined as theoretical concepts and
 computational methods that describe, represent in a mathematical form
 and simulate the functioning of real-world processes. <strong
@@ -64,7 +64,8 @@ to model and simulate processes in chemical process industry (mass,
 heat and momentum transfers, chemical reactions, separation processes,
 thermodynamics). However, <strong>DAE Tools</strong> can help you
 develop high-accuracy models of (in general) many different kind of
-processes/phenomena, simulate them, visualize and analyse the results.
+processes/phenomena, simulate/optimize them, visualize and analyse the
+results.
 Its features should be sufficient to enable mathematical description of
 chemical, physical or socio/economic phenomena. The most common are
 initial value
@@ -75,7 +76,8 @@ algebraic equations.<br>
 <h2>The main features<br>
 </h2>
 <p><!-- <img src="stirthepot.gif"></img> --> <strong>DAE Tools</strong>
-is a cross-platform equation-oriented process modelling system. All
+is a cross-platform equation-oriented process modelling and
+optimization system. All
 core libraries
 are written in standard ANSI/ISO c++. It is highly portable - it can
 run on
@@ -83,9 +85,8 @@ every platform
 with a decent c++ compiler, Boost and standard c++ libraries (by now it
 is tested on 32/64 bit x86 and ARM GNU/Linux architectures making it
 suitable for
-use in embedded systems - an embedded <a
- href="http://en.wikipedia.org/wiki/Model_predictive_control">model
-predictive control</a> is a mid-term objective). <strong>DAE Tools</strong>
+use in embedded systems - an embedded model
+predictive control is a mid-term objective). <strong>DAE Tools</strong>
 core libraries are
 small and fast, and each module can be easily extended.
 Models can be easily developed in Python (<span
@@ -95,7 +96,7 @@ independent executable and deployed without a need for any run time
 libraries.<br>
 </p>
 <p>Various types of processes (lumped or distributed, steady-state or
-dynamic) can be modelled. They may range from very simple
+dynamic) can be modelled and optimized. They may range from very simple
 to those which require complex operating procedures. Equations can be
 ordinary or
 discontinuous, where discontinuities are automatically handled by the
@@ -108,15 +109,23 @@ formats. <br>
 </p>
 <p>Currently <a
  href="https://computation.llnl.gov/casc/sundials/main.html">Sundials
-IDA</a> differential algebraic equation solver is used to solve
-underlying problems. <span style="font-weight: bold;">DAE Tools</span>
+IDAS</a> solver is used to solve
+DAE systems and calculate sensitivities, while <a
+ href="https://projects.coin-or.org/Bonmin">BONMIN</a>/<a
+ href="https://projects.coin-or.org/IPOPT">IPOPT</a> set of solvers is
+used to solve NLP/MINLP problems. <span style="font-weight: bold;">DAE
+Tools</span>
 support direct dense and sparse matrix linear solvers (sequential and
 multi-threaded versions) at the moment. In addition to the built-in
-linear
+Sundials linear
 solvers, several third party libraries are interfaced: <a
  href="http://software.intel.com/en-us/intel-mkl/">Intel MKL</a>, <a
  href="http://www.amd.com/acml">AMD ACML</a>, <a
- href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a>,
+ href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a>
+(<a href="http://crd.lbl.gov/%7Exiaoye/SuperLU/index.html">SuperLU</a>,
+<a href="http://www.cise.ufl.edu/research/sparse/umfpack">Umfpack</a>, <a
+ href="http://www.netlib.org/lapack">Lapack</a>/<a
+ href="http://math-atlas.sourceforge.net">ATLAS</a>),
 which
 can
 take
@@ -127,7 +136,9 @@ computers
 or
 computer
 clusters.
-Linear
+BONMIN/IPOPT currently can only use <a
+ href="http://graal.ens-lyon.fr/MUMPS">MUMPS</a> linear solver since it
+is the only one which is free. Linear
 solvers
 that
 exploit
@@ -149,7 +160,8 @@ objective.<br>
 <!-- Licence   -->
 <h1><a name="Licence"></a>Licence</h1>
 <p>
-<strong>DAE Tools</strong> is <strong><a href="http://www.gnu.org/">free
+<strong>DAE Tools</strong> is <strong style="font-weight: normal;"><a
+ href="http://www.gnu.org/">free
 software</a></strong>; you can redistribute it and/or modify it under
 the terms of the <a
  href="http://www.gnu.org/licenses/licenses.html#GPL">GNU General
@@ -223,7 +235,8 @@ I
 discovered
 some
 annoying
-bugs and lack of certain highly
+bugs
+and lack of certain highly
 appreciated features. The developers of that proprietary program (as it
 is a case with all proprietary computer programs) had their own agenda
 fixing only what they wanted to fix and introducing new features that
@@ -233,8 +246,9 @@ was
 helpless. The source code was
 not available and nobody will ever consider giving it to me to create
 patches with bugs fixes/new features.
-Not even if I swear on the holy (c++) bible!! Very soon the
-contours of the new process modelling software slowly began to form. It
+Not even if I swear on the holy (c++) bible!! <br>
+Very soon the
+contours of a new process modelling software slowly began to form. It
 took
 me a
 while until I made a definite plan and initial features, and I
@@ -266,7 +280,7 @@ moment.<br>
 <!-- Citation   -->
 <h1><a name="Acknowledgements"></a>Acknowledgements</h1>
 <p>DAE Tools use the following third party free software libraries
-(GNU GPL or some other permissive licences):<br>
+(GNU GPL or some other type of free licences):<br>
 </p>
 <ul>
   <li>Sundials IDAS: <a
@@ -282,9 +296,12 @@ moment.<br>
 
 
 
+
     <a href="http://www.riverbankcomputing.co.uk/software/pyqt/intro">http://www.riverbankcomputing.co.uk/software/pyqt/intro</a><br>
   </li>
-  <li>Numpy: <a href="http://numpy.scipy.org">http://numpy.scipy.org</a><br>
+  <li>Numpy: <a href="http://numpy.scipy.org">http://numpy.scipy.org</a></li>
+  <li>Blas/Lapack/CLapack: <a href="http://www.netlib.org">http://www.netlib.org</a></li>
+  <li>Atlas: <a href="http://math-atlas.sourceforge.net">http://math-atlas.sourceforge.net</a><br>
   </li>
   <li>Trilinos Amesos: <a
  href="http://trilinos.sandia.gov/packages/amesos/">http://trilinos.sandia.gov/packages/amesos</a><br>

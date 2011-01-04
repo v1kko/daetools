@@ -15,6 +15,8 @@ daeOptimization::daeOptimization(void)
 	m_pDataReporter		 = NULL;
 	m_pLog			     = NULL;
 	m_bIsInitialized     = false;
+	m_Initialization     = 0;
+	m_Optimization       = 0;
 
 	daeConfig& cfg = daeConfig::GetConfig();
 }
@@ -55,6 +57,10 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 		throw e;
 	}
 
+	m_Initialization = 0;
+	m_Optimization   = 0;
+	clock_t start    = time(NULL);
+
 	m_pSimulation		 = pSimulation;
 	m_pNLPSolver	     = pNLPSolver;
 	m_pDAESolver		 = pDAESolver;
@@ -65,6 +71,9 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 	m_pNLPSolver->Initialize(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 
 	m_bIsInitialized = true;
+	
+	clock_t end = time(NULL);
+	m_Initialization = difftime(end, start);
 }
 
 void daeOptimization::Run(void)
@@ -75,6 +84,8 @@ void daeOptimization::Run(void)
 		e << "Optimization has not been initialized";
 		throw e;
 	}
+	
+	m_Optimization = time(NULL);
 	
 	if(!m_pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -101,6 +112,13 @@ void daeOptimization::Finalize(void)
 	
 	if(!m_pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer);
+
+	clock_t end = time(NULL);
+	m_Optimization = difftime(end, m_Optimization);
+
+	m_pLog->Message(string(" "), 0);
+	m_pLog->Message(string("The optimization finished."), 0);
+	m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_Initialization + m_Optimization), -1, 0) + string(" s"), 0);
 
 	m_pSimulation->Finalize();
 }

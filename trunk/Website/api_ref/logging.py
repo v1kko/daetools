@@ -6,6 +6,10 @@ All classes are derived from the base daeLog_t class which contains only one met
 class daeLog_t:
     """
     The base log class (abstract).
+    Properties:
+     - Enabled: boolean
+     - Indent: unsigned integer
+     - IndentString: string (inserted before every message)
     """
     def Message(self, Message, Priority):
         """
@@ -17,8 +21,37 @@ class daeLog_t:
            Nothing
         """
         pass
+    
+    def IncreaseIndent(self, offset):
+        """
+        """
+        pass
+    
+    def DecreaseIndent(self, offset):
+        """
+        """
+        pass
 
-class daeFileLog(daeLog_t):
+class daeBaseLog(daeLog_t):
+    """
+    The implementation of the simple log class.
+    """
+    def Message(self, Message, Priority):
+        """
+        """
+        pass
+    
+    def IncreaseIndent(self, offset):
+        """
+        """
+        pass
+    
+    def DecreaseIndent(self, offset):
+        """
+        """
+        pass
+
+class daeFileLog(daeBaseLog):
     """
     The log class used to save received messages to the given text file.
     """
@@ -29,13 +62,13 @@ class daeFileLog(daeLog_t):
         """
         pass
 
-class daeStdOutLog(daeLog_t):
+class daeStdOutLog(daeBaseLog):
     """
     The log class used to redirect received messages to the standard output.
     """
     pass
 
-class daeTCPIPLog(daeLog_t):
+class daeTCPIPLog(daeBaseLog):
     """
     The log class used to send messages to daeTCPIPLogServer by TCPIP protocol.
     """

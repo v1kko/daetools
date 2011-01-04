@@ -1,5 +1,6 @@
 """
-dae.activity module is used to perform various types of activities. Currently only steady state and dynamic simulation are supported.
+daetools.pyDAE.activity module is used to perform various types of activities. 
+Currently steady state and dynamic simulation and optimization are supported.
 
 Integer constants defined in the module:
     daeeStopCriterion
@@ -8,9 +9,9 @@ Integer constants defined in the module:
      - eDoNotStopAtDiscontinuity
 """
 
-class daeActivity_t:
+class daeSimulation_t:
     """
-    The base activity class (abstract).
+    The base simulation class (abstract).
     """
     def GetModel(self):
         """
@@ -72,16 +73,6 @@ class daeActivity_t:
         """
         pass
     
-    def Stop(self):
-        """
-        (Abstract)
-        ARGUMENTS:
-           None
-        RETURNS:
-           Nothing
-        """
-        pass
-    
     def Resume(self):
         """
         (Abstract)
@@ -91,12 +82,7 @@ class daeActivity_t:
            Nothing
         """
         pass
-
     
-class daeDynamicActivity_t(daeActivity_t):
-    """
-    The base dynamic activity class (abstract).
-    """
     def GetTimeHorizon(self):
         """
         (Abstract)
@@ -139,17 +125,14 @@ class daeDynamicActivity_t(daeActivity_t):
     
     def ReportData(self):
         """
+        (Abstract)
         ARGUMENTS:
            None
         RETURNS:
            Nothing
         """
         pass
-
-class daeDynamicSimulation_t(daeDynamicActivity_t):
-    """
-    The base dynamic simulation class (abstract).
-    """
+    
     def Initialize(self, DAESolver, DataReporter, Log):
         """
         (Abstract)
@@ -157,6 +140,16 @@ class daeDynamicSimulation_t(daeDynamicActivity_t):
          - DAESolver: daeDAESolver_t
          - DataReporter: daeDataReporter_t
          - Log: daeLog_t
+        RETURNS:
+           Nothing
+        """
+        pass
+    
+    def Finalize(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           None
         RETURNS:
            Nothing
         """
@@ -183,6 +176,26 @@ class daeDynamicSimulation_t(daeDynamicActivity_t):
         pass
     
     def Reinitialize(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           Nothing
+        RETURNS:
+           None
+        """
+        pass
+    
+    def Reset(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           Nothing
+        RETURNS:
+           None
+        """
+        pass
+    
+    def ReRun(self):
         """
         (Abstract)
         ARGUMENTS:
@@ -242,12 +255,67 @@ class daeDynamicSimulation_t(daeDynamicActivity_t):
            Nothing
         """
         pass
+    
+    def SetUpOptimization(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           None
+        RETURNS:
+           Nothing
+        """
+        pass
 
-class daeDynamicSimulation(daeDynamicSimulation_t):
+class daeSimulation(daeSimulation_t):
     """
-    Default implementation of the dynamic simulation.
+    An implementation of the daeSimulation_t.
     The user has to implement the following methods:
      - SetUpParametersAndDomains
      - SetUpVariables
+     - SetUpOptimization (for optimization only)
     Also, the user can reimplement the Run() method to provide a custom operating procedure of the process.  
+    """
+
+
+class daeOptimization_t:
+    """
+    The optimization class (abstract).
+    """
+    def Run(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           None
+        RETURNS:
+           Nothing
+        """
+        pass
+    
+    def Initialize(self, Simulation, MINLPSolver, DAESolver, DataReporter, Log):
+        """
+        (Abstract)
+        ARGUMENTS:
+         - Simulation: daeSimulation_t object
+         - MINLPSolver: daeMINLPSolver_t object
+         - DAESolver: daeDAESolver_t object
+         - DataReporter: daeDataReporter_t object
+         - Log: daeLog_t object
+        RETURNS:
+           Nothing
+        """
+        pass
+    
+    def Finalize(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           None
+        RETURNS:
+           Nothing
+        """
+        pass
+    
+class daeOptimization(daeOptimization_t):
+    """
+    An implementation of the daeOptimization_t class.
     """

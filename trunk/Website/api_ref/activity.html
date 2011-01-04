@@ -3,7 +3,8 @@
 <html><head><title>Python: module activity</title>
 </head><body bgcolor="#f0f0f8">
 
-<p><tt>dae.activity&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;perform&nbsp;various&nbsp;types&nbsp;of&nbsp;activities.&nbsp;Currently&nbsp;only&nbsp;steady&nbsp;state&nbsp;and&nbsp;dynamic&nbsp;simulation&nbsp;are&nbsp;supported.<br>
+    <p><tt>daetools.pyDAE.activity&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;perform&nbsp;various&nbsp;types&nbsp;of&nbsp;activities.&nbsp;<br>
+Currently&nbsp;steady&nbsp;state&nbsp;and&nbsp;dynamic&nbsp;simulation&nbsp;and&nbsp;optimization&nbsp;are&nbsp;supported.<br>
 &nbsp;<br>
 Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;daeeStopCriterion<br>
@@ -18,76 +19,46 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="activity.html#daeActivity_t">daeActivity_t</a>
+<dt><font face="helvetica, arial"><a href="activity.html#daeOptimization_t">daeOptimization_t</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a>
-</font></dt><dd>
-<dl>
-<dt><font face="helvetica, arial"><a href="activity.html#daeDynamicSimulation_t">daeDynamicSimulation_t</a>
-</font></dt><dd>
-<dl>
-<dt><font face="helvetica, arial"><a href="activity.html#daeDynamicSimulation">daeDynamicSimulation</a>
+<dt><font face="helvetica, arial"><a href="activity.html#daeOptimization">daeOptimization</a>
 </font></dt></dl>
 </dd>
-</dl>
-</dd>
-</dl>
+<dt><font face="helvetica, arial"><a href="activity.html#daeSimulation_t">daeSimulation_t</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="activity.html#daeSimulation">daeSimulation</a>
+</font></dt></dl>
 </dd>
 </dl>
  <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeActivity_t">class <strong>daeActivity_t</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeOptimization">class <strong>daeOptimization</strong></a>(<a href="activity.html#daeOptimization_t">daeOptimization_t</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;base&nbsp;activity&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>An&nbsp;implementation&nbsp;of&nbsp;the&nbsp;<a href="#daeOptimization_t">daeOptimization_t</a>&nbsp;class.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeActivity_t-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeActivity_t-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeActivity_t-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeActivity_t-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<td width="100%">Methods inherited from <a href="activity.html#daeOptimization_t">daeOptimization_t</a>:<br>
+<dl><dt><a name="daeOptimization-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeActivity_t-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeOptimization-Initialize"><strong>Initialize</strong></a>(self, Simulation, MINLPSolver, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
+&nbsp;-&nbsp;Simulation:&nbsp;<a href="#daeSimulation_t">daeSimulation_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;MINLPSolver:&nbsp;daeMINLPSolver_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;daeDAESolver_t&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeActivity_t-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeActivity_t-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;Model:&nbsp;daeModel<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeActivity_t-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeOptimization-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
@@ -97,86 +68,29 @@ RETURNS:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeDynamicActivity_t">class <strong>daeDynamicActivity_t</strong></a>(<a href="activity.html#daeActivity_t">daeActivity_t</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeOptimization_t">class <strong>daeOptimization_t</strong></a></font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;base&nbsp;dynamic&nbsp;activity&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>The&nbsp;optimization&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeDynamicActivity_t-GetReportingInterval"><strong>GetReportingInterval</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-GetTimeHorizon"><strong>GetTimeHorizon</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-ReportData"><strong>ReportData</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-SetReportingInterval"><strong>SetReportingInterval</strong></a>(self, ReportingInterval)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;ReportingInterval:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-SetTimeHorizon"><strong>SetTimeHorizon</strong></a>(self, TimeHorizon)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;TimeHorizon:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<hr>
-Methods inherited from <a href="activity.html#daeActivity_t">daeActivity_t</a>:<br>
-<dl><dt><a name="daeDynamicActivity_t-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeOptimization_t-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicActivity_t-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeOptimization_t-Initialize"><strong>Initialize</strong></a>(self, Simulation, MINLPSolver, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
+&nbsp;-&nbsp;Simulation:&nbsp;<a href="#daeSimulation_t">daeSimulation_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;MINLPSolver:&nbsp;daeMINLPSolver_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;daeDAESolver_t&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicActivity_t-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;Model:&nbsp;daeModel<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicActivity_t-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeOptimization_t-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
@@ -186,30 +100,60 @@ RETURNS:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeDynamicSimulation">class <strong>daeDynamicSimulation</strong></a>(<a href="activity.html#daeDynamicSimulation_t">daeDynamicSimulation_t</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeSimulation">class <strong>daeSimulation</strong></a>(<a href="activity.html#daeSimulation_t">daeSimulation_t</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Default&nbsp;implementation&nbsp;of&nbsp;the&nbsp;dynamic&nbsp;simulation.<br>
+<td colspan=2><tt>An&nbsp;implementation&nbsp;of&nbsp;the&nbsp;<a href="#daeSimulation_t">daeSimulation_t</a>.<br>
 The&nbsp;user&nbsp;has&nbsp;to&nbsp;implement&nbsp;the&nbsp;following&nbsp;methods:<br>
 &nbsp;-&nbsp;SetUpParametersAndDomains<br>
 &nbsp;-&nbsp;SetUpVariables<br>
-Also,&nbsp;the&nbsp;user&nbsp;can&nbsp;reimplement&nbsp;the&nbsp;<a href="#daeDynamicSimulation-Run">Run</a>()&nbsp;method&nbsp;to&nbsp;provide&nbsp;a&nbsp;custom&nbsp;operating&nbsp;procedure&nbsp;of&nbsp;the&nbsp;process.<br>&nbsp;</tt></td></tr>
+&nbsp;-&nbsp;SetUpOptimization&nbsp;(for&nbsp;optimization&nbsp;only)<br>
+Also,&nbsp;the&nbsp;user&nbsp;can&nbsp;reimplement&nbsp;the&nbsp;<a href="#daeSimulation-Run">Run</a>()&nbsp;method&nbsp;to&nbsp;provide&nbsp;a&nbsp;custom&nbsp;operating&nbsp;procedure&nbsp;of&nbsp;the&nbsp;process.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="activity.html#daeDynamicSimulation">daeDynamicSimulation</a></dd>
-<dd><a href="activity.html#daeDynamicSimulation_t">daeDynamicSimulation_t</a></dd>
-<dd><a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a></dd>
-<dd><a href="activity.html#daeActivity_t">daeActivity_t</a></dd>
-</dl>
-<hr>
-Methods inherited from <a href="activity.html#daeDynamicSimulation_t">daeDynamicSimulation_t</a>:<br>
-<dl><dt><a name="daeDynamicSimulation-GetDAESolver"><strong>GetDAESolver</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<td width="100%">Methods inherited from <a href="activity.html#daeSimulation_t">daeSimulation_t</a>:<br>
+<dl><dt><a name="daeSimulation-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-GetDAESolver"><strong>GetDAESolver</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;daeDAESolver_t</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-Initialize"><strong>Initialize</strong></a>(self, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-GetReportingInterval"><strong>GetReportingInterval</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-GetTimeHorizon"><strong>GetTimeHorizon</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-Initialize"><strong>Initialize</strong></a>(self, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;DAESolver:&nbsp;daeDAESolver_t<br>
 &nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t<br>
@@ -217,125 +161,104 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-Integrate"><strong>Integrate</strong></a>(self, StopCriterion)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-Integrate"><strong>Integrate</strong></a>(self, StopCriterion)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-IntegrateForTimeInterval"><strong>IntegrateForTimeInterval</strong></a>(self, TimeInterval)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-IntegrateForTimeInterval"><strong>IntegrateForTimeInterval</strong></a>(self, TimeInterval)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;TimeInterval:&nbsp;float<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-IntegrateUntilTime"><strong>IntegrateUntilTime</strong></a>(self, Time, StopCriterion)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-IntegrateUntilTime"><strong>IntegrateUntilTime</strong></a>(self, Time, StopCriterion)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;Time:&nbsp;float<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-Reinitialize"><strong>Reinitialize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-ReRun"><strong>ReRun</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;Nothing<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-SetUpParametersAndDomains"><strong>SetUpParametersAndDomains</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-Reinitialize"><strong>Reinitialize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;Nothing<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-ReportData"><strong>ReportData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-SetUpVariables"><strong>SetUpVariables</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-Reset"><strong>Reset</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;Nothing<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-SolveInitial"><strong>SolveInitial</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<hr>
-Methods inherited from <a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a>:<br>
-<dl><dt><a name="daeDynamicSimulation-GetReportingInterval"><strong>GetReportingInterval</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-GetTimeHorizon"><strong>GetTimeHorizon</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-ReportData"><strong>ReportData</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-SetReportingInterval"><strong>SetReportingInterval</strong></a>(self, ReportingInterval)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;ReportingInterval:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-SetTimeHorizon"><strong>SetTimeHorizon</strong></a>(self, TimeHorizon)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;TimeHorizon:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<hr>
-Methods inherited from <a href="activity.html#daeActivity_t">daeActivity_t</a>:<br>
-<dl><dt><a name="daeDynamicSimulation-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;Model:&nbsp;daeModel<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation-SetReportingInterval"><strong>SetReportingInterval</strong></a>(self, ReportingInterval)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ReportingInterval:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetTimeHorizon"><strong>SetTimeHorizon</strong></a>(self, TimeHorizon)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;TimeHorizon:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetUpOptimization"><strong>SetUpOptimization</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetUpParametersAndDomains"><strong>SetUpParametersAndDomains</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetUpVariables"><strong>SetUpVariables</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SolveInitial"><strong>SolveInitial</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
@@ -345,25 +268,55 @@ RETURNS:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeDynamicSimulation_t">class <strong>daeDynamicSimulation_t</strong></a>(<a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeSimulation_t">class <strong>daeSimulation_t</strong></a></font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;base&nbsp;dynamic&nbsp;simulation&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>The&nbsp;base&nbsp;simulation&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="activity.html#daeDynamicSimulation_t">daeDynamicSimulation_t</a></dd>
-<dd><a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a></dd>
-<dd><a href="activity.html#daeActivity_t">daeActivity_t</a></dd>
-</dl>
-<hr>
-Methods defined here:<br>
-<dl><dt><a name="daeDynamicSimulation_t-GetDAESolver"><strong>GetDAESolver</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeSimulation_t-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-GetDAESolver"><strong>GetDAESolver</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;daeDAESolver_t</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-Initialize"><strong>Initialize</strong></a>(self, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-GetReportingInterval"><strong>GetReportingInterval</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-GetTimeHorizon"><strong>GetTimeHorizon</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-Initialize"><strong>Initialize</strong></a>(self, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;DAESolver:&nbsp;daeDAESolver_t<br>
 &nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t<br>
@@ -371,125 +324,104 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-Integrate"><strong>Integrate</strong></a>(self, StopCriterion)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-Integrate"><strong>Integrate</strong></a>(self, StopCriterion)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-IntegrateForTimeInterval"><strong>IntegrateForTimeInterval</strong></a>(self, TimeInterval)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-IntegrateForTimeInterval"><strong>IntegrateForTimeInterval</strong></a>(self, TimeInterval)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;TimeInterval:&nbsp;float<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-IntegrateUntilTime"><strong>IntegrateUntilTime</strong></a>(self, Time, StopCriterion)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-IntegrateUntilTime"><strong>IntegrateUntilTime</strong></a>(self, Time, StopCriterion)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;Time:&nbsp;float<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-Reinitialize"><strong>Reinitialize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-ReRun"><strong>ReRun</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;Nothing<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-SetUpParametersAndDomains"><strong>SetUpParametersAndDomains</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-Reinitialize"><strong>Reinitialize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;Nothing<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-ReportData"><strong>ReportData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-SetUpVariables"><strong>SetUpVariables</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-Reset"><strong>Reset</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;Nothing<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-SolveInitial"><strong>SolveInitial</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<hr>
-Methods inherited from <a href="activity.html#daeDynamicActivity_t">daeDynamicActivity_t</a>:<br>
-<dl><dt><a name="daeDynamicSimulation_t-GetReportingInterval"><strong>GetReportingInterval</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-GetTimeHorizon"><strong>GetTimeHorizon</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-ReportData"><strong>ReportData</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-SetReportingInterval"><strong>SetReportingInterval</strong></a>(self, ReportingInterval)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;ReportingInterval:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-SetTimeHorizon"><strong>SetTimeHorizon</strong></a>(self, TimeHorizon)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;TimeHorizon:&nbsp;float<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<hr>
-Methods inherited from <a href="activity.html#daeActivity_t">daeActivity_t</a>:<br>
-<dl><dt><a name="daeDynamicSimulation_t-GetDataReporter"><strong>GetDataReporter</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeDataReporter_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-GetLog"><strong>GetLog</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeLog_t&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-GetModel"><strong>GetModel</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;daeModel&nbsp;object</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-Resume"><strong>Resume</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-Run"><strong>Run</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDynamicSimulation_t-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-SetModel"><strong>SetModel</strong></a>(self, Model)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;Model:&nbsp;daeModel<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDynamicSimulation_t-Stop"><strong>Stop</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+<dl><dt><a name="daeSimulation_t-SetReportingInterval"><strong>SetReportingInterval</strong></a>(self, ReportingInterval)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;ReportingInterval:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-SetTimeHorizon"><strong>SetTimeHorizon</strong></a>(self, TimeHorizon)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;TimeHorizon:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-SetUpOptimization"><strong>SetUpOptimization</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-SetUpParametersAndDomains"><strong>SetUpParametersAndDomains</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-SetUpVariables"><strong>SetUpVariables</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-SolveInitial"><strong>SolveInitial</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>

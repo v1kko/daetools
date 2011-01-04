@@ -126,24 +126,24 @@ cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
 cp ../release/pyBONMIN.so           ${PACKAGE_NAME}/pyDAE
 
 mkdir ${PACKAGE_NAME}/pyAmdACML
-if [ -e ../release/pyAmdACML.so ]; then
-  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/pyAmdACML
-fi
+#if [ -e ../release/pyAmdACML.so ]; then
+#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/pyAmdACML
+#fi
 
 mkdir ${PACKAGE_NAME}/pyIntelMKL
-if [ -e ../release/pyIntelMKL.so ]; then
-  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/pyIntelMKL
-fi
+#if [ -e ../release/pyIntelMKL.so ]; then
+#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/pyIntelMKL
+#fi
 
 mkdir ${PACKAGE_NAME}/pyLapack
-if [ -e ../release/pyLapack.so ]; then
-  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack
-fi
+#if [ -e ../release/pyLapack.so ]; then
+#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack
+#fi
 
 mkdir ${PACKAGE_NAME}/pyIntelPardiso
-if [ -e ../release/pyIntelPardiso.so ]; then
-  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
-fi
+#if [ -e ../release/pyIntelPardiso.so ]; then
+#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
+#fi
 
 mkdir ${PACKAGE_NAME}/pyTrilinosAmesos
 if [ -e ../release/pyTrilinosAmesos.so ]; then

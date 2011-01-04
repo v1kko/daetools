@@ -1,3 +1,15 @@
+/***********************************************************************************
+                 DAE Tools Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic, 2010
+************************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the 
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+***********************************************************************************/
 #ifndef DAE_DEFINITIONS_H
 #define DAE_DEFINITIONS_H
 
@@ -39,10 +51,10 @@ const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute 
 								"You should have received a copy of the GNU General Public License "
 								"along with this program. If not, see <http://www.gnu.org/licenses/>.";
 const size_t FREE = ULONG_MAX;
-inline string daeVersion(bool bGetRevision = false)
+inline string daeVersion(bool bIncludeBuild = false)
 {
 	char dae__version[20];
-	if(bGetRevision)
+	if(bIncludeBuild)
 		::sprintf(dae__version, "%d.%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
 	else
 		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR);

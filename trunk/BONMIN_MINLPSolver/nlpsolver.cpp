@@ -621,83 +621,6 @@ bool daeMINLP::eval_h(Index n,
 	return false;
 }
 
-bool daeMINLP::intermediate_callback(AlgorithmMode mode,
-									 Index iter, 
-									 Number obj_value,
-									 Number inf_pr, 
-									 Number inf_du,
-									 Number mu, 
-									 Number d_norm,
-									 Number regularization_size,
-									 Number alpha_du, 
-									 Number alpha_pr,
-									 Index ls_trials,
-									 const IpoptData* ip_data,
-									 IpoptCalculatedQuantities* ip_cq)
-{
-	string strError;
-
-//	cout << "Iteration: " << iter << endl;
-	
-//	cout << "Mode: " << iter;
-//	if(mode == Solve_Succeeded)
-//		strError = "Solve_Succeeded.";	
-//	else if(mode == Solved_To_Acceptable_Level)
-//		strError = "Solved_To_Acceptable_Level.";	
-//	else if(mode == Infeasible_Problem_Detected)
-//		strError = "Infeasible_Problem_Detected.";	
-//	else if(mode ==  Search_Direction_Becomes_Too_Small)
-//		strError = "Search_Direction_Becomes_Too_Small.";	
-//	else if(mode ==  Diverging_Iterates)
-//		strError = "Diverging_Iterates.";	
-//	else if(mode ==  User_Requested_Stop)
-//		strError = "User_Requested_Stop.";	
-//	else if(mode ==  Feasible_Point_Found)
-//		strError = "Feasible_Point_Found.";	
-//	else if(mode ==  Maximum_Iterations_Exceeded)
-//		strError = "Maximum_Iterations_Exceeded.";	
-//	else if(mode ==  Restoration_Failed)
-//		strError = "Restoration_Failed.";	
-//	else if(mode ==  Error_In_Step_Computation)
-//		strError = "Error_In_Step_Computation.";	
-//	else if(mode ==  Maximum_CpuTime_Exceeded)
-//		strError = "Maximum_CpuTime_Exceeded.";	
-//	else if(mode ==  Not_Enough_Degrees_Of_Freedom)
-//		strError = "Not_Enough_Degrees_Of_Freedom.";	
-//	else if(mode ==  Invalid_Problem_Definition)
-//		strError = "Invalid_Problem_Definition.";	
-//	else if(mode ==  Invalid_Option)
-//		strError = "Invalid_Option.";	
-//	else if(mode ==  Invalid_Number_Detected)
-//		strError = "Invalid_Number_Detected.";	
-//	else if(mode ==  Unrecoverable_Exception)
-//		strError = "Unrecoverable_Exception.";	
-//	else if(mode ==  NonIpopt_Exception_Thrown)
-//		strError = "NonIpopt_Exception_Thrown.";	
-//	else if(mode ==  Insufficient_Memory)
-//		strError = "Insufficient_Memory.";	
-//	else if(mode ==  Internal_Error)
-//		strError = "Internal_Error.";	
-//	else
-//		strError = "Unknown.";	
-		
-//	cout << endl;
-	
-//	cout << "obj_value: " << obj_value << endl;
-	m_pLog->IncreaseIndent(2);
-	m_pLog->Message(string("Iteration: ") + toString(iter), 0);
-	m_pLog->DecreaseIndent(2);
-	
-	if(m_bPrintInfo) 
-	{
-		PrintObjectiveFunction();
-		PrintOptimizationVariables();
-		PrintConstraints();
-	}
-	
-	return true;
-}
-
 void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 								 Index n, 
 								 const Number* x, 
@@ -719,9 +642,9 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	else if(status == TMINLP::MINLP_ERROR)
 		strMessage = "Optimization failed: MINLP error";
 	
-	m_pLog->Message(string("**************************************************************************"), 0);
+	m_pLog->Message(string(" "), 0);
 	m_pLog->Message("                        " + strMessage, 0);
-	m_pLog->Message(string("**************************************************************************"), 0);
+	m_pLog->Message(string(" "), 0);
 	m_pLog->Message(string(" "), 0);
 	
 	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);

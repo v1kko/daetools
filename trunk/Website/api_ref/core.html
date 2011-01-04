@@ -3,7 +3,7 @@
 <html><head><title>Python: module core</title>
 </head><body bgcolor="#f0f0f8">
 
-    <p><tt>dae.core&nbsp;module&nbsp;contains&nbsp;classes&nbsp;necessary&nbsp;to&nbsp;build&nbsp;models.&nbsp;<br>
+    <p><tt>daetools.pyDAE.core&nbsp;module&nbsp;contains&nbsp;classes&nbsp;necessary&nbsp;to&nbsp;build&nbsp;models.&nbsp;<br>
 Every&nbsp;model&nbsp;consists&nbsp;of&nbsp;the&nbsp;following&nbsp;information:<br>
 &nbsp;-&nbsp;Domains<br>
 &nbsp;-&nbsp;Parameters<br>
@@ -69,6 +69,7 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#adouble_array">adouble_array</a>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeArrayRange">daeArrayRange</a>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeCondition">daeCondition</a>
+</font></dt><dt><font face="helvetica, arial"><a href="core.html#daeConfig">daeConfig</a>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeDomainIndex">daeDomainIndex</a>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeIndexRange">daeIndexRange</a>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeObject">daeObject</a>
@@ -165,7 +166,7 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a></tt></dd></dl>
 
-<dl><dt><a name="adouble-__pow__"><strong>__pow__</strong></a>(self, adf)</dt><dd><tt>Mathematical&nbsp;operator&nbsp;^<br>
+<dl><dt><a name="adouble-__pow__"><strong>__pow__</strong></a>(self, adf)</dt><dd><tt>Mathematical&nbsp;operator&nbsp;**<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;adf:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;float<br>
 RETURNS:<br>
@@ -265,6 +266,43 @@ ARGUMENTS:<br>
 &nbsp;-&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a>&nbsp;<br>
 RETURNS:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeCondition">daeCondition</a></tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeConfig">class <strong>daeConfig</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeConfig-GetBoolean"><strong>GetBoolean</strong></a>(self, propertyPath, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;propertyPath:&nbsp;string<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;boolean<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;boolean</tt></dd></dl>
+
+<dl><dt><a name="daeConfig-GetFloat"><strong>GetFloat</strong></a>(self, propertyPath, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;propertyPath:&nbsp;string<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeConfig-GetInteger"><strong>GetInteger</strong></a>(self, propertyPath, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;propertyPath:&nbsp;string<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;integer<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;integer</tt></dd></dl>
+
+<dl><dt><a name="daeConfig-GetString"><strong>GetString</strong></a>(self, propertyPath, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;propertyPath:&nbsp;string<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;string</tt></dd></dl>
+
+<dl><dt><a name="daeConfig-Reload"><strong>Reload</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Noting</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -517,24 +555,21 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeModel-d"><strong>d</strong></a>(self, ad, domain)</dt><dd><tt>Calculates&nbsp;a&nbsp;partial&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression&nbsp;per&nbsp;domain&nbsp;<br>
+<dl><dt><a name="daeModel-d"><strong>d</strong></a>(self, expression, domain)</dt><dd><tt>Calculates&nbsp;a&nbsp;partial&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression.&nbsp;<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;ad:&nbsp;<a href="#adouble">adouble</a>&nbsp;object<br>
+&nbsp;-&nbsp;expression:&nbsp;<a href="#adouble">adouble</a>&nbsp;object<br>
 &nbsp;-&nbsp;domain:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;object<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeModel-dt"><strong>dt</strong></a>(self, ad)</dt><dd><tt>Calculates&nbsp;a&nbsp;time&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression<br>
+<dl><dt><a name="daeModel-dt"><strong>dt</strong></a>(self, expression)</dt><dd><tt>Calculates&nbsp;a&nbsp;time&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;ad:&nbsp;<a href="#adouble">adouble</a>&nbsp;object<br>
+&nbsp;-&nbsp;expression:&nbsp;<a href="#adouble">adouble</a>&nbsp;object<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
 <dl><dt><a name="daeModel-integral"><strong>integral</strong></a>(self, adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble_array">adouble_array</a>&nbsp;object<br>
-&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;object<br>
-&nbsp;-&nbsp;From:&nbsp;unsigned&nbsp;int<br>
-&nbsp;-&nbsp;To:&nbsp;unsigned&nbsp;int<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
@@ -1055,9 +1090,15 @@ RETURNS:&nbsp;<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
 RETURNS:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
- <dl><dt><a name="-daeSaveModel"><strong>daeSaveModel</strong></a>(Model, Filename)</dt><dd><tt>Saves&nbsp;the&nbsp;model&nbsp;definition&nbsp;into&nbsp;.xml&nbsp;file<br>
+ <dl><dt><a name="-daeGetConfig"><strong>daeGetConfig</strong></a>()</dt><dd><tt>Returns&nbsp;configuration&nbsp;object.<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;Model:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;(model&nbsp;object)<br>
-&nbsp;-&nbsp;Filename:&nbsp;string&nbsp;(.xml&nbsp;file&nbsp;name)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;<a href="#daeConfig">daeConfig</a>&nbsp;object</tt></dd></dl>
+ <dl><dt><a name="-daeVersion"><strong>daeVersion</strong></a>(includeBuild)</dt><dd><tt>Returns&nbsp;the&nbsp;version&nbsp;string&nbsp;(i.e.&nbsp;'1.1.0')<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;includeBuild:&nbsp;bool<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;string&nbsp;with&nbsp;the&nbsp;DAE&nbsp;Tools&nbsp;version</tt></dd></dl>
 </td></tr></table>
 </body></html>

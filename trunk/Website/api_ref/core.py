@@ -1,5 +1,5 @@
 """
-dae.core module contains classes necessary to build models. 
+daetools.pyDAE.core module contains classes necessary to build models. 
 Every model consists of the following information:
  - Domains
  - Parameters
@@ -65,12 +65,23 @@ class daeObject:
     """
     pass
     
-def daeSaveModel(Model, Filename):
+def daeVersion(includeBuild):
     """
-    Saves the model definition into .xml file
+    Returns the version string (i.e. '1.1.0')
     ARGUMENTS:
-     - Model: daeModel (model object)
-     - Filename: string (.xml file name)
+     - includeBuild: bool
+    RETURNS:
+       string with the DAE Tools version
+    """
+    pass
+
+def daeGetConfig():
+    """
+    Returns configuration object.
+    ARGUMENTS:
+       None
+    RETURNS:
+       daeConfig object
     """
     pass
 
@@ -858,15 +869,27 @@ class daeModel(daeObject):
         """
         pass
 
-    def dt(self, ad):
+    def d(self, expression, domain):
         """
+        Calculates a partial derivative of an expression. 
         ARGUMENTS:
-         - ad: adouble object
+         - expression: adouble object
+         - domain: daeDomain object
         RETURNS:
            adouble object
         """
         pass
     
+    def dt(self, expression):
+        """
+        Calculates a time derivative of an expression
+        ARGUMENTS:
+         - expression: adouble object
+        RETURNS:
+           adouble object
+        """
+        pass
+
     def sum(self, adarr):
         """
         ARGUMENTS:
@@ -889,9 +912,6 @@ class daeModel(daeObject):
         """
         ARGUMENTS:
          - adarr: adouble_array object
-         - Domain: daeDomain object
-         - From: unsigned int
-         - To: unsigned int
         RETURNS:
            adouble object
         """
@@ -919,27 +939,6 @@ class daeModel(daeObject):
         """
         ARGUMENTS:
          - adarr: adouble_array object
-        RETURNS:
-           adouble object
-        """
-        pass
-
-    def dt(self, ad):
-        """
-        Calculates a time derivative of an expression
-        ARGUMENTS:
-         - ad: adouble object
-        RETURNS:
-           adouble object
-        """
-        pass
-
-    def d(self, ad, domain):
-        """
-        Calculates a partial derivative of an expression per domain 
-        ARGUMENTS:
-         - ad: adouble object
-         - domain: daeDomain object
         RETURNS:
            adouble object
         """
@@ -1018,6 +1017,56 @@ class daeModel(daeObject):
         """
         pass
 
+class daeConfig:
+    def GetBoolean(self, propertyPath, defaultValue):
+        """
+        ARGUMENTS:
+         - propertyPath: string
+         - defaultValue: boolean
+        RETURNS:
+           boolean
+        """
+        pass
+
+    def GetFloat(self, propertyPath, defaultValue):
+        """
+        ARGUMENTS:
+         - propertyPath: string
+         - defaultValue: float
+        RETURNS:
+           float
+        """
+        pass
+
+    def GetInteger(self, propertyPath, defaultValue):
+        """
+        ARGUMENTS:
+         - propertyPath: string
+         - defaultValue: integer
+        RETURNS:
+           integer
+        """
+        pass
+
+    def GetString(self, propertyPath, defaultValue):
+        """
+        ARGUMENTS:
+         - propertyPath: string
+         - defaultValue: string
+        RETURNS:
+           string
+        """
+        pass
+
+    def Reload(self):
+        """
+        ARGUMENTS:
+           None
+        RETURNS:
+           Noting
+        """
+        pass
+
 class adouble:
     """
     ATTRIBUTES:
@@ -1034,6 +1083,16 @@ class adouble:
         """
         pass
     
+    def __pos__(self):
+        """
+        Prefix operator +
+        ARGUMENTS:
+           None
+        RETURNS:
+           adouble
+        """
+        pass
+
     def __add__(self, adf):
         """
         Mathematical operator +

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta name="Description" content="">
   <meta name="Keywords"
@@ -62,10 +62,9 @@ solvers</a></p>
 <div class="post">
 <h1>Getting DAE Tools</h1>
 <h2><a name="Introduction"></a>Introduction</h2>
-<p><span style="font-weight: bold;">pyDAE</span> and <span
- style="font-weight: bold;">cDAE</span> modules come in a single
-package
-installed in <span style="font-weight: bold;">pyDAE</span> folder
+<p><span style="font-weight: bold;">DAE Tools</span> (<span
+ style="font-weight: bold;">pyDAE</span> module) is installed in <span
+ style="font-weight: bold;">daetools</span> folder
 within <span style="font-weight: bold;">site-packages</span> (or <span
  style="font-weight: bold;">dist-packages</span>) folder <span
  style="font-weight: bold;"></span><span style="font-weight: bold;"></span>
@@ -76,10 +75,8 @@ structure of the folders is the following: <br>
 <ul>
 </ul>
 <pre><span style="font-weight: bold;">daetools<br></span><span
- style="font-weight: bold;">  </span><span style="font-weight: bold;">+ </span><span
- style="font-weight: bold;"></span><span style="font-weight: bold;">cDAE<br>     + include<br>     + lib<br></span><span
- style="font-weight: bold;">  </span><span style="font-weight: bold;">+ </span><span
- style="font-weight: bold;">daePlotter<br>  </span><span
+ style="font-weight: bold;"></span><span style="font-weight: bold;">  </span><span
+ style="font-weight: bold;">+ </span><span style="font-weight: bold;">daePlotter<br>  </span><span
  style="font-weight: bold;">+ </span><span style="font-weight: bold;"></span><span
  style="font-weight: bold;">daeSimulator<br></span><span
  style="font-weight: bold;"></span><span style="font-weight: bold;">  + docs<br>     + api_ref<br>  + examples<br></span><span
@@ -94,19 +91,21 @@ structure of the folders is the following: <br>
 <p>Mandatory packages:<br>
 </p>
 <ul>
-  <li>Python (v2.6<sup>+</sup>): <a href="http://www.python.org">www.python.org</a><br>
+  <li>Python (v2.6<sup>+</sup>): <a href="http://www.python.org">http://www.python.org</a><br>
   </li>
   <li>Boost libraries (v1.35+; GNU/Linux only): <a
- href="http://www.boost.org">www.boost.org</a> </li>
-  <li>Numpy (v1.3<sup>+</sup>): <a href="http://numpy.scipy.org">numpy.scipy.org
+ href="http://www.boost.org">http://www.boost.org</a> </li>
+  <li>Numpy (v1.3<sup>+</sup>): <a href="http://numpy.scipy.org">http://numpy.scipy.org
+
 
 
     </a></li>
   <li>Matplotlib (v0.99<sup>+</sup>): <a
- href="http://matplotlib.sourceforge.net">matplotlib.sourceforge.net</a>
+ href="http://matplotlib.sourceforge.net">http://matplotlib.sourceforge.net</a>
   </li>
   <li>pyQt4 (v4.3<sup>+</sup>): <a
- href="http://www.riverbankcomputing.co.uk/software/pyqt">www.riverbankcomputing.co.uk/software/pyqt
+ href="http://www.riverbankcomputing.co.uk/software/pyqt">http://www.riverbankcomputing.co.uk/software/pyqt
+
 
 
 
@@ -115,21 +114,29 @@ structure of the folders is the following: <br>
 
 
     </a></li>
+  <li>Lapack (GNU/Linux only): <a href="http://www.netlib.org/lapack/">http://www.netlib.org/lapack</a></li>
+  <li>Atlas (GNU/Linux only): <a
+ href="http://math-atlas.sourceforge.net/">http://math-atlas.sourceforge.net</a></li>
 </ul>
 <p>Optional packages (3rd party linear solvers):<br>
 </p>
 <ul>
-  <li>SuperLU (v3<sup>+</sup>; GNU/Linux only)</li>
   <li>Umfpack (v5.4<sup>+</sup>; GNU/Linux only)<br>
-  </li>
-  <li>Lapack (GNU/Linux only)<br>
   </li>
   <li>Intel MKL (v10.2.5.035) - proprietary<br>
   </li>
-  <li>AMD ACML (v4.4.0) - proprietary </li>
+  <li>AMD ACML (v4.4.0) - proprietary</li>
+  <li>HSL MA27 (for BONMIN)<br>
+  </li>
 </ul>
 <p>For more information on how to install packages please refer to the
-documentation for the specific library.
+documentation for the specific library. By default GNU/Linux and
+Windows versions come with the default Sundials dense LU linear solver,
+Trilinos Amesos with built-in support for Lapack and SuperLU linear
+solvers and BONMIN with support for MUMPS linear solver (with PORD
+ordering). Additional linear solvers: Umfpack for Trilinos Amesos
+(GNU/Linux only), AMD ACML,&nbsp; Intel MKL&nbsp; and HSL MA27 must be
+downloaded separately since they are not free software. <br>
 </p>
 <h2><a name="Getting_the_packages"></a>Getting the packages
 </h2>
@@ -150,53 +157,34 @@ architecture (i386, amd64, arm):
 Synaptic Package Manager or type the following
 commands:
 </p>
-<pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib<br></pre>
-<p>Optionally you may install some additional free linear solvers and
+<pre>$ sudo apt-get install libboost-all-dev python-qt4 python-numpy python-matplotlib <br>$ sudo apt-get install liblapack3gf libblas3gf</pre>
+<p>Optionally you may install some Umfpack linear solver and
 3D plotting library:<br>
 </p>
-<pre>$ sudo apt-get install libblas3gf liblapack3gf<br>$ sudo apt-get install libsuperlu3<br>$ sudo apt-get install libamd2.2.0 libumfpack5.4.0<br>$ sudo apt-get install mayavi2<br></pre>
+<pre>$ sudo apt-get install libamd2.2.0 libumfpack5.4.0<br>$ sudo apt-get install mayavi2<br></pre>
 <p>Install <span style="font-weight: bold;">DAE Tools</span> by using
 GDebi package installer or by typing the following shell commands:
 </p>
-<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo dpkg -i daetools_x.x-x_amd64_debian-6.deb<br></pre>
+<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo dpkg -i daetools_x.x.x_amd64_debian-6.deb<br></pre>
 <p><br>
 </p>
 <h3><a name="Red_Hat_GNULinux"></a>Red Hat GNU/Linux (and derivatives)
 </h3>
-<p>First install themandatory packages. To do so can use the Package
+<p>First install the mandatory packages. To do so can use the Package
 Manager or type the
 following
 commands:
 </p>
-<pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br></pre>
-<p>Optionally you may install some additional free linear solvers and
+<pre>$ sudo yum install boost-devel PyQt4 numpy python-matplotlib<br>$ sudo yum install blas lapack<br></pre>
+<p>Optionally you may install Umfpack linear solver and
 3D plotting library:<br>
 </p>
-<pre>$ sudo yum install blas lapack<br>$ sudo yum install suitesparse<br>$ sudo yum install Mayavi<br></pre>
-<p><span style="font-weight: bold;">Note</span>: there is no package <span
- style="font-weight: bold;">superlu</span> in Fedora GNU/Linux.
-However, you can
-use packages for instance from openSUSE (for Fedora 14 use packages
-from
-openSuse 11.3) <a
- href="http://download.opensuse.org/distribution/11.3/repo/oss/suse">http://download.opensuse.org/distribution/11.3/repo/oss/suse</a>.
-Look
-for
-your&nbsp;
-architecture
-and
-find
-the
-package
-<span style="font-weight: bold;">superlu</span>.
-Anyway, superlu package is needed only during the compilation
-(pyTrilinosAmesos module is statically linked to superlu.a library).<br>
-</p>
+<pre>$ sudo yum install suitesparse<br>$ sudo yum install Mayavi<br></pre>
 <p>Install <span style="font-weight: bold;">DAE Tools</span> by using
 Package Installer or by typing the following
 shell commands:
 </p>
-<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo rpm -i daetools_x.x-x_amd64_fedora-14.rpm<br></pre>
+<pre>$ cd Directory_where_you_downloaded_the_package<br>$ sudo rpm -i daetools_x.x.x_amd64_fedora-14.rpm<br></pre>
 <p><br>
 </p>
 <h3><a name="Windows"></a>Windows
@@ -238,7 +226,8 @@ follow the instructions.<br>
 <p><br>
 </p>
 <h3><a name="Additional_linear_equation_solvers"></a>Additional linear
-equation solvers</h3>
+equation solvers (proprietary)<br>
+</h3>
 <p>Optionally you can also install proprietary <a
  href="http://www.amd.com/acml">AMD ACML</a> and <a
  href="http://software.intel.com/en-us/intel-mkl/">Intel MKL</a>
@@ -252,7 +241,9 @@ libraries are not</span> <a style="font-weight: bold;"
  href="http://www.gnu.org/philosophy/free-sw.html">free software</a>).<br>
 </p>
 <p>In order to use AMD ACML and Intel MKL libraries you have to do some
-additional configuration:<br style="font-weight: bold;">
+additional configuration. You can follow the instructions in the
+corresponding package documentation or do a quick setup as described
+below:<br style="font-weight: bold;">
 </p>
 <ol>
   <li><span style="font-weight: bold;">GNU/Linux</span>: setup for a
@@ -283,20 +274,21 @@ Panel -&gt; Sytem):<span style="font-style: italic;"><br>
 </ol>
 <p><br>
 </p>
-<h2><a name="Compiling_from_source"></a>Compiling from source<br>
+<h2><a name="Compiling_from_source"></a>Compiling DAE Tools from source<br>
 </h2>
 <h3 style="text-align: left;">Compiling of DAE Tools core libraries and
 python modules</h3>
 <p>To compile the source you need the following:<br>
 </p>
 <ul>
-  <li>Installed boost library headers and
-compiled <span style="font-weight: bold;">boost_system, boost_thread</span>
-and <span style="font-weight: bold;">boost_python</span> libraries</li>
-  <li>Installed python 2.6<br>
+  <li>Installed boost library (v1.35 or higher) headers and
+compiled <span style="font-weight: bold;">system, thread</span>
+and <span style="font-weight: bold;">python</span> libraries</li>
+  <li>Installed python 2.6/2.7<br>
   </li>
   <li>Installed python numpy module</li>
-  <li>Optionally: Trilinos Amesos, SuperLU, Lapack, Amd ACML and Intel
+  <li>Optionally: Bonmin, Trilinos Amesos, SuperLU, Blas/Lapack, Amd
+ACML and Intel
 MKL libraries. <br>
   </li>
 </ul>
@@ -307,10 +299,11 @@ integrated development environment. If you install the above
 dependecies
 correctly there is no much tweaking needed.<br>
 Check out the source code from the <a
- href="http://code.google.com/p/dae-tools">Google Code subversion
+ href="https://daetools.svn.sourceforge.net/svnroot/daetools">SourceForge
+subversion
 repository</a>:<br>
 </p>
-<pre>$ cd "folder where you want the source"<br>$ svn checkout http://dae-tools.googlecode.com/svn dae-tools-read-only<br></pre>
+<pre>$ svn co https://daetools.svn.sourceforge.net/svnroot/daetools daetools<br></pre>
 <p></p>
 <h3><a name="GNULinux_comp"></a>GNU/Linux<br>
 </h3>
@@ -350,6 +343,7 @@ be
 
 
 
+
     <span style="font-weight: bold;">$${PYTHONDIR}\dist-packages<br>
 &nbsp;&nbsp;&nbsp; </span>in Debian GNU/Linux based distributions<span
  style="font-weight: bold;"></span>.<br>
@@ -361,6 +355,16 @@ is missing: <span style="font-weight: bold;">Bug#589592</span>.<br>
   </li>
 </ul>
 <ul>
+  <li>Build the following third party libraries:<br>
+&nbsp;- Boost 1.35+ (Windows only)<br>
+&nbsp;- Blas/Lapack or CLapack on Windows<br>
+&nbsp;- Bonmin + MUMPS<br>
+&nbsp;- Sundials IDAS 1.0.0<br>
+&nbsp;- SuperLU 4.1<br>
+&nbsp;- Trilinos Amesos 10.4<br>
+    <span style="font-weight: bold;">TODO:</span> The details how to
+build the above libraries on GNU/Linux and Windows.<br>
+  </li>
   <li>Choose the right specification file for your platform (usually it
 is done automatically by the IDE, but double-check it):<br>
 &nbsp; - for 32 bit machines use <span style="font-weight: bold;">-spec

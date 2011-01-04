@@ -143,6 +143,8 @@ protected:
 	daeDataReporter_t*			m_pDataReporter;
 	daeDAESolver_t*				m_pDAESolver;
 	bool						m_bIsInitialized;
+	clock_t						m_Initialization;
+	clock_t						m_Optimization;
 };
 
 

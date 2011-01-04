@@ -3,7 +3,7 @@
 <html><head><title>Python: module solver</title>
 </head><body bgcolor="#f0f0f8">
 
-    <p><tt>dae.solver&nbsp;module&nbsp;implements&nbsp;several&nbsp;types&nbsp;of&nbsp;numerical&nbsp;solvers:<br>
+    <p><tt>daetools.pyDAE.solver&nbsp;module&nbsp;implements&nbsp;several&nbsp;types&nbsp;of&nbsp;numerical&nbsp;solvers:<br>
 &nbsp;-&nbsp;For&nbsp;solution&nbsp;of&nbsp;systems&nbsp;of&nbsp;equations:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;linear&nbsp;equations&nbsp;(LA&nbsp;solver)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;nonlinear&nbsp;equations&nbsp;(NLA&nbsp;solver)<br>
@@ -29,7 +29,13 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 <dt><font face="helvetica, arial"><a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="solver.html#daeIDASolver">daeIDASolver</a>
+<dt><font face="helvetica, arial"><a href="solver.html#daeIDAS">daeIDAS</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="solver.html#daeBONMIN">daeBONMIN</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -37,85 +43,89 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeDAESolver_t">class <strong>daeDAESolver_t</strong></a></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeBONMIN">class <strong>daeBONMIN</strong></a>(<a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
-&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
-&nbsp;-&nbsp;RelativeTolerance:&nbsp;float<br>
-&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>BONMIN&nbsp;MINLP&nbsp;solver&nbsp;wrapper.<br>
+https://projects.coin-or.org/Bonmin<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeDAESolver_t-Initialize"><strong>Initialize</strong></a>(self, Block, Log, InitialConditionMode)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;Block:&nbsp;daeBlock&nbsp;object<br>
-&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
-&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>
-&nbsp;RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDAESolver_t-Reinitialize"><strong>Reinitialize</strong></a>(self, CopyDataFromBlock)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;CopyDataFromBlock:&nbsp;bool<br>
-&nbsp;RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeDAESolver_t-Solve"><strong>Solve</strong></a>(self, Time, StopCriterion)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;Time:&nbsp;float<br>
-&nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
+<dl><dt><a name="daeBONMIN-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Simulation:&nbsp;daeSimulation_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;<a href="#daeDAESolver_t">daeDAESolver_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
 RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Current&nbsp;time:&nbsp;float</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeBONMIN-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="daeIDASolver">class <strong>daeIDASolver</strong></a>(<a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="daeDAESolver_t">class <strong>daeDAESolver_t</strong></a></font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Implementation&nbsp;of&nbsp;Sundials&nbsp;IDA&nbsp;DAE&nbsp;solver.<br>
+<td colspan=2><tt>DAE&nbsp;Solver&nbsp;interface.<br>
+PROPERTIES:<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
+&nbsp;-&nbsp;RelativeTolerance:&nbsp;float<br>
+&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"></td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeIDAS">class <strong>daeIDAS</strong></a>(<a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Sundials&nbsp;IDAS&nbsp;DAE&nbsp;solver&nbsp;wrapper.<br>
 https://computation.llnl.gov/casc/sundials/main.html<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeIDASolver-SaveMatrixAsPBM"><strong>SaveMatrixAsPBM</strong></a>(self, Filename)</dt><dd><tt>Saves&nbsp;sparse&nbsp;matrix&nbsp;structure&nbsp;in&nbsp;.pbm&nbsp;image&nbsp;format.<br>
+<dl><dt><a name="daeIDAS-SaveMatrixAsXPM"><strong>SaveMatrixAsXPM</strong></a>(self, Filename)</dt><dd><tt>Saves&nbsp;the&nbsp;sparse&nbsp;matrix&nbsp;structure&nbsp;in&nbsp;.xpm&nbsp;image&nbsp;format.<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;Filename:&nbsp;string<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeIDASolver-SaveMatrixAsXPM"><strong>SaveMatrixAsXPM</strong></a>(self, Filename)</dt><dd><tt>Saves&nbsp;the&nbsp;sparse&nbsp;matrix&nbsp;structure&nbsp;in&nbsp;.xpm&nbsp;image&nbsp;format.<br>
+<dl><dt><a name="daeIDAS-SetLASolver"><strong>SetLASolver</strong></a>(self, LASolver)</dt><dd><tt>Currently&nbsp;the&nbsp;following&nbsp;third&nbsp;part&nbsp;LA&nbsp;solvers&nbsp;are&nbsp;available:<br>
+&nbsp;-&nbsp;Dense&nbsp;Lapack&nbsp;(Intel&nbsp;MKL,&nbsp;AMD&nbsp;ACML,&nbsp;Atlas)&nbsp;[serial]<br>
+&nbsp;-&nbsp;Sparse&nbsp;Trilinos&nbsp;Amesos&nbsp;(Lapack,&nbsp;KLU,&nbsp;SuperLU,&nbsp;Umfpack)&nbsp;[serial&nbsp;or&nbsp;SMP]<br>
+&nbsp;-&nbsp;Sparse&nbsp;Intel&nbsp;Pardiso&nbsp;[SMP]<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;Filename:&nbsp;string<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeIDASolver-SetLASolver"><strong>SetLASolver</strong></a>(self, SolverType, LASolver<font color="#909090">=None</font>)</dt><dd><tt>Currently&nbsp;the&nbsp;following&nbsp;third&nbsp;part&nbsp;LA&nbsp;solvers&nbsp;are&nbsp;available:<br>
-&nbsp;-&nbsp;Dense&nbsp;Lapack&nbsp;(Intel&nbsp;MKL,&nbsp;AMD&nbsp;ACMl,&nbsp;custom)&nbsp;[serial]<br>
-&nbsp;-&nbsp;Sparse&nbsp;Trilinos&nbsp;Amesos&nbsp;[serial]<br>
-&nbsp;-&nbsp;Sparse&nbsp;Intel&nbsp;Pardiso&nbsp;[serial&nbsp;or&nbsp;SMP]<br>
-ARGUMENTS:<br>
-&nbsp;-&nbsp;SolverType:&nbsp;daeeIDALASolverType<br>
 &nbsp;-&nbsp;LASolver:&nbsp;daeIDALASolver&nbsp;object<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<hr>
-Methods inherited from <a href="solver.html#daeDAESolver_t">daeDAESolver_t</a>:<br>
-<dl><dt><a name="daeIDASolver-Initialize"><strong>Initialize</strong></a>(self, Block, Log, InitialConditionMode)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;Block:&nbsp;daeBlock&nbsp;object<br>
-&nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
-&nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>
-&nbsp;RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeIDASolver-Reinitialize"><strong>Reinitialize</strong></a>(self, CopyDataFromBlock)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;CopyDataFromBlock:&nbsp;bool<br>
-&nbsp;RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
-<dl><dt><a name="daeIDASolver-Solve"><strong>Solve</strong></a>(self, Time, StopCriterion)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;Time:&nbsp;float<br>
-&nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeNLPSolver_t">class <strong>daeNLPSolver_t</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>NLP&nbsp;Solver&nbsp;interface.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeNLPSolver_t-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Simulation:&nbsp;daeSimulation_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;<a href="#daeDAESolver_t">daeDAESolver_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
 RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Current&nbsp;time:&nbsp;float</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeNLPSolver_t-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
 </td></tr></table></td></tr></table>
 </body></html>

@@ -1,5 +1,5 @@
 """
-dae.datareporting module consists of two parts:
+daetools.pyDAE.datareporting module consists of two parts:
  1) DataReporter
  2) DataReceiver
 

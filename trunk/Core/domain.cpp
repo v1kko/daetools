@@ -378,7 +378,7 @@ daeeDiscretizationMethod daeDomain::GetDiscretizationMethod(void) const
 
 adouble_array daeDomain::array(void)
 {
-	daeDeclareAndThrowException(exNotImplemented); 
+	daeDeclareAndThrowException(exNotImplemented)
 
 	adouble_array varArray; 
 	return varArray;

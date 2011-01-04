@@ -1,5 +1,5 @@
 """
-dae.solver module implements several types of numerical solvers:
+daetools.pyDAE.solver module implements several types of numerical solvers:
  - For solution of systems of equations:
     - System of linear equations (LA solver)
     - System of nonlinear equations (NLA solver)
@@ -18,54 +18,25 @@ Integer constants defined in the module:
   
 class daeDAESolver_t:
     """
+    DAE Solver interface.
     PROPERTIES:
      - Log: daeLog object
      - RelativeTolerance: float
      - InitialConditionMode: daeeInitialConditionMode
     """
-    def Initialize(self, Block, Log, InitialConditionMode):
-        """
-        ARGUMENTS:
-         - Block: daeBlock object
-         - Log: daeLog object
-         - InitialConditionMode: daeeInitialConditionMode
-         RETURNS:
-           Nothing
-        """
-        pass
 
-    def Reinitialize(self, CopyDataFromBlock):
-        """
-        ARGUMENTS:
-         - CopyDataFromBlock: bool
-         RETURNS:
-           Nothing
-        """
-        pass
-
-    def Solve(self, Time, StopCriterion):
-        """
-        ARGUMENTS:
-         - Time: float
-         - StopCriterion: daeeStopCriterion
-        RETURNS:
-           Current time: float
-        """
-        pass
-
-class daeIDASolver(daeDAESolver_t):
+class daeIDAS(daeDAESolver_t):
     """
-    Implementation of Sundials IDA DAE solver.
+    Sundials IDAS DAE solver wrapper.
     https://computation.llnl.gov/casc/sundials/main.html
     """
-    def SetLASolver(self, SolverType, LASolver = None):
+    def SetLASolver(self, LASolver):
         """
         Currently the following third part LA solvers are available:
-         - Dense Lapack (Intel MKL, AMD ACMl, custom) [serial]
-         - Sparse Trilinos Amesos [serial]
-         - Sparse Intel Pardiso [serial or SMP]
+         - Dense Lapack (Intel MKL, AMD ACML, Atlas) [serial]
+         - Sparse Trilinos Amesos (Lapack, KLU, SuperLU, Umfpack) [serial or SMP]
+         - Sparse Intel Pardiso [SMP]
         ARGUMENTS:
-         - SolverType: daeeIDALASolverType
          - LASolver: daeIDALASolver object
         RETURNS:
            Nothing
@@ -82,11 +53,54 @@ class daeIDASolver(daeDAESolver_t):
         """
         pass
 
-    def SaveMatrixAsPBM(self, Filename):
+class daeNLPSolver_t:
+    """
+    NLP Solver interface.
+    """
+    def Initialize(self, Simulation, DAESolver, DataReporter, Log):
         """
-        Saves sparse matrix structure in .pbm image format.
+        (Abstract)
         ARGUMENTS:
-         - Filename: string
+         - Simulation: daeSimulation_t object
+         - DAESolver: daeDAESolver_t object
+         - DataReporter: daeDataReporter_t object
+         - Log: daeLog_t object
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def Solve(self):
+        """
+        (Abstract)
+        ARGUMENTS:
+           None
+        RETURNS:
+           Nothing
+        """
+        pass
+
+class daeBONMIN(daeNLPSolver_t):
+    """
+    BONMIN MINLP solver wrapper.
+    https://projects.coin-or.org/Bonmin
+    """
+    def Initialize(self, Simulation, DAESolver, DataReporter, Log):
+        """
+        ARGUMENTS:
+         - Simulation: daeSimulation_t object
+         - DAESolver: daeDAESolver_t object
+         - DataReporter: daeDataReporter_t object
+         - Log: daeLog_t object
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def Solve(self):
+        """
+        ARGUMENTS:
+           None
         RETURNS:
            Nothing
         """
