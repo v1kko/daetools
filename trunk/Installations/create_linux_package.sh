@@ -193,7 +193,7 @@ cp ../Website/images/*.gif    ${PACKAGE_NAME}/docs/images
 cp ../Website/images/*.jpg    ${PACKAGE_NAME}/docs/images                    
 cp ../Website/*.html          ${PACKAGE_NAME}/docs                
 cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref           
-rm ${PACKAGE_NAME}/docs/downloads.html
+#rm ${PACKAGE_NAME}/docs/downloads.html
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py

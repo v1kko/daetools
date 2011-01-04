@@ -163,13 +163,12 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 		m_pLog->Message(string("                                                                       "), 0);
 		m_pLog->Message(string("***********************************************************************"), 0);
 		m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
-		m_pLog->Message(string(" it under the terms of the GNU General Public License as published     "), 0);
-		m_pLog->Message(string(" by the Free Software Foundation; either version 3 of the License,     "), 0);
-		m_pLog->Message(string(" or (at your option) any later version.                                "), 0);
-		m_pLog->Message(string(" This program is distributed in the hope that it will be useful,       "), 0);
+		m_pLog->Message(string(" it under the terms of the GNU General Public License version 3        "), 0);
+		m_pLog->Message(string(" as published by the Free Software Foundation.                         "), 0);
+		m_pLog->Message(string(" DAE Tools is distributed in the hope that it will be useful,          "), 0);
 		m_pLog->Message(string(" but WITHOUT ANY WARRANTY; without even the implied warranty of        "), 0);
-		m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          "), 0);
-		m_pLog->Message(string(" GNU General Public License for more details.                          "), 0);
+		m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      "), 0);
+		m_pLog->Message(string(" General Public License for more details.                              "), 0);
 		m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
 		m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
 		m_pLog->Message(string("***********************************************************************"), 0);

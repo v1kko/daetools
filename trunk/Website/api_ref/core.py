@@ -1034,16 +1034,6 @@ class adouble:
         """
         pass
     
-    def __pos__(self):
-        """
-        Prefix operator +
-        ARGUMENTS:
-           None
-        RETURNS:
-           adouble
-        """
-        pass
-
     def __add__(self, adf):
         """
         Mathematical operator +
@@ -1086,7 +1076,7 @@ class adouble:
     
     def __pow__(self, adf):
         """
-        Mathematical operator ^
+        Mathematical operator **
         ARGUMENTS:
          - adf: adouble | float
         RETURNS:

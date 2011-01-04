@@ -1,6 +1,18 @@
 #!/usr/bin/env python
-
-import os, sys
+"""********************************************************************************
+                             daePlotter.py
+                 DAE Tools: pyDAE module, www.daetools.com
+                 Copyright (C) Dragan Nikolic, 2010
+***********************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the 
+terms of the GNU General Public License version 3 as published by the Free Software 
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+********************************************************************************"""
+import os, sys, distutils.sysconfig
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -22,8 +34,9 @@ except Exception, e:
 
 try:
     from about import AboutDialog
+    from daetools.pyDAE.WebViewDialog import WebView
 except Exception, e:
-    print '[daePlotter]: Cannot load about module\n Error: ', str(e)
+    print '[daePlotter]: Cannot load about/WebView module\n Error: ', str(e)
 
 
 class daeMainWindow(QtGui.QMainWindow):
@@ -56,6 +69,10 @@ class daeMainWindow(QtGui.QMainWindow):
         about.setStatusTip('About')
         self.connect(about, QtCore.SIGNAL('triggered()'), self.slotAbout)
 
+        docs = QtGui.QAction('Documentation', self)
+        docs.setStatusTip('Documentation')
+        self.connect(docs, QtCore.SIGNAL('triggered()'), self.slotDocumentation)
+
         self.statusBar()
 
         menubar = self.menuBar()
@@ -68,6 +85,7 @@ class daeMainWindow(QtGui.QMainWindow):
         
         help = menubar.addMenu('&Help')
         help.addAction(about)
+        help.addAction(docs)
 
         self.toolbar = self.addToolBar('Main toolbar')
 
@@ -105,6 +123,16 @@ class daeMainWindow(QtGui.QMainWindow):
     def slotAbout(self):
         about = AboutDialog(self)
         about.exec_()
+    
+    #@QtCore.pyqtSlot()
+    def slotDocumentation(self):
+        site_packages = distutils.sysconfig.get_python_lib()
+        url = QtCore.QUrl(site_packages + '/daetools/docs/index.html')
+        wv = WebView(url)
+        wv.resize(800, 550)
+        wv.setWindowState(QtCore.Qt.WindowMaximized)
+        wv.setWindowTitle("DAE Tools documentation")
+        wv.exec_()
     
 def daeStartPlotter(port = 0):
     try:
