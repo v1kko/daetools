@@ -22,7 +22,7 @@ A typical simulation imcludes 8 basic tasks:
     2. How to declare variable types
     3. How to define a model by deriving a class from the base daeModel, what are the methods
        that must be implemented by every model, and how to define an equation and its residual
-    4. How to define a simulation by deriving a class from the base daeDynamicSimulation, what are the methods
+    4. How to define a simulation by deriving a class from the base daeSimulation, what are the methods
        that must be implemented by every simulation, and how to set initial conditions
     5. How to create auxiliary objects required for the simulation (DAE solver, data reporter and logging objects)
     6. How to set simulation's additional settings
@@ -95,11 +95,11 @@ class modTutorial(daeModel):
         eq.Residual = self.time.dt() - 1.0
  
 # 4. Define a simulation
-#    Simulations are derived from the base daeDynamicSimulation class
+#    Simulations are derived from the base daeSimulation class
 class simTutorial(daeSimulation):
     def __init__(self):
         # 4.1 First, the base class constructor has to be called, and then the model for the simulation has to be instantiated.
-        #     daeDynamicSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.
+        #     daeSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.
         #     They are absolutely equivalent, and user can choose which one to use. For clarity, I prefer the shortest one: m.
         daeSimulation.__init__(self)
         self.m = modTutorial("whats_the_time")
@@ -108,7 +108,7 @@ class simTutorial(daeSimulation):
                              "1. How to import pyDAE module \n" \
                              "2. How to declare variable types \n" \
                              "3. How to define a model by deriving a class from the base daeModel, etc \n" \
-                             "4. How to define a simulation by deriving a class from the base daeDynamicSimulation, etc \n" \
+                             "4. How to define a simulation by deriving a class from the base daeSimulation, etc \n" \
                              "5. How to create auxiliary objects required for the simulation (DAE solver, data reporter and logging objects) \n" \
                              "6. How to set simulation's additional settings \n" \
                              "7. How to connect the TCP/IP data reporter \n" \
@@ -185,7 +185,7 @@ def consoleRun():
     #      The DAE system must be first initialized. The function SolveInitial is used for that purpose.
     simulation.SolveInitial()
 
-    # 8.3 Call the function Run from the daeDynamicSimulation class to start the simulation.
+    # 8.3 Call the function Run from the daeSimulation class to start the simulation.
     #     It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval number of seconds 
     simulation.Run()
 

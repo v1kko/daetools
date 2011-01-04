@@ -317,7 +317,7 @@ echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
 echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
 echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
 echo "Type=Application"                               >> ${daePlotter_DESKTOP}
-echo "StartupNotify=false"                            >> ${daePlotter_DESKTOP}
+echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
 
 daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Examples.desktop
 echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
@@ -329,7 +329,7 @@ echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
 echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
 echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
 echo "Type=Application"                               >> ${daeExamples_DESKTOP}
-echo "StartupNotify=false"                            >> ${daeExamples_DESKTOP}
+echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
 
 #daeDocumentation_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Documentation.desktop
 #echo "[Desktop Entry]"                                 > ${daeDocumentation_DESKTOP}
@@ -341,7 +341,7 @@ echo "StartupNotify=false"                            >> ${daeExamples_DESKTOP}
 #echo "Icon=${ICON}"                                   >> ${daeDocumentation_DESKTOP}
 #echo "Terminal=false"                                 >> ${daeDocumentation_DESKTOP}
 #echo "Type=Link"                                      >> ${daeDocumentation_DESKTOP}
-#echo "StartupNotify=false"                            >> ${daeDocumentation_DESKTOP}
+#echo "StartupNotify=true"                             >> ${daeDocumentation_DESKTOP}
 
 if [ ${PCKG_TYPE} = "tgz" ]; then
   cd ${BUILD_DIR}

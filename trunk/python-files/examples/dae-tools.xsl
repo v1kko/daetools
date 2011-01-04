@@ -55,7 +55,7 @@
             </h1>
 
             <h1 style="text-align: center;">
-                Model: <xsl:copy-of select="Model/MathMLName"/> 
+                Model: <xsl:copy-of select="Model/Name"/> 
             </h1>
 
             <xsl:if test="Model/Description != ''">
