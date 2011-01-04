@@ -8,32 +8,32 @@
 </head>
 <body>
 <pre style='color:#141312;background-color:#ffffff;'>
-<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
-<i><span style='color:#008000;'>                             tutorial2.py</span></i>
-<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
-<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
-<i><span style='color:#008000;'>***********************************************************************************</span></i>
-<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
-<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
-<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
-<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
-<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
-<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
-<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
-<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
-<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
-<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
+<span style='color:#008000;'>                             tutorial2.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span>
+<span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span>
+<span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span>
+<span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span>
+<span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span>
+<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
-<i><span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span></i>
-<i><span style='color:#008000;'>Here we introduce:</span></i>
-<i><span style='color:#008000;'> - Arrays (discrete distribution domains)</span></i>
-<i><span style='color:#008000;'> - Distributed parameters</span></i>
-<i><span style='color:#008000;'> - Number of degrees of freedom and how to fix it</span></i>
-<i><span style='color:#008000;'> - Initial guess of the variables </span></i>
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+<span style='color:#008000;'>Here we introduce:</span>
+<span style='color:#008000;'> - Arrays (discrete distribution domains)</span>
+<span style='color:#008000;'> - Distributed parameters</span>
+<span style='color:#008000;'> - Number of degrees of freedom and how to fix it</span>
+<span style='color:#008000;'> - Initial guess of the variables </span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
@@ -52,11 +52,11 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.x  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
         <span style='color:#0000ff;'>self</span>.y  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>) 
         
-        <i><span style='color:#008000;'># Nq is an array (a discrete distribution domain) with 2 elements</span></i>
+        <span style='color:#008000;'># Nq is an array (a discrete distribution domain) with 2 elements</span>
         <span style='color:#0000ff;'>self</span>.Nq  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;Nq&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Number of heat fluxes&quot;</span>)
         
-        <i><span style='color:#008000;'># In this example the heat capacity is not a constant value but the temperature dependent (at every point in x and y domains).</span></i>
-        <i><span style='color:#008000;'># To calculate cp a simple temperature dependency is proposed which depends on 2 parameters: a and b</span></i>
+        <span style='color:#008000;'># In this example the heat capacity is not a constant value but the temperature dependent (at every point in x and y domains).</span>
+        <span style='color:#008000;'># To calculate cp a simple temperature dependency is proposed which depends on 2 parameters: a and b</span>
         <span style='color:#0000ff;'>self</span>.cp <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;c_p&quot;</span>, typeConductivity, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
         <span style='color:#0000ff;'>self</span>.cp.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
         <span style='color:#0000ff;'>self</span>.cp.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
@@ -64,17 +64,17 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.a <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;a&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Coefficient for calculation of cp&quot;</span>)
         <span style='color:#0000ff;'>self</span>.b <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;b&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Coefficient for calculation of cp&quot;</span>)
 
-        <i><span style='color:#008000;'># To introduce arrays (discrete distribution domains) parameters Qb and Qt are combined</span></i>
-        <i><span style='color:#008000;'># into a single variable Q distributed on the domain Nq (that is as an array of fluxes)</span></i>
+        <span style='color:#008000;'># To introduce arrays (discrete distribution domains) parameters Qb and Qt are combined</span>
+        <span style='color:#008000;'># into a single variable Q distributed on the domain Nq (that is as an array of fluxes)</span>
         <span style='color:#0000ff;'>self</span>.Q  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux array at the edges of the plate (bottom/top), W/m2&quot;</span>)
         <span style='color:#0000ff;'>self</span>.Q.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nq)
 
-        <i><span style='color:#008000;'># In this example the thermal conductivity is a distributed parameter (on domains x and y)</span></i>
+        <span style='color:#008000;'># In this example the thermal conductivity is a distributed parameter (on domains x and y)</span>
         <span style='color:#0000ff;'>self</span>.k  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
         <span style='color:#0000ff;'>self</span>.k.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
 
-        <i><span style='color:#008000;'># In this example the density is now a variable</span></i>
+        <span style='color:#008000;'># In this example the density is now a variable</span>
         <span style='color:#0000ff;'>self</span>.ro <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>, typeDensity, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate, kg/m3&quot;</span>)
 
         <span style='color:#0000ff;'>self</span>.T <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, typeTemperature, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
@@ -91,13 +91,13 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_bottom&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
         x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)        
-        <i><span style='color:#008000;'># Now we use Q(0) as the heat flux into the bottom edge</span></i>
+        <span style='color:#008000;'># Now we use Q(0) as the heat flux into the bottom edge</span>
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.k(x, y) <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Q(<span style='color:#c000c0;'>0</span>)
 
         eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_top&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the top edge&quot;</span>)
         x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        <i><span style='color:#008000;'># Now we use Q(1) as the heat flux at the top edge</span></i>
+        <span style='color:#008000;'># Now we use Q(1) as the heat flux at the top edge</span>
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.k(x, y) <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Q(<span style='color:#c000c0;'>1</span>)
 
         eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_left&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions at the left edge&quot;</span>)
@@ -110,7 +110,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
         
-        <i><span style='color:#008000;'># Heat capacity as a function of the temperature</span></i>
+        <span style='color:#008000;'># Heat capacity as a function of the temperature</span>
         eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;C_p&quot;</span>, <span style='color:#bf0303;'>&quot;Equation to calculate the specific heat capacity of the plate as a function of the temperature.&quot;</span>)
         x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eClosedClosed)
@@ -130,7 +130,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
         <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
-        <i><span style='color:#008000;'># Nq is an array of size 2</span></i>
+        <span style='color:#008000;'># Nq is an array of size 2</span>
         <span style='color:#0000ff;'>self</span>.m.Nq.CreateArray(<span style='color:#c000c0;'>2</span>)
 
         <span style='color:#0000ff;'>self</span>.m.a.SetValue(<span style='color:#c000c0;'>367.0</span>)
@@ -144,19 +144,19 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
                 <span style='color:#0000ff;'>self</span>.m.k.SetValue(x, y, <span style='color:#c000c0;'>401</span>)
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <i><span style='color:#008000;'># In the above model we defined 2*N*N+1 variables and 2*N*N equations,</span></i>
-        <i><span style='color:#008000;'># meaning that the number of degrees of freedom (NDoF) is equal to: 2*N*N+1 - 2*N*N = 1</span></i>
-        <i><span style='color:#008000;'># Therefore, we have to assign a value of one of the variables.</span></i>
-        <i><span style='color:#008000;'># This variable cannot be chosen randomly, but must be chosen so that the combination </span></i>
-        <i><span style='color:#008000;'># of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).</span></i>
-        <i><span style='color:#008000;'># In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables. </span></i>
-        <i><span style='color:#008000;'># The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:</span></i>
+        <span style='color:#008000;'># In the above model we defined 2*N*N+1 variables and 2*N*N equations,</span>
+        <span style='color:#008000;'># meaning that the number of degrees of freedom (NDoF) is equal to: 2*N*N+1 - 2*N*N = 1</span>
+        <span style='color:#008000;'># Therefore, we have to assign a value of one of the variables.</span>
+        <span style='color:#008000;'># This variable cannot be chosen randomly, but must be chosen so that the combination </span>
+        <span style='color:#008000;'># of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).</span>
+        <span style='color:#008000;'># In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables. </span>
+        <span style='color:#008000;'># The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:</span>
         <span style='color:#0000ff;'>self</span>.m.ro.AssignValue(<span style='color:#c000c0;'>8960</span>)
 
-        <i><span style='color:#008000;'># To help the DAE solver it is possible to set initial guesses of of the variables.</span></i>
-        <i><span style='color:#008000;'># Closer the initial guess is to the solution - faster the solver will converge to the solution</span></i>
-        <i><span style='color:#008000;'># Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.</span></i>
-        <i><span style='color:#008000;'># Despite that, the solver will successfully initialize the system!</span></i>
+        <span style='color:#008000;'># To help the DAE solver it is possible to set initial guesses of of the variables.</span>
+        <span style='color:#008000;'># Closer the initial guess is to the solution - faster the solver will converge to the solution</span>
+        <span style='color:#008000;'># Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.</span>
+        <span style='color:#008000;'># Despite that, the solver will successfully initialize the system!</span>
         <span style='color:#0000ff;'>self</span>.m.T.SetInitialGuesses(<span style='color:#c000c0;'>1000</span>)
         <b>for</b> x <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints):
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints):
@@ -166,7 +166,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
 
-<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <span style='color:#0000ff;'>=</span> simTutorial()
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
@@ -175,37 +175,37 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim)
     simulator.exec_()
 
-<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
     simulation   <span style='color:#0000ff;'>=</span> simTutorial()
 
-    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
-    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1000</span>
 
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    <span style='color:#008000;'># Connect data reporter</span>
     simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
-    <i><span style='color:#008000;'># Initialize the simulation</span></i>
-    simulation.Initialize(solver, datareporter, log)
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
 
-    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    <span style='color:#008000;'># Save the model report and the runtime model report </span>
     simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <i><span style='color:#008000;'># Run</span></i>
+    <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 

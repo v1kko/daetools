@@ -620,19 +620,31 @@ BOOST_PYTHON_MODULE(pyCore)
 	daeLog
 ***************************************************************/
 	class_<daepython::daeLogWrapper, boost::noncopyable>("daeLog_t", no_init)
-		.def("Message", pure_virtual(&daeLog_t::Message))
-		;
-	
-	class_<daepython::daeFileLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeFileLog", init<string>())
-		.def("Message",	&daeLog_t::Message, &daepython::daeFileLogWrapper::def_Message)
-		;
-	
-	class_<daepython::daeStdOutLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeStdOutLog")
-		.def("Message",	&daeLog_t::Message, &daepython::daeStdOutLogWrapper::def_Message)
+		.add_property("Enabled",		&daeLog_t::GetEnabled,  &daeLog_t::SetEnabled)
+		.add_property("Indent",			&daeLog_t::GetIndent,   &daeLog_t::SetIndent)
+		.add_property("IndentString",	&daeLog_t::GetIndentString)
+		
+		.def("Message",			pure_virtual(&daeLog_t::Message))
+		.def("IncreaseIndent",	pure_virtual(&daeLog_t::IncreaseIndent))
+		.def("DecreaseIndent",	pure_virtual(&daeLog_t::DecreaseIndent))
 		;
 
-	class_<daepython::daeTCPIPLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeTCPIPLog", init<string, int>())
-		.def("Message",	&daeLog_t::Message, &daepython::daeTCPIPLogWrapper::def_Message)
+	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog")
+		.def("Message",			&daeLog_t::Message, &daepython::daeBaseLogWrapper::def_Message)
+		.def("IncreaseIndent",	&daeBaseLog::IncreaseIndent)
+		.def("DecreaseIndent",	&daeBaseLog::DecreaseIndent)
+		;
+	
+	class_<daepython::daeFileLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeFileLog", init<string>())
+		.def("Message",			&daeLog_t::Message, &daepython::daeFileLogWrapper::def_Message)
+		;
+	
+	class_<daepython::daeStdOutLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeStdOutLog")
+		.def("Message",			&daeLog_t::Message, &daepython::daeStdOutLogWrapper::def_Message)
+		;
+
+	class_<daepython::daeTCPIPLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeTCPIPLog", init<string, int>())
+		.def("Message",			&daeLog_t::Message, &daepython::daeTCPIPLogWrapper::def_Message)
 		;
 
 	class_<daepython::daeTCPIPLogServerWrapper, boost::noncopyable>("daeTCPIPLogServer", init<int>())

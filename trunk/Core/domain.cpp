@@ -186,7 +186,7 @@ adouble daeDomain::partial(daePartialDerivativeVariable& pdv) const
 
 adouble daeDomain::customPartialDerivative(daePartialDerivativeVariable& /*pdv*/) const
 {
-	daeDeclareAndThrowException(exNotImplemented); 
+	daeDeclareAndThrowException(exNotImplemented)
 	return adouble();
 }
 
@@ -327,7 +327,7 @@ void daeDomain::CreatePoints()
 			m_darrPoints.resize(m_nNumberOfPoints);
 			dInterval = (m_dUpperBound - m_dLowerBound) / (m_nNumberOfIntervals);
 			for(i = 0; i < m_nNumberOfPoints; i++)
-				m_darrPoints[i] = i * dInterval;
+				m_darrPoints[i] = m_dLowerBound + i * dInterval;
 			break;
 
 		default:
@@ -460,6 +460,7 @@ adouble daeDomain::operator[](size_t nIndex) const
 	node->m_nIndex = nIndex;
 	tmp.node = boost::shared_ptr<adNode>(node);
 	tmp.setGatherInfo(true);
+
 	return tmp;
 }
 

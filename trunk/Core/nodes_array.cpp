@@ -85,7 +85,7 @@ adNodeArray* adNodeArray::CreateNode(const io::xmlTag_t* pTag)
 	}
 	else
 	{
-		daeDeclareAndThrowException(exXMLIOError);
+		daeDeclareAndThrowException(exXMLIOError)
 		return NULL;
 	}
 	return NULL;
@@ -2353,11 +2353,15 @@ void adSetupExpressionDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, co
 void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
 	string strName, strValue;
-	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2;
+	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
+
+	strName  = "mrow";
+	strValue = "";
+	mrow0 = pTag->AddTag(strName, strValue);
 
 	strName  = "mfrac";
 	strValue = "";
-	mfrac = pTag->AddTag(strName, strValue);
+	mfrac = mrow0->AddTag(strName, strValue);
 
 	strName  = "mrow";
 	strValue = "";
@@ -2368,14 +2372,6 @@ void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTa
         strName  = "mo";
         strValue = "d"; // Should be &dd; but it does not show up correctly in windows
 		mrow1->AddTag(strName, strValue);
-
-		strName  = "mrow";
-		strValue = "";
-		mrow2 = mrow1->AddTag(strName, strValue);
-
-		mrow2->AddTag(string("mo"), string("("));
-		node->SaveAsPresentationMathML(mrow2, c);
-		mrow2->AddTag(string("mo"), string(")"));
 	}
 	else
 	{
@@ -2389,14 +2385,6 @@ void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTa
 			strName  = "mn";
 			strValue = "2";
 			msup->AddTag(strName, strValue);
-
-		strName  = "mrow";
-		strValue = "";
-		mrow2 = mrow1->AddTag(strName, strValue);
-
-		mrow2->AddTag(string("mo"), string("("));
-		node->SaveAsPresentationMathML(mrow2, c);
-		mrow2->AddTag(string("mo"), string(")"));
 	}
 
 	strName  = "mrow";
@@ -2430,7 +2418,15 @@ void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTa
 			strName  = "mn";
 			strValue = "2";
 			msup->AddTag(strName, strValue);
-	}
+	}	
+	
+	strName  = "mrow";
+	strValue = "";
+	mrow2 = mrow0->AddTag(strName, strValue);
+
+	mrow2->AddTag(string("mo"), string("("));
+	node->SaveAsPresentationMathML(mrow2, c);
+	mrow2->AddTag(string("mo"), string(")"));
 }
 
 void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
@@ -2634,13 +2630,17 @@ void adSetupExpressionPartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* p
 void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
 	string strName, strValue;
-	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2;
+	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
 
 	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
 
+	strName  = "mrow";
+	strValue = "";
+	mrow0 = pTag->AddTag(strName, strValue);
+
 	strName  = "mfrac";
 	strValue = "";
-	mfrac = pTag->AddTag(strName, strValue);
+	mfrac = mrow0->AddTag(strName, strValue);
 
 	strName  = "mrow";
 	strValue = "";
@@ -2651,14 +2651,6 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
         strName  = "mo";
         strValue = "&PartialD;";
 		mrow1->AddTag(strName, strValue);
-
-		strName  = "mrow";
-		strValue = "";
-		mrow2 = mrow1->AddTag(strName, strValue);
-
-		mrow2->AddTag(string("mo"), string("("));
-		node->SaveAsPresentationMathML(mrow2, c);
-		mrow2->AddTag(string("mo"), string(")"));
 	}
 	else
 	{
@@ -2672,14 +2664,6 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 			strName  = "mn";
 			strValue = "2";
 			msup->AddTag(strName, strValue);
-
-		strName  = "mrow";
-		strValue = "";
-		mrow2 = mrow1->AddTag(strName, strValue);
-
-		mrow2->AddTag(string("mo"), string("("));
-		node->SaveAsPresentationMathML(mrow2, c);
-		mrow2->AddTag(string("mo"), string(")"));
 	}
 
 	strName  = "mrow";
@@ -2714,6 +2698,14 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 			strValue = "2";
 			msup->AddTag(strName, strValue);
 	}
+	
+	strName  = "mrow";
+	strValue = "";
+	mrow2 = mrow0->AddTag(strName, strValue);
+
+	mrow2->AddTag(string("mo"), string("("));
+	node->SaveAsPresentationMathML(mrow2, c);
+	mrow2->AddTag(string("mo"), string(")"));
 }
 
 void adSetupExpressionPartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)

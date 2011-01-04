@@ -214,9 +214,9 @@ echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*'
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
-TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}_${ARCH}.tar.gz
-RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
-BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}_${ARCH}_${DISTRO}
+TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
+RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}.${ARCH_RPM}.rpm
+BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
 
 if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
@@ -309,8 +309,6 @@ mkdir ${BUILD_DIR}/usr/share/applications
 
 daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
 echo "[Desktop Entry]"                                 > ${daePlotter_DESKTOP}
-#echo "Encoding=UTF-8"                                >> ${daePlotter_DESKTOP}
-#echo "Version 1.0"                                   >> ${daePlotter_DESKTOP}
 echo "Name=daePlotter"                                >> ${daePlotter_DESKTOP}
 echo "GenericName=Equation-Oriented modelling tool"   >> ${daePlotter_DESKTOP}
 echo "Comment=DAE Tools Plotter"                      >> ${daePlotter_DESKTOP}
@@ -319,36 +317,45 @@ echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
 echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
 echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
 echo "Type=Application"                               >> ${daePlotter_DESKTOP}
-echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
+echo "StartupNotify=false"                            >> ${daePlotter_DESKTOP}
 
 daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Examples.desktop
-echo "[Desktop Entry]"                             > ${daeExamples_DESKTOP}
-#echo "Encoding=UTF-8"                            >> ${daeExamples_DESKTOP}
-#echo "Version 1.0"                               >> ${daeExamples_DESKTOP}
-echo "Name=DAE Tools Examples"                    >> ${daeExamples_DESKTOP}
-echo "GenericName=DAE Tools Examples"             >> ${daeExamples_DESKTOP}
-echo "Comment=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
-echo "Categories=GNOME;Development;"              >> ${daeExamples_DESKTOP}
-echo "Exec=/usr/bin/daeexamples"                  >> ${daeExamples_DESKTOP}
-echo "Icon=${ICON}"                               >> ${daeExamples_DESKTOP}
-echo "Terminal=false"                             >> ${daeExamples_DESKTOP}
-echo "Type=Application"                           >> ${daeExamples_DESKTOP}
-echo "StartupNotify=true"                         >> ${daeExamples_DESKTOP}
+echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
+echo "Name=DAE Tools Examples"                        >> ${daeExamples_DESKTOP}
+echo "GenericName=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
+echo "Comment=DAE Tools Examples"                     >> ${daeExamples_DESKTOP}
+echo "Categories=GNOME;Development;"                  >> ${daeExamples_DESKTOP}
+echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
+echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
+echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
+echo "Type=Application"                               >> ${daeExamples_DESKTOP}
+echo "StartupNotify=false"                            >> ${daeExamples_DESKTOP}
 
+#daeDocumentation_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Documentation.desktop
+#echo "[Desktop Entry]"                                 > ${daeDocumentation_DESKTOP}
+#echo "Name=DAE Tools Documentation"                   >> ${daeDocumentation_DESKTOP}
+#echo "GenericName=DAE Tools Documentation"            >> ${daeDocumentation_DESKTOP}
+#echo "Comment=DAE Tools Documentation"                >> ${daeDocumentation_DESKTOP}
+#echo "Categories=Development;Education;Science;Math;" >> ${daeDocumentation_DESKTOP}
+#echo "URL=file://${DAE_TOOLS_DIR}/docs/index.html"    >> ${daeDocumentation_DESKTOP}
+#echo "Icon=${ICON}"                                   >> ${daeDocumentation_DESKTOP}
+#echo "Terminal=false"                                 >> ${daeDocumentation_DESKTOP}
+#echo "Type=Link"                                      >> ${daeDocumentation_DESKTOP}
+#echo "StartupNotify=false"                            >> ${daeDocumentation_DESKTOP}
 
 if [ ${PCKG_TYPE} = "tgz" ]; then
   cd ${BUILD_DIR}
   tar -czvf ${TGZ} *
   cd ..
 
-  cp ${BUILD_DIR}/${TGZ} ${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}_${ARCH}_${BOOST}.tar.gz 
+  cp ${BUILD_DIR}/${TGZ} ${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${BOOST}.tar.gz 
 
 elif [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
 
   CONTROL=${BUILD_DIR}/DEBIAN/control
   echo "Package: ${PACKAGE_NAME} "                                                                   > ${CONTROL}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}-${VER_BUILD} "                                           >> ${CONTROL}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD} "                                           >> ${CONTROL}
   echo "Architecture: ${ARCH} "                                                                     >> ${CONTROL}
   echo "Section: math "                                                                             >> ${CONTROL}
   echo "Priority: optional "                                                                        >> ${CONTROL}
@@ -466,7 +473,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "rm -rf %{buildroot}"                                                >> ${SPEC}
 
   rpmbuild -bb dae-tools.spec
-  cp ~/rpmbuild/RPMS/${ARCH_RPM}/${RPM} ${INSTALLATIONS_DIR}/${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}_${ARCH}_${DISTRO}.rpm
+  cp ~/rpmbuild/RPMS/${ARCH_RPM}/${RPM} ${INSTALLATIONS_DIR}/${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}.rpm
 
   rm ${SPEC}
 

@@ -852,6 +852,28 @@ public:
 	}
 };
 
+class daeBaseLogWrapper : public daeBaseLog,
+	                      public boost::python::wrapper<daeBaseLog>
+{
+public:
+	daeBaseLogWrapper(void)
+	{
+	}
+
+	void Message(const string& strMessage, size_t nSeverity)
+	{
+        if(boost::python::override f = this->get_override("Message"))
+            f(strMessage, nSeverity);
+		else
+			this->daeBaseLog::Message(strMessage, nSeverity);
+	}
+	
+	void def_Message(const string& strMessage, size_t nSeverity)
+	{
+        this->daeBaseLog::Message(strMessage, nSeverity);
+	}
+};
+
 class daeFileLogWrapper : public daeFileLog,
 	                      public boost::python::wrapper<daeFileLog>
 {

@@ -8,31 +8,31 @@
 </head>
 <body>
 <pre style='color:#141312;background-color:#ffffff;'>
-<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
-<i><span style='color:#008000;'>                             tutorial3.py</span></i>
-<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
-<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
-<i><span style='color:#008000;'>***********************************************************************************</span></i>
-<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
-<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
-<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
-<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
-<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
-<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
-<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
-<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
-<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
-<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
+<span style='color:#008000;'>                             tutorial3.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span>
+<span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span>
+<span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span>
+<span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span>
+<span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span>
+<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
-<i><span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span></i>
-<i><span style='color:#008000;'>Here we introduce:</span></i>
-<i><span style='color:#008000;'> - Arrays of variable values</span></i>
-<i><span style='color:#008000;'> - Functions that operate on arrays of values</span></i>
-<i><span style='color:#008000;'> - Non-uniform domain grids</span></i>
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+<span style='color:#008000;'>Here we introduce:</span>
+<span style='color:#008000;'> - Arrays of variable values</span>
+<span style='color:#008000;'> - Functions that operate on arrays of values</span>
+<span style='color:#008000;'> - Non-uniform domain grids</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
@@ -58,7 +58,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.cp <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
  
-        <i><span style='color:#008000;'># Here we define two new variables to hold the average temperature and the sum of heat fluxes</span></i>
+        <span style='color:#008000;'># Here we define two new variables to hold the average temperature and the sum of heat fluxes</span>
         <span style='color:#0000ff;'>self</span>.Tave <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T_ave&quot;</span>, typeTemperature, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;The average temperature, K&quot;</span>)
         <span style='color:#0000ff;'>self</span>.Tsum <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T_sum&quot;</span>, typeTemperature, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;The sum of heat fluxes at the bottom edge of the plate, W/m2&quot;</span>)
 
@@ -93,27 +93,27 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
         eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
 
-        <i><span style='color:#008000;'># There are several function that return arrays of values (or time- or partial-derivatives)</span></i>
-        <i><span style='color:#008000;'># such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values</span></i>
-        <i><span style='color:#008000;'># To obtain the array of values it is necessary to define points from all domains that the parameter</span></i>
-        <i><span style='color:#008000;'># or variable is distributed on. Functions that return array of values accept daeIndexRange objects as</span></i>
-        <i><span style='color:#008000;'># their arguments. daeIndexRange constructor has three variants:</span></i>
-        <i><span style='color:#008000;'>#  1. The first one accepts a single argument: Domain</span></i>
-        <i><span style='color:#008000;'>#     in that case the array will contain all points from the domains</span></i>
-        <i><span style='color:#008000;'>#  2. The second one accepts 2 arguments: Domain and Indexes</span></i>
-        <i><span style='color:#008000;'>#     the argument indexes is a list of indexes within the domain and the array will contain the values</span></i>
-        <i><span style='color:#008000;'>#     of the variable at those points</span></i>
-        <i><span style='color:#008000;'>#  3. The third one accepts 4 arguments: Domain, StartIndex, EndIndex, Step</span></i>
-        <i><span style='color:#008000;'>#     Basically this defines a slice on the array of points in the domain</span></i>
-        <i><span style='color:#008000;'>#     StartIndex is the starting index, EndIndex is the last index and Step is used to iterate over</span></i>
-        <i><span style='color:#008000;'>#     this sub-domain [StartIndex, EndIndex). For example if we want values at even indexes in the domain</span></i>
-        <i><span style='color:#008000;'>#     we can write: xr = daeDomainIndex(self.x, 0, -1, 2)</span></i>
-        <i><span style='color:#008000;'># In this example we want to calculate:</span></i>
-        <i><span style='color:#008000;'>#  a) the average temperature of the plate</span></i>
-        <i><span style='color:#008000;'>#  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)</span></i>
-        <i><span style='color:#008000;'># Thus we use the first version of the above daeIndexRange constructor.</span></i>
-        <i><span style='color:#008000;'># To calculate the average and the sum of heat fluxes we can use functions 'average' and 'sum' from daeModel class.</span></i>
-        <i><span style='color:#008000;'># For the list of all available functions please have a look on pyDAE API Reference, module Core. </span></i>
+        <span style='color:#008000;'># There are several function that return arrays of values (or time- or partial-derivatives)</span>
+        <span style='color:#008000;'># such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values</span>
+        <span style='color:#008000;'># To obtain the array of values it is necessary to define points from all domains that the parameter</span>
+        <span style='color:#008000;'># or variable is distributed on. Functions that return array of values accept daeIndexRange objects as</span>
+        <span style='color:#008000;'># their arguments. daeIndexRange constructor has three variants:</span>
+        <span style='color:#008000;'>#  1. The first one accepts a single argument: Domain</span>
+        <span style='color:#008000;'>#     in that case the array will contain all points from the domains</span>
+        <span style='color:#008000;'>#  2. The second one accepts 2 arguments: Domain and Indexes</span>
+        <span style='color:#008000;'>#     the argument indexes is a list of indexes within the domain and the array will contain the values</span>
+        <span style='color:#008000;'>#     of the variable at those points</span>
+        <span style='color:#008000;'>#  3. The third one accepts 4 arguments: Domain, StartIndex, EndIndex, Step</span>
+        <span style='color:#008000;'>#     Basically this defines a slice on the array of points in the domain</span>
+        <span style='color:#008000;'>#     StartIndex is the starting index, EndIndex is the last index and Step is used to iterate over</span>
+        <span style='color:#008000;'>#     this sub-domain [StartIndex, EndIndex). For example if we want values at even indexes in the domain</span>
+        <span style='color:#008000;'>#     we can write: xr = daeDomainIndex(self.x, 0, -1, 2)</span>
+        <span style='color:#008000;'># In this example we want to calculate:</span>
+        <span style='color:#008000;'>#  a) the average temperature of the plate</span>
+        <span style='color:#008000;'>#  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)</span>
+        <span style='color:#008000;'># Thus we use the first version of the above daeIndexRange constructor.</span>
+        <span style='color:#008000;'># To calculate the average and the sum of heat fluxes we can use functions 'average' and 'sum' from daeModel class.</span>
+        <span style='color:#008000;'># For the list of all available functions please have a look on pyDAE API Reference, module Core. </span>
         xr <span style='color:#0000ff;'>=</span> daeIndexRange(<span style='color:#0000ff;'>self</span>.x)
         yr <span style='color:#0000ff;'>=</span> daeIndexRange(<span style='color:#0000ff;'>self</span>.y)
 
@@ -136,12 +136,12 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
         <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
         
-        <i><span style='color:#008000;'># Points in distributed domains can be changed after the domain is defined by the CreateDistributed function.</span></i>
-        <i><span style='color:#008000;'># In certain situations it is not desired to have a uniform distribution of the points within the given interval (LB, UB)</span></i>
-        <i><span style='color:#008000;'># In these cases, a non-uniform grid can be specified by using the Points property od daeDomain.</span></i>
-        <i><span style='color:#008000;'># A good candidates for the non-uniform grid are cases where we have a very stiff fronts at one side of the domain.</span></i>
-        <i><span style='color:#008000;'># In these cases it is desirable to place more points at that part od the domain.</span></i>
-        <i><span style='color:#008000;'># Here, we first print the points before changing them and then set the new values.</span></i>
+        <span style='color:#008000;'># Points in distributed domains can be changed after the domain is defined by the CreateDistributed function.</span>
+        <span style='color:#008000;'># In certain situations it is not desired to have a uniform distribution of the points within the given interval (LB, UB)</span>
+        <span style='color:#008000;'># In these cases, a non-uniform grid can be specified by using the Points property od daeDomain.</span>
+        <span style='color:#008000;'># A good candidates for the non-uniform grid are cases where we have a very stiff fronts at one side of the domain.</span>
+        <span style='color:#008000;'># In these cases it is desirable to place more points at that part od the domain.</span>
+        <span style='color:#008000;'># Here, we first print the points before changing them and then set the new values.</span>
         <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#bf0303;'>&quot;  Before:&quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(<span style='color:#0000ff;'>self</span>.m.y.Points), <span style='color:#c000c0;'>0</span>)
         <span style='color:#0000ff;'>self</span>.m.y.Points <span style='color:#0000ff;'>=</span> [<span style='color:#c000c0;'>0.000</span>, <span style='color:#c000c0;'>0.005</span>, <span style='color:#c000c0;'>0.010</span>, <span style='color:#c000c0;'>0.015</span>, <span style='color:#c000c0;'>0.020</span>, <span style='color:#c000c0;'>0.025</span>, <span style='color:#c000c0;'>0.030</span>, <span style='color:#c000c0;'>0.035</span>, <span style='color:#c000c0;'>0.040</span>, <span style='color:#c000c0;'>0.070</span>, <span style='color:#c000c0;'>0.100</span>]
         <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#bf0303;'>&quot;  After:&quot;</span> <span style='color:#0000ff;'>+</span> <b><span style='color:#000000;'>str</span></b>(<span style='color:#0000ff;'>self</span>.m.y.Points), <span style='color:#c000c0;'>0</span>)
@@ -154,12 +154,12 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span>)
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <i><span style='color:#008000;'>#self.InitialConditionMode = eSteadyState</span></i>
+        <span style='color:#008000;'>#self.InitialConditionMode = eSteadyState</span>
         <b>for</b> x <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
 
-<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <span style='color:#0000ff;'>=</span> simTutorial()
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
@@ -168,37 +168,37 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim)
     simulator.exec_()
 
-<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
     simulation   <span style='color:#0000ff;'>=</span> simTutorial()
 
-    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
-    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>5</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>200</span>
 
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    <span style='color:#008000;'># Connect data reporter</span>
     simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
-    <i><span style='color:#008000;'># Initialize the simulation</span></i>
-    simulation.Initialize(solver, datareporter, log)
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
 
-    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    <span style='color:#008000;'># Save the model report and the runtime model report </span>
     simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <i><span style='color:#008000;'># Run</span></i>
+    <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 

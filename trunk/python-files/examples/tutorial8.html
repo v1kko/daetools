@@ -8,41 +8,41 @@
 </head>
 <body>
 <pre style='color:#141312;background-color:#ffffff;'>
-<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
-<i><span style='color:#008000;'>                             tutorial8.py</span></i>
-<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
-<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
-<i><span style='color:#008000;'>***********************************************************************************</span></i>
-<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
-<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
-<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
-<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
-<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
-<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
-<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
-<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
-<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
-<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
+<span style='color:#008000;'>                             tutorial8.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span>
+<span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span>
+<span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span>
+<span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span>
+<span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span>
+<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
-<i><span style='color:#008000;'>In this example we use a similar problem as in the tutorial 5.</span></i>
-<i><span style='color:#008000;'>Here we introduce:</span></i>
-<i><span style='color:#008000;'> - Custom data reporters</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>In this example we use a similar problem as in the tutorial 5.</span>
+<span style='color:#008000;'>Here we introduce:</span>
+<span style='color:#008000;'> - Custom data reporters</span>
 
-<i><span style='color:#008000;'>Some time it is not enough to send the result to daePlotter but it is desirable to </span></i>
-<i><span style='color:#008000;'>export them in certain format for use in other programs. Here we show how the custom</span></i>
-<i><span style='color:#008000;'>data reporter can be created. In this example the data reporter simply, after the simulation</span></i>
-<i><span style='color:#008000;'>is finished, save the results into a plain text file. Obviously, the data can be exported to</span></i>
-<i><span style='color:#008000;'>any format. Also some numpy functions that operate on numpy arrays can be used as well.</span></i>
-<i><span style='color:#008000;'>In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It</span></i>
-<i><span style='color:#008000;'>has the same interface and the functionality like all data reporters. However, it does not do</span></i>
-<i><span style='color:#008000;'>any data processing by itself but calls the corresponding functions of data reporters which </span></i>
-<i><span style='color:#008000;'>are added to it by using the function AddDataReporter. This way it is possible, at the same </span></i>
-<i><span style='color:#008000;'>time, to send the results to the daePlotter and save them into a file (or process them in</span></i>
-<i><span style='color:#008000;'>some other ways). </span></i>
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>Some time it is not enough to send the result to daePlotter but it is desirable to </span>
+<span style='color:#008000;'>export them in certain format for use in other programs. Here we show how the custom</span>
+<span style='color:#008000;'>data reporter can be created. In this example the data reporter simply, after the simulation</span>
+<span style='color:#008000;'>is finished, save the results into a plain text file. Obviously, the data can be exported to</span>
+<span style='color:#008000;'>any format. Also some numpy functions that operate on numpy arrays can be used as well.</span>
+<span style='color:#008000;'>In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It</span>
+<span style='color:#008000;'>has the same interface and the functionality like all data reporters. However, it does not do</span>
+<span style='color:#008000;'>any data processing by itself but calls the corresponding functions of data reporters which </span>
+<span style='color:#008000;'>are added to it by using the function AddDataReporter. This way it is possible, at the same </span>
+<span style='color:#008000;'>time, to send the results to the daePlotter and save them into a file (or process them in</span>
+<span style='color:#008000;'>some other ways). </span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, tempfile
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
@@ -54,22 +54,22 @@ typeConductivity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
 typeDensity      <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Density&quot;</span>,      <span style='color:#bf0303;'>&quot;kg/m3&quot;</span>,  <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
 typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;HeatCapacity&quot;</span>, <span style='color:#bf0303;'>&quot;J/KgK&quot;</span>,  <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
 
-<i><span style='color:#008000;'># The best starting point in creating custom data reporters that can export the results </span></i>
-<i><span style='color:#008000;'># into a file is daeDataReporterLocal class. It internally does all the processing</span></i>
-<i><span style='color:#008000;'># and offers a user the Process property of type daeDataReporterProcess which contains</span></i>
-<i><span style='color:#008000;'># all domains and variables sent by simulation. The following functions have to be implemented:</span></i>
-<i><span style='color:#008000;'>#  - Connect</span></i>
-<i><span style='color:#008000;'>#    It is used to connect the data reporter. In the case when the local data reporter is used</span></i>
-<i><span style='color:#008000;'>#    it may contain a file name, for instance.</span></i>
-<i><span style='color:#008000;'>#  - Disconnect</span></i>
-<i><span style='color:#008000;'>#    Disconnects the data reporter.</span></i>
-<i><span style='color:#008000;'>#  - IsConnected</span></i>
-<i><span style='color:#008000;'>#    Check if the data reporter is connected or not.</span></i>
-<i><span style='color:#008000;'># In this example we use the first argument of the function Connect as a file name to open </span></i>
-<i><span style='color:#008000;'># a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write </span></i>
-<i><span style='color:#008000;'># the data into the file. In the function MakeString we iterate over all variables and write </span></i>
-<i><span style='color:#008000;'># their values into a string which will be saved in the function Write.</span></i>
-<i><span style='color:#008000;'># The content of the file (/tmp/tutorial8.out) will also be printed to the console.</span></i>
+<span style='color:#008000;'># The best starting point in creating custom data reporters that can export the results </span>
+<span style='color:#008000;'># into a file is daeDataReporterLocal class. It internally does all the processing</span>
+<span style='color:#008000;'># and offers a user the Process property of type daeDataReporterProcess which contains</span>
+<span style='color:#008000;'># all domains and variables sent by simulation. The following functions have to be implemented:</span>
+<span style='color:#008000;'>#  - Connect</span>
+<span style='color:#008000;'>#    It is used to connect the data reporter. In the case when the local data reporter is used</span>
+<span style='color:#008000;'>#    it may contain a file name, for instance.</span>
+<span style='color:#008000;'>#  - Disconnect</span>
+<span style='color:#008000;'>#    Disconnects the data reporter.</span>
+<span style='color:#008000;'>#  - IsConnected</span>
+<span style='color:#008000;'>#    Check if the data reporter is connected or not.</span>
+<span style='color:#008000;'># In this example we use the first argument of the function Connect as a file name to open </span>
+<span style='color:#008000;'># a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write </span>
+<span style='color:#008000;'># the data into the file. In the function MakeString we iterate over all variables and write </span>
+<span style='color:#008000;'># their values into a string which will be saved in the function Write.</span>
+<span style='color:#008000;'># The content of the file (/tmp/tutorial8.out) will also be printed to the console.</span>
 <b>class</b> MyDataReporter(daeDataReporterLocal):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeDataReporterLocal.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
@@ -151,20 +151,20 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(<span style='color:#c000c0;'>300</span>)
 
-<i><span style='color:#008000;'># This function does not work!!</span></i>
-<i><span style='color:#008000;'># It seems the class daeDelegateDataReporter cant iterate over</span></i>
-<i><span style='color:#008000;'># data reporters!!???</span></i>
+<span style='color:#008000;'># This function does not work!!</span>
+<span style='color:#008000;'># It seems the class daeDelegateDataReporter cant iterate over</span>
+<span style='color:#008000;'># data reporters!!???</span>
 <b>def</b> setupDataReporters(simulationName):
-    <i><span style='color:#008000;'># Create daeDelegateDataReporter and the add 2 data reporters:</span></i>
-    <i><span style='color:#008000;'># - MyDataReporterLocal (to write data to the file 'tutorial8.out')</span></i>
-    <i><span style='color:#008000;'># - daeTCPIPDataReporter (to send data to the daePlotter)</span></i>
+    <span style='color:#008000;'># Create daeDelegateDataReporter and the add 2 data reporters:</span>
+    <span style='color:#008000;'># - MyDataReporterLocal (to write data to the file 'tutorial8.out')</span>
+    <span style='color:#008000;'># - daeTCPIPDataReporter (to send data to the daePlotter)</span>
     datareporter <span style='color:#0000ff;'>=</span> daeDelegateDataReporter()
     dr1 <span style='color:#0000ff;'>=</span> MyDataReporter()
     dr2 <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
 
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    <span style='color:#008000;'># Connect data reporter</span>
     simName <span style='color:#0000ff;'>=</span> simulationName <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     filename <span style='color:#0000ff;'>=</span> tempfile.gettempdir() <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;/tutorial8.out&quot;</span>
     <b>if</b>(dr1.Connect(filename, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
@@ -174,7 +174,7 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     
     <b>return</b> datareporter
    
-<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <span style='color:#0000ff;'>=</span> simTutorial()
     dr  <span style='color:#0000ff;'>=</span> MyDataReporter()
@@ -187,11 +187,11 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim, datareporter<span style='color:#0000ff;'>=</span>dr)
     simulator.exec_()
     
-<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     simulation   <span style='color:#0000ff;'>=</span> simTutorial()
     datareporter <span style='color:#0000ff;'>=</span> MyDataReporter()
     
@@ -199,24 +199,24 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     <b>if</b>(datareporter.Connect(filename, simulation.m.Name) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
-    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
-    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>100</span>
 
-    <i><span style='color:#008000;'># Initialize the simulation</span></i>
-    simulation.Initialize(solver, datareporter, log)
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
 
-    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    <span style='color:#008000;'># Save the model report and the runtime model report </span>
     simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <i><span style='color:#008000;'># Run</span></i>
+    <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 

@@ -35,19 +35,22 @@ daeTCPIPLog::~daeTCPIPLog(void)
 
 void daeTCPIPLog::Message(const string& strMessage, size_t nSeverity)
 {
-	if(m_ptcpipSocket && m_ptcpipSocket->is_open())
+	if(m_ptcpipSocket && m_ptcpipSocket->is_open() && m_bEnabled)
 	{
 		if(strMessage.empty())
 			return;
 		
+	// Add indent
+		string msg = m_strIndent + strMessage;
+		
 	// Gather the message data
-		boost::int32_t msgSize = strMessage.size();
+		boost::int32_t msgSize = msg.size();
 	
 	// First send the size
-		boost::asio::write(*m_ptcpipSocket, boost::asio::buffer(&msgSize, sizeof(msgSize)), boost::asio::transfer_all());
+		size_t nSent = boost::asio::write(*m_ptcpipSocket, boost::asio::buffer(&msgSize, sizeof(msgSize)), boost::asio::transfer_all());
 	
 	// Then send the message
-		size_t nSent = boost::asio::write(*m_ptcpipSocket, boost::asio::buffer(strMessage.c_str(), msgSize), boost::asio::transfer_all());
+		nSent = boost::asio::write(*m_ptcpipSocket, boost::asio::buffer(msg.c_str(), msgSize), boost::asio::transfer_all());
 	}
 }
 

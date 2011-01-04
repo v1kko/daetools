@@ -29,7 +29,7 @@ win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} 
 
 linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
 							  -lblas -llapack \
-							  -lsuperlu \
+							  -lcdaesuperlu \
 							  -lumfpack -lamd \
 							  -lamesos -lepetra -lepetraext -lteuchos
 

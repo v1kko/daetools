@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>431</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,30 +52,45 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="dAESolverLabel">
+      <widget class="QLabel" name="MINLPSolverLabel">
+       <property name="text">
+        <string>(MI)NLP Solver</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="MINLPSolverComboBox">
+       <item>
+        <property name="text">
+         <string>Bonmin MINLP (with MUMPS)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="DAESolverLabel">
        <property name="text">
         <string>DAE Solver</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="DAESolverLineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>IDA Sundials</string>
-       </property>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="DAESolverComboBox">
+       <item>
+        <property name="text">
+         <string>Sundials IDAS</string>
+        </property>
+       </item>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="LASolverLabel">
        <property name="text">
         <string>LA Solver</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QComboBox" name="LASolverComboBox">
        <item>
         <property name="text">
@@ -124,28 +139,28 @@
        </item>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QLabel" name="TimeHorizonLabel">
        <property name="text">
         <string>Time Horizon, s</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <widget class="QDoubleSpinBox" name="TimeHorizonDoubleSpinBox">
        <property name="maximum">
         <double>1000000000.000000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="ReportingIntervalLabel">
        <property name="text">
         <string>Reporting Interval, s</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QDoubleSpinBox" name="ReportingIntervalDoubleSpinBox">
        <property name="maximum">
         <double>1000000000.000000000000000</double>

@@ -235,7 +235,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!m_pIDA) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to allocate m_pIDA pointer";
+		e << "Sundials IDAS solver faint-heartedly failed to allocate a memory for itself";
 		throw e;
 	}
 
@@ -243,7 +243,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to set initial condition types; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver faint-heartedly failed to set initial condition types; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 		
@@ -255,7 +255,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to alloc IDA struct; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver faint-heartedly failed to allocate IDA structure; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 	
@@ -263,7 +263,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to set tolerances; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver faint-heartedly refused to set tolerances; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 
@@ -271,7 +271,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to set residual data; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver faint-heartedly refused to set residual data; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 }
@@ -280,15 +280,13 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 {
 	int	retval;
 	int iSensMethod;
-	bool bErrorControl;
-	string strSensMethod;
 	
 	size_t Ns = m_narrParametersIndexes.size();
 
 	if(!m_bCalculateSensitivities || Ns == 0)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Sensitivity calculation has not been enabled";
+		e << "Sundials IDAS solver abjectly refused to enable sensitivity calculation: it has not been enabled";
 		throw e;
 	}
 		
@@ -309,7 +307,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver abjectly refused to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	
@@ -317,7 +315,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver abjectly refused to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	
@@ -325,7 +323,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver abjectly refused to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	
@@ -353,7 +351,7 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to get sensitivity values; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver spinelessly failed to return sensitivities; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	}
@@ -403,7 +401,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Unable to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	
@@ -411,7 +409,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Unable to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	}
@@ -424,7 +422,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Unable to create Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver ignobly refused to create Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 		
@@ -432,7 +430,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Unable to set preconditioner functions for Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver ignobly refused to set preconditioner functions for Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 
@@ -443,7 +441,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(m_pLASolver == NULL)
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Third party has not been specified";
+			e << "Sundials IDAS solver ignobly refused to set the third party linear solver: the solver object is null";
 			throw e;
 		}
 	// Third party LA Solver	
@@ -451,14 +449,14 @@ void daeIDASolver::CreateLinearSolver(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Unable to create third party linear solver; " << CreateIDAErrorMessage(retval);
+			e << "The third party linear solver chickenly failed to initialize it self; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	}
 	else
 	{
 		daeDeclareException(exRuntimeCheck);
-		e << "Unspecified linear solver";
+		e << "Sundials IDAS solver abjectly refused to set an unspecified linear solver";
 		throw e;		
 	}
 }
@@ -477,7 +475,7 @@ void daeIDASolver::RefreshRootFunctions(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to initialize roots; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver timidly failed to initialize roots' functions; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 }
@@ -489,7 +487,7 @@ void daeIDASolver::SolveInitial(void)
 	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "IDA Solver has not been initialized";
+		e << "Sundials IDAS solver timidly refuses to solve initial: the solver has not been initialized";
 		throw e;
 	}
 	
@@ -503,7 +501,7 @@ void daeIDASolver::SolveInitial(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver cowardly failed to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 
@@ -522,7 +520,7 @@ void daeIDASolver::SolveInitial(void)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver cowardly failed to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 	}
@@ -559,7 +557,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to re-initialize the system at TIME = " << m_dCurrentTime << "; " 
+		e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; " 
 		  << CreateIDAErrorMessage(retval);
 		throw e;
 	}
@@ -574,7 +572,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "IDA Solver has not been initialized";
+		e << "Sundials IDAS solver timidly refuses to reset: the solver has not been initialized";
 		throw e;
 	}
 	
@@ -610,7 +608,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to re-init IDA solver at TIME = " << m_dCurrentTime << "; " 
+		e << "Sundials IDAS solver timidly refused to re-init at TIME = " << m_dCurrentTime << "; " 
 		  << CreateIDAErrorMessage(retval);
 		throw e;
 	}
@@ -626,14 +624,15 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "IDA Solver has not been initialized";
+		e << "Sundials IDAS solver cravenly refuses to solve the system: the solver has not been initialized";
 		throw e;
 	}
 	
 	if(dTime <= m_dCurrentTime)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid time horizon specified [" << dTime << "]; it must be higher than [" << m_dCurrentTime << "]";
+		e << "Sundials IDAS solver cravenly refuses to solve the system: an invalid time horizon specified [" 
+		  << dTime << "]; it must be higher than [" << m_dCurrentTime << "]";
 		throw e;
 	}
 	m_dTargetTime = dTime;
@@ -644,7 +643,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Unable to set time horizon (the stop time) at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver cravenly refused to set the time horizon (the stop time) at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 
@@ -652,7 +651,8 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Integration failed at TIME = " << m_dCurrentTime << "; time horizon [" << m_dTargetTime << "]; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver cowardly failed to solve the system at TIME = " << m_dCurrentTime 
+			  << "; time horizon [" << m_dTargetTime << "]; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 
@@ -664,7 +664,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 			if(!CheckFlag(retval)) 
 			{
 				daeDeclareException(exMiscellanous);
-				e << "Get root info failed; " << CreateIDAErrorMessage(retval);
+				e << "Sundials IDAS solver cravenly failed to get roots' info; " << CreateIDAErrorMessage(retval);
 				throw e;
 			}
 			delete[] rootsfound;

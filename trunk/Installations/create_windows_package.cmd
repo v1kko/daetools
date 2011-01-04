@@ -171,7 +171,7 @@ ECHO       package_dir={'%PACKAGE_NAME%': '%DEST%'},  >> setup.py
 ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} >> setup.py
 ECHO       )  >> setup.py
 
-SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%-%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe
+SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe
 
 "c:\Program Files\NSIS\makensis.exe" daetools.nsi
 copy daetools.exe %EXE%
@@ -181,7 +181,7 @@ rem python setup.py bdist --format=%PCKG_TYPE%
 rem copy %INSTALL%\dist\%EXEs% %EXEd%
 
 rem SET EXEs=%PACKAGE_NAME%-%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%.%PLATFORM%_python%PYTHON_VERSION%.exe
-rem SET EXEd=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%-%VER_BUILD%_%PLATFORM%_python%PYTHON_VERSION%.exe
+rem SET EXEd=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%_%PLATFORM%_python%PYTHON_VERSION%.exe
 
 rem rd /q /s build
 rem rd /q /s dist

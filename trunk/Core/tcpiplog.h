@@ -6,7 +6,7 @@
 #include <string>
 #include <iomanip>
 #include <vector>
-#include "log.h"
+#include "base_logging.h"
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
@@ -19,7 +19,7 @@ namespace logging
 /********************************************************************
 	daeTCPIPLog
 *********************************************************************/
-class daeTCPIPLog : public daeLog_t
+class daeTCPIPLog : public daeBaseLog
 {
 public:
 	daeTCPIPLog(string strIPAddress, int nPort);

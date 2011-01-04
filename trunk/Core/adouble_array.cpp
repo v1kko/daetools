@@ -451,7 +451,7 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 	    return tmp;
 	}
 
-	adCheckArrays(*this, a)
+	adCheckArrays(*this, a);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -654,7 +654,6 @@ const adouble daeModel::integral(const adouble_array& a) const
 	size_t i, nCount;
 	daeArrayRange range;
 	vector<daeArrayRange> arrRanges;
-	vector<size_t>	narrPoints;	
 	daeDomain* pDomain = NULL;
 
 	adNodeArrayImpl* n = dynamic_cast<adNodeArrayImpl*>(a.node.get());
@@ -694,7 +693,6 @@ const adouble daeModel::integral(const adouble_array& a) const
 	return tmp;
 }
 
-// This is a function for internal use in c++ if I use daeModel member function pointers and not adNode trees
 const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain, const vector<size_t>& narrPoints) const
 {
 	adouble tmp;
@@ -716,7 +714,13 @@ const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain,
 	{
 		i1 = narrPoints[i];
 		i2 = narrPoints[i+1];
-		tmp = tmp + (a[i1] + a[i2]) * ( (*pDomain)[i2] - (*pDomain)[i1] ) / 2;
+	
+	// In daeDomain operator[] I always return node, not the value
+	// Therefore I cannot call here operator[] but function GetPoint
+		tmp = tmp + (a[i1] + a[i2]) * ( pDomain->GetPoint(i2) - pDomain->GetPoint(i1) ) / 2;
+
+	// Old code:
+	//	tmp = tmp + (a[i1] + a[i2]) * ( (*pDomain)[i2] - (*pDomain)[i1] ) / 2;
 	}
 
 	return tmp;

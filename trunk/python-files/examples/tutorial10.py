@@ -21,7 +21,8 @@ In this example we use the same conduction problem as in the tutorial 1.
 Here we introduce:
  - daeModel functions d() and dt() which calculate time- or partial-derivative of an expression
  - Initialization files
- - Mathematical operators which operate on both adouble and adouble_array
+ - Domains which bounds depend on parameter values
+ - How to evaluate integrals of a function
 """
 
 import sys
@@ -37,9 +38,12 @@ typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",      0, 1E10, 100, 1
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-
+        
         self.x  = daeDomain("x", self, "X axis domain")
         self.y  = daeDomain("y", self, "Y axis domain")
+
+        self.dx = daeParameter("&delta;_x", eReal, self, "Width of the plate, m")
+        self.dy = daeParameter("&delta;_y", eReal, self, "Height of the plate, m")
 
         self.Qb = daeParameter("Q_b", eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
         self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")
@@ -53,6 +57,12 @@ class modTutorial(daeModel):
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
+        
+        # Data needed to calculate the area of a semi-circle
+        self.c  = daeDomain("c", self, "Domain for a circle")
+        self.semicircle = daeVariable("SemiCircle", typeNone, self, "Semi-circle")
+        self.semicircle.DistributeOnDomain(self.c)
+        self.area = daeVariable("area", typeNone, self, "Area of the semi-circle, m2")
 
     def DeclareEquations(self):
         # All equations are written so that they use only functions d() and dt() from daeModel
@@ -86,24 +96,43 @@ class modTutorial(daeModel):
         xr = daeIndexRange(self.x)
         yr = daeIndexRange(self.y)
 
-        # Here we have a complex expression in integral function 
+        # Here we have a function that calculates integral of heat fluxes at y = 0: integral(-k * (dT/dy) / dx)|y=0
+        # The result should be 1E6 W/m2, which is equal to the input flux
         eq = self.CreateEquation("Q_int", "Integral of the heat flux per x domain; just an example of the integral function")
-        eq.Residual = self.Q_int() - self.integral( -self.k() * self.T.d_array(self.y, xr, 0) )
-              
+        eq.Residual = self.Q_int() - self.integral( -self.k() * self.T.d_array(self.y, xr, 0) / self.dx() )
+        
+        # To check the integral function we can create a semi-circle around domain c with 100 intervals and bounds: -1 to +1
+        # The variable semicircle will be a cirle with the radius 1 and coordinates: (0,0)
+        # The semi-circle area is equal to: 0.5 * integral(circle * dc) = 1.56913425555 
+        # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
+        eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
+        c = eq.DistributeOnDomain(self.c, eClosedClosed)
+        eq.Residual = self.semicircle(c) - Sqrt( 1**2 - c()**2 )
+
+        cr = daeIndexRange(self.c)
+        eq = self.CreateEquation("Area", "Area of the semi-circle")
+        eq.Residual = self.area() - self.integral( self.semicircle.array(cr) )
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial10")
         self.m.Description = "This tutorial explains how to use daeModel functions d() and dt() " \
                              "that calculate time- and partial-derivative of an expression (not of a single variable), " \
-                             "how to use initialization files (.init) and how to use mathematical operators " \
-                             "which operate on both adouble and adouble_array."
+                             "how to use initialization files (.init) and how to evaluate integrals of a function."
           
     def SetUpParametersAndDomains(self):
-        n = 10
+        n = 25
         
-        self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
-        self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
+        # The domain for a semi-circle
+        self.m.c.CreateDistributed(eCFDM, 2, 100, -1, 1)
+        
+        self.m.dx.SetValue(0.1)
+        self.m.dy.SetValue(0.1)
+
+        # Domain bounds can depend on input parameters:
+        self.m.x.CreateDistributed(eCFDM, 2, n, 0, self.m.dx.GetValue())
+        self.m.y.CreateDistributed(eCFDM, 2, n, 0, self.m.dy.GetValue())
         
         self.m.ro.SetValue(8960)
         self.m.cp.SetValue(385)
@@ -118,14 +147,14 @@ class simTutorial(daeSimulation):
                 self.m.T.SetInitialCondition(x, y, 300)
         
         # Load initialization file previously saved after the successful initialization phase (see below)
-        #self.LoadInitializationValues("tutorial10.init")
+        self.LoadInitializationValues("tutorial10.init")
 
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
+    sim.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
 
@@ -142,7 +171,7 @@ def consoleRun():
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
+    simulation.TimeHorizon = 500
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

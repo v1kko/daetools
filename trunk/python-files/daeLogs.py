@@ -5,6 +5,6 @@ class daePythonStdOutLog(daeStdOutLog):
         daeStdOutLog.__init__(self)
 
     def Message(self, message, severity):
-        print message
+        print self.IndentString + message
 
 

@@ -138,7 +138,7 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	if(!pDataReporter->IsConnected())
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Data Reporter is not connected \n";
+		e << "Simulation ignobly refused to initialize: the data reporter is not connected";
 		throw e;
 	}
 
@@ -173,7 +173,6 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 		m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
 		m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
 		m_pLog->Message(string("***********************************************************************"), 0);
-		m_pLog->Message(string("  "), 0);
 	}
 
 	m_pLog->Message(string("Creating the system... "), 0);
@@ -236,7 +235,6 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	end = time(NULL);
 	m_ProblemCreation = difftime(end, start);
 	m_pLog->Message(string("The system created successfully in: ") + toStringFormatted<real_t>(real_t(m_ProblemCreation), -1, 3) + string(" s"), 0);
-	m_pLog->Message(string(""), 0);
 }
 
 void daeSimulation::SetupSolver(void)
@@ -304,10 +302,6 @@ void daeSimulation::SetupSolver(void)
 				
 			narrParametersIndexes.push_back(pOptVariable->GetOverallIndex());
 		}
-//		std::cout << "Optimization variables indexes: ";
-//		for(i = 0; i < narrParametersIndexes.size(); i++)
-//			std::cout << narrParametersIndexes[i] << " ";
-//		std::cout << std::endl;
 		
 	// 3. Initialize the objective function
 		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables);
@@ -334,7 +328,7 @@ void daeSimulation::SolveInitial(void)
 	if(!m_bIsInitialized)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Simulation has not been initialized";
+		e << "Simulation ignobly refused to solve initial: the simulation has not been initialized";
 		throw e;
 	}
 	
@@ -350,7 +344,6 @@ void daeSimulation::SolveInitial(void)
 
 // Start initialization
 	start = time(NULL);
-	m_pLog->Message(string("Starting initialization of the system..."), 0);
 
 // Ask DAE solver to initialize the system
 	m_pDAESolver->SolveInitial();
@@ -364,8 +357,7 @@ void daeSimulation::SolveInitial(void)
 // Announce success	
 	end = time(NULL);
 	m_Initialization = difftime(end, start);
-	m_pLog->Message(string("Initialization completed. Initialization time: ") + toStringFormatted<real_t>(real_t(m_Initialization), -1, 0) + string(" s"), 0);
-	m_pLog->Message(string("  "), 0);
+	m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
 }
 
 void daeSimulation::Run(void)
@@ -374,13 +366,13 @@ void daeSimulation::Run(void)
 	if(!m_bIsInitialized)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Simulation has not been initialized";
+		e << "Simulation ignobly refuses to run: the simulation has not been initialized";
 		throw e;
 	}
 	if(!m_bIsSolveInitial)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Simulation function SolveInitial() must be called prior a call to Run()";
+		e << "Simulation ignobly refuses to run: the function SolveInitial() must be called before a call to Run()";
 		throw e;
 	}
 	
@@ -408,19 +400,16 @@ void daeSimulation::Run(void)
 	
 	if(m_dCurrentTime == 0)
 	{
-		m_pLog->Message(string("Starting dynamic simulation..."), 0);
 		m_Integration = time(NULL);
 	}
 	if(m_dCurrentTime >= m_dTimeHorizon)
 	{
-		m_pLog->Message(string("The time domain has been riched; exiting."), 0);
+		m_pLog->Message(string("The time horizon has been riched; exiting."), 0);
 		return;
 	}
 	m_eActivityAction = eRunActivity;
 
-//	for(real_t t = m_dCurrentTime + m_dReportingInterval; t <= m_dTimeHorizon; t += m_dReportingInterval)
 	real_t t;
-	
 	while(m_dCurrentTime < m_dTimeHorizon)
 	{
 		t = m_dCurrentTime + m_dReportingInterval;
@@ -455,13 +444,6 @@ void daeSimulation::Run(void)
 		
 		m_dCurrentTime = t;
 	}
-
-// Finalize the simulation		
-	clock_t end = time(NULL);
-	m_Integration = difftime(end, m_Integration);
-	m_pLog->Message(string("Dynamic simulation has finished successfuly"), 0);
-	m_pLog->Message(string("Integration time = ") + toStringFormatted<real_t>(real_t(m_Integration), -1, 0) + string(" s"), 0);
-	m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_ProblemCreation + m_Initialization + m_Integration), -1, 0) + string(" s"), 0);
 }
 
 void daeSimulation::Finalize(void)
@@ -474,7 +456,19 @@ void daeSimulation::Finalize(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
-		
+	
+// Finalize the simulation		
+	if(!m_bSetupOptimization)
+	{
+		clock_t end = time(NULL);
+		m_Integration = difftime(end, m_Integration);
+		m_pLog->Message(string(" "), 0);
+		m_pLog->Message(string("The simulation has finished successfuly!"), 0);
+		m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(real_t(m_Initialization), -1, 0) + string(" s"), 0);
+		m_pLog->Message(string("Integration time = ") + toStringFormatted<real_t>(real_t(m_Integration), -1, 0) + string(" s"), 0);
+		m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_ProblemCreation + m_Initialization + m_Integration), -1, 0) + string(" s"), 0);
+	}
+	
 // Notify the receiver that there is no more data, and disconnect it		
 	m_pDataReporter->EndOfData();
 	m_pDataReporter->Disconnect();
@@ -597,7 +591,7 @@ void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** vari
 	if(!node)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "The first argument of the functions: SetContinuousOptimizationVariable, SetBinaryOptimizationVariable, and SetIntegerOptimizationVariable function "
+		e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
 		  << "can only be a variable or a distributed variable with constant indexes";
 		throw e;
 	}
@@ -620,7 +614,7 @@ void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** vari
 		else
 		{
 			daeDeclareException(exInvalidCall);
-			e << "The first argument of the functions: SetContinuousOptimizationVariable, SetBinaryOptimizationVariable, and SetIntegerOptimizationVariable function "
+			e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
 			  << "can only be a variable or a distributed variable with constant indexes";
 			throw e;
 		}
@@ -648,14 +642,14 @@ void daeSimulation::CheckSystem(void) const
 	if(mi.m_nNumberOfVariables == 0)
 	{
 		daeDeclareException(exRuntimeCheck);
-		e << "Number of variables is equal zero\n";
+		e << "The system cowardly refused to initialize:\n The number of variables is equal to zero\n";
 		throw e;
 	}
 
 	if(mi.m_nNumberOfEquations == 0)
 	{
 		daeDeclareException(exRuntimeCheck);
-		e << "Number of equations is equal zero\n";
+		e << "The system cowardly refused to initialize:\n The number of equations is equal to zero\n";
 		throw e;
 	}
 
@@ -663,9 +657,9 @@ void daeSimulation::CheckSystem(void) const
 	{
 		daeDeclareException(exRuntimeCheck);
 		if(mi.m_nNumberOfEquations < mi.m_nNumberOfVariables)
-			e << "Number of equations is lower than number of variables \n";
+			e << "The system cowardly refused to initialize:\n The number of equations is lower than the number of variables \n";
 		else
-			e << "Number of variables is lower than number of equations \n";
+			e << "The system cowardly refused to initialize:\n The number of variables is lower than then number of equations \n";
 		e << string("Number of equations: ")       + toString(mi.m_nNumberOfEquations)      + string("\n");
 		e << string("Number of variables: ")       + toString(mi.m_nNumberOfVariables)      + string("\n");
 		e << string("Number of fixed variables: ") + toString(mi.m_nNumberOfFixedVariables) + string("\n");
@@ -675,7 +669,7 @@ void daeSimulation::CheckSystem(void) const
 	if(mi.m_nNumberOfInitialConditions != mi.m_nNumberOfDifferentialVariables)
 	{
 		daeDeclareException(exRuntimeCheck);
-		e << "Number of differential variables is not equal to number of initial conditions \n";
+		e << "Simulation cowardly refused to initialize the problem:\n The number of differential variables is not equal to the number of initial conditions \n";
 		e << string("Number of differential variables: ") + toString(mi.m_nNumberOfDifferentialVariables) + string("\n");
 		e << string("Number of initial conditions: ")     + toString(mi.m_nNumberOfInitialConditions)     + string("\n");
 		throw e;
@@ -838,7 +832,8 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 	if(!m_bConditionalIntegrationMode)
 	{
 		daeDeclareException(exInvalidCall);
-		e << string("the function EnterConditionalIntegrationMode() should be called prior the call to IntegrateUntilConditionSatisfied()");
+		e << string("Simulation spinelessly failed to integrate until condition satisfied: " 
+		            "the function EnterConditionalIntegrationMode() should be called prior the call to IntegrateUntilConditionSatisfied()");
 		throw e;
 	}
 	
@@ -956,7 +951,7 @@ void daeSimulation::RegisterVariable(daeVariable_t* pVariable)
 	if(!m_pDataReporter->RegisterVariable(&var))
 	{
 		daeDeclareException(exDataReportingError);
-		e << "Failed to register variable [" << var.m_strName << "]";
+		e << "Simulation dastardly failed to register variable [" << var.m_strName << "]";
 		throw e;
 	}
 }
@@ -980,7 +975,7 @@ void daeSimulation::RegisterDomain(daeDomain_t* pDomain)
 	if(!m_pDataReporter->RegisterDomain(&domain))
 	{
 		daeDeclareException(exDataReportingError);
-		e << "Failed to register domain [" << domain.m_strName << "]";
+		e << "Simulation dastardly failed to register domain [" << domain.m_strName << "]";
 		throw e;
 	}
 }
@@ -993,7 +988,7 @@ void daeSimulation::ReportData(void)
 	if(!m_pDataReporter->StartNewResultSet(m_dCurrentTime))
 	{
 		daeDeclareException(exDataReportingError);
-		e << "Failed to start new result set at TIME: [" << m_dCurrentTime << "]";
+		e << "Simulation dastardly failed to start new result set at TIME: [" << m_dCurrentTime << "]";
 		throw e;
 	}
 
@@ -1075,7 +1070,7 @@ void daeSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
 	if(!m_pDataReporter->SendVariable(&var))
 	{
 		daeDeclareException(exDataReportingError);
-		e << "Failed to report variable [" << var.m_strName << "] at TIME: [" << time << "]";
+		e << "Simulation dastardly failed to report variable [" << var.m_strName << "] at TIME: [" << time << "]";
 		throw e;
 	}
 }

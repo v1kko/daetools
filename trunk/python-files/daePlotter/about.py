@@ -7,4 +7,4 @@ class AboutDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_About()
         self.ui.setupUi(self)
-        self.setWindowTitle("DAE Tools Project v" + daeVersion())
+        self.setWindowTitle("DAE Tools Project v" + daeVersion(True))

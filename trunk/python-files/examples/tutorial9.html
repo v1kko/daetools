@@ -8,51 +8,51 @@
 </head>
 <body>
 <pre style='color:#141312;background-color:#ffffff;'>
-<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
-<i><span style='color:#008000;'>                              tutorial9.py</span></i>
-<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
-<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
-<i><span style='color:#008000;'>***********************************************************************************</span></i>
-<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
-<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
-<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
-<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
-<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
-<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
-<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
-<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
-<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
-<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
+<span style='color:#008000;'>                              tutorial9.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span>
+<span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span>
+<span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span>
+<span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span>
+<span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span>
+<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
-<i><span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span></i>
-<i><span style='color:#008000;'>Here we introduce:</span></i>
-<i><span style='color:#008000;'> - Third party linear equations solvers</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+<span style='color:#008000;'>Here we introduce:</span>
+<span style='color:#008000;'> - Third party linear equations solvers</span>
 
-<i><span style='color:#008000;'>Currently there are 3rd party linear equations solvers:</span></i>
-<i><span style='color:#008000;'> - TrilinosAmesos: sequential sparse direct solver defined in pyTrilinosAmesos module (GNU Lesser GPL)</span></i>
-<i><span style='color:#008000;'> - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span></i>
-<i><span style='color:#008000;'> - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)</span></i>
-<i><span style='color:#008000;'> - IntelMKL: multi-threaded dense lapack direct solver defined in pyIntelMKL (proprietary)</span></i>
-<i><span style='color:#008000;'> - Lapack: generic sequential dense lapack direct solver defined in pyLapack module </span></i>
-<i><span style='color:#008000;'>           (The University of Tennessee free license)</span></i>
-<i><span style='color:#008000;'> - Atlas: Automatically Tuned Linear Algebra Software implementation of the sequential dense Lapack </span></i>
-<i><span style='color:#008000;'>          direct solver defined in pyAtlas module (BSD-style license)</span></i>
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>Currently there are 3rd party linear equations solvers:</span>
+<span style='color:#008000;'> - TrilinosAmesos: sequential sparse direct solver defined in pyTrilinosAmesos module (GNU Lesser GPL)</span>
+<span style='color:#008000;'> - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
+<span style='color:#008000;'> - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)</span>
+<span style='color:#008000;'> - IntelMKL: multi-threaded dense lapack direct solver defined in pyIntelMKL (proprietary)</span>
+<span style='color:#008000;'> - Lapack: generic sequential dense lapack direct solver defined in pyLapack module </span>
+<span style='color:#008000;'>           (The University of Tennessee free license)</span>
+<span style='color:#008000;'> - Atlas: Automatically Tuned Linear Algebra Software implementation of the sequential dense Lapack </span>
+<span style='color:#008000;'>          direct solver defined in pyAtlas module (BSD-style license)</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 
-<i><span style='color:#008000;'># First import desired solver's module:</span></i>
-<i><span style='color:#008000;'>#import daetools.pyTrilinosAmesos as pyTrilinosAmesos</span></i>
-<i><span style='color:#008000;'>#import daetools.pyIntelPardiso   as pyIntelPardiso</span></i>
-<i><span style='color:#008000;'>#import daetools.pyAmdACML        as pyAmdACML</span></i>
-<i><span style='color:#008000;'>#import daetools.pyIntelMKL       as pyIntelMKL</span></i>
-<i><span style='color:#008000;'>#import daetools.pyLapack         as pyLapack</span></i>
-<i><span style='color:#008000;'>#import daetools.pyAtlas          as pyAtlas</span></i>
+<span style='color:#008000;'># First import desired solver's module:</span>
+<span style='color:#0000ff;'>import</span> daetools.pyTrilinosAmesos <span style='color:#0000ff;'>as</span> pyTrilinosAmesos
+<span style='color:#008000;'>#import daetools.pyIntelPardiso   as pyIntelPardiso</span>
+<span style='color:#008000;'>#import daetools.pyAmdACML        as pyAmdACML</span>
+<span style='color:#008000;'>#import daetools.pyIntelMKL       as pyIntelMKL</span>
+<span style='color:#008000;'>#import daetools.pyLapack         as pyLapack</span>
+<span style='color:#008000;'>#import daetools.pyAtlas          as pyAtlas</span>
 
 typeNone         <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;None&quot;</span>,         <span style='color:#bf0303;'>&quot;-&quot;</span>,      <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
 typeTemperature  <span style='color:#0000ff;'>=</span> daeVariableType(<span style='color:#bf0303;'>&quot;Temperature&quot;</span>,  <span style='color:#bf0303;'>&quot;K&quot;</span>,    <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>300</span>, <span style='color:#c000c0;'>1e-5</span>)
@@ -129,66 +129,75 @@ typeHeatCapacity <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
 
-<b>if</b> <b><span style='color:#000000;'>__name__</span></b> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+<span style='color:#008000;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <span style='color:#0000ff;'>=</span> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    sim.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
+    sim.TimeHorizon       <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1000</span>
+    simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim)
+    simulator.exec_()
+    
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
     simulation   <span style='color:#0000ff;'>=</span> simTutorial()
 
-    <i><span style='color:#008000;'># The default linear solver is Sundials dense sequential solver (LU decomposition).</span></i>
-    <i><span style='color:#008000;'># It is possible to set the following 3rd party direct linear solvers:</span></i>
-    <i><span style='color:#008000;'>#  1. Sparse solvers:</span></i>
-    <i><span style='color:#008000;'>#      - IntelPardiso (multi-threaded - OMP)</span></i>
-    <i><span style='color:#008000;'>#      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span></i>
-    <i><span style='color:#008000;'>#  3. Dense lapack wrappers:</span></i>
-    <i><span style='color:#008000;'>#      - Amd ACML (OMP)</span></i>
-    <i><span style='color:#008000;'>#      - Intel MKL (OMP)</span></i>
-    <i><span style='color:#008000;'>#      - Generic Lapack (Sequential)</span></i>
-    <i><span style='color:#008000;'>#      - Atlas lapack (Sequential)</span></i>
-    <i><span style='color:#008000;'># If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).</span></i>
-    <i><span style='color:#008000;'># If you are using OMP capable solvers you should set the number of threads to the number of cores. </span></i>
-    <i><span style='color:#008000;'># For instance:</span></i>
-    <i><span style='color:#008000;'>#    export OMP_NUM_THREADS=4</span></i>
-    <i><span style='color:#008000;'># You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).</span></i>
+    <span style='color:#008000;'># The default linear solver is Sundials dense sequential solver (LU decomposition).</span>
+    <span style='color:#008000;'># It is possible to set the following 3rd party direct linear solvers:</span>
+    <span style='color:#008000;'>#  1. Sparse solvers:</span>
+    <span style='color:#008000;'>#      - IntelPardiso (multi-threaded - OMP)</span>
+    <span style='color:#008000;'>#      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span>
+    <span style='color:#008000;'>#  3. Dense lapack wrappers:</span>
+    <span style='color:#008000;'>#      - Amd ACML (OMP)</span>
+    <span style='color:#008000;'>#      - Intel MKL (OMP)</span>
+    <span style='color:#008000;'>#      - Generic Lapack (Sequential)</span>
+    <span style='color:#008000;'>#      - Atlas lapack (Sequential)</span>
+    <span style='color:#008000;'># If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).</span>
+    <span style='color:#008000;'># If you are using OMP capable solvers you should set the number of threads to the number of cores. </span>
+    <span style='color:#008000;'># For instance:</span>
+    <span style='color:#008000;'>#    export OMP_NUM_THREADS=4</span>
+    <span style='color:#008000;'># You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).</span>
 
-    <i><span style='color:#008000;'># Import desired module and uncomment corresponding solver and set it by using SetLASolver function</span></i>
-    <i><span style='color:#008000;'>#</span></i>
-    <i><span style='color:#008000;'>#print &quot;Supported Trilinos Amesos 3rd party LA solvers:&quot;, str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers())</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Klu&quot;)</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Superlu&quot;)</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Lapack&quot;)</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Umfpack&quot;)</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyAmdACML.daeCreateLapackSolver()</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyIntelMKL.daeCreateLapackSolver()</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyLapack.daeCreateLapackSolver()</span></i>
-    <i><span style='color:#008000;'>#lasolver     = pyAtlas.daeCreateLapackSolver()</span></i>
-    <i><span style='color:#008000;'>#solver.SetLASolver(lasolver)</span></i>
+    <span style='color:#008000;'># Import desired module and uncomment corresponding solver and set it by using SetLASolver function</span>
+    <b>print</b> <span style='color:#bf0303;'>&quot;Supported Trilinos Amesos 3rd party LA solvers:&quot;</span>, <b><span style='color:#000000;'>str</span></b>(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers())
+    <span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Klu&quot;)</span>
+    lasolver     <span style='color:#0000ff;'>=</span> pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(<span style='color:#bf0303;'>&quot;Amesos_Superlu&quot;</span>)
+    <span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Lapack&quot;)</span>
+    <span style='color:#008000;'>#lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver(&quot;Amesos_Umfpack&quot;)</span>
+    <span style='color:#008000;'>#lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()</span>
+    <span style='color:#008000;'>#lasolver     = pyAmdACML.daeCreateLapackSolver()</span>
+    <span style='color:#008000;'>#lasolver     = pyIntelMKL.daeCreateLapackSolver()</span>
+    <span style='color:#008000;'>#lasolver     = pyLapack.daeCreateLapackSolver()</span>
+    <span style='color:#008000;'>#lasolver     = pyAtlas.daeCreateLapackSolver()</span>
+    daesolver.SetLASolver(lasolver)
 
-    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
-    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1000</span>
 
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    <span style='color:#008000;'># Connect data reporter</span>
     simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
-    <i><span style='color:#008000;'># Initialize the simulation</span></i>
-    simulation.Initialize(solver, datareporter, log)
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
 
-    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    <span style='color:#008000;'># Save the model report and the runtime model report </span>
     simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <i><span style='color:#008000;'># Run</span></i>
+    <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 </pre>

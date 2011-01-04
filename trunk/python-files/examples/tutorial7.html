@@ -8,34 +8,34 @@
 </head>
 <body>
 <pre style='color:#141312;background-color:#ffffff;'>
-<i><span style='color:#008000;'>#!/usr/bin/env python</span></i>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span></i>
-<i><span style='color:#008000;'>                             tutorial7.py</span></i>
-<i><span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
-<i><span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
-<i><span style='color:#008000;'>***********************************************************************************</span></i>
-<i><span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span></i>
-<i><span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span></i>
-<i><span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span></i>
-<i><span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span></i>
-<i><span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span></i>
-<i><span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
-<i><span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span></i>
-<i><span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span></i>
-<i><span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span></i>
-<i><span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
+<span style='color:#008000;'>                             tutorial7.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span style='color:#008000;'>terms of the GNU General Public License as published by the Free Software </span>
+<span style='color:#008000;'>Foundation; either version 3 of the License, or (at your option) any later version.</span>
+<span style='color:#008000;'>The DAE Tools is distributed in the hope that it will be useful, but WITHOUT ANY </span>
+<span style='color:#008000;'>WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, write to the Free Software Foundation, Inc., </span>
+<span style='color:#008000;'>59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.</span>
+<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
 
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
-<i><span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span></i>
-<i><span style='color:#008000;'>Here we introduce:</span></i>
-<i><span style='color:#008000;'> - Custom operating procedures</span></i>
-<i><span style='color:#008000;'> - Resetting of degrees of freedom</span></i>
-<i><span style='color:#008000;'> - Resetting of initial conditions </span></i>
-<i><span style='color:#008000;'> </span></i>
-<i><span style='color:#008000;'>Here the heat flux at the bottom edge is defined as a variable. In the simulation its </span></i>
-<i><span style='color:#008000;'>value will be fixed and manipulated in the custom operating procedure.</span></i>
-<i><span style='color:#008000;'>&quot;&quot;&quot;</span></i>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+<span style='color:#008000;'>Here we introduce:</span>
+<span style='color:#008000;'> - Custom operating procedures</span>
+<span style='color:#008000;'> - Resetting of degrees of freedom</span>
+<span style='color:#008000;'> - Resetting of initial conditions </span>
+<span style='color:#008000;'> </span>
+<span style='color:#008000;'>Here the heat flux at the bottom edge is defined as a variable. In the simulation its </span>
+<span style='color:#008000;'>value will be fixed and manipulated in the custom operating procedure.</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
@@ -118,23 +118,23 @@ typeHeatFlux     <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
     
-    <i><span style='color:#008000;'># daeDynamicSimulation class defines the function Run which is called after successful initialization</span></i>
-    <i><span style='color:#008000;'># to run the simulation. By default it runs for time period defined by the TimeHorizon property,</span></i>
-    <i><span style='color:#008000;'># stopping after each period of time defined by the ReportInterval property to send the data to</span></i>
-    <i><span style='color:#008000;'># the data reporter. However, default behaviour can be changed by implementing a user defined</span></i>
-    <i><span style='color:#008000;'># function Run. The functions Integrate, IntegrateUntilTime, and IntegrateForTimeInterval from </span></i>
-    <i><span style='color:#008000;'># daeDynamicSimulation class can be used to advance in time, while functions ReAssignValue and </span></i>
-    <i><span style='color:#008000;'># ReSetInitialCondition from daeVariable class can be used to alter the values of variables.</span></i>
-    <i><span style='color:#008000;'># In this example we first assign the value of Qb to 1E6 and then use the function IntegrateForTimeInterval</span></i>
-    <i><span style='color:#008000;'># to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after </span></i>
-    <i><span style='color:#008000;'># you finished with re-assigning or re-setting the initial conditions you have to call the function</span></i>
-    <i><span style='color:#008000;'># Reinitialize from daeDynamicSimulation class. The function Reinitialize reinitializes the DAE solver</span></i>
-    <i><span style='color:#008000;'># and clears all previous data accumulated in the solver. Also, you can call the function ReportData</span></i>
-    <i><span style='color:#008000;'># at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization </span></i>
-    <i><span style='color:#008000;'># we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and </span></i>
-    <i><span style='color:#008000;'># then we again report the data. After that, we again change the value of Qb and also re-set the initial </span></i>
-    <i><span style='color:#008000;'># conditions for the variable T (again to 300K) and then run until the TimeHorizon is reached </span></i>
-    <i><span style='color:#008000;'># (by using the function Integrate). </span></i>
+    <span style='color:#008000;'># daeDynamicSimulation class defines the function Run which is called after successful initialization</span>
+    <span style='color:#008000;'># to run the simulation. By default it runs for time period defined by the TimeHorizon property,</span>
+    <span style='color:#008000;'># stopping after each period of time defined by the ReportInterval property to send the data to</span>
+    <span style='color:#008000;'># the data reporter. However, default behaviour can be changed by implementing a user defined</span>
+    <span style='color:#008000;'># function Run. The functions Integrate, IntegrateUntilTime, and IntegrateForTimeInterval from </span>
+    <span style='color:#008000;'># daeDynamicSimulation class can be used to advance in time, while functions ReAssignValue and </span>
+    <span style='color:#008000;'># ReSetInitialCondition from daeVariable class can be used to alter the values of variables.</span>
+    <span style='color:#008000;'># In this example we first assign the value of Qb to 1E6 and then use the function IntegrateForTimeInterval</span>
+    <span style='color:#008000;'># to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after </span>
+    <span style='color:#008000;'># you finished with re-assigning or re-setting the initial conditions you have to call the function</span>
+    <span style='color:#008000;'># Reinitialize from daeDynamicSimulation class. The function Reinitialize reinitializes the DAE solver</span>
+    <span style='color:#008000;'># and clears all previous data accumulated in the solver. Also, you can call the function ReportData</span>
+    <span style='color:#008000;'># at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization </span>
+    <span style='color:#008000;'># we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and </span>
+    <span style='color:#008000;'># then we again report the data. After that, we again change the value of Qb and also re-set the initial </span>
+    <span style='color:#008000;'># conditions for the variable T (again to 300K) and then run until the TimeHorizon is reached </span>
+    <span style='color:#008000;'># (by using the function Integrate). </span>
     <b>def</b> Run(<span style='color:#0000ff;'>self</span>):
         <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#bf0303;'>&quot;OP: Integrating for 100 seconds ... &quot;</span>, <span style='color:#c000c0;'>0</span>)
         time <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.IntegrateForTimeInterval(<span style='color:#c000c0;'>100</span>)
@@ -147,7 +147,7 @@ typeHeatFlux     <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.ReportData()
 
         <span style='color:#0000ff;'>self</span>.m.Qb.ReAssignValue(<span style='color:#c000c0;'>1.5E6</span>)
-        <i><span style='color:#008000;'>#self.m.Qt.SetValue(2E6)</span></i>
+        <span style='color:#008000;'>#self.m.Qt.SetValue(2E6)</span>
         <b>for</b> x <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints<span style='color:#0000ff;'>-</span><span style='color:#c000c0;'>1</span>):
             <b>for</b> y <span style='color:#0000ff;'>in</span> <b><span style='color:#000000;'>range</span></b>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints<span style='color:#0000ff;'>-</span><span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.ReSetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
@@ -159,7 +159,7 @@ typeHeatFlux     <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
         <span style='color:#0000ff;'>self</span>.ReportData()
         <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#bf0303;'>&quot;OP: Finished&quot;</span>, <span style='color:#c000c0;'>0</span>)
 
-<i><span style='color:#008000;'># Use daeSimulator class</span></i>
+<span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <span style='color:#0000ff;'>=</span> simTutorial()
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
@@ -168,37 +168,37 @@ typeHeatFlux     <span style='color:#0000ff;'>=</span> daeVariableType(<span sty
     simulator  <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation<span style='color:#0000ff;'>=</span>sim)
     simulator.exec_()
 
-<i><span style='color:#008000;'># Setup everything manually and run in a console</span></i>
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <i><span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    solver       <span style='color:#0000ff;'>=</span> daeIDASolver()
+    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
     simulation   <span style='color:#0000ff;'>=</span> simTutorial()
 
-    <i><span style='color:#008000;'># Enable reporting of all variables</span></i>
+    <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
-    <i><span style='color:#008000;'># Set the time horizon and the reporting interval</span></i>
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
     simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>500</span>
 
-    <i><span style='color:#008000;'># Connect data reporter</span></i>
+    <span style='color:#008000;'># Connect data reporter</span>
     simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0000ff;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
-    <i><span style='color:#008000;'># Initialize the simulation</span></i>
-    simulation.Initialize(solver, datareporter, log)
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
 
-    <i><span style='color:#008000;'># Save the model report and the runtime model report </span></i>
+    <span style='color:#008000;'># Save the model report and the runtime model report </span>
     simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <i><span style='color:#008000;'># Solve at time=0 (initialization)</span></i>
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <i><span style='color:#008000;'># Run</span></i>
+    <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 

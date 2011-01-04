@@ -684,6 +684,10 @@ bool daeMINLP::intermediate_callback(AlgorithmMode mode,
 //	cout << endl;
 	
 //	cout << "obj_value: " << obj_value << endl;
+	m_pLog->IncreaseIndent(2);
+	m_pLog->Message(string("Iteration: ") + toString(iter), 0);
+	m_pLog->DecreaseIndent(2);
+	
 	if(m_bPrintInfo) 
 	{
 		PrintObjectiveFunction();
@@ -715,40 +719,62 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	else if(status == TMINLP::MINLP_ERROR)
 		strMessage = "Optimization failed: MINLP error";
 	
-	m_pLog->Message(string("################################################################"), 0);
-	m_pLog->Message("          " + strMessage, 0);
-	m_pLog->Message(string("################################################################"), 0);
+	m_pLog->Message(string("**************************************************************************"), 0);
+	m_pLog->Message("                        " + strMessage, 0);
+	m_pLog->Message(string("**************************************************************************"), 0);
 	m_pLog->Message(string(" "), 0);
 	
-	strMessage = "Objective function = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	strMessage = toStringFormatted("Objective function", 25) +  
+				 toStringFormatted("Final value",        16);
+	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	strMessage = toStringFormatted(m_pObjectiveFunction->m_pObjectiveVariable->GetName(), 25) +   
+				 toStringFormatted(obj_value,                                             16, 6, true);
 	m_pLog->Message(strMessage, 0);
 	m_pLog->Message(string(" "), 0);
 
-	m_pLog->Message(string("Optimization variables:"), 0);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	strMessage = toStringFormatted("Optimization variable", 25) +  
+				 toStringFormatted("Final value",           16) +
+				 toStringFormatted("Lower bound",           16) +
+				 toStringFormatted("Upper bound",           16);
+	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
 	for(i = 0; i < n; i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		if(!pOptVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = pOptVariable->GetName() + " = " + toStringFormatted<real_t>(x[i], -1, 10, true);
+		strMessage = toStringFormatted(pOptVariable->GetName(), 25)          +   
+					 toStringFormatted(x[i],                    16, 6, true) +
+		             toStringFormatted(pOptVariable->m_dLB,     16, 6, true) + 
+		             toStringFormatted(pOptVariable->m_dUB,     16, 6, true);
 		m_pLog->Message(strMessage, 0);
-	}	
+	}
 	m_pLog->Message(string(" "), 0);
 
-	m_pLog->Message(string("Final values of the constraints:"), 0);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	strMessage = toStringFormatted("Constraint",  25) +  
+				 toStringFormatted("Final value", 16) +
+				 toStringFormatted("Lower bound", 16) +
+				 toStringFormatted("Upper bound", 16);
+	m_pLog->Message(strMessage, 0);
+	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
 		pConstraint = m_ptrarrConstraints[i];
 		if(!pConstraint)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = pConstraint->m_pConstraintVariable->GetName() + " = " + 
-					 toStringFormatted<real_t>(pConstraint->m_pConstraintVariable->GetValue(), -1, 10, true);
+		strMessage = toStringFormatted(pConstraint->m_pConstraintVariable->GetName(),  25)          + 
+					 toStringFormatted(pConstraint->m_pConstraintVariable->GetValue(), 16, 6, true) +
+					 toStringFormatted(pConstraint->m_dLB,                             16, 6, true) + 
+					 toStringFormatted(pConstraint->m_dUB,                             16, 6, true);
 		m_pLog->Message(strMessage, 0);
 	}	
 	m_pLog->Message(string(" "), 0);
-	m_pLog->Message(string("################################################################"), 0);
 }
 
 void daeMINLP::PrintObjectiveFunction(void)
@@ -921,14 +947,17 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 	size_t i, j;
 	daeOptimizationVariable* pOptVariable;
 	
+	m_pLog->IncreaseIndent(1);
+	m_pLog->Message(string("Starting the run No. ") + toString(m_iRunCounter + 1) + string(" ..."), 0);
+	
 // Print before Run
-	if(m_bPrintInfo) 
-	{
-		m_pLog->Message("**** Before Run", 0);
-		PrintObjectiveFunction();
-		PrintOptimizationVariables();
-		PrintConstraints();
-	}
+//	if(m_bPrintInfo) 
+//	{
+//		m_pLog->Message("Values before Run", 0);
+//		PrintObjectiveFunction();
+//		PrintOptimizationVariables();
+//		PrintConstraints();
+//	}
 	
 	if(m_iRunCounter == 0)
 	{
@@ -972,15 +1001,18 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 	// 5. Run the simulation
 		m_pSimulation->Run();
 	}
-	
+	  
 // Print After Run
-	if(m_bPrintInfo) 
-	{
-		m_pLog->Message("**** After Run", 0);
-		PrintObjectiveFunction();
-		PrintOptimizationVariables();
-		PrintConstraints();
-	}
+//	if(m_bPrintInfo) 
+//	{
+//		m_pLog->Message("Values after Run", 0);
+//		PrintObjectiveFunction();
+//		PrintOptimizationVariables();
+//		PrintConstraints();
+//	}
+	
+	m_pLog->Message(string(" "), 0);
+	m_pLog->DecreaseIndent(1);
 }
 
 const TMINLP::SosInfo* daeMINLP::sosConstraints() const

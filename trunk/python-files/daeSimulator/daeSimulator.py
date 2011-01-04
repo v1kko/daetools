@@ -5,14 +5,14 @@ from PyQt4 import QtCore, QtGui
 from Simulator_ui import Ui_SimulatorDialog
 from daetools.pyDAE.WebViewDialog import WebView
 
-class daeTextEditLog(daeStdOutLog):
+class daeTextEditLog(daeBaseLog):
     def __init__(self, TextEdit, App):
-        daeStdOutLog.__init__(self)
+        daeBaseLog.__init__(self)
         self.TextEdit = TextEdit
         self.App      = App
 
     def Message(self, message, severity):
-        self.TextEdit.append(message)
+        self.TextEdit.append(self.IndentString + message)
         if self.TextEdit.isVisible() == True:
             self.TextEdit.update()
         self.App.processEvents()
@@ -46,8 +46,10 @@ class daeSimulator(QtGui.QDialog):
 
         if self.optimization == None:
             self.ui.simulationLabel.setText('Simulation')
+            self.ui.MINLPSolverComboBox.setEnabled(False)
         else:
             self.ui.simulationLabel.setText('Optimization')
+            self.ui.MINLPSolverComboBox.setEnabled(True)
         self.ui.SimulationLineEdit.insert(self.simulation.m.Name)
             
         self.ui.ReportingIntervalDoubleSpinBox.setValue(self.simulation.ReportingInterval)
@@ -170,6 +172,8 @@ class daeSimulator(QtGui.QDialog):
             self.ui.RunButton.setEnabled(False)
             if(lasolverIndex in [1, 2, 3, 5]):
                 self.ui.MatrixButton.setEnabled(True)
+            self.ui.MINLPSolverComboBox.setEnabled(False)
+            self.ui.DAESolverComboBox.setEnabled(False)
             self.ui.LASolverComboBox.setEnabled(False)
             self.ui.DataReporterTCPIPAddressLineEdit.setEnabled(False)
             self.ui.ReportingIntervalDoubleSpinBox.setEnabled(False)

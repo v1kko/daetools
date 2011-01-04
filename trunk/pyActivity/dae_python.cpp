@@ -98,7 +98,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Integrate",                   &daeSimulation::Integrate)
         .def("IntegrateForTimeInterval",    &daeSimulation::IntegrateForTimeInterval)
         .def("IntegrateUntilTime",          &daeSimulation::IntegrateUntilTime)
-  
+     
         .def("CreateEqualityConstraint",    &daeSimulation::CreateEqualityConstraint, return_internal_reference<>())
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>())
 
