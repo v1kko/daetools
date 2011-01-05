@@ -147,26 +147,16 @@ unix::SUNDIALS_LIBS = -lsundials_idas \
 #####################################################################################
 #                                  BONMIN / IPOPT
 #####################################################################################
-#    Compiling BONMIN on GNU/Linux
-# 0) Unpack BONMIN to daetools/trunk/bonmin
-# 1) cd bonmin/ThirdParty/Mumps
-#    sh get.Mumps
-# 2) cd bonmin/ThirdParty/Metis
-#    sh get.Metis
-# 3) mkdir build
-# 4) cd build
-# 5) ../configure
-# 6) make -jN
-# 7) make test
-# 8) make install
-#####################################################################################
 BONMIN_DIR = ../bonmin/build
 MUMPS_DIR  = ../mumps
+win32-msvc2008::G95_LIBDIR = c:\MinGW\lib\gcc-lib\i686-pc-mingw32\4.1.2
 
 BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 MUMPS_LIBDIR   = $${MUMPS_DIR}/lib \
-                 $${MUMPS_DIR}/libseq
+                 $${MUMPS_DIR}/libseq \
+                 $${MUMPS_DIR}/blas \
+                 $${G95_LIBDIR}
 
 unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
 						-lbonmin \
@@ -181,7 +171,6 @@ unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
 						-lOsi
 
 win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-                              libCoinHSL.lib \
                               libBonmin.lib \
                               libIpopt.lib \
                               libCbc.lib \
@@ -193,10 +182,13 @@ win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
                               libOsi.lib
 
 unix::MUMPS_LIBS =
-win32-msvc2008::MUMPS_LIBS = libmpiseq.lib \
+win32-msvc2008::MUMPS_LIBS = blas.lib \
+                             libmpiseq.lib \
                              libdmumps.lib \
                              libmumps_common.lib \
-                             libpord.lib
+                             libpord.lib \
+                             libf95.a \
+                             libgcc.a
 
 
 #####################################################################################

@@ -1,4 +1,4 @@
-daetools (1.0.1) stable; urgency=low
+daetools (1.1.0) stable; urgency=low
 
   * Implemented sensitivity calculation (through Sundials IDAS DAE solver).
   * Implemented steady-state and dynamic optimization capabilities (Bonmin).

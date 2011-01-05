@@ -74,15 +74,15 @@ copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
 copy pyBONMIN.pyd                   %ROOT%\pyDAE
-REM copy pyIPOPT.pyd                %ROOT%\pyDAE
-REM copy IPOPT39.dll                %ROOT%\pyDAE
-
-copy pyAmdACML.pyd                  %ROOT%\pyAmdACML
-copy pyIntelMKL.pyd                 %ROOT%\pyIntelMKL
-copy pyIntelPardiso.pyd             %ROOT%\pyIntelPardiso
 copy pyTrilinosAmesos.pyd           %ROOT%\pyTrilinosAmesos
 
+REM copy pyAmdACML.pyd              %ROOT%\pyAmdACML
+REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL
+REM copy pyIntelPardiso.pyd         %ROOT%\pyIntelPardiso
+
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
+copy libifcoremd.dll                %ROOT%\pyDAE
+copy libmmd.dll                     %ROOT%\pyDAE
 
 cd ..\python-files
 
