@@ -130,9 +130,9 @@ unix::BOOST_LIBS       = -lboost_system \
 #####################################################################################
 #                                 SUNDIALS IDAS
 #####################################################################################
-# ./configure --prefix=/home/ciroki/Data/daetools/trunk/idas-1.0.0/build --disable-mpi
+# ./configure --prefix=${HOME}/Data/daetools/trunk/idas/build --disable-mpi
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
-#
+#             CFLAGS=-O3
 #####################################################################################
 SUNDIALS = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include

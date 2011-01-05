@@ -188,3 +188,15 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
+    
+if __name__ == "__main__":
+    runInGUI = True
+    if len(sys.argv) > 1:
+        if(sys.argv[1] == 'console'):
+            runInGUI = False
+    if runInGUI:
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)
+    else:
+        consoleRun()
