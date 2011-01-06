@@ -187,8 +187,7 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	{
 		daeConfig& cfg = daeConfig::GetConfig();
 		real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
-		daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(pModel, dAbsTolerance));
+		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(m_pModel, dAbsTolerance));
 		
 		SetUpOptimization();
 	}
@@ -1082,8 +1081,11 @@ daeModel_t* daeSimulation::GetModel(void) const
 void daeSimulation::SetModel(daeModel_t* pModel)
 {
 	if(!pModel)
-		return;
-	m_pModel = pModel;
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	m_pModel = dynamic_cast<daeModel*>(pModel);
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer)
 }
 
 daeDataReporter_t* daeSimulation::GetDataReporter(void) const

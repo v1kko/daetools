@@ -100,7 +100,7 @@ protected:
 	real_t						m_dTimeHorizon;
 	real_t						m_dReportingInterval;
 	daeLog_t*					m_pLog;
-	daeModel_t*					m_pModel;
+	daeModel*					m_pModel;
 	daeDataReporter_t*			m_pDataReporter;
 	daeDAESolver_t*				m_pDAESolver;
 	daePtrVector<daeBlock_t*>	m_ptrarrBlocks;

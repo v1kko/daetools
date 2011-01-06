@@ -123,7 +123,7 @@ BOOST_PYTHON_MODULE(pyActivity)
 		.def("Finalize",               pure_virtual(&daeOptimization_t::Finalize))
 	;
 	
-	class_<daeOptimization, bases<daeSimulation_t>, boost::noncopyable>("daeOptimization")
+	class_<daeOptimization, bases<daeOptimization_t>, boost::noncopyable>("daeOptimization")
 		.def("Initialize",             &daeOptimization::Initialize)
 		.def("Run",                    &daeOptimization::Run)
 		.def("Finalize",               &daeOptimization::Finalize)

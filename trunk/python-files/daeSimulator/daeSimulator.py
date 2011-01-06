@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, tempfile
+import os, platform, sys, tempfile
 from daetools.pyDAE import *
 from time import localtime, strftime
 from PyQt4 import QtCore, QtGui
@@ -36,6 +36,13 @@ class daeSimulator(QtGui.QDialog):
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
         
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        if platform.system() == 'Linux':
+            font.setFamily("Monospace")
+        else:
+            font.setFamily("Courier New")
+        self.ui.textEdit.setFont(font)
         self.setWindowTitle("DAE Tools Simulator v" + daeVersion(True))
 
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)

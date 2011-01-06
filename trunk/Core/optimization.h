@@ -54,6 +54,9 @@ namespace activity
 class daeOptimization_t
 {
 public:
+	virtual ~daeOptimization_t(void){}
+	
+public:
 	virtual void Initialize(daeSimulation_t*   pSimulation,
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 

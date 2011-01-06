@@ -156,7 +156,9 @@ public:
 	{
 		model = Model;
 		daeModel* pModel = boost::python::extract<daeModel*>(Model);
-		this->daeSimulation::SetModel(pModel);
+		if(!pModel)
+			daeDeclareAndThrowException(exInvalidPointer)
+		this->m_pModel = pModel;
 	}
 
 	void SetUpParametersAndDomains(void)
