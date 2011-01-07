@@ -239,6 +239,11 @@ public:
 	{
         this->daeSimulation::SetIntegerOptimizationVariable(a, LB, UB, defaultValue);
 	}
+	
+	daeObjectiveFunction* GetObjectiveFunction(void) const
+	{
+		return m_pObjectiveFunction.get();
+	}
     
 public:
 	boost::python::object model;	

@@ -72,7 +72,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("CurrentTime",            make_function(&daeSimulation::GetCurrentTime))       
         .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,  &daeSimulation::SetInitialConditionMode)
 
-        .add_property("ObjectiveFunction",       make_function(&daeSimulation::GetObjectiveFunction, return_internal_reference<>()))
+        .add_property("ObjectiveFunction",       make_function(&daepython::daeDefaultSimulationWrapper::GetObjectiveFunction, return_internal_reference<>()))
 
         .def("GetModel",                    &daeSimulation::GetModel, return_internal_reference<>())
         .def("SetModel",                    &daeSimulation::SetModel)
