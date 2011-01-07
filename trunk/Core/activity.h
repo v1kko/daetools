@@ -77,6 +77,10 @@ public:
 	virtual real_t				IntegrateForTimeInterval(real_t time_interval)			= 0;
 	virtual real_t				IntegrateUntilTime(real_t time, 
 												   daeeStopCriterion eStopCriterion)	= 0;
+	
+	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
+	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const = 0;
+	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
 };
 
 /******************************************************************

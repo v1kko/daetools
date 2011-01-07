@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "nlpsolver_class_factory.h"
-#include "../Core/coreimpl.h"
 #include "../Core/optimization.h"
 #include <stdio.h>
 #include <time.h>
@@ -162,13 +161,12 @@ public:
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;
 	daeDataReporter_t*	m_pDataReporter;
-	//std::vector<size_t>	m_narrOptimizationVariableIndexes;
 	
 	real_t*			    m_pdTempStorage;
 	
-	daeObjectiveFunction*					 m_pObjectiveFunction;
-	std::vector<daeOptimizationConstraint*>  m_ptrarrConstraints;
-	std::vector<daeOptimizationVariable*>    m_ptrarrOptVariables;
+	daeObjectiveFunction_t*					   m_pObjectiveFunction;
+	std::vector<daeOptimizationConstraint_t*>  m_ptrarrConstraints;
+	std::vector<daeOptimizationVariable_t*>    m_ptrarrOptVariables;
 	
 	int  m_iRunCounter;
 	bool m_bPrintInfo;

@@ -18,6 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "activity.h"
 #include "datareporting.h"
+using namespace dae::activity;
 
 namespace dae
 {

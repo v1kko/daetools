@@ -34,21 +34,9 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 	m_pdTempStorage = NULL;
 	m_iRunCounter   = 0;
 
-//	size_t i;
-//	daeOptimizationVariable* pOptVariable;
-	
-	daeSimulation* pSim = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSim)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-// Get the objective function, opt. variables and constraints from the simulation 
-// In BONMIN get_nlp_info is called twice. Why is that??
-	m_ptrarrConstraints.clear();
-	m_ptrarrOptVariables.clear();
-	
-	pSim->GetOptimizationConstraints(m_ptrarrConstraints);
-	pSim->GetOptimizationVariables(m_ptrarrOptVariables);
-	m_pObjectiveFunction = pSim->GetObjectiveFunction();
+	m_pSimulation->GetOptimizationConstraints(m_ptrarrConstraints);
+	m_pSimulation->GetOptimizationVariables(m_ptrarrOptVariables);
+	m_pObjectiveFunction = m_pSimulation->GetObjectiveFunction();
 
 	if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
 		daeDeclareAndThrowException(exInvalidPointer)
@@ -59,15 +47,6 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 
 	m_pdTempStorage = new real_t[n];
 				
-// Generate the array of opt. variables indexes
-//	m_narrOptimizationVariableIndexes.clear();
-//	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-//	{
-//		pOptVariable = m_ptrarrOptVariables[i];
-			
-//		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetOverallIndex());
-//	}
-	
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_bPrintInfo = cfg.Get<bool>("daetools.minlpsolver.printInfo", false);
 }
@@ -85,7 +64,7 @@ bool daeMINLP::get_variables_types(Index n,
 								   VariableType* var_types)
 {
 	size_t i;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 	
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
@@ -111,7 +90,7 @@ bool daeMINLP::get_variables_linearity(Index n,
 									   Ipopt::TNLP::LinearityType* var_types)
 {
 	size_t i;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 	
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
@@ -138,7 +117,7 @@ bool daeMINLP::get_constraints_linearity(Index m,
 									     Ipopt::TNLP::LinearityType* const_types)
 {
 	size_t i;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 	
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
@@ -163,7 +142,7 @@ bool daeMINLP::get_nlp_info(Index& n,
 						    TNLP::IndexStyleEnum& index_style)
 {
 	size_t i;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 	std::vector<size_t> narrOptimizationVariablesIndexes;
 	
 // Set the number of opt. variables and constraints
@@ -198,8 +177,8 @@ bool daeMINLP::get_bounds_info(Index n,
 							   Number* g_u)
 {
 	size_t i, j;
-	daeOptimizationConstraint* pConstraint;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationConstraint_t* pConstraint;
+	daeOptimizationVariable_t* pOptVariable;
 
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
@@ -246,7 +225,7 @@ bool daeMINLP::get_starting_point(Index n,
 								  Number* lambda)
 {
 	size_t i;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 
 // I am interested ONLY in initial values for opt. variables (x) 
 	if(init_x)
@@ -324,14 +303,6 @@ bool daeMINLP::eval_grad_f(Index n,
 		
 		m_pObjectiveFunction->GetGradients(matSens, grad_f, n);
 		
-/*	OLD	
-		// Iterate and set only the values for the opt. variable indexes in the objective function
-		for(j = 0; j < m_pObjectiveFunction->m_narrOptimizationVariablesIndexes.size(); j++)
-		{
-			grad_f[j] = matSens.GetItem(m_pObjectiveFunction->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
-								        m_pObjectiveFunction->m_nEquationIndexInBlock);              // Equation index
-		}
-*/		
 		if(m_bPrintInfo) 
 		{
 			string strMessage;
@@ -357,7 +328,7 @@ bool daeMINLP::eval_g(Index n,
 					  Number* g)
 {
 	size_t i;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 
 	if(m != m_ptrarrConstraints.size())
 		daeDeclareAndThrowException(exInvalidCall)
@@ -401,7 +372,7 @@ bool daeMINLP::eval_gi(Index n,
 					   Index i, 
 					   Number& gi)
 {
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 
 	try
 	{
@@ -435,7 +406,7 @@ bool daeMINLP::eval_jac_g(Index n,
 						  Number* values)
 {
 	size_t i, j, counter, paramIndex;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 	std::vector<size_t> narrOptimizationVariablesIndexes;
 
 	try
@@ -505,15 +476,6 @@ bool daeMINLP::eval_jac_g(Index n,
 					values[counter] = m_pdTempStorage[paramIndex];
 					counter++;
 				}
-				
-/*	OLD			
-				for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
-				{
-					values[counter] = matSens.GetItem(pConstraint->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
-											          pConstraint->m_nEquationIndexInBlock );             // Equation index
-					counter++;
-				}
-*/
 			}
 			if(nele_jac != counter)
 				daeDeclareAndThrowException(exInvalidCall)
@@ -546,7 +508,7 @@ bool daeMINLP::eval_grad_gi(Index n,
 						    Number* values)
 {
 	size_t j, counter, paramIndex;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 	std::vector<size_t> narrOptimizationVariablesIndexes;
 
 	try
@@ -612,20 +574,10 @@ bool daeMINLP::eval_grad_gi(Index n,
 				values[counter] = m_pdTempStorage[paramIndex];
 				counter++;
 			}
-			if(nele_grad_gi != counter)
-				daeDeclareAndThrowException(exInvalidCall)
 			
-/*			
-			for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
-			{
-				values[counter] = matSens.GetItem(pConstraint->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
-												  pConstraint->m_nEquationIndexInBlock );             // Equation index
-				counter++;
-			}
 			if(nele_grad_gi != counter)
 				daeDeclareAndThrowException(exInvalidCall)
-*/
-				
+						
 			if(m_bPrintInfo) 
 			{
 				string strMessage;
@@ -667,8 +619,8 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationVariable* pOptVariable;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationVariable_t* pOptVariable;
+	daeOptimizationConstraint_t* pConstraint;
 		
 	if(status == TMINLP::SUCCESS)
 		strMessage = "Optimal Solution Found!";	
@@ -747,7 +699,7 @@ void daeMINLP::PrintOptimizationVariables(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
@@ -764,7 +716,7 @@ void daeMINLP::PrintConstraints(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
@@ -782,7 +734,7 @@ void daeMINLP::PrintVariablesTypes(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 	
 	m_pLog->Message(string("Variable types:"), 0);
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
@@ -806,7 +758,7 @@ void daeMINLP::PrintVariablesLinearity(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 	
 	m_pLog->Message(string("Variable linearity:"), 0);
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
@@ -831,7 +783,7 @@ void daeMINLP::PrintConstraintsLinearity(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationConstraint* pConstraint;
+	daeOptimizationConstraint_t* pConstraint;
 	
 	m_pLog->Message(string("Constraints linearity:"), 0);
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
@@ -852,8 +804,8 @@ void daeMINLP::PrintBoundsInfo(void)
 {
 	size_t i;
 	string strMessage;
-	daeOptimizationConstraint* pConstraint;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationConstraint_t* pConstraint;
+	daeOptimizationVariable_t* pOptVariable;
 
 	m_pLog->Message(string("Variables bounds:"), 0);
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
@@ -885,7 +837,7 @@ void daeMINLP::PrintBoundsInfo(void)
 void daeMINLP::PrintStartingPoint(void)
 {
 	size_t i;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 
 	m_pLog->Message(string("Starting point:"), 0);
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
@@ -901,7 +853,7 @@ void daeMINLP::PrintStartingPoint(void)
 void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 {
 	size_t i, j;
-	daeOptimizationVariable* pOptVariable;
+	daeOptimizationVariable_t* pOptVariable;
 	
 	m_pLog->IncreaseIndent(1);
 	m_pLog->Message(string("Starting the run No. ") + toString(m_iRunCounter + 1) + string(" ..."), 0);

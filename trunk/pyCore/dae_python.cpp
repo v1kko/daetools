@@ -529,7 +529,21 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__str__",					&daepython::daePort_str)
 		.def("SetReportingOn",			&daePort::SetReportingOn)
 		;
- 
+	
+	class_<daeObjectiveFunction_t, boost::noncopyable>("daeObjectiveFunction_t", no_init)
+		;
+
+	class_<daeOptimizationConstraint_t, boost::noncopyable>("daeOptimizationConstraint_t", no_init)
+		;
+
+	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t>, boost::noncopyable>("daeObjectiveFunction", no_init)
+		.add_property("Residual",	&daeObjectiveFunction::GetResidual,  &daeObjectiveFunction::SetResidual)
+		;
+
+	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t>, boost::noncopyable>("daeOptimizationConstraint", no_init)
+		.add_property("Residual",	&daeOptimizationConstraint::GetResidual,  &daeOptimizationConstraint::SetResidual)
+		;
+	
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel")
 		.def(init<string, optional<daeModel*, string> >())
  	
@@ -604,17 +618,10 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("SetActiveState",				&daepython::daeSTNWrapper::SetActState)
         ;
-
-	class_<daeObjectiveFunction, bases<daeObject>, boost::noncopyable>("daeObjectiveFunction", no_init)
-		.add_property("Residual",	&daeObjectiveFunction::GetResidual,  &daeObjectiveFunction::SetResidual)
-		;
-
-	class_<daeOptimizationConstraint, bases<daeObject>, boost::noncopyable>("daeOptimizationConstraint", no_init)
-		.add_property("Residual",	&daeOptimizationConstraint::GetResidual,  &daeOptimizationConstraint::SetResidual)
-		;
-
+	
 	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")
 		;
+	
     
 /**************************************************************
 	daeLog

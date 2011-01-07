@@ -60,8 +60,7 @@ real_t daeObjectiveFunction::GetValue(void) const
 }
 /*
  This function DOES NOT set gradients for ALL optimization variables but only for those that the obj.function depends on!!! 
- Therefore the array 'gradients' has to be Nparams long!
- Indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
+ Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
  matSensitivities is a (Nparams) x (Nvariables) matrix
 
  Here I need values for the column 'k' (marked with x below):
@@ -300,8 +299,7 @@ real_t daeOptimizationConstraint::GetValue(void) const
 
 /*
  This function DOES NOT set gradients for ALL optimization variables but only for those that the constraint depends on!!! 
- Therefore the array 'gradients' has to be Nparams long!
- Indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
+ Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
  matSensitivities is a (Nparams) x (Nvariables) matrix ... see the discussion above (daeOptimizationFunction::GetGradients)
 */
 void daeOptimizationConstraint::GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const

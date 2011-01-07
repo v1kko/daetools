@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simHS71);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simToy);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
@@ -49,8 +49,9 @@ int main(int argc, char *argv[])
 		if(bRunOptimization)
 		{	
 			pOptimization->Initialize(pSimulation.get(), pNLPSolver.get(), pDAESolver.get(), pDataReporter.get(), pLog.get());
-			pSimulation->GetModel()->SaveModelReport("simTest.xml");
-			pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+			
+			pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");
+			pSimulation->GetModel()->SaveRuntimeModelReport(pSimulation->GetModel()->GetName() + "-rt.xml");
 			
 			pOptimization->Run();
 			pOptimization->Finalize();
@@ -60,8 +61,8 @@ int main(int argc, char *argv[])
 			pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
 			pSimulation->SolveInitial();
 			
-			pSimulation->GetModel()->SaveModelReport("simTest.xml");
-			pSimulation->GetModel()->SaveRuntimeModelReport("simTest-rt.xml");
+			pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");
+			pSimulation->GetModel()->SaveRuntimeModelReport(pSimulation->GetModel()->GetName() + "-rt.xml");
 		  
 			pSimulation->Run();
 			pSimulation->Finalize();

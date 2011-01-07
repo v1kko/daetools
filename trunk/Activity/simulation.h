@@ -53,9 +53,9 @@ public:
 	virtual void				SetUpVariables(void);
 	virtual void				SetUpOptimization(void);
 	
-	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint*>& ptrarrConstraints) const;
-	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable*>&   ptrarrOptVariables) const;
-	virtual daeObjectiveFunction* GetObjectiveFunction(void) const;
+	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
+	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const;
+	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const;
 
 //	void GetOptimizationConstraints(std::vector< boost::shared_ptr<daeOptimizationConstraint> >& ptrarrConstraints);
 //	void GetOptimizationVariables  (std::vector< boost::shared_ptr<daeOptimizationVariable> >&   ptrarrOptVariables);

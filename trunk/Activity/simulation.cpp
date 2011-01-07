@@ -674,19 +674,19 @@ void daeSimulation::CheckSystem(void) const
 	}
 }
 
-void daeSimulation::GetOptimizationConstraints(std::vector<daeOptimizationConstraint*>& ptrarrConstraints) const
+void daeSimulation::GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const
 {
 	for(size_t i = 0; i < m_arrConstraints.size(); i++)
 		ptrarrConstraints.push_back(m_arrConstraints[i].get());
 }
 
-void daeSimulation::GetOptimizationVariables(std::vector<daeOptimizationVariable*>& ptrarrOptVariables) const
+void daeSimulation::GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const
 {
 	for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
 		ptrarrOptVariables.push_back(m_arrOptimizationVariables[i].get());
 }
 
-daeObjectiveFunction* daeSimulation::GetObjectiveFunction(void) const
+daeObjectiveFunction_t* daeSimulation::GetObjectiveFunction(void) const
 {
 	return m_pObjectiveFunction.get();
 }

@@ -6,7 +6,7 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pyBONMIN)
 {
-    import_array(); 
+    import_array();
     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 
 	class_<daepython::daeNLPSolverWrapper, boost::noncopyable>("daeNLPSolver_t", no_init)

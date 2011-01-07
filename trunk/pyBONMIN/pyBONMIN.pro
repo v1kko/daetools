@@ -8,16 +8,18 @@ INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
                $${BONMIN_INCLUDE}
 
-QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
+QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
+                $${PYTHON_LIB_DIR} \
                 $${BONMIN_LIBDIR} \
                 $${MUMPS_LIBDIR}
 
-LIBS += $${DAE_NLPSOLVER_LIB} \
+LIBS += $${BOOST_PYTHON_LIB} \
+        $${DAE_SIMULATION_LIB} \
         $${DAE_DATAREPORTERS_LIB} \
         $${DAE_CORE_LIB} \
-        $${DAE_SIMULATION_LIB} \
         $${DAE_SOLVER_LIB} \
-        $${BOOST_PYTHON_LIB} \
+        $${DAE_NLPSOLVER_LIB} \
+        $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${BONMIN_LIBS} \
         $${MUMPS_LIBS}

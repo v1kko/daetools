@@ -7,7 +7,14 @@ CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
                $${BONMIN_INCLUDE}
 
-LIBS += $${DAE_CORE_LIB} \
+QMAKE_LIBDIR += $${BONMIN_LIBDIR} \
+                $${MUMPS_LIBDIR}
+
+LIBS += $${DAE_SIMULATION_LIB} \
+        $${DAE_DATAREPORTERS_LIB} \
+        $${DAE_CORE_LIB} \
+        $${DAE_SOLVER_LIB} \
+        $${BOOST_LIBS} \
         $${BONMIN_LIBS} \
         $${MUMPS_LIBS}
 
