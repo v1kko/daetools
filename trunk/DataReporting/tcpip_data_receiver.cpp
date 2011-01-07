@@ -423,7 +423,7 @@ void daeTCPIPDataReceiver::thread(void)
 			}
 			if(nRead != msgSize)
 			{
-				delete data;
+				delete[] data;
 				cout << "Message not read completely; " << nRead << " bytes has been read; "
 					 << "Error: " << ec.message() << endl;
 				return;				

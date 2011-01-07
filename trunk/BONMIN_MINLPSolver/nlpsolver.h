@@ -164,6 +164,8 @@ public:
 	daeDataReporter_t*	m_pDataReporter;
 	//std::vector<size_t>	m_narrOptimizationVariableIndexes;
 	
+	real_t*			    m_pdTempStorage;
+	
 	daeObjectiveFunction*					 m_pObjectiveFunction;
 	std::vector<daeOptimizationConstraint*>  m_ptrarrConstraints;
 	std::vector<daeOptimizationVariable*>    m_ptrarrOptVariables;

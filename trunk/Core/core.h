@@ -637,7 +637,91 @@ public:
 	virtual void	SetTime(real_t time) = 0;
 	
 	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const = 0;
+	
+	virtual bool	IsModelDynamic() const = 0;
 };
+
+
+/******************************************************************
+	daeOptimizationVariable_t
+*******************************************************************/
+class daeOptimizationVariable_t
+{
+public:
+	virtual ~daeOptimizationVariable_t(void){}
+	
+public:
+	virtual std::string GetName(void) const = 0;
+	
+	virtual size_t GetOverallIndex(void) const = 0;
+	virtual size_t GetOptimizationVariableIndex(void) const = 0;
+	
+	virtual void SetValue(real_t value) = 0;
+	virtual real_t GetValue(void) const = 0;
+	
+	virtual void SetType(daeeOptimizationVariableType value) = 0;
+	virtual daeeOptimizationVariableType GetType(void) const = 0;
+
+	virtual void SetStartingPoint(real_t value) = 0;
+	virtual real_t GetStartingPoint(void) const = 0;
+
+	virtual void SetLB(real_t value) = 0;
+	virtual real_t GetLB(void) const = 0;
+
+	virtual void SetUB(real_t value) = 0;
+	virtual real_t GetUB(void) const = 0;
+};
+
+/******************************************************************
+	daeObjectiveFunction_t
+*******************************************************************/
+class daeObjectiveFunction_t
+{
+public:
+	virtual ~daeObjectiveFunction_t(void){}
+	
+public:
+	virtual bool IsLinear(void) const = 0;
+	
+	virtual std::string GetName(void) const = 0;
+	virtual real_t GetValue(void) const = 0;
+	virtual void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const = 0;
+	
+	virtual void   GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;
+};
+
+
+/******************************************************************
+	daeOptimizationConstraint_t
+*******************************************************************/
+class daeOptimizationConstraint_t
+{
+public:
+	virtual ~daeOptimizationConstraint_t(void){}
+	
+public:
+	virtual void               SetType(daeeConstraintType value) = 0;
+	virtual daeeConstraintType GetType(void) const = 0;
+	
+	virtual bool IsLinear(void) const = 0;
+	
+	virtual void SetLB(real_t value) = 0;
+	virtual real_t GetLB(void) const = 0;
+
+	virtual void SetUB(real_t value) = 0;
+	virtual real_t GetUB(void) const = 0;
+	
+	virtual void SetEqualityValue(real_t value) = 0;
+	virtual real_t GetEqualityValue(void) const = 0;
+
+	virtual std::string GetName(void) const = 0;
+	virtual real_t GetValue(void) const = 0;
+	virtual void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const = 0;
+
+	virtual void   GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;
+};
+
+
 
 /******************************************************************
 	daeModelInfo
@@ -689,7 +773,7 @@ public:
 
 	virtual void	SaveModelReport(const string& strFileName) const		= 0;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
-	virtual bool IsModelDynamic() const										= 0;
+	virtual bool	IsModelDynamic() const									= 0;
 
 	virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName)		= 0;

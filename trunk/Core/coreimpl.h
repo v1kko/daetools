@@ -1138,6 +1138,8 @@ public:
 
 	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const;
 	
+	virtual bool	IsModelDynamic() const;
+	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;
 	void			SetDataProxy(daeDataProxy_t* pDataProxy);
@@ -1642,6 +1644,8 @@ protected:
 	friend class adSetupExpressionDerivativeNode;
 	friend class adSetupExpressionPartialDerivativeNode;
 	friend class daeOptimizationVariable;
+	friend class daeObjectiveFunction;
+	friend class daeOptimizationConstraint;
 };	
 
 /******************************************************************
@@ -2481,7 +2485,8 @@ public:
 /******************************************************************
 	daeOptimizationVariable
 *******************************************************************/
-class DAE_CORE_API daeOptimizationVariable : public daeObject
+class DAE_CORE_API daeOptimizationVariable : public daeOptimizationVariable_t,
+		                                     public daeRuntimeCheck
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationVariable)
@@ -2491,14 +2496,29 @@ public:
 	virtual ~daeOptimizationVariable(void);
 	
 public:
-	bool CheckObject(std::vector<string>& strarrErrors) const;
-	size_t GetOverallIndex(void) const;
-	size_t GetOptimizationVariableIndex(void) const;
-	void SetValue(real_t value);
-	real_t GetValue(void) const;
 	std::string GetName(void) const;
 	
-public:
+	size_t GetOverallIndex(void) const;
+	size_t GetOptimizationVariableIndex(void) const;
+	
+	void SetValue(real_t value);
+	real_t GetValue(void) const;
+	
+	void                         SetType(daeeOptimizationVariableType value);
+	daeeOptimizationVariableType GetType(void) const;
+
+	void SetStartingPoint(real_t value);
+	real_t GetStartingPoint(void) const;
+
+	void SetLB(real_t value);
+	real_t GetLB(void) const;
+
+	void SetUB(real_t value);
+	real_t GetUB(void) const;
+	
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+protected:
 	daeVariable*					m_pVariable;
 	real_t							m_dLB;
 	real_t							m_dUB;
@@ -2511,7 +2531,8 @@ public:
 /******************************************************************
 	daeObjectiveFunction
 *******************************************************************/
-class DAE_CORE_API daeObjectiveFunction : public daeObject
+class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
+		                                  public daeRuntimeCheck
 {
 public:
 	daeDeclareDynamicClass(daeObjectiveFunction)
@@ -2519,29 +2540,35 @@ public:
 	virtual ~daeObjectiveFunction(void);
 
 public:
-	void Open(io::xmlTag_t* pTag);
-	void Save(io::xmlTag_t* pTag) const;
-	void OpenRuntime(io::xmlTag_t* pTag);
-	void SaveRuntime(io::xmlTag_t* pTag) const;
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	bool IsLinear(void) const;
+
+	std::string GetName(void) const;
+	real_t GetValue(void) const;
+	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
+
+	void   GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
 
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
 	
-	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables);
+	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
 	
-public:
+protected:
 	daeModel*						m_pModel;
 	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
 	daeEquation*					m_pObjectiveFunction;
 	size_t							m_nEquationIndexInBlock;
+	size_t							m_nVariableIndexInBlock;
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 
 /******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
-class DAE_CORE_API daeOptimizationConstraint : public daeObject
+class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_t,
+                                               public daeRuntimeCheck
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
@@ -2550,24 +2577,40 @@ public:
 	virtual ~daeOptimizationConstraint(void);
 
 public:
-	void Open(io::xmlTag_t* pTag);
-	void Save(io::xmlTag_t* pTag) const;
-	void OpenRuntime(io::xmlTag_t* pTag);
-	void SaveRuntime(io::xmlTag_t* pTag) const;
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void               SetType(daeeConstraintType value);
+	daeeConstraintType GetType(void) const;
+	
+	bool IsLinear(void) const;
+	
+	void SetLB(real_t value);
+	real_t GetLB(void) const;
+
+	void SetUB(real_t value);
+	real_t GetUB(void) const;
+	
+	void SetEqualityValue(real_t value);
+	real_t GetEqualityValue(void) const;
+
+	std::string GetName(void) const;
+	real_t GetValue(void) const;
+	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
+
+	void   GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
 
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
 	
-	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables);
+	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
 
-public:
+protected:
 	daeeConstraintType				m_eConstraintType;
 	real_t							m_dLB;
 	real_t							m_dUB;
-	real_t							m_dValue;
 	daeModel*						m_pModel;
 	size_t							m_nEquationIndexInBlock;
+	size_t							m_nVariableIndexInBlock;
 	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
 	daeEquation*					m_pConstraintFunction;
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;

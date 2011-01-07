@@ -130,7 +130,7 @@ void daeTCPIPLogServer::thread()
 			}
 			if(nRead != msgSize)
 			{
-				delete data;
+				delete[] data;
 				data = NULL;
 				cout << "Message not read completely; " << nRead << " bytes has been read; "
 					 << "Error: " << error.message() << endl;

@@ -206,16 +206,8 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 
 	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
 
-//Determine if there is any differential variable; if true set the model as dynamic
-	m_bIsModelDynamic = false;
-	for(size_t i = 0; i < m_nNumberOfEquations; i++)
-	{
-		if(pInitialConditionsTypes[i] == cnDifferential)
-		{
-			m_bIsModelDynamic = true;
-			break;
-		}
-	}
+// Determine if the model is dynamic or steady-state
+	m_bIsModelDynamic = m_pBlock->IsModelDynamic();
 	m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
 
 // Absolute tolerances
@@ -643,7 +635,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 		if(!CheckFlag(retval)) 
 		{
 			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver cravenly refused to set the time horizon (the stop time) at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+			e << "Sundials IDAS solver cravenly refused to set the stop time at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
 

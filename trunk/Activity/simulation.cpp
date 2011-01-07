@@ -302,7 +302,7 @@ void daeSimulation::SetupSolver(void)
 		}
 		
 	// 3. Initialize the objective function
-		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables);
+		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
 		
 	// 4. Initialize the constraints
 		for(i = 0; i < m_arrConstraints.size(); i++)
@@ -311,7 +311,7 @@ void daeSimulation::SetupSolver(void)
 			if(!pConstraint)
 				daeDeclareAndThrowException(exInvalidPointer)
 				
-			pConstraint->Initialize(m_arrOptimizationVariables);
+			pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
 		}
 	}
 

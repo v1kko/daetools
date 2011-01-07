@@ -31,10 +31,11 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 	m_pDataReporter		 = pDataReporter;
 	m_pLog			     = pLog;
 	
-	m_iRunCounter = 0;
+	m_pdTempStorage = NULL;
+	m_iRunCounter   = 0;
 
-	size_t i;
-	daeOptimizationVariable* pOptVariable;
+//	size_t i;
+//	daeOptimizationVariable* pOptVariable;
 	
 	daeSimulation* pSim = dynamic_cast<daeSimulation*>(m_pSimulation);
 	if(!pSim)
@@ -51,6 +52,12 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 
 	if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
 		daeDeclareAndThrowException(exInvalidPointer)
+		
+	size_t n = m_ptrarrOptVariables.size();
+	if(n == 0)
+		daeDeclareAndThrowException(exInvalidCall)
+
+	m_pdTempStorage = new real_t[n];
 				
 // Generate the array of opt. variables indexes
 //	m_narrOptimizationVariableIndexes.clear();
@@ -67,6 +74,11 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 
 daeMINLP::~daeMINLP(void)
 {
+	if(m_pdTempStorage)
+	{
+		delete[] m_pdTempStorage;
+		m_pdTempStorage = NULL;
+	}
 }
 
 bool daeMINLP::get_variables_types(Index n, 
@@ -79,11 +91,11 @@ bool daeMINLP::get_variables_types(Index n,
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		
-		if(pOptVariable->m_eType == eIntegerVariable)
+		if(pOptVariable->GetType() == eIntegerVariable)
 			var_types[i] = INTEGER;
-		else if(pOptVariable->m_eType == eBinaryVariable)
+		else if(pOptVariable->GetType() == eBinaryVariable)
 			var_types[i] = BINARY;
-		else if(pOptVariable->m_eType == eContinuousVariable)
+		else if(pOptVariable->GetType() == eContinuousVariable)
 			var_types[i] = CONTINUOUS;
 		else
 			daeDeclareAndThrowException(exNotImplemented)
@@ -105,11 +117,11 @@ bool daeMINLP::get_variables_linearity(Index n,
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		
-		if(pOptVariable->m_eType == eIntegerVariable)
+		if(pOptVariable->GetType() == eIntegerVariable)
 			var_types[i] = Ipopt::TNLP::LINEAR;
-		else if(pOptVariable->m_eType == eBinaryVariable)
+		else if(pOptVariable->GetType() == eBinaryVariable)
 			var_types[i] = Ipopt::TNLP::LINEAR;
-		else if(pOptVariable->m_eType == eContinuousVariable)
+		else if(pOptVariable->GetType() == eContinuousVariable)
 			var_types[i] = Ipopt::TNLP::NON_LINEAR;
 		else
 			daeDeclareAndThrowException(exNotImplemented)
@@ -132,8 +144,7 @@ bool daeMINLP::get_constraints_linearity(Index m,
 	{
 		pConstraint = m_ptrarrConstraints[i];
 	
-	// Here I access SetupNode!! Is it wise??
-		if(pConstraint->m_pConstraintFunction->GetResidual().node->IsLinear())
+		if(pConstraint->IsLinear())
 			const_types[i] = Ipopt::TNLP::LINEAR;
 		else
 			const_types[i] = Ipopt::TNLP::NON_LINEAR;
@@ -153,40 +164,15 @@ bool daeMINLP::get_nlp_info(Index& n,
 {
 	size_t i;
 	daeOptimizationConstraint* pConstraint;
-	
-/*	
-	daeOptimizationVariable* pOptVariable;
-
-	daeSimulation* pSimulation = dynamic_cast<daeSimulation*>(m_pSimulation);
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-// Get the objective function, opt. variables and constraints from the simulation 
-// In BONMIN get_nlp_info is called twice. Why is that??
-	m_ptrarrConstraints.clear();
-	m_ptrarrOptVariables.clear();
-	
-	pSimulation->GetOptimizationConstraints(m_ptrarrConstraints);
-	pSimulation->GetOptimizationVariables(m_ptrarrOptVariables);
-	m_pObjectiveFunction = pSimulation->GetObjectiveFunction();
-
-	if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
-		return false;
-				
-// Generate the array of opt. variables indexes
-	m_narrOptimizationVariableIndexes.clear();
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-			
-		m_narrOptimizationVariableIndexes.push_back(pOptVariable->GetIndex());
-	}	
-*/
+	std::vector<size_t> narrOptimizationVariablesIndexes;
 	
 // Set the number of opt. variables and constraints
 	n = m_ptrarrOptVariables.size();
 	m = m_ptrarrConstraints.size();
 	index_style = TNLP::C_STYLE;
+	
+	if(n == 0)
+		daeDeclareAndThrowException(exInvalidCall)
 	
 // Set the jacobian number of non-zeroes
 	nnz_jac_g = 0;
@@ -194,8 +180,11 @@ bool daeMINLP::get_nlp_info(Index& n,
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
 		pConstraint = m_ptrarrConstraints[i];
+		
+		narrOptimizationVariablesIndexes.clear();
+		pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
 	
-		nnz_jac_g += pConstraint->m_narrOptimizationVariablesIndexes.size();
+		nnz_jac_g += narrOptimizationVariablesIndexes.size();
 	}
 	
 	return true;
@@ -216,23 +205,23 @@ bool daeMINLP::get_bounds_info(Index n,
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 			
-		x_l[i] = pOptVariable->m_dLB;
-		x_u[i] = pOptVariable->m_dUB;
+		x_l[i] = pOptVariable->GetLB();
+		x_u[i] = pOptVariable->GetUB();
 	}	
 
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
 		pConstraint = m_ptrarrConstraints[i];
 	
-		if(pConstraint->m_eConstraintType == eInequalityConstraint)
+		if(pConstraint->GetType() == eInequalityConstraint)
 		{
-			g_l[i] = pConstraint->m_dLB;
-			g_u[i] = pConstraint->m_dUB;
+			g_l[i] = pConstraint->GetLB();
+			g_u[i] = pConstraint->GetUB();
 		}
-		else if(pConstraint->m_eConstraintType == eEqualityConstraint)
+		else if(pConstraint->GetType() == eEqualityConstraint)
 		{
-			g_l[i] = pConstraint->m_dValue;
-			g_u[i] = pConstraint->m_dValue;
+			g_l[i] = pConstraint->GetEqualityValue();
+			g_u[i] = pConstraint->GetEqualityValue();
 		}
 		else
 		{
@@ -266,7 +255,7 @@ bool daeMINLP::get_starting_point(Index n,
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
 				
-			x[i] = pOptVariable->m_dDefaultValue;
+			x[i] = pOptVariable->GetStartingPoint();
 		}
 		
 		if(m_bPrintInfo) 
@@ -293,7 +282,7 @@ bool daeMINLP::eval_f(Index n,
 			m_iRunCounter++;
 		}
 		
-		obj_value = m_pObjectiveFunction->m_pObjectiveVariable->GetValue();
+		obj_value = m_pObjectiveFunction->GetValue();
 		
 		if(m_bPrintInfo) 
 		{
@@ -333,13 +322,16 @@ bool daeMINLP::eval_grad_f(Index n,
 		// Set all values to 0
 		::memset(grad_f, 0, n * sizeof(Number));
 		
+		m_pObjectiveFunction->GetGradients(matSens, grad_f, n);
+		
+/*	OLD	
 		// Iterate and set only the values for the opt. variable indexes in the objective function
 		for(j = 0; j < m_pObjectiveFunction->m_narrOptimizationVariablesIndexes.size(); j++)
 		{
 			grad_f[j] = matSens.GetItem(m_pObjectiveFunction->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
 								        m_pObjectiveFunction->m_nEquationIndexInBlock);              // Equation index
 		}
-		
+*/		
 		if(m_bPrintInfo) 
 		{
 			string strMessage;
@@ -382,7 +374,7 @@ bool daeMINLP::eval_g(Index n,
 		{
 			pConstraint = m_ptrarrConstraints[i];
 				
-			g[i] = pConstraint->m_pConstraintVariable->GetValue();
+			g[i] = pConstraint->GetValue();
 		}
 		
 		if(m_bPrintInfo) 
@@ -422,7 +414,7 @@ bool daeMINLP::eval_gi(Index n,
 			daeDeclareAndThrowException(exInvalidCall)
 
 		pConstraint = m_ptrarrConstraints[i];
-		gi = pConstraint->m_pConstraintVariable->GetValue();
+		gi = pConstraint->GetValue();
 	}
 	catch(std::exception& e)
 	{
@@ -442,8 +434,9 @@ bool daeMINLP::eval_jac_g(Index n,
 						  Index *jCol,
 						  Number* values)
 {
-	size_t i, j, counter;
+	size_t i, j, counter, paramIndex;
 	daeOptimizationConstraint* pConstraint;
+	std::vector<size_t> narrOptimizationVariablesIndexes;
 
 	try
 	{
@@ -454,13 +447,16 @@ bool daeMINLP::eval_jac_g(Index n,
 			for(i = 0; i < m_ptrarrConstraints.size(); i++)
 			{
 				pConstraint = m_ptrarrConstraints[i];
+				
+				narrOptimizationVariablesIndexes.clear();
+				pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
 					
 			// Add indexes for the current constraint
 			// Achtung: m_narrOptimizationVariablesIndexes must previously be sorted (in function Initialize)
-				for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
+				for(j = 0; j < narrOptimizationVariablesIndexes.size(); j++)
 				{
 					iRow[counter] = i; // The row number is 'i' (the current constraint)
-					jCol[counter] = pConstraint->m_narrOptimizationVariablesIndexes[j];
+					jCol[counter] = narrOptimizationVariablesIndexes[j];
 					counter++;
 				}
 			}
@@ -480,6 +476,8 @@ bool daeMINLP::eval_jac_g(Index n,
 			daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 			if(n != matSens.GetNrows())
 				daeDeclareAndThrowException(exInvalidCall)
+			if(!m_pdTempStorage)
+				daeDeclareAndThrowException(exInvalidCall)
 
 			// Set all values to 0
 			::memset(values, 0, nele_jac * sizeof(Number));
@@ -488,15 +486,34 @@ bool daeMINLP::eval_jac_g(Index n,
 			for(i = 0; i < m_ptrarrConstraints.size(); i++)
 			{
 				pConstraint = m_ptrarrConstraints[i];
-				if(!pConstraint)
-					daeDeclareAndThrowException(exInvalidPointer)
 											
+				narrOptimizationVariablesIndexes.clear();
+				pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
+
+			// The function GetGradients needs an array of size n (number of opt. variables)
+			// Therefore, first I should to set all values to zero (I dont have to, but just in case)
+				::memset(m_pdTempStorage, 0, n * sizeof(real_t));
+				
+			// Call GetGradients to fill the array m_pdTempStorage with gradients
+			// ONLY the values for indexes in the current constraint are set!! The rest is left as it is (zero)
+				pConstraint->GetGradients(matSens, m_pdTempStorage, n);
+
+			// Copy the values to the gradients array
+				for(j = 0; j < narrOptimizationVariablesIndexes.size(); j++)
+				{
+					paramIndex = narrOptimizationVariablesIndexes[j];
+					values[counter] = m_pdTempStorage[paramIndex];
+					counter++;
+				}
+				
+/*	OLD			
 				for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
 				{
 					values[counter] = matSens.GetItem(pConstraint->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
 											          pConstraint->m_nEquationIndexInBlock );             // Equation index
 					counter++;
 				}
+*/
 			}
 			if(nele_jac != counter)
 				daeDeclareAndThrowException(exInvalidCall)
@@ -528,8 +545,9 @@ bool daeMINLP::eval_grad_gi(Index n,
 						    Index* jCol,
 						    Number* values)
 {
-	size_t j, counter;
+	size_t j, counter, paramIndex;
 	daeOptimizationConstraint* pConstraint;
+	std::vector<size_t> narrOptimizationVariablesIndexes;
 
 	try
 	{
@@ -541,15 +559,16 @@ bool daeMINLP::eval_grad_gi(Index n,
 		// Return the structure only
 			
 			pConstraint = m_ptrarrConstraints[i];
-			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer)
+				
+			narrOptimizationVariablesIndexes.clear();
+			pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
 					
 		// Add indexes for the current constraint
 		// Achtung: m_narrOptimizationVariablesIndexes must previously be sorted (in function Initialize)
 			counter = 0;
-			for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
+			for(j = 0; j < narrOptimizationVariablesIndexes.size(); j++)
 			{
-				jCol[counter] = pConstraint->m_narrOptimizationVariablesIndexes[j];
+				jCol[counter] = narrOptimizationVariablesIndexes[j];
 				counter++;
 			}
 			
@@ -574,18 +593,38 @@ bool daeMINLP::eval_grad_gi(Index n,
 
 			counter = 0;
 			pConstraint = m_ptrarrConstraints[i];
-			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer)
-										
+			
+			narrOptimizationVariablesIndexes.clear();
+			pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
+
+		// The function GetGradients needs an array of size n (number of opt. variables)
+		// Therefore, first I should to set all values to zero (I dont have to, but just in case)
+			::memset(m_pdTempStorage, 0, n * sizeof(real_t));
+			
+		// Call GetGradients to fill the array m_pdTempStorage with gradients
+		// ONLY the values for indexes in the current constraint are set!! The rest is left as it is (zero)
+			pConstraint->GetGradients(matSens, m_pdTempStorage, n);
+
+		// Copy the values to the gradients array
+			for(j = 0; j < narrOptimizationVariablesIndexes.size(); j++)
+			{
+				paramIndex = narrOptimizationVariablesIndexes[j];
+				values[counter] = m_pdTempStorage[paramIndex];
+				counter++;
+			}
+			if(nele_grad_gi != counter)
+				daeDeclareAndThrowException(exInvalidCall)
+			
+/*			
 			for(j = 0; j < pConstraint->m_narrOptimizationVariablesIndexes.size(); j++)
 			{
 				values[counter] = matSens.GetItem(pConstraint->m_narrOptimizationVariablesIndexes[j], // Sensitivity parameter index
 												  pConstraint->m_nEquationIndexInBlock );             // Equation index
 				counter++;
 			}
-
 			if(nele_grad_gi != counter)
 				daeDeclareAndThrowException(exInvalidCall)
+*/
 				
 			if(m_bPrintInfo) 
 			{
@@ -652,7 +691,7 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 				 toStringFormatted("Final value",        16);
 	m_pLog->Message(strMessage, 0);
 	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
-	strMessage = toStringFormatted(m_pObjectiveFunction->m_pObjectiveVariable->GetName(), 25) +   
+	strMessage = toStringFormatted(m_pObjectiveFunction->GetName(), 25) +   
 				 toStringFormatted(obj_value,                                             16, 6, true);
 	m_pLog->Message(strMessage, 0);
 	m_pLog->Message(string(" "), 0);
@@ -667,13 +706,11 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	for(i = 0; i < n; i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
-		if(!pOptVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
 			
 		strMessage = toStringFormatted(pOptVariable->GetName(), 25)          +   
 					 toStringFormatted(x[i],                    16, 6, true) +
-		             toStringFormatted(pOptVariable->m_dLB,     16, 6, true) + 
-		             toStringFormatted(pOptVariable->m_dUB,     16, 6, true);
+		             toStringFormatted(pOptVariable->GetLB(),     16, 6, true) + 
+		             toStringFormatted(pOptVariable->GetUB(),     16, 6, true);
 		m_pLog->Message(strMessage, 0);
 	}
 	m_pLog->Message(string(" "), 0);
@@ -688,13 +725,11 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
 		pConstraint = m_ptrarrConstraints[i];
-		if(!pConstraint)
-			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = toStringFormatted(pConstraint->m_pConstraintVariable->GetName(),  25)          + 
-					 toStringFormatted(pConstraint->m_pConstraintVariable->GetValue(), 16, 6, true) +
-					 toStringFormatted(pConstraint->m_dLB,                             16, 6, true) + 
-					 toStringFormatted(pConstraint->m_dUB,                             16, 6, true);
+		strMessage = toStringFormatted(pConstraint->GetName(),  25)          + 
+					 toStringFormatted(pConstraint->GetValue(), 16, 6, true) +
+					 toStringFormatted(pConstraint->GetLB(),    16, 6, true) + 
+					 toStringFormatted(pConstraint->GetUB(),    16, 6, true);
 		m_pLog->Message(strMessage, 0);
 	}	
 	m_pLog->Message(string(" "), 0);
@@ -703,7 +738,7 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 void daeMINLP::PrintObjectiveFunction(void)
 {
 	string strMessage;
-	real_t obj_value = m_pObjectiveFunction->m_pObjectiveVariable->GetValue();
+	real_t obj_value = m_pObjectiveFunction->GetValue();
 	strMessage = "Fobj = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
 	m_pLog->Message(strMessage, 0);
 }
@@ -717,8 +752,6 @@ void daeMINLP::PrintOptimizationVariables(void)
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
-		if(!pOptVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
 			
 		strMessage = pOptVariable->GetName() + 
 					 " = " + 
@@ -739,8 +772,8 @@ void daeMINLP::PrintConstraints(void)
 		if(!pConstraint)
 			daeDeclareAndThrowException(exInvalidPointer)
 			
-		strMessage = pConstraint->m_pConstraintVariable->GetName() + " = " + 
-					 toStringFormatted<real_t>(pConstraint->m_pConstraintVariable->GetValue(), -1, 10, true);
+		strMessage = pConstraint->GetName() + " = " + 
+					 toStringFormatted<real_t>(pConstraint->GetValue(), -1, 10, true);
 		m_pLog->Message(strMessage, 0);
 	}	
 }
@@ -756,11 +789,11 @@ void daeMINLP::PrintVariablesTypes(void)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		
-		if(pOptVariable->m_eType == eIntegerVariable)
+		if(pOptVariable->GetType() == eIntegerVariable)
 			strMessage = "INTEGER";
-		else if(pOptVariable->m_eType == eBinaryVariable)
+		else if(pOptVariable->GetType() == eBinaryVariable)
 			strMessage = "BINARY";
-		else if(pOptVariable->m_eType == eContinuousVariable)
+		else if(pOptVariable->GetType() == eContinuousVariable)
 			strMessage = "CONTINUOUS";
 		else
 			daeDeclareAndThrowException(exNotImplemented)
@@ -780,11 +813,11 @@ void daeMINLP::PrintVariablesLinearity(void)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 		
-		if(pOptVariable->m_eType == eIntegerVariable)
+		if(pOptVariable->GetType() == eIntegerVariable)
 			strMessage = "LINEAR";
-		else if(pOptVariable->m_eType == eBinaryVariable)
+		else if(pOptVariable->GetType() == eBinaryVariable)
 			strMessage = "LINEAR";
-		else if(pOptVariable->m_eType == eContinuousVariable)
+		else if(pOptVariable->GetType() == eContinuousVariable)
 			strMessage = "NON_LINEAR";
 		else
 			daeDeclareAndThrowException(exNotImplemented)
@@ -806,12 +839,12 @@ void daeMINLP::PrintConstraintsLinearity(void)
 		pConstraint = m_ptrarrConstraints[i];
 	
 	// Here I access SetupNode!! Is it wise??
-		if(pConstraint->m_pConstraintFunction->GetResidual().node->IsLinear())
+		if(pConstraint->IsLinear())
 			strMessage = "LINEAR";
 		else
 			strMessage = "NON_LINEAR";
 		
-		m_pLog->Message(pConstraint->m_pConstraintFunction->GetName() + " = " + strMessage, 0);
+		m_pLog->Message(pConstraint->GetName() + " = " + strMessage, 0);
 	}
 }
 
@@ -828,9 +861,9 @@ void daeMINLP::PrintBoundsInfo(void)
 		pOptVariable = m_ptrarrOptVariables[i];
 			
 		strMessage = pOptVariable->GetName() + " bounds = [" + 
-					 toStringFormatted<real_t>(pOptVariable->m_dLB, -1, 10, true) + 
+					 toStringFormatted<real_t>(pOptVariable->GetLB(), -1, 10, true) + 
 					 ", " + 
-					 toStringFormatted<real_t>(pOptVariable->m_dUB, -1, 10, true) + 
+					 toStringFormatted<real_t>(pOptVariable->GetUB(), -1, 10, true) + 
 					 "]";
 		m_pLog->Message(strMessage, 0);
 	}	
@@ -840,10 +873,10 @@ void daeMINLP::PrintBoundsInfo(void)
 	{
 		pConstraint = m_ptrarrConstraints[i];
 	
-		strMessage = pConstraint->m_pConstraintFunction->GetName() + " bounds = [" + 
-					 toStringFormatted<real_t>(pConstraint->m_dLB, -1, 10, true) + 
+		strMessage = pConstraint->GetName() + " bounds = [" + 
+					 toStringFormatted<real_t>(pConstraint->GetLB(), -1, 10, true) + 
 					 ", " + 
-					 toStringFormatted<real_t>(pConstraint->m_dUB, -1, 10, true) + 
+					 toStringFormatted<real_t>(pConstraint->GetUB(), -1, 10, true) + 
 					 "]";
 		m_pLog->Message(strMessage, 0);
 	}
@@ -861,7 +894,7 @@ void daeMINLP::PrintStartingPoint(void)
 			
 		m_pLog->Message(pOptVariable->GetName() + 
 						" = " + 
-						toStringFormatted<real_t>(pOptVariable->m_dDefaultValue, -1, 10, true), 0);
+						toStringFormatted<real_t>(pOptVariable->GetStartingPoint(), -1, 10, true), 0);
 	}	
 }
 
@@ -888,9 +921,6 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
-			if(!pOptVariable)
-				daeDeclareAndThrowException(exInvalidPointer)
-				
 			pOptVariable->SetValue(x[i]);
 		}
 		
@@ -909,9 +939,6 @@ void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
 		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
-			if(!pOptVariable)
-				daeDeclareAndThrowException(exInvalidPointer)
-				
 			pOptVariable->SetValue(x[i]);
 		}
 			

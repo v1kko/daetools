@@ -317,12 +317,12 @@ public:
 
 public:
 	modHS71(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
-		x1("x1", typex,     this, ""),
-		x2("x2", typex,     this, ""),
-		x3("x3", typex,     this, ""),
-		x4("x4", typex,     this, ""),
 		dummy("dummy", typex,     this, ""),
-		time("&tau;", typex,     this, "")
+		x1("x1",       typex,     this, ""),
+		x2("x2",       typex,     this, ""),
+		x3("x3",       typex,     this, ""),
+		x4("x4",       typex,     this, ""),
+		time("&tau;",  typex,     this, "")
 	{
 	}
 	

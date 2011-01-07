@@ -323,6 +323,14 @@ size_t daeBlock::FindVariableBlockIndex(size_t nVariableOverallIndex) const
 		return ULONG_MAX;
 }
 
+bool daeBlock::IsModelDynamic() const
+{
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer); 
+
+	return m_pDataProxy->IsModelDynamic();
+}
+
 void daeBlock::CopyValuesFromSolver(daeArray<real_t>& arrValues)
 {
 	real_t dValue;

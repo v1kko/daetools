@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial3);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simHS71);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
@@ -39,18 +39,12 @@ int main(int argc, char *argv[])
 		if(!pDataReporter->Connect(string(""), simName))
 			daeDeclareAndThrowException(exInvalidCall); 
     
-//		daeConfig& cfg = daeConfig::GetConfig();
-//		std::cout << cfg.Get<string>("daetools.version") << std::endl;
-//		std::cout << cfg.Get<real_t>("daetools.core.eventTolerance") << std::endl;
-//		std::cout << cfg.Get<real_t>("daetools.activity.timeHorizon") << std::endl;
-//		std::cout << cfg.Get<real_t>("daetools.activity.reportingInterval") << std::endl;
-		
 		pDAESolver->SetRelativeTolerance(1e-6);
         pSimulation->SetReportingInterval(1);
         pSimulation->SetTimeHorizon(2);
 		pSimulation->GetModel()->SetReportingOn(true);
 		
-		bool bRunOptimization = false;
+		bool bRunOptimization = true;
 		
 		if(bRunOptimization)
 		{	

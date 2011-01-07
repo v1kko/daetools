@@ -25,7 +25,7 @@ daePartialDerivativeVariable::daePartialDerivativeVariable(const size_t			nOrder
 daePartialDerivativeVariable::~daePartialDerivativeVariable(void)
 {
 	if(m_pIndexes)
-		delete m_pIndexes;
+		delete[] m_pIndexes;
 }
 
 size_t daePartialDerivativeVariable::GetPoint(void) const
