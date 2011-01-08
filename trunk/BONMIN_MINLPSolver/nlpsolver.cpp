@@ -638,50 +638,54 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	m_pLog->Message(string(" "), 0);
 	m_pLog->Message(string(" "), 0);
 	
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	strMessage = toStringFormatted("Objective function", 25) +  
-				 toStringFormatted("Final value",        16);
+				 toStringFormatted("Final value",        16) +
+				 toStringFormatted("Type",               5);
 	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	strMessage = toStringFormatted(m_pObjectiveFunction->GetName(), 25) +   
-				 toStringFormatted(obj_value,                                             16, 6, true);
+				 toStringFormatted(obj_value,                       16, 6, true) +
+				 toStringFormatted((m_pObjectiveFunction->IsLinear() ? "L" : "NL"), 5);
 	m_pLog->Message(strMessage, 0);
 	m_pLog->Message(string(" "), 0);
 
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	strMessage = toStringFormatted("Optimization variable", 25) +  
 				 toStringFormatted("Final value",           16) +
 				 toStringFormatted("Lower bound",           16) +
 				 toStringFormatted("Upper bound",           16);
 	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	for(i = 0; i < n; i++)
 	{
 		pOptVariable = m_ptrarrOptVariables[i];
 			
 		strMessage = toStringFormatted(pOptVariable->GetName(), 25)          +   
 					 toStringFormatted(x[i],                    16, 6, true) +
-		             toStringFormatted(pOptVariable->GetLB(),     16, 6, true) + 
-		             toStringFormatted(pOptVariable->GetUB(),     16, 6, true);
+		             toStringFormatted(pOptVariable->GetLB(),   16, 6, true) + 
+		             toStringFormatted(pOptVariable->GetUB(),   16, 6, true);
 		m_pLog->Message(strMessage, 0);
 	}
 	m_pLog->Message(string(" "), 0);
 
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	strMessage = toStringFormatted("Constraint",  25) +  
 				 toStringFormatted("Final value", 16) +
 				 toStringFormatted("Lower bound", 16) +
-				 toStringFormatted("Upper bound", 16);
+				 toStringFormatted("Upper bound", 16) +
+				 toStringFormatted("Type",         5);
 	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("--------------------------------------------------------------------------"), 0);
+	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
 		pConstraint = m_ptrarrConstraints[i];
 			
-		strMessage = toStringFormatted(pConstraint->GetName(),  25)          + 
-					 toStringFormatted(pConstraint->GetValue(), 16, 6, true) +
-					 toStringFormatted(pConstraint->GetLB(),    16, 6, true) + 
-					 toStringFormatted(pConstraint->GetUB(),    16, 6, true);
+		strMessage = toStringFormatted(pConstraint->GetName(),                 25)          + 
+					 toStringFormatted(pConstraint->GetValue(),                16, 6, true) +
+					 toStringFormatted(pConstraint->GetLB(),                   16, 6, true) + 
+					 toStringFormatted(pConstraint->GetUB(),                   16, 6, true) +
+					 toStringFormatted((pConstraint->IsLinear() ? "L" : "NL"),  5);
 		m_pLog->Message(strMessage, 0);
 	}	
 	m_pLog->Message(string(" "), 0);

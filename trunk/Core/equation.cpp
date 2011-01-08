@@ -124,6 +124,9 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 
 	strName = "EquationEvaluationNode";
 	adNode::SaveNodeAsMathML(pTag, string("MathML"), m_EquationEvaluationNode.get(), &c, true);
+	
+	strName = "IsLinear";
+	pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
 }
 
 void daeEquationExecutionInfo::GatherInfo(void)

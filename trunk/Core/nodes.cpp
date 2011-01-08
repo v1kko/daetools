@@ -350,7 +350,7 @@ void adNodeImpl::ExportAsLatex(string strFileName)
 
 bool adNodeImpl::IsLinear(void) const
 {
-// All nodes are non-linear if I dont explicitly state that they are!
+// All nodes are non-linear if I dont explicitly state that they are linear!
 	return false;
 }
 
@@ -426,7 +426,7 @@ void adConstantNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveA
 	xmlPresentationCreator::Constant(pTag, m_dValue);
 }
 
-void adConstantNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adConstantNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -548,7 +548,7 @@ void adRuntimeParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const 
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adRuntimeParameterNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adRuntimeParameterNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -647,7 +647,7 @@ void adDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSa
 	xmlPresentationCreator::Domain(pTag, strName, strIndex);
 }
 
-void adDomainIndexNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adDomainIndexNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -839,13 +839,33 @@ void adRuntimeVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const d
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adRuntimeVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	pair<size_t, size_t> mapPair(m_nOverallIndex, mapIndexes.size());
-	mapIndexes.insert(mapPair);
+	
+	
+	if(bAddFixed)
+	{
+	// Add anyway (even if it is assigned) 
+		mapIndexes.insert(mapPair);
+	}
+	else
+	{
+	// Add only if it is not assigned 
+		if(!m_pVariable || !m_pVariable->m_pModel || !m_pVariable->m_pModel->GetDataProxy())
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		if(m_pVariable->m_pModel->GetDataProxy()->GetVariableType(m_nOverallIndex) != cnFixed)
+			mapIndexes.insert(mapPair);
+	}
 }
 
 bool adRuntimeVariableNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adRuntimeVariableNode::IsFunctionOfVariables(void) const
 {
 	return true;
 }
@@ -1026,8 +1046,9 @@ void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, c
 	xmlPresentationCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
-void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+// Time derivatives are always state variables: always add 
 	pair<size_t, size_t> mapPair(m_nOverallIndex, mapIndexes.size());
 	mapIndexes.insert(mapPair);
 }
@@ -1158,21 +1179,30 @@ void adRuntimePartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, con
 
 void adRuntimePartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
-//	vector<string> strarrIndexes;
-//	for(size_t i = 0; i < m_narrDomains.size(); i++)
-//		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
-
-//	string strVariableName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
-//	string strDomainName   = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
-//	xmlPresentationCreator::PartialDerivative(pTag, m_nDegree, strVariableName, strDomainName, strarrIndexes);
 	return pardevnode->SaveAsPresentationMathML(pTag, c);
 }
 
-void adRuntimePartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimePartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!pardevnode)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pardevnode->AddVariableIndexToArray(mapIndexes);
+	pardevnode->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adRuntimePartialDerivativeNode::IsLinear(void) const
+{
+	if(!pardevnode)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	return pardevnode->IsLinear();
+}
+
+bool adRuntimePartialDerivativeNode::IsFunctionOfVariables(void) const
+{
+	if(!pardevnode)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	return pardevnode->IsFunctionOfVariables();
 }
 
 /*********************************************************************************************
@@ -1722,15 +1752,18 @@ void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMa
 	}
 }
 
-void adUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 bool adUnaryNode::IsLinear(void) const
 {
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+
 	bool lin   = node->IsLinear();
 	bool isFun = node->IsFunctionOfVariables();
 
@@ -2173,14 +2206,14 @@ void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsM
 	}
 }
 
-void adBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!left)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!right)
 		daeDeclareAndThrowException(exInvalidPointer);
-	left->AddVariableIndexToArray(mapIndexes);
-	right->AddVariableIndexToArray(mapIndexes);
+	left->AddVariableIndexToArray(mapIndexes, bAddFixed);
+	right->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 bool adBinaryNode::IsLinear(void) const

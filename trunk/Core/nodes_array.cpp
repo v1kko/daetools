@@ -194,6 +194,19 @@ void adNodeArrayImpl::ExportAsLatex(string strFileName)
 	file.close();
 }
 
+bool adNodeArrayImpl::IsLinear(void) const
+{
+// All nodes are non-linear if I dont explicitly state that they are linear!
+	return false;
+}
+
+bool adNodeArrayImpl::IsFunctionOfVariables(void) const
+{
+// All nodes are functions of variables if I dont explicitly state that they aint!
+	return true;
+}
+
+
 void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 {	
 }
@@ -275,8 +288,18 @@ void adConstantNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 	xmlPresentationCreator::Constant(pTag, m_dValue);
 }
 
-void adConstantNodeArray::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adConstantNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+}
+
+bool adConstantNodeArray::IsLinear(void) const
+{
+	return true;
+}
+
+bool adConstantNodeArray::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -359,8 +382,18 @@ void adRuntimeParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, c
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrParameterNodes, c);
 }
 
-void adRuntimeParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adRuntimeParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+}
+
+bool adRuntimeParameterNodeArray::IsLinear(void) const
+{
+	return true;
+}
+
+bool adRuntimeParameterNodeArray::IsFunctionOfVariables(void) const
+{
+	return false;
 }
 
 /*********************************************************************************************
@@ -442,10 +475,20 @@ void adRuntimeVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, co
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrVariableNodes, c);
 }
 
-void adRuntimeVariableNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeVariableNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	for(size_t i = 0; i < m_ptrarrVariableNodes.size(); i++)
-		m_ptrarrVariableNodes[i]->AddVariableIndexToArray(mapIndexes);
+		m_ptrarrVariableNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adRuntimeVariableNodeArray::IsLinear(void) const
+{
+	return true;
+}
+
+bool adRuntimeVariableNodeArray::IsFunctionOfVariables(void) const
+{
+	return true;
 }
 
 /*********************************************************************************************
@@ -531,10 +574,10 @@ void adRuntimeTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pT
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrTimeDerivativeNodes, c);
 }
 
-void adRuntimeTimeDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeTimeDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	for(size_t i = 0; i < m_ptrarrTimeDerivativeNodes.size(); i++)
-		m_ptrarrTimeDerivativeNodes[i]->AddVariableIndexToArray(mapIndexes);
+		m_ptrarrTimeDerivativeNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -625,12 +668,35 @@ void adRuntimePartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t*
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrPartialDerivativeNodes, c);
 }
 
-void adRuntimePartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimePartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	for(size_t i = 0; i < m_ptrarrPartialDerivativeNodes.size(); i++)
-		m_ptrarrPartialDerivativeNodes[i]->AddVariableIndexToArray(mapIndexes);
+		m_ptrarrPartialDerivativeNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
+bool adRuntimePartialDerivativeNodeArray::IsLinear(void) const
+{
+// If just one is non-linear return false; otherwise all are linear and return true
+	if(m_ptrarrPartialDerivativeNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	for(size_t i = 0; i < m_ptrarrPartialDerivativeNodes.size(); i++)
+		if(m_ptrarrPartialDerivativeNodes[i]->IsLinear() == false)
+			return false;
+	return true;
+}
+
+bool adRuntimePartialDerivativeNodeArray::IsFunctionOfVariables(void) const
+{
+// If just one is a function of variables return true; otherwise none is a function of variables so return false
+	if(m_ptrarrPartialDerivativeNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	for(size_t i = 0; i < m_ptrarrPartialDerivativeNodes.size(); i++)
+		if(m_ptrarrPartialDerivativeNodes[i]->IsFunctionOfVariables() == true)
+			return true;
+	return false;
+}
 
 /*********************************************************************************************
 	adRuntimeSpecialFunctionNode
@@ -863,9 +929,50 @@ void adRuntimeSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 	}
 }
 
-void adRuntimeSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-	node->AddVariableIndexToArray(mapIndexes);
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adRuntimeSpecialFunctionNode::IsLinear(void) const
+{
+	bool lin, isFun;
+	Linearity type;
+	
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	lin   = node->IsLinear();
+	isFun = node->IsFunctionOfVariables();
+
+	if(lin && (!isFun))
+		type = LIN;
+	else if(lin && isFun)
+		type = LIN_FUN;
+	else
+		type = NON_LIN;
+	
+	switch(eFunction)
+	{
+	case eSum:
+	case eAverage:
+		if(type == LIN || type == LIN_FUN)
+			return true;
+		break;
+	}
+
+	return false;
+}
+
+bool adRuntimeSpecialFunctionNode::IsFunctionOfVariables(void) const
+{
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	return node->IsFunctionOfVariables();
 }
 
 /*********************************************************************************************
@@ -1017,9 +1124,21 @@ void adRuntimeIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const d
 	}
 }
 
-void adRuntimeIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adRuntimeIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-	node->AddVariableIndexToArray(mapIndexes);
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer)
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adRuntimeIntegralNode::IsLinear(void) const
+{
+	return false;
+}
+
+bool adRuntimeIntegralNode::IsFunctionOfVariables(void) const
+{
+	return true;
 }
 
 /*********************************************************************************************
@@ -1527,11 +1646,59 @@ void adUnaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSav
 	}
 }
 
-void adUnaryNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adUnaryNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adUnaryNodeArray::IsLinear(void) const
+{
+	bool lin, isFun;
+	Linearity type;
+	
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	lin   = node->IsLinear();
+	isFun = node->IsFunctionOfVariables();
+	
+	if(lin && (!isFun))
+		type = LIN;
+	else if(lin && isFun)
+		type = LIN_FUN;
+	else
+		type = NON_LIN;
+	
+// If nodes are linear and not a function of variable: return linear
+	if(type == LIN) 
+	{
+		return true;
+	}
+	else if(type == NON_LIN) 
+	{
+		return false;
+	}
+	else if(type == LIN_FUN) 
+	{
+	// If the argument is a function of variables then I should check the function
+		if(eFunction == eSign)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool adUnaryNodeArray::IsFunctionOfVariables(void) const
+{
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsFunctionOfVariables();
 }
 
 /*********************************************************************************************
@@ -1925,14 +2092,114 @@ void adBinaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSa
 	}
 }
 
-void adBinaryNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adBinaryNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!left)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!right)
 		daeDeclareAndThrowException(exInvalidPointer);
-	left->AddVariableIndexToArray(mapIndexes);
-	right->AddVariableIndexToArray(mapIndexes);
+	left->AddVariableIndexToArray(mapIndexes, bAddFixed);
+	right->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adBinaryNodeArray::IsLinear(void) const
+{
+	if(!left)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!right)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	bool l = left->IsLinear();
+	bool r = right->IsLinear();
+
+	bool lisFun = left->IsFunctionOfVariables();
+	bool risFun = right->IsFunctionOfVariables();
+
+	Linearity l_type, r_type;
+	
+	if(l && (!lisFun))
+		l_type = LIN;
+	else if(l && lisFun)
+		l_type = LIN_FUN;
+	else
+		l_type = NON_LIN;
+
+	if(r && (!risFun))
+		r_type = LIN;
+	else if(r && risFun)
+		r_type = LIN_FUN;
+	else
+		r_type = NON_LIN;
+	
+// If both are linear and not a function of variables then the expression is linear
+// c = constant/parameter; lf = linear-function; nl = non-linear-function; 
+// Cases: c + c, c - c, c * c, c / c
+	if( l_type == LIN && r_type == LIN )
+		return true;
+
+// If any of these is not linear then the expression is non-linear
+// Cases: nl + lf, nl - lf, nl * lf, nl / lf
+	if( l_type == NON_LIN || r_type == NON_LIN )
+		return false;
+	
+// If either left or right (or both) IS a function of variables then I should check the function;
+// Ohterwise the expression is non-linear
+	if(l_type == LIN_FUN || r_type == LIN_FUN)
+	{
+		switch(eFunction)
+		{
+		case ePlus:
+		case eMinus:
+		// If both are linear or linear functions then the expression is linear
+		// (no matter if both are functions of variables)
+		// Cases: c + lf, lf + c, lf + lf
+			if(l_type != NON_LIN && r_type != NON_LIN) 
+				return true;
+			else 
+				return false;
+			break;
+		case eMulti:
+		// If LEFT is linear (can be a function of variables) AND RIGHT is linear and not a function of variables
+		// or if LEFT is linear and not a function of of variables AND RIGHT is linear (can be a function of variables)
+		// Cases: c * lf, lf * c
+			if( l_type == LIN && r_type == LIN_FUN ) 
+				return true;
+			else if( l_type == LIN_FUN && r_type == LIN ) 
+				return true;
+			else 
+				return false;
+			break;
+		case eDivide:
+		// If LEFT is linear function and RIGHT is linear
+		// Cases: lf / c
+			if( l_type == LIN_FUN && r_type == LIN ) 
+				return true;
+			else 
+				return false;
+			break;
+		default:
+			return false;
+		}
+	}
+// Eihter LEFT or RIGHT are non-linear so return false
+	else
+	{
+		return false;
+	}
+	
+// Just in case I somehow rich this point	
+	return false;
+}
+
+bool adBinaryNodeArray::IsFunctionOfVariables(void) const
+{
+	if(!left)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!right)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// If ANY of these two nodes is a function of variables return true
+	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables() );
 }
 
 /*********************************************************************************************
@@ -2178,11 +2445,11 @@ void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, co
 	}
 }
 
-void adSetupSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 bool adSetupSpecialFunctionNode::IsLinear(void) const
@@ -2429,11 +2696,11 @@ void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTa
 	mrow2->AddTag(string("mo"), string(")"));
 }
 
-void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -2708,11 +2975,11 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 	mrow2->AddTag(string("mo"), string(")"));
 }
 
-void adSetupExpressionPartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupExpressionPartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -2889,11 +3156,11 @@ void adSetupIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 	}
 }
 
-void adSetupIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -2993,11 +3260,11 @@ void adSingleNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSa
 	node->SaveAsPresentationMathML(pTag, c);
 }
 
-void adSingleNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSingleNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
-	node->AddVariableIndexToArray(mapIndexes);
+	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 

@@ -56,7 +56,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -86,7 +86,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -118,7 +118,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -151,8 +151,9 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 // Runtime part
@@ -188,7 +189,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 // Runtime part
@@ -226,7 +227,9 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 // Runtime part
@@ -259,7 +262,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -288,7 +291,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -325,7 +328,7 @@ public:
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext, 
 											  real_t dEventTolerance);
-	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 	boost::shared_ptr<adNode>	m_pLeft;
@@ -358,7 +361,7 @@ public:
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
-	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 	boost::shared_ptr<condNode>		m_pNode;
@@ -390,7 +393,7 @@ public:
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
-	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 	boost::shared_ptr<condNode>		m_pLeft;
@@ -422,7 +425,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -451,7 +454,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 
@@ -480,8 +483,9 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -510,7 +514,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 	daeVariable*			m_pVariable;
@@ -541,7 +545,7 @@ public:
 	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes);
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 
 public:
 	daeVariable*			m_pVariable;

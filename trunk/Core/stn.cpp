@@ -367,7 +367,7 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 			if(!pStateTransition)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
-			pStateTransition->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes);
+			pStateTransition->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes, false);
 		}
 	}
 }

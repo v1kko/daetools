@@ -81,8 +81,6 @@ REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL
 REM copy pyIntelPardiso.pyd         %ROOT%\pyIntelPardiso
 
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
-copy libifcoremd.dll                %ROOT%\pyDAE
-copy libmmd.dll                     %ROOT%\pyDAE
 
 cd ..\python-files
 

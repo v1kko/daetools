@@ -28,4 +28,5 @@ BOOST_PYTHON_MODULE(pyBONMIN)
         .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile) 
         ; 
 }
-   
+
+

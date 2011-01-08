@@ -106,7 +106,7 @@ def consoleRun():
     # Initialize the simulation
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    nlpsolver.SetOption('print_level', 0)
+    nlpsolver.SetOption('print_level', 5)
     nlpsolver.SetOption('hessian_approximation', 'limited-memory')
     nlpsolver.SetOption('tol', 1e-7)
     nlpsolver.SetOption('linear_solver', 'mumps')

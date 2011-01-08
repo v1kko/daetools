@@ -11,11 +11,11 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 
-VERSION = 1.1.0
+VERSION = 1.1.1
 
 QMAKE_CXXFLAGS += -DDAE_MAJOR=1
 QMAKE_CXXFLAGS += -DDAE_MINOR=1
-QMAKE_CXXFLAGS += -DDAE_BUILD=0
+QMAKE_CXXFLAGS += -DDAE_BUILD=1
 
 CONFIG(debug, debug|release){
 	DAE_DEST_DIR = ../debug

@@ -499,8 +499,16 @@
       <xsl:if test="count(Object) > 0">
 
           <xsl:for-each select="Object">
-              <p>
-                 <xsl:copy-of select="MathML"/>
+             <p>
+                <xsl:copy-of select="MathML"/>
+                <br/>
+                Equation is: 
+                <xsl:if test="IsLinear = 'True'">
+                    Linear
+                </xsl:if>
+                <xsl:if test="IsLinear = 'False'">
+                    Non-linear
+                </xsl:if>
              </p>
           </xsl:for-each>
 

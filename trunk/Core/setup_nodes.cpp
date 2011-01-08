@@ -115,7 +115,7 @@ void adSetupParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const da
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupParameterNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupParameterNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -201,7 +201,7 @@ void adSetupDomainIteratorNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupDomainIteratorNode::AddVariableIndexToArray(map<size_t, size_t>& /*mapIndexes*/)
+void adSetupDomainIteratorNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -320,11 +320,17 @@ void adSetupVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 bool adSetupVariableNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adSetupVariableNode::IsFunctionOfVariables(void) const
 {
 	return true;
 }
@@ -376,7 +382,7 @@ adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutio
 		}
 		else
 		{
-			daeDeclareAndThrowException(exInvalidCall);
+			daeDeclareAndThrowException(exInvalidCall)
 		}
 	}
 
@@ -440,8 +446,9 @@ void adSetupTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
 	xmlPresentationCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
-void adSetupTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 /*********************************************************************************************
@@ -567,8 +574,9 @@ void adSetupPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 	xmlPresentationCreator::PartialDerivative(pTag, m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
-void adSetupPartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupPartialDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 

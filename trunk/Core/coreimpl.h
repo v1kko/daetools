@@ -1643,6 +1643,9 @@ protected:
 	friend class adSetupPartialDerivativeNodeArray;
 	friend class adSetupExpressionDerivativeNode;
 	friend class adSetupExpressionPartialDerivativeNode;
+	friend class adRuntimeVariableNode;
+	friend class adRuntimeTimeDerivativeNode;
+	friend class adRuntimePartialDerivativeNode;
 	friend class daeOptimizationVariable;
 	friend class daeObjectiveFunction;
 	friend class daeOptimizationConstraint;
@@ -1936,6 +1939,8 @@ public:
 	daePort*		FindPort(unsigned long nID) const;
 	daeVariable*	FindVariable(unsigned long nID) const;
 
+	boost::shared_ptr<daeDataProxy_t> GetDataProxy(void) const;
+	
 // Internal functions
 protected:
 	void		InitializeParameters(void);
@@ -2434,8 +2439,6 @@ protected:
 	
 	friend class daeModel;
 	friend class daeEquationExecutionInfo;
-	friend class daeOptimizationConstraint;
-	friend class daeObjectiveFunction;
 };
 
 /******************************************************************
@@ -2559,6 +2562,7 @@ protected:
 	daeModel*						m_pModel;
 	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
 	daeEquation*					m_pObjectiveFunction;
+	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
 	size_t							m_nEquationIndexInBlock;
 	size_t							m_nVariableIndexInBlock;
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
@@ -2613,6 +2617,7 @@ protected:
 	size_t							m_nVariableIndexInBlock;
 	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
 	daeEquation*					m_pConstraintFunction;
+	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 

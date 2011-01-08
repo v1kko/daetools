@@ -814,6 +814,11 @@ void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 	AddPortConnection(pPortConnection);
 }
 
+boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
+{
+	return m_pDataProxy;
+}
+
 daeeInitialConditionMode daeModel::GetInitialConditionMode(void) const
 {
 	if(!m_pDataProxy)

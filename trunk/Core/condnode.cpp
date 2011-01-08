@@ -474,14 +474,14 @@ void condExpressionNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & pt
 */	
 }
 
-void condExpressionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void condExpressionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!m_pLeft)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	if(!m_pRight)
 		daeDeclareAndThrowException(exInvalidPointer);
-	m_pLeft->AddVariableIndexToArray(mapIndexes);
-	m_pRight->AddVariableIndexToArray(mapIndexes);
+	m_pLeft->AddVariableIndexToArray(mapIndexes, bAddFixed);
+	m_pRight->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -616,11 +616,11 @@ void condUnaryNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & ptrarrE
 	m_pNode->BuildExpressionsArray(ptrarrExpressions, pExecutionContext, dEventTolerance);
 }
 
-void condUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void condUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!m_pNode)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	m_pNode->AddVariableIndexToArray(mapIndexes);
+	m_pNode->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 /*********************************************************************************************
@@ -804,14 +804,14 @@ void condBinaryNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & ptrarr
 	m_pRight->BuildExpressionsArray(ptrarrExpressions, pExecutionContext, dEventTolerance);
 }
 
-void condBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void condBinaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 	if(!m_pLeft)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	if(!m_pRight)
 		daeDeclareAndThrowException(exInvalidPointer); 
-	m_pLeft->AddVariableIndexToArray(mapIndexes);
-	m_pRight->AddVariableIndexToArray(mapIndexes);
+	m_pLeft->AddVariableIndexToArray(mapIndexes, bAddFixed);
+	m_pRight->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
 }

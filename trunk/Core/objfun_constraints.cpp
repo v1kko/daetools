@@ -21,6 +21,7 @@ daeObjectiveFunction::daeObjectiveFunction(daeModel* pModel, real_t abstol)
 	m_pObjectiveVariable	= boost::shared_ptr<daeVariable>(new daeVariable("V_obj", typeObjectiveFunction, pModel, "Objective value"));
 	m_pObjectiveVariable->SetReportingOn(true);
 	m_pObjectiveFunction = pModel->CreateEquation("F_obj", "Objective function");
+	m_pEquationExecutionInfo = NULL;
 }
 
 daeObjectiveFunction::~daeObjectiveFunction(void)
@@ -113,8 +114,9 @@ void daeObjectiveFunction::GetGradients(const daeMatrix<real_t>& matSensitivitie
 
 bool daeObjectiveFunction::IsLinear(void) const
 {
-// Here I access SetupNode!! Is it wise?? Should I try with the RuntimeNode???
-	boost::shared_ptr<adNode> node = m_pObjectiveFunction->GetResidual().node;
+	if(!m_pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
@@ -130,9 +132,7 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 {
 	size_t i;
 	map<size_t, size_t> mapVariableIndexes;
-	map<size_t, size_t>::iterator iter;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
 	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
 	if(!m_pObjectiveFunction)
@@ -142,12 +142,12 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	if(ptrarrEquationExecutionInfos.size() != 1)
 		daeDeclareAndThrowException(exInvalidCall)
 		
-	pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
-	if(!pEquationExecutionInfo)
+	m_pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
+	if(!m_pEquationExecutionInfo)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
 // 1. Set the variable/equation index in the block it belongs
-	m_nEquationIndexInBlock = pEquationExecutionInfo->GetEquationIndexInBlock();
+	m_nEquationIndexInBlock = m_pEquationExecutionInfo->GetEquationIndexInBlock();
 	m_nVariableIndexInBlock = pBlock->FindVariableBlockIndex(m_pObjectiveVariable->m_nOverallIndex);
 	if(m_nEquationIndexInBlock == ULONG_MAX || m_nVariableIndexInBlock == ULONG_MAX)
 		daeDeclareAndThrowException(exInvalidCall)
@@ -156,14 +156,15 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 //     This requires some iterating over the arrays of indexes
 	m_narrOptimizationVariablesIndexes.clear();
 	
-	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
-	node->AddVariableIndexToArray(mapVariableIndexes);
+	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
+	node->AddVariableIndexToArray(mapVariableIndexes, true);
 	
-//	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
-//	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-//		std::cout << iter->first << " ";
-//	std::cout << std::endl;
-//	std::cout.flush();	
+	map<size_t, size_t>::iterator iter;
+	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
+	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+		std::cout << iter->first << " ";
+	std::cout << std::endl;
+	std::cout.flush();	
 
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
@@ -176,11 +177,11 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
 
-//	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
-//	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-//		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-//	std::cout << std::endl;
-//	std::cout.flush();	
+	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
+	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+	std::cout << std::endl;
+	std::cout.flush();	
 }
 
 bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
@@ -213,8 +214,6 @@ bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 	
-	cout << "Objective function is: " << (m_pObjectiveFunction->GetResidual().node->IsLinear() ? "linear" : "non-linear") << endl;
-
 	return bCheck;
 }
 
@@ -240,6 +239,7 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
 	m_pConstraintVariable->SetReportingOn(true);
 	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
+	m_pEquationExecutionInfo = NULL;
 }
 
 daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription)
@@ -259,6 +259,7 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Va
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
 	m_pConstraintVariable->SetReportingOn(true);
 	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
+	m_pEquationExecutionInfo = NULL;
 }
 
 daeOptimizationConstraint::~daeOptimizationConstraint(void)
@@ -325,8 +326,9 @@ void daeOptimizationConstraint::GetGradients(const daeMatrix<real_t>& matSensiti
 
 bool daeOptimizationConstraint::IsLinear(void) const
 {
-// Here I access SetupNode!! Is it wise?? Should I try with the RuntimeNode???
-	boost::shared_ptr<adNode> node = m_pConstraintFunction->GetResidual().node;
+	if(!m_pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
@@ -386,9 +388,7 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 {
 	size_t i;
 	map<size_t, size_t> mapVariableIndexes;
-	map<size_t, size_t>::iterator iter;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
 	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
 	if(!m_pConstraintFunction)
@@ -398,12 +398,12 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	if(ptrarrEquationExecutionInfos.size() != 1)
 		daeDeclareAndThrowException(exInvalidCall)
 		
-	pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
-	if(!pEquationExecutionInfo)
+	m_pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
+	if(!m_pEquationExecutionInfo)
 		daeDeclareAndThrowException(exInvalidPointer)
 	
 // 1. Set the variable/equation index in the block it belongs
-	m_nEquationIndexInBlock = pEquationExecutionInfo->GetEquationIndexInBlock();
+	m_nEquationIndexInBlock = m_pEquationExecutionInfo->GetEquationIndexInBlock();
 	m_nVariableIndexInBlock = pBlock->FindVariableBlockIndex(m_pConstraintVariable->m_nOverallIndex);
 	if(m_nEquationIndexInBlock == ULONG_MAX || m_nVariableIndexInBlock == ULONG_MAX)
 		daeDeclareAndThrowException(exInvalidCall)
@@ -411,14 +411,15 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 // 2a. Add all optimization variables indexes that are found in this constraint
 	m_narrOptimizationVariablesIndexes.clear();
 	
-	boost::shared_ptr<adNode> node = pEquationExecutionInfo->GetEquationEvaluationNode();
-	node->AddVariableIndexToArray(mapVariableIndexes);
-	
-//	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
-//	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-//		std::cout << iter->first << " ";
-//	std::cout << std::endl;
-//	std::cout.flush();
+	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
+	node->AddVariableIndexToArray(mapVariableIndexes, true);
+
+	map<size_t, size_t>::iterator iter;
+	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
+	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
+		std::cout << iter->first << " ";
+	std::cout << std::endl;
+	std::cout.flush();
 
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
@@ -430,12 +431,12 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
-	
-//	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
-//	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-//		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-//	std::cout << std::endl;
-//	std::cout.flush();
+
+	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
+	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
+		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
+	std::cout << std::endl;
+	std::cout.flush();
 }
 
 bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
@@ -468,9 +469,6 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 	
-	// Here I access SetupNode!! Is it wise??
-	cout << "Constraint [" << m_pConstraintFunction->GetName() << "] is: " << (m_pConstraintFunction->GetResidual().node->IsLinear() ? "linear" : "non-linear") << endl;
-
 	return bCheck;
 }
 

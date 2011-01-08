@@ -374,9 +374,6 @@ public:
 		
 		daeOptimizationConstraint* c2 = CreateEqualityConstraint(40, "Constraint 2");
 		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() );
-				
-		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-1E5, +1E5, "Constraint 3");
-		c3->SetResidual( - m.x1() + m.x2() / 5 - 2 * m.x3() + sin(1) );
 		
 	// Set the optimization variables and their lower and upper bounds
 		SetContinuousOptimizationVariable(m.x1, 1, 5, 1);

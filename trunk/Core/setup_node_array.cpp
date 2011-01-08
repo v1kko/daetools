@@ -113,7 +113,7 @@ void adSetupParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
@@ -220,8 +220,9 @@ void adSetupVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, cons
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupVariableNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupVariableNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 /*********************************************************************************************
@@ -332,12 +333,13 @@ void adSetupTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag
 	xmlPresentationCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
-void adSetupTimeDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupTimeDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 /*********************************************************************************************
-	adRuntimePartialDerivativeNodeArray
+	adSetupPartialDerivativeNodeArray
 **********************************************************************************************/
 adSetupPartialDerivativeNodeArray::adSetupPartialDerivativeNodeArray(daeVariable* pVariable, 
 														   size_t nDegree, 
@@ -454,8 +456,9 @@ void adSetupPartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* p
 	xmlPresentationCreator::PartialDerivative(pTag, m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
-void adSetupPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes)
+void adSetupPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	daeDeclareAndThrowException(exInvalidCall)
 }
 
 

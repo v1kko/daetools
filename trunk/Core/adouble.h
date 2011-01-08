@@ -329,6 +329,13 @@ typedef struct DAE_CORE_API daeFPUCommand_t
 const int Nbinaryfns = 7;
 const int Nunaryfns  = 12;
 
+enum Linearity
+{
+	LIN = 0,
+	LIN_FUN,
+	NON_LIN
+};
+
 static const string strarrBinaryFns[7]={"plus",
 										"minus",
 										"times",
@@ -371,7 +378,8 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 		                                     const daeSaveAsMathMLContext* c) const	= 0;
 
-	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes)	= 0;
+	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
+											bool bAddFixed)							= 0;
 	virtual bool	IsLinear(void) const											= 0;
 	virtual bool	IsFunctionOfVariables(void) const								= 0;
 
@@ -383,13 +391,6 @@ public:
 									 const adNode* node, 
 									 const daeSaveAsMathMLContext* c, 
 									 bool bAppendEqualToZero = false);
-	
-	enum Linearity
-	{
-		LIN = 0,
-		LIN_FUN,
-		NON_LIN
-	};
 };
 
 #define CLONE_NODE(NODE, VALUE) (  boost::shared_ptr<adNode>(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
@@ -417,7 +418,11 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 		                                     const daeSaveAsMathMLContext* c) const			= 0;
 
-	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes)			= 0;
+	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
+											bool bAddFixed)									= 0;
+	
+	virtual bool	IsLinear(void) const													= 0;
+	virtual bool	IsFunctionOfVariables(void) const										= 0;
 
 	static adNodeArray*	CreateNode(const io::xmlTag_t* pTag);
 	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNodeArray* node);
@@ -456,7 +461,7 @@ public:
 	virtual void		BuildExpressionsArray(std::vector<boost::shared_ptr<adNode> >& ptrarrExpressions, 
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance)										= 0;
-	virtual void		AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes)						= 0;
+	virtual void		AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes, bool bAddFixed)		= 0;
 
 	static condNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node);

@@ -215,7 +215,7 @@ echo "      ) " >> setup.py
 echo " " >> setup.py
 
 TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
-RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}.${ARCH_RPM}.rpm
+RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
 BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
 
 if [ -d ${BUILD_DIR} ]; then
