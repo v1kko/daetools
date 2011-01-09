@@ -554,6 +554,32 @@ public:
 	vector<daeDomainIndex>	m_arrDomains;
 };
 
+/*********************************************************************************************
+	adExternalFunctionNode
+**********************************************************************************************/
+class DAE_CORE_API adExternalFunctionNode : public adNodeImpl
+{
+public:
+	daeDeclareDynamicClass(adExternalFunctionNode)
+	adExternalFunctionNode(void);
+	virtual ~adExternalFunctionNode(void);
+
+public:
+	virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNode* Clone(void) const;
+	virtual void	Open(io::xmlTag_t* pTag);
+	virtual void	Save(io::xmlTag_t* pTag) const;
+	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
+	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
+
+public:
+};
+
 
 /*********************************************************************************************
 	daeFPUCommand

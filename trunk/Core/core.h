@@ -784,6 +784,126 @@ public:
 	virtual daeModelArray_t*	FindModelArray(string& strCanonicalName)	= 0;
 };
 
+
+/*********************************************************************************************
+	daeExternalFunctionXXX info structures
+**********************************************************************************************/
+class daeExternalFunctionArgumentInfo_t
+{
+public:
+	bool operator == (const daeExternalFunctionArgumentInfo_t& efai)
+	{
+		if(m_strName == efai.m_strName &&
+		   m_nLength == efai.m_nLength  )
+		{
+			return true;
+		}
+		else 
+		{
+			return false;
+		}
+	}
+	
+	std::string	m_strName;	
+	size_t		m_nLength;	
+};
+
+class daeExternalFunctionInfo_t
+{
+public:
+	bool operator == (const daeExternalFunctionInfo_t& efi)
+	{
+		if(m_strName                  == efi.m_strName          &&
+		   m_nNumberOfResults         == efi.m_nNumberOfResults &&
+		   m_bCanCalculateDerivatives == efi.m_bCanCalculateDerivatives &&
+		   m_arrArgumentInfos.size()  == efi.m_arrArgumentInfos.size()  )
+		{
+			for(size_t i = 0; i < m_arrArgumentInfos.size(); i++)
+			{
+				if(m_arrArgumentInfos[i] == efi.m_arrArgumentInfos[i])
+					continue;
+				else
+					return false;
+			}
+			return true;
+		}
+		else 
+		{
+			return false;
+		}
+	}
+	
+	std::string										m_strName;	
+	size_t											m_nNumberOfResults;	
+	bool											m_bCanCalculateDerivatives;	
+	std::vector<daeExternalFunctionArgumentInfo_t>	m_arrArgumentInfos;	
+};
+	
+class daeExternalObjectInfo_t
+{
+public:
+	std::string								m_strName;	
+	std::vector<daeExternalFunctionInfo_t>	m_arrFunctionInfos;	
+};
+
+/*********************************************************************************************
+	daeExternalFunctionArgument_t
+**********************************************************************************************/
+class daeExternalFunctionArgument_t
+{
+public:
+	virtual ~daeExternalFunctionArgument_t(void){}
+
+public:
+	virtual void								GetValues(real_t* values, size_t n)       = 0;
+	virtual void								SetValues(const real_t* values, size_t n) = 0;
+	virtual daeExternalFunctionArgumentInfo_t	GetInfo(void) const                       = 0;
+};
+
+
+/*********************************************************************************************
+	daeExternalFunction_t
+**********************************************************************************************/
+class daeExternalFunction_t
+{
+public:
+	virtual ~daeExternalFunction_t(void){}
+
+public:
+	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const = 0;
+// Before a call to Calculate/CalculateDerivatives the aruments' values has to be set
+	virtual void						Calculate(real_t* results, size_t n)                                             = 0;
+	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives)                             = 0;
+	virtual daeExternalFunctionInfo_t	GetInfo(void) const                                                              = 0;
+};
+
+
+/*********************************************************************************************
+	daeExternalObject_t
+**********************************************************************************************/
+class daeExternalObject_t
+{
+public:
+	virtual ~daeExternalObject_t(void){}
+
+public:
+	// It is user's responsibility to ensure thread safety if multiple objects of the same 
+	// function are created and some vintage code is called
+	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName) = 0;
+	virtual daeExternalObjectInfo_t	GetInfo(void) const                                = 0;
+};
+
+/*
+ C function prototype that external object shared libraries has to implement and export:
+	   daeExternalObject_t* GetExternalObject(void);
+ Should be defined as extern "C" to avoid a dodgy compiler name-mangling
+*/
+extern "C"
+{
+	typedef daeExternalObject_t* (*pfnGetExternalObject)(void);
+}
+
+
 /******************************************************************
 	daeCoreClassFactory_t
 *******************************************************************/

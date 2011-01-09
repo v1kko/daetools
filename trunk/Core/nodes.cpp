@@ -2311,5 +2311,74 @@ bool adBinaryNode::IsFunctionOfVariables(void) const
 	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables() );
 }
 
+
+/*********************************************************************************************
+	adExternalFunctionNode
+**********************************************************************************************/
+adExternalFunctionNode::adExternalFunctionNode()
+{
+}
+
+adExternalFunctionNode::~adExternalFunctionNode()
+{
+}
+
+adouble adExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+	adouble tmp;
+	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+	{
+		tmp.setGatherInfo(true);
+		tmp.node = shared_ptr<adNode>( Clone() );
+	}
+	return tmp;
+}
+
+adNode* adExternalFunctionNode::Clone(void) const
+{
+	return new adExternalFunctionNode(*this);
+}
+
+string adExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+{
+	return string("");
+}
+
+string adExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+{
+	return string("");
+}
+
+void adExternalFunctionNode::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adExternalFunctionNode::Save(io::xmlTag_t* pTag) const
+{
+}
+
+void adExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+}
+
+void adExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+}
+
+void adExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+}
+
+bool adExternalFunctionNode::IsLinear(void) const
+{
+	return false;
+}
+
+bool adExternalFunctionNode::IsFunctionOfVariables(void) const
+{
+	return true;
+}
+	
+
 }
 }

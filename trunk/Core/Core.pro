@@ -46,7 +46,8 @@ SOURCES += xmlreadstream.cpp \
     dllmain.cpp \
     global_functions.cpp \
     tcpiplog.cpp \
-    objfun_constraints.cpp
+    objfun_constraints.cpp \
+    external_function.cpp
 HEADERS += xmlfunctions.h \
     xmlfile.h \
     stdafx.h \
@@ -75,4 +76,4 @@ HEADERS += xmlfunctions.h \
     inlines_varparam_array.h \
     nodes_array.h \
     tcpiplog.h \
-    optimization.h
+    optimization.h 

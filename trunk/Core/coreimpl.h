@@ -2621,6 +2621,58 @@ protected:
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 
+/*********************************************************************************************
+	daeExternalFunctionArgument
+**********************************************************************************************/
+class DAE_CORE_API daeExternalFunctionArgument : public daeExternalFunctionArgument_t
+{
+public:
+	daeExternalFunctionArgument(const string& strName, const std::vector<adouble>& adarrArguments);
+	virtual ~daeExternalFunctionArgument(void);
+
+public:
+	virtual void								GetValues(real_t* values, size_t n);
+	virtual void								SetValues(const real_t* values, size_t n);
+	virtual daeExternalFunctionArgumentInfo_t	GetInfo(void) const;
+
+protected:
+	std::string          m_strName;
+	std::vector<adouble> m_adarrArguments;
+};
+
+
+/*********************************************************************************************
+	daeExternalFunction
+**********************************************************************************************/
+class DAE_CORE_API daeExternalFunction : public daeExternalFunction_t
+{
+public:
+	daeExternalFunction(void);
+	virtual ~daeExternalFunction(void);
+
+public:
+	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const;
+	virtual void						Calculate(real_t* results, size_t n);
+	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives);
+	virtual daeExternalFunctionInfo_t	GetInfo(void) const;
+};
+
+
+/*********************************************************************************************
+	daeExternalObject
+**********************************************************************************************/
+class DAE_CORE_API daeExternalObject : public daeExternalObject_t
+{
+public:
+	daeExternalObject(void);
+	virtual ~daeExternalObject(void);
+
+public:
+	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName);
+	virtual daeExternalObjectInfo_t	GetInfo(void) const;
+};
+
+
 /******************************************************************
 	daeCoreClassFactory
 *******************************************************************/
