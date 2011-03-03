@@ -26,12 +26,18 @@ BOOST_PYTHON_MODULE(pyTrilinosAmesos)
 		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))
 		.def("Reinitialize",pure_virtual(&daeIDALASolver_t::Reinitialize))
 		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
+		//.def("SaveAsMatrixMarketFile",	pure_virtual(&daeIDALASolver_t::SaveAsMatrixMarketFile))
 		;
 
 	class_<daeTrilinosAmesosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosAmesosSolver", init<string>())
-		.def("Create",		&daeTrilinosAmesosSolver::Create)
-		.def("Reinitialize",&daeTrilinosAmesosSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeTrilinosAmesosSolver::SaveAsXPM)
+		.def_readwrite("NumIters",		&daeTrilinosAmesosSolver::m_nNumIters)
+		.def_readwrite("Tolerance",		&daeTrilinosAmesosSolver::m_dTolerance)
+		.def("Create",					&daeTrilinosAmesosSolver::Create)
+		.def("Reinitialize",			&daeTrilinosAmesosSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeTrilinosAmesosSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeTrilinosAmesosSolver::SaveAsMatrixMarketFile)
+		.def("SetAztecOption",			&daeTrilinosAmesosSolver::SetAztecOption)
+		.def("SetAztecParameter",		&daeTrilinosAmesosSolver::SetAztecParameter)
 		;
 
 	def("daeCreateTrilinosAmesosSolver",      daeCreateTrilinosAmesosSolver,  return_value_policy<reference_existing_object>());

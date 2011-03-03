@@ -10,12 +10,17 @@
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
 #include <Epetra_SerialComm.h>
+
 #include <Amesos.h>
+#include <AztecOO.h>
+
 #include <Epetra_RowMatrix.h>
 #include <Epetra_CrsMatrix.h>
+#include <Epetra_VbrMatrix.h>
 #include <Epetra_Vector.h>
 #include <Epetra_LinearProblem.h>
 #include <Epetra_Map.h>
+#include "EpetraExt_RowMatrixOut.h"
 #include <boost/smart_ptr.hpp>
 #ifdef HAVE_MPI
 #include "mpi.h"
@@ -23,10 +28,10 @@
 #else
 #include <Epetra_SerialComm.h>
 #endif
-//#include <AztecOO.h>
-//#include <AztecOO_StatusTestMaxIters.h>
-//#include <AztecOO_StatusTestResNorm.h>
-//#include <AztecOO_StatusTestCombo.h>
+
+#include <Ifpack_ConfigDefs.h>
+#include <Ifpack.h>
+
 
 namespace dae
 {
@@ -184,11 +189,16 @@ public:
 		delete[] row;
 	}
 	
+	void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+	{
+		EpetraExt::RowMatrixToMatrixMarketFile(strFileName.c_str(), *matrix, strMatrixName.c_str(), strMatrixDescription.c_str());
+	}
+	
 protected:
 	int					N;
 	size_t				rowCounter;
-	Epetra_CrsMatrix*	matrix;
 	bool				indexing;
+	Epetra_CrsMatrix*	matrix;
 };
 
 class DAE_SOLVER_API daeTrilinosAmesosSolver : public dae::solver::daeIDALASolver_t
@@ -200,6 +210,7 @@ public:
 	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
 	int Reinitialize(void* ida);
 	int SaveAsXPM(const std::string& strFileName);
+	int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);	
 	
 	int Init(void* ida);
 	int Setup(void* ida,
@@ -217,6 +228,9 @@ public:
 			  N_Vector	vectorResiduals);
 	int Free(void* ida);
 	
+	void SetAztecOption(int Option, int Value);
+	void SetAztecParameter(int Option, double Value);
+	
 protected:
 	bool CheckData() const;
 	void AllocateMemory(void);
@@ -233,8 +247,10 @@ public:
 	boost::shared_ptr<Epetra_Map>			m_map;
 	boost::shared_ptr<Epetra_CrsMatrix>		m_matEPETRA;
 
+/* AMESOS */
 	boost::shared_ptr<Amesos_BaseSolver>	m_pSolver;
-//	boost::shared_ptr<AztecOO>				m_pSolver;
+/* AZTECOO */
+	boost::shared_ptr<AztecOO>				m_pAztecOOSolver;
 	
 #ifdef HAVE_MPI
 	Epetra_MpiComm			m_Comm;
@@ -242,6 +258,8 @@ public:
 	Epetra_SerialComm		m_Comm;
 #endif
 
+	bool					m_bIsAmesos;
+	
 	int						m_nNoEquations;
 	daeDAESolver_t*			m_pDAESolver;
 	daeDenseArray			m_arrValues;
@@ -249,6 +267,14 @@ public:
 	daeDenseArray			m_arrResiduals;
 	daeEpetraCSRMatrix		m_matJacobian;	
 	size_t					m_nJacobianEvaluations;
+
+/* ML */
+	boost::shared_ptr<Ifpack_Preconditioner> m_pPreconditioner;
+	
+/* AZTECOO */
+	int						m_nNumIters;
+	double					m_dTolerance;
+	bool					m_bIsPreconditionerCreated;
 };
 
 }
