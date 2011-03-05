@@ -36,12 +36,14 @@
 #include <Ifpack_ILUT.h>
 #include <Ifpack_IC.h>
 #include <Ifpack_ICT.h>
+#include <ml_include.h>
+#include <ml_MultiLevelPreconditioner.h>
 
 namespace dae
 {
 namespace solver
 {
-daeIDALASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName);
+daeIDALASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
 std::vector<string> daeTrilinosSupportedSolvers(void);
 
 class daeEpetraCSRMatrix : public daeSparseMatrix<double>
@@ -212,7 +214,7 @@ protected:
 class DAE_SOLVER_API daeTrilinosSolver : public dae::solver::daeIDALASolver_t
 {
 public:
-	daeTrilinosSolver(const std::string& strSolverName);
+	daeTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
 	~daeTrilinosSolver(void);
 	
 	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
@@ -236,9 +238,17 @@ public:
 			  N_Vector	vectorResiduals);
 	int Free(void* ida);
 	
+	bool SetupLinearProblem(void);
+
 	void SetAmesosOptions(Teuchos::ParameterList& paramList);
-	void SetAztecOptions(Teuchos::ParameterList& paramList);
+	void SetAztecOOOptions(Teuchos::ParameterList& paramList);
 	void SetIfpackOptions(Teuchos::ParameterList& paramList);
+	void SetMLOptions(Teuchos::ParameterList& paramList);
+
+	Teuchos::ParameterList& GetAmesosOptions(void);
+	Teuchos::ParameterList& GetAztecOOOptions(void);
+	Teuchos::ParameterList& GetIfpackOptions(void);
+	Teuchos::ParameterList& GetMLOptions(void);
 	
 protected:
 	bool CheckData() const;
@@ -266,7 +276,8 @@ public:
 	{
 		eAmesos,
 		eAztecOO,
-		eAztecOO_Ifpack		
+		eAztecOO_Ifpack,		
+		eAztecOO_ML		
 	};
 	
 	daeeTrilinosSolverType	m_eTrilinosSolver;
@@ -280,17 +291,20 @@ public:
 	bool					m_bMatrixStructureChanged;
 
 /* AMESOS */
-	boost::shared_ptr<Amesos_BaseSolver>	m_pSolver;
+	boost::shared_ptr<Amesos_BaseSolver>	m_pAmesosSolver;
 	Teuchos::ParameterList					m_parameterListAmesos;
 	
 /* AZTECOO */
-	boost::shared_ptr<AztecOO>					m_pAztecOOSolver;
-	boost::shared_ptr<Ifpack_Preconditioner>	m_pPreconditioner;
-	Teuchos::ParameterList						m_parameterListAztec;
-	Teuchos::ParameterList						m_parameterListIfpack;
-	int											m_nNumIters;
-	double										m_dTolerance;
-	bool										m_bIsPreconditionerCreated;
+	std::string												m_strPreconditionerName;
+	boost::shared_ptr<AztecOO>								m_pAztecOOSolver;
+	boost::shared_ptr<Ifpack_Preconditioner>				m_pPreconditionerIfpack;
+	boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
+	Teuchos::ParameterList									m_parameterListAztec;
+	Teuchos::ParameterList									m_parameterListIfpack;
+	Teuchos::ParameterList									m_parameterListML;
+	int														m_nNumIters;
+	double													m_dTolerance;
+	bool													m_bIsPreconditionerConstructed;
 };
 
 }

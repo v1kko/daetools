@@ -123,7 +123,7 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 1:
                 try:
                     import daetools.pyTrilinos as pyTrilinos
-                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu")
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
@@ -132,7 +132,7 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 2:
                 try:
                     import daetools.pyTrilinos as pyTrilinos
-                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu")
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
@@ -141,7 +141,7 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 3:
                 try:
                     import daetools.pyTrilinos as pyTrilinos
-                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack")
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
@@ -150,7 +150,7 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 4:
                 try:
                     import daetools.pyTrilinos as pyTrilinos
-                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack")
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
@@ -159,7 +159,7 @@ class daeSimulator(QtGui.QDialog):
             elif lasolverIndex == 5:
                 try:
                     import daetools.pyTrilinos as pyTrilinos
-                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO")
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))

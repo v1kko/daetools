@@ -17,42 +17,80 @@ boost::python::list pydaeTrilinosSupportedSolvers(void)
 	return l;
 }
 
-void pydaeParameterListSet1(Teuchos::ParameterList& list, const string& strName, const string& Value);
-void pydaeParameterListSet2(Teuchos::ParameterList& list, const string& strName, double Value);
-void pydaeParameterListSet3(Teuchos::ParameterList& list, const string& strName, int Value);
-void pydaeParameterListSet4(Teuchos::ParameterList& list, const string& strName, bool Value);
+void pydaeParameterListPrint(Teuchos::ParameterList& list);
+void pydaeParameterListSet_string(Teuchos::ParameterList& list, const string& strName, const string& Value);
+void pydaeParameterListSet_float(Teuchos::ParameterList& list, const string& strName, double Value);
+void pydaeParameterListSet_int(Teuchos::ParameterList& list, const string& strName, int Value);
+void pydaeParameterListSet_bool(Teuchos::ParameterList& list, const string& strName, bool Value);
+string pydaeParameterListGet_string(Teuchos::ParameterList& list, const string& strName);
+double pydaeParameterListGet_float(Teuchos::ParameterList& list, const string& strName);
+int    pydaeParameterListGet_int(Teuchos::ParameterList& list, const string& strName);
+bool   pydaeParameterListGet_bool(Teuchos::ParameterList& list, const string& strName);
 
-void pydaeParameterListSet1(Teuchos::ParameterList& list, const string& strName, const string& Value)
+
+void pydaeParameterListPrint(Teuchos::ParameterList& list)
 {
-	list.set(strName, Value);
+	list.print(std::cout, 0, true, true);
 }
 
-void pydaeParameterListSet2(Teuchos::ParameterList& list, const string& strName, double Value)
+void pydaeParameterListSet_string(Teuchos::ParameterList& list, const string& strName, const string& Value)
 {
-	list.set(strName, Value);
+	list.set<string>(strName, Value);
 }
 
-void pydaeParameterListSet3(Teuchos::ParameterList& list, const string& strName, int Value)
+void pydaeParameterListSet_float(Teuchos::ParameterList& list, const string& strName, double Value)
 {
-	list.set(strName, Value);
+	list.set<double>(strName, Value);
 }
 
-void pydaeParameterListSet4(Teuchos::ParameterList& list, const string& strName, bool Value)
+void pydaeParameterListSet_int(Teuchos::ParameterList& list, const string& strName, int Value)
 {
-	list.set(strName, Value);
+	list.set<int>(strName, Value);
 }
 
+void pydaeParameterListSet_bool(Teuchos::ParameterList& list, const string& strName, bool Value)
+{
+	list.set<bool>(strName, Value);
+}
+
+
+string pydaeParameterListGet_string(Teuchos::ParameterList& list, const string& strName)
+{
+	return list.get<string>(strName);
+}
+
+double pydaeParameterListGet_float(Teuchos::ParameterList& list, const string& strName)
+{
+	return list.get<double>(strName);
+}
+
+int pydaeParameterListGet_int(Teuchos::ParameterList& list, const string& strName)
+{
+	return list.get<int>(strName);
+}
+
+bool pydaeParameterListGet_bool(Teuchos::ParameterList& list, const string& strName)
+{
+	return list.get<bool>(strName);
+}
 
 BOOST_PYTHON_MODULE(pyTrilinos)
 {
 /**************************************************************
 	TrilinosAmesos LA Solver
 ***************************************************************/
-	class_<Teuchos::ParameterList, boost::noncopyable>("TeuchosParameterList")
-		.def("set",		&pydaeParameterListSet1)
-		.def("set",		&pydaeParameterListSet2)
-		.def("set",		&pydaeParameterListSet3)
-		.def("set",		&pydaeParameterListSet4)
+	class_<Teuchos::ParameterList>("TeuchosParameterList")
+		.def("Print",	&pydaeParameterListPrint)
+
+		.def("get_string",	&pydaeParameterListGet_string)
+		.def("get_float",	&pydaeParameterListGet_float)
+		.def("get_int",		&pydaeParameterListGet_int)
+		.def("get_bool",	&pydaeParameterListGet_bool)
+		
+		.def("set_string",	&pydaeParameterListSet_string)
+		.def("set_float",	&pydaeParameterListSet_float)
+		.def("set_int",		&pydaeParameterListSet_int)
+		.def("set_bool",	&pydaeParameterListSet_bool)
 		;
 
 	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
@@ -62,18 +100,26 @@ BOOST_PYTHON_MODULE(pyTrilinos)
 		//.def("SaveAsMatrixMarketFile",	pure_virtual(&daeIDALASolver_t::SaveAsMatrixMarketFile))
 		;
 
-	class_<daeTrilinosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosSolver", init<string>())
+	class_<daeTrilinosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosSolver", init<string, string>())
 		.def_readwrite("NumIters",		&daeTrilinosSolver::m_nNumIters)
 		.def_readwrite("Tolerance",		&daeTrilinosSolver::m_dTolerance)
 		.def("Create",					&daeTrilinosSolver::Create)
 		.def("Reinitialize",			&daeTrilinosSolver::Reinitialize)
+		
 		.def("SaveAsXPM",				&daeTrilinosSolver::SaveAsXPM)
 		.def("SaveAsMatrixMarketFile",	&daeTrilinosSolver::SaveAsMatrixMarketFile)
-		.def("SetAztecOptions",			&daeTrilinosSolver::SetAztecOptions)
-		.def("SetIfpackOptions",		&daeTrilinosSolver::SetIfpackOptions)
-		.def("SetAmesosOptions",		&daeTrilinosSolver::SetAmesosOptions)
-		//.def("SetAztecOption",		&daeTrilinosSolver::SetAztecOption)
-		//.def("SetAztecParameter",		&daeTrilinosSolver::SetAztecParameter)
+		
+		//.def("CreatePreconditioner",	&daeTrilinosSolver::CreatePreconditioner)
+
+//		.def("SetAztecOOOptions",		&daeTrilinosSolver::SetAztecOOOptions)
+//		.def("SetIfpackOptions",		&daeTrilinosSolver::SetIfpackOptions)
+//		.def("SetMLOptions",			&daeTrilinosSolver::SetMLOptions)
+//		.def("SetAmesosOptions",		&daeTrilinosSolver::SetAmesosOptions)
+
+		.def("GetAztecOOOptions",		&daeTrilinosSolver::GetAztecOOOptions, return_value_policy<reference_existing_object>())
+		.def("GetIfpackOptions",		&daeTrilinosSolver::GetIfpackOptions,  return_value_policy<reference_existing_object>())
+		.def("GetMLOptions",			&daeTrilinosSolver::GetMLOptions,      return_value_policy<reference_existing_object>())
+		.def("GetAmesosOptions",		&daeTrilinosSolver::GetAmesosOptions,  return_value_policy<reference_existing_object>())
 		;
 
 	def("daeCreateTrilinosSolver",      daeCreateTrilinosSolver,  return_value_policy<reference_existing_object>());

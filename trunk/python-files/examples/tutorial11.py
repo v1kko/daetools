@@ -145,49 +145,54 @@ def CreateLASolver():
     #
     # 2) AztecOO solver:
     #
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack_ILUT")
-
-    lasolver.NumIters  = 500
-    lasolver.Tolerance = 1e-6
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "ILUT")
+    paramListAztec = lasolver.GetAztecOOOptions()
 
     # AztecOO solver options:
-    paramListAztec = pyTrilinos.TeuchosParameterList()
-    paramListAztec.set("AZ_solver",    daeAztecOptions.AZ_gmres)
-    paramListAztec.set("AZ_kspace",    500)
-    paramListAztec.set("AZ_scaling",   daeAztecOptions.AZ_none)
-    paramListAztec.set("AZ_reorder",   0)
-    paramListAztec.set("AZ_conv",      daeAztecOptions.AZ_r0)
-    paramListAztec.set("AZ_keep_info", 1)
-    paramListAztec.set("AZ_output",    daeAztecOptions.AZ_summary) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+    lasolver.NumIters  = 500
+    lasolver.Tolerance = 1e-6
+    paramListAztec.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
+    paramListAztec.set_int("AZ_kspace",    500)
+    paramListAztec.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
+    paramListAztec.set_int("AZ_reorder",   0)
+    paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
+    paramListAztec.set_int("AZ_keep_info", 1)
+    paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_none) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
 
     #
     # 2a) AztecOO built-in preconditioner:
     #
     """
-    paramListAztec.set("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
-    paramListAztec.set("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
-    paramListAztec.set("AZ_overlap",         daeAztecOptions.AZ_none)
-    paramListAztec.set("AZ_graph_fill",      1)
-    paramListAztec.set("AZ_ilut_fill",       3.0)
-    paramListAztec.set("AZ_type_overlap",    daeAztecOptions.AZ_standard)
-    paramListAztec.set("AZ_drop",            0.0)
-    paramListAztec.set("AZ_athresh",         1e8)
-    paramListAztec.set("AZ_rthresh",         0.0)
-
-    lasolver.SetAztecOptions(paramListAztec)
+    paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
+    paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
+    paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)
+    paramListAztec.set_int("AZ_graph_fill",      1)
+    paramListAztec.set_int("AZ_type_overlap",    daeAztecOptions.AZ_standard)
+    paramListAztec.set_float("AZ_ilut_fill",     3.0)
+    paramListAztec.set_float("AZ_drop",          0.0)
+    paramListAztec.set_float("AZ_athresh",       1e8)
+    paramListAztec.set_float("AZ_rthresh",       0.0)
     """
+    paramListAztec.Print()
 
     #
     # 2b) Ifpack preconditioner:
     #
-    paramListIfpack = pyTrilinos.TeuchosParameterList()
-    paramListIfpack.set("fact: level-of-fill",        5)
-    paramListIfpack.set("fact: ilut level-of-fill",   3.0)
-    #paramListIfpack.set("fact: relax value",        10.0)
-    paramListIfpack.set("fact: absolute threshold",   1e8)
-    paramListIfpack.set("fact: relative threshold",   0.0)
 
-    lasolver.SetIfpackOptions(paramListIfpack)
+    paramListIfpack = lasolver.GetIfpackOptions()
+    paramListIfpack.set_float("fact: level-of-fill",        5)
+    paramListIfpack.set_float("fact: ilut level-of-fill",   3.0)
+    paramListIfpack.set_float("fact: absolute threshold",   1e8)
+    paramListIfpack.set_float("fact: relative threshold",   0.0)
+    paramListIfpack.Print()
+
+    #
+    # 2c) ML preconditioner:
+    #
+    """
+    paramListML = lasolver.GetMLOptions()
+    paramListML.set("reuse: enable", true)
+    """
 
     return lasolver
 

@@ -29,9 +29,9 @@ int solve_la(IDAMem ida_mem,
 			  N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 
-daeIDALASolver_t* daeCreateTrilinosSolver(const std::string& strSolverName)
+daeIDALASolver_t* daeCreateTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName)
 {
-	return new daeTrilinosSolver(strSolverName);
+	return new daeTrilinosSolver(strSolverName, strPreconditionerName);
 }
 
 std::vector<string> daeTrilinosSupportedSolvers(void)
@@ -61,28 +61,126 @@ std::vector<string> daeTrilinosSupportedSolvers(void)
 		strarrSolvers.push_back("Amesos_Mumps");
 	
 	strarrSolvers.push_back("AztecOO");
-	strarrSolvers.push_back("AztecOO_Ifpack_IC");
-	strarrSolvers.push_back("AztecOO_Ifpack_ICT");
-	strarrSolvers.push_back("AztecOO_Ifpack_ILU");
-	strarrSolvers.push_back("AztecOO_Ifpack_ILUT");
+	strarrSolvers.push_back("AztecOO_Ifpack");
+	strarrSolvers.push_back("AztecOO_ML");
+
+//	strarrSolvers.push_back("AztecOO_Ifpack_IC");
+//	strarrSolvers.push_back("AztecOO_Ifpack_ICT");
+//	strarrSolvers.push_back("AztecOO_Ifpack_ILU");
+//	strarrSolvers.push_back("AztecOO_Ifpack_ILUT");
+//	
+//	strarrSolvers.push_back("AztecOO_ML_SA");
+//	strarrSolvers.push_back("AztecOO_ML_DD");
+//	strarrSolvers.push_back("AztecOO_ML_DD-ML");
+//	strarrSolvers.push_back("AztecOO_ML_maxwell");
+//	strarrSolvers.push_back("AztecOO_ML_NSSA");
 
 	return strarrSolvers;
 }
 
-daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName)
+daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName)
 #ifdef HAVE_MPI
 	: m_Comm(MPI_COMM_WORLD)
 #endif
 {
 	m_pBlock				= NULL;
 	m_strSolverName			= strSolverName;
+	m_strPreconditionerName = strPreconditionerName;
 	m_nNoEquations			= 0;
 	m_nJacobianEvaluations	= 0;
+	m_eTrilinosSolver		= eAmesos;
 	
-	m_nNumIters				= 200;
-	m_dTolerance			= 1e-6;
-	m_bIsPreconditionerCreated = false;
-	m_bMatrixStructureChanged  = false;
+	m_nNumIters						= 200;
+	m_dTolerance					= 1e-6;
+	m_bIsPreconditionerConstructed	= false;
+	m_bMatrixStructureChanged		= false;
+	
+	if(m_strSolverName == "AztecOO")
+	{
+		m_eTrilinosSolver = eAztecOO;
+	}
+	else if(m_strSolverName == "AztecOO_Ifpack")
+	{
+		m_eTrilinosSolver = eAztecOO_Ifpack;
+		
+		if(m_strPreconditionerName != "ILU"  &&
+		   m_strPreconditionerName != "ILUT" &&
+		   m_strPreconditionerName != "IC"   &&
+		   m_strPreconditionerName != "ICT")
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Error: Ifpack preconditioner: [" << m_strPreconditionerName << "] is not supported!";
+			throw e;			
+		}
+	}
+	else if(m_strSolverName == "AztecOO_ML")
+	{
+		m_eTrilinosSolver = eAztecOO_ML;
+		
+		if(m_strPreconditionerName != "SA"       &&
+		   m_strPreconditionerName != "DD"       &&
+		   m_strPreconditionerName != "DD-ML"    &&
+		   m_strPreconditionerName != "DD-ML-LU" &&
+		   m_strPreconditionerName != "maxwell"  &&
+		   m_strPreconditionerName != "NSSA")
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Error: ML preconditioner: [" << m_strPreconditionerName << "] is not supported!";
+			throw e;			
+		}
+		
+		if(m_strPreconditionerName == "SA")
+			ML_Epetra::SetDefaults("SA", m_parameterListML);
+		else if(m_strPreconditionerName == "DD")
+			ML_Epetra::SetDefaults("DD", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML")
+			ML_Epetra::SetDefaults("DD-ML", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML-LU")
+			ML_Epetra::SetDefaults("DD-ML-LU", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-LU")
+			ML_Epetra::SetDefaults("DD-LU", m_parameterListML);
+		else if(m_strPreconditionerName == "maxwell")
+			ML_Epetra::SetDefaults("maxwell", m_parameterListML);
+		else if(m_strPreconditionerName == "NSSA")
+			ML_Epetra::SetDefaults("NSSA", m_parameterListML);
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+	}
+	else
+	{
+		Amesos Factory;
+		if(!Factory.Query(m_strSolverName.c_str()))
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Error: the solver: [" << m_strSolverName << "] is not supported!" << "\n"
+			  << "Supported Amesos solvers: " << "\n"
+			  << "   * Amesos_Klu: "         << (Factory.Query("Amesos_Klu")         ? "true" : "false") << "\n"
+			  << "   * Amesos_Lapack: "      << (Factory.Query("Amesos_Lapack")      ? "true" : "false") << "\n"
+			  << "   * Amesos_Scalapack: "   << (Factory.Query("Amesos_Scalapack")   ? "true" : "false") << "\n"
+			  << "   * Amesos_Umfpack: "     << (Factory.Query("Amesos_Umfpack")     ? "true" : "false") << "\n"
+			  << "   * Amesos_Pardiso: "     << (Factory.Query("Amesos_Pardiso")     ? "true" : "false") << "\n"
+			  << "   * Amesos_Taucs: "       << (Factory.Query("Amesos_Taucs")       ? "true" : "false") << "\n"
+			  << "   * Amesos_Superlu: "     << (Factory.Query("Amesos_Superlu")     ? "true" : "false") << "\n"
+			  << "   * Amesos_Superludist: " << (Factory.Query("Amesos_Superludist") ? "true" : "false") << "\n"
+			  << "   * Amesos_Dscpack: "     << (Factory.Query("Amesos_Dscpack")     ? "true" : "false") << "\n"
+			  << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << "\n"
+ 			  << "Supported AztecOO solvers: " << "\n"
+			  << "   * AztecOO (with built-in preconditioners) \n"
+			  << "   * AztecOO_Ifpack \n"
+			  << "   * AztecOO_ML \n";
+//			  << "   * AztecOO_Ifpack_IC \n"
+//			  << "   * AztecOO_Ifpack_ICT \n"
+//			  << "   * AztecOO_Ifpack_ILU \n"
+//			  << "   * AztecOO_Ifpack_ILUT \n"
+//			  << "   * AztecOO_ML_SA \n"
+//			  << "   * AztecOO_ML_DD \n"
+//			  << "   * AztecOO_ML_DD-ML \n"
+//			  << "   * AztecOO_ML_maxwell \n"
+//			  << "   * AztecOO_ML_NSSA \n";
+			throw e;
+		}
+		m_eTrilinosSolver = eAmesos;
+	}
 }
 
 daeTrilinosSolver::~daeTrilinosSolver(void)
@@ -168,47 +266,6 @@ bool daeTrilinosSolver::CheckData() const
 
 void daeTrilinosSolver::AllocateMemory(void)
 {
-	if(m_strSolverName == "AztecOO")
-	{
-		m_eTrilinosSolver = eAztecOO;
-	}
-	else if(m_strSolverName == "AztecOO_Ifpack_ILU"  ||
-			m_strSolverName == "AztecOO_Ifpack_ILUT" ||
-			m_strSolverName == "AztecOO_Ifpack_IC"   ||
-			m_strSolverName == "AztecOO_Ifpack_ICT ")
-	{
-		m_eTrilinosSolver = eAztecOO_Ifpack;
-	}
-	else
-	{
-		Amesos Factory;
-		if(!Factory.Query(m_strSolverName.c_str()))
-		{
-			daeDeclareException(exRuntimeCheck);
-			e << "Error: the solver: [" << m_strSolverName << "] is not supported!" << "\n"
-			  << "Supported Amesos solvers: " << "\n"
-			  << "   * Amesos_Klu: "         << (Factory.Query("Amesos_Klu")         ? "true" : "false") << "\n"
-			  << "   * Amesos_Lapack: "      << (Factory.Query("Amesos_Lapack")      ? "true" : "false") << "\n"
-			  << "   * Amesos_Scalapack: "   << (Factory.Query("Amesos_Scalapack")   ? "true" : "false") << "\n"
-			  << "   * Amesos_Umfpack: "     << (Factory.Query("Amesos_Umfpack")     ? "true" : "false") << "\n"
-			  << "   * Amesos_Pardiso: "     << (Factory.Query("Amesos_Pardiso")     ? "true" : "false") << "\n"
-			  << "   * Amesos_Taucs: "       << (Factory.Query("Amesos_Taucs")       ? "true" : "false") << "\n"
-			  << "   * Amesos_Superlu: "     << (Factory.Query("Amesos_Superlu")     ? "true" : "false") << "\n"
-			  << "   * Amesos_Superludist: " << (Factory.Query("Amesos_Superludist") ? "true" : "false") << "\n"
-			  << "   * Amesos_Dscpack: "     << (Factory.Query("Amesos_Dscpack")     ? "true" : "false") << "\n"
-			  << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << "\n"
- 			  << "Supported AztecOO solvers: " << "\n"
-			  << "   * AztecOO (with built-in preconditioners) \n"
-			  << "   * AztecOO_Ifpack_IC \n"
-			  << "   * AztecOO_Ifpack_ICT \n"
-			  << "   * AztecOO_Ifpack_ILU \n"
-			  << "   * AztecOO_Ifpack_ILUT \n";
-	
-			throw e;
-		}
-		m_eTrilinosSolver = eAmesos;
-	}
-	
 	m_map.reset(new Epetra_Map(m_nNoEquations, 0, m_Comm));
 	
 	m_matEPETRA.reset(new Epetra_CrsMatrix(Copy, *m_map, 0));
@@ -217,79 +274,66 @@ void daeTrilinosSolver::AllocateMemory(void)
 	m_vecB.reset(new Epetra_Vector(*m_map));
 	m_vecX.reset(new Epetra_Vector(*m_map));
 	
+/*	
 	m_Problem.reset(new Epetra_LinearProblem(m_matEPETRA.get(), m_vecX.get(), m_vecB.get())); 
 	
-// Now I can create the solver (because of some implementation details in AztecOO)
 	if(m_eTrilinosSolver == eAmesos)
 	{
 		Amesos Factory;
-		m_pSolver.reset(Factory.Create(m_strSolverName.c_str(), *m_Problem));
+		m_pAmesosSolver.reset(Factory.Create(m_strSolverName.c_str(), *m_Problem));
 	}
 	else if(m_eTrilinosSolver == eAztecOO)
 	{
 		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		m_pAztecOOSolver->SetAztecDefaults();
 	}
-	else
+	else if(m_eTrilinosSolver == eAztecOO_ML)
 	{
-		//Ifpack Factory;
-		//m_pPreconditioner.reset(Factory.Create("Amesos", m_matEPETRA.get(), 2));
-		
 		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		m_pAztecOOSolver->SetAztecDefaults();
 
-		if(m_strSolverName == "AztecOO_Ifpack_ILU")
-			m_pPreconditioner.reset(new Ifpack_ILU(m_matEPETRA.get()));
-		else if(m_strSolverName == "AztecOO_Ifpack_ILUT")
-			m_pPreconditioner.reset(new Ifpack_ILUT(m_matEPETRA.get()));
-		else if(m_strSolverName == "AztecOO_Ifpack_IC")
-			m_pPreconditioner.reset(new Ifpack_IC(m_matEPETRA.get()));
-		else if(m_strSolverName == "AztecOO_Ifpack_ICT")
-			m_pPreconditioner.reset(new Ifpack_ICT(m_matEPETRA.get()));
+		if(m_strPreconditionerName == "SA")
+			ML_Epetra::SetDefaults("SA", m_parameterListML);
+		else if(m_strPreconditionerName == "DD")
+			ML_Epetra::SetDefaults("DD", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML")
+			ML_Epetra::SetDefaults("DD-ML", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML-LU")
+			ML_Epetra::SetDefaults("DD-ML-LU", m_parameterListML);
+		else if(m_strPreconditionerName == "maxwell")
+			ML_Epetra::SetDefaults("maxwell", m_parameterListML);
+		else if(m_strPreconditionerName == "NSSA")
+			ML_Epetra::SetDefaults("NSSA", m_parameterListML);
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+
+		m_pPreconditionerML.reset(new ML_Epetra::MultiLevelPreconditioner(*m_matEPETRA.get(), m_parameterListML, false));
+		m_bIsPreconditionerConstructed = false;
+	}
+	else if(m_eTrilinosSolver == eAztecOO_Ifpack)
+	{
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		m_pAztecOOSolver->SetAztecDefaults();
+
+		if(m_strPreconditionerName == "ILU")
+			m_pPreconditionerIfpack.reset(new Ifpack_ILU(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "ILUT")
+			m_pPreconditionerIfpack.reset(new Ifpack_ILUT(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "IC")
+			m_pPreconditionerIfpack.reset(new Ifpack_IC(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "ICT")
+			m_pPreconditionerIfpack.reset(new Ifpack_ICT(m_matEPETRA.get()));
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		
-		m_bIsPreconditionerCreated = false;
+		m_bIsPreconditionerConstructed = false;
 	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+*/
 }
-
-void daeTrilinosSolver::SetAztecOptions(Teuchos::ParameterList& paramList)
-{
-	m_parameterListAztec = paramList;
-	m_parameterListAztec.print(cout, 0, true, true);
-}
-
-void daeTrilinosSolver::SetIfpackOptions(Teuchos::ParameterList& paramList)
-{
-	m_parameterListIfpack = paramList;
-	m_parameterListIfpack.print(cout, 0, true, true);
-}
-
-void daeTrilinosSolver::SetAmesosOptions(Teuchos::ParameterList& paramList)
-{
-	m_parameterListAmesos = paramList;
-	m_parameterListAmesos.print(cout, 0, true, true);
-}
-
-//void daeTrilinosSolver::SetAztecOption(int Option, int Value)
-//{
-//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
-//	{
-//		daeDeclareException(exInvalidCall);
-//		e << "Cannot set AztecOO option";
-//		throw e;
-//	}
-//	m_pAztecOOSolver->SetAztecOption(Option, Value);
-//}
-//
-//void daeTrilinosSolver::SetAztecParameter(int Option, double Value)
-//{
-//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
-//	{
-//		daeDeclareException(exInvalidCall);
-//		e << "Cannot set AztecOO parameter";
-//		throw e;
-//	}
-//	m_pAztecOOSolver->SetAztecParam(Option, Value);
-//}
 
 void daeTrilinosSolver::FreeMemory(void)
 {
@@ -298,14 +342,119 @@ void daeTrilinosSolver::FreeMemory(void)
 	m_vecB.reset();
 	m_vecX.reset();
 	m_Problem.reset(); 
-	m_pSolver.reset();
+	m_pAmesosSolver.reset();
 	m_pAztecOOSolver.reset();
-	m_pPreconditioner.reset();
+	m_pPreconditionerML.reset();
+	m_pPreconditionerIfpack.reset();
 }
 
 int daeTrilinosSolver::Init(void* ida)
 {
 	return IDA_SUCCESS;
+}
+
+bool daeTrilinosSolver::SetupLinearProblem(void)
+{
+	int nResult;
+	
+// At this point I should have the structure of A and the numerical values of A, x and b computed
+	
+	m_Problem.reset(new Epetra_LinearProblem(m_matEPETRA.get(), m_vecX.get(), m_vecB.get())); 
+	
+	if(m_eTrilinosSolver == eAmesos)
+	{
+		Amesos Factory;
+		m_pAmesosSolver.reset(Factory.Create(m_strSolverName.c_str(), *m_Problem));
+		
+		nResult = m_pAmesosSolver->SymbolicFactorization();
+		if(nResult != 0)
+		{
+			std::cout << "Symbolic factorization failed: " << nResult << std::endl;
+			return false;
+		}
+	}
+	else if(m_eTrilinosSolver == eAztecOO)
+	{
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		// SetAztecDefaults has been called in the AztecOO constructor
+		m_parameterListAztec.set("AZ_keep_info", 1);
+		m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+	}
+	else if(m_eTrilinosSolver == eAztecOO_ML)
+	{
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+
+		if(m_strPreconditionerName == "SA")
+			ML_Epetra::SetDefaults("SA", m_parameterListML);
+		else if(m_strPreconditionerName == "DD")
+			ML_Epetra::SetDefaults("DD", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML")
+			ML_Epetra::SetDefaults("DD-ML", m_parameterListML);
+		else if(m_strPreconditionerName == "DD-ML-LU")
+			ML_Epetra::SetDefaults("DD-ML-LU", m_parameterListML);
+		else if(m_strPreconditionerName == "maxwell")
+			ML_Epetra::SetDefaults("maxwell", m_parameterListML);
+		else if(m_strPreconditionerName == "NSSA")
+			ML_Epetra::SetDefaults("NSSA", m_parameterListML);
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+
+		m_parameterListML.set("reuse: enable", true);
+		
+		m_pPreconditionerML.reset(new ML_Epetra::MultiLevelPreconditioner(*m_matEPETRA.get(), m_parameterListML, false));
+		m_bIsPreconditionerConstructed = false;
+
+		nResult = m_pAztecOOSolver->SetPrecOperator(m_pPreconditionerML.get());		
+		if(nResult != 0)
+		{
+			std::cout << "Failed to set tht ML preconditioner" << std::endl;
+			return false;
+		}
+	}
+	else if(m_eTrilinosSolver == eAztecOO_Ifpack)
+	{
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+		m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+
+		if(m_strPreconditionerName == "ILU")
+			m_pPreconditionerIfpack.reset(new Ifpack_ILU(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "ILUT")
+			m_pPreconditionerIfpack.reset(new Ifpack_ILUT(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "IC")
+			m_pPreconditionerIfpack.reset(new Ifpack_IC(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "ICT")
+			m_pPreconditionerIfpack.reset(new Ifpack_ICT(m_matEPETRA.get()));
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		
+		m_pPreconditionerIfpack->SetParameters(m_parameterListIfpack);
+		m_bIsPreconditionerConstructed = false;
+		
+		nResult = m_pPreconditionerIfpack->Initialize();
+		if(nResult != 0)
+		{
+			std::cout << "Ifpack preconditioner initialize failed" << std::endl;
+			return false;
+		}
+		
+		nResult = m_pAztecOOSolver->SetPrecOperator(m_pPreconditionerIfpack.get());
+		if(nResult != 0)
+		{
+			std::cout << "Failed to set tht Ifpack preconditioner" << std::endl;
+			return false;
+		}
+		
+		std::cout << *m_pPreconditionerIfpack.get() << std::endl;
+		Ifpack_Analyze(*m_matEPETRA.get(), false, 1);
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+	
+	m_bMatrixStructureChanged = false;
+	return true;
 }
 
 int daeTrilinosSolver::Setup(void*	ida,
@@ -316,7 +465,7 @@ int daeTrilinosSolver::Setup(void*	ida,
 								   N_Vector	vectorTemp2, 
 								   N_Vector	vectorTemp3)
 {
-	int info;
+	int nResult;
 	realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 		
 	IDAMem ida_mem = (IDAMem)ida;
@@ -348,37 +497,61 @@ int daeTrilinosSolver::Setup(void*	ida,
 							    dInverseTimeStep);
 	//m_matJacobian.Print();
 
+	if(m_bMatrixStructureChanged)
+	{
+		if(!SetupLinearProblem())
+		{
+			std::cout << "SetupLinearProblem failed" << std::endl;
+			return IDA_LSETUP_FAIL;
+		}
+	}
+	
 	if(m_eTrilinosSolver == eAmesos)
 	{
-		m_pSolver->SetParameters(m_parameterListAmesos);
-		
+		if(!m_pAmesosSolver)
+			daeDeclareAndThrowException(exInvalidCall);
+/*		
 	// This does not have to be called each time (but should be called when the nonzero structure changes)
 		if(m_bMatrixStructureChanged)
 		{
-			info = m_pSolver->SymbolicFactorization();
-			if(info != 0)
+			//m_pAmesosSolver->SetParameters(m_parameterListAmesos);
+			
+			nResult = m_pAmesosSolver->SymbolicFactorization();
+			if(nResult != 0)
 			{
 				std::cout << "[setup_linear]: SymbolicFactorization failed: " << info << std::endl;
 				return IDA_LSETUP_FAIL;
 			}
 			m_bMatrixStructureChanged = false;
 		}
-		
-		info = m_pSolver->NumericFactorization();
-		if(info != 0)
+*/		
+		nResult = m_pAmesosSolver->NumericFactorization();
+		if(nResult != 0)
 		{
-			std::cout << "[setup_linear]: NumericFactorization failed: " << info << std::endl;
+			std::cout << "Amesos: numeric factorization failed: " << nResult << std::endl;
 			return IDA_LSETUP_FAIL;
 		}
 	}
 	else if(m_eTrilinosSolver == eAztecOO)
 	{
 		double condest;
-		int nResult;
 		
-		if(!m_bIsPreconditionerCreated)
+		if(!m_pAztecOOSolver)
+			daeDeclareAndThrowException(exInvalidCall);
+
+		nResult = m_pAztecOOSolver->ConstructPreconditioner(condest);
+		if(nResult < 0)
+		{
+			std::cout << "AztecOO: construct preconditioner failed: " << nResult << std::endl;
+			return IDA_LSETUP_FAIL;
+		}
+		
+		cout << "Condition estimate = " << condest << endl << endl;
+		
+/*		
+		if(!m_bIsPreconditionerConstructed)
 		{	
-			m_pAztecOOSolver->SetParameters(m_parameterListAztec);
+			//m_pAztecOOSolver->SetParameters(m_parameterListAztec);
 			
 //			cout << "Setup before: " << endl;
 //			cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
@@ -407,7 +580,7 @@ int daeTrilinosSolver::Setup(void*	ida,
 			if(nResult < 0)
 			{
 				daeDeclareException(exMiscellanous);
-				e << "Failed to create the preconditioner";
+				e << "Failed to construct the preconditioner";
 				throw e;
 			}
 			
@@ -430,18 +603,27 @@ int daeTrilinosSolver::Setup(void*	ida,
 //			cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
 //			cout.flush();
 
-			m_bIsPreconditionerCreated = true;
+			m_bIsPreconditionerConstructed = true;
 		}
+*/
 	}
 	else if(m_eTrilinosSolver == eAztecOO_Ifpack)
 	{
-		double condest;
-		int nResult;
-		
-		if(m_bIsPreconditionerCreated)
+		if(!m_pAztecOOSolver || !m_pPreconditionerIfpack)
+			daeDeclareAndThrowException(exInvalidCall);
+
+		nResult = m_pPreconditionerIfpack->Compute();
+		if(nResult != 0)
 		{
-			m_pPreconditioner->Compute();
-			if(!m_pPreconditioner->IsComputed())
+			std::cout << "Ifpack: compute preconditioner failed: " << nResult << std::endl;
+			return IDA_LSETUP_FAIL;
+		}
+		
+/*
+		if(m_bIsPreconditionerConstructed)
+		{
+			m_pPreconditionerIfpack->Compute();
+			if(!m_pPreconditionerIfpack->IsComputed())
 			{
 				std::cout << "[setup_linear]: preconditioner compute failed" << std::endl;
 				return IDA_LSETUP_FAIL;
@@ -456,34 +638,68 @@ int daeTrilinosSolver::Setup(void*	ida,
 //			//paramList.set("fact: relax value", 10.0);
 //			paramList.set("fact: absolute threshold", 1e8);
 //			paramList.set("fact: relative threshold", 0.01);
-//			m_pPreconditioner->SetParameters(paramList);
+//			m_pPreconditionerIfpack->SetParameters(paramList);
 
-			m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
-			m_pPreconditioner->SetParameters(m_parameterListIfpack);
+//			m_pAztecOOSolver->SetPrecOperator(m_pPreconditionerIfpack.get());		
+//			m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+//			m_pPreconditionerIfpack->SetParameters(m_parameterListIfpack);
 			
-			m_pPreconditioner->Initialize();
-			if(!m_pPreconditioner->IsInitialized())
+			m_pPreconditionerIfpack->Initialize();
+			if(!m_pPreconditionerIfpack->IsInitialized())
 			{
 				std::cout << "[setup_linear]: preconditioner initialize failed" << std::endl;
 				return IDA_LSETUP_FAIL;
 			}
 				
-			m_pPreconditioner->Compute();
-			if(!m_pPreconditioner->IsComputed())
+			m_pPreconditionerIfpack->Compute();
+			if(!m_pPreconditionerIfpack->IsComputed())
 			{
 				std::cout << "[setup_linear]: preconditioner compute failed" << std::endl;
 				return IDA_LSETUP_FAIL;
 			}
 
 			std::cout << "[setup_linear]: preconditioner info:" << std::endl;
-			std::cout << *m_pPreconditioner.get() << std::endl;
+			std::cout << *m_pPreconditionerIfpack.get() << std::endl;
 			Ifpack_Analyze(*m_matEPETRA.get(), false, 1);
 			//Ifpack_PrintSparsity(*m_matEPETRA.get(), "/home/ciroki/matrix.ps", 1);
 			
-			m_pAztecOOSolver->SetPrecOperator(m_pPreconditioner.get());
-			
-			m_bIsPreconditionerCreated = true;
+			m_bIsPreconditionerConstructed = true;
 		}
+*/
+	}
+	else if(m_eTrilinosSolver == eAztecOO_ML)
+	{
+		double condest;
+		int nResult;
+		
+		if(!m_pAztecOOSolver || !m_pPreconditionerML)
+			daeDeclareAndThrowException(exInvalidCall);
+
+		nResult = m_pPreconditionerML->ComputePreconditioner();
+		if(nResult != 0)
+		{
+			std::cout << "ML: compute preconditioner failed: " << nResult << std::endl;
+			return IDA_LSETUP_FAIL;
+		}
+		
+/*
+		if(m_bIsPreconditionerConstructed)
+		{
+			nResult = m_pPreconditionerML->ComputePreconditioner();
+			if(nResult != 0)
+			{
+				std::cout << "[setup_linear]: preconditioner compute failed" << std::endl;
+				return IDA_LSETUP_FAIL;
+			}
+		}
+		else
+		{
+			m_pAztecOOSolver->SetPrecOperator(m_pPreconditionerML.get());		
+			m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+			m_pPreconditionerML->SetParameterList(m_parameterListML);
+			m_bIsPreconditionerConstructed = true;
+		}
+*/
 	}
 	
 	return IDA_SUCCESS;
@@ -496,7 +712,7 @@ int daeTrilinosSolver::Solve(void*	ida,
 								   N_Vector	vectorTimeDerivatives, 
 								   N_Vector	vectorResiduals)
 {
-	int info;
+	int nResult;
 	realtype* pdB;
 		
 	IDAMem ida_mem = (IDAMem)ida;
@@ -516,18 +732,18 @@ int daeTrilinosSolver::Solve(void*	ida,
 
 	if(m_eTrilinosSolver == eAmesos)
 	{
-		info = m_pSolver->Solve();
-		if(info != 0)
+		nResult = m_pAmesosSolver->Solve();
+		if(nResult != 0)
 		{
-			std::cout << "[solve_linear]: Solve Failed: " << info << std::endl;
+			std::cout << "Amesos: solve failed: " << nResult << std::endl;
 			return IDA_LSOLVE_FAIL;
 		}
 	}
-	else if(m_eTrilinosSolver == eAztecOO || m_eTrilinosSolver == eAztecOO_Ifpack)
+	else if(m_eTrilinosSolver == eAztecOO       || 
+			m_eTrilinosSolver == eAztecOO_ML    || 
+			m_eTrilinosSolver == eAztecOO_Ifpack)
 	{	
-		int nResult;
-		double condest;
-	
+/*	
 //		cout << "Solve before: " << endl;
 //		cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
 //		cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
@@ -553,7 +769,7 @@ int daeTrilinosSolver::Solve(void*	ida,
 //		m_pAztecOOSolver->SetAztecParam(AZ_athresh,          1e8);
 //		m_pAztecOOSolver->SetAztecParam(AZ_rthresh,          0.0);
 	
-		m_pAztecOOSolver->SetParameters(m_parameterListAztec);
+		//m_pAztecOOSolver->SetParameters(m_parameterListAztec);
 		nResult = m_pAztecOOSolver->Iterate(m_nNumIters, m_dTolerance);
 		
 //		cout << "m_nJacobianEvaluations = " << m_nJacobianEvaluations << endl;
@@ -569,17 +785,17 @@ int daeTrilinosSolver::Solve(void*	ida,
 //		cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
 //		cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
 //		cout.flush();
-		
+*/
+		nResult = m_pAztecOOSolver->Iterate(m_nNumIters, m_dTolerance);
 		if(nResult == 1)
 		{
-			// Max. Iterations reached
+			std::cout << "AztecOO solve failed: Max. iterations reached" << std::endl;
 			return IDA_CONV_FAIL;
 			//Or return this: return IDA_LSOLVE_FAIL;
 		}
 		else if(nResult < 0)
 		{
 			string strError;
-			daeDeclareException(exMiscellanous);
 			
 			if(nResult == -1) 
 				strError = "Aztec status AZ_param: option not implemented";
@@ -589,10 +805,8 @@ int daeTrilinosSolver::Solve(void*	ida,
 				strError = "Aztec status AZ_loss: loss of precision";
 			else if(nResult == -4) 
 				strError = "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned";
-				
-			e << "Trilinos AztecOO error: " + strError;
-			throw e;
 			
+			std::cout << "AztecOO solve failed: " << strError << std::endl;
 			return IDA_LSOLVE_FAIL;
 		}
 	}
@@ -606,6 +820,124 @@ int daeTrilinosSolver::Solve(void*	ida,
 	
 	return IDA_SUCCESS;
 }
+
+Teuchos::ParameterList& daeTrilinosSolver::GetAmesosOptions(void)
+{
+//	if(m_eTrilinosSolver != eAmesos || !m_pAmesosSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot get Amesos options before the solver is created";
+//		throw e;
+//	}
+	return m_parameterListAmesos;
+}
+
+Teuchos::ParameterList& daeTrilinosSolver::GetAztecOOOptions(void)
+{
+//	if(m_eTrilinosSolver != eAztecOO || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot get AztecOO options before the solver is created";
+//		throw e;
+//	}
+	return m_parameterListAztec;
+}
+
+Teuchos::ParameterList& daeTrilinosSolver::GetIfpackOptions(void)
+{
+//	if(m_eTrilinosSolver != eAztecOO_Ifpack || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot get Ifpack options before the solver is created";
+//		throw e;
+//	}
+	return m_parameterListIfpack;
+}
+
+Teuchos::ParameterList& daeTrilinosSolver::GetMLOptions(void)
+{
+//	if(m_eTrilinosSolver != eAztecOO_ML || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot get ML options before the solver is created";
+//		throw e;
+//	}
+	return m_parameterListML;
+}
+
+void daeTrilinosSolver::SetAmesosOptions(Teuchos::ParameterList& paramList)
+{
+//	if(m_eTrilinosSolver != eAmesos || !m_pAmesosSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set Amesos options before the solver is created";
+//		throw e;
+//	}
+	m_parameterListAmesos = paramList;
+//	m_parameterListAmesos.print(cout, 0, true, true);
+//	m_pAmesosSolver->SetParameters(m_parameterListAztec);
+}
+
+void daeTrilinosSolver::SetAztecOOOptions(Teuchos::ParameterList& paramList)
+{
+//	if(m_eTrilinosSolver != eAztecOO || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set AztecOO options before the solver is created";
+//		throw e;
+//	}
+	m_parameterListAztec = paramList;
+//	m_parameterListAztec.print(cout, 0, true, true);
+//	m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+}
+
+void daeTrilinosSolver::SetIfpackOptions(Teuchos::ParameterList& paramList)
+{
+//	if(m_eTrilinosSolver != eAztecOO_Ifpack || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set Ifpack options before the solver is created";
+//		throw e;
+//	}
+	m_parameterListIfpack = paramList;
+//	m_parameterListIfpack.print(cout, 0, true, true);
+//	m_pPreconditionerIfpack->SetParameters(m_parameterListIfpack);
+}
+
+void daeTrilinosSolver::SetMLOptions(Teuchos::ParameterList& paramList)
+{
+//	if(m_eTrilinosSolver != eAztecOO_ML || !m_pAztecOOSolver)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot get ML options before the solver is created";
+//		throw e;
+//	}
+	m_parameterListML = paramList;
+//	m_parameterListML.print(cout, 0, true, true);
+//	m_pPreconditionerML->SetParameterList(m_parameterListML);
+}
+
+//void daeTrilinosSolver::SetAztecOption(int Option, int Value)
+//{
+//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set AztecOO option";
+//		throw e;
+//	}
+//	m_pAztecOOSolver->SetAztecOption(Option, Value);
+//}
+//
+//void daeTrilinosSolver::SetAztecParameter(int Option, double Value)
+//{
+//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set AztecOO parameter";
+//		throw e;
+//	}
+//	m_pAztecOOSolver->SetAztecParam(Option, Value);
+//}
 
 int daeTrilinosSolver::Free(void* ida)
 {
