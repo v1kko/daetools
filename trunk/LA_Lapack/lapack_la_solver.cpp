@@ -4,6 +4,13 @@
 #include <idas/idas_impl.h>
 #include "lapack_la_solver.h"
 
+#ifdef daeHasMagma
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include <magma.h>
+#endif
+
 #ifdef daeHasLapack
 extern "C" void dgetrf_(int *m, int *n, double *a, int *lda, int *ipiv, int *info);
 extern "C" void dgetrs_(char *trans, int* n, int* nrhs, double *a , int* lda, int *ipiv, double *b, int* ldb, int *info);
@@ -43,11 +50,20 @@ daeLapackSolver::daeLapackSolver(void)
 	m_matLAPACK            = NULL;
 	m_vecPivot             = NULL;
 	m_pBlock			   = NULL;
+	
+#ifdef daeHasMagma
+	m_matCUDA = NULL;
+	m_pdB     = NULL;
+#endif
 }
 
 daeLapackSolver::~daeLapackSolver(void)
 {
 	FreeMemory();
+	
+#ifdef daeHasMagma
+	cublasShutdown();
+#endif
 }
 
 int daeLapackSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
@@ -97,10 +113,14 @@ int daeLapackSolver::SaveAsXPM(const std::string& strFileName)
 
 bool daeLapackSolver::CheckData() const
 {
-	if(m_vecPivot && m_matLAPACK && m_nNoEquations > 0)
-		return true;
-	else
+	if(!m_vecPivot || !m_matLAPACK || !m_nNoEquations > 0)
 		return false;
+#ifdef daeHasMagma
+	if(!m_matCUDA || !m_pdB)
+		return false;
+#endif
+
+	return true;
 }
 
 void daeLapackSolver::AllocateMemory(void)
@@ -115,12 +135,67 @@ void daeLapackSolver::AllocateMemory(void)
 	if(!m_vecPivot || !m_matLAPACK)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to allocate memory for MKL Lapack LA solver";
+		e << "Unable to allocate memory for Lapack LA solver";
 		FreeMemory();
 		throw e;
 	}
 
 	m_matJacobian.InitMatrix(m_nNoEquations, m_nNoEquations, m_matLAPACK, eColumnWise);
+	
+#ifdef daeHasMagma
+	cublasStatus cures;
+	size_t free;
+	size_t total;
+
+//	CUdevice dev;
+//	CUcontext ctx;
+//	cuInit(0);
+//	cuDeviceGet(&dev,0);
+//	cuCtxCreate(&ctx, 0, dev);
+//	
+//	cures = cuMemGetInfo(&free, &total);
+//	if(cures != CUBLAS_STATUS_SUCCESS)
+//	{
+//		daeDeclareException(exMiscellanous);
+//		e << "Unable to initialize CUDA device";
+//		FreeMemory();
+//		throw e;
+//	}
+//	std::cout << "Available memory on video card:" << std::endl << "Total memory = " << total << std::endl << "Free memory  = " << free << std::endl;
+	
+	cures = cublasInit();
+	if(cures != CUBLAS_STATUS_SUCCESS)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to initialize CUDA device";
+		FreeMemory();
+		throw e;
+	}
+
+	cures = cublasAlloc(m_nNoEquations * m_nNoEquations, sizeof(real_t), (void**)&m_matCUDA);
+	if(cures != CUBLAS_STATUS_SUCCESS)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to allocate memory for CUDA matrix: ";
+		if(cures == CUBLAS_STATUS_NOT_INITIALIZED)
+			e << "CUBLAS_STATUS_NOT_INITIALIZED";
+		else if(cures == CUBLAS_STATUS_INVALID_VALUE)
+			e << "CUBLAS_STATUS_INVALID_VALUE";
+		else if(cures == CUBLAS_STATUS_ALLOC_FAILED)
+			e << "CUBLAS_STATUS_ALLOC_FAILED";
+		FreeMemory();
+		throw e;
+	}
+	
+	cures = cublasAlloc(m_nNoEquations, sizeof(real_t), (void**)&m_pdB);
+	if(cures != CUBLAS_STATUS_SUCCESS)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to allocate memory for CUDA B array";
+		FreeMemory();
+		throw e;
+	}
+#endif
 }
 
 void daeLapackSolver::FreeMemory(void)
@@ -132,6 +207,15 @@ void daeLapackSolver::FreeMemory(void)
 	
 	m_matLAPACK = NULL;
 	m_vecPivot  = NULL;
+	
+#ifdef daeHasMagma
+	if(m_matCUDA)
+		cublasFree(m_matCUDA);
+	if(m_pdB)
+		cublasFree(m_pdB);
+	m_matCUDA = NULL;
+	m_pdB     = NULL;
+#endif
 }
 
 int daeLapackSolver::Init(void* ida)
@@ -189,19 +273,26 @@ int daeLapackSolver::Setup(void*		ida,
 #endif
 #endif
 	
+#ifdef daeHasMagma
+	magma_int_t res;
+	cublasStatus cures;
+	
+	cures = cublasSetMatrix (n, n, sizeof(real_t), m_matLAPACK, n, m_matCUDA, n);
+	if(cures != CUBLAS_STATUS_SUCCESS)
+		return IDA_LSETUP_FAIL;
+	
+#ifdef DAE_SINGLE_PRECISION
+	res = magma_sgetrf_gpu(n, n, m_matCUDA, n, m_vecPivot, &info);
+#else
+	res = magma_dgetrf_gpu(n, n, m_matCUDA, n, m_vecPivot, &info);
+#endif
+#endif
+	
 #ifdef daeHasLapack
 #ifdef DAE_SINGLE_PRECISION
 	sgetrf_(&n, &n, m_matLAPACK, &n, m_vecPivot, &info);
 #else
 	dgetrf_(&n, &n, m_matLAPACK, &n, m_vecPivot, &info);
-#endif
-#endif
-	
-#ifdef daeHasAtlas
-#ifdef DAE_SINGLE_PRECISION
-	info = clapack_sgetrf(CblasColMajor, n, n, m_matLAPACK, n, m_vecPivot);
-#else
-	info = clapack_dgetrf(CblasColMajor, n, n, m_matLAPACK, n, m_vecPivot);
 #endif
 #endif
 
@@ -259,19 +350,31 @@ int daeLapackSolver::Solve(void*		ida,
 #endif
 #endif
 	
+#ifdef daeHasMagma
+	magma_int_t res;
+	cublasStatus cures;
+	
+	cures = cublasSetVector(n, sizeof(real_t), pdB, 1, m_pdB, 1);
+	if(cures != CUBLAS_STATUS_SUCCESS)
+		return IDA_LSOLVE_FAIL;
+	
+#ifdef DAE_SINGLE_PRECISION
+	res = magma_sgetrs_gpu(transa, n, nrhs, m_matCUDA, n, m_vecPivot, m_pdB, n, &info);
+#else
+	res = magma_dgetrs_gpu(transa, n, nrhs, m_matCUDA, n, m_vecPivot, m_pdB, n, &info);
+#endif
+	
+	cures = cublasGetVector(n, sizeof(real_t), m_pdB, 1, pdB, 1);
+	if(cures != CUBLAS_STATUS_SUCCESS)
+		return IDA_LSOLVE_FAIL;
+	
+#endif
+	
 #ifdef daeHasLapack
 #ifdef DAE_SINGLE_PRECISION
 	sgetrs_(&transa, &n, &nrhs, m_matLAPACK, &n, m_vecPivot, pdB, &n, &info);
 #else
 	dgetrs_(&transa, &n, &nrhs, m_matLAPACK, &n, m_vecPivot, pdB, &n, &info);
-#endif
-#endif
-	
-#ifdef daeHasAtlas
-#ifdef DAE_SINGLE_PRECISION
-	info = clapack_sgetrs(CblasColMajor, CblasNoTrans, n, nrhs, m_matLAPACK, n, m_vecPivot, pdB, n);
-#else
-	info = clapack_dgetrs(CblasColMajor, CblasNoTrans, n, nrhs, m_matLAPACK, n, m_vecPivot, pdB, n);
 #endif
 #endif
 	

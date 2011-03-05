@@ -29,12 +29,12 @@ int solve_la(IDAMem ida_mem,
 			  N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 
-daeIDALASolver_t* daeCreateTrilinosAmesosSolver(const std::string& strSolverName)
+daeIDALASolver_t* daeCreateTrilinosSolver(const std::string& strSolverName)
 {
-	return new daeTrilinosAmesosSolver(strSolverName);
+	return new daeTrilinosSolver(strSolverName);
 }
 
-std::vector<string> daeTrilinosAmesosSupportedSolvers(void)
+std::vector<string> daeTrilinosSupportedSolvers(void)
 {
 	std::vector<string> strarrSolvers;
 
@@ -60,10 +60,16 @@ std::vector<string> daeTrilinosAmesosSupportedSolvers(void)
 	if(Factory.Query("Amesos_Mumps")) 
 		strarrSolvers.push_back("Amesos_Mumps");
 	
+	strarrSolvers.push_back("AztecOO");
+	strarrSolvers.push_back("AztecOO_Ifpack_IC");
+	strarrSolvers.push_back("AztecOO_Ifpack_ICT");
+	strarrSolvers.push_back("AztecOO_Ifpack_ILU");
+	strarrSolvers.push_back("AztecOO_Ifpack_ILUT");
+
 	return strarrSolvers;
 }
 
-daeTrilinosAmesosSolver::daeTrilinosAmesosSolver(const std::string& strSolverName)
+daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName)
 #ifdef HAVE_MPI
 	: m_Comm(MPI_COMM_WORLD)
 #endif
@@ -75,16 +81,16 @@ daeTrilinosAmesosSolver::daeTrilinosAmesosSolver(const std::string& strSolverNam
 	
 	m_nNumIters				= 200;
 	m_dTolerance			= 1e-6;
-	m_bIsAmesos				= true;
 	m_bIsPreconditionerCreated = false;
+	m_bMatrixStructureChanged  = false;
 }
 
-daeTrilinosAmesosSolver::~daeTrilinosAmesosSolver(void)
+daeTrilinosSolver::~daeTrilinosSolver(void)
 {
 	FreeMemory();
 }
 
-int daeTrilinosAmesosSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
+int daeTrilinosSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
 {
 	IDAMem ida_mem = (IDAMem)ida;
 	if(!ida_mem)
@@ -105,6 +111,7 @@ int daeTrilinosAmesosSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESol
 	m_pBlock->FillSparseMatrix(&m_matJacobian);
 	m_matJacobian.Sort();
 	//m_matJacobian.Print();
+	m_bMatrixStructureChanged = true;
 	
 	ida_mem->ida_linit	= init_la;
 	ida_mem->ida_lsetup = setup_la;
@@ -118,7 +125,7 @@ int daeTrilinosAmesosSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESol
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::Reinitialize(void* ida)
+int daeTrilinosSolver::Reinitialize(void* ida)
 {
 	IDAMem ida_mem = (IDAMem)ida;
 	if(!ida_mem)
@@ -129,27 +136,29 @@ int daeTrilinosAmesosSolver::Reinitialize(void* ida)
 	
 // Re-initialize sparse matrix
 // ACHTUNG, ACHTUNG!!! It doesn't work, should be checked
+// If the matrix structure changes I cannot change Epetra_Crs_Matrix - I have to re-built it!
 	m_matJacobian.ResetCounters();
 	m_pBlock->FillSparseMatrix(&m_matJacobian);
 	m_matJacobian.Sort();
 	//m_matJacobian.Print();
+	m_bMatrixStructureChanged = true;
 
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::SaveAsXPM(const std::string& strFileName)
+int daeTrilinosSolver::SaveAsXPM(const std::string& strFileName)
 {
 	m_matJacobian.SaveMatrixAsXPM(strFileName);
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+int daeTrilinosSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
 {
 	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
 	return IDA_SUCCESS;
 }
 
-bool daeTrilinosAmesosSolver::CheckData() const
+bool daeTrilinosSolver::CheckData() const
 {
 	if(m_matEPETRA && m_vecB && m_vecX && m_nNoEquations > 0)
 		return true;
@@ -157,11 +166,18 @@ bool daeTrilinosAmesosSolver::CheckData() const
 		return false;
 }
 
-void daeTrilinosAmesosSolver::AllocateMemory(void)
+void daeTrilinosSolver::AllocateMemory(void)
 {
 	if(m_strSolverName == "AztecOO")
 	{
-		m_bIsAmesos = false;
+		m_eTrilinosSolver = eAztecOO;
+	}
+	else if(m_strSolverName == "AztecOO_Ifpack_ILU"  ||
+			m_strSolverName == "AztecOO_Ifpack_ILUT" ||
+			m_strSolverName == "AztecOO_Ifpack_IC"   ||
+			m_strSolverName == "AztecOO_Ifpack_ICT ")
+	{
+		m_eTrilinosSolver = eAztecOO_Ifpack;
 	}
 	else
 	{
@@ -180,11 +196,17 @@ void daeTrilinosAmesosSolver::AllocateMemory(void)
 			  << "   * Amesos_Superlu: "     << (Factory.Query("Amesos_Superlu")     ? "true" : "false") << "\n"
 			  << "   * Amesos_Superludist: " << (Factory.Query("Amesos_Superludist") ? "true" : "false") << "\n"
 			  << "   * Amesos_Dscpack: "     << (Factory.Query("Amesos_Dscpack")     ? "true" : "false") << "\n"
-			  << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << "\n";
+			  << "   * Amesos_Mumps: "       << (Factory.Query("Amesos_Mumps")       ? "true" : "false") << "\n"
+ 			  << "Supported AztecOO solvers: " << "\n"
+			  << "   * AztecOO (with built-in preconditioners) \n"
+			  << "   * AztecOO_Ifpack_IC \n"
+			  << "   * AztecOO_Ifpack_ICT \n"
+			  << "   * AztecOO_Ifpack_ILU \n"
+			  << "   * AztecOO_Ifpack_ILUT \n";
 	
 			throw e;
 		}
-		m_bIsAmesos = true;
+		m_eTrilinosSolver = eAmesos;
 	}
 	
 	m_map.reset(new Epetra_Map(m_nNoEquations, 0, m_Comm));
@@ -198,42 +220,78 @@ void daeTrilinosAmesosSolver::AllocateMemory(void)
 	m_Problem.reset(new Epetra_LinearProblem(m_matEPETRA.get(), m_vecX.get(), m_vecB.get())); 
 	
 // Now I can create the solver (because of some implementation details in AztecOO)
-	if(m_bIsAmesos)
+	if(m_eTrilinosSolver == eAmesos)
 	{
 		Amesos Factory;
 		m_pSolver.reset(Factory.Create(m_strSolverName.c_str(), *m_Problem));
 	}
+	else if(m_eTrilinosSolver == eAztecOO)
+	{
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+	}
 	else
 	{
-		Ifpack Factory;
-		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));		
-		m_pPreconditioner.reset(Factory.Create("Ifpack_ILUT", m_matEPETRA.get(), 0));
+		//Ifpack Factory;
+		//m_pPreconditioner.reset(Factory.Create("Amesos", m_matEPETRA.get(), 2));
+		
+		m_pAztecOOSolver.reset(new AztecOO(*m_Problem.get()));
+
+		if(m_strSolverName == "AztecOO_Ifpack_ILU")
+			m_pPreconditioner.reset(new Ifpack_ILU(m_matEPETRA.get()));
+		else if(m_strSolverName == "AztecOO_Ifpack_ILUT")
+			m_pPreconditioner.reset(new Ifpack_ILUT(m_matEPETRA.get()));
+		else if(m_strSolverName == "AztecOO_Ifpack_IC")
+			m_pPreconditioner.reset(new Ifpack_IC(m_matEPETRA.get()));
+		else if(m_strSolverName == "AztecOO_Ifpack_ICT")
+			m_pPreconditioner.reset(new Ifpack_ICT(m_matEPETRA.get()));
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		
+		m_bIsPreconditionerCreated = false;
 	}
 }
 
-void daeTrilinosAmesosSolver::SetAztecOption(int Option, int Value)
+void daeTrilinosSolver::SetAztecOptions(Teuchos::ParameterList& paramList)
 {
-	if(m_bIsAmesos || !m_pAztecOOSolver)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Cannot set AztecOO option";
-		throw e;
-	}
-	m_pAztecOOSolver->SetAztecOption(Option, Value);
+	m_parameterListAztec = paramList;
+	m_parameterListAztec.print(cout, 0, true, true);
 }
 
-void daeTrilinosAmesosSolver::SetAztecParameter(int Option, double Value)
+void daeTrilinosSolver::SetIfpackOptions(Teuchos::ParameterList& paramList)
 {
-	if(m_bIsAmesos || !m_pAztecOOSolver)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Cannot set AztecOO parameter";
-		throw e;
-	}
-	m_pAztecOOSolver->SetAztecParam(Option, Value);
+	m_parameterListIfpack = paramList;
+	m_parameterListIfpack.print(cout, 0, true, true);
 }
 
-void daeTrilinosAmesosSolver::FreeMemory(void)
+void daeTrilinosSolver::SetAmesosOptions(Teuchos::ParameterList& paramList)
+{
+	m_parameterListAmesos = paramList;
+	m_parameterListAmesos.print(cout, 0, true, true);
+}
+
+//void daeTrilinosSolver::SetAztecOption(int Option, int Value)
+//{
+//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set AztecOO option";
+//		throw e;
+//	}
+//	m_pAztecOOSolver->SetAztecOption(Option, Value);
+//}
+//
+//void daeTrilinosSolver::SetAztecParameter(int Option, double Value)
+//{
+//	if(m_eTrilinosSolver != eAztecOO || m_eTrilinosSolver != eAztecOO_Ifpack)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Cannot set AztecOO parameter";
+//		throw e;
+//	}
+//	m_pAztecOOSolver->SetAztecParam(Option, Value);
+//}
+
+void daeTrilinosSolver::FreeMemory(void)
 {
 	m_map.reset();
 	m_matEPETRA.reset();
@@ -242,14 +300,15 @@ void daeTrilinosAmesosSolver::FreeMemory(void)
 	m_Problem.reset(); 
 	m_pSolver.reset();
 	m_pAztecOOSolver.reset();
+	m_pPreconditioner.reset();
 }
 
-int daeTrilinosAmesosSolver::Init(void* ida)
+int daeTrilinosSolver::Init(void* ida)
 {
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::Setup(void*	ida,
+int daeTrilinosSolver::Setup(void*	ida,
 								   N_Vector	vectorVariables, 
 								   N_Vector	vectorTimeDerivatives, 
 								   N_Vector	vectorResiduals,
@@ -289,14 +348,20 @@ int daeTrilinosAmesosSolver::Setup(void*	ida,
 							    dInverseTimeStep);
 	//m_matJacobian.Print();
 
-/* AMESOS */
-	if(m_bIsAmesos)
+	if(m_eTrilinosSolver == eAmesos)
 	{
-		info = m_pSolver->SymbolicFactorization();
-		if(info != 0)
+		m_pSolver->SetParameters(m_parameterListAmesos);
+		
+	// This does not have to be called each time (but should be called when the nonzero structure changes)
+		if(m_bMatrixStructureChanged)
 		{
-			std::cout << "[setup_linear]: SymbolicFactorization failed: " << info << std::endl;
-			return IDA_LSETUP_FAIL;
+			info = m_pSolver->SymbolicFactorization();
+			if(info != 0)
+			{
+				std::cout << "[setup_linear]: SymbolicFactorization failed: " << info << std::endl;
+				return IDA_LSETUP_FAIL;
+			}
+			m_bMatrixStructureChanged = false;
 		}
 		
 		info = m_pSolver->NumericFactorization();
@@ -306,45 +371,37 @@ int daeTrilinosAmesosSolver::Setup(void*	ida,
 			return IDA_LSETUP_FAIL;
 		}
 	}
-	else
+	else if(m_eTrilinosSolver == eAztecOO)
 	{
-/* AZTECOO */
 		double condest;
 		int nResult;
 		
 		if(!m_bIsPreconditionerCreated)
 		{	
-			Teuchos::ParameterList paramList;
-			paramList.set("amesos: solver type", "Amesos_Superlu");
-
-			m_pPreconditioner->SetParameters(paramList);
-			m_pPreconditioner->PrintUnused();
+			m_pAztecOOSolver->SetParameters(m_parameterListAztec);
 			
-/*
-			m_pAztecOOSolver->SetMatrixName(12345);
+//			cout << "Setup before: " << endl;
+//			cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
+//			cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
+//			cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
+//			cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
+//			cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
+//			cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
+//			cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
+//			cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
+//			cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
+//			cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
+//			cout.flush();
 			
-			cout << "Setup before: " << endl;
-			cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
-			cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
-			cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
-			cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
-			cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
-			cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
-			cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
-			cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
-			cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
-			cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
-			cout.flush();
-			
-			m_pAztecOOSolver->SetAztecOption(AZ_pre_calc,        AZ_calc);
-			m_pAztecOOSolver->SetAztecOption(AZ_solver,          AZ_gmres);
-			m_pAztecOOSolver->SetAztecOption(AZ_precond,         AZ_dom_decomp);
-			m_pAztecOOSolver->SetAztecOption(AZ_subdomain_solve, AZ_ilut);
-			m_pAztecOOSolver->SetAztecParam(AZ_ilut_fill,        3.0);
-			m_pAztecOOSolver->SetAztecOption(AZ_kspace,          m_nNumIters);
-			m_pAztecOOSolver->SetAztecOption(AZ_overlap,         1);
-			m_pAztecOOSolver->SetAztecParam(AZ_athresh,          1e8);
-			m_pAztecOOSolver->SetAztecParam(AZ_rthresh,          0.0);
+//			m_pAztecOOSolver->SetAztecOption(AZ_pre_calc,        AZ_calc);
+//			m_pAztecOOSolver->SetAztecOption(AZ_solver,          AZ_gmres);
+//			m_pAztecOOSolver->SetAztecOption(AZ_precond,         AZ_dom_decomp);
+//			m_pAztecOOSolver->SetAztecOption(AZ_subdomain_solve, AZ_ilut);
+//			m_pAztecOOSolver->SetAztecParam(AZ_ilut_fill,        3.0);
+//			m_pAztecOOSolver->SetAztecOption(AZ_kspace,          m_nNumIters);
+//			m_pAztecOOSolver->SetAztecOption(AZ_overlap,         1);
+//			m_pAztecOOSolver->SetAztecParam(AZ_athresh,          1e8);
+//			m_pAztecOOSolver->SetAztecParam(AZ_rthresh,          0.0);
 		
 			nResult = m_pAztecOOSolver->ConstructPreconditioner(condest);
 			if(nResult < 0)
@@ -360,32 +417,79 @@ int daeTrilinosAmesosSolver::Setup(void*	ida,
 				 << "\n Inf-norm of A before scaling = " << norminf 
 				 << "\n One-norm of A before scaling = " << normone << endl << endl;
 			
-			cout << "Setup after: " << endl;
-			cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
-			cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
-			cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
-			cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
-			cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
-			cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
-			cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
-			cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
-			cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
-			cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
-			cout.flush();
-*/			
+//			cout << "Setup after: " << endl;
+//			cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
+//			cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
+//			cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
+//			cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
+//			cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
+//			cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
+//			cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
+//			cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
+//			cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
+//			cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
+//			cout.flush();
+
 			m_bIsPreconditionerCreated = true;
 		}
-		else
+	}
+	else if(m_eTrilinosSolver == eAztecOO_Ifpack)
+	{
+		double condest;
+		int nResult;
+		
+		if(m_bIsPreconditionerCreated)
 		{
-			m_pMLPreconditioner->DestroyPreconditioner();
-			m_pMLPreconditioner->ReComputePreconditioner();
+			m_pPreconditioner->Compute();
+			if(!m_pPreconditioner->IsComputed())
+			{
+				std::cout << "[setup_linear]: preconditioner compute failed" << std::endl;
+				return IDA_LSETUP_FAIL;
+			}
+		}
+		else
+		{	
+//			//level_fill, drop_tolerance, absolute_threshold, relative_threshold and overlap_mode
+//			Teuchos::ParameterList paramList;
+//			paramList.set("fact: level-of-fill", 5);
+//			paramList.set("fact: ilut level-of-fill", 3.0);
+//			//paramList.set("fact: relax value", 10.0);
+//			paramList.set("fact: absolute threshold", 1e8);
+//			paramList.set("fact: relative threshold", 0.01);
+//			m_pPreconditioner->SetParameters(paramList);
+
+			m_pAztecOOSolver->SetParameters(m_parameterListAztec, true);
+			m_pPreconditioner->SetParameters(m_parameterListIfpack);
+			
+			m_pPreconditioner->Initialize();
+			if(!m_pPreconditioner->IsInitialized())
+			{
+				std::cout << "[setup_linear]: preconditioner initialize failed" << std::endl;
+				return IDA_LSETUP_FAIL;
+			}
+				
+			m_pPreconditioner->Compute();
+			if(!m_pPreconditioner->IsComputed())
+			{
+				std::cout << "[setup_linear]: preconditioner compute failed" << std::endl;
+				return IDA_LSETUP_FAIL;
+			}
+
+			std::cout << "[setup_linear]: preconditioner info:" << std::endl;
+			std::cout << *m_pPreconditioner.get() << std::endl;
+			Ifpack_Analyze(*m_matEPETRA.get(), false, 1);
+			//Ifpack_PrintSparsity(*m_matEPETRA.get(), "/home/ciroki/matrix.ps", 1);
+			
+			m_pAztecOOSolver->SetPrecOperator(m_pPreconditioner.get());
+			
+			m_bIsPreconditionerCreated = true;
 		}
 	}
 	
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::Solve(void*	ida,
+int daeTrilinosSolver::Solve(void*	ida,
 								   N_Vector	vectorB, 
 								   N_Vector	vectorWeight, 
 								   N_Vector	vectorVariables,
@@ -408,15 +512,9 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 	m_vecB->ExtractView(&b);
 	m_vecX->ExtractView(&x);
 
-//	daeDenseArray arr;
-//	arr.InitArray(Neq, pdB);
-//	std::cout << "b vector" << std::endl;
-//	arr.Print();
-
 	::memcpy(b, pdB, Neq*sizeof(double));
 
-/* AMESOS */
-	if(m_bIsAmesos)
+	if(m_eTrilinosSolver == eAmesos)
 	{
 		info = m_pSolver->Solve();
 		if(info != 0)
@@ -425,9 +523,8 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 			return IDA_LSOLVE_FAIL;
 		}
 	}
-	else
+	else if(m_eTrilinosSolver == eAztecOO || m_eTrilinosSolver == eAztecOO_Ifpack)
 	{	
-/* AZTECOO */
 		int nResult;
 		double condest;
 	
@@ -444,8 +541,8 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 //		cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
 //		cout.flush();
 		
-		m_pAztecOOSolver->SetLHS(m_vecX.get());
-		m_pAztecOOSolver->SetRHS(m_vecB.get());
+//		m_pAztecOOSolver->SetLHS(m_vecX.get());
+//		m_pAztecOOSolver->SetRHS(m_vecB.get());
 
 //		m_pAztecOOSolver->SetAztecOption(AZ_solver,          AZ_gmres);
 //		m_pAztecOOSolver->SetAztecOption(AZ_precond,         AZ_dom_decomp);
@@ -456,8 +553,22 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 //		m_pAztecOOSolver->SetAztecParam(AZ_athresh,          1e8);
 //		m_pAztecOOSolver->SetAztecParam(AZ_rthresh,          0.0);
 	
+		m_pAztecOOSolver->SetParameters(m_parameterListAztec);
 		nResult = m_pAztecOOSolver->Iterate(m_nNumIters, m_dTolerance);
-		cout << "m_nJacobianEvaluations = " << m_nJacobianEvaluations << endl;
+		
+//		cout << "m_nJacobianEvaluations = " << m_nJacobianEvaluations << endl;
+//		cout << "Solve after: " << endl;
+//		cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
+//		cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
+//		cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
+//		cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
+//		cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
+//		cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
+//		cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
+//		cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
+//		cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
+//		cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
+//		cout.flush();
 		
 		if(nResult == 1)
 		{
@@ -484,19 +595,7 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 			
 			return IDA_LSOLVE_FAIL;
 		}
-	}	
-//	cout << "Solve after: " << endl;
-//	cout << "AZ_precond         = " << m_pAztecOOSolver->GetAztecOption(AZ_precond) << endl;
-//	cout << "AZ_subdomain_solve = " << m_pAztecOOSolver->GetAztecOption(AZ_subdomain_solve) << endl;
-//	cout << "AZ_kspace          = " << m_pAztecOOSolver->GetAztecOption(AZ_kspace) << endl;
-//	cout << "AZ_overlap         = " << m_pAztecOOSolver->GetAztecOption(AZ_overlap) << endl;
-//	cout << "AZ_scaling         = " << m_pAztecOOSolver->GetAztecOption(AZ_scaling) << endl;
-//	cout << "AZ_reorder         = " << m_pAztecOOSolver->GetAztecOption(AZ_reorder) << endl;
-//	cout << "AZ_graph_fill      = " << m_pAztecOOSolver->GetAztecOption(AZ_graph_fill) << endl;
-//	cout << "AZ_type_overlap    = " << m_pAztecOOSolver->GetAztecOption(AZ_type_overlap) << endl;
-//	cout << "AZ_drop            = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_drop] << endl;
-//	cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
-//	cout.flush();
+	}
 
 	::memcpy(pdB, x, Neq*sizeof(double));
 	if(ida_mem->ida_cjratio != 1.0)
@@ -508,14 +607,14 @@ int daeTrilinosAmesosSolver::Solve(void*	ida,
 	return IDA_SUCCESS;
 }
 
-int daeTrilinosAmesosSolver::Free(void* ida)
+int daeTrilinosSolver::Free(void* ida)
 {
 	return IDA_SUCCESS;
 }
 
 int init_la(IDAMem ida_mem)
 {
-	daeTrilinosAmesosSolver* pSolver = (daeTrilinosAmesosSolver*)ida_mem->ida_lmem;
+	daeTrilinosSolver* pSolver = (daeTrilinosSolver*)ida_mem->ida_lmem;
 	if(!pSolver)
 		return IDA_MEM_NULL;
 	
@@ -530,7 +629,7 @@ int setup_la(IDAMem	ida_mem,
 			  N_Vector	vectorTemp2, 
 			  N_Vector	vectorTemp3)
 {
-	daeTrilinosAmesosSolver* pSolver = (daeTrilinosAmesosSolver*)ida_mem->ida_lmem;
+	daeTrilinosSolver* pSolver = (daeTrilinosSolver*)ida_mem->ida_lmem;
 	if(!pSolver)
 		return IDA_MEM_NULL;
 	
@@ -551,7 +650,7 @@ int solve_la(IDAMem	ida_mem,
 			 N_Vector	vectorTimeDerivatives, 
 			 N_Vector	vectorResiduals)
 {
-	daeTrilinosAmesosSolver* pSolver = (daeTrilinosAmesosSolver*)ida_mem->ida_lmem;
+	daeTrilinosSolver* pSolver = (daeTrilinosSolver*)ida_mem->ida_lmem;
 	if(!pSolver)
 		return IDA_MEM_NULL;
 	
@@ -565,7 +664,7 @@ int solve_la(IDAMem	ida_mem,
 
 int free_la(IDAMem ida_mem)
 {
-	daeTrilinosAmesosSolver* pSolver = (daeTrilinosAmesosSolver*)ida_mem->ida_lmem;
+	daeTrilinosSolver* pSolver = (daeTrilinosSolver*)ida_mem->ida_lmem;
 	if(!pSolver)
 		return IDA_MEM_NULL;
 	

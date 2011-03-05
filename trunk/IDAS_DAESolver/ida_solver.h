@@ -41,10 +41,7 @@ public:
 	virtual void						Reset(void);
 	virtual daeMatrix<real_t>&			GetSensitivities(void);
 	
-//	virtual void						GetSensitivities(size_t nEquationIndexInBlock,
-//														 const std::vector<size_t>& narrOptimizationVariablesIndexes,
-//														 real_t* pSensitivityValues) const;
-
+	void SetLASolver(daeeIDALASolverType eLASolverType);
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 
 protected:
@@ -54,7 +51,7 @@ protected:
 	virtual void CreateLinearSolver(void);
 	virtual void SetupSensitivityCalculation(void);
 
-	int CalculateGradients(void);
+	void CalculateGradients(void);
 
 	bool CheckFlag(int flag);
 	string CreateIDAErrorMessage(int flag);

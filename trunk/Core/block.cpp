@@ -140,13 +140,13 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 }
 
 // For dynamic models
-void daeBlock::CalculateSensitivities(real_t					 dTime, 
-									  const std::vector<size_t>& narrParameterIndexes,
-									  daeArray<real_t>&			 arrValues, 
-									  daeArray<real_t>&			 arrTimeDerivatives, 
-									  daeMatrix<real_t>&		 matSValues, 
-									  daeMatrix<real_t>&		 matSTimeDerivatives, 
-									  daeMatrix<real_t>&		 matSResiduals)
+void daeBlock::CalculateSensitivityResiduals(real_t						dTime, 
+											 const std::vector<size_t>& narrParameterIndexes,
+											 daeArray<real_t>&			arrValues, 
+											 daeArray<real_t>&			arrTimeDerivatives, 
+											 daeMatrix<real_t>&			matSValues, 
+											 daeMatrix<real_t>&			matSTimeDerivatives, 
+											 daeMatrix<real_t>&			matSResiduals)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -170,7 +170,7 @@ void daeBlock::CalculateSensitivities(real_t					 dTime,
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		pEquationExecutionInfo->Sensitivities(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityResiduals(narrParameterIndexes);
 	}
 
 // In general, neither objective function nor constraints can be within an STN
@@ -180,16 +180,16 @@ void daeBlock::CalculateSensitivities(real_t					 dTime,
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		pSTN->CalculateSensitivities(narrParameterIndexes);
+		pSTN->CalculateSensitivityResiduals(narrParameterIndexes);
 	}
 	
 	m_pDataProxy->ResetSensitivityMatrixes();
 }
 
 // For steady-state models
-void daeBlock::CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
-								  daeArray<real_t>&			 arrValues, 
-								  daeMatrix<real_t>&		 matSResiduals)
+void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes,
+													   daeArray<real_t>&		  arrValues, 
+													   daeMatrix<real_t>&		  matSResiduals)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -204,7 +204,7 @@ void daeBlock::CalculateGradients(const std::vector<size_t>& narrParameterIndexe
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		pEquationExecutionInfo->Gradients(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityParametersGradients(narrParameterIndexes);
 	}
 
 // In general, neither objective function nor constraints can be within an STN
@@ -214,7 +214,7 @@ void daeBlock::CalculateGradients(const std::vector<size_t>& narrParameterIndexe
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		pSTN->CalculateGradients(narrParameterIndexes);
+		pSTN->CalculateSensitivityParametersGradients(narrParameterIndexes);
 	}
 	
 	m_pDataProxy->ResetSensitivityMatrixes();

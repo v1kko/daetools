@@ -14,10 +14,6 @@
 #include <mkl_lapack.h>
 #endif
 
-#ifdef daeHasAtlas
-#include <atlas.h>
-#endif
-
 #ifdef daeHasAmdACML
 #include <acml.h>
 #endif
@@ -64,11 +60,15 @@ protected:
 public:
 	daeBlock_t*			m_pBlock;
 
-// MKL Lapack Solver Data
+// Lapack Solver Data
 	int					m_nNoEquations;  
 	real_t*				m_matLAPACK;
 	int*				m_vecPivot;
 	daeDAESolver_t*		m_pDAESolver;
+#ifdef daeHasMagma
+	real_t*				m_matCUDA;
+	real_t*				m_pdB;
+#endif
 	
 	daeDenseArray		m_arrValues;
 	daeDenseArray		m_arrTimeDerivatives;

@@ -73,6 +73,17 @@ int solve_preconditioner(realtype	time,
 						 void*		pUserData, 
 						 N_Vector	vectorTemp);
 
+int jac_times_vector(realtype time,
+				     N_Vector vectorVariables, 
+					 N_Vector vectorTimeDerivatives, 
+					 N_Vector vectorResiduals,
+				     N_Vector vectorV, 
+					 N_Vector vectorJV,
+				     realtype dInverseTimeStep, 
+					 void*    pUserData,
+				     N_Vector tmp1, 
+					 N_Vector tmp2);
+
 daeIDASolver::daeIDASolver(void)
 {
 	m_pLog					         = NULL;
@@ -108,6 +119,15 @@ void daeIDASolver::SetLASolver(daeIDALASolver_t* pLASolver)
 {
 	m_eLASolver = eThirdParty;
 	m_pLASolver = pLASolver;
+}
+
+void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType)
+{
+	if(eLASolverType == eThirdParty)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	m_eLASolver = eLASolverType;
+	m_pLASolver = NULL;
 }
 
 size_t daeIDASolver::GetNumberOfVariables(void) const
@@ -329,7 +349,9 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 	}
 }
 
-
+// Think about possibility to initialize matrix m_matSValues only once;
+// Then the GetSensitivities call can simply return m_matSValues with no 
+// additional processing
 daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 {
 	int	retval;
@@ -407,7 +429,7 @@ void daeIDASolver::CreateLinearSolver(void)
 	}
 	else if(m_eLASolver == eSundialsGMRES)
 	{
-		daeDeclareAndThrowException(exNotImplemented)
+		daeDeclareAndThrowException(exNotImplemented);
 		
 	// Sundials dense GMRES LA Solver	
 		retval = IDASpgmr(m_pIDA, 20);
@@ -418,6 +440,14 @@ void daeIDASolver::CreateLinearSolver(void)
 			throw e;
 		}
 		
+		retval = IDASpilsSetJacTimesVecFn(m_pIDA, jac_times_vector);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Sundials IDAS solver ignobly refused to set jacobian x vector function for Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
+
 		retval = IDASpilsSetPreconditioner(m_pIDA, setup_preconditioner, solve_preconditioner);
 		if(!CheckFlag(retval)) 
 		{
@@ -425,7 +455,6 @@ void daeIDASolver::CreateLinearSolver(void)
 			e << "Sundials IDAS solver ignobly refused to set preconditioner functions for Sundials GMRES linear solver; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
-
 		m_pIDASolverData->CreatePreconditionerArrays(m_nNumberOfEquations);
 	}
 	else if(m_eLASolver == eThirdParty)
@@ -810,29 +839,29 @@ void daeIDASolver::SetInitialConditionMode(daeeInitialConditionMode eMode)
 	m_eInitialConditionMode = eMode;
 }
 
-int daeIDASolver::CalculateGradients(void)
+void daeIDASolver::CalculateGradients(void)
 {
 	realtype *pdValues, *pdTimeDerivatives;
 
 	if(!m_bCalculateSensitivities || m_bIsModelDynamic)
-		return -1;
+		daeDeclareAndThrowException(exInvalidCall);
 	if(!m_pIDASolverData)
-		return -1;
+		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pBlock)
-		return -1;
+		daeDeclareAndThrowException(exInvalidPointer);
 
 	size_t N  = m_pIDASolverData->m_N;
 	size_t Ns = m_pIDASolverData->m_Ns;
 	if(N == 0 || Ns == 0)
-		return -1;
+		daeDeclareAndThrowException(exInvalidCall);
 	
 	pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
 	
 	if(!m_pIDASolverData->ppdSValues)
-		return -1;
+		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pIDASolverData->m_pvectorSVariables)
-		return -1;
+		daeDeclareAndThrowException(exInvalidPointer);
 		
 	for(int i = 0; i < Ns; i++)
 		m_pIDASolverData->ppdSValues[i] = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
@@ -841,18 +870,16 @@ int daeIDASolver::CalculateGradients(void)
 	m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
 	
-	m_pBlock->CalculateGradients(m_narrParametersIndexes,
-							     m_arrValues, 
-							     m_matSValues);
-
+	m_pBlock->CalculateSensitivityParametersGradients(m_narrParametersIndexes,
+													  m_arrValues, 
+													  m_matSValues);
+	
 	if(m_bPrintInfo)
 	{
 		cout << "CalculateGradients function:" << endl;
 		cout << "Gradients matrix:" << endl;
 		m_matSValues.Print();
 	}
-	
-	return 0;
 }
 
 int residuals(realtype	time, 
@@ -1038,14 +1065,14 @@ int sens_residuals(int		 Ns,
 	pSolver->m_matSTimeDerivatives.InitMatrix(Ns, N, pSolver->m_pIDASolverData->ppdSDValues,      eRowWise);
 	pSolver->m_matSResiduals.InitMatrix      (Ns, N, pSolver->m_pIDASolverData->ppdSensResiduals, eRowWise);
 	
-	pBlock->CalculateSensitivities(time, 
-								   pSolver->m_narrParametersIndexes,
-								   pSolver->m_arrValues, 
-								   pSolver->m_arrTimeDerivatives,
-								   pSolver->m_matSValues,
-								   pSolver->m_matSTimeDerivatives,
-								   pSolver->m_matSResiduals);
-
+	pBlock->CalculateSensitivityResiduals(time, 
+										  pSolver->m_narrParametersIndexes,
+										  pSolver->m_arrValues, 
+										  pSolver->m_arrTimeDerivatives,
+										  pSolver->m_matSValues,
+										  pSolver->m_matSTimeDerivatives,
+										  pSolver->m_matSResiduals);
+	
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "Sensitivity residuals function:" << endl;
@@ -1070,6 +1097,7 @@ int setup_preconditioner(realtype	time,
 						 N_Vector	vectorTemp2, 
 						 N_Vector	vectorTemp3)
 {
+/*
 	realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
 
 	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
@@ -1103,16 +1131,14 @@ int setup_preconditioner(realtype	time,
 							  pSolver->m_matJacobian, 
 							  dInverseTimeStep);
 	pSolver->m_pIDASolverData->SetMaxElements();
-	pSolver->m_matJacobian.Print();
+	//pSolver->m_matJacobian.Print();
 
 	daeDenseArray arr;
 	arr.InitArray(Neq, pSolver->m_pIDASolverData->m_vectorInvMaxElements);
 	std::cout << "setup_preconditioner" << std::endl;
 	arr.Print();
-	
+*/		
 	return 0;
-	
-	//return DenseGETRF(pSolver->m_pIDASolverData->m_matKrylov, pSolver->m_pIDASolverData->m_vectorPivot);
 }
 
 int solve_preconditioner(realtype	time, 
@@ -1126,6 +1152,7 @@ int solve_preconditioner(realtype	time,
 						 void*		pUserData, 
 						 N_Vector	vectorTemp)
 {
+/*
 	realtype *pdR, *pdZ;
 
 	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
@@ -1153,14 +1180,82 @@ int solve_preconditioner(realtype	time,
 	std::cout << "z" << std::endl;
 	z.InitArray(Neq, pdZ);
 	z.Print();
-//	
-//	::memcpy(pdZ, pdR, Neq*sizeof(realtype));
-//	
-//	DenseGETRS(pSolver->m_pIDASolverData->m_matKrylov, pSolver->m_pIDASolverData->m_vectorPivot, pdZ);
-	
+*/
 	return 0;
 }
 
+//extern "C" void dgemv_(char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
+
+int jac_times_vector(realtype time,
+				     N_Vector vectorVariables, 
+					 N_Vector vectorTimeDerivatives, 
+					 N_Vector vectorResiduals,
+				     N_Vector vectorV, 
+					 N_Vector vectorJV,
+				     realtype dInverseTimeStep, 
+					 void*    pUserData,
+				     N_Vector tmp1, 
+					 N_Vector tmp2)
+{
+/*
+	realtype *pV, *pJV;
+	realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
+
+	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
+	if(!pSolver || !pSolver->m_pIDASolverData)
+		return -1;
+	if(!pSolver->m_pIDASolverData->m_matKrylov || !pSolver->m_pIDASolverData->m_vectorPivot)
+		return -1;
+
+	daeBlock_t* pBlock = pSolver->m_pBlock;
+	if(!pBlock)
+		return -1;
+
+	size_t Neq = pBlock->GetNumberOfEquations();
+	
+	pV	= NV_DATA_S(vectorV); 
+	pJV	= NV_DATA_S(vectorJV);
+
+	pdValues			= NV_DATA_S(vectorVariables); 
+	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
+	pdResiduals			= NV_DATA_S(vectorResiduals);
+	ppdJacobian			= JACOBIAN(pSolver->m_pIDASolverData->m_matKrylov);
+
+	pSolver->m_arrValues.InitArray(Neq, pdValues);
+	pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
+	pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
+	pSolver->m_matJacobian.InitMatrix(Neq, Neq, ppdJacobian, eColumnWise);
+	
+	SetToZero(pSolver->m_pIDASolverData->m_matKrylov);
+
+	pBlock->CalculateJacobian(time, 
+		                      pSolver->m_arrValues, 
+							  pSolver->m_arrResiduals, 
+							  pSolver->m_arrTimeDerivatives, 
+							  pSolver->m_matJacobian, 
+							  dInverseTimeStep);
+	//pSolver->m_matJacobian.Print();
+	
+	daeDenseArray arr;
+	arr.InitArray(Neq, pV);
+	std::cout << "V vector:" << std::endl;
+	arr.Print();
+
+	char op = 'N';
+	double alpha = 1;
+	double beta = 0;
+	int n = Neq;
+	int lda = n;
+	int incx = 1;
+	int incy = 1;
+	//dgemv_(&op, &n, &n, &alpha, pSolver->m_pIDASolverData->m_matKrylov->data, &lda, pV, &incx, &beta, pJV, &incy);
+
+	arr.InitArray(Neq, pJV);
+	std::cout << "JV vector:" << std::endl;
+	arr.Print();
+*/
+	return 0;
+}
 
 }
 }

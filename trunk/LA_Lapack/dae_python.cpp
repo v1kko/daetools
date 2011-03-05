@@ -9,8 +9,8 @@ using namespace dae::solver;
 BOOST_PYTHON_MODULE(pyIntelMKL)
 #elif daeHasLapack
 BOOST_PYTHON_MODULE(pyLapack)
-#elif daeHasAtlas
-BOOST_PYTHON_MODULE(pyAtlas)
+#elif daeHasMagma
+BOOST_PYTHON_MODULE(pyMagma)
 #elif daeHasAmdACML
 BOOST_PYTHON_MODULE(pyAmdACML)
 #endif

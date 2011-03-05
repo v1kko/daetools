@@ -364,6 +364,38 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 */
 }
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#include <***.h>
+#else
+#include <dlfcn.h>
+#endif
+
+boost::shared_ptr<daeExternalObject_t> daeModel::LoadExternalObject(const string& strPath)
+{
+	boost::shared_ptr<daeExternalObject_t> extobj;
+
+//	void* lib_handle;
+//	pfnGetExternalObject pfn;
+//	
+//	lib_handle = dlopen(strPath.c_str(), RTLD_LAZY);
+//	if(!lib_handle) 
+//		daeDeclareAndThrowException(exInvalidCall);
+//	
+//	pfn = dlsym(lib_handle, "GetExternalObject");
+//	if ((error = dlerror()) != NULL)  
+//	{
+//		fprintf(stderr, "%s\n", error);
+//		exit(1);
+//	}
+//	
+//	(*fn)(&x);
+//	printf("Valx=%d\n",x);
+//	
+//	dlclose(lib_handle);
+	
+	return extobj;
+}
+
 void daeModel::AddDomain(daeDomain* pDomain)
 {
 	std::string strName = pDomain->GetName();

@@ -16,7 +16,6 @@
 
 #include <Epetra_RowMatrix.h>
 #include <Epetra_CrsMatrix.h>
-#include <Epetra_VbrMatrix.h>
 #include <Epetra_Vector.h>
 #include <Epetra_LinearProblem.h>
 #include <Epetra_Map.h>
@@ -31,14 +30,19 @@
 
 #include <Ifpack_ConfigDefs.h>
 #include <Ifpack.h>
-
+#include <Ifpack_AdditiveSchwarz.h>
+#include <Ifpack_Amesos.h>
+#include <Ifpack_ILU.h>
+#include <Ifpack_ILUT.h>
+#include <Ifpack_IC.h>
+#include <Ifpack_ICT.h>
 
 namespace dae
 {
 namespace solver
 {
-daeIDALASolver_t* daeCreateTrilinosAmesosSolver(const std::string& strSolverName);
-std::vector<string> daeTrilinosAmesosSupportedSolvers(void);
+daeIDALASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName);
+std::vector<string> daeTrilinosSupportedSolvers(void);
 
 class daeEpetraCSRMatrix : public daeSparseMatrix<double>
 {
@@ -84,7 +88,9 @@ public:
 
 		int indices = j;
 		double values = val;
-		matrix->ReplaceGlobalValues((int)i, 1, &values, &indices);
+		int res = matrix->ReplaceGlobalValues((int)i, 1, &values, &indices);
+		if(res != 0)
+			daeDeclareException(exInvalidCall);
 	}
 	
 	void ClearMatrix(void)
@@ -123,7 +129,9 @@ public:
 			indexes[i] = iter->second;			
 		}
 		
-		matrix->InsertGlobalValues(rowCounter, n, values, indexes);
+		int res = matrix->InsertGlobalValues(rowCounter, n, values, indexes);
+		if(res != 0)
+			daeDeclareException(exInvalidCall);
 		
 		delete[] values;
 		delete[] indexes;
@@ -201,11 +209,11 @@ protected:
 	Epetra_CrsMatrix*	matrix;
 };
 
-class DAE_SOLVER_API daeTrilinosAmesosSolver : public dae::solver::daeIDALASolver_t
+class DAE_SOLVER_API daeTrilinosSolver : public dae::solver::daeIDALASolver_t
 {
 public:
-	daeTrilinosAmesosSolver(const std::string& strSolverName);
-	~daeTrilinosAmesosSolver(void);
+	daeTrilinosSolver(const std::string& strSolverName);
+	~daeTrilinosSolver(void);
 	
 	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
 	int Reinitialize(void* ida);
@@ -228,8 +236,9 @@ public:
 			  N_Vector	vectorResiduals);
 	int Free(void* ida);
 	
-	void SetAztecOption(int Option, int Value);
-	void SetAztecParameter(int Option, double Value);
+	void SetAmesosOptions(Teuchos::ParameterList& paramList);
+	void SetAztecOptions(Teuchos::ParameterList& paramList);
+	void SetIfpackOptions(Teuchos::ParameterList& paramList);
 	
 protected:
 	bool CheckData() const;
@@ -240,26 +249,27 @@ public:
 	daeBlock_t*	m_pBlock;
 	std::string m_strSolverName;
 
-// Amesos Solver Data
+// General Trilinos Solver Data
 	boost::shared_ptr<Epetra_LinearProblem>	m_Problem;
 	boost::shared_ptr<Epetra_Vector>		m_vecB;
 	boost::shared_ptr<Epetra_Vector>		m_vecX;
 	boost::shared_ptr<Epetra_Map>			m_map;
 	boost::shared_ptr<Epetra_CrsMatrix>		m_matEPETRA;
 
-/* AMESOS */
-	boost::shared_ptr<Amesos_BaseSolver>	m_pSolver;
-/* AZTECOO */
-	boost::shared_ptr<AztecOO>				m_pAztecOOSolver;
-	
 #ifdef HAVE_MPI
-	Epetra_MpiComm			m_Comm;
+	Epetra_MpiComm		m_Comm;
 #else
-	Epetra_SerialComm		m_Comm;
+	Epetra_SerialComm	m_Comm;
 #endif
 
-	bool					m_bIsAmesos;
+	enum daeeTrilinosSolverType
+	{
+		eAmesos,
+		eAztecOO,
+		eAztecOO_Ifpack		
+	};
 	
+	daeeTrilinosSolverType	m_eTrilinosSolver;
 	int						m_nNoEquations;
 	daeDAESolver_t*			m_pDAESolver;
 	daeDenseArray			m_arrValues;
@@ -267,14 +277,20 @@ public:
 	daeDenseArray			m_arrResiduals;
 	daeEpetraCSRMatrix		m_matJacobian;	
 	size_t					m_nJacobianEvaluations;
+	bool					m_bMatrixStructureChanged;
 
-/* ML */
-	boost::shared_ptr<Ifpack_Preconditioner> m_pPreconditioner;
+/* AMESOS */
+	boost::shared_ptr<Amesos_BaseSolver>	m_pSolver;
+	Teuchos::ParameterList					m_parameterListAmesos;
 	
 /* AZTECOO */
-	int						m_nNumIters;
-	double					m_dTolerance;
-	bool					m_bIsPreconditionerCreated;
+	boost::shared_ptr<AztecOO>					m_pAztecOOSolver;
+	boost::shared_ptr<Ifpack_Preconditioner>	m_pPreconditioner;
+	Teuchos::ParameterList						m_parameterListAztec;
+	Teuchos::ParameterList						m_parameterListIfpack;
+	int											m_nNumIters;
+	double										m_dTolerance;
+	bool										m_bIsPreconditionerCreated;
 };
 
 }

@@ -72,7 +72,15 @@ public:
 		daeIDASolver::Initialize(pBlock, pLog, eMode, bCalculateSensitivities, narrParametersIndexes);
 	}
 
-	
+	void SetLASolver1(daeeIDALASolverType eLASolverType)
+	{
+		daeIDASolver::SetLASolver(eLASolverType);
+	}
+
+	void SetLASolver2(daeIDALASolver_t* pLASolver)
+	{
+		daeIDASolver::SetLASolver(pLASolver);
+	}
 	
 
 };

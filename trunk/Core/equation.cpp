@@ -281,7 +281,7 @@ void daeEquationExecutionInfo::Jacobian(void)
 	}
 }
 
-void daeEquationExecutionInfo::Sensitivities(const std::vector<size_t>& narrParameterIndexes)
+void daeEquationExecutionInfo::SensitivityResiduals(const std::vector<size_t>& narrParameterIndexes)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -293,7 +293,7 @@ void daeEquationExecutionInfo::Sensitivities(const std::vector<size_t>& narrPara
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateSensitivities;
+	EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{
@@ -321,7 +321,7 @@ void daeEquationExecutionInfo::Sensitivities(const std::vector<size_t>& narrPara
 	}
 }
 
-void daeEquationExecutionInfo::Gradients(const std::vector<size_t>& narrParameterIndexes)
+void daeEquationExecutionInfo::SensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -333,7 +333,7 @@ void daeEquationExecutionInfo::Gradients(const std::vector<size_t>& narrParamete
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateGradients;
+	EC.m_eEquationCalculationMode	= eCalculateSensitivityParametersGradients;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{

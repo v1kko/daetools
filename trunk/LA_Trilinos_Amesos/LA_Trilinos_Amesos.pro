@@ -14,7 +14,7 @@
 include(../dae.pri)
 QT -= core \
     gui
-TARGET = TrilinosAmesos
+TARGET = Trilinos
 TEMPLATE = lib
 
 ####################################################################################
@@ -38,19 +38,19 @@ linux-g++-64::BLAS_LAPACK_LIBDIR   = /usr/lib/atlas
 win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
                                 BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
                                 superlu.lib \
-                                amesos.lib epetra.lib teuchos.lib aztecoo.lib
+                                aztecoo.lib ifpack.lib amesos.lib epetra.lib teuchos.lib
 
 linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
 							  -lblas -llapack \
 							  -lcdaesuperlu \
 							  -lumfpack -lamd \
-							  -laztecoo -lamesos -lepetra -lepetraext -lteuchos
+							  -laztecoo -lifpack -lamesos -lepetra -lepetraext -lteuchos
 
 linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
 							  -lblas -llapack \
 							  -lcdaesuperlu \
 							  -lumfpack -lamd \
-							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos
+							  -laztecoo -lifpack -lamesos -lepetra -lepetraext -lteuchos
 
 INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \
@@ -70,13 +70,13 @@ HEADERS += stdafx.h \
     trilinos_amesos_la_solver.h
 win32-msvc2008::QMAKE_POST_LINK = move \
     /y \
-    $${DAE_DEST_DIR}/TrilinosAmesos1.dll \
-    $${DAE_DEST_DIR}/pyTrilinosAmesos.pyd
+    $${DAE_DEST_DIR}/Trilinos1.dll \
+    $${DAE_DEST_DIR}/pyTrilinos.pyd
 win32-g++::QMAKE_POST_LINK = move \
     /y \
-    $${DAE_DEST_DIR}/TrilinosAmesos1.dll \
-    $${DAE_DEST_DIR}/pyTrilinosAmesos.pyd
+    $${DAE_DEST_DIR}/Trilinos1.dll \
+    $${DAE_DEST_DIR}/pyTrilinos.pyd
 unix::QMAKE_POST_LINK = cp \
     -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-    $${DAE_DEST_DIR}/pyTrilinosAmesos.so
+    $${DAE_DEST_DIR}/pyTrilinos.so

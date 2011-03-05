@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """********************************************************************************
                              tutorial9.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -20,14 +21,13 @@ Here we introduce:
  - Third party linear equations solvers
 
 Currently there are 3rd party linear equations solvers:
- - TrilinosAmesos: sequential sparse direct solver defined in pyTrilinosAmesos module (GNU Lesser GPL)
+ - Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
  - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
  - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)
  - IntelMKL: multi-threaded dense lapack direct solver defined in pyIntelMKL (proprietary)
- - Lapack: generic sequential dense lapack direct solver defined in pyLapack module 
+ - Lapack: generic sequential dense lapack direct solver defined in pyLapack module
            (The University of Tennessee free license)
- - Atlas: Automatically Tuned Linear Algebra Software implementation of the sequential dense Lapack 
-          direct solver defined in pyAtlas module (BSD-style license)
+ - Magma: implementation of the sequential dense Lapack direct solver on CUDA NVidia GPUs
 """
 
 import sys
@@ -35,7 +35,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-import daetools.pyTrilinosAmesos as pyTrilinosAmesos
+import daetools.pyTrilinos        as pyTrilinos
 #import daetools.pyIntelPardiso   as pyIntelPardiso
 #import daetools.pyAmdACML        as pyAmdACML
 #import daetools.pyIntelMKL       as pyIntelMKL
@@ -61,7 +61,7 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
- 
+
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
@@ -98,10 +98,10 @@ class simTutorial(daeSimulation):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial9")
         self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
-          
+
     def SetUpParametersAndDomains(self):
         n = 25
-        
+
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
 
@@ -125,7 +125,7 @@ def guiRun(app):
     sim.TimeHorizon       = 1000
     simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
-    
+
 # Setup everything manually and run in a console
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
@@ -143,19 +143,19 @@ def consoleRun():
     #      - Amd ACML (OMP)
     #      - Intel MKL (OMP)
     #      - Generic Lapack (Sequential)
-    #      - Atlas lapack (Sequential)
+    #      - Magma lapack (GPU)
     # If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).
-    # If you are using OMP capable solvers you should set the number of threads to the number of cores. 
+    # If you are using OMP capable solvers you should set the number of threads to the number of cores.
     # For instance:
     #    export OMP_NUM_THREADS=4
     # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
 
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    print "Supported Trilinos Amesos 3rd party LA solvers:", str(pyTrilinosAmesos.daeTrilinosAmesosSupportedSolvers())
-    #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
-    lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
-    #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
-    #lasolver     = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
+    print "Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu")
+    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
@@ -178,7 +178,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -188,7 +188,7 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
-    
+
 if __name__ == "__main__":
     runInGUI = True
     if len(sys.argv) > 1:

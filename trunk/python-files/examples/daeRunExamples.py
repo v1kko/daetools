@@ -4,10 +4,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -43,7 +43,7 @@ except Exception, e:
     sys.exit()
 
 try:
-    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10
+    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11
     import opt_tutorial1, opt_tutorial2
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
@@ -67,14 +67,14 @@ class RunExamples(QtGui.QDialog):
         self.ui = Ui_RunExamplesDialog()
         self.ui.setupUi(self)
         self.app = app
-        
+
         self.setWindowTitle("DAE Tools Tutorials v" + daeVersion(True))
 
         self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)
         self.connect(self.ui.toolButtonCode,               QtCore.SIGNAL('clicked()'), self.slotShowCode)
         self.connect(self.ui.toolButtonModelReport,        QtCore.SIGNAL('clicked()'), self.slotShowModelReport)
         self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
-        
+
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(0, "whats_the_time")
         self.ui.comboBoxExample.addItem("")
@@ -98,10 +98,12 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(10, "tutorial10")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(11, "opt_tutorial1")
+        self.ui.comboBoxExample.setItemText(11, "tutorial11")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(12, "opt_tutorial2")
-        
+        self.ui.comboBoxExample.setItemText(12, "opt_tutorial1")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(13, "opt_tutorial2")
+
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
@@ -110,7 +112,7 @@ class RunExamples(QtGui.QDialog):
         wv = WebView(url)
         wv.setWindowTitle(title)
         wv.exec_()
-    
+
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
@@ -126,7 +128,7 @@ class RunExamples(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):
         simName = str(self.ui.comboBoxExample.currentText())
-        
+
         try:
             if simName == "tutorial1":
                 tutorial1.guiRun(self.app)
@@ -164,7 +166,7 @@ class RunExamples(QtGui.QDialog):
                 pass
         except RuntimeError, e:
             print "Exception: ", str(e)
-        
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     main = RunExamples(app)

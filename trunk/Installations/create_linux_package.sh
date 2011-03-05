@@ -43,12 +43,13 @@ PYTHON_VERSION=$6
 IDAS=../idas-1.0.0/build
 BONMIN=../bonmin/build
 SUPERLU=../superlu
+MAGMA=../magma
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
   ARCH=amd64
   ARCH_RPM=x86_64
-fi 
+fi
 if [ ${HOST_ARCH} = "armv5tejl" ]; then
   LIB=lib
   ARCH=armel
@@ -73,16 +74,16 @@ if [ $4 = "deb" ]; then
   else
     SITE_PACK=dist-packages
   fi
-elif [ $4 = "tgz" ]; then  
+elif [ $4 = "tgz" ]; then
   PCKG_TYPE=tgz
   PLATFORM=linux
   SITE_PACK=site-packages
-elif [ $4 = "rpm" ]; then  
+elif [ $4 = "rpm" ]; then
   PCKG_TYPE=rpm
   PLATFORM=linux
   SITE_PACK=site-packages
-else  
-  echo "ERROR: undefined type of a package"  
+else
+  echo "ERROR: undefined type of a package"
   return
 fi
 
@@ -140,14 +141,19 @@ mkdir ${PACKAGE_NAME}/pyLapack
 #  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack
 #fi
 
+mkdir ${PACKAGE_NAME}/pyMagma
+if [ -e ../release/pyMagma.so ]; then
+  cp ../release/pyMagma.so             ${PACKAGE_NAME}/pyMagma
+fi
+
 mkdir ${PACKAGE_NAME}/pyIntelPardiso
 #if [ -e ../release/pyIntelPardiso.so ]; then
 #  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
 #fi
 
-mkdir ${PACKAGE_NAME}/pyTrilinosAmesos
-if [ -e ../release/pyTrilinosAmesos.so ]; then
-  cp ../release/pyTrilinosAmesos.so   ${PACKAGE_NAME}/pyTrilinosAmesos
+mkdir ${PACKAGE_NAME}/pyTrilinos
+if [ -e ../release/pyTrilinos.so ]; then
+  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/pyTrilinos
 fi
 
 # Licences
@@ -161,8 +167,9 @@ cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.
 cp ../python-files/pyAmdACML__init__.py          ${PACKAGE_NAME}/pyAmdACML/__init__.py
 cp ../python-files/pyIntelMKL__init__.py         ${PACKAGE_NAME}/pyIntelMKL/__init__.py
 cp ../python-files/pyLapack__init__.py           ${PACKAGE_NAME}/pyLapack/__init__.py
+cp ../python-files/pyMagma__init__.py            ${PACKAGE_NAME}/pyMagma/__init__.py
 cp ../python-files/pyIntelPardiso__init__.py     ${PACKAGE_NAME}/pyIntelPardiso/__init__.py
-cp ../python-files/pyTrilinosAmesos__init__.py   ${PACKAGE_NAME}/pyTrilinosAmesos/__init__.py
+cp ../python-files/pyTrilinos__init__.py         ${PACKAGE_NAME}/pyTrilinos/__init__.py
 cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
 
@@ -187,12 +194,12 @@ cp ../python-files/examples/*.init       ${PACKAGE_NAME}/examples
 cp ../python-files/examples/images/*.*   ${PACKAGE_NAME}/examples/images
 
 # Website
-cp ../Website/images/*.png    ${PACKAGE_NAME}/docs/images                    
-cp ../Website/images/*.css    ${PACKAGE_NAME}/docs/images                    
-cp ../Website/images/*.gif    ${PACKAGE_NAME}/docs/images                    
-cp ../Website/images/*.jpg    ${PACKAGE_NAME}/docs/images                    
-cp ../Website/*.html          ${PACKAGE_NAME}/docs                
-cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref           
+cp ../Website/images/*.png    ${PACKAGE_NAME}/docs/images
+cp ../Website/images/*.css    ${PACKAGE_NAME}/docs/images
+cp ../Website/images/*.gif    ${PACKAGE_NAME}/docs/images
+cp ../Website/images/*.jpg    ${PACKAGE_NAME}/docs/images
+cp ../Website/*.html          ${PACKAGE_NAME}/docs
+cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 #rm ${PACKAGE_NAME}/docs/downloads.html
 
 echo "#!/usr/bin/env python " > setup.py
@@ -210,7 +217,7 @@ echo "      license='GNU GPL v3', " >> setup.py
 echo "      platforms='${ARCH}', " >> setup.py
 echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} " >> setup.py
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} " >> setup.py
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
@@ -224,7 +231,7 @@ fi
 mkdir ${BUILD_DIR}
 
 if [ ${PCKG_TYPE} = "tgz" ]; then
-  python setup.py install --prefix=/usr --root=${BUILD_DIR} 
+  python setup.py install --prefix=/usr --root=${BUILD_DIR}
 elif [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
   if [ ${DISTRO} = "Debian-5" ]; then
@@ -233,15 +240,15 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
     python setup.py install --install-layout=deb --root=${BUILD_DIR}
   fi
 elif [ ${PCKG_TYPE} = "rpm" ]; then
-  python setup.py install --prefix=/usr --root=${BUILD_DIR} 
+  python setup.py install --prefix=/usr --root=${BUILD_DIR}
 fi
 
 # Delete all .pyc files
 find ${BUILD_DIR} -name \*.pyc | xargs rm
 
 # Set execute flag to all python files except __init__.py
-#find ${BUILD_DIR} -name \*.py        | xargs chmod +x 
-#find ${BUILD_DIR} -name \__init__.py | xargs chmod -x 
+#find ${BUILD_DIR} -name \*.py        | xargs chmod +x
+#find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
 # If python is installed in /usr/lib then copy files there; otherwise to /usr/lib64
 if [ -d ${BUILD_DIR}/usr/lib ]; then
@@ -259,13 +266,21 @@ if [ ! -d ${BUILD_DIR}/usr/${LIB} ]; then
 fi
 mkdir ${BUILD_DIR}/usr/bin
 
+# Magma libraries
+if [ -e ${MAGMA}/lib/libmagma.so ]; then
+  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+fi
+if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
+  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+fi
+
 # SuperLU 4.1 libraries
 if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
   cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
 fi
 # Change permissions and strip .so libraries
-chmod -x ${BUILD_DIR}/usr/${LIB}/*.so* 
-find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip 
+chmod -x ${BUILD_DIR}/usr/${LIB}/*.so*
+find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip
 
 
 USRBIN=${BUILD_DIR}/usr/bin
@@ -273,7 +288,7 @@ DAE_TOOLS_DIR=${USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
 echo "#!/bin/sh"                       > ${USRBIN}/daeplotter
-echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${USRBIN}/daeplotter 
+echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${USRBIN}/daeplotter
 echo "python daePlotter.py"           >> ${USRBIN}/daeplotter
 chmod +x ${USRBIN}/daeplotter
 
@@ -348,7 +363,7 @@ if [ ${PCKG_TYPE} = "tgz" ]; then
   tar -czvf ${TGZ} *
   cd ..
 
-  cp ${BUILD_DIR}/${TGZ} ${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${BOOST}.tar.gz 
+  cp ${BUILD_DIR}/${TGZ} ${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${BOOST}.tar.gz
 
 elif [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
@@ -371,13 +386,16 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
   echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                           >> ${CONTROL}
   echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
- 
+
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
   SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
   echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
+  echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
+  echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
+  echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
@@ -387,7 +405,7 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   echo "    title=\"daePlotter\" \\"                         >> ${MENU}
   echo "    icon=\"${ICON}\" \\"                             >> ${MENU}
   echo "    command=\"/usr/bin/daeplotter\""                 >> ${MENU}
-     
+
   EXAMPLES=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}-examples
   echo "?package(${PACKAGE_NAME}-examples):\\"                > ${MENU}
   echo "    needs=\"x11\" \\"                                >> ${MENU}

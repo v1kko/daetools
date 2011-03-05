@@ -166,10 +166,12 @@ public:
 	{
 		real_t** m = m_matKrylov->cols;
 		for(size_t i = 0; i < m_N; i++)
+		{
 			if(m[i][i] == 0.0)
 				m_vectorInvMaxElements[i] = 1e-7;
 			else
 				m_vectorInvMaxElements[i] = 1.0 / m[i][i];
+		}
 	}
 
 	void CreatePreconditionerArrays(size_t N)
@@ -198,48 +200,6 @@ public:
 	realtype**				ppdSensResiduals;
 };
 	
-//int IDA_uBLAS(void* ida, size_t n, void* pUserData);
-
-//#ifdef HAS_GNU_GSL
-//enum eGSLSolver
-//{
-//	eLUDecomposition,
-//	eQRDecomposition,
-//	eHouseHolder
-//};
-//int IDA_dense_GNU_GSL(void* ida, size_t n, eGSLSolver eSolverType, void* pUserData);
-//#endif
-
-
-
-//#ifdef HAS_INTEL_MKL
-//enum daeeMKLSolver
-//{
-//	eGeneric
-//};
-//int IDA_sparse_MKL_PARDISO_LU(void* ida, size_t n, void* pUserData);
-//int IDA_sparse_MKL_PARDISO_LU_Reset(void* ida);
-//int IDA_sparse_MKL_PARDISO_LU_Get_Matrix_Data(void* ida, int& nnz, int** ia, int** ja);
-//int IDA_sparse_MKL_PARDISO_LU_SaveMatrixAsXPM(void* ida, const std::string& strFilename);
-//int IDA_sparse_MKL_PARDISO_LU_SaveMatrixAsPBM(void* ida, const std::string& strFilename);
-
-//int IDA_dense_MKL_LU(void* ida, size_t n, void* pUserData);
-
-//#endif
-
-
-
-//#ifdef HAS_AMD_ACML
-//int IDA_dense_ACML_LU(void* ida, size_t n, void* pUserData);
-//#endif
-	
-
-//#ifdef HAS_TRILINOS
-//int IDA_dense_TRILINOS(void* ida, size_t n, void* pUserData);
-
-//int IDA_sparse_TRILINOS_AMESOS(void* ida, size_t n, void* pUserData);
-//int IDA_sparse_TRILINOS_AMESOS_Reset(void* ida, size_t n, void* pUserData);
-//#endif
 
 }
 }

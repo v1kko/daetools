@@ -388,8 +388,8 @@ public:
 	void GatherInfo(void);
 	void Residual(void);
 	void Jacobian(void);
-	void Sensitivities(const std::vector<size_t>& narrParameterIndexes);
-	void Gradients(const std::vector<size_t>& narrParameterIndexes);
+	void SensitivityResiduals(const std::vector<size_t>& narrParameterIndexes);
+	void SensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes);
 	void AddVariableInEquation(size_t nIndex);
 	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
 
@@ -1096,18 +1096,18 @@ public:
 									  daeMatrix<real_t>&	matJacobian, 
 									  real_t				dInverseTimeStep);
 
-	virtual void	CalculateSensitivities(real_t					  dTime, 
-										   const std::vector<size_t>& narrParameterIndexes,
-										   daeArray<real_t>&		  arrValues, 
-										   daeArray<real_t>&		  arrTimeDerivatives, 
-										   daeMatrix<real_t>&		  matSValues, 
-										   daeMatrix<real_t>&		  matSTimeDerivatives, 
-										   daeMatrix<real_t>&		  matSResiduals);
-
-	virtual void	CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
-									   daeArray<real_t>&		  arrValues, 
-									   daeMatrix<real_t>&		  matSResiduals);
-
+	virtual void	CalculateSensitivityResiduals(real_t					  dTime, 
+												  const std::vector<size_t>& narrParameterIndexes,
+												  daeArray<real_t>&		  arrValues, 
+												  daeArray<real_t>&		  arrTimeDerivatives, 
+												  daeMatrix<real_t>&		  matSValues, 
+												  daeMatrix<real_t>&		  matSTimeDerivatives, 
+												  daeMatrix<real_t>&		  matSResiduals);
+	
+	virtual void	CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes,
+															daeArray<real_t>&		   arrValues, 
+															daeMatrix<real_t>&		   matSResiduals);
+	
 	virtual void	CalculateConditions(real_t					dTime, 
 									    daeArray<real_t>&		arrValues, 
 									    daeArray<real_t>&		arrTimeDerivatives, 
@@ -1832,6 +1832,8 @@ public:
 	virtual void LoadInitializationValues(const std::string& strFileName) const;
 	
 	virtual bool IsModelDynamic() const;
+	
+	boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -2321,8 +2323,8 @@ protected:
 
 	void			CalculateResiduals(void);
 	void			CalculateJacobian(void);
-	void			CalculateSensitivities(const std::vector<size_t>& narrParameterIndexes);
-	void			CalculateGradients(const std::vector<size_t>& narrParameterIndexes);
+	void			CalculateSensitivityResiduals(const std::vector<size_t>& narrParameterIndexes);
+	void			CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes);
 
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 
@@ -2627,50 +2629,99 @@ protected:
 class DAE_CORE_API daeExternalFunctionArgument : public daeExternalFunctionArgument_t
 {
 public:
-	daeExternalFunctionArgument(const string& strName, const std::vector<adouble>& adarrArguments);
-	virtual ~daeExternalFunctionArgument(void);
+	daeExternalFunctionArgument(const string& strName, size_t n)
+	{
+		if(n == 0)
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		N          = n;
+		m_strName  = strName;
+		m_pdValues = new real_t[N];
+	}
+	
+	virtual ~daeExternalFunctionArgument(void)
+	{
+		if(m_pdValues)
+			delete[] m_pdValues;
+	}
 
 public:
-	virtual void								GetValues(real_t* values, size_t n);
-	virtual void								SetValues(const real_t* values, size_t n);
-	virtual daeExternalFunctionArgumentInfo_t	GetInfo(void) const;
+	void GetValues(real_t* values, size_t n)
+	{
+		if(n != N)
+			daeDeclareAndThrowException(exInvalidCall);
+		if(!m_pdValues)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		for(size_t i = 0; i < n; i++)
+			values[i] = m_pdValues[i];
+	}
+	
+	void SetValues(const real_t* values, size_t n)
+	{
+		if(n != N)
+			daeDeclareAndThrowException(exInvalidCall);
+		if(!m_pdValues)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		for(size_t i = 0; i < n; i++)
+			m_pdValues[i] = values[i];
+	}
+	
+	daeExternalFunctionArgumentInfo_t GetInfo(void)
+	{
+		daeExternalFunctionArgumentInfo_t info;
+		info.m_strName = m_strName;
+		info.m_nLength = N;
+		return info;
+	}
+	
+	real_t operator [](size_t i) const
+	{
+		if(i >= N)
+			daeDeclareAndThrowException(exInvalidCall);
+		if(!m_pdValues)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		return m_pdValues[i];
+	}
 
 protected:
-	std::string          m_strName;
-	std::vector<adouble> m_adarrArguments;
+	std::string m_strName;
+	real_t*     m_pdValues;
+	size_t      N;
 };
 
 
-/*********************************************************************************************
-	daeExternalFunction
-**********************************************************************************************/
-class DAE_CORE_API daeExternalFunction : public daeExternalFunction_t
-{
-public:
-	daeExternalFunction(void);
-	virtual ~daeExternalFunction(void);
+///*********************************************************************************************
+//	daeExternalFunction
+//**********************************************************************************************/
+//class DAE_CORE_API daeExternalFunction : public daeExternalFunction_t
+//{
+//public:
+//	daeExternalFunction(void);
+//	virtual ~daeExternalFunction(void);
 
-public:
-	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const;
-	virtual void						Calculate(real_t* results, size_t n);
-	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives);
-	virtual daeExternalFunctionInfo_t	GetInfo(void) const;
-};
+//public:
+//	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const;
+//	virtual void						Calculate(real_t* results, size_t n);
+//	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives);
+//	virtual daeExternalFunctionInfo_t	GetInfo(void) const;
+//};
 
+///*********************************************************************************************
+//	daeExternalObject
+//**********************************************************************************************/
+//class DAE_CORE_API daeExternalObject : public daeExternalObject_t
+//{
+//public:
+//	daeExternalObject(void);
+//	virtual ~daeExternalObject(void);
 
-/*********************************************************************************************
-	daeExternalObject
-**********************************************************************************************/
-class DAE_CORE_API daeExternalObject : public daeExternalObject_t
-{
-public:
-	daeExternalObject(void);
-	virtual ~daeExternalObject(void);
-
-public:
-	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName);
-	virtual daeExternalObjectInfo_t	GetInfo(void) const;
-};
+//public:
+//	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName);
+//	virtual daeExternalObjectInfo_t	GetInfo(void) const;
+//};
 
 
 /******************************************************************

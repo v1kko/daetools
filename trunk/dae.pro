@@ -5,11 +5,13 @@ SUBDIRS = Core \
     Activity \
     IDAS_DAESolver \ 
     BONMIN_MINLPSolver \
+	#NLOPT_NLPSolver \
 	pyCore \
 	pyActivity \
 	pyDataReporting \
 	pyIDAS \
-	pyBONMIN
+	pyBONMIN \
+	ExternalFunction
  
 HEADERS += dae.h \
     dae_develop.h

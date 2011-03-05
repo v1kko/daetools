@@ -64,7 +64,8 @@ REM Python modules
 mkdir pyAmdACML
 mkdir pyIntelMKL
 mkdir pyIntelPardiso
-mkdir pyTrilinosAmesos
+mkdir pyTrilinos
+mkdir pyMagma
 
 echo on
 
@@ -74,7 +75,8 @@ copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
 copy pyBONMIN.pyd                   %ROOT%\pyDAE
-copy pyTrilinosAmesos.pyd           %ROOT%\pyTrilinosAmesos
+copy pyTrilinos.pyd           %ROOT%\pyTrilinos
+copy pyMagma.pyd                    %ROOT%\pyMagma
 
 REM copy pyAmdACML.pyd              %ROOT%\pyAmdACML
 REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL
@@ -94,7 +96,8 @@ copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
 copy pyAmdACML__init__.py        %ROOT%\pyAmdACML\__init__.py
 copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
 copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
-copy pyTrilinosAmesos__init__.py %ROOT%\pyTrilinosAmesos\__init__.py
+copy pyTrilinos__init__.py       %ROOT%\pyTrilinos\__init__.py
+copy pyMagma__init__.py          %ROOT%\pyMagma\__init__.py
 
 REM daePlotter
 cd daePlotter
@@ -146,7 +149,7 @@ cd %ROOT%
 REM Config
 cd %TRUNK%
 copy daetools.cfg  %ROOT%
-copy bonmin.cfg    %ROOT% 
+copy bonmin.cfg    %ROOT%
 
 cd %INSTALL%
 rem ECHO cd C:\Python%PYTHON_VERSION%\Lib\site-packages\%PACKAGE_NAME%\daePlotter > %ROOT%\daeplotter.cmd
@@ -166,7 +169,7 @@ ECHO       license='GNU GPL v3',  >> setup.py
 ECHO       platforms='%PLATFORM%',  >> setup.py
 ECHO       packages=['%PACKAGE_NAME%'],  >> setup.py
 ECHO       package_dir={'%PACKAGE_NAME%': '%DEST%'},  >> setup.py
-ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyIntelPardiso/*.*', 'pyAtlas/*.*', 'pyTrilinosAmesos/*.*']} >> setup.py
+ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} >> setup.py
 ECHO       )  >> setup.py
 
 SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe

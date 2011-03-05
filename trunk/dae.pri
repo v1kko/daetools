@@ -104,7 +104,7 @@ linux-g++::PYTHONDIR           = /usr/lib/python2.6
 linux-g++-64::PYTHONDIR        = /usr/lib64/python2.6
 
 unix::PYTHON_INCLUDE_DIR       = /usr/include/python2.6 \
-							   # /usr/include/python2.6/numpy \
+							     /usr/include/python2.6/numpy \
                                  /usr/share/pyshared
 unix::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}/dist-packages
 unix::PYTHON_LIB_DIR           =
@@ -189,6 +189,20 @@ win32-msvc2008::MUMPS_LIBS = blas.lib \
                              libpord.lib \
                              libf95.a \
                              libgcc.a
+
+
+
+#####################################################################################
+#                                 NLOPT
+#####################################################################################
+NLOPT = ../nlopt
+NLOPT_INCLUDE = $${NLOPT}/api \
+			    $${NLOPT}/util
+NLOPT_LIBDIR  = $${NLOPT}/.libs
+
+win32-msvc2008::NLOPT_LIBS = 
+unix::NLOPT_LIBS           = -lnlopt -lm
+
 
 
 #####################################################################################

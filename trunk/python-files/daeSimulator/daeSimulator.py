@@ -3,10 +3,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -35,7 +35,7 @@ class daeSimulator(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
-        
+
         font = QtGui.QFont()
         font.setPointSize(9)
         if platform.system() == 'Linux':
@@ -49,7 +49,8 @@ class daeSimulator(QtGui.QDialog):
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
         self.connect(self.ui.PauseButton,  QtCore.SIGNAL('clicked()'), self.slotPause)
         self.connect(self.ui.MatrixButton, QtCore.SIGNAL('clicked()'), self.slotOpenSparseMatrixImage)
-        
+        self.connect(self.ui.ExportButton, QtCore.SIGNAL('clicked()'), self.slotExportSparseMatrixAsMatrixMarketFormat)
+
         self.app          = app
         self.simulation   = kwargs.get('simulation',   None)
         self.optimization = kwargs.get('optimization', None)
@@ -58,11 +59,16 @@ class daeSimulator(QtGui.QDialog):
         self.daesolver    = kwargs.get('daesolver',    None)
         self.lasolver     = kwargs.get('lasolver',     None)
         self.nlpsolver    = kwargs.get('nlpsolver',    None)
-        
+
         if self.app == None:
             raise RuntimeError('daeSimulator: app object must not be None')
         if self.simulation == None:
             raise RuntimeError('daeSimulator: simulation object must not be None')
+
+        if self.lasolver == None:
+            self.ui.LASolverComboBox.setEnabled(True)
+        else:
+            self.ui.LASolverComboBox.setEnabled(False)
 
         if self.optimization == None:
             self.ui.simulationLabel.setText('Simulation')
@@ -71,10 +77,10 @@ class daeSimulator(QtGui.QDialog):
             self.ui.simulationLabel.setText('Optimization')
             self.ui.MINLPSolverComboBox.setEnabled(True)
         self.ui.SimulationLineEdit.insert(self.simulation.m.Name)
-            
+
         self.ui.ReportingIntervalDoubleSpinBox.setValue(self.simulation.ReportingInterval)
         self.ui.TimeHorizonDoubleSpinBox.setValue(self.simulation.TimeHorizon)
-        
+
         cfg = daeGetConfig()
         tcpip = cfg.GetString("daetools.datareporting.tcpipDataReceiverAddress", "127.0.0.1")
         port  = cfg.GetInteger("daetools.datareporting.tcpipDataReceiverPort", 50000)
@@ -83,11 +89,11 @@ class daeSimulator(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotResume(self):
         self.simulation.Resume()
-    
+
     #@QtCore.pyqtSlot()
     def slotPause(self):
         self.simulation.Pause()
-    
+
     #@QtCore.pyqtSlot()
     def slotRun(self):
         try:
@@ -108,49 +114,58 @@ class daeSimulator(QtGui.QDialog):
                 self.log = daeTextEditLog(self.ui.textEdit, self.app)
             if self.daesolver == None:
                 self.daesolver = daeIDAS()
-            
+
             self.lasolver = None
             lasolverIndex = self.ui.LASolverComboBox.currentIndex()
             if lasolverIndex == 0:
                 pass
-            
+
             elif lasolverIndex == 1:
                 try:
-                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Klu")
+                    import daetools.pyTrilinos as pyTrilinos
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                     return
-                
+
             elif lasolverIndex == 2:
                 try:
-                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Superlu")
+                    import daetools.pyTrilinos as pyTrilinos
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                     return
-                
+
             elif lasolverIndex == 3:
                 try:
-                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Umfpack")
+                    import daetools.pyTrilinos as pyTrilinos
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                     return
-                
+
             elif lasolverIndex == 4:
                 try:
-                    import daetools.pyTrilinosAmesos as pyTrilinosAmesos
-                    self.lasolver = pyTrilinosAmesos.daeCreateTrilinosAmesosSolver("Amesos_Lapack")
+                    import daetools.pyTrilinos as pyTrilinos
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack")
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                     return
-                
+
             elif lasolverIndex == 5:
+                try:
+                    import daetools.pyTrilinos as pyTrilinos
+                    self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO")
+                    self.daesolver.SetLASolver(self.lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    return
+
+            elif lasolverIndex == 6:
                 try:
                     import daetools.pyIntelPardiso as pyIntelPardiso
                     self.lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
@@ -158,8 +173,8 @@ class daeSimulator(QtGui.QDialog):
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelPardiso LA solver\nError: " + str(e))
                     return
-                
-            elif lasolverIndex == 6:
+
+            elif lasolverIndex == 7:
                 try:
                     import daetools.pyIntelMKL as pyIntelMKL
                     self.lasolver = pyIntelMKL.daeCreateLapackSolver()
@@ -167,8 +182,8 @@ class daeSimulator(QtGui.QDialog):
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelMKL LA solver\nError: " + str(e))
                     return
-                
-            elif lasolverIndex == 7:
+
+            elif lasolverIndex == 8:
                 try:
                     import daetools.pyAmdACML as pyAmdACML
                     self.lasolver = pyAmdACML.daeCreateLapackSolver()
@@ -176,22 +191,24 @@ class daeSimulator(QtGui.QDialog):
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create AmdACML LA solver\nError: " + str(e))
                     return
-                
-            elif lasolverIndex == 8:
+
+            elif lasolverIndex == 9:
                 try:
-                    import daetools.pyLapack as pyLapack
-                    self.lasolver = pyLapack.daeCreateLapackSolver()
+                    import daetools.pyMagma as pyMagma
+                    self.lasolver = pyMagma.daeCreateLapackSolver()
                     self.daesolver.SetLASolver(self.lasolver)
                 except Exception, e:
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Lapack LA solver\nError: " + str(e))
                     return
-                
+
             else:
                 raise RuntimeError("Unsupported LA Solver selected")
-            
+
             self.ui.RunButton.setEnabled(False)
-            if(lasolverIndex in [1, 2, 3, 5]):
+            if(lasolverIndex in [1, 2, 3, 5, 6]):
                 self.ui.MatrixButton.setEnabled(True)
+            if(lasolverIndex in [1, 2, 3, 5]):
+                self.ui.ExportButton.setEnabled(True)
             self.ui.MINLPSolverComboBox.setEnabled(False)
             self.ui.DAESolverComboBox.setEnabled(False)
             self.ui.LASolverComboBox.setEnabled(False)
@@ -209,8 +226,8 @@ class daeSimulator(QtGui.QDialog):
                     self.nlpsolver = daeBONMIN()
                 self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
                 self.optimization.Run()
-                self.optimization.Finalize()                
-            
+                self.optimization.Finalize()
+
         except Exception, error:
             self.ui.textEdit.append(str(error))
             if self.ui.textEdit.isVisible() == True:
@@ -228,3 +245,10 @@ class daeSimulator(QtGui.QDialog):
             wv.resize(400, 400)
             wv.setWindowTitle("Sparse matrix: " + matName)
             wv.exec_()
+
+    #@QtCore.pyqtSlot()
+    def slotExportSparseMatrixAsMatrixMarketFormat(self):
+        if(self.lasolver != None):
+            fileName = QtGui.QFileDialog.getSaveFileName(self, "Save File", self.simulation.m.Name +".mtx", "Matrix Market Format Files (*.mtx)")
+            if(str(fileName) != ""):
+                self.lasolver.SaveAsMatrixMarketFile(str(fileName), self.simulation.m.Name + " matrix", self.simulation.m.Name + " description")

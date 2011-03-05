@@ -99,42 +99,47 @@
        </item>
        <item>
         <property name="text">
-         <string>Trilinos Amesos - KLU (sparse, sequential)</string>
+         <string>Trilinos Amesos - KLU (sparse, sequential, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Trilinos Amesos - SuperLU (sparse, sequential)</string>
+         <string>Trilinos Amesos - SuperLU (sparse, sequential, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Trilinos Amesos - Umfpack (sparse, sequential)</string>
+         <string>Trilinos Amesos - Umfpack (sparse, sequential, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Trilinos Amesos - Lapack (dense, sequential)</string>
+         <string>Trilinos Amesos - Lapack (dense, sequential, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Intel Pardiso (sparse, OpenMP)</string>
+         <string>Trilinos AztecOO - Krylov (sparse, sequential, iterative)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Intel MKL Lapack (dense, OpenMP)</string>
+         <string>Intel Pardiso (sparse, OpenMP, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>AMD ACML Lapack (dense, OpenMP)</string>
+         <string>Intel MKL Lapack (dense, OpenMP, direct)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Generic Lapack (dense, sequential)</string>
+         <string>AMD ACML Lapack (dense, OpenMP, direct)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Magma Lapack (dense, CUDA, direct)</string>
         </property>
        </item>
       </widget>
@@ -185,12 +190,22 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="ExportButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Export Matrix...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="MatrixButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Sparse Matrix Preview</string>
+        <string>Matrix Preview...</string>
        </property>
       </widget>
      </item>
@@ -204,6 +219,9 @@
        </property>
        <property name="text">
         <string>Start</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

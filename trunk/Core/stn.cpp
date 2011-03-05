@@ -789,7 +789,7 @@ void daeSTN::CalculateJacobian(void)
 	}
 }
 
-void daeSTN::CalculateSensitivities(const std::vector<size_t>& narrParameterIndexes)
+void daeSTN::CalculateSensitivityResiduals(const std::vector<size_t>& narrParameterIndexes)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -806,7 +806,7 @@ void daeSTN::CalculateSensitivities(const std::vector<size_t>& narrParameterInde
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->Sensitivities(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityResiduals(narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -815,11 +815,11 @@ void daeSTN::CalculateSensitivities(const std::vector<size_t>& narrParameterInde
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateSensitivities(narrParameterIndexes);
+		pSTN->CalculateSensitivityResiduals(narrParameterIndexes);
 	}
 }
 
-void daeSTN::CalculateGradients(const std::vector<size_t>& narrParameterIndexes)
+void daeSTN::CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -836,7 +836,7 @@ void daeSTN::CalculateGradients(const std::vector<size_t>& narrParameterIndexes)
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->Gradients(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityParametersGradients(narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -845,7 +845,7 @@ void daeSTN::CalculateGradients(const std::vector<size_t>& narrParameterIndexes)
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateGradients(narrParameterIndexes);
+		pSTN->CalculateSensitivityParametersGradients(narrParameterIndexes);
 	}
 }
 

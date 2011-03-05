@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Tue Jan  4 00:57:12 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Fri Mar  4 23:22:13 2011
+#      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -63,6 +63,7 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
+        self.LASolverComboBox.addItem("")
         self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.LASolverComboBox)
         self.TimeHorizonLabel = QtGui.QLabel(SimulatorDialog)
         self.TimeHorizonLabel.setObjectName("TimeHorizonLabel")
@@ -83,6 +84,10 @@ class Ui_SimulatorDialog(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
+        self.ExportButton = QtGui.QPushButton(SimulatorDialog)
+        self.ExportButton.setEnabled(False)
+        self.ExportButton.setObjectName("ExportButton")
+        self.horizontalLayout.addWidget(self.ExportButton)
         self.MatrixButton = QtGui.QPushButton(SimulatorDialog)
         self.MatrixButton.setEnabled(False)
         self.MatrixButton.setObjectName("MatrixButton")
@@ -93,6 +98,7 @@ class Ui_SimulatorDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.RunButton.sizePolicy().hasHeightForWidth())
         self.RunButton.setSizePolicy(sizePolicy)
+        self.RunButton.setDefault(True)
         self.RunButton.setObjectName("RunButton")
         self.horizontalLayout.addWidget(self.RunButton)
         self.PauseButton = QtGui.QPushButton(SimulatorDialog)
@@ -146,17 +152,19 @@ class Ui_SimulatorDialog(object):
         self.DAESolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "Sundials IDAS", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "Sundials LU (dense, sequential)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(1, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - KLU (sparse, sequential)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(2, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - SuperLU (sparse, sequential)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(3, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - Umfpack (sparse, sequential)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(4, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - Lapack (dense, sequential)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(5, QtGui.QApplication.translate("SimulatorDialog", "Intel Pardiso (sparse, OpenMP)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(6, QtGui.QApplication.translate("SimulatorDialog", "Intel MKL Lapack (dense, OpenMP)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(7, QtGui.QApplication.translate("SimulatorDialog", "AMD ACML Lapack (dense, OpenMP)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(8, QtGui.QApplication.translate("SimulatorDialog", "Generic Lapack (dense, sequential)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(1, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - KLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(2, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - SuperLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(3, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - Umfpack (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(4, QtGui.QApplication.translate("SimulatorDialog", "Trilinos Amesos - Lapack (dense, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(5, QtGui.QApplication.translate("SimulatorDialog", "Trilinos AztecOO - Krylov (sparse, sequential, iterative)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(6, QtGui.QApplication.translate("SimulatorDialog", "Intel Pardiso (sparse, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(7, QtGui.QApplication.translate("SimulatorDialog", "Intel MKL Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(8, QtGui.QApplication.translate("SimulatorDialog", "AMD ACML Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(9, QtGui.QApplication.translate("SimulatorDialog", "Magma Lapack (dense, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
-        self.MatrixButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Sparse Matrix Preview", None, QtGui.QApplication.UnicodeUTF8))
+        self.ExportButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Export Matrix...", None, QtGui.QApplication.UnicodeUTF8))
+        self.MatrixButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Matrix Preview...", None, QtGui.QApplication.UnicodeUTF8))
         self.RunButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Start", None, QtGui.QApplication.UnicodeUTF8))
         self.PauseButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Pause", None, QtGui.QApplication.UnicodeUTF8))
         self.ResumeButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Resume", None, QtGui.QApplication.UnicodeUTF8))

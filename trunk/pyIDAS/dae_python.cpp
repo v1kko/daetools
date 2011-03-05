@@ -12,21 +12,20 @@ BOOST_PYTHON_MODULE(pyIDAS)
 /**************************************************************
     Enums
 ***************************************************************/
-//	enum_<daeeIDALASolverType>("daeeIDALASolverType")
-//		.value("eSundialsLU",		dae::solver::eSundialsLU)
-//		.value("eSundialsGMRES",	dae::solver::eSundialsGMRES)
-//		.value("eThirdParty",		dae::solver::eThirdParty)
-//		.export_values()
-//	;
+	enum_<daeeIDALASolverType>("daeeIDALASolverType")
+		.value("eSundialsLU",		dae::solver::eSundialsLU)
+		.value("eSundialsGMRES",	dae::solver::eSundialsGMRES)
+		.value("eThirdParty",		dae::solver::eThirdParty)
+		.export_values()
+	;
     
 /**************************************************************
 	daeSolver
 ***************************************************************/
 	class_<daepython::daeDAESolverWrapper, boost::noncopyable>("daeDAESolver_t", no_init)
-		.add_property("Log",	make_function(&daeDAESolver_t::GetLog,   return_internal_reference<>()))
-		//.add_property("Block",	make_function(&daeDAESolver_t::GetBlock, return_internal_reference<>()))
-		.add_property("RelativeTolerance",	  &daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
-		.add_property("InitialConditionMode", &daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
+		.add_property("Log",					make_function(&daeDAESolver_t::GetLog, return_internal_reference<>()))
+		.add_property("RelativeTolerance",		&daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
+		.add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
      
 		//.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
 		//.def("Solve",			pure_virtual(&daeDAESolver_t::Solve))
@@ -35,7 +34,8 @@ BOOST_PYTHON_MODULE(pyIDAS)
 	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDAS")
 		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
 		//.def("Solve",						&daeIDASolver::Solve)
-		.def("SetLASolver",					&daeIDASolver::SetLASolver) 
+		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver1) 
+		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver2) 
 		.def("SaveMatrixAsXPM",				&daeIDASolver::SaveMatrixAsXPM)
 		;
 

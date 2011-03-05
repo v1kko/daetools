@@ -26,9 +26,9 @@ unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 
 ######################################################################################
 #                                 SOLVER SPECIFICATION
-# IntelMKL, AmdACML, or Lapack   
+# IntelMKL, AmdACML, Magma or Lapack   
 ######################################################################################
-CONFIG += AmdACML
+CONFIG += Magma
 
 ######################################################################################
 #                                 INTEL MKL solver
@@ -92,7 +92,39 @@ pyObject = pyAmdACML
 }
 
 ######################################################################################
-#                              Generic Lapack solver
+#                           Magma NVidia CUDA Lapack solver
+######################################################################################
+Magma{
+QMAKE_CXXFLAGS += -DdaeHasMagma
+win32-msvc2008::LAPACK_PATH = 
+linux-g++::LAPACK_PATH      = ../magma
+linux-g++-64::LAPACK_PATH   = ../magma
+
+win32-msvc2008::CUDA_PATH = 
+linux-g++::CUDA_PATH      = /usr/local/cuda
+linux-g++-64::CUDA_PATH   = /usr/local/cuda
+
+win32-msvc2008::LAPACK_INCLUDE =
+linux-g++::LAPACK_INCLUDE      = $${LAPACK_PATH}/include \
+                                 $${LAPACK_PATH}/quark/include \
+                                 $${CUDA_PATH}/include
+linux-g++-64::LAPACK_INCLUDE   = $${LAPACK_PATH}/include \
+                                 $${LAPACK_PATH}/quark/include \
+                                 $${CUDA_PATH}/include
+
+win32-msvc2008::LAPACK_LIBS = 
+linux-g++::LAPACK_LIBS      = -L$${LAPACK_PATH}/lib -lmagma -lmagmablas \
+                              -L$${LAPACK_PATH}/quark/lib -lquark \
+                              -L$${CUDA_PATH}/lib -lcuda -lcublas -lcudart -lm 
+linux-g++-64::LAPACK_LIBS   = -L$${LAPACK_PATH}/lib -lmagma -lmagmablas \
+                              -L$${LAPACK_PATH}/quark/lib -lquark \
+                              -L$${CUDA_PATH}/lib64 -lcuda -lcublas -lcudart -lm -llapack
+
+pyObject = pyMagma
+}
+
+######################################################################################
+#                               Lapack solver (Atlas)
 ######################################################################################
 Lapack{
 QMAKE_CXXFLAGS += -DdaeHasLapack
@@ -103,29 +135,10 @@ win32-msvc2008::LAPACK_INCLUDE =
 unix::LAPACK_INCLUDE =
 
 win32-msvc2008::LAPACK_LIBS = 
-unix::LAPACK_LIBS = -lblas -llapack -lgfortran
+unix::LAPACK_LIBS = -lblas -llapack
+
 
 pyObject = pyLapack
-}
-
-######################################################################################
-#                                    Atlas solver
-######################################################################################
-Atlas{
-QMAKE_CXXFLAGS += -DdaeHasAtlas
-win32-msvc2008::LAPACK_PATH = 
-unix::LAPACK_PATH =
-
-win32-msvc2008::LAPACK_INCLUDE =
-unix::LAPACK_INCLUDE =
-
-win32-msvc2008::LAPACK_LIBS = 
-unix::LAPACK_LIBS = -L/usr/lib/atlas-amd64sse3 \
-					/usr/lib/atlas-amd64sse3/libptcblas.a \ 
-					/usr/lib/atlas-amd64sse3/libatlas.a
-
-
-pyObject = pyAtlas
 }
 
 INCLUDEPATH += $${BOOSTDIR} \
@@ -161,10 +174,10 @@ win32-msvc2008::QMAKE_POST_LINK =  move /y \
     $${DAE_DEST_DIR}/pyLapack.pyd
 }
 
-Atlas{
+Magma{
 win32-msvc2008::QMAKE_POST_LINK =  move /y \
     $${DAE_DEST_DIR}/Lapack1.dll \
-    $${DAE_DEST_DIR}/pyAtlas.pyd
+    $${DAE_DEST_DIR}/pyMagma.pyd
 }
 
 unix::QMAKE_POST_LINK = cp \

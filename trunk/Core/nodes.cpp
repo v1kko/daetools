@@ -700,7 +700,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		return tmp;
 	}
 	
-	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
 		// If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
 		// the variable is fixed and its sensitivity derivative per given parameter is 1.
@@ -750,7 +750,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		
 		return value;
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
 	{
 		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
@@ -912,7 +912,7 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 		return tmp;
 	}
 
-	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivities)
+	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
 		// Here m_nCurrentParameterIndexForSensitivityEvaluation MUST NOT be equal to m_nOverallIndex,
 		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)
@@ -947,7 +947,7 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 																		m_nBlockIndex) );
 		return value;
 	}
-	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateGradients)
+	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
 	{
 		//I can never rich this point, since the model must be steady-state to call CalculateGradients function
 		daeDeclareAndThrowException(exInvalidCall)

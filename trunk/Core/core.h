@@ -76,8 +76,8 @@ enum daeeEquationCalculationMode
 	eCalculate,
 	eCreateFunctionsIFsSTNs,
 	eCalculateJacobian,
-	eCalculateSensitivities,
-	eCalculateGradients
+	eCalculateSensitivityResiduals,
+	eCalculateSensitivityParametersGradients
 };
 
 enum daeeModelType
@@ -598,18 +598,18 @@ public:
 									  daeMatrix<real_t>& matJacobian, 
 									  real_t			 dInverseTimeStep) = 0;
 
-	virtual void	CalculateSensitivities(real_t					  dTime, 
-										   const std::vector<size_t>& narrParameterIndexes,
-										   daeArray<real_t>&		  arrValues, 
-										   daeArray<real_t>&		  arrTimeDerivatives, 
-										   daeMatrix<real_t>&		  matSValues, 
-										   daeMatrix<real_t>&		  matSTimeDerivatives, 
-										   daeMatrix<real_t>&		  matSResiduals) = 0;
-
-	virtual void	CalculateGradients(const std::vector<size_t>& narrParameterIndexes,
-									   daeArray<real_t>&		  arrValues, 
-									   daeMatrix<real_t>&		  matSResiduals) = 0;
-
+	virtual void	CalculateSensitivityResiduals(real_t					 dTime, 
+												  const std::vector<size_t>& narrParameterIndexes,
+												  daeArray<real_t>&			 arrValues, 
+												  daeArray<real_t>&			 arrTimeDerivatives, 
+												  daeMatrix<real_t>&		 matSValues, 
+												  daeMatrix<real_t>&		 matSTimeDerivatives, 
+												  daeMatrix<real_t>&		 matSResiduals) = 0;
+	
+	virtual void	CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes,
+															daeArray<real_t>&		   arrValues, 
+															daeMatrix<real_t>&		   matSResiduals) = 0;
+	
 	virtual void	CalculateConditions(real_t				 dTime, 
 									    daeArray<real_t>&	 arrValues, 
 									    daeArray<real_t>&	 arrTimeDerivatives, 
@@ -786,69 +786,9 @@ public:
 
 
 /*********************************************************************************************
-	daeExternalFunctionXXX info structures
-**********************************************************************************************/
-class daeExternalFunctionArgumentInfo_t
-{
-public:
-	bool operator == (const daeExternalFunctionArgumentInfo_t& efai)
-	{
-		if(m_strName == efai.m_strName &&
-		   m_nLength == efai.m_nLength  )
-		{
-			return true;
-		}
-		else 
-		{
-			return false;
-		}
-	}
-	
-	std::string	m_strName;	
-	size_t		m_nLength;	
-};
-
-class daeExternalFunctionInfo_t
-{
-public:
-	bool operator == (const daeExternalFunctionInfo_t& efi)
-	{
-		if(m_strName                  == efi.m_strName          &&
-		   m_nNumberOfResults         == efi.m_nNumberOfResults &&
-		   m_bCanCalculateDerivatives == efi.m_bCanCalculateDerivatives &&
-		   m_arrArgumentInfos.size()  == efi.m_arrArgumentInfos.size()  )
-		{
-			for(size_t i = 0; i < m_arrArgumentInfos.size(); i++)
-			{
-				if(m_arrArgumentInfos[i] == efi.m_arrArgumentInfos[i])
-					continue;
-				else
-					return false;
-			}
-			return true;
-		}
-		else 
-		{
-			return false;
-		}
-	}
-	
-	std::string										m_strName;	
-	size_t											m_nNumberOfResults;	
-	bool											m_bCanCalculateDerivatives;	
-	std::vector<daeExternalFunctionArgumentInfo_t>	m_arrArgumentInfos;	
-};
-	
-class daeExternalObjectInfo_t
-{
-public:
-	std::string								m_strName;	
-	std::vector<daeExternalFunctionInfo_t>	m_arrFunctionInfos;	
-};
-
-/*********************************************************************************************
 	daeExternalFunctionArgument_t
 **********************************************************************************************/
+struct daeExternalFunctionArgumentInfo_t;
 class daeExternalFunctionArgument_t
 {
 public:
@@ -857,7 +797,31 @@ public:
 public:
 	virtual void								GetValues(real_t* values, size_t n)       = 0;
 	virtual void								SetValues(const real_t* values, size_t n) = 0;
-	virtual daeExternalFunctionArgumentInfo_t	GetInfo(void) const                       = 0;
+	virtual real_t								operator [](size_t i) const               = 0;
+	virtual daeExternalFunctionArgumentInfo_t	GetInfo(void)                             = 0;
+};
+
+/*********************************************************************************************
+	daeExternalFunctionXXX info structures
+**********************************************************************************************/
+struct daeExternalFunctionArgumentInfo_t
+{
+	std::string	m_strName;	
+	size_t		m_nLength;	
+};
+
+struct daeExternalFunctionInfo_t
+{
+	std::string										m_strName;	
+	size_t											m_nNumberOfResults;	
+	bool											m_bCanCalculateDerivatives;	
+	std::vector<daeExternalFunctionArgument_t*>		m_ptrarrArguments;	
+};
+	
+struct daeExternalObjectInfo_t
+{
+	std::string					m_strName;	
+	std::vector<std::string>	m_strarrAvailableFunctions;	
 };
 
 
@@ -870,11 +834,10 @@ public:
 	virtual ~daeExternalFunction_t(void){}
 
 public:
-	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const = 0;
 // Before a call to Calculate/CalculateDerivatives the aruments' values has to be set
-	virtual void						Calculate(real_t* results, size_t n)                                             = 0;
-	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives)                             = 0;
-	virtual daeExternalFunctionInfo_t	GetInfo(void) const                                                              = 0;
+	virtual void						Calculate(real_t* results, size_t n)                 = 0;
+	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives) = 0;
+	virtual daeExternalFunctionInfo_t	GetInfo(void)                                        = 0;
 };
 
 
@@ -890,7 +853,7 @@ public:
 	// It is user's responsibility to ensure thread safety if multiple objects of the same 
 	// function are created and some vintage code is called
 	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName) = 0;
-	virtual daeExternalObjectInfo_t	GetInfo(void) const                                = 0;
+	virtual daeExternalObjectInfo_t	GetInfo(void)                                      = 0;
 };
 
 /*
