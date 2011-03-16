@@ -275,7 +275,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Sundials IDAS solver faint-heartedly refused to set tolerances; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver cowardly refused to set tolerances; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 
@@ -283,7 +283,7 @@ void daeIDASolver::CreateIDA(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Sundials IDAS solver faint-heartedly refused to set residual data; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver cowardly refused to set residual data; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
 }

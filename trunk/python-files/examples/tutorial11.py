@@ -110,7 +110,7 @@ Function to create and set-up the Trilinos linear equation solver. Possible choi
  - Direct:
    {Amesos_KLU, Amesos_Superlu, Amesos_Umfpack, Amesos_Lapack}
  - Iterative:
-   {AztecOO, AztecOO_Ifpack_IC, AztecOO_Ifpack_ICT, AztecOO_Ifpack_ILU, AztecOO_Ifpack_ILUT}
+   {AztecOO, AztecOO_Ifpack, AztecOO_ML}
 """
 def CreateLASolver():
     #
@@ -145,7 +145,7 @@ def CreateLASolver():
     #
     # 2) AztecOO solver:
     #
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "ILUT")
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "PointRelaxation")
     paramListAztec = lasolver.GetAztecOOOptions()
 
     # AztecOO solver options:
@@ -157,7 +157,7 @@ def CreateLASolver():
     paramListAztec.set_int("AZ_reorder",   0)
     paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
     paramListAztec.set_int("AZ_keep_info", 1)
-    paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_none) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+    paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_all) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
 
     #
     # 2a) AztecOO built-in preconditioner:
@@ -180,10 +180,12 @@ def CreateLASolver():
     #
 
     paramListIfpack = lasolver.GetIfpackOptions()
-    paramListIfpack.set_float("fact: level-of-fill",        5)
-    paramListIfpack.set_float("fact: ilut level-of-fill",   3.0)
-    paramListIfpack.set_float("fact: absolute threshold",   1e8)
-    paramListIfpack.set_float("fact: relative threshold",   0.0)
+    paramListIfpack.set_string("relaxation: type",               "Jacobi")
+    paramListIfpack.set_float ("relaxation: min diagonal value", 1e-2)
+    paramListIfpack.set_int   ("relaxation: sweeps",             5)
+    #paramListIfpack.set_float("fact: ilut level-of-fill",   3.0)
+    #paramListIfpack.set_float("fact: absolute threshold",   1e8)
+    #paramListIfpack.set_float("fact: relative threshold",   0.0)
     paramListIfpack.Print()
 
     #

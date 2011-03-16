@@ -146,6 +146,11 @@ if [ -e ../release/pyMagma.so ]; then
   cp ../release/pyMagma.so             ${PACKAGE_NAME}/pyMagma
 fi
 
+mkdir ${PACKAGE_NAME}/pySuperLU
+if [ -e ../release/pySuperLU.so ]; then
+  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/pySuperLU
+fi
+
 mkdir ${PACKAGE_NAME}/pyIntelPardiso
 #if [ -e ../release/pyIntelPardiso.so ]; then
 #  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
@@ -170,6 +175,7 @@ cp ../python-files/pyLapack__init__.py           ${PACKAGE_NAME}/pyLapack/__init
 cp ../python-files/pyMagma__init__.py            ${PACKAGE_NAME}/pyMagma/__init__.py
 cp ../python-files/pyIntelPardiso__init__.py     ${PACKAGE_NAME}/pyIntelPardiso/__init__.py
 cp ../python-files/pyTrilinos__init__.py         ${PACKAGE_NAME}/pyTrilinos/__init__.py
+cp ../python-files/pySuperLU__init__.py          ${PACKAGE_NAME}/pySuperLU/__init__.py
 cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
 
@@ -217,7 +223,7 @@ echo "      license='GNU GPL v3', " >> setup.py
 echo "      platforms='${ARCH}', " >> setup.py
 echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} " >> setup.py
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pySuperLU/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} " >> setup.py
 echo "      ) " >> setup.py
 echo " " >> setup.py
 

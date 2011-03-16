@@ -109,7 +109,7 @@ BOOST_PYTHON_MODULE(pyTrilinos)
 		.def("SaveAsXPM",				&daeTrilinosSolver::SaveAsXPM)
 		.def("SaveAsMatrixMarketFile",	&daeTrilinosSolver::SaveAsMatrixMarketFile)
 		
-		//.def("CreatePreconditioner",	&daeTrilinosSolver::CreatePreconditioner)
+		.def("PrintPreconditionerInfo",	&daeTrilinosSolver::PrintPreconditionerInfo)
 
 //		.def("SetAztecOOOptions",		&daeTrilinosSolver::SetAztecOOOptions)
 //		.def("SetIfpackOptions",		&daeTrilinosSolver::SetIfpackOptions)

@@ -105,6 +105,8 @@ daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName, const std
 		
 		if(m_strPreconditionerName != "ILU"  &&
 		   m_strPreconditionerName != "ILUT" &&
+		   m_strPreconditionerName != "PointRelaxation"   &&
+		   m_strPreconditionerName != "BlockRelaxation"   &&
 		   m_strPreconditionerName != "IC"   &&
 		   m_strPreconditionerName != "ICT")
 		{
@@ -425,6 +427,8 @@ bool daeTrilinosSolver::SetupLinearProblem(void)
 			m_pPreconditionerIfpack.reset(new Ifpack_IC(m_matEPETRA.get()));
 		else if(m_strPreconditionerName == "ICT")
 			m_pPreconditionerIfpack.reset(new Ifpack_ICT(m_matEPETRA.get()));
+		else if(m_strPreconditionerName == "PointRelaxation")
+			m_pPreconditionerIfpack.reset(new Ifpack_PointRelaxation(m_matEPETRA.get()));
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		
@@ -438,15 +442,19 @@ bool daeTrilinosSolver::SetupLinearProblem(void)
 			return false;
 		}
 		
+		nResult = m_pPreconditionerIfpack->Compute();
+		if(nResult != 0)
+		{
+			std::cout << "Ifpack preconditioner compute failed: " << std::endl;
+			return IDA_LSETUP_FAIL;
+		}
+		
 		nResult = m_pAztecOOSolver->SetPrecOperator(m_pPreconditionerIfpack.get());
 		if(nResult != 0)
 		{
-			std::cout << "Failed to set tht Ifpack preconditioner" << std::endl;
+			std::cout << "Failed to set the Ifpack preconditioner" << std::endl;
 			return false;
 		}
-		
-		std::cout << *m_pPreconditionerIfpack.get() << std::endl;
-		Ifpack_Analyze(*m_matEPETRA.get(), false, 1);
 	}
 	else
 	{
@@ -457,13 +465,28 @@ bool daeTrilinosSolver::SetupLinearProblem(void)
 	return true;
 }
 
-int daeTrilinosSolver::Setup(void*	ida,
-								   N_Vector	vectorVariables, 
-								   N_Vector	vectorTimeDerivatives, 
-								   N_Vector	vectorResiduals,
-								   N_Vector	vectorTemp1, 
-								   N_Vector	vectorTemp2, 
-								   N_Vector	vectorTemp3)
+void daeTrilinosSolver::PrintPreconditionerInfo(void)
+{
+	if(m_eTrilinosSolver == eAztecOO)
+	{
+	}
+	else if(m_eTrilinosSolver == eAztecOO_ML)
+	{
+	}
+	else if(m_eTrilinosSolver == eAztecOO_Ifpack)
+	{
+		std::cout << *m_pPreconditionerIfpack.get() << std::endl;
+		//Ifpack_Analyze(*m_matEPETRA.get(), false, 1);
+	}
+}
+
+int daeTrilinosSolver::Setup(void*		ida,
+							 N_Vector	vectorVariables, 
+							 N_Vector	vectorTimeDerivatives, 
+							 N_Vector	vectorResiduals,
+							 N_Vector	vectorTemp1, 
+							 N_Vector	vectorTemp2, 
+							 N_Vector	vectorTemp3)
 {
 	int nResult;
 	realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
@@ -786,27 +809,40 @@ int daeTrilinosSolver::Solve(void*	ida,
 //		cout << "AZ_ilut_fill       = " << m_pAztecOOSolver->GetAllAztecParams()[AZ_ilut_fill] << endl;
 //		cout.flush();
 */
-		nResult = m_pAztecOOSolver->Iterate(m_nNumIters, m_dTolerance);
-		if(nResult == 1)
+		try
 		{
-			std::cout << "AztecOO solve failed: Max. iterations reached" << std::endl;
-			return IDA_CONV_FAIL;
-			//Or return this: return IDA_LSOLVE_FAIL;
+			nResult = m_pAztecOOSolver->Iterate(m_nNumIters, m_dTolerance);
+			if(nResult == 1)
+			{
+				std::cout << "AztecOO solve failed: Max. iterations reached" << std::endl;
+				return IDA_CONV_FAIL;
+				//Or return this: return IDA_LSOLVE_FAIL;
+			}
+			else if(nResult < 0)
+			{
+				string strError;
+				
+				if(nResult == -1) 
+					strError = "Aztec status AZ_param: option not implemented";
+				else if(nResult == -2) 
+					strError = "Aztec status AZ_breakdown: numerical breakdown";
+				else if(nResult == -3) 
+					strError = "Aztec status AZ_loss: loss of precision";
+				else if(nResult == -4) 
+					strError = "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned";
+				
+				std::cout << "AztecOO solve failed: " << strError << std::endl;
+				return IDA_LSOLVE_FAIL;
+			}
 		}
-		else if(nResult < 0)
+		catch(std::exception& e)
 		{
-			string strError;
-			
-			if(nResult == -1) 
-				strError = "Aztec status AZ_param: option not implemented";
-			else if(nResult == -2) 
-				strError = "Aztec status AZ_breakdown: numerical breakdown";
-			else if(nResult == -3) 
-				strError = "Aztec status AZ_loss: loss of precision";
-			else if(nResult == -4) 
-				strError = "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned";
-			
-			std::cout << "AztecOO solve failed: " << strError << std::endl;
+			std::cout << "AztecOO solve failed (exception thrown): " << e.what() << std::endl;
+			return IDA_LSOLVE_FAIL;
+		}
+		catch(...)
+		{
+			std::cout << "AztecOO solve failed (unknown exception thrown)" << std::endl;
 			return IDA_LSOLVE_FAIL;
 		}
 	}

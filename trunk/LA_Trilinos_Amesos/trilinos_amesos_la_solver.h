@@ -36,6 +36,8 @@
 #include <Ifpack_ILUT.h>
 #include <Ifpack_IC.h>
 #include <Ifpack_ICT.h>
+#include <Ifpack_PointRelaxation.h>
+#include <Ifpack_BlockRelaxation.h>
 #include <ml_include.h>
 #include <ml_MultiLevelPreconditioner.h>
 
@@ -239,6 +241,7 @@ public:
 	int Free(void* ida);
 	
 	bool SetupLinearProblem(void);
+	void PrintPreconditionerInfo(void);
 
 	void SetAmesosOptions(Teuchos::ParameterList& paramList);
 	void SetAztecOOOptions(Teuchos::ParameterList& paramList);

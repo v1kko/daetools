@@ -1,0 +1,481 @@
+#include "stdafx.h"
+#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+#include <boost/python.hpp>
+#include <idas/idas_impl.h>
+#include "superlu_la_solver.h"
+
+namespace dae
+{
+namespace solver
+{
+int init_la(IDAMem ida_mem);
+int setup_la(IDAMem ida_mem,
+			  N_Vector	vectorVariables, 
+			  N_Vector	vectorTimeDerivatives, 
+			  N_Vector	vectorResiduals,
+			  N_Vector	vectorTemp1, 
+			  N_Vector	vectorTemp2, 
+			  N_Vector	vectorTemp3);
+int solve_la(IDAMem ida_mem,
+			  N_Vector	b, 
+			  N_Vector	weight, 
+			  N_Vector	vectorVariables,
+			  N_Vector	vectorTimeDerivatives, 
+			  N_Vector	vectorResiduals);
+int free_la(IDAMem ida_mem);
+	
+daeIDALASolver_t* daeCreateSuperLUSolver(void)
+{
+	return new daeSuperLUSolver;
+}
+
+daeSuperLUSolver::daeSuperLUSolver(void)
+{
+	m_pBlock	= NULL;
+	m_vecB		= NULL;
+	m_vecX		= NULL;
+	m_perm_c	= NULL;
+	m_perm_r	= NULL;
+	m_etree		= NULL;
+	m_R			= NULL;
+	m_C			= NULL;
+	m_bFactorizationDone = false;
+//	A			= NULL;
+//	IA			= NULL;
+//	JA			= NULL;
+	
+// The user shoud be able to set parameters right after the construction of the solver
+    set_default_options(&m_Options);
+//    printf(".. options:\n");
+//    printf("\tFact\t %8d\n", m_Options.Fact);
+//    printf("\tEquil\t %8d\n", m_Options.Equil);
+//    printf("\tColPerm\t %8d\n", m_Options.ColPerm);
+//    printf("\tDiagPivotThresh %8.4f\n", m_Options.DiagPivotThresh);
+//    printf("\tTrans\t %8d\n", m_Options.Trans);
+//    printf("\tIterRefine\t%4d\n", m_Options.IterRefine);
+//    printf("\tSymmetricMode\t%4d\n", m_Options.SymmetricMode);
+//    printf("\tPivotGrowth\t%4d\n", m_Options.PivotGrowth);
+//    printf("\tConditionNumber\t%4d\n", m_Options.ConditionNumber);
+//    printf("..\n");
+}
+
+daeSuperLUSolver::~daeSuperLUSolver(void)
+{
+	FreeMemory();
+}
+
+int daeSuperLUSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
+{
+	IDAMem ida_mem = (IDAMem)ida;
+	if(!ida_mem)
+		return IDA_MEM_NULL;
+	if(!ida_mem || !pDAESolver)
+		return IDA_ILL_INPUT;
+	
+	m_pBlock = pDAESolver->GetBlock();
+	if(!m_pBlock)
+		return IDA_MEM_NULL;
+
+	int nnz = 0;
+	m_pBlock->CalcNonZeroElements(nnz);
+	if(nnz == 0)
+		return IDA_ILL_INPUT;
+	
+	m_nNoEquations	= n;
+	m_pDAESolver	= pDAESolver;
+
+	InitializeSuperLU(nnz);
+	
+	ida_mem->ida_linit	= init_la;
+	ida_mem->ida_lsetup = setup_la;
+	ida_mem->ida_lsolve = solve_la;
+	ida_mem->ida_lperf	= NULL;
+	ida_mem->ida_lfree	= free_la;
+
+	ida_mem->ida_lmem         = this;
+	ida_mem->ida_setupNonNull = TRUE;
+
+	return IDA_SUCCESS;
+}
+
+int daeSuperLUSolver::Reinitialize(void* ida)
+{
+	IDAMem ida_mem = (IDAMem)ida;
+	if(!ida_mem)
+		return IDA_MEM_NULL;
+	if(!m_pBlock)
+		return IDA_MEM_NULL;
+	
+	int n   = m_nNoEquations;
+	int nnz = 0;
+	m_pBlock->CalcNonZeroElements(nnz);
+
+	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
+	m_matJacobian.ResetCounters();
+	m_pBlock->FillSparseMatrix(&m_matJacobian);
+	m_matJacobian.Sort();
+	//m_matJacobian.Print();
+
+//	int i;
+//	A  = doubleMalloc(m_matJacobian.NNZ);
+//	IA = intMalloc(m_matJacobian.N+1);
+//	JA = intMalloc(m_matJacobian.NNZ);
+//	
+//	for(i = 0; i < m_matJacobian.N+1; i++)
+//		IA[i] = m_matJacobian.IA[i];
+//	
+//	for(i = 0; i < m_matJacobian.NNZ; i++)
+//		JA[i] = m_matJacobian.JA[i];
+
+    Destroy_SuperMatrix_Store(&m_matA);
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
+	m_bFactorizationDone = false;
+	
+	return IDA_SUCCESS;
+}
+
+void daeSuperLUSolver::FreeMemory(void)
+{
+	if(m_vecB)
+		SUPERLU_FREE(m_vecB);
+	if(m_vecX)
+		SUPERLU_FREE(m_vecX);
+	if(m_perm_c)
+		SUPERLU_FREE(m_perm_c);
+	if(m_perm_r)
+		SUPERLU_FREE(m_perm_r);
+	if(m_etree)
+		SUPERLU_FREE(m_etree);
+	if(m_R)
+		SUPERLU_FREE(m_R);
+	if(m_C)
+		SUPERLU_FREE(m_C);
+	
+	m_matJacobian.Free();
+    Destroy_SuperMatrix_Store(&m_matA);
+	Destroy_SuperMatrix_Store(&m_matB);
+	Destroy_SuperMatrix_Store(&m_matX);
+	if(m_bFactorizationDone)
+	{
+		Destroy_SuperNode_Matrix(&m_matL);
+		Destroy_CompCol_Matrix(&m_matU);
+	}
+}
+
+void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
+{
+	m_nJacobianEvaluations	= 0;
+	m_vecB					= doubleMalloc(m_nNoEquations);
+	m_vecX					= doubleMalloc(m_nNoEquations);
+	m_perm_c				= intMalloc(m_nNoEquations);
+	m_perm_r				= intMalloc(m_nNoEquations);
+	m_etree					= intMalloc(m_nNoEquations);
+	m_R						= doubleMalloc(m_nNoEquations);
+	m_C						= doubleMalloc(m_nNoEquations);
+	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_etree || !m_R || !m_C)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to allocate memory for B, X, m_perm_c, m_perm_r, m_etree, m_R, m_C vectors";
+		throw e;
+	}
+
+// Initialize sparse matrix
+	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
+	m_matJacobian.ResetCounters();
+	m_pBlock->FillSparseMatrix(&m_matJacobian);
+	m_matJacobian.Sort();
+	//m_matJacobian.Print();
+
+//	int i;
+//	A  = doubleMalloc(m_matJacobian.NNZ);
+//	IA = intMalloc(m_matJacobian.N+1);
+//	JA = intMalloc(m_matJacobian.NNZ);
+//	
+//	for(i = 0; i < m_matJacobian.N+1; i++)
+//		IA[i] = m_matJacobian.IA[i];
+//	
+//	for(i = 0; i < m_matJacobian.NNZ; i++)
+//		JA[i] = m_matJacobian.JA[i];
+	
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
+	dCreate_Dense_Matrix(&m_matB, m_nNoEquations, 1, m_vecB, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+	m_bFactorizationDone = false;
+}
+
+int daeSuperLUSolver::SaveAsXPM(const std::string& strFileName)
+{
+	m_matJacobian.SaveMatrixAsXPM(strFileName);
+	return IDA_SUCCESS;
+}
+
+superlu_options_t& daeSuperLUSolver::GetOptions(void)
+{
+	return m_Options;
+}
+
+int daeSuperLUSolver::Init(void* ida)
+{
+	return IDA_SUCCESS;
+}
+
+int daeSuperLUSolver::Setup(void*		ida,
+							N_Vector	vectorVariables, 
+							N_Vector	vectorTimeDerivatives, 
+							N_Vector	vectorResiduals,
+							N_Vector	vectorTemp1, 
+							N_Vector	vectorTemp2, 
+							N_Vector	vectorTemp3)
+{
+	int info;
+    double rpg, rcond;
+	realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
+		
+	IDAMem ida_mem = (IDAMem)ida;
+	if(!ida_mem)
+		return IDA_MEM_NULL;
+	if(!m_pBlock)
+		return IDA_MEM_NULL;
+	
+	size_t Neq              = m_nNoEquations;
+	real_t time             = ida_mem->ida_tn;
+	real_t dInverseTimeStep = ida_mem->ida_cj;
+	
+	pdValues			= NV_DATA_S(vectorVariables); 
+	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
+	pdResiduals			= NV_DATA_S(vectorResiduals);
+
+	m_nJacobianEvaluations++;
+	
+	m_arrValues.InitArray(Neq, pdValues);
+	m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
+	m_arrResiduals.InitArray(Neq, pdResiduals);
+
+	m_matJacobian.ClearValues();
+	
+	m_pBlock->CalculateJacobian(time, 
+		                        m_arrValues, 
+							    m_arrResiduals, 
+							    m_arrTimeDerivatives, 
+							    m_matJacobian, 
+							    dInverseTimeStep);
+	
+//	std::cout << "Setup" << std::endl;
+//
+//	std::cout << "A before factorization" << std::endl;
+//	m_matJacobian.Print(false, true);
+//	std::cout << "B before factorization" << std::endl;
+//	daeDenseArray a;
+//	a.InitArray(Neq, m_vecB);
+//	a.Print(false);
+
+
+
+//	for(int i = 0; i < m_matJacobian.NNZ; i++)
+//		A[i]  = m_matJacobian.A[i];
+
+/* 
+*/
+	
+/*
+	The default input options:
+		m_Options.Fact = DOFACT;
+		m_Options.Equil = YES;
+		m_Options.ColPerm = COLAMD;
+		m_Options.DiagPivotThresh = 1.0;
+		m_Options.IterRefine = NOREFINE;
+		
+	The first time Setup is called (or after Reinitialize) m_bFactorizationDone is false 
+	and the full factorization is requested: m_Options.Fact = DOFACT
+	Otherwise reuse some information from the previous call: m_Options.Fact = SamePattern
+*/
+	if(m_bFactorizationDone)
+	{
+		m_Options.Fact = SamePattern;
+		Destroy_SuperNode_Matrix(&m_matL);
+		Destroy_CompCol_Matrix(&m_matU);
+	}
+	else
+	{
+		m_Options.Fact = DOFACT;
+	}
+	
+	StatInit(&m_Stats);
+
+	m_matB.ncol = 0;  /* Indicate not to solve the system */
+	dgssvx(&m_Options, &m_matA, m_perm_c, m_perm_r, m_etree, &m_equed, m_R, m_C, &m_matL, &m_matU, NULL, 0, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &m_Stats, &info);
+	m_matB.ncol = 1;  /* Restore it back */
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to solve the system: " << info;
+		throw e;
+	}
+//	std::cout << "m_equed = " << m_equed << std::endl;
+//	std::cout << "recip_pivot_growth = " << rpg << std::endl;
+//	std::cout << "rcond = " << rcond << std::endl;
+//	
+//	dPrint_CompCol_Matrix("U", &m_matU);
+//	dPrint_SuperNode_Matrix("L", &m_matL);
+//	
+//	std::cout << "A after factorization" << std::endl;
+//	m_matJacobian.Print(false, true);
+//	std::cout << "B after factorization" << std::endl;
+//	a.InitArray(Neq, m_vecB);
+//	a.Print(false);
+//
+//	StatPrint(&m_Stats);
+
+	StatFree(&m_Stats);
+	m_bFactorizationDone = true;
+	
+	return IDA_SUCCESS;
+}
+
+int daeSuperLUSolver::Solve(void*		ida,
+							N_Vector	vectorB, 
+							N_Vector	vectorWeight, 
+							N_Vector	vectorVariables,
+							N_Vector	vectorTimeDerivatives, 
+							N_Vector	vectorResiduals)
+{
+	int info;
+    double rpg, rcond;
+	realtype* pdB;
+		
+	IDAMem ida_mem = (IDAMem)ida;
+	if(!ida_mem)
+		return IDA_MEM_NULL;
+	if(!m_pBlock)
+		return IDA_MEM_NULL;
+	
+	size_t Neq = m_nNoEquations;
+	pdB        = NV_DATA_S(vectorB);
+	
+	memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+
+// Solve
+//	std::cout << "****************************************************" << std::endl;
+//	std::cout << "*                     Solve                        *" << std::endl;
+//	std::cout << "****************************************************" << std::endl;
+//
+//	std::cout << "m_vecB before" << std::endl;
+//	daeDenseArray b, x;
+//	b.InitArray(Neq, m_vecB);
+//	b.Print(false);
+//	dPrint_Dense_Matrix("m_matB before", &m_matB);
+//	x.InitArray(Neq, m_vecX);
+//	std::cout << "m_vecX before" << std::endl;
+//	x.Print(false);
+//	dPrint_Dense_Matrix("m_matX before", &m_matX);
+
+	StatInit(&m_Stats);
+	
+	m_Options.Fact = FACTORED;
+	dgssvx(&m_Options, &m_matA, m_perm_c, m_perm_r, m_etree, &m_equed, m_R, m_C, &m_matL, &m_matU, NULL, 0, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &m_Stats, &info);
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to solve the system: " << info;
+		throw e;
+	}
+	
+//	std::cout << "recip_pivot_growth = " << rpg << std::endl;
+//	std::cout << "rcond = " << rcond << std::endl;
+//	std::cout << "m_ferr = " << m_ferr << std::endl;
+//	std::cout << "m_berr = " << m_berr << std::endl;
+//	std::cout << "m_vecB after" << std::endl;
+//	b.Print(false);
+//	dPrint_Dense_Matrix("m_matB after", &m_matB);
+//	std::cout << "m_vecX after" << std::endl;
+//	x.Print(false);
+//	dPrint_Dense_Matrix("m_matX after", &m_matX);
+//	StatPrint(&m_Stats);
+
+	StatFree(&m_Stats);
+	
+	::memcpy(pdB, m_vecX, Neq*sizeof(real_t));
+	if(ida_mem->ida_cjratio != 1.0)
+	{
+		for(size_t i = 0; i < Neq; i++)
+			pdB[i] *= 2.0 / (1.0 + ida_mem->ida_cjratio);
+		//N_VScale(2.0 / (1.0 + ida_mem->ida_cjratio), vectorB, vectorB);
+	}
+	
+	return IDA_SUCCESS;	
+}
+
+int daeSuperLUSolver::Free(void* ida)
+{
+	return IDA_SUCCESS;	
+}
+
+
+int init_la(IDAMem ida_mem)
+{
+	daeSuperLUSolver* pSolver = (daeSuperLUSolver*)ida_mem->ida_lmem;
+	if(!pSolver)
+		return IDA_MEM_NULL;
+	
+	return pSolver->Init(ida_mem);
+}
+
+int setup_la(IDAMem	ida_mem,
+			  N_Vector	vectorVariables, 
+			  N_Vector	vectorTimeDerivatives, 
+			  N_Vector	vectorResiduals,
+			  N_Vector	vectorTemp1, 
+			  N_Vector	vectorTemp2, 
+			  N_Vector	vectorTemp3)
+{
+	daeSuperLUSolver* pSolver = (daeSuperLUSolver*)ida_mem->ida_lmem;
+	if(!pSolver)
+		return IDA_MEM_NULL;
+	
+	return pSolver->Setup(ida_mem,
+						  vectorVariables, 
+						  vectorTimeDerivatives, 
+						  vectorResiduals,
+						  vectorTemp1, 
+						  vectorTemp2, 
+						  vectorTemp3);
+	
+}
+
+int solve_la(IDAMem	ida_mem,
+			 N_Vector	vectorB, 
+			 N_Vector	vectorWeight, 
+			 N_Vector	vectorVariables,
+			 N_Vector	vectorTimeDerivatives, 
+			 N_Vector	vectorResiduals)
+{
+	daeSuperLUSolver* pSolver = (daeSuperLUSolver*)ida_mem->ida_lmem;
+	if(!pSolver)
+		return IDA_MEM_NULL;
+	
+	return pSolver->Solve(ida_mem,
+						  vectorB, 
+						  vectorWeight, 
+						  vectorVariables,
+						  vectorTimeDerivatives, 
+						  vectorResiduals); 
+}
+
+int free_la(IDAMem ida_mem)
+{
+	daeSuperLUSolver* pSolver = (daeSuperLUSolver*)ida_mem->ida_lmem;
+	if(!pSolver)
+		return IDA_MEM_NULL;
+	
+	int ret = pSolver->Free(ida_mem);
+
+	delete pSolver;
+	ida_mem->ida_lmem = NULL;
+
+	return ret;
+}
+
+
+}
+}
+
