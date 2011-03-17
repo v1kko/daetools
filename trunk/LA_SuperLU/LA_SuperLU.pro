@@ -17,9 +17,14 @@ QT -= core \
 TARGET = SuperLU
 TEMPLATE = lib
 
+CONFIG += SuperLU_MT
+
 ######################################################################################
 #                                   SuperLU
 ######################################################################################
+SuperLU{
+QMAKE_CXXFLAGS += -DdaeSuperLU
+
 win32-msvc2008::SUPERLU_PATH = ..\superlu
 linux-g++::SUPERLU_PATH      = ../superlu
 linux-g++-64::SUPERLU_PATH   = ../superlu
@@ -34,12 +39,32 @@ win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBS} superlu.lib
 linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBS} -lcdaesuperlu
 linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBS} -lcdaesuperlu
 
-####################################################################################
-#                       Suppress some warnings
-####################################################################################
-#unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CXXFLAGS += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+pyObject = pySuperLU
+}
+
+######################################################################################
+#                                   SuperLU_MT
+######################################################################################
+SuperLU_MT{
+QMAKE_CXXFLAGS += -DdaeSuperLU_MT
+
+win32-msvc2008::SUPERLU_PATH = ..\superlu_mt
+linux-g++::SUPERLU_PATH      = ../superlu_mt
+linux-g++-64::SUPERLU_PATH   = ../superlu_mt
+
+win32-msvc2008::SUPERLU_LIBS = $${SUPERLU_PATH}\lib
+linux-g++::SUPERLU_LIBS      = $${SUPERLU_PATH}/lib
+linux-g++-64::SUPERLU_LIBS   = $${SUPERLU_PATH}/lib
+
+SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
+
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBS} superlu_mt.lib
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBS} -lcdaesuperlu_mt
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBS} -lcdaesuperlu_mt
+
+pyObject = pySuperLU_MT
+}
+
 
 INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \
@@ -56,10 +81,20 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
     superlu_la_solver.h
 
+SuperLU{
 win32-msvc2008::QMAKE_POST_LINK = move /y \
     $${DAE_DEST_DIR}/SuperLU1.dll \
     $${DAE_DEST_DIR}/SuperLU.pyd
+}
+
+SuperLU_MT{
+win32-msvc2008::QMAKE_POST_LINK = move /y \
+    $${DAE_DEST_DIR}/SuperLU_MT1.dll \
+    $${DAE_DEST_DIR}/SuperLU_MT.pyd
+}
+
 unix::QMAKE_POST_LINK = cp \
-    -f \
-    $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-    $${DAE_DEST_DIR}/pySuperLU.so
+            -f \
+            $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
+            $${DAE_DEST_DIR}/$${pyObject}.so
+

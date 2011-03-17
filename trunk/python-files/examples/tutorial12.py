@@ -35,8 +35,9 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-import daetools.pySuperLU         as pySuperLU
-import daetools.pyTrilinos       as pyTrilinos
+from daetools.pySuperLU import pySuperLU_MT
+#import daetools.pySuperLU         as pySuperLU
+#import daetools.pyTrilinos       as pyTrilinos
 #import daetools.pyIntelPardiso   as pyIntelPardiso
 #import daetools.pyAmdACML        as pyAmdACML
 #import daetools.pyIntelMKL       as pyIntelMKL
@@ -97,11 +98,11 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial9")
+        self.m = modTutorial("tutorial12")
         self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
 
     def SetUpParametersAndDomains(self):
-        n = 100
+        n = 200
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
@@ -161,7 +162,9 @@ def consoleRun():
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
-    lasolver      = pySuperLU.daeCreateSuperLUSolver()
+    #lasolver     = pySuperLU.daeCreateSuperLUSolver()
+    lasolver      = pySuperLU_MT.daeCreateSuperLUSolver()
+
     daesolver.SetLASolver(lasolver)
 
     # SuperLU options:

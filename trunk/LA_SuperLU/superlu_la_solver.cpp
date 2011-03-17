@@ -36,15 +36,32 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_vecX		= NULL;
 	m_perm_c	= NULL;
 	m_perm_r	= NULL;
-	m_etree		= NULL;
 	m_R			= NULL;
 	m_C			= NULL;
 	m_bFactorizationDone = false;
-//	A			= NULL;
-//	IA			= NULL;
-//	JA			= NULL;
 	
 // The user shoud be able to set parameters right after the construction of the solver
+#ifdef daeSuperLU_MT
+    m_Options.nprocs			= 4;
+    m_Options.fact				= EQUILIBRATE;
+    m_Options.trans				= NOTRANS;
+    m_Options.refact			= NO;
+    m_Options.panel_size		= sp_ienv(1);
+    m_Options.relax				= sp_ienv(2);
+    m_Options.diag_pivot_thresh = 1.0;
+    m_Options.drop_tol			= 0.0;
+    m_Options.ColPerm			= COLAMD;
+    m_Options.usepr				= NO;
+    m_Options.SymmetricMode		= NO;
+    m_Options.PrintStat			= NO;
+    m_Options.perm_c			= NULL;
+    m_Options.perm_r			= NULL;
+    m_Options.work				= NULL;
+    m_Options.lwork				= 0;
+	
+#elif daeSuperLU
+	m_etree		= NULL;
+	
     set_default_options(&m_Options);
 //    printf(".. options:\n");
 //    printf("\tFact\t %8d\n", m_Options.Fact);
@@ -57,6 +74,7 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 //    printf("\tPivotGrowth\t%4d\n", m_Options.PivotGrowth);
 //    printf("\tConditionNumber\t%4d\n", m_Options.ConditionNumber);
 //    printf("..\n");
+#endif
 }
 
 daeSuperLUSolver::~daeSuperLUSolver(void)
@@ -83,6 +101,7 @@ int daeSuperLUSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
 	
 	m_nNoEquations	= n;
 	m_pDAESolver	= pDAESolver;
+	m_nJacobianEvaluations	= 0;
 
 	InitializeSuperLU(nnz);
 	
@@ -116,26 +135,47 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	m_matJacobian.Sort();
 	//m_matJacobian.Print();
 
-//	int i;
-//	A  = doubleMalloc(m_matJacobian.NNZ);
-//	IA = intMalloc(m_matJacobian.N+1);
-//	JA = intMalloc(m_matJacobian.NNZ);
-//	
-//	for(i = 0; i < m_matJacobian.N+1; i++)
-//		IA[i] = m_matJacobian.IA[i];
-//	
-//	for(i = 0; i < m_matJacobian.NNZ; i++)
-//		JA[i] = m_matJacobian.JA[i];
-
     Destroy_SuperMatrix_Store(&m_matA);
 	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
 	m_bFactorizationDone = false;
 	
+#ifdef daeSuperLU_MT
+    //pxgstrf_finalize(&m_Options, &m_matAC);	
+	if(m_Options.lwork >= 0)
+	{
+		Destroy_SuperNode_SCP(&m_matL);
+		Destroy_CompCol_NCP(&m_matU);
+	}
+	//StatFree(&m_Stats);
+	
+#elif daeSuperLU
+
+#endif
+
 	return IDA_SUCCESS;
 }
 
 void daeSuperLUSolver::FreeMemory(void)
 {
+#ifdef daeSuperLU_MT
+    //pxgstrf_finalize(&m_Options, &m_matAC);	
+	if(m_Options.lwork >= 0)
+	{
+		Destroy_SuperNode_SCP(&m_matL);
+		Destroy_CompCol_NCP(&m_matU);
+	}
+	//StatFree(&m_Stats);
+	
+#elif daeSuperLU
+	if(m_etree)
+		SUPERLU_FREE(m_etree);
+	if(m_bFactorizationDone)
+	{
+		Destroy_SuperNode_Matrix(&m_matL);
+		Destroy_CompCol_Matrix(&m_matU);
+	}
+#endif
+
 	if(m_vecB)
 		SUPERLU_FREE(m_vecB);
 	if(m_vecX)
@@ -144,8 +184,6 @@ void daeSuperLUSolver::FreeMemory(void)
 		SUPERLU_FREE(m_perm_c);
 	if(m_perm_r)
 		SUPERLU_FREE(m_perm_r);
-	if(m_etree)
-		SUPERLU_FREE(m_etree);
 	if(m_R)
 		SUPERLU_FREE(m_R);
 	if(m_C)
@@ -155,29 +193,40 @@ void daeSuperLUSolver::FreeMemory(void)
     Destroy_SuperMatrix_Store(&m_matA);
 	Destroy_SuperMatrix_Store(&m_matB);
 	Destroy_SuperMatrix_Store(&m_matX);
-	if(m_bFactorizationDone)
-	{
-		Destroy_SuperNode_Matrix(&m_matL);
-		Destroy_CompCol_Matrix(&m_matU);
-	}
 }
 
 void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 {
-	m_nJacobianEvaluations	= 0;
 	m_vecB					= doubleMalloc(m_nNoEquations);
 	m_vecX					= doubleMalloc(m_nNoEquations);
 	m_perm_c				= intMalloc(m_nNoEquations);
 	m_perm_r				= intMalloc(m_nNoEquations);
-	m_etree					= intMalloc(m_nNoEquations);
 	m_R						= doubleMalloc(m_nNoEquations);
 	m_C						= doubleMalloc(m_nNoEquations);
-	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_etree || !m_R || !m_C)
+	
+#ifdef daeSuperLU_MT
+    m_Options.perm_c	= m_perm_c;
+    m_Options.perm_r	= m_perm_r;
+    m_Options.work		= NULL;
+    m_Options.lwork		= 0;
+	
+	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_R || !m_C)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to allocate memory for B, X, m_perm_c, m_perm_r, m_etree, m_R, m_C vectors";
+		e << "Unable to allocate memory for B, X, perm_c, perm_r, R, C vectors";
 		throw e;
 	}
+
+#elif daeSuperLU
+	m_etree	= intMalloc(m_nNoEquations);
+	
+	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_R || !m_C || !m_etree)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to allocate memory for B, X, perm_c, perm_r, etree, R, C vectors";
+		throw e;
+	}
+#endif
 
 // Initialize sparse matrix
 	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
@@ -186,20 +235,10 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 	m_matJacobian.Sort();
 	//m_matJacobian.Print();
 
-//	int i;
-//	A  = doubleMalloc(m_matJacobian.NNZ);
-//	IA = intMalloc(m_matJacobian.N+1);
-//	JA = intMalloc(m_matJacobian.NNZ);
-//	
-//	for(i = 0; i < m_matJacobian.N+1; i++)
-//		IA[i] = m_matJacobian.IA[i];
-//	
-//	for(i = 0; i < m_matJacobian.NNZ; i++)
-//		JA[i] = m_matJacobian.JA[i];
-	
 	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matB, m_nNoEquations, 1, m_vecB, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+	
 	m_bFactorizationDone = false;
 }
 
@@ -209,7 +248,12 @@ int daeSuperLUSolver::SaveAsXPM(const std::string& strFileName)
 	return IDA_SUCCESS;
 }
 
-superlu_options_t& daeSuperLUSolver::GetOptions(void)
+#ifdef daeSuperLU_MT
+superlumt_options_t& 		
+#elif daeSuperLU
+superlu_options_t& 
+#endif
+daeSuperLUSolver::GetOptions(void)
 {
 	return m_Options;
 }
@@ -260,23 +304,85 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_matJacobian, 
 							    dInverseTimeStep);
 	
-//	std::cout << "Setup" << std::endl;
-//
-//	std::cout << "A before factorization" << std::endl;
-//	m_matJacobian.Print(false, true);
-//	std::cout << "B before factorization" << std::endl;
-//	daeDenseArray a;
-//	a.InitArray(Neq, m_vecB);
-//	a.Print(false);
+#ifdef daeSuperLU_MT
+/*
+	Get column permutation vector perm_c[], according to permc_spec:
+	  permc_spec = 0: natural ordering 
+	  permc_spec = 1: minimum degree ordering on structure of A'*A
+	  permc_spec = 2: minimum degree ordering on structure of A'+A
+	  permc_spec = 3: approximate minimum degree for unsymmetric matrices
+*/    	
+    int permc_spec = 1;
+	
+// I use this to prevent solving the system; Does it have any sense? How it should be done?
+	::memset(m_vecB, 0, m_nNoEquations*sizeof(real_t));
 
+	if(m_bFactorizationDone)
+	{
+		m_Options.refact = NO;
+		m_Options.fact   = EQUILIBRATE;
+	}
+	else
+	{
+		m_Options.refact = NO;
+		m_Options.fact   = EQUILIBRATE;
+	}
+	
+	get_perm_c(permc_spec, &m_matA, m_perm_c);
+	
+	pdgssvx(m_Options.nprocs, &m_Options, &m_matA, m_perm_c, m_perm_r, &m_equed, m_R, m_C, &m_matL, &m_matU, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &info);
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to factorize the matrix: " << info;
+		throw e;
+	}
 
+/*
+	if(m_bFactorizationDone)
+	{
+		StatInit(m_nNoEquations, m_Options.nprocs, &m_Stats);
+		
+		m_Options.refact = YES;
+	}
+	else
+	{
+		StatAlloc(m_nNoEquations, m_Options.nprocs, m_Options.panel_size, m_Options.relax, &m_Stats);
+		StatInit(m_nNoEquations, m_Options.nprocs, &m_Stats);
+		
+		get_perm_c(permc_spec, &m_matA, m_perm_c);
+		
+		m_Options.refact = NO;
+	}
+	
+	pdgstrf_init(m_Options.nprocs, 
+				 m_Options.fact, 
+				 m_Options.trans, 
+				 m_Options.refact, 
+				 m_Options.panel_size, 
+				 m_Options.relax,
+				 m_Options.diag_pivot_thresh,
+				 m_Options.usepr, 
+				 m_Options.drop_tol, 
+				 m_Options.perm_c, 
+				 m_Options.perm_r,
+				 m_Options.work, 
+				 m_Options.lwork, 
+				 &m_matA, 
+				 &m_matAC, 
+				 &m_Options, 
+				 &m_Stats);
 
-//	for(int i = 0; i < m_matJacobian.NNZ; i++)
-//		A[i]  = m_matJacobian.A[i];
-
-/* 
+	pdgstrf(&m_Options, &m_matAC, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to factorize the matrix: " << info;
+		throw e;
+	}
 */
 	
+#elif daeSuperLU
 /*
 	The default input options:
 		m_Options.Fact = DOFACT;
@@ -299,7 +405,6 @@ int daeSuperLUSolver::Setup(void*		ida,
 	{
 		m_Options.Fact = DOFACT;
 	}
-	
 	StatInit(&m_Stats);
 
 	m_matB.ncol = 0;  /* Indicate not to solve the system */
@@ -308,25 +413,14 @@ int daeSuperLUSolver::Setup(void*		ida,
 	if(info != 0)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to solve the system: " << info;
+		e << "Unable to factorize the matrix: " << info;
 		throw e;
 	}
-//	std::cout << "m_equed = " << m_equed << std::endl;
-//	std::cout << "recip_pivot_growth = " << rpg << std::endl;
-//	std::cout << "rcond = " << rcond << std::endl;
-//	
-//	dPrint_CompCol_Matrix("U", &m_matU);
-//	dPrint_SuperNode_Matrix("L", &m_matL);
-//	
-//	std::cout << "A after factorization" << std::endl;
-//	m_matJacobian.Print(false, true);
-//	std::cout << "B after factorization" << std::endl;
-//	a.InitArray(Neq, m_vecB);
-//	a.Print(false);
-//
-//	StatPrint(&m_Stats);
-
+	//std::cout << "FactFlops = " << m_Stats.ops[FACT] << std::endl;
+	
 	StatFree(&m_Stats);
+#endif
+
 	m_bFactorizationDone = true;
 	
 	return IDA_SUCCESS;
@@ -353,25 +447,38 @@ int daeSuperLUSolver::Solve(void*		ida,
 	pdB        = NV_DATA_S(vectorB);
 	
 	memcpy(m_vecB, pdB, Neq*sizeof(real_t));
-
-// Solve
-//	std::cout << "****************************************************" << std::endl;
-//	std::cout << "*                     Solve                        *" << std::endl;
-//	std::cout << "****************************************************" << std::endl;
-//
-//	std::cout << "m_vecB before" << std::endl;
-//	daeDenseArray b, x;
-//	b.InitArray(Neq, m_vecB);
-//	b.Print(false);
-//	dPrint_Dense_Matrix("m_matB before", &m_matB);
-//	x.InitArray(Neq, m_vecX);
-//	std::cout << "m_vecX before" << std::endl;
-//	x.Print(false);
-//	dPrint_Dense_Matrix("m_matX before", &m_matX);
-
-	StatInit(&m_Stats);
 	
+	std::cout << "Solve" << std::endl;
+
+#ifdef daeSuperLU_MT
+    m_Options.fact   = FACTORED;
+	m_Options.refact = YES;
+	
+	pdgssvx(m_Options.nprocs, &m_Options, &m_matA, m_perm_c, m_perm_r, &m_equed, m_R, m_C, &m_matL, &m_matU, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &info);
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to factorize the matrix: " << info;
+		throw e;
+	}
+	
+	::memcpy(pdB, m_vecX, Neq*sizeof(real_t));
+	
+/*
+    dgstrs(m_Options.trans, &m_matL, &m_matU, m_perm_r, m_perm_c, &m_matB, &m_Stats, &info);
+	if(info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to factorize the matrix: " << info;
+		throw e;
+	}
+	
+	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
+*/	
+#elif daeSuperLU
+	StatInit(&m_Stats);
 	m_Options.Fact = FACTORED;
+
 	dgssvx(&m_Options, &m_matA, m_perm_c, m_perm_r, m_etree, &m_equed, m_R, m_C, &m_matL, &m_matU, NULL, 0, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &m_Stats, &info);
 	if(info != 0)
 	{
@@ -380,21 +487,12 @@ int daeSuperLUSolver::Solve(void*		ida,
 		throw e;
 	}
 	
-//	std::cout << "recip_pivot_growth = " << rpg << std::endl;
-//	std::cout << "rcond = " << rcond << std::endl;
-//	std::cout << "m_ferr = " << m_ferr << std::endl;
-//	std::cout << "m_berr = " << m_berr << std::endl;
-//	std::cout << "m_vecB after" << std::endl;
-//	b.Print(false);
-//	dPrint_Dense_Matrix("m_matB after", &m_matB);
-//	std::cout << "m_vecX after" << std::endl;
-//	x.Print(false);
-//	dPrint_Dense_Matrix("m_matX after", &m_matX);
-//	StatPrint(&m_Stats);
-
+	//std::cout << "SolveFlops = " << m_Stats.ops[SOLVE] << std::endl;
 	StatFree(&m_Stats);
 	
 	::memcpy(pdB, m_vecX, Neq*sizeof(real_t));
+#endif
+	
 	if(ida_mem->ida_cjratio != 1.0)
 	{
 		for(size_t i = 0; i < Neq; i++)

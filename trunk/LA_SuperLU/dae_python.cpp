@@ -5,43 +5,15 @@
 using namespace boost::python;
 using namespace dae::solver;
 
+#ifdef daeSuperLU_MT
+BOOST_PYTHON_MODULE(pySuperLU_MT)
+#elif daeSuperLU
 BOOST_PYTHON_MODULE(pySuperLU)
+#endif
 {
 /**************************************************************
 	LA Solver
 ***************************************************************/
-//
-//	typedef struct {
-//		fact_t        Fact;
-//		yes_no_t      Equil;
-//		colperm_t     ColPerm;
-//		trans_t       Trans;
-//		IterRefine_t  IterRefine;
-//		double        DiagPivotThresh;
-//		yes_no_t      SymmetricMode;
-//		yes_no_t      PivotGrowth;
-//		yes_no_t      ConditionNumber;
-//		rowperm_t     RowPerm;
-//		int 	  ILU_DropRule;
-//		double	  ILU_DropTol;    /* threshold for dropping */
-//		double	  ILU_FillFactor; /* gamma in the secondary dropping */
-//		norm_t	  ILU_Norm;       /* infinity-norm, 1-norm, or 2-norm */
-//		double	  ILU_FillTol;    /* threshold for zero pivot perturbation */
-//		milu_t	  ILU_MILU;
-//		double	  ILU_MILU_Dim;   /* Dimension of PDE (if available) */
-//		yes_no_t      ParSymbFact;
-//		yes_no_t      ReplaceTinyPivot; /* used in SuperLU_DIST */
-//		yes_no_t      SolveInitialized;
-//		yes_no_t      RefineInitialized;
-//		yes_no_t      PrintStat;
-//	} superlu_options_t;
-//
-//	typedef enum {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD,
-//			  METIS_AT_PLUS_A, PARMETIS, ZOLTAN, MY_PERMC}      colperm_t;
-//	typedef enum {NOTRANS, TRANS, CONJ}                             trans_t;
-//	typedef enum {NOEQUIL, ROW, COL, BOTH}                          DiagScale_t;
-//	typedef enum {NOREFINE, SINGLE=1, DOUBLE, EXTRA}                IterRefine_t;
-
     enum_<yes_no_t>("yes_no_t")
 		.value("NO",	NO)
 		.value("YES",	YES)
@@ -55,11 +27,23 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.value("COLAMD",			COLAMD)
 		.value("METIS_AT_PLUS_A",	METIS_AT_PLUS_A)
 		.value("PARMETIS",			PARMETIS)
-		.value("ZOLTAN",			ZOLTAN)
 		.value("MY_PERMC",			MY_PERMC)
 		.export_values()
 	;
+
+#ifdef daeSuperLU_MT
+	class_<superlumt_options_t, boost::noncopyable>("superlumt_options_t", no_init)
+		.def_readwrite("nprocs",			&superlumt_options_t::nprocs)
+		.def_readwrite("panel_size",		&superlumt_options_t::panel_size)
+		.def_readwrite("relax",				&superlumt_options_t::relax)
+		.def_readwrite("ColPerm",			&superlumt_options_t::ColPerm)
+		.def_readwrite("diag_pivot_thresh",	&superlumt_options_t::diag_pivot_thresh)
+		.def_readwrite("drop_tol",			&superlumt_options_t::drop_tol)
+		.def_readwrite("usepr",				&superlumt_options_t::usepr)
+		.def_readwrite("PrintStat",			&superlumt_options_t::PrintStat)
+		;
 	
+#elif daeSuperLU
     enum_<IterRefine_t>("IterRefine_t")
 		.value("NOREFINE",	NOREFINE)
 		.value("SINGLE",	SINGLE)
@@ -81,7 +65,9 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
 		.def_readwrite("DiagPivotThresh",	&superlu_options_t::DiagPivotThresh)
 		.def_readwrite("RowPerm",			&superlu_options_t::RowPerm)
+		.def_readwrite("PrintStat",			&superlu_options_t::PrintStat)
 		;
+#endif
 
 	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
 		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))

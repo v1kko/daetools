@@ -9,9 +9,14 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
+
 extern "C" 
 {
+#ifdef daeSuperLU_MT
+#include <pdsp_defs.h>
+#elif daeSuperLU
 #include <slu_ddefs.h>
+#endif
 }
 
 namespace dae
@@ -20,39 +25,6 @@ namespace solver
 {
 daeIDALASolver_t* daeCreateSuperLUSolver(void);
 
-/*
-class daeSuperLUMatrix: public daeCSRMatrix<real_t, int>
-{
-public:
-	daeSuperLUMatrix(void)
-	{
-	}
-	
-	~daeSuperLUMatrix(void)
-	{
-		SuperLUFree();
-	}
-	
-	void SuperLUFree(void)
-	{
-	// Destroy_CompRow_Matrix will delete A, IA and JA as well
-		Destroy_CompRow_Matrix(&m_matA);
-		A   = NULL;
-		IA  = NULL;
-		JA  = NULL;
-	}
-	
-	void Reset(int n, int nnz, bool ind)
-	{
-		SuperLUFree();
-		daeCSRMatrix<real_t, int>::Reset(n, nnz, ind);
-		dCreate_CompCol_Matrix(&m_matA, N, N, NNZ, A, IA, JA, SLU_NR, SLU_D, SLU_GE);
-	}
-	
-public:
-	SuperMatrix m_matA;
-};
-*/
 
 class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
 {
@@ -82,7 +54,11 @@ public:
 			  N_Vector	vectorResiduals);
 	int Free(void* ida);
 
+#ifdef daeSuperLU_MT
+	superlumt_options_t& GetOptions(void);
+#elif daeSuperLU
 	superlu_options_t& GetOptions(void);
+#endif
 	
 protected:
 	void InitializeSuperLU(size_t nnz);
@@ -101,28 +77,34 @@ public:
 	daeDenseArray		m_arrResiduals;
 	daeSuperLUMatrix	m_matJacobian;
 
-//	real_t*				A;  // values
-//	int*				IA; // row indexes data
-//	int*				JA; // column indexes
-	SuperMatrix			m_matA;
-	bool				m_bFactorizationDone;
+#ifdef daeSuperLU_MT
+    superlumt_options_t	m_Options;
+    superlu_memusage_t	m_memUsage;
+	equed_t				m_equed;
+	//SuperMatrix		m_matAC;
+    //Gstat_t			m_Stats;
+	
+#elif daeSuperLU
+    superlu_options_t	m_Options;
+    mem_usage_t			m_memUsage;
+    SuperLUStat_t		m_Stats;
+    int*				m_etree;
+	char				m_equed;
+#endif
 
+	SuperMatrix			m_matA;
 	SuperMatrix			m_matB;
 	SuperMatrix			m_matX;
 	SuperMatrix			m_matL;	
 	SuperMatrix			m_matU;	
-    mem_usage_t			m_memUsage;
-    superlu_options_t	m_Options;
-    SuperLUStat_t		m_Stats;
-	fact_t				m_refactorOption;
+	
     int*				m_perm_c;
     int*				m_perm_r;
-    int*				m_etree;
-	char				m_equed;
     real_t*				m_R;
     real_t*				m_C;
     real_t				m_ferr;
     real_t				m_berr;
+	bool				m_bFactorizationDone;
 };
 
 }

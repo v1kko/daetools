@@ -43,6 +43,7 @@ PYTHON_VERSION=$6
 IDAS=../idas-1.0.0/build
 BONMIN=../bonmin/build
 SUPERLU=../superlu
+SUPERLU_MT=../superlu_mt
 MAGMA=../magma
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
@@ -149,6 +150,9 @@ fi
 mkdir ${PACKAGE_NAME}/pySuperLU
 if [ -e ../release/pySuperLU.so ]; then
   cp ../release/pySuperLU.so           ${PACKAGE_NAME}/pySuperLU
+fi
+if [ -e ../release/pySuperLU_MT.so ]; then
+  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/pySuperLU
 fi
 
 mkdir ${PACKAGE_NAME}/pyIntelPardiso
@@ -280,10 +284,16 @@ if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
   cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
 fi
 
-# SuperLU 4.1 libraries
+# SuperLU libraries
 if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
   cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
 fi
+
+# SuperLU_MT libraries
+if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
+  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+fi
+
 # Change permissions and strip .so libraries
 chmod -x ${BUILD_DIR}/usr/${LIB}/*.so*
 find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip
@@ -399,6 +409,7 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
 
   SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
   echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
+  echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
   echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
   echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
   echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
