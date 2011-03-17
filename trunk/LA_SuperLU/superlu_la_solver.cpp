@@ -36,8 +36,6 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_vecX		= NULL;
 	m_perm_c	= NULL;
 	m_perm_r	= NULL;
-	m_R			= NULL;
-	m_C			= NULL;
 	m_bFactorizationDone = false;
 	
 // The user shoud be able to set parameters right after the construction of the solver
@@ -61,6 +59,8 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	
 #elif daeSuperLU
 	m_etree		= NULL;
+	m_R			= NULL;
+	m_C			= NULL;
 	
     set_default_options(&m_Options);
 //    printf(".. options:\n");
@@ -133,23 +133,35 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	m_matJacobian.ResetCounters();
 	m_pBlock->FillSparseMatrix(&m_matJacobian);
 	m_matJacobian.Sort();
-	//m_matJacobian.Print();
 
-    Destroy_SuperMatrix_Store(&m_matA);
-	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
 	m_bFactorizationDone = false;
 	
 #ifdef daeSuperLU_MT
-    //pxgstrf_finalize(&m_Options, &m_matAC);	
-	if(m_Options.lwork >= 0)
+    pxgstrf_finalize(&m_Options, &m_matAC);	
+	if(m_bFactorizationDone && m_Options.lwork >= 0)
 	{
 		Destroy_SuperNode_SCP(&m_matL);
 		Destroy_CompCol_NCP(&m_matU);
 	}
-	//StatFree(&m_Stats);
+	StatFree(&m_Stats);
 	
 #elif daeSuperLU
+	if(m_bFactorizationDone)
+	{
+		Destroy_CompCol_Permuted(&m_matAC);
+		Destroy_SuperNode_Matrix(&m_matL);
+		Destroy_CompCol_Matrix(&m_matU);
+	}
+#endif
 
+// I deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
+	Destroy_SuperMatrix_Store(&m_matA);
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
+
+#ifdef daeSuperLU_MT
+	m_Options.trans	= TRANS;
+#elif daeSuperLU
+	m_Options.Trans	= TRANS;
 #endif
 
 	return IDA_SUCCESS;
@@ -158,19 +170,25 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 void daeSuperLUSolver::FreeMemory(void)
 {
 #ifdef daeSuperLU_MT
-    //pxgstrf_finalize(&m_Options, &m_matAC);	
-	if(m_Options.lwork >= 0)
+    pxgstrf_finalize(&m_Options, &m_matAC);	
+	if(m_bFactorizationDone && m_Options.lwork >= 0)
 	{
 		Destroy_SuperNode_SCP(&m_matL);
 		Destroy_CompCol_NCP(&m_matU);
 	}
-	//StatFree(&m_Stats);
+	StatFree(&m_Stats);
 	
 #elif daeSuperLU
 	if(m_etree)
 		SUPERLU_FREE(m_etree);
+	if(m_R)
+		SUPERLU_FREE(m_R);
+	if(m_C)
+		SUPERLU_FREE(m_C);
+	
 	if(m_bFactorizationDone)
 	{
+		Destroy_CompCol_Permuted(&m_matAC);
 		Destroy_SuperNode_Matrix(&m_matL);
 		Destroy_CompCol_Matrix(&m_matU);
 	}
@@ -184,10 +202,6 @@ void daeSuperLUSolver::FreeMemory(void)
 		SUPERLU_FREE(m_perm_c);
 	if(m_perm_r)
 		SUPERLU_FREE(m_perm_r);
-	if(m_R)
-		SUPERLU_FREE(m_R);
-	if(m_C)
-		SUPERLU_FREE(m_C);
 	
 	m_matJacobian.Free();
     Destroy_SuperMatrix_Store(&m_matA);
@@ -201,8 +215,12 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 	m_vecX					= doubleMalloc(m_nNoEquations);
 	m_perm_c				= intMalloc(m_nNoEquations);
 	m_perm_r				= intMalloc(m_nNoEquations);
-	m_R						= doubleMalloc(m_nNoEquations);
-	m_C						= doubleMalloc(m_nNoEquations);
+	
+// Initialize sparse matrix
+	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
+	m_matJacobian.ResetCounters();
+	m_pBlock->FillSparseMatrix(&m_matJacobian);
+	m_matJacobian.Sort();
 	
 #ifdef daeSuperLU_MT
     m_Options.perm_c	= m_perm_c;
@@ -210,15 +228,17 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
     m_Options.work		= NULL;
     m_Options.lwork		= 0;
 	
-	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_R || !m_C)
+	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r)
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Unable to allocate memory for B, X, perm_c, perm_r, R, C vectors";
+		e << "Unable to allocate memory for B, X, perm_c, perm_r vectors";
 		throw e;
 	}
-
+	
 #elif daeSuperLU
 	m_etree	= intMalloc(m_nNoEquations);
+	m_R		= doubleMalloc(m_nNoEquations);
+	m_C		= doubleMalloc(m_nNoEquations);
 	
 	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_R || !m_C || !m_etree)
 	{
@@ -226,18 +246,19 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 		e << "Unable to allocate memory for B, X, perm_c, perm_r, etree, R, C vectors";
 		throw e;
 	}
+	
 #endif
 
-// Initialize sparse matrix
-	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
-	m_matJacobian.ResetCounters();
-	m_pBlock->FillSparseMatrix(&m_matJacobian);
-	m_matJacobian.Sort();
-	//m_matJacobian.Print();
-
-	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NR, SLU_D, SLU_GE);
+// I deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matB, m_nNoEquations, 1, m_vecB, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+
+#ifdef daeSuperLU_MT
+	m_Options.trans	= TRANS;
+#elif daeSuperLU
+	m_Options.Trans	= TRANS;
+#endif
 	
 	m_bFactorizationDone = false;
 }
@@ -305,56 +326,34 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    dInverseTimeStep);
 	
 #ifdef daeSuperLU_MT
-/*
-	Get column permutation vector perm_c[], according to permc_spec:
-	  permc_spec = 0: natural ordering 
-	  permc_spec = 1: minimum degree ordering on structure of A'*A
-	  permc_spec = 2: minimum degree ordering on structure of A'+A
-	  permc_spec = 3: approximate minimum degree for unsymmetric matrices
-*/    	
-    int permc_spec = 1;
-	
-// I use this to prevent solving the system; Does it have any sense? How it should be done?
-	::memset(m_vecB, 0, m_nNoEquations*sizeof(real_t));
-
 	if(m_bFactorizationDone)
 	{
-		m_Options.refact = NO;
-		m_Options.fact   = EQUILIBRATE;
-	}
-	else
-	{
-		m_Options.refact = NO;
-		m_Options.fact   = EQUILIBRATE;
-	}
-	
-	get_perm_c(permc_spec, &m_matA, m_perm_c);
-	
-	pdgssvx(m_Options.nprocs, &m_Options, &m_matA, m_perm_c, m_perm_r, &m_equed, m_R, m_C, &m_matL, &m_matU, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &info);
-	if(info != 0)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize the matrix: " << info;
-		throw e;
-	}
-
-/*
-	if(m_bFactorizationDone)
-	{
-		StatInit(m_nNoEquations, m_Options.nprocs, &m_Stats);
-		
+	// During the subsequent calls re-use what is possible
 		m_Options.refact = YES;
+		
+	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
+		Destroy_CompCol_Permuted(&m_matAC);
 	}
 	else
 	{
-		StatAlloc(m_nNoEquations, m_Options.nprocs, m_Options.panel_size, m_Options.relax, &m_Stats);
-		StatInit(m_nNoEquations, m_Options.nprocs, &m_Stats);
-		
-		get_perm_c(permc_spec, &m_matA, m_perm_c);
-		
+	// At the first call do the fresh factorization (Pr, Pc, etree, L, U and AC will be computed)
 		m_Options.refact = NO;
+		
+		StatAlloc(m_nNoEquations, m_Options.nprocs, m_Options.panel_size, m_Options.relax, &m_Stats);
+		get_perm_c(m_Options.ColPerm, &m_matA, m_perm_c);
 	}
+
+	StatInit(m_nNoEquations, m_Options.nprocs, &m_Stats);
 	
+// This will allocate memory for AC. 
+// If I call it repeatedly then I will have memory leaks! (double check it)
+// If that is true before each call to pdgstrf_init I have to call: pxgstrf_finalize(&m_Options, &m_matAC)
+// Which destroys AC, options->etree, options->colcnt_h and options->part_super_h
+// but in that case I still need options->etree, options->colcnt_h and options->part_super_h
+// Perhaps the best ideas are:
+//   1) call Destroy_CompCol_Permuted(&AC) before each pdgstrf_init() call
+//   2) call pdgstrf_init() only once
+// I will use 1) at the moment
 	pdgstrf_init(m_Options.nprocs, 
 				 m_Options.fact, 
 				 m_Options.trans, 
@@ -372,29 +371,18 @@ int daeSuperLUSolver::Setup(void*		ida,
 				 &m_matAC, 
 				 &m_Options, 
 				 &m_Stats);
-
+	
 	pdgstrf(&m_Options, &m_matAC, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 	if(info != 0)
 	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize the matrix: " << info;
-		throw e;
+		std::cout << "SuperLU factorization failed = " << info << std::endl;
+		return IDA_LSETUP_FAIL;		
 	}
-*/
+	
+	PrintStats();
 	
 #elif daeSuperLU
-/*
-	The default input options:
-		m_Options.Fact = DOFACT;
-		m_Options.Equil = YES;
-		m_Options.ColPerm = COLAMD;
-		m_Options.DiagPivotThresh = 1.0;
-		m_Options.IterRefine = NOREFINE;
-		
-	The first time Setup is called (or after Reinitialize) m_bFactorizationDone is false 
-	and the full factorization is requested: m_Options.Fact = DOFACT
-	Otherwise reuse some information from the previous call: m_Options.Fact = SamePattern
-*/
+/* 1) Use expert driver routine (dgssvx)
 	if(m_bFactorizationDone)
 	{
 		m_Options.Fact = SamePattern;
@@ -407,18 +395,61 @@ int daeSuperLUSolver::Setup(void*		ida,
 	}
 	StatInit(&m_Stats);
 
-	m_matB.ncol = 0;  /* Indicate not to solve the system */
+	m_matB.ncol = 0;  // Indicate not to solve the system
 	dgssvx(&m_Options, &m_matA, m_perm_c, m_perm_r, m_etree, &m_equed, m_R, m_C, &m_matL, &m_matU, NULL, 0, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &m_Stats, &info);
-	m_matB.ncol = 1;  /* Restore it back */
+	m_matB.ncol = 1;  // Restore it back
 	if(info != 0)
 	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize the matrix: " << info;
-		throw e;
+	// Perhaps I can try to recover: I can set m_bFactorizationDone = false and try to do the fresh factorization
+		std::cout << "SuperLU factorization failed = " << info << std::endl;
+		m_bFactorizationDone = false;
+		return IDA_LSETUP_FAIL;		
 	}
-	//std::cout << "FactFlops = " << m_Stats.ops[FACT] << std::endl;
 	
+	PrintStats();
 	StatFree(&m_Stats);
+*/
+	
+// 2) Use dgstrf routine
+    int panel_size = sp_ienv(1);
+    int relax      = sp_ienv(2);
+
+	if(m_bFactorizationDone)
+	{
+	// During the subsequent calls re-use Pc 
+	// It is a conservative approach - we could use SamePattern_SameRowPerm to re-use Pr, Pc, Dr, Dc and structures allocated for L and U,
+	// but we may run into a numerical instability. Therefore I will sacrify some speed for stability!
+		m_Options.Fact = SamePattern;
+		
+	// Destroy matrices L and U
+		Destroy_SuperNode_Matrix(&m_matL);
+		Destroy_CompCol_Matrix(&m_matU);
+		
+	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
+		Destroy_CompCol_Permuted(&m_matAC);
+	}
+	else
+	{
+	// At the first call do the fresh factorization (Pr, Pc, etree, L, U and AC will be computed)
+		m_Options.Fact = DOFACT;
+		
+		get_perm_c(m_Options.ColPerm, &m_matA, m_perm_c);
+	}
+
+	StatInit(&m_Stats);
+	
+	sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
+
+	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, 0, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+	if(info != 0)
+	{
+		std::cout << "SuperLU factorization failed = " << info << std::endl;
+		return IDA_LSETUP_FAIL;		
+	}
+	
+	PrintStats();
+	StatFree(&m_Stats);
+
 #endif
 
 	m_bFactorizationDone = true;
@@ -448,50 +479,55 @@ int daeSuperLUSolver::Solve(void*		ida,
 	
 	memcpy(m_vecB, pdB, Neq*sizeof(real_t));
 	
-	std::cout << "Solve" << std::endl;
-
 #ifdef daeSuperLU_MT
-    m_Options.fact   = FACTORED;
-	m_Options.refact = YES;
-	
-	pdgssvx(m_Options.nprocs, &m_Options, &m_matA, m_perm_c, m_perm_r, &m_equed, m_R, m_C, &m_matL, &m_matU, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &info);
-	if(info != 0)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize the matrix: " << info;
-		throw e;
-	}
-	
-	::memcpy(pdB, m_vecX, Neq*sizeof(real_t));
-	
-/*
+// Note the order: (..., Pr, Pc, ...) and not (..., Pc, Pr, ...) as in superlu
     dgstrs(m_Options.trans, &m_matL, &m_matU, m_perm_r, m_perm_c, &m_matB, &m_Stats, &info);
 	if(info != 0)
 	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize the matrix: " << info;
-		throw e;
+		std::cout << "SuperLU solve failed = " << info << std::endl;
+		return IDA_LSOLVE_FAIL;		
 	}
 	
+	PrintStats();
+	
 	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
-*/	
+	
 #elif daeSuperLU
+/*
 	StatInit(&m_Stats);
 	m_Options.Fact = FACTORED;
 
 	dgssvx(&m_Options, &m_matA, m_perm_c, m_perm_r, m_etree, &m_equed, m_R, m_C, &m_matL, &m_matU, NULL, 0, &m_matB, &m_matX, &rpg, &rcond, &m_ferr, &m_berr, &m_memUsage, &m_Stats, &info);
 	if(info != 0)
 	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to solve the system: " << info;
-		throw e;
+		std::cout << "SuperLU solve failed = " << info << std::endl;
+		return IDA_LSOLVE_FAIL;		
 	}
 	
-	//std::cout << "SolveFlops = " << m_Stats.ops[SOLVE] << std::endl;
+	PrintStats();
 	StatFree(&m_Stats);
 	
 	::memcpy(pdB, m_vecX, Neq*sizeof(real_t));
+*/
+
+	StatInit(&m_Stats);
+	
+// Note the order: (..., Pc, Pr, ...) and not (..., Pr, Pc, ...) as in superlu_mt
+    dgstrs(m_Options.Trans, &m_matL, &m_matU, m_perm_c, m_perm_r, &m_matB, &m_Stats, &info); 
+	if(info != 0)
+	{
+		std::cout << "SuperLU solve failed = " << info << std::endl;
+		return IDA_LSOLVE_FAIL;		
+	}
+	
+	PrintStats();
+	StatFree(&m_Stats);
+	
+	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
+	
 #endif
+	
+	PrintStats();
 	
 	if(ida_mem->ida_cjratio != 1.0)
 	{
@@ -501,6 +537,28 @@ int daeSuperLUSolver::Solve(void*		ida,
 	}
 	
 	return IDA_SUCCESS;	
+}
+
+void daeSuperLUSolver::PrintStats(void)
+{
+#ifdef daeSuperLU_MT
+	
+#elif daeSuperLU
+//	if(m_Options.PrintStat == YES)
+//	{
+//		StatPrint(&m_Stats);
+//
+//		std::cout << "ops[FACT] = " << m_Stats.ops[FACT] << std::endl;
+//		
+//		std::cout << "utime[EQUIL]   = " << m_Stats.utime[EQUIL]   << std::endl;
+//		std::cout << "utime[COLPERM] = " << m_Stats.utime[COLPERM] << std::endl;
+//		std::cout << "utime[ETREE]   = " << m_Stats.utime[ETREE]   << std::endl;
+//		std::cout << "utime[FACT]    = " << m_Stats.utime[FACT]    << std::endl;
+//		std::cout << "utime[RCOND]   = " << m_Stats.utime[RCOND]   << std::endl;
+//		std::cout << "utime[SOLVE]   = " << m_Stats.utime[SOLVE]   << std::endl;
+//		std::cout << "utime[REFINE]  = " << m_Stats.utime[REFINE]  << std::endl;
+//	}
+#endif	
 }
 
 int daeSuperLUSolver::Free(void* ida)

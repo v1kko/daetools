@@ -35,8 +35,8 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-from daetools.pySuperLU import pySuperLU_MT
-#import daetools.pySuperLU         as pySuperLU
+#from daetools.pySuperLU import pySuperLU_MT as superlu
+from daetools.pySuperLU import pySuperLU    as superlu
 #import daetools.pyTrilinos       as pyTrilinos
 #import daetools.pyIntelPardiso   as pyIntelPardiso
 #import daetools.pyAmdACML        as pyAmdACML
@@ -162,18 +162,18 @@ def consoleRun():
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
-    #lasolver     = pySuperLU.daeCreateSuperLUSolver()
-    lasolver      = pySuperLU_MT.daeCreateSuperLUSolver()
+    lasolver      = superlu.daeCreateSuperLUSolver()
 
     daesolver.SetLASolver(lasolver)
 
     # SuperLU options:
-    #options = lasolver.GetOptions()
-    #options.Equil           = pySuperLU.YES       # {YES | NO}
-    #options.ColPerm         = pySuperLU.COLAMD    # {NATURAL | MMD_ATA | MMD_AT_PLUS_A | COLAMD | METIS_AT_PLUS_A | PARMETIS | ZOLTAN | MY_PERMC}
-    #options.IterRefine      = pySuperLU.NOREFINE  # {NOREFINE | SINGLE | DOUBLE | EXTRA}
-    #options.RowPerm         = pySuperLU.NOROWPERM # {NOROWPERM | LargeDiag | MY_PERMR}
-    #options.DiagPivotThresh = 1.0                 # {[0, 1]}
+    options = lasolver.GetOptions()
+    #options.PrintStat       = superlu.YES
+    #options.ColPerm         = superlu.COLAMD     # {NATURAL | MMD_ATA | MMD_AT_PLUS_A | COLAMD}
+    #options.RowPerm         = superlu.NOROWPERM # {NOROWPERM | LargeDiag | MY_PERMR}
+    #options.DiagPivotThresh = 1.0               # {[0, 1]}
+    #options.Equil           = superlu.YES        # {YES | NO}
+    #options.IterRefine      = superlu.NOREFINE  # {NOREFINE | SINGLE | DOUBLE | EXTRA}
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

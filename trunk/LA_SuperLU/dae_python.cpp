@@ -60,12 +60,12 @@ BOOST_PYTHON_MODULE(pySuperLU)
 	;
 
 	class_<superlu_options_t, boost::noncopyable>("superlu_options_t", no_init)
-		.def_readwrite("Equil",				&superlu_options_t::Equil)
 		.def_readwrite("ColPerm",			&superlu_options_t::ColPerm)
-		.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
 		.def_readwrite("DiagPivotThresh",	&superlu_options_t::DiagPivotThresh)
 		.def_readwrite("RowPerm",			&superlu_options_t::RowPerm)
 		.def_readwrite("PrintStat",			&superlu_options_t::PrintStat)
+		//.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
+		//.def_readwrite("Equil",				&superlu_options_t::Equil)
 		;
 #endif
 

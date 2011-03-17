@@ -63,6 +63,7 @@ public:
 protected:
 	void InitializeSuperLU(size_t nnz);
 	void FreeMemory(void);
+	void PrintStats(void);
 	
 public:
 	daeBlock_t*			m_pBlock;
@@ -81,15 +82,20 @@ public:
     superlumt_options_t	m_Options;
     superlu_memusage_t	m_memUsage;
 	equed_t				m_equed;
-	//SuperMatrix		m_matAC;
-    //Gstat_t			m_Stats;
+	SuperMatrix			m_matAC;
+    Gstat_t				m_Stats;
 	
 #elif daeSuperLU
     superlu_options_t	m_Options;
     mem_usage_t			m_memUsage;
     SuperLUStat_t		m_Stats;
     int*				m_etree;
+    real_t*				m_R;
+    real_t*				m_C;
 	char				m_equed;
+    real_t				m_ferr;
+    real_t				m_berr;
+	SuperMatrix			m_matAC;
 #endif
 
 	SuperMatrix			m_matA;
@@ -100,10 +106,6 @@ public:
 	
     int*				m_perm_c;
     int*				m_perm_r;
-    real_t*				m_R;
-    real_t*				m_C;
-    real_t				m_ferr;
-    real_t				m_berr;
 	bool				m_bFactorizationDone;
 };
 
