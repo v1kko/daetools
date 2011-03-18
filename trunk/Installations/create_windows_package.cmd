@@ -18,6 +18,8 @@ SET INSTALL=%TRUNK%\Installations
 SET ROOT=%INSTALL%\%DEST%
 SET IDAS=%TRUNK%\idas-1.0.0\build
 SET BONMIN=%TRUNK%\bonmin\build
+SET SUPERLU=%TRUNK%\superlu
+SET SUPERLU_MT=%TRUNK%\superlu_mt
 
 ECHO " "
 ECHO "***************************"
@@ -66,6 +68,7 @@ mkdir pyIntelMKL
 mkdir pyIntelPardiso
 mkdir pyTrilinos
 mkdir pyMagma
+mkdir pySuperLU
 
 echo on
 
@@ -75,8 +78,10 @@ copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
 copy pyBONMIN.pyd                   %ROOT%\pyDAE
-copy pyTrilinos.pyd           %ROOT%\pyTrilinos
+copy pyTrilinos.pyd                 %ROOT%\pyTrilinos
 copy pyMagma.pyd                    %ROOT%\pyMagma
+copy pySuperLU.pyd                  %ROOT%\pySuperLU
+copy pySuperLU_MT.pyd               %ROOT%\pySuperLU
 
 REM copy pyAmdACML.pyd              %ROOT%\pyAmdACML
 REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL
@@ -98,6 +103,7 @@ copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
 copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
 copy pyTrilinos__init__.py       %ROOT%\pyTrilinos\__init__.py
 copy pyMagma__init__.py          %ROOT%\pyMagma\__init__.py
+copy pySuperLU__init__.py        %ROOT%\pySuperLU\__init__.py
 
 REM daePlotter
 cd daePlotter
@@ -169,7 +175,7 @@ ECHO       license='GNU GPL v3',  >> setup.py
 ECHO       platforms='%PLATFORM%',  >> setup.py
 ECHO       packages=['%PACKAGE_NAME%'],  >> setup.py
 ECHO       package_dir={'%PACKAGE_NAME%': '%DEST%'},  >> setup.py
-ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} >> setup.py
+ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pySuperLU/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} >> setup.py
 ECHO       )  >> setup.py
 
 SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe

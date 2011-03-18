@@ -43,7 +43,7 @@ except Exception, e:
     sys.exit()
 
 try:
-    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11
+    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12
     import opt_tutorial1, opt_tutorial2
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
@@ -100,9 +100,11 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(11, "tutorial11")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(12, "opt_tutorial1")
+        self.ui.comboBoxExample.setItemText(12, "tutorial12")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(13, "opt_tutorial2")
+        self.ui.comboBoxExample.setItemText(13, "opt_tutorial1")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(14, "opt_tutorial2")
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -152,10 +154,8 @@ class RunExamples(QtGui.QDialog):
                 tutorial10.guiRun(self.app)
             elif simName == "tutorial11":
                 tutorial11.guiRun(self.app)
-            elif simName == "tutorial1":
-                opt_tutorial1.guiRun(self.app)
-            elif simName == "tutorial2":
-                opt_tutorial2.guiRun(self.app)
+            elif simName == "tutorial12":
+                tutorial12.guiRun(self.app)
             elif simName == "whats_the_time":
                 whats_the_time.guiRun(self.app)
             elif simName == "opt_tutorial1":

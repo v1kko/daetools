@@ -26,8 +26,6 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.value("MMD_AT_PLUS_A",		MMD_AT_PLUS_A)
 		.value("COLAMD",			COLAMD)
 		.value("METIS_AT_PLUS_A",	METIS_AT_PLUS_A)
-		.value("PARMETIS",			PARMETIS)
-		.value("MY_PERMC",			MY_PERMC)
 		.export_values()
 	;
 
@@ -39,7 +37,6 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.def_readwrite("ColPerm",			&superlumt_options_t::ColPerm)
 		.def_readwrite("diag_pivot_thresh",	&superlumt_options_t::diag_pivot_thresh)
 		.def_readwrite("drop_tol",			&superlumt_options_t::drop_tol)
-		.def_readwrite("usepr",				&superlumt_options_t::usepr)
 		.def_readwrite("PrintStat",			&superlumt_options_t::PrintStat)
 		;
 	

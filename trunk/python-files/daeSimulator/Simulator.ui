@@ -142,6 +142,16 @@
          <string>Magma Lapack (dense, CUDA, direct)</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>SuperLU (sparse, sequential, direct)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SuperLU_MT (sparse, POSIX threads, direct)</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="5" column="0">

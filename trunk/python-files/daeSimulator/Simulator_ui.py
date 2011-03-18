@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Fri Mar  4 23:22:13 2011
+# Created: Thu Mar 17 23:16:02 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,6 +54,8 @@ class Ui_SimulatorDialog(object):
         self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.LASolverLabel)
         self.LASolverComboBox = QtGui.QComboBox(SimulatorDialog)
         self.LASolverComboBox.setObjectName("LASolverComboBox")
+        self.LASolverComboBox.addItem("")
+        self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
@@ -161,6 +163,8 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.setItemText(7, QtGui.QApplication.translate("SimulatorDialog", "Intel MKL Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(8, QtGui.QApplication.translate("SimulatorDialog", "AMD ACML Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(9, QtGui.QApplication.translate("SimulatorDialog", "Magma Lapack (dense, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(10, QtGui.QApplication.translate("SimulatorDialog", "SuperLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(11, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_MT (sparse, POSIX threads, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ExportButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Export Matrix...", None, QtGui.QApplication.UnicodeUTF8))

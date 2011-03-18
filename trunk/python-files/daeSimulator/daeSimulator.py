@@ -201,13 +201,31 @@ class daeSimulator(QtGui.QDialog):
                     QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Lapack LA solver\nError: " + str(e))
                     return
 
+            elif lasolverIndex == 10:
+                try:
+                    from daetools.pySuperLU import pySuperLU
+                    self.lasolver = pySuperLU.daeCreateSuperLUSolver()
+                    self.daesolver.SetLASolver(self.lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU LA solver\nError: " + str(e))
+                    return
+
+            elif lasolverIndex == 11:
+                try:
+                    from daetools.pySuperLU import pySuperLU_MT
+                    self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
+                    self.daesolver.SetLASolver(self.lasolver)
+                except Exception, e:
+                    QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_MT LA solver\nError: " + str(e))
+                    return
+
             else:
                 raise RuntimeError("Unsupported LA Solver selected")
 
             self.ui.RunButton.setEnabled(False)
-            if(lasolverIndex in [1, 2, 3, 5, 6]):
+            if(lasolverIndex in [1, 2, 3, 5, 6, 10, 11]):
                 self.ui.MatrixButton.setEnabled(True)
-            if(lasolverIndex in [1, 2, 3, 5]):
+            if(lasolverIndex in [1, 2, 3, 5, 10, 11]):
                 self.ui.ExportButton.setEnabled(True)
             self.ui.MINLPSolverComboBox.setEnabled(False)
             self.ui.DAESolverComboBox.setEnabled(False)

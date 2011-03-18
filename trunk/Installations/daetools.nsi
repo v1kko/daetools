@@ -7,7 +7,7 @@ OutFile "daetools.exe"
 ; The default installation directory
 InstallDir C:\Python26\Lib\site-packages\daetools
 
-; Registry key to check for directory (so if you install again, it will 
+; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
 InstallDirRegKey HKLM "Software\NSIS_daetools" "Install_Dir"
 
@@ -31,7 +31,7 @@ UninstPage instfiles
 Section "daetools (required)"
 
   SectionIn RO
-  
+
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
   File /r   "daetools\*.*"
@@ -40,6 +40,8 @@ Section "daetools (required)"
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelMKL
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelPardiso
   CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyTrilinosAmesos
+  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyMagma
+  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pySuperLU
 
   ; Config file
   CreateDirectory c:\daetools
@@ -50,7 +52,7 @@ Section "daetools (required)"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_daetools "Install_Dir" "$INSTDIR"
-  
+
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\daetools" "DisplayName" "DAE Tools"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\daetools" "UninstallString" '"$INSTDIR\uninstall.exe"'
@@ -83,7 +85,7 @@ SectionEnd
 ; Uninstaller
 
 Section "Uninstall"
-  
+
   ; Remove registry keys
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\daetools"
   DeleteRegKey HKLM SOFTWARE\NSIS_daetools

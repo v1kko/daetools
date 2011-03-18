@@ -102,7 +102,7 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
 
     def SetUpParametersAndDomains(self):
-        n = 200
+        n = 20
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
@@ -163,17 +163,24 @@ def consoleRun():
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
     lasolver      = superlu.daeCreateSuperLUSolver()
+    options = lasolver.GetOptions()
 
     daesolver.SetLASolver(lasolver)
 
     # SuperLU options:
-    options = lasolver.GetOptions()
-    #options.PrintStat       = superlu.YES
-    #options.ColPerm         = superlu.COLAMD     # {NATURAL | MMD_ATA | MMD_AT_PLUS_A | COLAMD}
-    #options.RowPerm         = superlu.NOROWPERM # {NOROWPERM | LargeDiag | MY_PERMR}
-    #options.DiagPivotThresh = 1.0               # {[0, 1]}
-    #options.Equil           = superlu.YES        # {YES | NO}
-    #options.IterRefine      = superlu.NOREFINE  # {NOREFINE | SINGLE | DOUBLE | EXTRA}
+    #options.PrintStat       = superlu.YES       # {YES, NO}
+    #options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+    #options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
+    #options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
+
+    # SuperLU_MT options:
+    #options.nprocs            = 4                 # No. of threads (= no. of CPUs/Cores)
+    #options.PrintStat         = superlu.YES       # {YES, NO}
+    #options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+    #options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0
+    #options.panel_size        = 8                 # Integer value
+    #options.relax             = 6                 # Integer value
+    #options.drop_tol          = 0.0               # Floating point value
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -190,7 +197,6 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    lasolver.SaveAsXPM('/home/ciroki/test.xpm')
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
