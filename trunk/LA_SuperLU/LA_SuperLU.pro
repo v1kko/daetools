@@ -17,7 +17,7 @@ QT -= core \
 TARGET = SuperLU
 TEMPLATE = lib
 
-CONFIG += SuperLU_MT
+CONFIG += SuperLU
 
 ######################################################################################
 #                                   SuperLU
@@ -29,15 +29,19 @@ win32-msvc2008::SUPERLU_PATH = ..\superlu
 linux-g++::SUPERLU_PATH      = ../superlu
 linux-g++-64::SUPERLU_PATH   = ../superlu
 
-win32-msvc2008::SUPERLU_LIBS = $${SUPERLU_PATH}\lib
-linux-g++::SUPERLU_LIBS      = $${SUPERLU_PATH}/lib
-linux-g++-64::SUPERLU_LIBS   = $${SUPERLU_PATH}/lib
+win32-msvc2008::CUDA_PATH = 
+linux-g++::CUDA_PATH      = /usr/local/cuda
+linux-g++-64::CUDA_PATH   = /usr/local/cuda
 
-SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
+SUPERLU_LIBPATH = $${SUPERLU_PATH}\lib
 
-win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBS} superlu.lib
-linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBS} -lcdaesuperlu
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBS} -lcdaesuperlu
+SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC \
+                  $${CUDA_PATH}/include
+
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu \
+                               -L$${CUDA_PATH}/lib64 -lcuda -lcublas -lcudart
 
 pyObject = pySuperLU
 }
@@ -52,15 +56,13 @@ win32-msvc2008::SUPERLU_PATH = ..\superlu_mt
 linux-g++::SUPERLU_PATH      = ../superlu_mt
 linux-g++-64::SUPERLU_PATH   = ../superlu_mt
 
-win32-msvc2008::SUPERLU_LIBS = $${SUPERLU_PATH}\lib
-linux-g++::SUPERLU_LIBS      = $${SUPERLU_PATH}/lib
-linux-g++-64::SUPERLU_LIBS   = $${SUPERLU_PATH}/lib
+SUPERLU_LIBPATH = $${SUPERLU_PATH}\lib
 
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBS} superlu_mt.lib
-linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBS} -lcdaesuperlu_mt
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBS} -lcdaesuperlu_mt
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_PATH} superlu_mt.lib
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_PATH} -lcdaesuperlu_mt
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_PATH} -lcdaesuperlu_mt
 
 pyObject = pySuperLU_MT
 }

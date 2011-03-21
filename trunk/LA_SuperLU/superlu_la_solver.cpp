@@ -3,6 +3,9 @@
 #include <boost/python.hpp>
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 
 namespace dae
 {
@@ -61,6 +64,9 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_etree		= NULL;
 	m_R			= NULL;
 	m_C			= NULL;
+
+    m_work		= NULL;
+    m_lwork		= 0;
 	
     set_default_options(&m_Options);
 //    printf(".. options:\n");
@@ -180,6 +186,21 @@ void daeSuperLUSolver::FreeMemory(void)
 	StatFree(&m_Stats);
 	
 #elif daeSuperLU
+	
+	if(m_work && m_lwork > 0)
+		free(m_work);
+    m_work	= NULL;
+    m_lwork	= 0;
+
+//	blasMemory_& blasMemory = *get_blasMemory();
+//	if(blasMemory.a)
+//		cublasFree(blasMemory.a);
+//	if(blasMemory.b)
+//		cublasFree(blasMemory.b);
+//	if(blasMemory.c)
+//		cublasFree(blasMemory.c);
+	
+	
 	if(m_etree)
 		SUPERLU_FREE(m_etree);
 	if(m_R)
@@ -190,8 +211,13 @@ void daeSuperLUSolver::FreeMemory(void)
 	if(m_bFactorizationDone)
 	{
 		Destroy_CompCol_Permuted(&m_matAC);
+		
+// If lwork = 0		
 		Destroy_SuperNode_Matrix(&m_matL);
 		Destroy_CompCol_Matrix(&m_matU);
+// If lwork > 0		
+		Destroy_SuperMatrix_Store(&m_matL);
+		Destroy_SuperMatrix_Store(&m_matU);
 	}
 #endif
 
@@ -248,6 +274,38 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 		throw e;
 	}
 	
+//	cublasStatus ce;
+//	
+//	blasMemory_& blasMemory = *get_blasMemory();
+//	blasMemory.sizeA = m_matJacobian.NNZ * 3 * sizeof(real_t);
+//	blasMemory.sizeB = m_matJacobian.NNZ * 3 * sizeof(real_t);
+//	blasMemory.sizeC = m_matJacobian.NNZ * 3 * sizeof(real_t);
+////	printf("blasMemory.sizeA = %d \n", blasMemory.sizeA);
+////	printf("blasMemory.sizeB = %d \n", blasMemory.sizeB);
+////	printf("blasMemory.sizeC = %d \n", blasMemory.sizeC);
+//			
+//	ce = cublasAlloc(blasMemory.sizeA, sizeof(real_t), (void**)&blasMemory.a);
+//	if(ce != CUBLAS_STATUS_SUCCESS)
+//	{
+//		daeDeclareException(exMiscellanous);
+//		e << "Unable to allocate memory for GPU A";
+//		throw e;
+//	}
+//	ce = cublasAlloc(blasMemory.sizeB, sizeof(real_t), (void**)&blasMemory.b);
+//	if(ce != cudaSuccess)
+//	{
+//		daeDeclareException(exMiscellanous);
+//		e << "Unable to allocate memory for GPU B";
+//		throw e;
+//	}
+//	ce = cublasAlloc(blasMemory.sizeC, sizeof(real_t), (void**)&blasMemory.c);
+//	if(ce != cudaSuccess)
+//	{
+//		daeDeclareException(exMiscellanous);
+//		e << "Unable to allocate memory for GPU C";
+//		throw e;
+//	}
+
 #endif
 
 // We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
@@ -391,9 +449,15 @@ int daeSuperLUSolver::Setup(void*		ida,
 	// but we may run into a numerical instability. Therefore we will sacrify some speed for stability!
 		m_Options.Fact = SamePattern;
 		
+// If lwork > 0		
 	// Destroy matrices L and U
 		Destroy_SuperNode_Matrix(&m_matL);
 		Destroy_CompCol_Matrix(&m_matU);
+
+// If lwork > 0		
+//		Destroy_SuperMatrix_Store(&m_matL);
+//		Destroy_SuperMatrix_Store(&m_matU);
+		
 		
 	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
 		Destroy_CompCol_Permuted(&m_matAC);
@@ -413,7 +477,85 @@ int daeSuperLUSolver::Setup(void*		ida,
 // Therefore before each call to sp_preorder() destroy matrix AC with a call to Destroy_CompCol_Permuted(&AC)
 	sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
 
-	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, 0, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+// Determine the amount of memory:
+	if(m_lwork == 0)
+	{
+		cudaError_t ce;
+		cublasStatus cse;
+		size_t free;
+		size_t total;
+		cudaDeviceProp dp;
+	
+//		CUdevice dev;
+//		CUcontext ctx;
+//		cuInit(0);
+//		cuDeviceGet(&dev,0);
+//		cuCtxCreate(&ctx, 0, dev);
+		
+		cudaSetDevice(0);
+		
+		ce = cudaGetDeviceProperties(&dp, 0); 	
+		if(ce != cudaSuccess)
+		{
+			std::cout << "Cannot get device properties" << std::endl;
+			return IDA_LSETUP_FAIL;		
+		}
+		
+//		if(dp.canMapHostMemory != 1)
+//		{
+//			std::cout << "GPU device cannot map host memory" << std::endl;
+//			return IDA_LSETUP_FAIL;		
+//		}
+	
+		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+		m_lwork = 1.2 * info;
+		std::cout << "Memory requirements = " << m_lwork << " bytes" << std::endl;
+
+		m_work = realloc(m_work, m_lwork);
+		if(!m_work)
+		{
+			std::cout << "Cannot allocate memory (" << m_lwork << " bytes)" << std::endl;
+			return IDA_LSETUP_FAIL;		
+		}
+		
+//		ce = cudaSetDeviceFlags(cudaDeviceMapHost);
+//		if(ce != cudaSuccess)
+//		{
+//			std::cout << "Cannot set cudaDeviceMapHost flag" << std::endl;
+//			return IDA_LSETUP_FAIL;		
+//		}
+//
+//		ce = cudaHostAlloc(&m_work, m_lwork, cudaHostAllocMapped);
+//		if(ce != cudaSuccess)
+//		{
+//			std::cout << "Cannot allocate mapped GPU device memory (" << m_lwork << " bytes)" << std::endl;
+//			return IDA_LSETUP_FAIL;		
+//		}
+//
+//		void* dev_work;
+//		ce = cudaHostGetDevicePointer(&dev_work, m_work, 0);
+//		if(ce != cudaSuccess)
+//		{
+//			if(ce == cudaErrorInvalidValue)
+//				printf("Cannot get device pointer: cudaErrorInvalidValue \n");
+//			else if(ce == cudaErrorMemoryAllocation)
+//				printf("Cannot get device pointer: cudaErrorMemoryAllocation \n");
+//			else
+//				printf("Cannot get device pointer: %d \n", ce);
+//				
+//			return -1;
+//		}
+//		std::cout << "Allocated " << m_lwork << " bytes" << std::endl;
+		
+		cse = cublasInit(); 	
+		if(cse != CUBLAS_STATUS_SUCCESS)
+		{
+			std::cout << "Cannot init cublas" << std::endl;
+			return IDA_LSETUP_FAIL;		
+		}
+	}
+	
+	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 	if(info != 0)
 	{
 		std::cout << "SuperLU factorization failed = " << info << std::endl;

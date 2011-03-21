@@ -17,6 +17,7 @@ extern "C"
 #elif daeSuperLU
 #include <slu_ddefs.h>
 #endif
+#include <slu_ddefs.h>
 }
 
 namespace dae
@@ -96,6 +97,9 @@ public:
     real_t				m_ferr;
     real_t				m_berr;
 	SuperMatrix			m_matAC;
+	
+	int					m_lwork;
+	void*				m_work;
 #endif
 
 	SuperMatrix			m_matA;
