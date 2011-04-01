@@ -53,18 +53,20 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		;
 	
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
-		.def("Create",		&daeSuperLUSolver::Create)
-		.def("Reinitialize",&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
-		.def("GetOptions",	&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
+		.def("Create",					&daeSuperLUSolver::Create)
+		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
+		.def("GetOptions",				&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
 		;
 #endif
 	
 #ifdef daeSuperLU_CUDA
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
-		.def("Create",		&daeSuperLUSolver::Create)
-		.def("Reinitialize",&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
+		.def("Create",					&daeSuperLUSolver::Create)
+		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
 		;
 #endif
 
@@ -95,10 +97,11 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		;
 
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
-		.def("Create",		&daeSuperLUSolver::Create)
-		.def("Reinitialize",&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
-		.def("GetOptions",	&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
+		.def("Create",					&daeSuperLUSolver::Create)
+		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
+		.def("GetOptions",				&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
 		;
 #endif
 

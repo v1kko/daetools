@@ -16,9 +16,9 @@ CXXFLAGS      = -m64 -pipe -DDAE_MAJOR=1 -DDAE_MINOR=1 -DDAE_BUILD=1 -Wextra -Wn
 INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4 -I/usr/include/boost -I/usr/include/python2.6 -I/usr/lib/pymodules/python2.6/numpy/core/include/numpy -I/usr/share/pyshared -I/usr/lib/python2.6/dist-packages -I../idas/build/include -I/usr/local/cuda/include -I.
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1 -shared -Wl,-soname,libCUSP.so.1
-LIBS          = $(SUBLIBS)  -L../release -L/usr/lib -lboost_python -lpthread 
+LIBS          = $(SUBLIBS)  -L../release -L/usr/lib -lboost_python -lpthread
 AR            = ar cqs
-RANLIB        = 
+RANLIB        =
 QMAKE         = /usr/bin/qmake-qt4
 TAR           = tar -cf
 COMPRESS      = gzip -9f
@@ -46,7 +46,7 @@ OBJECTS_DIR   = release/
 SOURCES       = stdafx.cpp \
 		dllmain.cpp \
 		dae_python.cpp \
-		cusp_la_solver.cpp 
+		cusp_la_solver.cpp
 OBJECTS       = release/stdafx.o \
 		release/dllmain.o \
 		release/dae_python.o \
@@ -106,8 +106,8 @@ first: all
 
 all: Makefile  ../release/$(TARGET)
 
-../release/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
-	@$(CHK_DIR_EXISTS) ../release/ || $(MKDIR) ../release/ 
+../release/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)
+	@$(CHK_DIR_EXISTS) ../release/ || $(MKDIR) ../release/
 	-$(DEL_FILE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
 	-ln -s $(TARGET) $(TARGET0)
@@ -118,14 +118,14 @@ all: Makefile  ../release/$(TARGET)
 	-$(DEL_FILE) ../release/$(TARGET1)
 	-$(DEL_FILE) ../release/$(TARGET2)
 	-$(MOVE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2) ../release/
-	cp -f ../release/libCUSP.so.1.1.1 ../release/.so
+	cp -f ../release/libCUSP.so.1.1.1 ../release/pyCUSP.so
 
 
 
 staticlib: $(TARGETA)
 
-$(TARGETA):  $(OBJECTS) $(OBJCOMP) 
-	-$(DEL_FILE) $(TARGETA) 
+$(TARGETA):  $(OBJECTS) $(OBJCOMP)
+	-$(DEL_FILE) $(TARGETA)
 	$(AR) $(TARGETA) $(OBJECTS)
 
 Makefile: LA_CUSP.pro  /usr/share/qt4/mkspecs/linux-g++-64/qmake.conf /usr/share/qt4/mkspecs/common/g++.conf \
@@ -172,12 +172,12 @@ Makefile: LA_CUSP.pro  /usr/share/qt4/mkspecs/linux-g++-64/qmake.conf /usr/share
 qmake:  FORCE
 	@$(QMAKE) -spec /usr/share/qt4/mkspecs/linux-g++-64 -unix -o Makefile LA_CUSP.pro
 
-dist: 
-	@$(CHK_DIR_EXISTS) release/CUSP1.1.1 || $(MKDIR) release/CUSP1.1.1 
+dist:
+	@$(CHK_DIR_EXISTS) release/CUSP1.1.1 || $(MKDIR) release/CUSP1.1.1
 	$(COPY_FILE) --parents $(SOURCES) $(DIST) release/CUSP1.1.1/ && $(COPY_FILE) --parents ../config.h ../dae_develop.h ../dae.h stdafx.h cusp_la_solver.h cusp_solver.h release/CUSP1.1.1/ && $(COPY_FILE) --parents stdafx.cpp dllmain.cpp dae_python.cpp cusp_la_solver.cpp release/CUSP1.1.1/ && (cd `dirname release/CUSP1.1.1` && $(TAR) CUSP1.1.1.tar CUSP1.1.1 && $(COMPRESS) CUSP1.1.1.tar) && $(MOVE) `dirname release/CUSP1.1.1`/CUSP1.1.1.tar.gz . && $(DEL_FILE) -r release/CUSP1.1.1
 
 
-clean:compiler_clean 
+clean:compiler_clean
 	-$(DEL_FILE) $(OBJECTS)
 	-$(DEL_FILE) *~ core *.core
 
@@ -185,7 +185,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) ../release/$(TARGET) 
+	-$(DEL_FILE) ../release/$(TARGET)
 	-$(DEL_FILE) ../release/$(TARGET0) ../release/$(TARGET1) ../release/$(TARGET2) $(TARGETA)
 	-$(DEL_FILE) Makefile
 
@@ -213,7 +213,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: 
+compiler_clean:
 
 ####### Compile
 

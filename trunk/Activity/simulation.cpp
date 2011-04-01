@@ -17,9 +17,6 @@ daeSimulation::daeSimulation(void)
 	m_pDataReporter		 = NULL;
 	m_pModel		     = NULL;
 	m_pLog			     = NULL;
-	m_ProblemCreation    = 0;
-	m_Initialization     = 0;
-	m_Integration        = 0;
 	m_eActivityAction    = eAAUnknown;	
 	m_bConditionalIntegrationMode = false;
 	m_bIsInitialized	 = false;
@@ -123,8 +120,6 @@ void daeSimulation::InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataRe
 
 void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
 {
-	time_t start, end;
-
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pDAESolver)
@@ -146,7 +141,7 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	m_pDataReporter	= pDataReporter;
 	m_pLog			= pLog;
 
-	start = time(NULL);
+	clock_gettime(CLOCK_MONOTONIC, &m_ProblemCreationStart);
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 	bool bPrintInfo = cfg.Get<bool>("daetools.activity.printHeader", true);
@@ -230,9 +225,10 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	m_bIsInitialized = true;
 
 // Announce success	
-	end = time(NULL);
-	m_ProblemCreation = difftime(end, start);
-	m_pLog->Message(string("The system created successfully in: ") + toStringFormatted<real_t>(real_t(m_ProblemCreation), -1, 3) + string(" s"), 0);
+	clock_gettime(CLOCK_MONOTONIC, &m_ProblemCreationEnd);
+	m_pLog->Message(string("The system created successfully in: ") + 
+					toStringFormatted<real_t>(timespecDiff(&m_ProblemCreationEnd, &m_ProblemCreationStart) / 1.0E9, -1, 3) + 
+					string(" s"), 0);
 }
 
 void daeSimulation::SetupSolver(void)
@@ -320,8 +316,6 @@ void daeSimulation::SetupSolver(void)
 
 void daeSimulation::SolveInitial(void)
 {
-	clock_t start, end;
-
 // Check if initialized
 	if(!m_bIsInitialized)
 	{
@@ -341,7 +335,7 @@ void daeSimulation::SolveInitial(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 // Start initialization
-	start = time(NULL);
+	clock_gettime(CLOCK_MONOTONIC, &m_InitializationStart);
 
 // Ask DAE solver to initialize the system
 	m_pDAESolver->SolveInitial();
@@ -353,8 +347,7 @@ void daeSimulation::SolveInitial(void)
 	m_bIsSolveInitial = true;
 
 // Announce success	
-	end = time(NULL);
-	m_Initialization = difftime(end, start);
+	clock_gettime(CLOCK_MONOTONIC, &m_InitializationEnd);
 	m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
 }
 
@@ -398,7 +391,7 @@ void daeSimulation::Run(void)
 	
 	if(m_dCurrentTime == 0)
 	{
-		m_Integration = time(NULL);
+		clock_gettime(CLOCK_MONOTONIC, &m_IntegrationStart);
 	}
 	if(m_dCurrentTime >= m_dTimeHorizon)
 	{
@@ -458,13 +451,16 @@ void daeSimulation::Finalize(void)
 // Finalize the simulation		
 	if(!m_bSetupOptimization)
 	{
-		clock_t end = time(NULL);
-		m_Integration = difftime(end, m_Integration);
+		clock_gettime(CLOCK_MONOTONIC, &m_IntegrationEnd);
+		real_t creation       = timespecDiff(&m_ProblemCreationEnd, &m_ProblemCreationStart) / 1.0E9;
+		real_t initialization = timespecDiff(&m_InitializationEnd,  &m_InitializationStart)  / 1.0E9;
+		real_t integration    = timespecDiff(&m_IntegrationEnd,     &m_IntegrationStart)     / 1.0E9;
+		
 		m_pLog->Message(string(" "), 0);
 		m_pLog->Message(string("The simulation has finished successfuly!"), 0);
-		m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(real_t(m_Initialization), -1, 0) + string(" s"), 0);
-		m_pLog->Message(string("Integration time = ") + toStringFormatted<real_t>(real_t(m_Integration), -1, 0) + string(" s"), 0);
-		m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_ProblemCreation + m_Initialization + m_Integration), -1, 0) + string(" s"), 0);
+		m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(initialization,                          -1, 3) + string(" s"), 0);
+		m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(integration,                             -1, 3) + string(" s"), 0);
+		m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(creation + initialization + integration, -1, 3) + string(" s"), 0);
 	}
 	
 // Notify the receiver that there is no more data, and disconnect it		
@@ -476,9 +472,6 @@ void daeSimulation::Finalize(void)
 	m_pDataReporter = NULL;
 	m_pLog			= NULL;
 	
-	m_ProblemCreation    = 0;
-	m_Initialization     = 0;
-	m_Integration        = 0;
 	m_bIsInitialized	 = false;
 	m_bIsSolveInitial	 = false;
 }
@@ -486,9 +479,6 @@ void daeSimulation::Finalize(void)
 void daeSimulation::Reset(void)
 {
 	m_dCurrentTime		 = 0;
-	m_ProblemCreation    = 0;
-	m_Initialization     = 0;
-	m_Integration        = 0;
 	m_eActivityAction    = eAAUnknown;	
 
 	m_pDAESolver->Reset();

@@ -1,16 +1,19 @@
+#
+# compile it with: make --file=gpuMakefile
+#
 CC            = gcc
 CXX           = g++
 NVCC          = nvcc
 DEFINES       = -DQT_NO_DEBUG
 CFLAGS        = -m64 -pipe -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -m64 -pipe -DDAE_MAJOR=1 -DDAE_MINOR=1 -DDAE_BUILD=1 -DdaeSuperLU_GPU -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-NVCCFLAGS     = -m64 -fPIC -DDEBUGlevel=0 -DPRNTlevel=0 -DdaeDEBUGlevel=0 -DAdd_ -DUSE_VENDOR_BLAS -D__OPENMP -DSuperLU_DYNAMIC_SNODE_STORE=0
+CXXFLAGS      = -m64 -pipe -DDAE_MAJOR=1 -DDAE_MINOR=1 -DDAE_BUILD=1 -DdaeSuperLU_CUDA -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+NVCCFLAGS     = -m64 -fPIC -DDEBUGlevel=0 -DPRNTlevel=0 -DdaeDEBUGlevel=1 -DAdd_ -DUSE_VENDOR_BLAS -D__OPENMP -DSuperLU_DYNAMIC_SNODE_STORE=0
 
-INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4 -I/usr/include/boost -I/usr/include/python2.6 -I/usr/lib/pymodules/python2.6/numpy/core/include/numpy -I/usr/share/pyshared -I/usr/lib/python2.6/dist-packages -I../idas/build/include -I../superlu_mt-GPU -I/usr/local/cuda/include -I.
-NVCCINCPATH    = -I. -I../superlu_mt-GPU -I/usr/local/cuda/include
+INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4 -I/usr/include/boost -I/usr/include/python2.6 -I/usr/lib/pymodules/python2.6/numpy/core/include/numpy -I/usr/share/pyshared -I/usr/lib/python2.6/dist-packages -I../idas/build/include -I../superlu_cuda -I/usr/local/cuda/include -I.
+NVCCINCPATH    = -I. -I../superlu_cuda -I/usr/local/cuda/include
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1 -shared -Wl,-soname,libSuperLU.so.1
-LIBS          = $(SUBLIBS)  -L../release -L/usr/lib -lboost_python -L../superlu_mt-GPU -L/usr/local/cuda/lib64 -lcuda -lcudart -lpthread 
+LIBS          = $(SUBLIBS)  -L../release -L/usr/lib -lboost_python -L/usr/local/cuda/lib64 -lcuda -lcudart -lpthread 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/bin/qmake-qt4
@@ -96,7 +99,7 @@ all: Makefile  ../release/$(TARGET)
 	-$(DEL_FILE) ../release/$(TARGET1)
 	-$(DEL_FILE) ../release/$(TARGET2)
 	-$(MOVE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2) ../release/
-	cp -f ../release/libSuperLU.so.1.1.1 ../release/pySuperLU_GPU.so
+	cp -f ../release/libSuperLU.so.1.1.1 ../release/pySuperLU_CUDA.so
 
 
 

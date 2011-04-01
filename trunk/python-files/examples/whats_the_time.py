@@ -6,17 +6,17 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
-What is the time? (AKA Hello world!) is a very simple simulation. 
+What is the time? (AKA Hello world!) is a very simple simulation.
 It shows the basic structure of the model and the simulation classes.
 A typical simulation imcludes 8 basic tasks:
     1. How to import the pyDAE module
@@ -44,8 +44,8 @@ from time import localtime, strftime
 #     - LowerBound: float
 #     - UpperBound: float
 #     - InitialGuess: float
-#     - AbsoluteTolerance: float 
-#    Here a very simple variable type is declared 
+#     - AbsoluteTolerance: float
+#    Here a very simple variable type is declared
 typeNone = daeVariableType("None", "-", 0, 1E10,   0, 1e-5)
 
 # 3. Define a model
@@ -55,10 +55,10 @@ class modTutorial(daeModel):
         # 3.1 Declare domains/parameters/variables/ports
         #     Domains, parameters, variables, ports, etc has to be defined in the constructor: __init__
         #     First, the base class constructor has to be called.
-        #     Then, all domains, parameters, variables, ports etc has to be declared as members of 
-        #     the new model class (except equations which are handled by the framework), since the base class 
+        #     Then, all domains, parameters, variables, ports etc has to be declared as members of
+        #     the new model class (except equations which are handled by the framework), since the base class
         #     keeps only their references. Therefore we write:
-        #                    self.variable = daeVariable(...) 
+        #                    self.variable = daeVariable(...)
         #     and not:
         #                    variable = daeVariable(...)
         #
@@ -83,7 +83,7 @@ class modTutorial(daeModel):
         #     It accepts two arguments: equation name and description (optional). All naming conventions apply here as well.
         #     Equations are written in the form of a residual, which is accepted by DAE equation system solvers:
         #                           'residual expression' = 0
-        #     Residuals are defined by creating the above expression by using the basic mathematical operations (+, -, * and /) 
+        #     Residuals are defined by creating the above expression by using the basic mathematical operations (+, -, * and /)
         #     and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several useful functions:
         #      - operator () which calculates the variable value
         #      - function dt() which calculates a time derivative of the variable
@@ -94,7 +94,7 @@ class modTutorial(daeModel):
         #     Note that the variables should be accessed through the model object, therefore we use self.time
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.time.dt() - 1.0
- 
+
 # 4. Define a simulation
 #    Simulations are derived from the base daeSimulation class
 class simTutorial(daeSimulation):
@@ -114,13 +114,13 @@ class simTutorial(daeSimulation):
                              "6. How to set simulation's additional settings \n" \
                              "7. How to connect the TCP/IP data reporter \n" \
                              "8. How to run a simulation \n"
-          
+
     def SetUpParametersAndDomains(self):
         # 4.2 Define the domains and parameters
         #     Every simulation class must implement SetUpParametersAndDomains method, even if it is empty.
         #     It is used to set the values of the parameters, create domains etc. In this example nothing has to be done.
         pass
-    
+
     def SetUpVariables(self):
         # 4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.
         #     Every simulation class must implement SetUpVariables method, even if it is empty.
@@ -163,7 +163,7 @@ def consoleRun():
     # 7. Connect the data reporter
     #    daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the daePlotter.
     #    It contains the function Connect which accepts two arguments:
-    #      - TCP/IP address and port as a string in the following form: '127.0.0.1:50000'. 
+    #      - TCP/IP address and port as a string in the following form: '127.0.0.1:50000'.
     #        The default is an empty string which allows the data reporter to connect to the local (on this machine) daePlotter listening on the port 50000.
     #      - Process name; in this example we use the combination of the simulation name and the current date and time
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -174,7 +174,7 @@ def consoleRun():
     #  8.1 The simulation initialization
     #      The first task is to initialize the simulation by calling the function Initialize.
     #      After the successful initialization the model report can be saved.
-    #      The function SaveModelReport exports the model report in the XML format which can be opened in a web browser 
+    #      The function SaveModelReport exports the model report in the XML format which can be opened in a web browser
     #      (like Mozilla Firefox, or others that support XHTML+MathMl standard).
     #      The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
     simulation.Initialize(daesolver, datareporter, log)
@@ -187,7 +187,7 @@ def consoleRun():
     simulation.SolveInitial()
 
     # 8.3 Call the function Run from the daeSimulation class to start the simulation.
-    #     It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval number of seconds 
+    #     It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval number of seconds
     simulation.Run()
 
     # 8.4 Finally, call the function Finalize to clean-up.
@@ -198,13 +198,9 @@ def consoleRun():
 # 2) If you use: "python whats_the_time.py gui" the simulation will be launched from a GUI
 #    The default is "gui" and you can omit it.
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

@@ -17,9 +17,10 @@ BOOST_PYTHON_MODULE(pyCUSP)
 		;
 
 	class_<daeCUSPSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeCUSPSolver")
-		.def("Create",		&daeCUSPSolver::Create)
-		.def("Reinitialize",&daeCUSPSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeCUSPSolver::SaveAsXPM)
+		.def("Create",					&daeCUSPSolver::Create)
+		.def("Reinitialize",			&daeCUSPSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeCUSPSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeCUSPSolver::SaveAsMatrixMarketFile)
 		;
 
 	def("daeCreateCUSPSolver", daeCreateCUSPSolver, return_value_policy<reference_existing_object>());

@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -46,7 +46,7 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
- 
+
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
         self.Tave = daeVariable("T_ave", typeTemperature, self, "The average temperature, K")
         self.Tsum = daeVariable("T_sum", typeTemperature, self, "The sum of heat fluxes at the bottom edge of the plate, W/m2")
@@ -102,29 +102,29 @@ class modTutorial(daeModel):
         #  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)
         # Thus we use the first version of the above daeIndexRange constructor.
         # To calculate the average and the sum of heat fluxes we can use functions 'average' and 'sum' from daeModel class.
-        # For the list of all available functions please have a look on pyDAE API Reference, module Core. 
+        # For the list of all available functions please have a look on pyDAE API Reference, module Core.
         xr = daeIndexRange(self.x)
         yr = daeIndexRange(self.y)
 
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
         eq.Residual = self.Tave() - self.average(self.T.array(xr, yr))
-        
+
         eq = self.CreateEquation("T_sum", "The sum of the plate temperatures")
         eq.Residual = self.Tsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
-        
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial3")
         self.m.Description = "This tutorial explains how to define arrays of variable values and " \
                              "functions that operate on these arrays, and how to define a non-uniform domain grid."
-          
+
     def SetUpParametersAndDomains(self):
         n = 10
-        
+
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
-        
+
         # Points in distributed domains can be changed after the domain is defined by the CreateDistributed function.
         # In certain situations it is not desired to have a uniform distribution of the points within the given interval (LB, UB)
         # In these cases, a non-uniform grid can be specified by using the Points property od daeDomain.
@@ -180,7 +180,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -192,13 +192,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

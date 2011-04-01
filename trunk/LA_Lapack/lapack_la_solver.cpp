@@ -101,14 +101,16 @@ int daeLapackSolver::Reinitialize(void* pIDA)
 	return IDA_SUCCESS;
 }
 
-int daeLapackSolver::SaveAsPBM(const std::string& strFileName)
-{
-	return IDA_SUCCESS;
-}
-
 int daeLapackSolver::SaveAsXPM(const std::string& strFileName)
 {
-	return IDA_SUCCESS;
+	m_matJacobian.SaveMatrixAsXPM(strFileName);
+	return 0;
+}
+
+int daeLapackSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+{
+	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
+	return 0;
 }
 
 bool daeLapackSolver::CheckData() const

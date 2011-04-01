@@ -41,7 +41,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \
-    cusp_la_solver.cpp
+    cusp_la_solver.cpp \
+	../IDAS_DAESolver/mmio.c
 HEADERS += stdafx.h \
     cusp_la_solver.h \
     cusp_solver.h

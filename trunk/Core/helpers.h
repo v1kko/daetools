@@ -18,6 +18,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <vector>
 #include <stdexcept>
+#include <stdint.h>
+#include <time.h>
 
 namespace dae 
 {
@@ -41,12 +43,13 @@ void		RemoveAll(std::string& strSource, const std::string& strFind);
 void		LTrim(std::string& strSource, char cTrim = ' ');
 void		RTrim(std::string& strSource, char cTrim = ' ');
 
-std::string		Split(std::vector<std::string>& Array,  const char* lpszDelimiter = ", ");
-std::string		SplitAndBracket(std::vector<std::string>& Array,  const char* lpszDelimiter = ", ");
+std::string	Split(std::vector<std::string>& Array,  const char* lpszDelimiter = ", ");
+std::string	SplitAndBracket(std::vector<std::string>& Array,  const char* lpszDelimiter = ", ");
 void		Enclose(std::string& strToEnclose, char cLeft, char cRight);
 void		Enclose(std::string& strToEnclose, const char* lpszLeft = "[", const char* lpszRight = "]");
 bool		ParseSingleToken(std::string& strFullName, std::string& strShortName, std::vector<size_t>& narrDomains);
 
+int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p); 
 
 template<class T>
 T fromString(const std::string& value)
@@ -549,6 +552,12 @@ inline bool ParseSingleToken(std::string& strFullName, std::string& strShortName
 	RTrim(strShortName, ' ');
 
 	return true;
+}
+
+inline int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
+{
+	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
+	       ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
 }
 
 

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "nlpsolver_class_factory.h"
 #include "../Core/optimization.h"
+#include "../BONMIN_MINLPSolver/nlp_common.h"
 #include <stdio.h>
 #include <time.h>
 #include <nlopt.h>
@@ -32,7 +33,8 @@ struct nloptData
 	daeOptimizationConstraint_t* constraint;
 };
 
-class DAE_NLPSOLVER_API daeNLOPTSolver: public daeNLPSolver_t
+class DAE_NLPSOLVER_API daeNLOPTSolver: public daeNLPSolver_t,
+                                        public daeNLPCommon
 {
 public:
 	daeNLOPTSolver(void);
@@ -55,32 +57,15 @@ public:
 	void   eval_grad_g(daeOptimizationConstraint_t* pConstraint,  unsigned n, const double* x, double* grad) ;
 	
 protected:
-	void CopyOptimizationVariablesToSimulationAndRun(const double* x);
 	string CreateNLOPTErrorMessage(nlopt_result status);
-	void SetOptimizationVariables(void);
-	void SetConstraints(void);	
-	void PrintObjectiveFunction(void);
-	void PrintOptimizationVariables(void);
-	void PrintConstraints(void);
-	void PrintVariablesTypes(void);
-	void PrintVariablesLinearity(void);
-	void PrintConstraintsLinearity(void);
-	void PrintBoundsInfo(void);
-	void PrintStartingPoint(void);
 	void PrintSolution(const double* x, double obj_value, nlopt_result status);
-	
+	void SetConstraints(void);
+	void SetOptimizationVariables(void);
+	void CheckAndRun(const double* x);
+		
 protected:
-	daeSimulation_t*	m_pSimulation;
-	daeDAESolver_t*		m_pDAESolver;
-	daeLog_t*			m_pLog;
-	daeDataReporter_t*	m_pDataReporter;
-	
-	nlopt_opt			m_nlopt;
-	nlopt_algorithm     m_nlopt_algorithm;
-	
-	daeObjectiveFunction_t*					   m_pObjectiveFunction;
-	std::vector<daeOptimizationConstraint_t*>  m_ptrarrConstraints;
-	std::vector<daeOptimizationVariable_t*>    m_ptrarrOptVariables;
+	nlopt_opt				m_nlopt;
+	nlopt_algorithm			m_nlopt_algorithm;
 
 	std::vector<double>		m_darrLBs;
 	std::vector<double>		m_darrUBs;
@@ -88,9 +73,6 @@ protected:
 	std::vector<double>		m_darrLastX;
 	std::vector<nloptData>  m_arrConstraintData;
 	std::vector<double>		m_darrTempStorage;
-
-	int  m_iRunCounter;
-	bool m_bPrintInfo;
 };
 
 }

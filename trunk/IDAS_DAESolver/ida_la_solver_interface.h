@@ -27,6 +27,9 @@ public:
 	virtual int Reinitialize(void* ida)						= 0;
 	virtual int Init(void* ida)								= 0;
 	virtual int SaveAsXPM(const std::string& strFileName)	= 0;
+	virtual int SaveAsMatrixMarketFile(const std::string& strFileName, 
+									   const std::string& strMatrixName, 
+									   const std::string& strMatrixDescription) = 0;
 };
 
 }

@@ -25,12 +25,6 @@ int solve_la(IDAMem ida_mem,
 			  N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 	
-int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
-{
-	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
-	       ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
-}
-
 daeIDALASolver_t* daeCreateSuperLUSolver(void)
 {
 	return new daeSuperLUSolver;
@@ -202,9 +196,6 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 
 void daeSuperLUSolver::FreeMemory(void)
 {
-	std::cout << "Total factorization time = " << m_factorize / 1.E9 << " s" << std::endl;
-	std::cout << "Total solve time = "         << m_solve / 1.E9     << " s" << std::endl;
-	
 #ifdef daeSuperLU_MT
     pxgstrf_finalize(&m_Options, &m_matAC);	
 	if(m_bFactorizationDone)
@@ -237,6 +228,9 @@ void daeSuperLUSolver::FreeMemory(void)
 		e << "Unable to free memory for superlu_mt_gpu solver" << cudaGetErrorString(ce);
 		throw e;
 	}
+	
+	std::cout << "Total factorization time = " << m_factorize / 1.E9 << " s" << std::endl;
+	std::cout << "Total solve time = "         << m_solve / 1.E9     << " s" << std::endl;
 #endif
 	
 #ifdef daeSuperLU
@@ -359,7 +353,13 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 int daeSuperLUSolver::SaveAsXPM(const std::string& strFileName)
 {
 	m_matJacobian.SaveMatrixAsXPM(strFileName);
-	return IDA_SUCCESS;
+	return 0;
+}
+
+int daeSuperLUSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+{
+	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
+	return 0;
 }
 
 #ifdef daeSuperLU_MT
@@ -422,7 +422,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_matJacobian, 
 							    dInverseTimeStep);
 
-	struct timespec start, end;
+	struct timespec start, end, memcopy;
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	
 #ifdef daeSuperLU_MT
@@ -489,6 +489,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		e << "Unable to copy matrix values to the device (CUDA error: " << cudaGetErrorString(ce) << ")";
 		throw e;
 	}
+	clock_gettime(CLOCK_MONOTONIC, &memcopy);
 
 	ce = m_superlu_mt_gpuSolver.Factorize(info);
 	if(ce != cudaSuccess || info != 0)
@@ -566,9 +567,16 @@ int daeSuperLUSolver::Setup(void*		ida,
 #endif
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
+	uint64_t timeMemcopy = timespecDiff(&memcopy, &start);
+	uint64_t timeFactor  = timespecDiff(&end, &memcopy);
 	uint64_t timeElapsed = timespecDiff(&end, &start);
-	std::cout << "Factorization time = " << timeElapsed / 1.E9 << " s" << std::endl;
 	m_factorize += timeElapsed;
+	
+#ifdef daeSuperLU_CUDA
+	std::cout << "  Memcopy time = "     << timeMemcopy / 1.E9 << " s" << std::endl
+	          << "  Factor time = "      << timeFactor  / 1.E9 << " s" << std::endl
+	          << "  Total fact. time = " << timeElapsed / 1.E9 << " s" << std::endl;
+#endif
 
 	m_bFactorizationDone = true;
 	
@@ -636,10 +644,10 @@ int daeSuperLUSolver::Solve(void*		ida,
 		throw e;
 	}
 	
-	daeDenseArray ba;
-	ba.InitArray(Neq, pdB);
-	std::cout << "X: " << std::endl;
-	ba.Print();
+//	daeDenseArray ba;
+//	ba.InitArray(Neq, pdB);
+//	std::cout << "X: " << std::endl;
+//	ba.Print();
 #endif
 	
 #ifdef daeSuperLU
@@ -663,8 +671,10 @@ int daeSuperLUSolver::Solve(void*		ida,
 	
 	clock_gettime(CLOCK_MONOTONIC, &end);
 	uint64_t timeElapsed = timespecDiff(&end, &start);
-	std::cout << "Solve time = " << timeElapsed / 1.E9 << " s" << std::endl;
 	m_solve += timeElapsed;
+#ifdef daeSuperLU_CUDA
+	std::cout << "  Solve time = " << timeElapsed / 1.E9 << " s" << std::endl;
+#endif
 	
 	if(ida_mem->ida_cjratio != 1.0)
 	{

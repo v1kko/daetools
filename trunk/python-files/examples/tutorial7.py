@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -20,9 +20,9 @@ In this example we use the same conduction problem as in the tutorial 1.
 Here we introduce:
  - Custom operating procedures
  - Resetting of degrees of freedom
- - Resetting of initial conditions 
- 
-Here the heat flux at the bottom edge is defined as a variable. In the simulation its 
+ - Resetting of initial conditions
+
+Here the heat flux at the bottom edge is defined as a variable. In the simulation its
 value will be fixed and manipulated in the custom operating procedure.
 """
 
@@ -50,7 +50,7 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
- 
+
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
@@ -88,10 +88,10 @@ class simTutorial(daeSimulation):
         self.m = modTutorial("tutorial7")
         self.m.Description = "This tutorial explains how to create custom operating procedures, how to re-set the values of " \
                              "assigned variables and how to re-set the initial conditions. "
-          
+
     def SetUpParametersAndDomains(self):
         n = 25
-        
+
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
 
@@ -102,33 +102,33 @@ class simTutorial(daeSimulation):
         self.m.Qt.SetValue(0)
 
     def SetUpVariables(self):
-        self.m.Qb.AssignValue(1e6)        
+        self.m.Qb.AssignValue(1e6)
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)
-    
+
     # daeDynamicSimulation class defines the function Run which is called after successful initialization
     # to run the simulation. By default it runs for time period defined by the TimeHorizon property,
     # stopping after each period of time defined by the ReportInterval property to send the data to
     # the data reporter. However, default behaviour can be changed by implementing a user defined
-    # function Run. The functions Integrate, IntegrateUntilTime, and IntegrateForTimeInterval from 
-    # daeDynamicSimulation class can be used to advance in time, while functions ReAssignValue and 
+    # function Run. The functions Integrate, IntegrateUntilTime, and IntegrateForTimeInterval from
+    # daeDynamicSimulation class can be used to advance in time, while functions ReAssignValue and
     # ReSetInitialCondition from daeVariable class can be used to alter the values of variables.
     # In this example we first assign the value of Qb to 1E6 and then use the function IntegrateForTimeInterval
-    # to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after 
+    # to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after
     # you finished with re-assigning or re-setting the initial conditions you have to call the function
     # Reinitialize from daeDynamicSimulation class. The function Reinitialize reinitializes the DAE solver
     # and clears all previous data accumulated in the solver. Also, you can call the function ReportData
-    # at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization 
-    # we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and 
-    # then we again report the data. After that, we again change the value of Qb and also re-set the initial 
-    # conditions for the variable T (again to 300K) and then run until the TimeHorizon is reached 
-    # (by using the function Integrate). 
+    # at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization
+    # we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and
+    # then we again report the data. After that, we again change the value of Qb and also re-set the initial
+    # conditions for the variable T (again to 300K) and then run until the TimeHorizon is reached
+    # (by using the function Integrate).
     def Run(self):
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100)
         self.ReportData()
-        
+
         self.m.Qb.ReAssignValue(2E6)
         self.Reinitialize()
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
@@ -180,7 +180,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -192,13 +192,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

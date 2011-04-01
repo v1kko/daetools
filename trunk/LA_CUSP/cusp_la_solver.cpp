@@ -120,7 +120,13 @@ void daeCUSPSolver::InitializeSuperLU(size_t nnz)
 int daeCUSPSolver::SaveAsXPM(const std::string& strFileName)
 {
 	m_matJacobian.SaveMatrixAsXPM(strFileName);
-	return IDA_SUCCESS;
+	return 0;
+}
+
+int daeCUSPSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+{
+	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
+	return 0;
 }
 
 int daeCUSPSolver::Init(void* ida)

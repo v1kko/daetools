@@ -8,6 +8,7 @@
 #include <time.h>
 #include <iomanip>
 #include <fstream>
+#include "nlp_common.h"
 
 #ifdef daeIPOPT
 #include <IpTNLP.hpp>
@@ -49,10 +50,12 @@ namespace nlpsolver
 	daeNLP
 *******************************************************************/
 #ifdef daeIPOPT
-class DAE_NLPSOLVER_API daeMINLP : public TNLP
+class DAE_NLPSOLVER_API daeMINLP : public TNLP,
+                                   public daeNLPCommon
 #endif
 #ifdef daeBONMIN
-class DAE_NLPSOLVER_API daeMINLP : public TMINLP
+class DAE_NLPSOLVER_API daeMINLP : public TMINLP,
+                                   public daeNLPCommon
 #endif
 {
 public:
@@ -189,31 +192,8 @@ public:
 								   Number obj_value);
 #endif
 	
-protected:
-	void CopyOptimizationVariablesToSimulationAndRun(const double* x);
-	void PrintObjectiveFunction(void);
-	void PrintOptimizationVariables(void);
-	void PrintConstraints(void);
-	void PrintConstraintsLinearity(void);
-	void PrintStartingPoint(void);
-	void PrintBoundsInfo(void);
-	void PrintVariablesTypes(void);
-	void PrintVariablesLinearity(void);
-
 public:
-	daeSimulation_t*	m_pSimulation;
-	daeDAESolver_t*		m_pDAESolver;
-	daeLog_t*			m_pLog;
-	daeDataReporter_t*	m_pDataReporter;
-	
-	real_t*			    m_pdTempStorage;
-	
-	daeObjectiveFunction_t*					   m_pObjectiveFunction;
-	std::vector<daeOptimizationConstraint_t*>  m_ptrarrConstraints;
-	std::vector<daeOptimizationVariable_t*>    m_ptrarrOptVariables;
-	
-	int  m_iRunCounter;
-	bool m_bPrintInfo;
+	real_t* m_pdTempStorage;
 };
 
 /******************************************************************

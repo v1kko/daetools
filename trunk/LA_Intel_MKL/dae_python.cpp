@@ -17,9 +17,10 @@ BOOST_PYTHON_MODULE(pyIntelPardiso)
 		;
 
 	class_<daeIntelPardisoSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeIntelPardisoSolver")
-		.def("Create",		&daeIntelPardisoSolver::Create)
-		.def("Reinitialize",&daeIntelPardisoSolver::Reinitialize)
-		.def("SaveAsXPM",	&daeIntelPardisoSolver::SaveAsXPM)
+		.def("Create",					&daeIntelPardisoSolver::Create)
+		.def("Reinitialize",			&daeIntelPardisoSolver::Reinitialize)
+		.def("SaveAsXPM",				&daeIntelPardisoSolver::SaveAsXPM)
+		.def("SaveAsMatrixMarketFile",	&daeIntelPardisoSolver::SaveAsMatrixMarketFile)
 		;
 
 	def("daeCreateIntelPardisoSolver", daeCreateIntelPardisoSolver, return_value_policy<reference_existing_object>());

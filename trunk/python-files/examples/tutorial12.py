@@ -40,12 +40,12 @@ from time import localtime, strftime
 #from daetools.solvers import pySuperLU_MT as superlu
 from daetools.solvers import pySuperLU as superlu
 #from daetools.solvers import pySuperLU_CUDA as superlu
-#from daetools.solvers import as pyTrilinos
-#from daetools.solvers import as pyIntelPardiso
-#from daetools.solvers import as pyAmdACML
-#from daetools.solvers import as pyIntelMKL
-#from daetools.solvers import as pyLapack
-#from daetools.solvers import as pyAtlas
+#from daetools.solvers import pyTrilinos
+#from daetools.solvers import pyIntelPardiso
+#from daetools.solvers import pyAmdACML
+#from daetools.solvers import pyIntelMKL
+#from daetools.solvers import pyLapack
+#from daetools.solvers import pyAtlas
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
 typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
@@ -105,7 +105,7 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
 
     def SetUpParametersAndDomains(self):
-        n = 50
+        n = 20
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
@@ -215,13 +215,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

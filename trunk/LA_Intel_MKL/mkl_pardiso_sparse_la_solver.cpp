@@ -125,6 +125,18 @@ int daeIntelPardisoSolver::Reinitialize(void* ida)
 	return IDA_SUCCESS;
 }
 
+int daeIntelPardisoSolver::SaveAsXPM(const std::string& strFileName)
+{
+	m_matJacobian.SaveMatrixAsXPM(strFileName);
+	return 0;
+}
+
+int daeIntelPardisoSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+{
+	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
+	return 0;
+}
+
 void daeIntelPardisoSolver::ResetMatrix(size_t nnz)
 {
 	m_vecB = (real_t*)realloc(m_vecB, m_nNoEquations * sizeof(real_t));
@@ -195,14 +207,6 @@ void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
 
 	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_FORTRAN_STYLE);
 }
-
-int daeIntelPardisoSolver::SaveAsXPM(const std::string& strFileName)
-{
-	m_matJacobian.SaveMatrixAsXPM(strFileName);
-	return IDA_SUCCESS;
-}
-
-
 
 int daeIntelPardisoSolver::Init(void* ida)
 {

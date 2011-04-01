@@ -105,9 +105,12 @@ protected:
 	daeDAESolver_t*				m_pDAESolver;
 	daePtrVector<daeBlock_t*>	m_ptrarrBlocks;
 	daeeActivityAction			m_eActivityAction;
-	clock_t						m_ProblemCreation;
-	clock_t						m_Initialization;
-	clock_t						m_Integration;
+	timespec					m_ProblemCreationStart;
+	timespec					m_ProblemCreationEnd;
+	timespec					m_InitializationStart;
+	timespec					m_InitializationEnd;
+	timespec					m_IntegrationStart;
+	timespec					m_IntegrationEnd;
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;

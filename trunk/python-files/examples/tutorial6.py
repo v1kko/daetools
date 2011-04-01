@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -21,7 +21,7 @@ Here we introduce:
  - Ports
  - Port connections
  - Units (instances of other models)
- 
+
 A simple port type 'portSimple' is defined which contains only one variable 't'.
 Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'.
 The wrapper model 'modTutorial' instantiate these two models as its units and connects them
@@ -42,11 +42,11 @@ typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
 # can be distributed as well. Here we define a very simple port, with only one variable.
 # The process of defining ports is analogous to defining models. Domains, parameters and
 # variables are declared in the constructor __init__ and their constructor accepts ports as
-# the 'Parent' argument. 
+# the 'Parent' argument.
 class portSimple(daePort):
     def __init__(self, Name, PortType, Model, Description = ""):
         daePort.__init__(self, Name, PortType, Model, Description)
-        
+
         self.t = daeVariable("t", typeNone, self, "Time elapsed in the process, s")
 
 # Here we define two models, 'modPortIn' and 'modPortOut' each having one port of type portSimple.
@@ -56,7 +56,7 @@ class modPortIn(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.Pin = portSimple("P_in", eInletPort, self, "The simple port")
-    
+
     def DeclareEquations(self):
         pass
 
@@ -66,7 +66,7 @@ class modPortOut(daeModel):
 
         self.Pout = portSimple("P_out", eOutletPort, self, "The simple port")
         self.time = daeVariable("Time", typeNone, self, "Time elapsed in the process, s")
-    
+
     def DeclareEquations(self):
         eq = self.CreateEquation("time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.time.dt() - 1.0
@@ -83,7 +83,7 @@ class modTutorial(daeModel):
         self.mpout = modPortOut("Port_Out", self)
 
     def DeclareEquations(self):
-        # Ports can be connected by using the function ConnectPorts from daeModel class. Apparently, 
+        # Ports can be connected by using the function ConnectPorts from daeModel class. Apparently,
         # ports dont have to be of the same type but must contain the same number of parameters and variables.
         self.ConnectPorts(self.mpout.Pout, self.mpin.Pin)
 
@@ -96,13 +96,13 @@ class simTutorial(daeSimulation):
                              "Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'. " \
                              "The wrapper model 'modTutorial' instantiate these two models as its units and connects them " \
                              "by connecting their ports. "
-                             
+
     def SetUpParametersAndDomains(self):
         pass
-    
+
     def SetUpVariables(self):
         self.m.mpout.time.SetInitialCondition(0)
-    
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -134,8 +134,8 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    
-    # Save the model report and the runtime model report 
+
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -147,13 +147,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

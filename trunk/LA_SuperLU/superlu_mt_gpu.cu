@@ -403,9 +403,9 @@ cudaError_t superlu_mt_gpu_solver::Factorize(int& info)
 	if(info == 0 && ce == cudaSuccess)
 		data.m_bFactorizationDone = true;
 		
-	gpu_Print_CompCol_Matrix<<<1, 1>>>(data.m_matU);
-	ce = cudaThreadSynchronize();
-	CUDACheck(ce);
+//	gpu_Print_CompCol_Matrix<<<1, 1>>>(data.m_matU);
+//	ce = cudaThreadSynchronize();
+//	CUDACheck(ce);
 	
 	return ce;
 } 

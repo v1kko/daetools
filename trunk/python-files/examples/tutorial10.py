@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -37,7 +37,7 @@ typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",      0, 1E10, 100, 1
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-        
+
         self.x  = daeDomain("x", self, "X axis domain")
         self.y  = daeDomain("y", self, "Y axis domain")
 
@@ -50,13 +50,13 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
- 
+
         self.Q_int = daeVariable("Q_int", typeTemperature, self, "The heat input per unit of length, W/m")
 
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
-        
+
         # Data needed to calculate the area of a semi-circle
         self.c  = daeDomain("c", self, "Domain for a circle")
         self.semicircle = daeVariable("SemiCircle", typeNone, self, "Semi-circle")
@@ -99,10 +99,10 @@ class modTutorial(daeModel):
         # The result should be 1E6 W/m2, which is equal to the input flux
         eq = self.CreateEquation("Q_int", "Integral of the heat flux per x domain; just an example of the integral function")
         eq.Residual = self.Q_int() - self.integral( -self.k() * self.T.d_array(self.y, xr, 0) / self.dx() )
-        
+
         # To check the integral function we can create a semi-circle around domain c with 100 intervals and bounds: -1 to +1
         # The variable semicircle will be a cirle with the radius 1 and coordinates: (0,0)
-        # The semi-circle area is equal to: 0.5 * integral(circle * dc) = 1.56913425555 
+        # The semi-circle area is equal to: 0.5 * integral(circle * dc) = 1.56913425555
         # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
         eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
         c = eq.DistributeOnDomain(self.c, eClosedClosed)
@@ -119,20 +119,20 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to use daeModel functions d() and dt() " \
                              "that calculate time- and partial-derivative of an expression (not of a single variable), " \
                              "how to use initialization files (.init) and how to evaluate integrals of a function."
-          
+
     def SetUpParametersAndDomains(self):
         n = 25
-        
+
         # The domain for a semi-circle
         self.m.c.CreateDistributed(eCFDM, 2, 100, -1, 1)
-        
+
         self.m.dx.SetValue(0.1)
         self.m.dy.SetValue(0.1)
 
         # Domain bounds can depend on input parameters:
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, self.m.dx.GetValue())
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, self.m.dy.GetValue())
-        
+
         self.m.ro.SetValue(8960)
         self.m.cp.SetValue(385)
         self.m.k.SetValue(401)
@@ -144,7 +144,7 @@ class simTutorial(daeSimulation):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)
-        
+
         # Load initialization file previously saved after the successful initialization phase (see below)
         self.LoadInitializationValues("tutorial10.init")
 
@@ -180,7 +180,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -194,13 +194,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

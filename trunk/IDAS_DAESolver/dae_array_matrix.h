@@ -7,7 +7,10 @@
 #include <fstream>
 #include "../Core/helpers.h"
 #include "solver_class_factory.h"
-
+extern "C"
+{
+#include "../IDAS_DAESolver/mmio.h" 
+}
 
 namespace dae
 {
@@ -186,6 +189,86 @@ public:
 					data[col][row] = 0;
 		}
 	}
+	
+	void SaveMatrixAsXPM(const std::string& strFilename)
+	{
+		std::ofstream of(strFilename.c_str(), std::ios_base::out);
+		if(!of.is_open())
+			return;
+		
+		char* rowdata  = new char[Ncol+1];
+		rowdata[Ncol]  = '\0';
+	
+		of << "/* XPM */" << std::endl;
+		of << "static char *dummy[]={" << std::endl;
+		of << "\"" << Nrow << " " << Ncol << " " << 2 << " " << 1 << "\"," << std::endl;
+		of << "\"- c #ffffff\"," << std::endl;
+		of << "\"X c #000000\"," << std::endl;
+		
+		for(size_t row = 0; row < Nrow; row++)
+		{
+			memset(rowdata, '-', Ncol);
+			for(size_t col = 0; col < Ncol; col++)
+			{				
+				if(data_access == eRowWise)
+				{
+					if(data[row][col] != 0)
+						rowdata[col] = 'X';
+				}
+				else
+				{
+					if(data[col][row] != 0)
+						rowdata[col] = 'X';
+				}
+			}
+			of << "\"" << rowdata << (row == Nrow-1 ? "\"" : "\",") << std::endl;
+		}
+		of << "};" << std::endl;
+		of.close();
+		delete[] rowdata;
+	}
+	
+	void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+	{
+		int n;
+		size_t row, col;
+		FILE* mmx = fopen(strFileName.c_str(), "w");
+		if(!mmx)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to open " << strFileName << " file";
+			throw e;			
+		}
+		
+		MM_typecode matcode;
+		mm_initialize_typecode(&matcode);
+		mm_set_matrix(&matcode);
+		mm_set_coordinate(&matcode);
+		mm_set_real(&matcode);
+		
+		mm_write_banner(mmx, matcode); 
+		fprintf(mmx, "%% \n");
+		fprintf(mmx, "%% DAE Tools Project <www.daetools.com>\n");
+		fprintf(mmx, "%% %s\n", strMatrixName.c_str());
+		fprintf(mmx, "%% %s\n", strMatrixDescription.c_str());
+		fprintf(mmx, "%% \n");
+		mm_write_mtx_crd_size(mmx, Nrow, Ncol, Nrow * Ncol);
+		
+		/* NOTE: matrix market files use 1-based indices */	
+		for(row = 0; row < Nrow; row++)
+		{
+			for(col = 0; col < Ncol; col++)
+			{				
+				if(data_access == eRowWise)
+					fprintf(mmx, "%d %d %17.10e\n", int(row+1), int(col+1), data[row][col]);
+				else
+					fprintf(mmx, "%d %d %17.10e\n", int(row+1), int(col+1), data[col][row]);
+			}
+			fflush(mmx);
+		}
+		
+		fclose(mmx);
+	}
 
 public:
 	size_t				Nrow;
@@ -305,6 +388,74 @@ public:
 	{
 		::memset(data, 0, Nrow*Ncol*sizeof(real_t));
 	}
+
+	void SaveMatrixAsXPM(const std::string& strFilename)
+	{
+		std::ofstream of(strFilename.c_str(), std::ios_base::out);
+		if(!of.is_open())
+			return;
+		
+		char* rowdata  = new char[Ncol+1];
+		rowdata[Ncol]  = '\0';
+	
+		of << "/* XPM */" << std::endl;
+		of << "static char *dummy[]={" << std::endl;
+		of << "\"" << Nrow << " " << Ncol << " " << 2 << " " << 1 << "\"," << std::endl;
+		of << "\"- c #ffffff\"," << std::endl;
+		of << "\"X c #000000\"," << std::endl;
+		
+		for(size_t i = 0; i < Nrow; i++)
+		{
+			memset(rowdata, '-', Ncol);
+			for(size_t k = 0; k < Ncol; k++)
+			{				
+				if(GetItem(i, k) != 0)
+					rowdata[k] = 'X';
+			}
+			of << "\"" << rowdata << (i == Nrow-1 ? "\"" : "\",") << std::endl;
+		}
+		of << "};" << std::endl;
+		of.close();
+		delete[] rowdata;
+	}
+	
+	void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+	{
+		int n;
+		size_t i, k;
+		FILE* mmx = fopen(strFileName.c_str(), "w");
+		if(!mmx)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to open " << strFileName << " file";
+			throw e;			
+		}
+		
+		MM_typecode matcode;
+		mm_initialize_typecode(&matcode);
+		mm_set_matrix(&matcode);
+		mm_set_coordinate(&matcode);
+		mm_set_real(&matcode);
+		
+		mm_write_banner(mmx, matcode); 
+		fprintf(mmx, "%% \n");
+		fprintf(mmx, "%% DAE Tools Project <www.daetools.com>\n");
+		fprintf(mmx, "%% %s\n", strMatrixName.c_str());
+		fprintf(mmx, "%% %s\n", strMatrixDescription.c_str());
+		fprintf(mmx, "%% \n");
+		mm_write_mtx_crd_size(mmx, Nrow, Ncol, Nrow*Ncol);
+		
+		/* NOTE: matrix market files use 1-based indices */	
+		for(i = 0; i < Nrow; i++)
+		{
+			for(k = 0; k < Ncol; k++)
+			{
+				fprintf(mmx, "%d %d %17.10e\n", int(i+1), int(k+1), GetItem(i, k));
+			}
+			fflush(mmx);
+		}
+		fclose(mmx);
+	}	
 	
 public:
 	size_t				Nrow;
@@ -620,6 +771,51 @@ public:
 		of << "};" << std::endl;
 		of.close();
 		delete[] row;
+	}
+	
+	void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
+	{
+		int n;
+		size_t i, j;
+		FILE* mmx = fopen(strFileName.c_str(), "w");
+		if(!mmx)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Unable to open " << strFileName << " file";
+			throw e;			
+		}
+		
+		MM_typecode matcode;
+		mm_initialize_typecode(&matcode);
+		mm_set_matrix(&matcode);
+		mm_set_coordinate(&matcode);
+		mm_set_real(&matcode);
+		
+		mm_write_banner(mmx, matcode); 
+		fprintf(mmx, "%% \n");
+		fprintf(mmx, "%% DAE Tools Project <www.daetools.com>\n");
+		fprintf(mmx, "%% %s\n", strMatrixName.c_str());
+		fprintf(mmx, "%% %s\n", strMatrixDescription.c_str());
+		fprintf(mmx, "%% \n");
+		mm_write_mtx_crd_size(mmx, N, N, NNZ);
+		
+		/* NOTE: matrix market files use 1-based indices */		
+		for(i = 0; i < N; i++)
+		{
+			for(j = 0; j < N; j++)
+			{
+				if(indexing == CSR_C_STYLE)
+					n = CalcIndex(i, j);
+				else
+					n = CalcIndex(i+1, j+1);
+				
+				if(n >= 0)
+					fprintf(mmx, "%d %d %17.10e\n", int(i+1), int(j+1), A[n]);
+			}
+			fflush(mmx);
+		}
+		
+		fclose(mmx);
 	}
 	
 public:

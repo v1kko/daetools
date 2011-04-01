@@ -17,30 +17,8 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 			       daeDataReporter_t* pDataReporter, 
 			       daeLog_t*          pLog)
 {
-	if(!pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer)
-	if(!pDAESolver)
-		daeDeclareAndThrowException(exInvalidPointer)
-	if(!pDataReporter)
-		daeDeclareAndThrowException(exInvalidPointer)
-	if(!pLog)
-		daeDeclareAndThrowException(exInvalidPointer)
+	daeNLPCommon::Init(pSimulation, pDAESolver, pDataReporter, pLog);
 	
-	m_pSimulation	     = pSimulation;
-	m_pDAESolver		 = pDAESolver;
-	m_pDataReporter		 = pDataReporter;
-	m_pLog			     = pLog;
-	
-	m_pdTempStorage = NULL;
-	m_iRunCounter   = 0;
-
-	m_pSimulation->GetOptimizationConstraints(m_ptrarrConstraints);
-	m_pSimulation->GetOptimizationVariables(m_ptrarrOptVariables);
-	m_pObjectiveFunction = m_pSimulation->GetObjectiveFunction();
-
-	if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
-		daeDeclareAndThrowException(exInvalidPointer)
-		
 	size_t n = m_ptrarrOptVariables.size();
 	if(n == 0)
 		daeDeclareAndThrowException(exInvalidCall)
@@ -268,26 +246,10 @@ bool daeMINLP::eval_f(Index n,
 					  bool new_x, 
 					  Number& obj_value)
 {
-	try
-	{
-		if(new_x)
-			CopyOptimizationVariablesToSimulationAndRun(x);
-		
-		obj_value = m_pObjectiveFunction->GetValue();
-		
-		if(m_bPrintInfo) 
-		{
-			string strMessage = "Fobj: ";
-			strMessage += toStringFormatted<real_t>(obj_value, -1, 10, true);
-			m_pLog->Message(strMessage, 0);
-		}
-	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_gf: ") + e.what(), 0);
-		return false;
-	}
+	if(new_x)
+		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 	
+	daeNLPCommon::Calculate_fobj(obj_value);	
 	return true;
 }
 
@@ -296,37 +258,10 @@ bool daeMINLP::eval_grad_f(Index n,
 						   bool new_x, 
 						   Number* grad_f)
 {
-	size_t j;
+	if(new_x)
+		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 
-	try
-	{
-		if(new_x)
-			CopyOptimizationVariablesToSimulationAndRun(x);
-
-		daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
-		if(n != matSens.GetNrows())
-			daeDeclareAndThrowException(exInvalidCall)
-		
-		// Set all values to 0
-		::memset(grad_f, 0, n * sizeof(Number));
-		
-		m_pObjectiveFunction->GetGradients(matSens, grad_f, n);
-		
-		if(m_bPrintInfo) 
-		{
-			string strMessage;
-			m_pLog->Message("Fobj gradient: ", 0);
-			for(j = 0; j < n; j++)
-				strMessage += toStringFormatted<real_t>(grad_f[j], -1, 10, true) + " ";
-			m_pLog->Message(strMessage, 0);
-		}
-	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_grad_f): ") + e.what(), 0);
-		return false;
-	}
-
+	daeNLPCommon::Calculate_fobj_gradient(grad_f);
 	return true;
 }
 
@@ -341,32 +276,13 @@ bool daeMINLP::eval_g(Index n,
 
 	if(m != m_ptrarrConstraints.size())
 		daeDeclareAndThrowException(exInvalidCall)
+	if(new_x)
+		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 
-	try
+	for(i = 0; i < m_ptrarrConstraints.size(); i++)
 	{
-		if(new_x)
-			CopyOptimizationVariablesToSimulationAndRun(x);
-
-		for(i = 0; i < m_ptrarrConstraints.size(); i++)
-		{
-			pConstraint = m_ptrarrConstraints[i];
-				
-			g[i] = pConstraint->GetValue();
-		}
-		
-		if(m_bPrintInfo) 
-		{
-			string strMessage;
-			m_pLog->Message("Constraints values: ", 0);
-			for(size_t j = 0; j < m; j++)
-				strMessage += toStringFormatted<real_t>(g[j], -1, 10, true) + " ";
-			m_pLog->Message(strMessage, 0);
-		}
-	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_g): ") + e.what(), 0);
-		return false;
+		pConstraint = m_ptrarrConstraints[i];
+		daeNLPCommon::Calculate_g(pConstraint, g[i]);
 	}
 
 	return true;
@@ -381,22 +297,14 @@ bool daeMINLP::eval_gi(Index n,
 {
 	daeOptimizationConstraint_t* pConstraint;
 
-	try
-	{
-		if(new_x)
-			CopyOptimizationVariablesToSimulationAndRun(x);
+	if(new_x)
+		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 
-		if(i >= m_ptrarrConstraints.size())
-			daeDeclareAndThrowException(exInvalidCall)
+	if(i >= m_ptrarrConstraints.size())
+		daeDeclareAndThrowException(exInvalidCall)
 
-		pConstraint = m_ptrarrConstraints[i];
-		gi = pConstraint->GetValue();
-	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_gi): ") + e.what(), 0);
-		return false;
-	}
+	pConstraint = m_ptrarrConstraints[i];
+	daeNLPCommon::Calculate_g(pConstraint, gi);
 
 	return true;
 }
@@ -445,7 +353,7 @@ bool daeMINLP::eval_jac_g(Index n,
 		{
 		// Return the values
 			if(new_x)
-				CopyOptimizationVariablesToSimulationAndRun(x);
+				daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 	
 			daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 			if(n != matSens.GetNrows())
@@ -545,7 +453,7 @@ bool daeMINLP::eval_grad_gi(Index n,
 		{
 		// Return the values
 			if(new_x)
-				CopyOptimizationVariablesToSimulationAndRun(x);
+				daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 	
 			daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 			if(n != matSens.GetNrows())
@@ -700,289 +608,12 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 	m_pLog->Message(string(" "), 0);
 	m_pLog->Message(string(" "), 0);
 	
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	strMessage = toStringFormatted("Objective function", 25) +  
-				 toStringFormatted("Final value",        16) +
-				 toStringFormatted("Type",               5);
-	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	strMessage = toStringFormatted(m_pObjectiveFunction->GetName(), 25) +   
-				 toStringFormatted(obj_value,                       16, 6, true) +
-				 toStringFormatted((m_pObjectiveFunction->IsLinear() ? "L" : "NL"), 5);
-	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string(" "), 0);
-
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	strMessage = toStringFormatted("Optimization variable", 25) +  
-				 toStringFormatted("Final value",           16) +
-				 toStringFormatted("Lower bound",           16) +
-				 toStringFormatted("Upper bound",           16);
-	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	for(i = 0; i < n; i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-			
-		strMessage = toStringFormatted(pOptVariable->GetName(), 25)          +   
-					 toStringFormatted(x[i],                    16, 6, true) +
-		             toStringFormatted(pOptVariable->GetLB(),   16, 6, true) + 
-		             toStringFormatted(pOptVariable->GetUB(),   16, 6, true);
-		m_pLog->Message(strMessage, 0);
-	}
-	m_pLog->Message(string(" "), 0);
-
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	strMessage = toStringFormatted("Constraint",  25) +  
-				 toStringFormatted("Final value", 16) +
-//				 toStringFormatted("Lower bound", 16) +
-//				 toStringFormatted("Upper bound", 16) +
-				 toStringFormatted("Type",         5);
-	m_pLog->Message(strMessage, 0);
-	m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-	for(i = 0; i < m_ptrarrConstraints.size(); i++)
-	{
-		pConstraint = m_ptrarrConstraints[i];
-			
-		strMessage = toStringFormatted(pConstraint->GetName(),                 25)          + 
-					 toStringFormatted(pConstraint->GetValue(),                16, 6, true) +
-//					 toStringFormatted(pConstraint->GetLB(),                   16, 6, true) + 
-//					 toStringFormatted(pConstraint->GetUB(),                   16, 6, true) +
-					 toStringFormatted((pConstraint->IsLinear() ? "L" : "NL"),  5);
-		m_pLog->Message(strMessage, 0);
-	}	
-	m_pLog->Message(string(" "), 0);
-}
-
-void daeMINLP::PrintObjectiveFunction(void)
-{
-	string strMessage;
-	real_t obj_value = m_pObjectiveFunction->GetValue();
-	strMessage = "Fobj = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
-	m_pLog->Message(strMessage, 0);
-}
-
-void daeMINLP::PrintOptimizationVariables(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationVariable_t* pOptVariable;
-
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-			
-		strMessage = pOptVariable->GetName() + 
-					 " = " + 
-					 toStringFormatted<real_t>(pOptVariable->GetValue(), -1, 10, true);
-		m_pLog->Message(strMessage, 0);
-	}	
-}
-
-void daeMINLP::PrintConstraints(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationConstraint_t* pConstraint;
-
-	for(i = 0; i < m_ptrarrConstraints.size(); i++)
-	{
-		pConstraint = m_ptrarrConstraints[i];
-		if(!pConstraint)
-			daeDeclareAndThrowException(exInvalidPointer)
-			
-		strMessage = pConstraint->GetName() + " = " + 
-					 toStringFormatted<real_t>(pConstraint->GetValue(), -1, 10, true);
-		m_pLog->Message(strMessage, 0);
-	}	
-}
-
-void daeMINLP::PrintVariablesTypes(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationVariable_t* pOptVariable;
-	
-	m_pLog->Message(string("Variable types:"), 0);
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-		
-		if(pOptVariable->GetType() == eIntegerVariable)
-			strMessage = "INTEGER";
-		else if(pOptVariable->GetType() == eBinaryVariable)
-			strMessage = "BINARY";
-		else if(pOptVariable->GetType() == eContinuousVariable)
-			strMessage = "CONTINUOUS";
-		else
-			daeDeclareAndThrowException(exNotImplemented)
-					
-		m_pLog->Message(pOptVariable->GetName() + " = " + strMessage, 0);
-	}	
-}
-
-void daeMINLP::PrintVariablesLinearity(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationVariable_t* pOptVariable;
-	
-	m_pLog->Message(string("Variable linearity:"), 0);
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-		
-		if(pOptVariable->GetType() == eIntegerVariable)
-			strMessage = "LINEAR";
-		else if(pOptVariable->GetType() == eBinaryVariable)
-			strMessage = "LINEAR";
-		else if(pOptVariable->GetType() == eContinuousVariable)
-			strMessage = "NON_LINEAR";
-		else
-			daeDeclareAndThrowException(exNotImplemented)
-					
-		m_pLog->Message(pOptVariable->GetName() + " = " + strMessage, 0);
-	}	
-}
-
-
-void daeMINLP::PrintConstraintsLinearity(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationConstraint_t* pConstraint;
-	
-	m_pLog->Message(string("Constraints linearity:"), 0);
-	for(i = 0; i < m_ptrarrConstraints.size(); i++)
-	{
-		pConstraint = m_ptrarrConstraints[i];
-	
-	// Here I access SetupNode!! Is it wise??
-		if(pConstraint->IsLinear())
-			strMessage = "LINEAR";
-		else
-			strMessage = "NON_LINEAR";
-		
-		m_pLog->Message(pConstraint->GetName() + " = " + strMessage, 0);
-	}
-}
-
-void daeMINLP::PrintBoundsInfo(void)
-{
-	size_t i;
-	string strMessage;
-	daeOptimizationConstraint_t* pConstraint;
-	daeOptimizationVariable_t* pOptVariable;
-
-	m_pLog->Message(string("Variables bounds:"), 0);
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-			
-		strMessage = pOptVariable->GetName() + " bounds = [" + 
-					 toStringFormatted<real_t>(pOptVariable->GetLB(), -1, 10, true) + 
-					 ", " + 
-					 toStringFormatted<real_t>(pOptVariable->GetUB(), -1, 10, true) + 
-					 "]";
-		m_pLog->Message(strMessage, 0);
-	}	
-
-//	m_pLog->Message(string("Constraints bounds:"), 0);
-//	for(i = 0; i < m_ptrarrConstraints.size(); i++)
-//	{
-//		pConstraint = m_ptrarrConstraints[i];
-//	
-//		strMessage = pConstraint->GetName() + " bounds = [" + 
-//					 toStringFormatted<real_t>(pConstraint->GetLB(), -1, 10, true) + 
-//					 ", " + 
-//					 toStringFormatted<real_t>(pConstraint->GetUB(), -1, 10, true) + 
-//					 "]";
-//		m_pLog->Message(strMessage, 0);
-//	}
-}
-
-void daeMINLP::PrintStartingPoint(void)
-{
-	size_t i;
-	daeOptimizationVariable_t* pOptVariable;
-
-	m_pLog->Message(string("Starting point:"), 0);
-	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-	{
-		pOptVariable = m_ptrarrOptVariables[i];
-			
-		m_pLog->Message(pOptVariable->GetName() + 
-						" = " + 
-						toStringFormatted<real_t>(pOptVariable->GetStartingPoint(), -1, 10, true), 0);
-	}	
-}
-
-void daeMINLP::CopyOptimizationVariablesToSimulationAndRun(const Number* x)
-{
-	size_t i, j;
-	daeOptimizationVariable_t* pOptVariable;
-	
-	m_pLog->IncreaseIndent(1);
-	m_pLog->Message(string("Starting the run No. ") + toString(m_iRunCounter + 1) + string(" ..."), 0);
-	
-// Print before Run
-//	if(m_bPrintInfo) 
-//	{
-//		m_pLog->Message("Values before Run", 0);
-//		PrintObjectiveFunction();
-//		PrintOptimizationVariables();
-//		PrintConstraints();
-//	}
-	
-	if(m_iRunCounter == 0)
-	{
-	// 1. Re-assign the optimization variables
-		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-		{
-			pOptVariable = m_ptrarrOptVariables[i];
-			pOptVariable->SetValue(x[i]);
-		}
-		
-	// 2. Calculate initial conditions
-		m_pSimulation->SolveInitial();
-		
-	// 3. Run the simulation
-		m_pSimulation->Run();
-	}
-	else
-	{		
-	// 1. Set again the initial conditions, values, tolerances, active states etc
-		m_pSimulation->SetUpVariables();
-		
-	// 2. Re-assign the optimization variables
-		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-		{
-			pOptVariable = m_ptrarrOptVariables[i];
-			pOptVariable->SetValue(x[i]);
-		}
-			
-	// 3. Reset simulation and DAE solver
-		m_pSimulation->Reset();
-	
-	// 4. Calculate initial conditions
-		m_pSimulation->SolveInitial();
-	
-	// 5. Run the simulation
-		m_pSimulation->Run();
-	}
-	
-	m_iRunCounter++;
-	  
-// Print After Run
-//	if(m_bPrintInfo) 
-//	{
-//		m_pLog->Message("Values after Run", 0);
-//		PrintObjectiveFunction();
-//		PrintOptimizationVariables();
-//		PrintConstraints();
-//	}
-	
-	m_pLog->Message(string(" "), 0);
-	m_pLog->DecreaseIndent(1);
+#ifdef daeIPOPT
+	daeNLPCommon::PrintSolution(obj_value, x, g);
+#endif
+#ifdef daeBONMIN
+	daeNLPCommon::PrintSolution(obj_value, x, NULL);
+#endif
 }
 
 /******************************************************************

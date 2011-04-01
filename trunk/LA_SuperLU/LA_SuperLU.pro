@@ -15,7 +15,7 @@ QT -= core gui
 TARGET = SuperLU
 TEMPLATE = lib
 
-CONFIG += SuperLU_CUDA
+CONFIG += SuperLU
 
 ######################################################################################
 #                                   SuperLU
@@ -102,11 +102,13 @@ LIBS += $${BOOST_PYTHON_LIB} \
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \
-    superlu_la_solver.cpp
+    superlu_la_solver.cpp \
+	../IDAS_DAESolver/mmio.c
 
 HEADERS += stdafx.h \
     superlu_la_solver.h \
-	superlu_mt_gpu.h
+	superlu_mt_gpu.h \
+	../IDAS_DAESolver/mmio.h 
 
 SuperLU {
 win32-msvc2008::QMAKE_POST_LINK = move \

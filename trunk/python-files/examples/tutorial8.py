@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -20,17 +20,17 @@ In this example we use a similar problem as in the tutorial 5.
 Here we introduce:
  - Custom data reporters
 
-Some time it is not enough to send the result to daePlotter but it is desirable to 
+Some time it is not enough to send the result to daePlotter but it is desirable to
 export them in certain format for use in other programs. Here we show how the custom
 data reporter can be created. In this example the data reporter simply, after the simulation
 is finished, save the results into a plain text file. Obviously, the data can be exported to
 any format. Also some numpy functions that operate on numpy arrays can be used as well.
 In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It
 has the same interface and the functionality like all data reporters. However, it does not do
-any data processing by itself but calls the corresponding functions of data reporters which 
-are added to it by using the function AddDataReporter. This way it is possible, at the same 
+any data processing by itself but calls the corresponding functions of data reporters which
+are added to it by using the function AddDataReporter. This way it is possible, at the same
 time, to send the results to the daePlotter and save them into a file (or process them in
-some other ways). 
+some other ways).
 """
 
 import sys, tempfile
@@ -43,7 +43,7 @@ typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
 typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
 typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
 
-# The best starting point in creating custom data reporters that can export the results 
+# The best starting point in creating custom data reporters that can export the results
 # into a file is daeDataReporterLocal class. It internally does all the processing
 # and offers a user the Process property of type daeDataReporterProcess which contains
 # all domains and variables sent by simulation. The following functions have to be implemented:
@@ -54,9 +54,9 @@ typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
 #    Disconnects the data reporter.
 #  - IsConnected
 #    Check if the data reporter is connected or not.
-# In this example we use the first argument of the function Connect as a file name to open 
-# a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write 
-# the data into the file. In the function MakeString we iterate over all variables and write 
+# In this example we use the first argument of the function Connect as a file name to open
+# a text file in the TMP folder (/tmp or c:\temp) and implement a new function Write to write
+# the data into the file. In the function MakeString we iterate over all variables and write
 # their values into a string which will be saved in the function Write.
 # The content of the file (/tmp/tutorial8.out) will also be printed to the console.
 class MyDataReporter(daeDataReporterLocal):
@@ -67,11 +67,11 @@ class MyDataReporter(daeDataReporterLocal):
     def Connect(self, ConnectionString, ProcessName):
         self.ProcessName = ProcessName
         try:
-            self.f = open(ConnectionString, "w")            
+            self.f = open(ConnectionString, "w")
         except IOError:
-            return False       
+            return False
         return True
-        
+
     def Disconnect(self):
         self.Write()
         return True
@@ -93,7 +93,7 @@ class MyDataReporter(daeDataReporterLocal):
                 s += "        " + str(values[i, ...]) + "\n"
 
         return s
-        
+
     def Write(self):
         try:
             content = self.MakeString()
@@ -117,7 +117,7 @@ class modTutorial(daeModel):
 
         self.m  = daeParameter("m",   eReal, self, "Mass of the plate, kg")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
- 
+
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
 
     def DeclareEquations(self):
@@ -131,7 +131,7 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to create custom data reporters and how to " \
                              "create a composite data reporter which delegates " \
                              "the data processing to other data reporters. "
-          
+
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385)
         self.m.m.SetValue(1)
@@ -160,9 +160,9 @@ def setupDataReporters(simulationName):
         sys.exit()
     if(dr2.Connect("", simName) == False):
         sys.exit()
-    
+
     return datareporter
-   
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -175,7 +175,7 @@ def guiRun(app):
     sim.TimeHorizon       = 100
     simulator  = daeSimulator(app, simulation=sim, datareporter=dr)
     simulator.exec_()
-    
+
 # Setup everything manually and run in a console
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
@@ -183,7 +183,7 @@ def consoleRun():
     daesolver    = daeIDAS()
     simulation   = simTutorial()
     datareporter = MyDataReporter()
-    
+
     filename = tempfile.gettempdir() + "/tutorial8.out"
     if(datareporter.Connect(filename, simulation.m.Name) == False):
         sys.exit()
@@ -198,7 +198,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -210,13 +210,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -21,7 +21,7 @@ Here we introduce:
  - Arrays (discrete distribution domains)
  - Distributed parameters
  - Number of degrees of freedom and how to fix it
- - Initial guess of the variables 
+ - Initial guess of the variables
 """
 
 import sys
@@ -39,11 +39,11 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.x  = daeDomain("x", self, "X axis domain")
-        self.y  = daeDomain("y", self, "Y axis domain") 
-        
+        self.y  = daeDomain("y", self, "Y axis domain")
+
         # Nq is an array (a discrete distribution domain) with 2 elements
         self.Nq  = daeDomain("Nq", self, "Number of heat fluxes")
-        
+
         # In this example the heat capacity is not a constant value but the temperature dependent (at every point in x and y domains).
         # To calculate cp a simple temperature dependency is proposed which depends on 2 parameters: a and b
         self.cp = daeVariable("c_p", typeConductivity, self, "Specific heat capacity of the plate, J/kgK")
@@ -79,7 +79,7 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        y = eq.DistributeOnDomain(self.y, eLowerBound)        
+        y = eq.DistributeOnDomain(self.y, eLowerBound)
         # Now we use Q(0) as the heat flux into the bottom edge
         eq.Residual = - self.k(x, y) * self.T.d(self.y, x, y) - self.Q(0)
 
@@ -98,12 +98,12 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
-        
+
         # Heat capacity as a function of the temperature
         eq = self.CreateEquation("C_p", "Equation to calculate the specific heat capacity of the plate as a function of the temperature.")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = self.cp(x,y) - self.a() - self.b() * self.T(x, y)        
+        eq.Residual = self.cp(x,y) - self.a() - self.b() * self.T(x, y)
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -112,10 +112,10 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to define Arrays (discrete distribution domains) and " \
                              "distributed parameters, how to calculate the number of degrees of freedom (NDOF) " \
                              "and how to fix it, and how to set initial guesses of the variables."
-          
+
     def SetUpParametersAndDomains(self):
         n = 25
-        
+
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
 
@@ -127,7 +127,7 @@ class simTutorial(daeSimulation):
 
         self.m.Q.SetValue(0, 1e6)
         self.m.Q.SetValue(1, 0.0)
-        
+
         for x in range(0, self.m.x.NumberOfPoints):
             for y in range(0, self.m.y.NumberOfPoints):
                 self.m.k.SetValue(x, y, 401)
@@ -136,9 +136,9 @@ class simTutorial(daeSimulation):
         # In the above model we defined 2*N*N+1 variables and 2*N*N equations,
         # meaning that the number of degrees of freedom (NDoF) is equal to: 2*N*N+1 - 2*N*N = 1
         # Therefore, we have to assign a value of one of the variables.
-        # This variable cannot be chosen randomly, but must be chosen so that the combination 
+        # This variable cannot be chosen randomly, but must be chosen so that the combination
         # of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).
-        # In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables. 
+        # In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables.
         # The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:
         self.m.ro.AssignValue(8960)
 
@@ -187,7 +187,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -199,13 +199,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()

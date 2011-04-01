@@ -9,8 +9,6 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
-#include <stdint.h>
-#include <time.h>
 
 #ifdef daeSuperLU_MT
 #include <pdsp_defs.h>
@@ -45,6 +43,7 @@ public:
 	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
 	int Reinitialize(void* ida);
 	int SaveAsXPM(const std::string& strFileName);
+	int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
 
 	int Init(void* ida);
 	int Setup(void* ida,

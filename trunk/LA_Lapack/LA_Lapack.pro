@@ -21,7 +21,7 @@ TEMPLATE = lib
 #                                 SOLVER SPECIFICATION
 # IntelMKL, AmdACML, Magma or Lapack   
 ######################################################################################
-CONFIG += Magma
+CONFIG += Lapack
 
 ######################################################################################
 #                                 INTEL MKL solver
@@ -145,7 +145,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \
-    lapack_la_solver.cpp
+    lapack_la_solver.cpp \
+	../IDAS_DAESolver/mmio.c
 HEADERS += stdafx.h \
     lapack_la_solver.h
 

@@ -6,10 +6,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -19,13 +19,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 In this example we use the same conduction problem as in the tutorial 1.
 Here we introduce:
  - Discontinuous equations (symmetrical state transition networks: daeIF statements)
- 
+
 Here we have a very simple heat balance:
     ro * cp * dT/dt - Qin = h * A * (T - Tsurr)
 
-A piece of copper (a plate) is at one side exposed to the source of heat and at the 
-other to the surroundings. The process starts at the temperature of the metal of 283K. 
-The metal is allowed to warm up for 200 seconds and then the heat source is 
+A piece of copper (a plate) is at one side exposed to the source of heat and at the
+other to the surroundings. The process starts at the temperature of the metal of 283K.
+The metal is allowed to warm up for 200 seconds and then the heat source is
 removed and the metal cools down slowly again to the ambient temperature.
 
 """
@@ -50,7 +50,7 @@ class modTutorial(daeModel):
         self.alpha = daeParameter("&alpha;", eReal, self, "Heat transfer coefficient, W/m2K")
         self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
         self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
-        
+
         self.Qin  = daeVariable("Q_in",  typePower,       self, "Power of the heater, W")
         self.time = daeVariable("&tau;", typeNone,        self, "Time elapsed in the process, s")
         self.T    = daeVariable("T",     typeTemperature, self, "Temperature of the plate, K")
@@ -61,11 +61,11 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.time.dt() - 1.0
-        
+
         # Symmetrical STNs in DAE Tools can be created by using IF/ELSE_IF/ELSE/END_IF statements.
         # These statements are more or less used as normal if/else if/else blocks in all programming languages.
         # An important rule is that all states MUST contain the SAME NUMBER OF EQUATIONS.
-        # First start with the call to IF( condition ) function from daeModel class.  
+        # First start with the call to IF( condition ) function from daeModel class.
         # After that call, write equations that will be active if 'condition' is satisfied.
         # If there are only two states call the function ELSE() and write equations that will be active
         # if 'condition' is not satisfied.
@@ -85,16 +85,16 @@ class modTutorial(daeModel):
         #        time - 200         = 0
         #        time - 200.0000001 = 0
         # For example, if the variable 'time' is increasing from 0 and is approaching the value of 200,
-        # the equation 'Q_on' will be active. As the simulation goes on, the variable 'time' will reach the value 
-        # of 199.9999999 and the solver will discover that the expression 'time - 199.9999999' became equal to zero. 
-        # Then it will check if the condition 'time < 200' is satisfied. It is, and no state change will occur. 
-        # The solver will continue, the variable 'time' will increase to 200 and the solver will discover that 
-        # the expression 'time - 200' became equal to zero. It will again check the condition 'time < 200' and 
-        # find out that it is not satisfied. Now the state ELSE becomes active, and the solver will use equations 
+        # the equation 'Q_on' will be active. As the simulation goes on, the variable 'time' will reach the value
+        # of 199.9999999 and the solver will discover that the expression 'time - 199.9999999' became equal to zero.
+        # Then it will check if the condition 'time < 200' is satisfied. It is, and no state change will occur.
+        # The solver will continue, the variable 'time' will increase to 200 and the solver will discover that
+        # the expression 'time - 200' became equal to zero. It will again check the condition 'time < 200' and
+        # find out that it is not satisfied. Now the state ELSE becomes active, and the solver will use equations
         # from that state (in this example equation 'Q_off').
         # But, if we have 'time > 200' condition instead, we can see that when the variable 'time' reaches 200
         # the expression 'time - 200' becomes equal to zero. The solver will check the condition 'time > 200'
-        # and will find out that it is not satisfied and no state change will occur. However, once the variable 
+        # and will find out that it is not satisfied and no state change will occur. However, once the variable
         # 'time' reaches the value of 200.0000001 the expression 'time - 200.0000001' becomes equal to zero.
         # The solver will check the condition 'time > 200' and will find out that it is satisfied and it will
         # go to the state ELSE.
@@ -104,7 +104,7 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Q_on", "The heater is on")
         eq.Residual = self.Qin() - 1500
-        
+
         self.ELSE()
 
         eq = self.CreateEquation("Q_off", "The heater is off")
@@ -121,7 +121,7 @@ class simTutorial(daeSimulation):
                               "other to the surroundings. The process starts at the temperature of the metal of 283K. " \
                               "The metal is allowed to warm up for 200 seconds and then the heat source is " \
                               "removed and the metal cools down slowly again to the ambient temperature."
-          
+
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385)
         self.m.m.SetValue(1)
@@ -165,7 +165,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
@@ -177,13 +177,9 @@ def consoleRun():
     simulation.Finalize()
 
 if __name__ == "__main__":
-    runInGUI = True
-    if len(sys.argv) > 1:
-        if(sys.argv[1] == 'console'):
-            runInGUI = False
-    if runInGUI:
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
         from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)
-    else:
-        consoleRun()
