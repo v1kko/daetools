@@ -62,7 +62,17 @@
       <widget class="QComboBox" name="MINLPSolverComboBox">
        <item>
         <property name="text">
-         <string>Bonmin MINLP (with MUMPS)</string>
+         <string>IPOPT NLP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NLOPT NLP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bonmin MINLP</string>
         </property>
        </item>
       </widget>
@@ -150,6 +160,16 @@
        <item>
         <property name="text">
          <string>SuperLU_MT (sparse, POSIX threads, direct)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SuperLU_CUDA (sparse, CUDA, direct)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CUSP (sparse, CUDA, iterative)</string>
         </property>
        </item>
       </widget>

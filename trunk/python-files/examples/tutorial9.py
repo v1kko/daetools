@@ -35,12 +35,11 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-import daetools.pyTrilinos        as pyTrilinos
-#import daetools.pyIntelPardiso   as pyIntelPardiso
-#import daetools.pyAmdACML        as pyAmdACML
-#import daetools.pyIntelMKL       as pyIntelMKL
-#import daetools.pyLapack         as pyLapack
-#import daetools.pyAtlas          as pyAtlas
+from daetools.solvers import pyTrilinos
+#from daetools.solvers import pyIntelPardiso
+#from daetools.solvers import pyAmdACML
+#from daetools.solvers import pyIntelMKL
+#from daetools.solvers import pyLapack
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
 typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
@@ -152,10 +151,10 @@ def consoleRun():
 
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
     print "Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu")
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()

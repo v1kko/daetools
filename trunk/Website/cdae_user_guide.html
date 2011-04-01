@@ -1,18 +1,14 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <meta name="Description" content="">
-  <meta name="Keywords"
- content="DAE Tools Project, pyDAE, cxxDAE, dynamic modelling, simulation, partial differential equations, dae, pdae, equation-oriented modelling">
-  <meta http-equiv="Content-Type"
- content="text/html; charset=ISO-8859-1">
-  <meta name="Distribution" content="Copyrighted">
-  <meta name="Author" content="Dragan Nikolic - dnikolic@daetools.com">
-  <meta name="Robots" content="index,follow">
-  <link rel="stylesheet" href="images/dae.css" type="text/css">
-  <title>DAE Tools project</title>
-</head>
-<body>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+
+
+  <meta name="Description" content="" />
+  <meta name="Keywords" content="DAE Tools Project, pyDAE, cxxDAE, dynamic modelling, simulation, partial differential equations, dae, pdae, equation-oriented modelling" />
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+  <meta name="Distribution" content="Copyrighted" />
+  <meta name="Author" content="Dragan Nikolic - dnikolic@daetools.com" />
+  <meta name="Robots" content="index,follow" />
+  <link rel="stylesheet" href="images/dae.css" type="text/css" /><title>DAE Tools project</title></head><body>
 <!-- wrap starts here -->
 <div id="wrap">
 <div id="header">
@@ -36,7 +32,7 @@ Project</span></a></h1>
 <div id="content">
 <div id="sidebar">
 <div class="sidebox">
-<h1 class="clear">User Guide<br>
+<h1 class="clear">User Guide<br />
 </h1>
 <ul class="sidemenu">
   <li><a href="#" class="top">Dummy</a></li>
@@ -49,12 +45,12 @@ Project</span></a></h1>
 <h2>Models</h2>
 <p>Model is set of parameters, distribution domains, variables, ports,
 equations, state transition networks (STN) and child models. Models
-have the following properties:<br>
+have the following properties:<br />
 </p>
 <ul>
   <li>Name: string (read-only; inherited from daeObject)</li>
   <li>Defines a name of an object (&#8220;Temperature&#8221; for instance)</li>
-  <li>CanonicalName: string (read-only; inherited from daeObject)<br>
+  <li>CanonicalName: string (read-only; inherited from daeObject)<br />
 It is a method of defining a location of an object
 (&#8220;HeatExchanger.Temperature&#8221; for instance means that the object
 Temperature belongs to the parent object HeatExchanger). Object names
@@ -78,32 +74,29 @@ are divided by dot symbols (&#8220;.&#8221;)</li>
   <li>If, Else_if, Else, End_if</li>
   <li>Stn, State, Switch_to, End_stn </li>
 </ul>
-<p>Every user model has to implement two functions: <span
- style="font-style: italic;">__init__</span> and&nbsp;
-<span style="font-style: italic;">DeclareEquations</span>. <span
- style="font-style: italic;">__init__</span> is the constructor and all
+<p>Every user model has to implement two functions: <span style="font-style: italic;">__init__</span> and&nbsp;
+<span style="font-style: italic;">DeclareEquations</span>. <span style="font-style: italic;">__init__</span> is the constructor and all
 parameters,
 distribution domains, variables, ports, and child models must be
 declared here.&nbsp; DeclareEquations function is used to declare
 equations and state transition networks.</p>
-<p>For instance, models can be defined in <span
- style="font-weight: bold;">pyDAE</span> by the following construct:<br>
+<p>For instance, models can be defined in <span style="font-weight: bold;">pyDAE</span> by the following construct:<br />
 </p>
-<pre>class myModel(daeModel):<br>    def __init__(self, Name, Parent = None):<br>        daeModel.__init__(self, Name, Parent)<br>        ... (here go declarations of domains, parameters, variables, ports, etc)<br><br>    def DeclareEquations(self):<br>        ... (here go declarations of equations and state transitions)<br></pre>
+<pre>class myModel(daeModel):<br />    def __init__(self, Name, Parent = None):<br />        daeModel.__init__(self, Name, Parent)<br />        ... (here go declarations of domains, parameters, variables, ports, etc)<br /><br />    def DeclareEquations(self):<br />        ... (here go declarations of equations and state transitions)<br /></pre>
 <p>In <span style="font-weight: bold;">cxxDAE</span> models are
-defined by:<br>
+defined by:<br />
 </p>
-<pre>class myModel : public daeModel<br>{<br>public:<br> &nbsp;&nbsp; myModel(string strName, daeModel* pParent = NULL) : daeModel(strName, pParent)<br>    {<br>        ... (here we set additional properties of domains, parameters, variables, ports, etc)<br>    }<br><br>&nbsp;&nbsp;&nbsp; void DeclareEquations(void)<br>&nbsp;&nbsp;&nbsp; {<br>        ... (here go declarations of equations and state transitions)<br>   &nbsp;}<br><br>public:<br>    ... (here go declarations of domains, parameters, variables, ports, etc)<br>};</pre>
+<pre>class myModel : public daeModel<br />{<br />public:<br /> &nbsp;&nbsp; myModel(string strName, daeModel* pParent = NULL) : daeModel(strName, pParent)<br />    {<br />        ... (here we set additional properties of domains, parameters, variables, ports, etc)<br />    }<br /><br />&nbsp;&nbsp;&nbsp; void DeclareEquations(void)<br />&nbsp;&nbsp;&nbsp; {<br />        ... (here go declarations of equations and state transitions)<br />   &nbsp;}<br /><br />public:<br />    ... (here go declarations of domains, parameters, variables, ports, etc)<br />};</pre>
 <p>Details of how to declare and use parameters, distribution domains,
 variables, ports, equations, state transition networks (STN) and child
-models are given in the following sections.<br>
+models are given in the following sections.<br />
 </p>
 <h2>Equations</h2>
 <p><span style="font-weight: bold;">DAE Tools</span> introduce two
 types of equations: ordinary and distributed.
 A residual expression of distributed equations is valid on every point
 in distributed domains that the equations is
-distriibuted on. The most important equation properties are:<br>
+distriibuted on. The most important equation properties are:<br />
 </p>
 <ul>
   <li><span style="font-weight: bold; font-style: italic;">Name</span>:
@@ -124,110 +117,80 @@ adouble</li>
 to declare an ordinary equation:</p>
 <pre>eq = model.CreateEquation("MyEquation")</pre>
 <p>while to declare a distributed equation the next statemets is used:</p>
-<pre>eq = model.CreateEquation("MyEquation")<br>d = eq.DistributeOnDomain(myDomain, eClosedClosed)</pre>
-<p>In cxxDAE the following statement is used <span
- style="font-weight: bold;"></span>to declare an ordinary equation:</p>
+<pre>eq = model.CreateEquation("MyEquation") <br />d = eq.DistributeOnDomain(myDomain, eClosedClosed)</pre>
+<p>In cxxDAE the following statement is used <span style="font-weight: bold;" />to declare an ordinary equation:</p>
 <pre>eq = model.CreateEquation("MyEquation");</pre>
 <p>while to declare a distributed equation the next statemets is used:</p>
-<pre>eq = model.CreateEquation("MyEquation");<br>d = eq.DistributeOnDomain(myDomain, eClosedClosed);</pre>
+<pre>eq = model.CreateEquation("MyEquation");<br />d = eq.DistributeOnDomain(myDomain, eClosedClosed);</pre>
 <p>Equations can be distributed on a whole domain or on a part of it.
-Currently there are 7 options:<br>
+Currently there are 7 options:<br />
 </p>
 <ul>
-  <li>Distribute on a closed domain - analogous to: x &#8712;&nbsp; <span
- style="font-weight: bold;">[ </span>LB, UB <span
- style="font-weight: bold;">]</span></li>
-  <li>Distribute on a left open domain - analogous to: x &#8712; <span
- style="font-weight: bold;">( </span>LB, UB <span
- style="font-weight: bold;">]</span></li>
-  <li>Distribute on a right open domain - analogous to: x &#8712; <span
- style="font-weight: bold;">[</span> LB, UB<span
- style="font-weight: bold;"> )</span></li>
-  <li>Distribute on a domain open on both sides - analogous to: x &#8712; <span
- style="font-weight: bold;">(</span> LB, UB<span
- style="font-weight: bold;"> )</span></li>
-  <li>Distribute on a left bound - only one point: x &#8712; <span
- style="font-weight: bold;"></span>{ LB }<span
- style="font-weight: bold;"></span></li>
-  <li>Distribute on a right bound - only one point: x &#8712; { UB }<br>
+  <li>Distribute on a closed domain - analogous to: x &#8712;&nbsp; <span style="font-weight: bold;">[ </span>LB, UB <span style="font-weight: bold;">]</span></li>
+  <li>Distribute on a left open domain - analogous to: x &#8712; <span style="font-weight: bold;">( </span>LB, UB <span style="font-weight: bold;">]</span></li>
+  <li>Distribute on a right open domain - analogous to: x &#8712; <span style="font-weight: bold;">[</span> LB, UB<span style="font-weight: bold;"> )</span></li>
+  <li>Distribute on a domain open on both sides - analogous to: x &#8712; <span style="font-weight: bold;">(</span> LB, UB<span style="font-weight: bold;"> )</span></li>
+  <li>Distribute on a left bound - only one point: x &#8712; <span style="font-weight: bold;" />{ LB }<span style="font-weight: bold;" /></li>
+  <li>Distribute on a right bound - only one point: x &#8712; { UB }<br />
   </li>
-  <li>Custom array of points within a domain<br>
+  <li>Custom array of points within a domain<br />
   </li>
 </ul>
 <p>where LB stands for the LowerBound and UB stands for the UpperBound
-of the domain. An overview of various bounds is given in <span
- style="font-weight: bold;">Figure 1.</span><br>
+of the domain. An overview of various bounds is given in <span style="font-weight: bold;">Figure 1.</span><br />
 </p>
 <p>
 </p>
 <p>Therefore, the Python
-code to create the equation residual F (from Figure 1.) in <span
- style="font-weight: bold;">pyDAE</span> is given by:<br>
+code to create the equation residual F (from Figure 1.) in <span style="font-weight: bold;">pyDAE</span> is given by:<br />
 </p>
-<pre>F.Residal = V14.dt() + V1() / (V14() + 2.5) + sin(3.14 * V3())<br></pre>
+<pre>F.Residal = V14.dt() + V1() / (V14() + 2.5) + sin(3.14 * V3())<br /></pre>
 <p>In <span style="font-weight: bold;">cxxDAE</span> the equation
-residual F is given by:<br>
+residual F is given by:<br />
 </p>
 <pre>F.SetResidal( V14.dt() + V1() / (V14() + 2.5) + sin(3.14 * V3()) );</pre>
-<p>Ovde sad moze onaj grafik sa razni Bounds-ima...<br>
+<p>Ovde sad moze onaj grafik sa razni Bounds-ima...<br />
 </p>
 <h3>Defining equations (building of equation residuals)</h3>
-<br>
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2"
- cellspacing="2">
+<br />
+<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20%5B%5D%5B%5D.png"><br>
-x: eClosedClosed; y: eClosedClosed<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20%5B%5D%5B%5D.png" /><br />
+x: eClosedClosed; y: eClosedClosed<br />
       </td>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20%28%29%28%29.png"><br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20%28%29%28%29.png" /><br />
 x: eOpenOpen; y: eOpenOpen </td>
     </tr>
     <tr>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20%5B%5D%28%29.png"><br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20%5B%5D%28%29.png" /><br />
 x: eClosedClosed; y: eOpenOpen </td>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20%5B%5D%28%5D.png"><br>
-x: eClosedClosed; y: eOpenClosed<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20%5B%5D%28%5D.png" /><br />
+x: eClosedClosed; y: eOpenClosed<br />
       </td>
     </tr>
     <tr>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20LB%20%5B%29.png"><br>
-x: LB; y: eClosedOpen<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20LB%20%5B%29.png" /><br />
+x: LB; y: eClosedOpen<br />
       </td>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20LB%20%5B%5D.png"><br>
-x: UB; y: eClosedClosed<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20LB%20%5B%5D.png" /><br />
+x: UB; y: eClosedClosed<br />
       </td>
     </tr>
     <tr>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20UB%20%5B%5D.png"><br>
-x: UB; y: eClosedClosed<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20UB%20%5B%5D.png" /><br />
+x: UB; y: eClosedClosed<br />
       </td>
-      <td style="text-align: center;"><img
- style="width: 250px; height: 250px;" alt=""
- src="images/EquationBounds%20LB%20UB.png"><br>
-x: LB; y: UB<br>
+      <td style="text-align: center;"><img style="width: 250px; height: 250px;" alt="" src="images/EquationBounds%20LB%20UB.png" /><br />
+x: LB; y: UB<br />
       </td>
     </tr>
   </tbody>
 </table>
 <p style="text-align: center;"><span style="font-weight: bold;">Figure
-1. Distributed equation bound examples</span><br>
+1. Distributed equation bound examples</span><br />
 </p>
-<p><br>
+<p><br />
 </p>
 <h2>Distribution Domains</h2>
 <p>Derived from daeObject. A distribution domain is a general term used
@@ -237,7 +200,7 @@ arrays and distributed domains. Arrays are a synonym for a simple array
 Distributed domains are most frequently used to model a spatial
 distribution of variables, but can be equally used to spatially
 distribute just any other object (parameters, ports, equations or even
-models). Domains have the following properties:<br>
+models). Domains have the following properties:<br />
 </p>
 <ul>
   <li>Name: string (read-only; inherited from daeObject)</li>
@@ -251,10 +214,10 @@ models). Domains have the following properties:<br>
 </ul>
 <p>Distributed domains also have:</p>
 <ul>
-  <li>DiscretizationMethod: daeeDiscretizationMethod (read-only)<br>
+  <li>DiscretizationMethod: daeeDiscretizationMethod (read-only)<br />
 It can be backward difference, forward difference or central difference
 method</li>
-  <li>DiscretizationOrder: unsigned integer (read-only)<br>
+  <li>DiscretizationOrder: unsigned integer (read-only)<br />
 It can be 2, 4 and 6</li>
 </ul>
 <p>There is a difference between number of points in domain and number
@@ -286,12 +249,12 @@ properties) in the simulation.</p>
 <pre>myDomain = daeDomain("myDomain", Parent)</pre>
 <h3>Defining a domain</h3>
 <p>The following statement is used to define a distributed domain:</p>
-<pre># Center finite diff, 2nd order, 10 elements, Bounds: 0.0 to 1.0<br>myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,&nbsp; 1.0)</pre>
+<pre># Center finite diff, 2nd order, 10 elements, Bounds: 0.0 to 1.0<br />myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,&nbsp; 1.0)</pre>
 <p>To define an array:</p>
-<pre># Array of 10 elements<br>myDomain.CreateArray(10)</pre>
+<pre># Array of 10 elements<br />myDomain.CreateArray(10)</pre>
 <h3>Non-uniform grids</h3>
 <p>To define a non-uniform grid:</p>
-<pre># First create a distributed domain<br>myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,&nbsp; 1.0)<br># The original points are: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]<br># If we are have a stiff profile at the beginning of the domain, <br># then we can place more points there<br>myDomain.SetPoint(0, 0)<br>myDomain.SetPoint(1, 0.02)<br>myDomain.SetPoint(2, 0.06)<br>myDomain.SetPoint(3, 0.10)<br>myDomain.SetPoint(4, 0.14)<br>myDomain.SetPoint(5, 0.18)<br>myDomain.SetPoint(6, 0.22)<br>myDomain.SetPoint(7, 0.40)<br>myDomain.SetPoint(8, 0.60)<br>myDomain.SetPoint(9, 0.80)<br>myDomain.SetPoint(10, 1.0)<br><br># In the previous case points were set manually<br># However, we can also loop over the original points and calculate the new values<br>for n in range(0, myDomain.NumberOfPoints):<br>&nbsp;&nbsp;&nbsp; newValue = ...<br>&nbsp;&nbsp;&nbsp; myDomain.SetPoint(n, newValue)<br></pre>
+<pre># First create a distributed domain<br />myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,&nbsp; 1.0)<br /># The original points are: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]<br /># If we are have a stiff profile at the beginning of the domain, <br /># then we can place more points there<br />myDomain.SetPoint(0, 0)<br />myDomain.SetPoint(1, 0.02)<br />myDomain.SetPoint(2, 0.06)<br />myDomain.SetPoint(3, 0.10)<br />myDomain.SetPoint(4, 0.14)<br />myDomain.SetPoint(5, 0.18)<br />myDomain.SetPoint(6, 0.22)<br />myDomain.SetPoint(7, 0.40)<br />myDomain.SetPoint(8, 0.60)<br />myDomain.SetPoint(9, 0.80)<br />myDomain.SetPoint(10, 1.0)<br /><br /># In the previous case points were set manually<br /># However, we can also loop over the original points and calculate the new values<br />for n in range(0, myDomain.NumberOfPoints):<br />&nbsp;&nbsp;&nbsp; newValue = ...<br />&nbsp;&nbsp;&nbsp; myDomain.SetPoint(n, newValue)<br /></pre>
 <p>The comparison of the effects of uniform and non-uniform grids is
 given in Figure 1 (a simple heat conduction problem from the Tutorial3
 has been served as a basis for comparison). Here we have the following
@@ -303,11 +266,10 @@ domain</li>
   <li>Red line (10 intervals): more points at the beginning of the
 domain</li>
   <li>Green line (100 intervals): uniform-grid (close to the analytical
-solution)<br>
+solution)<br />
   </li>
 </ul>
-<p style="text-align: center;"><img style="width: 563px; height: 318px;"
- alt="" src="images/NonUniformGrid.png"><br>
+<p style="text-align: center;"><img style="width: 563px; height: 318px;" alt="" src="images/NonUniformGrid.png" /><br />
 </p>
 <div style="text-align: center;"><span style="font-weight: bold;">Figure
 2.
@@ -316,7 +278,7 @@ of
 the
 effects
 of
-uniform and non-uniform grids<br>
+uniform and non-uniform grids<br />
 </span></div>
 <p>We can clearly observe that we get much more precise results by
 using more dense grid at the beginning of the domain.</p>
@@ -327,8 +289,8 @@ access the real (raw) data.</p>
 <p>I) To get a value of the point within the domain at the given index
 we can use operator []. For instance if we want variable myVar to be
 equal to the sixth point in the domain myDomain, we can write:</p>
-<pre># Notation:<br>#&nbsp; - eq is a daeEquation object <br>#&nbsp; - myDomain is daeDomain object<br>#&nbsp; - myVar is an daeVariable object<br>eq.Residual = myVar() - myDomain[5]</pre>
-<p>This code translates into:<br>
+<pre># Notation:<br />#&nbsp; - eq is a daeEquation object <br />#&nbsp; - myDomain is daeDomain object<br />#&nbsp; - myVar is an daeVariable object<br />eq.Residual = myVar() - myDomain[5]</pre>
+<p>This code translates into:<br />
 </p>
 <p>&nbsp;&nbsp;&nbsp; </p>
 <p>II) daeDomain operator() returns the daeIndexRange object which is
@@ -361,15 +323,15 @@ array</li>
 </ul>
 <p>The process of creating parameters is two-fold: first you declare a
 parameter in the model and then you define it (by assigning its value)
-in the simulation.<br>
+in the simulation.<br />
 </p>
 <h3>Declaring a parameter</h3>
 <p>Parameters are declared in a model constructor (__init__ function).
 To declare an ordinary parameter:</p>
-<pre>myParam = daeParameter("myParam", eReal, Parent)<br></pre>
+<pre>myParam = daeParameter("myParam", eReal, Parent)<br /></pre>
 <p>Parameters can be distributed on domains. To declare a distributed
 parameter:</p>
-<pre>myParam = daeParameter("myParam", eReal, Parent)<br>myParam.DistributeOnDomain(myDomain)<br></pre>
+<pre>myParam = daeParameter("myParam", eReal, Parent)<br />myParam.DistributeOnDomain(myDomain)<br /></pre>
 <p>Here, argument Parent can be either daeModel or daePort.</p>
 <h3>Defining a parameter</h3>
 <p>Parameters are defined in a simulation class
@@ -378,7 +340,7 @@ parameter:</p>
 <pre>myParam.SetValue(1.0)</pre>
 <p>To set a value of distributed parameters (one-dimensional for
 example):</p>
-<pre>for i in range(0, myDomain.NumberOfPoints)<br>&nbsp;&nbsp;&nbsp; myParam.SetValue(i, 1.0)</pre>
+<pre>for i in range(0, myDomain.NumberOfPoints)<br />&nbsp;&nbsp;&nbsp; myParam.SetValue(i, 1.0)</pre>
 <h3>Using parameters</h3>
 <p>NOTE: It is important to understand that all functions in this
 chapter are used ONLY to construct equation residuals and NOT no to
@@ -386,7 +348,7 @@ access the real (raw) data.</p>
 <p>I) To get a value of the ordinary parameter we can use operator ().
 For instance, if we want variable myVar to be equal to the sum of the
 value of the parameter myParam and 15, we can write:</p>
-<pre># Notation:<br>#&nbsp; - eq is a daeEquation object<br>#&nbsp; - myParam is an ordinary daeParameter object (not distributed)<br>#&nbsp; - myVar is an ordinary daeVariable (not distributed)<br>eq.Residual = myVar() - myParam() - 15</pre>
+<pre># Notation:<br />#&nbsp; - eq is a daeEquation object<br />#&nbsp; - myParam is an ordinary daeParameter object (not distributed)<br />#&nbsp; - myVar is an ordinary daeVariable (not distributed)<br />eq.Residual = myVar() - myParam() - 15</pre>
 <p>This code translates into:</p>
 <p>&nbsp;&nbsp;&nbsp; </p>
 <p>II) To get a value of the distributed parameter we can again use
@@ -394,19 +356,19 @@ operator (). For instance, if we want distributed variable myVar to be
 equal to the sum of the value of the parameter myParam and 15 at each
 point of the domain myDomain, we need an equation for each point in the
 myDomain:</p>
-<pre># Notation:<br>#&nbsp; - myDomain is daeDomain object<br>#&nbsp; - n is the number of points in the myDomain<br>#&nbsp; - eq is a daeEquation object distributed on the myDomain<br>#&nbsp; - d is daeDEDI object (used to iterate through the domain points)<br>#&nbsp; - myParam is daeParameter object distributed on the myDomain<br>#&nbsp; - myVar is daeVariable object distributed on the myDomain<br><br>d = eq.DistributeOnDomain(myDomain, eClosedClosed)<br>eq.Residual = myVar(d) - myParam(d) - 15</pre>
+<pre># Notation:<br />#&nbsp; - myDomain is daeDomain object<br />#&nbsp; - n is the number of points in the myDomain<br />#&nbsp; - eq is a daeEquation object distributed on the myDomain<br />#&nbsp; - d is daeDEDI object (used to iterate through the domain points)<br />#&nbsp; - myParam is daeParameter object distributed on the myDomain<br />#&nbsp; - myVar is daeVariable object distributed on the myDomain<br /><br />d = eq.DistributeOnDomain(myDomain, eClosedClosed)<br />eq.Residual = myVar(d) - myParam(d) - 15</pre>
 <p>This code translates into:</p>
 <p>&nbsp;&nbsp;&nbsp; </p>
 <p>which is equivalent to writing (in pseudo-code):</p>
-<pre>for d = 0 to n: <br>&nbsp;&nbsp;&nbsp; myVar(d) = myParam(d) + 15</pre>
+<pre>for d = 0 to n: <br />&nbsp;&nbsp;&nbsp; myVar(d) = myParam(d) + 15</pre>
 <p>and which internally transforms into n separate equations:</p>
 <p>&nbsp;&nbsp;&nbsp; </p>
 <p>Obviously, a parameter can be distributed on more than one domain.
 In that case we can use identical functions which accept two arguments:</p>
-<pre># Notation:<br>#&nbsp; - myDomain1, myDomain2 are daeDomain objects<br>#&nbsp; - n is the number of points in the myDomain1<br>#&nbsp; - m is the number of points in the myDomain2<br>#&nbsp; - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2<br>#&nbsp; - d is daeDEDI object (used to iterate through the domain points)<br>#&nbsp; - myParam is daeParameter object distributed on the myDomain1 and myDomain2<br>#&nbsp; - myVar is daeVariable object distributed on the myDomaina and myDomain2<br><br>d1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)<br>d2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)<br>eq.Residual = myVar(d1,d2) &#8211; myParam(d1,d2) &#8211; 15</pre>
+<pre># Notation:<br />#&nbsp; - myDomain1, myDomain2 are daeDomain objects<br />#&nbsp; - n is the number of points in the myDomain1<br />#&nbsp; - m is the number of points in the myDomain2<br />#&nbsp; - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2<br />#&nbsp; - d is daeDEDI object (used to iterate through the domain points)<br />#&nbsp; - myParam is daeParameter object distributed on the myDomain1 and myDomain2<br />#&nbsp; - myVar is daeVariable object distributed on the myDomaina and myDomain2<br /><br />d1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)<br />d2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)<br />eq.Residual = myVar(d1,d2) &#8211; myParam(d1,d2) &#8211; 15</pre>
 <p>This code translates into:</p>
-<p>&nbsp;&nbsp;&nbsp; <br>
-<br>
+<p>&nbsp;&nbsp;&nbsp; <br />
+<br />
 </p>
 <p>III) To get an array of parameter values we can use the function
 array which returns the adouble_array object. Arrays of values can only
@@ -418,23 +380,23 @@ we can use the function sum (defined in daeModel class) which accepts
 results of the array function (defined in daeParameter class).
 Arguments for the array function are daeIndexRange objects obtained by
 the call to daeDomain operator (). Thus, we can write:</p>
-<pre># Notation:<br>#&nbsp; - myDomain is daeDomain object<br>#&nbsp; - n is the number of points in the domain myDomain<br>#&nbsp; - eq is daeEquation object<br>#&nbsp; - myVar is daeVariable object<br>#&nbsp; - myParam is daeParameter object distributed on the myDomain<br><br>eq.Residual = myVar() - sum( myParam.array( myDomain() ) )</pre>
+<pre># Notation:<br />#&nbsp; - myDomain is daeDomain object<br />#&nbsp; - n is the number of points in the domain myDomain<br />#&nbsp; - eq is daeEquation object<br />#&nbsp; - myVar is daeVariable object<br />#&nbsp; - myParam is daeParameter object distributed on the myDomain<br /><br />eq.Residual = myVar() - sum( myParam.array( myDomain() ) )</pre>
 <p>This code translates into:</p>
-<p>&nbsp;&nbsp;&nbsp; <br>
+<p>&nbsp;&nbsp;&nbsp; <br />
 </p>
 <p>which transforms into:</p>
 <p>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </p>
 <p>The above example could be also written in an extended form:</p>
-<pre># points_range is daeDomainRange object<br>points_range = daeDomainRange(myDomain)<br><br># arr is adouble_array object <br>arr = myVar2.array(points_range)<br><br># Finally:<br>eq.Residual = myVar() - sum(arr)</pre>
+<pre># points_range is daeDomainRange object<br />points_range = daeDomainRange(myDomain)<br /><br /># arr is adouble_array object <br />arr = myVar2.array(points_range)<br /><br /># Finally:<br />eq.Residual = myVar() - sum(arr)</pre>
 <p>However, the previous formulation is more concise and shorter.</p>
 <p>On the other hand, if we want variable myVar to be equal to the sum
 of values of the parameter myParam only for certain points in the
 myDomain, there are two ways to do it:</p>
-<pre># Notation:<br>#&nbsp; - myDomain is daeDomain object<br>#&nbsp; - n is the number of points in the domain myDomain<br>#&nbsp; - eq is a daeEquation object<br>#&nbsp; - myVar is an ordinary daeVariable object<br>#&nbsp; - myParam is a daeParameter object distributed on the myDomain<br><br># 1) For a given set of points; the points must be in the range [0,n-1]<br>eq.Residual = myVar() - sum( myParam.array( myDomain( [0, 5, 12] ) ) )<br><br><br><br><br><br># 2) For a given slice of points in the domain; <br>#&nbsp;&nbsp;&nbsp; slices are defined by 3 arguments: start_index, end_index, step<br>#&nbsp;&nbsp;&nbsp; in this example: start_index = 1<br>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end_index = 10<br>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; step = 2<br>eq.Residual = myVar() - sum( myParam.array( myDomain(1, 10, 2) ) )</pre>
+<pre># Notation:<br />#&nbsp; - myDomain is daeDomain object<br />#&nbsp; - n is the number of points in the domain myDomain<br />#&nbsp; - eq is a daeEquation object<br />#&nbsp; - myVar is an ordinary daeVariable object<br />#&nbsp; - myParam is a daeParameter object distributed on the myDomain<br /><br /># 1) For a given set of points; the points must be in the range [0,n-1]<br />eq.Residual = myVar() - sum( myParam.array( myDomain( [0, 5, 12] ) ) )<br /><br /><br /><br /><br /><br /># 2) For a given slice of points in the domain; <br />#&nbsp;&nbsp;&nbsp; slices are defined by 3 arguments: start_index, end_index, step<br />#&nbsp;&nbsp;&nbsp; in this example: start_index = 1<br />#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end_index = 10<br />#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; step = 2<br />eq.Residual = myVar() - sum( myParam.array( myDomain(1, 10, 2) ) )</pre>
 <p>The code sample 1) translates into:</p>
 <p>&nbsp;&nbsp;&nbsp; </p>
 <p>The code sample 2) translates into:</p>
-<p>&nbsp;&nbsp;&nbsp; <br>
+<p>&nbsp;&nbsp;&nbsp; <br />
 </p>
 <p>NOTE: One may argue that the function array calls can be somewhat
 simpler and directly accept python lists or slices as its arguments.
@@ -444,12 +406,12 @@ For instance it would be possible to write:</p>
 <pre>eq.Residual = myVar() - sum( myParam.array( slice(1,10,2) ) )</pre>
 <p>&nbsp;However, that would be more error prone since it does not
 check whether a valid domain is used and whether specified indexes lay
-within the domain bounds (which should be done by the user).<br>
+within the domain bounds (which should be done by the user).<br />
 </p>
-<p><br>
+<p><br />
 </p>
 <h2>Variable Types</h2>
-<p><br>
+<p><br />
 Variable types are used to describe variables. The most important
 properties are:</p>
 <ul>
@@ -462,23 +424,23 @@ properties are:</p>
 </ul>
 <p>Declaration of variable types is usually done outside of model
 definitions (as global variables).</p>
-<p><br>
+<p><br />
 </p>
 <h3>Declaring a variable type</h3>
-<p>To declare a variable type:<br>
+<p>To declare a variable type:<br />
 # Temperature, units: Kelvin, limits: 100 &#8211; 1000K, Def.value: 273K,
-Abs.Tol: 1E-5<br>
+Abs.Tol: 1E-5<br />
 typeTemperature = daeVariableType("Temperature", "K", 100, 1000, 273,
-1E-5)<br>
+1E-5)<br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p></p>
+<p />
 <h2>Variables</h2>
-<p><br>
+<p><br />
 Variables are time variant quantities (state variables). However, it
 is possible to fix the value of certain variables, that is to fix the
-degrees of freedom of a model. The most important properties are:<br>
+degrees of freedom of a model. The most important properties are:<br />
 </p>
 <ul>
   <li>Name: string (read-only; inherited from daeObject)</li>
@@ -521,140 +483,140 @@ array</li>
 <p>The process of creating variables is two-fold: first you declare a
 variable in the model and then you define it (by assigning its value)
 in the simulation. </p>
-<p><br>
+<p><br />
 </p>
 <h3>Declaring a variable</h3>
 <p>Variables are declared in a model constructor (__init__ function).
-To declare an ordinary variable:<br>
-myVar = daeVariable("myVar", variableType, Parent)<br>
+To declare an ordinary variable:<br />
+myVar = daeVariable("myVar", variableType, Parent)<br />
 Variables can be distributed on domains. To declare a distributed
-variable:<br>
-myVar = daeVariable("myVar", variableType, Parent)<br>
-myVar.DistributeOnDomain(myDomain)<br>
-Here, argument Parent can be either daeModel or daePort.<br>
-<br>
+variable:<br />
+myVar = daeVariable("myVar", variableType, Parent)<br />
+myVar.DistributeOnDomain(myDomain)<br />
+Here, argument Parent can be either daeModel or daePort.<br />
+<br />
 </p>
 <h3>Setting degrees of freedom of the model (fixing the variable value)</h3>
 <p>Degrees of freedom are fixed in a simulation class (SetUpVariables
-function). To fix the value of ordinary variables:<br>
-myVar.FixValue(1.0)<br>
-To fix the value of distributed variables (one-dimensional for example):<br>
-for i in range(0, myDomain.NumberOfPoints)<br>
-&nbsp;&nbsp;&nbsp; myVar.FixValue(i, 1.0)<br>
-<br>
-Changing a value of the fixed variable<br>
-<br>
+function). To fix the value of ordinary variables:<br />
+myVar.FixValue(1.0)<br />
+To fix the value of distributed variables (one-dimensional for example):<br />
+for i in range(0, myDomain.NumberOfPoints)<br />
+&nbsp;&nbsp;&nbsp; myVar.FixValue(i, 1.0)<br />
+<br />
+Changing a value of the fixed variable<br />
+<br />
 </p>
 <h3>Accessing a variable raw data</h3>
 <p>GetValue/SetValue functions access the variable raw data and should
-be used directly with a great care!!!<br>
+be used directly with a great care!!!<br />
 ONLY USE THIS FUNCTION IF YOU EXACTLY KNOW WHAT ARE YOU DOING AND&nbsp;
-THE POSSIBLE IMPLICATIONS!!!!<br>
-To set the value of ordinary variables:<br>
-myVar.SetValue(1.0)<br>
-To set the value of distributed variables (one-dimensional for example):<br>
-for i in range(0, myDomain.NumberOfPoints)<br>
-&nbsp;&nbsp;&nbsp; myVar.SetValue(i, 1.0)<br>
-<br>
+THE POSSIBLE IMPLICATIONS!!!!<br />
+To set the value of ordinary variables:<br />
+myVar.SetValue(1.0)<br />
+To set the value of distributed variables (one-dimensional for example):<br />
+for i in range(0, myDomain.NumberOfPoints)<br />
+&nbsp;&nbsp;&nbsp; myVar.SetValue(i, 1.0)<br />
+<br />
 </p>
 <h3>Setting an initial guess</h3>
 <p>Initial guesses are set in a simulation class (SetUpVariables
-function). To set the initial guess of an ordinary variable:<br>
-myVar.SetInitialGuess(1.0)<br>
-To set the initial guess of distributed variables:<br>
-for i in range(myDomain.NumberOfPoints)<br>
-&nbsp;&nbsp;&nbsp; myVar.SetInitialGuess(i, 1.0)<br>
+function). To set the initial guess of an ordinary variable:<br />
+myVar.SetInitialGuess(1.0)<br />
+To set the initial guess of distributed variables:<br />
+for i in range(myDomain.NumberOfPoints)<br />
+&nbsp;&nbsp;&nbsp; myVar.SetInitialGuess(i, 1.0)<br />
 To set the initial guess of distributed variables to a single value for
-all points in all domains:<br>
-myVar.SetInitialGuesses(1.0)<br>
-<br>
+all points in all domains:<br />
+myVar.SetInitialGuesses(1.0)<br />
+<br />
 </p>
 <h3>Setting an initial condition</h3>
 <p>Initial conditions are set in a simulation class (SetUpVariables
 function). It is possible to set initial conditions for the variable
 value or its time derivative. To set the initial condition of an
-ordinary variable:<br>
-myVar.SetInitialCondition(1.0, eAlgebraicIC)<br>
-To set the initial condition of distributed variables:<br>
-for i in range(myDomain.NumberOfPoints)<br>
-&nbsp;&nbsp;&nbsp; myVar.SetInitialCondition(i, 1.0, eAlgebraicIC)<br>
-<br>
+ordinary variable:<br />
+myVar.SetInitialCondition(1.0, eAlgebraicIC)<br />
+To set the initial condition of distributed variables:<br />
+for i in range(myDomain.NumberOfPoints)<br />
+&nbsp;&nbsp;&nbsp; myVar.SetInitialCondition(i, 1.0, eAlgebraicIC)<br />
+<br />
 </p>
 <h3>Re-setting an initial condition</h3>
-<p><br>
+<p><br />
 </p>
 <h3>Setting an absolute tolerance</h3>
 <p>Absolute tolerances are set in a simulation class (SetUpVariables
 function). To set the absolute tolerance of both ordinary and
-distributed variables:<br>
-myVar.SetAbsoluteTolerances(1E-5)<br>
-<br>
+distributed variables:<br />
+myVar.SetAbsoluteTolerances(1E-5)<br />
+<br />
 </p>
 <h3>Getting a variable value</h3>
 <p>NOTE: It is important to understand that all functions in this and
 all following chapters (4.1.6.7. to Error: Reference source not found)
 are used ONLY to construct equation residuals and NOT no to access the
-real (raw) data.<br>
-<br>
+real (raw) data.<br />
+<br />
 For the code snippet how to get a variable value see the examples I -
 III in the section 4.1.4.3. Operator () in daeVariable behaves in the
-same way as the operator () in daeParameter class.<br>
-<br>
+same way as the operator () in daeParameter class.<br />
+<br />
 </p>
 <h3>Getting a variable time derivative</h3>
 <p>I) To get a time derivative of the ordinary variable we can use the
 function dt. For instance, if we want a time derivative of the variable
-myVar to be equal to some constant, let's say 1.0, we can write:<br>
-# Notation:<br>
-#&nbsp; - eq is a daeEquation object<br>
-#&nbsp; - myVar is an ordinary daeVariable (not distributed)<br>
-<br>
-eq.Residual = myVar.dt() - 1<br>
-This code translates into:<br>
-&nbsp;&nbsp;&nbsp; <br>
+myVar to be equal to some constant, let's say 1.0, we can write:<br />
+# Notation:<br />
+#&nbsp; - eq is a daeEquation object<br />
+#&nbsp; - myVar is an ordinary daeVariable (not distributed)<br />
+<br />
+eq.Residual = myVar.dt() - 1<br />
+This code translates into:<br />
+&nbsp;&nbsp;&nbsp; <br />
 II) Getting a time derivative of distributed variables is analogous to
 getting a parameter value (see the example II in the section 4.1.4.3.).
 The function dt accepts the same arguments and it is called in the same
-way as the operator () in daeParameter class.<br>
+way as the operator () in daeParameter class.<br />
 III) Getting an array of time derivatives of distributed variables is
 analogous to getting an array of parameter values (see the example III
 in the section 4.1.4.3.). The function dt_array accepts the same
 arguments and it is called in the same way as the function array in
-daeParameter class.<br>
-<br>
+daeParameter class.<br />
+<br />
 </p>
 <h3>Getting a variable partial derivative</h3>
 <p>It is possible to get a partial derivative only of the distributed
 variables and only for a domain which is distributed (not an ordinary
-array). <br>
+array). <br />
 I) To get a partial derivative of the variable per some domain, we can
 use functions d or d2 (the function d calculates a partial derivative
 of the first order while the function d2 calculates a partial
 derivative of the second order). For instance, if we want a first order
 partial derivative of the variable myVar to be equal to some constant,
-let's say 1.0, we can write:<br>
-# Notation:<br>
-#&nbsp; - myDomain is daeDomain object<br>
-#&nbsp; - n is the number of points in the myDomain<br>
-#&nbsp; - eq is a daeEquation object distributed on the myDomain<br>
+let's say 1.0, we can write:<br />
+# Notation:<br />
+#&nbsp; - myDomain is daeDomain object<br />
+#&nbsp; - n is the number of points in the myDomain<br />
+#&nbsp; - eq is a daeEquation object distributed on the myDomain<br />
 #&nbsp; - d is daeDEDI object (used to iterate through the domain
-points)<br>
-#&nbsp; - myVar is daeVariable object distributed on the myDomain<br>
-<br>
-d = eq.DistributeOnDomain(myDomain, eOpenOpen)<br>
-eq.Residual = myVar.d(myDomain, d) - 1<br>
-This code translates into:<br>
-&nbsp;&nbsp;&nbsp; <br>
+points)<br />
+#&nbsp; - myVar is daeVariable object distributed on the myDomain<br />
+<br />
+d = eq.DistributeOnDomain(myDomain, eOpenOpen)<br />
+eq.Residual = myVar.d(myDomain, d) - 1<br />
+This code translates into:<br />
+&nbsp;&nbsp;&nbsp; <br />
 Please note that the function myEquation is not distributed on the
-whole myDomain (it does not include the bounds). <br>
+whole myDomain (it does not include the bounds). <br />
 In the case we want to get a partial derivative of the second order we
 can use the function d2 which is called in the same fashion as the
-function d:<br>
-d = eq.DistributeOnDomain(myDomain, eOpenOpen)<br>
-eq.Residual = myVar.d2(myDomain, d) - 1<br>
-which translates into:<br>
-&nbsp;&nbsp;&nbsp; <br>
-<br>
+function d:<br />
+d = eq.DistributeOnDomain(myDomain, eOpenOpen)<br />
+eq.Residual = myVar.d2(myDomain, d) - 1<br />
+which translates into:<br />
+&nbsp;&nbsp;&nbsp; <br />
+<br />
 II) To get an array of partial derivatives we can use functions d_array
 and d2_array which return the adouble_array object (the function
 d_array returns an array of partial derivatives of the first order
@@ -668,144 +630,144 @@ min (defined in daeModel class) which accepts arguments of type
 adouble_array. Arguments for the d_array function are daeIndexRange
 objects obtained by the call to daeDomain operator (). In this
 particular example we need a minimum among partial derivatives for the
-specified points (0, 1, and 3). Thus, we can write:<br>
-# Notation:<br>
-#&nbsp; - myDomain is daeDomain object<br>
-#&nbsp; - n is the number of points in the domain myDomain<br>
-#&nbsp; - eq is daeEquation object<br>
-#&nbsp; - myVar is daeVariable object<br>
-#&nbsp; - myVar2 is daeVariable object distributed on myDomain<br>
-<br>
+specified points (0, 1, and 3). Thus, we can write:<br />
+# Notation:<br />
+#&nbsp; - myDomain is daeDomain object<br />
+#&nbsp; - n is the number of points in the domain myDomain<br />
+#&nbsp; - eq is daeEquation object<br />
+#&nbsp; - myVar is daeVariable object<br />
+#&nbsp; - myVar2 is daeVariable object distributed on myDomain<br />
+<br />
 eq.Residual = myVar() - min( myVar2.d_array(myDomain, myDomain( [0, 1,
-3] ) ) )<br>
-This code translates into:<br>
-&nbsp;&nbsp;&nbsp; <br>
-1.1.1.Ports<br>
+3] ) ) )<br />
+This code translates into:<br />
+&nbsp;&nbsp;&nbsp; <br />
+1.1.1.Ports<br />
 Ports are used to connect two instances of models. Like models, ports
 can contain domains, parameters and variables. The most important
-properties are:<br>
-Name: string (read-only; inherited from daeObject)<br>
-CanonicalName: string (read-only; inherited from daeObject)<br>
-Type: daeePortType (inlet, outlet, inlet-outlet)<br>
-Domains: daeDomain list<br>
-Parameters: daeParameter list<br>
-Variables: daeVariable list<br>
-The most important functions are:<br>
-SetReportingOn<br>
-<br>
-1.1.2.Advanced Equations<br>
-<br>
-1.1.2.1.More complex equation<br>
-<br>
-1.1.2.2.State Transition Networks<br>
+properties are:<br />
+Name: string (read-only; inherited from daeObject)<br />
+CanonicalName: string (read-only; inherited from daeObject)<br />
+Type: daeePortType (inlet, outlet, inlet-outlet)<br />
+Domains: daeDomain list<br />
+Parameters: daeParameter list<br />
+Variables: daeVariable list<br />
+The most important functions are:<br />
+SetReportingOn<br />
+<br />
+1.1.2.Advanced Equations<br />
+<br />
+1.1.2.1.More complex equation<br />
+<br />
+1.1.2.2.State Transition Networks<br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p>1.1.Simulation module<br>
-Ovde mi treba class hierarchy.<br>
-<br>
-1.1.1.Basic use<br>
-<br>
-1.1.2.Advanced use (operating procedures)<br>
+<p>1.1.Simulation module<br />
+Ovde mi treba class hierarchy.<br />
+<br />
+1.1.1.Basic use<br />
+<br />
+1.1.2.Advanced use (operating procedures)<br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p>1.1.DataReporting module<br>
-DataReporting module consists of two parts:<br>
-DataReporter<br>
-DataReceiver<br>
+<p>1.1.DataReporting module<br />
+DataReporting module consists of two parts:<br />
+DataReporter<br />
+DataReceiver<br />
 DataReporter (a client) is used by the running activity to send the
 results. There are two different types of data reporters: Local and
 Remote. Local do not need the server side (data receiver) and they are
 capable to process the received data internally (to save them into a
-file, for instance). Remote need the server to send the data. <br>
+file, for instance). Remote need the server to send the data. <br />
 The module defines two main interfaces: daeDataReporter_t and
 daeDataReceiver_t. daeDataReporter_t defines an interface used to
-perform the following tasks:<br>
+perform the following tasks:<br />
 Connect/Disconnect to the corresponding daeDataReceiver_t (if any). A
 good example is a tcpip client which connects and sends data to a tcpip
-server.<br>
-Send the info about domains and variables in the activity<br>
-Send the results for specified variables at the given time intervals<br>
-&nbsp;<br>
+server.<br />
+Send the info about domains and variables in the activity<br />
+Send the results for specified variables at the given time intervals<br />
+&nbsp;<br />
 daeDataReceiver_t is used to receive the information from the activity
 (a server) and to store the received data for further processing
 (plotting, for example). The most often it is a tcp/ip server but in
 general any type of a client/server communication can be implemented
-(pipes, shared memory, etc).<br>
-<br>
-1.1.1.Basic use<br>
-daeDataReporterLocal<br>
-daeFileDataReporter<br>
-daeTEXTFileDataReporter<br>
-daeHTMLFileDataReporter<br>
-daeXMLFileDataReporter<br>
-daeDelegateDataReporter<br>
-daeHybridDataReporterReceiver<br>
-<br>
-daeDataReporterRemote<br>
-daeTCPIPDataReporter<br>
-<br>
-<br>
-1.1.2.Advanced use<br>
+(pipes, shared memory, etc).<br />
+<br />
+1.1.1.Basic use<br />
+daeDataReporterLocal<br />
+daeFileDataReporter<br />
+daeTEXTFileDataReporter<br />
+daeHTMLFileDataReporter<br />
+daeXMLFileDataReporter<br />
+daeDelegateDataReporter<br />
+daeHybridDataReporterReceiver<br />
+<br />
+daeDataReporterRemote<br />
+daeTCPIPDataReporter<br />
+<br />
+<br />
+1.1.2.Advanced use<br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p><br>
+<p><br />
 </p>
-<p>1.1.Solver module<br>
-Ovde mi treba class hierarchy.<br>
-<br>
-1.1.1.Basic use<br>
-<br>
-<br>
-1.1.2.Setting a third party linear solver<br>
+<p>1.1.Solver module<br />
+Ovde mi treba class hierarchy.<br />
+<br />
+1.1.1.Basic use<br />
+<br />
+<br />
+1.1.2.Setting a third party linear solver<br />
 </p>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 <!-- content-wrap ends here --> </div>
 </div>
 <!-- footer starts here -->
 <div id="footer">
 <div id="footer-content">
 <div class="col float-left">
-<p> &copy; Copyright: Dragan Nikolic 2010<br>
+<p> © Copyright: Dragan Nikolic 2010<br />
 </p>
 </div>
 <div class="col float-left">
@@ -814,8 +776,7 @@ Ovde mi treba class hierarchy.<br>
 </div>
 <div class="col2 float-right">
 <p> Design by: <a href="http://www.styleshout.com/"><strong>Styleshout</strong></a>
-&nbsp; &nbsp; Valid <a
- href="http://jigsaw.w3.org/css-validator/check/referer"><strong>CSS</strong></a>
+&nbsp; &nbsp; Valid <a href="http://jigsaw.w3.org/css-validator/check/referer"><strong>CSS</strong></a>
 | <a href="http://validator.w3.org/check/referer"><strong>XHTML</strong></a>
 </p>
 </div>
@@ -835,8 +796,7 @@ var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
 piwikTracker.trackPageView();
 piwikTracker.enableLinkTracking();
 } catch( err ) {}
-</script><noscript><p><img src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1" style="border:0" alt=""/></p></noscript>
+</script><noscript><p><img src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1" style="border: 0pt none ;" alt="" /></p></noscript>
 <!-- End Piwik Tag -->
 
-</body>
-</html>
+</body></html>

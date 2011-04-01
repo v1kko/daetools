@@ -7,13 +7,24 @@ using namespace dae::solver;
 
 #ifdef daeSuperLU_MT
 BOOST_PYTHON_MODULE(pySuperLU_MT)
-#elif daeSuperLU
+#endif	
+#ifdef daeSuperLU_CUDA
+BOOST_PYTHON_MODULE(pySuperLU_CUDA)
+#endif
+#ifdef daeSuperLU
 BOOST_PYTHON_MODULE(pySuperLU)
 #endif
 {
 /**************************************************************
 	LA Solver
 ***************************************************************/
+	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
+		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))
+		.def("Reinitialize",pure_virtual(&daeIDALASolver_t::Reinitialize))
+		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
+		;
+
+#ifndef daeSuperLU_CUDA
     enum_<yes_no_t>("yes_no_t")
 		.value("NO",	NO)
 		.value("YES",	YES)
@@ -28,7 +39,8 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.value("METIS_AT_PLUS_A",	METIS_AT_PLUS_A)
 		.export_values()
 	;
-
+#endif
+		
 #ifdef daeSuperLU_MT
 	class_<superlumt_options_t, boost::noncopyable>("superlumt_options_t", no_init)
 		.def_readwrite("nprocs",			&superlumt_options_t::nprocs)
@@ -40,7 +52,24 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.def_readwrite("PrintStat",			&superlumt_options_t::PrintStat)
 		;
 	
-#elif daeSuperLU
+	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+		.def("Create",		&daeSuperLUSolver::Create)
+		.def("Reinitialize",&daeSuperLUSolver::Reinitialize)
+		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
+		.def("GetOptions",	&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
+		;
+#endif
+	
+#ifdef daeSuperLU_CUDA
+	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+		.def("Create",		&daeSuperLUSolver::Create)
+		.def("Reinitialize",&daeSuperLUSolver::Reinitialize)
+		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
+		;
+#endif
+
+
+#ifdef daeSuperLU
     enum_<IterRefine_t>("IterRefine_t")
 		.value("NOREFINE",	NOREFINE)
 		.value("SINGLE",	SINGLE)
@@ -64,13 +93,6 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		//.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
 		//.def_readwrite("Equil",				&superlu_options_t::Equil)
 		;
-#endif
-
-	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
-		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))
-		.def("Reinitialize",pure_virtual(&daeIDALASolver_t::Reinitialize))
-		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
-		;
 
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
 		.def("Create",		&daeSuperLUSolver::Create)
@@ -78,6 +100,7 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.def("SaveAsXPM",	&daeSuperLUSolver::SaveAsXPM)
 		.def("GetOptions",	&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
 		;
+#endif
 
 	def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<reference_existing_object>());
 

@@ -221,7 +221,7 @@ bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
 /******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
-daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB, real_t UB, real_t abstol, size_t N, string strDescription)
+daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, bool bIsInequalityConstraint, real_t abstol, size_t N, string strDescription)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer)
@@ -231,9 +231,7 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB
 	string strFName = string("F_constraint") + toString<size_t>(N + 1); 
 
 	m_pModel				= pModel;
-	m_eConstraintType		= eInequalityConstraint;
-	m_dLB					= LB;
-	m_dUB					= UB;
+	m_eConstraintType		= (bIsInequalityConstraint ? eInequalityConstraint : eEqualityConstraint);
 	m_nEquationIndexInBlock = ULONG_MAX;
 	m_nVariableIndexInBlock = ULONG_MAX;
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
@@ -242,25 +240,46 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB
 	m_pEquationExecutionInfo = NULL;
 }
 
-daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription)
-{
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-	const daeVariableType typeConstraint("typeConstraint", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
-	string strVName = string("V_constraint") + toString<size_t>(N + 1); 
-	string strFName = string("F_constraint") + toString<size_t>(N + 1); 
-
-	m_pModel				= pModel;
-	m_eConstraintType		= eEqualityConstraint;
-	m_dLB					= Value;
-	m_dUB					= Value;
-	m_nEquationIndexInBlock = ULONG_MAX;
-	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
-	m_pConstraintVariable->SetReportingOn(true);
-	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
-	m_pEquationExecutionInfo = NULL;
-}
+//daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t LB, real_t UB, real_t abstol, size_t N, string strDescription)
+//{
+//	if(!pModel)
+//		daeDeclareAndThrowException(exInvalidPointer)
+//		
+//	const daeVariableType typeConstraint("typeConstraint", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
+//	string strVName = string("V_constraint") + toString<size_t>(N + 1); 
+//	string strFName = string("F_constraint") + toString<size_t>(N + 1); 
+//
+//	m_pModel				= pModel;
+//	m_eConstraintType		= eInequalityConstraint;
+//	m_dLB					= LB;
+//	m_dUB					= UB;
+//	m_nEquationIndexInBlock = ULONG_MAX;
+//	m_nVariableIndexInBlock = ULONG_MAX;
+//	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
+//	m_pConstraintVariable->SetReportingOn(true);
+//	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
+//	m_pEquationExecutionInfo = NULL;
+//}
+//
+//daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription)
+//{
+//	if(!pModel)
+//		daeDeclareAndThrowException(exInvalidPointer)
+//		
+//	const daeVariableType typeConstraint("typeConstraint", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
+//	string strVName = string("V_constraint") + toString<size_t>(N + 1); 
+//	string strFName = string("F_constraint") + toString<size_t>(N + 1); 
+//
+//	m_pModel				= pModel;
+//	m_eConstraintType		= eEqualityConstraint;
+//	m_dLB					= Value;
+//	m_dUB					= Value;
+//	m_nEquationIndexInBlock = ULONG_MAX;
+//	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
+//	m_pConstraintVariable->SetReportingOn(true);
+//	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
+//	m_pEquationExecutionInfo = NULL;
+//}
 
 daeOptimizationConstraint::~daeOptimizationConstraint(void)
 {
@@ -340,25 +359,25 @@ void daeOptimizationConstraint::GetOptimizationVariableIndexes(std::vector<size_
 	narrOptimizationVariablesIndexes = m_narrOptimizationVariablesIndexes;
 }
 
-void daeOptimizationConstraint::SetLB(real_t value)
-{
-	m_dLB = value;	
-}
-
-real_t daeOptimizationConstraint::GetLB(void) const
-{
-	return m_dLB;	
-}
-
-void daeOptimizationConstraint::SetUB(real_t value)
-{
-	m_dUB = value;	
-}
-
-real_t daeOptimizationConstraint::GetUB(void) const
-{
-	return m_dUB;	
-}
+//void daeOptimizationConstraint::SetLB(real_t value)
+//{
+//	m_dLB = value;	
+//}
+//
+//real_t daeOptimizationConstraint::GetLB(void) const
+//{
+//	return m_dLB;	
+//}
+//
+//void daeOptimizationConstraint::SetUB(real_t value)
+//{
+//	m_dUB = value;	
+//}
+//
+//real_t daeOptimizationConstraint::GetUB(void) const
+//{
+//	return m_dUB;	
+//}
 
 void daeOptimizationConstraint::SetType(daeeConstraintType value)
 {
@@ -370,19 +389,19 @@ daeeConstraintType daeOptimizationConstraint::GetType(void) const
 	return m_eConstraintType;	
 }
 
-void daeOptimizationConstraint::SetEqualityValue(real_t value)
-{
-	m_dLB = value;	
-	m_dUB = value;	
-}
-
-real_t daeOptimizationConstraint::GetEqualityValue(void) const
-{
-	if(m_dLB != m_dUB)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-	return m_dLB;	
-}
+//void daeOptimizationConstraint::SetEqualityValue(real_t value)
+//{
+//	m_dLB = value;	
+//	m_dUB = value;	
+//}
+//
+//real_t daeOptimizationConstraint::GetEqualityValue(void) const
+//{
+//	if(m_dLB != m_dUB)
+//		daeDeclareAndThrowException(exInvalidPointer)
+//		
+//	return m_dLB;	
+//}
 
 void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
 {

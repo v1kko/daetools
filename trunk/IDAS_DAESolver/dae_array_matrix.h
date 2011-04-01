@@ -7,22 +7,7 @@
 #include <fstream>
 #include "../Core/helpers.h"
 #include "solver_class_factory.h"
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-using namespace boost::numeric;
 
-#ifdef HAS_GNU_GSL
-#include <gsl/gsl_linalg.h>
-#endif
-
-#ifdef HAS_TRILINOS
-#include <Amesos_ConfigDefs.h>
-#include <Epetra_RowMatrix.h>
-#include <Epetra_MultiVector.h>
-#include <Epetra_SerialDenseVector.h>
-#include <Epetra_SerialDenseMatrix.h>
-#include <Epetra_CrsMatrix.h>
-#endif
 
 namespace dae
 {
@@ -69,18 +54,16 @@ public:
 		data = pData;
 	}
 	
-	void Print(bool bStructureOnly = false)
+	void Print()
 	{
+		std::cout << "vector[" << N << "] = {";
 		for(size_t i = 0; i < N; i++)
 		{
 			if(i != 0)
 				std::cout << ", ";
-			if(bStructureOnly)
-				std::cout << (GetItem(i) == 0 ? "-" : "X");
-			else
-				std::cout << dae::toStringFormatted(GetItem(i), 15, 8, true);
+			std::cout << dae::toStringFormatted(GetItem(i), 15, 8, true);
 		}
-		std::cout << std::endl;
+		std::cout << "};" << std::endl;
 		std::cout.flush();
 	}
 
@@ -331,297 +314,6 @@ public:
 };		
 
 /*********************************************************************************************
-	daeCSCMatrix
-**********************************************************************************************/
-//template<typename FLOAT, typename INT>
-//class daeCSCMatrix : public daeSparseMatrix<FLOAT>
-//{
-//public:
-//	daeCSCMatrix(void)
-//	{
-//		N        = 0;
-//		NNZ      = 0;
-//		A        = NULL;
-//		IA       = NULL;
-//		JA       = NULL;
-//		indexing = CSR_C_STYLE;
-//	}
-//	
-//// Construct it from the input data in CSR format
-//	daeCSCMatrix(INT n, INT nnz, INT* IA, INT* JA, FLOAT* A, bool ind)
-//	{
-//		N        = 0;
-//		NNZ      = 0;
-//		A        = NULL;
-//		IA       = NULL;
-//		JA       = NULL;
-//		indexing = ind;
-//	
-//		Reset(n, nnz, ind);
-//	}
-//	
-//	~daeCSCMatrix(void)
-//	{
-//		Free();
-//	}
-//	
-//public:
-//	bool GetIndexing(void)
-//	{
-//		return indexing;
-//	}
-//	
-//	void SetIndexing(bool ind)
-//	{
-//		indexing = ind;
-//	}
-//	
-//	void Reset(INT n, INT nnz, bool ind)
-//	{
-//		N        = n;
-//		NNZ      = nnz;
-//		indexing = ind;
-//		
-//	// If the pointers are NULL then it will allocate as in malloc
-//	// Otherwise it will realloc the memory to the new size
-//		A  = (FLOAT*)realloc(A,   NNZ  * sizeof(FLOAT));
-//		IA = (INT*)  realloc(IA,  NNZ  * sizeof(INT));
-//		JA = (INT*)  realloc(JA, (N+1) * sizeof(INT));
-//		
-//		if(!A || !IA || !JA)
-//		{
-//			Free();
-//			daeDeclareException(exMiscellanous);
-//			e << "Unable to allocate memory for daeCSRMatrix";
-//			throw e;
-//		}
-//
-//		memset(A,  0,  NNZ  * sizeof(FLOAT));
-//		memset(IA, 0,  NNZ  * sizeof(INT));
-//		memset(JA, 0, (N+1) * sizeof(INT));
-//		
-//	// The last item in IA is the number of NNZ	
-//		if(indexing == CSR_C_STYLE)
-//			JA[N] = NNZ;
-//		else
-//			JA[N] = NNZ + 1;
-//	}
-//	
-//	void ClearValues(void)
-//	{
-//		memset(A,  0,  NNZ  * sizeof(FLOAT));
-//	}
-//
-//	void Free(void)
-//	{
-//		if(A)
-//			free(A);
-//		if(IA)
-//			free(IA);
-//		if(JA)
-//			free(JA);
-//		
-//		N   = 0;
-//		NNZ = 0;
-//		A   = NULL;
-//		IA  = NULL;
-//		JA  = NULL;
-//	}
-//	
-//	real_t GetItem(size_t i, size_t j) const
-//	{
-//		INT index = CalcIndex(i, j);
-//		if(index < 0)
-//			return 0.0;
-//		else
-//			return A[index];
-//	}
-//	
-//	void SetItem(size_t i, size_t j, real_t val)
-//	{
-//		INT index = CalcIndex(i, j);
-//		if(index < 0)
-//		{
-//			daeDeclareException(exMiscellanous);
-//			e << "Invalid element in CSC matrix: (" << i << ", " << j << ")";
-//			throw e;
-//		}
-//		A[index] = val;
-//	}
-//	
-//	size_t GetNrows(void) const
-//	{
-//		return N;
-//	}
-//	
-//	size_t GetNcols(void) const
-//	{
-//		return N;
-//	}
-//		
-//	INT CalcIndex(size_t i, size_t j) const
-//	{
-//		if(indexing == CSR_C_STYLE)
-//		{
-//			if(i >= N || j >= N) 
-//				daeDeclareException(exOutOfBounds);
-//			
-//		// JA contains number of row indexes in the column j: Nrow_indexes = JA[j+1] - JA[j]
-//		// Row indexes start at IA[ JA[j] ] and end at IA[ JA[j+1] ]
-//			for(INT k = JA[j]; k < JA[j+1]; k++)
-//				if(i == IA[k])
-//					return k;
-//		}
-//		else
-//		{
-//			if(i >= N+1 || j >= N+1) 
-//				daeDeclareException(exOutOfBounds);
-//			
-//		// FORTRAN arrays use 1-based indexing, therefore we start at JA[j-1] and end at JA[j]
-//		// IA already contains 1-based indexes, thus no need to adjust it
-//			for(INT k = JA[j-1]; k < JA[j]; k++)
-//				if(i == IA[k])
-//					return k;
-//		}
-//		return -1;
-//	}
-//
-//	real_t CalculateRatio() const
-//	{
-//		real_t sparse = 2 * NNZ + N + 1;
-//		real_t dense  = N * N;
-//		
-//		return sparse/dense; 
-//	}
-//	
-//	void Print(bool bStructureOnly = false, bool bPrintValues = false) const
-//	{
-//		INT n, i, k;
-//		real_t value;
-//		
-//		std::cout << "N     = " << N   << std::endl;
-//		std::cout << "NNZ   = " << NNZ << std::endl;
-//		std::cout << "Ratio = " << CalculateRatio() << std::endl;
-//		std::cout << "JA:" << std::endl;
-//		for(i = 0; i < N+1; i++)
-//		{
-//			if(i != 0)
-//				std::cout << ", ";
-//			std::cout << JA[i];
-//		}
-//		std::cout << std::endl;
-//	
-//		std::cout << "IA:" << std::endl;
-//		for(i = 0; i < NNZ; i++)
-//		{				
-//			if(i != 0)
-//				std::cout << ", ";
-//			std::cout << IA[i];
-//		}
-//		std::cout << std::endl;
-//	
-//		if(bPrintValues)
-//		{
-//			std::cout << "A:" << std::endl;
-//			for(i = 0; i < NNZ; i++)
-//			{
-//				if(i != 0)
-//					std::cout << ", ";
-//				std::cout << A[i];
-//			}
-//			std::cout << std::endl;
-//
-//			for(i = 0; i < N; i++)
-//			{
-//				for(k = 0; k < N; k++)
-//				{				
-//					if(indexing == CSR_C_STYLE)
-//						n = CalcIndex(i, k);
-//					else
-//						n = CalcIndex(i+1, k+1);
-//						
-//					if(n < 0)
-//						value = 0.0;
-//					else
-//						value = A[n];				
-//					
-//					if(k != 0)
-//						std::cout << " ";
-//					if(bStructureOnly)
-//						std::cout << (n < 0 ? "-" : "X");
-//					else
-//						std::cout << dae::toStringFormatted(value, 15, 8, true);				
-//				}
-//				std::cout << std::endl;
-//			}
-//			std::cout << std::endl;	
-//		}
-//		std::cout.flush();
-//	}
-//
-//	void Sort(void)
-//	{
-//		INT i, b, e;
-//
-//		for(i = 0; i < N; i++)
-//		{
-//			b = JA[i];
-//			e = JA[i+1];
-//			std::sort(&IA[b], &IA[e]);
-//		}
-//	}
-//
-//	void SaveMatrixAsXPM(const std::string& strFilename)
-//	{
-//		size_t i, j;
-//		std::ofstream of(strFilename.c_str(), std::ios_base::out);
-//		if(!of.is_open())
-//			return;
-//		
-//		char* row  = new char[N+1];
-//		row[N]  = '\0';
-//	
-//		of << "/* XPM */" << std::endl;
-//		of << "static char *dummy[]={" << std::endl;
-//		of << "\"" << N << " " << N << " " << 2 << " " << 1 << "\"," << std::endl;
-//		of << "\"- c #ffffff\"," << std::endl;
-//		of << "\"X c #000000\"," << std::endl;
-//		
-//		for(i = 0; i < N; i++)
-//		{
-//			memset(row, '-', N);
-//			for(j = 0; j < N; j++)
-//			{				
-//				if(indexing == CSR_C_STYLE)
-//				{
-//					if(CalcIndex(i, j) >= 0)
-//						row[j] = 'X';	
-//				}
-//				else
-//				{
-//					if(CalcIndex(i+1, j+1) >= 0)
-//						row[j] = 'X';
-//				}
-//			}
-//			of << "\"" << row << (i == N-1 ? "\"" : "\",") << std::endl;
-//		}
-//		of << "};" << std::endl;
-//		of.close();
-//		delete[] row;
-//	}
-//	
-//public:
-//	INT     NNZ;      // no of non-zero elements
-//	INT     N;        // matrix size
-//	FLOAT*  A;        // values
-//	INT*    JA;       // column indexes data
-//	INT*    IA;       // row indexes
-//	bool    indexing; // C style arrays start from 0, FORTRAN from 1
-//};
-
-
-
-/*********************************************************************************************
 	daeCSRMatrix
 **********************************************************************************************/
 template<typename FLOAT, typename INT>
@@ -637,18 +329,6 @@ public:
 		JA       = NULL;
 		indexing = CSR_C_STYLE;
 	}
-	
-//	daeCSRMatrix(INT n, INT nnz, bool ind)
-//	{
-//		N        = 0;
-//		NNZ      = 0;
-//		A        = NULL;
-//		IA       = NULL;
-//		JA       = NULL;
-//		indexing = ind;
-//	
-//		Reset(n, nnz, ind);
-//	}
 	
 	~daeCSRMatrix(void)
 	{
@@ -792,34 +472,34 @@ public:
 		std::cout << "N     = " << N   << std::endl;
 		std::cout << "NNZ   = " << NNZ << std::endl;
 		std::cout << "Ratio = " << CalculateRatio() << std::endl;
-		std::cout << "IA:" << std::endl;
+		std::cout << "IA[" << N+1 << "] = {";
 		for(i = 0; i < N+1; i++)
 		{
 			if(i != 0)
 				std::cout << ", ";
 			std::cout << IA[i];
 		}
-		std::cout << std::endl;
+		std::cout << "};" << std::endl;
 	
-		std::cout << "JA:" << std::endl;
+		std::cout << "JA[" << NNZ << "] = {";
 		for(i = 0; i < NNZ; i++)
 		{				
 			if(i != 0)
 				std::cout << ", ";
 			std::cout << JA[i];
 		}
-		std::cout << std::endl;
+		std::cout << "};" << std::endl;
 	
 		if(bPrintValues)
 		{
-			std::cout << "A:" << std::endl;
+			std::cout << "A[" << NNZ << "] = {";
 			for(i = 0; i < NNZ; i++)
 			{
 				if(i != 0)
 					std::cout << ", ";
 				std::cout << A[i];
 			}
-			std::cout << std::endl;
+			std::cout << "};" << std::endl;
 
 			for(i = 0; i < N; i++)
 			{

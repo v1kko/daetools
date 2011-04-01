@@ -2,11 +2,6 @@ from pyCore import *
 from pyActivity import *
 from pyDataReporting import *
 from pyIDAS import *
-try:
-    from pyBONMIN import *
-except ImportError, e:
-    print 'Cannot load pyBONMIN module', str(e)
-
 from daetools.daeSimulator import *
 from daeLogs import daePythonStdOutLog
 

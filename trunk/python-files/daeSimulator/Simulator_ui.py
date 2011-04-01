@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Thu Mar 17 23:16:02 2011
+# Created: Thu Mar 31 11:46:18 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,6 +41,8 @@ class Ui_SimulatorDialog(object):
         self.MINLPSolverComboBox = QtGui.QComboBox(SimulatorDialog)
         self.MINLPSolverComboBox.setObjectName("MINLPSolverComboBox")
         self.MINLPSolverComboBox.addItem("")
+        self.MINLPSolverComboBox.addItem("")
+        self.MINLPSolverComboBox.addItem("")
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.MINLPSolverComboBox)
         self.DAESolverLabel = QtGui.QLabel(SimulatorDialog)
         self.DAESolverLabel.setObjectName("DAESolverLabel")
@@ -54,6 +56,8 @@ class Ui_SimulatorDialog(object):
         self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.LASolverLabel)
         self.LASolverComboBox = QtGui.QComboBox(SimulatorDialog)
         self.LASolverComboBox.setObjectName("LASolverComboBox")
+        self.LASolverComboBox.addItem("")
+        self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
@@ -149,7 +153,9 @@ class Ui_SimulatorDialog(object):
         self.simulationLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.DataReporterTCPIPAddressLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Data Reporter (TCP/IP : port)", None, QtGui.QApplication.UnicodeUTF8))
         self.MINLPSolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "(MI)NLP Solver", None, QtGui.QApplication.UnicodeUTF8))
-        self.MINLPSolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "Bonmin MINLP (with MUMPS)", None, QtGui.QApplication.UnicodeUTF8))
+        self.MINLPSolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "IPOPT NLP", None, QtGui.QApplication.UnicodeUTF8))
+        self.MINLPSolverComboBox.setItemText(1, QtGui.QApplication.translate("SimulatorDialog", "NLOPT NLP", None, QtGui.QApplication.UnicodeUTF8))
+        self.MINLPSolverComboBox.setItemText(2, QtGui.QApplication.translate("SimulatorDialog", "Bonmin MINLP", None, QtGui.QApplication.UnicodeUTF8))
         self.DAESolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "DAE Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.DAESolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "Sundials IDAS", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
@@ -165,6 +171,8 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.setItemText(9, QtGui.QApplication.translate("SimulatorDialog", "Magma Lapack (dense, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(10, QtGui.QApplication.translate("SimulatorDialog", "SuperLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(11, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_MT (sparse, POSIX threads, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(12, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_CUDA (sparse, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(13, QtGui.QApplication.translate("SimulatorDialog", "CUSP (sparse, CUDA, iterative)", None, QtGui.QApplication.UnicodeUTF8))
         self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ExportButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Export Matrix...", None, QtGui.QApplication.UnicodeUTF8))

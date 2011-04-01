@@ -22,7 +22,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-import daetools.pyTrilinos as pyTrilinos
+from daetools.solvers import pyTrilinos
 from aztecoo_options import daeAztecOptions
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)

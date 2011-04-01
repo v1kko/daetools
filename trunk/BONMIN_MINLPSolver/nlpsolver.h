@@ -6,15 +6,22 @@
 #include "../Core/optimization.h"
 #include <stdio.h>
 #include <time.h>
-#include "BonTMINLP.hpp"
+#include <iomanip>
+#include <fstream>
 
+#ifdef daeIPOPT
+#include <IpTNLP.hpp>
+#include <IpIpoptApplication.hpp>
+using namespace Ipopt;
+#endif
+
+#ifdef daeBONMIN
 #if defined(_MSC_VER)
 // Turn off compiler warning about long names
 #  pragma warning(disable:4786)
 #endif
-#include <iomanip>
-#include <fstream>
 
+#include "BonTMINLP.hpp"
 #include "CoinTime.hpp"
 #include "CoinError.hpp"
 
@@ -26,12 +33,13 @@
 #include "BonOACutGenerator2.hpp"
 #include "BonEcpCuts.hpp"
 #include "BonOaNlpOptim.hpp"
+using namespace Ipopt;
+using namespace Bonmin;
+#endif
 
 using namespace dae::core;
 using namespace dae::solver;
 using namespace dae::activity;
-using namespace Ipopt;
-using namespace Bonmin;
 
 namespace dae
 {
@@ -40,7 +48,12 @@ namespace nlpsolver
 /******************************************************************
 	daeNLP
 *******************************************************************/
+#ifdef daeIPOPT
+class DAE_NLPSOLVER_API daeMINLP : public TNLP
+#endif
+#ifdef daeBONMIN
 class DAE_NLPSOLVER_API daeMINLP : public TMINLP
+#endif
 {
 public:
 	daeMINLP(daeSimulation_t*   pSimulation, 
@@ -52,6 +65,7 @@ public:
 
 public:
 // TMINLP interface
+#ifdef daeBONMIN
 	virtual bool get_variables_types(Index n, 
 									 VariableType* var_types);
 	
@@ -78,6 +92,7 @@ public:
 							  Index& nele_grad_gi, 
 							  Index* jCol,
 							  Number* values);
+#endif
 	
 // TNLP interface
 	virtual bool get_nlp_info(Index& n, 
@@ -140,21 +155,50 @@ public:
 						Index* jCol, 
 						Number* values);
 	
+#ifdef daeIPOPT
+	virtual bool intermediate_callback( AlgorithmMode mode,
+										Index iter, 
+										Number obj_value,
+										Number inf_pr, 
+										Number inf_du,
+										Number mu, 
+										Number d_norm,
+										Number regularization_size,
+										Number alpha_du, 
+										Number alpha_pr,
+										Index ls_trials,
+										const IpoptData* ip_data,
+										IpoptCalculatedQuantities* ip_cq);
+	
+	virtual void finalize_solution(SolverReturn status,
+								   Index n, 
+								   const Number* x, 
+								   const Number* z_L,
+								   const Number* z_U,
+								   Index m, 
+								   const Number* g, 
+								   const Number* lambda,
+								   Number obj_value,
+								   const IpoptData* ip_data,
+								   IpoptCalculatedQuantities* ip_cq);
+#endif
+#ifdef daeBONMIN
     virtual void finalize_solution(TMINLP::SolverReturn status,
                                    Index n, 
 								   const Number* x, 
 								   Number obj_value);
+#endif
 	
 protected:
-	void CopyOptimizationVariablesToSimulationAndRun(const Number* x);
+	void CopyOptimizationVariablesToSimulationAndRun(const double* x);
 	void PrintObjectiveFunction(void);
 	void PrintOptimizationVariables(void);
 	void PrintConstraints(void);
-	void PrintVariablesTypes(void);
-	void PrintVariablesLinearity(void);
 	void PrintConstraintsLinearity(void);
 	void PrintStartingPoint(void);
 	void PrintBoundsInfo(void);
+	void PrintVariablesTypes(void);
+	void PrintVariablesLinearity(void);
 
 public:
 	daeSimulation_t*	m_pSimulation;
@@ -202,8 +246,16 @@ protected:
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;
 	daeDataReporter_t*	m_pDataReporter;
+	
+#ifdef daeBONMIN
 	SmartPtr<TMINLP>	m_MINLP;	
 	BonminSetup			m_Bonmin;
+#endif	
+#ifdef daeIPOPT
+	SmartPtr<TNLP>				m_NLP;	
+	SmartPtr<IpoptApplication>	m_Application;
+#endif
+	
 };
 
 }

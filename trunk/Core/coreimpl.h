@@ -2578,8 +2578,9 @@ class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
-	daeOptimizationConstraint(daeModel* pModel, real_t LB, real_t UB, real_t abstol, size_t N, string strDescription);
-	daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription);
+	daeOptimizationConstraint(daeModel* pModel, bool bIsInequalityConstraint, real_t abstol, size_t N, string strDescription);
+//	daeOptimizationConstraint(daeModel* pModel, real_t LB, real_t UB, real_t abstol, size_t N, string strDescription);
+//	daeOptimizationConstraint(daeModel* pModel, real_t Value, real_t abstol, size_t N, string strDescription);
 	virtual ~daeOptimizationConstraint(void);
 
 public:
@@ -2590,14 +2591,14 @@ public:
 	
 	bool IsLinear(void) const;
 	
-	void SetLB(real_t value);
-	real_t GetLB(void) const;
-
-	void SetUB(real_t value);
-	real_t GetUB(void) const;
-	
-	void SetEqualityValue(real_t value);
-	real_t GetEqualityValue(void) const;
+//	void SetLB(real_t value);
+//	real_t GetLB(void) const;
+//
+//	void SetUB(real_t value);
+//	real_t GetUB(void) const;
+//	
+//	void SetEqualityValue(real_t value);
+//	real_t GetEqualityValue(void) const;
 
 	std::string GetName(void) const;
 	real_t GetValue(void) const;
@@ -2612,8 +2613,8 @@ public:
 
 protected:
 	daeeConstraintType				m_eConstraintType;
-	real_t							m_dLB;
-	real_t							m_dUB;
+//	real_t							m_dLB;
+//	real_t							m_dUB;
 	daeModel*						m_pModel;
 	size_t							m_nEquationIndexInBlock;
 	size_t							m_nVariableIndexInBlock;

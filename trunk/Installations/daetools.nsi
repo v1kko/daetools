@@ -5,6 +5,7 @@ Name "DAE Tools"
 OutFile "daetools.exe"
 
 ; The default installation directory
+; Python version: PYTHON_VERSION=`$PYTHON -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
 InstallDir C:\Python26\Lib\site-packages\daetools
 
 ; Registry key to check for directory (so if you install again, it will

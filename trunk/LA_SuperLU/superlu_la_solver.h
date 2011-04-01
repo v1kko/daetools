@@ -9,17 +9,24 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
+#include <stdint.h>
+#include <time.h>
 
-extern "C" 
-{
 #ifdef daeSuperLU_MT
 #include <pdsp_defs.h>
-#elif daeSuperLU
+#endif
+
+#ifdef daeSuperLU_CUDA
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include "superlu_mt_gpu.h"
+#endif
+
+#ifdef daeSuperLU
 #include <slu_ddefs.h>
 #endif
-#include <slu_ddefs.h>
-}
 
+				
 namespace dae
 {
 namespace solver
@@ -57,7 +64,21 @@ public:
 
 #ifdef daeSuperLU_MT
 	superlumt_options_t& GetOptions(void);
-#elif daeSuperLU
+#endif
+
+#ifdef daeSuperLU_CUDA
+	void SetMatrixValues_A(void);
+	void Factorize(void);
+	void Solve(double** b);
+	void AllocateMatrix_A(void);
+	void AllocateMatrix_B(void);
+	void FreeMatrixStore_A(void);
+	void FreeMatrixStore_B(void);
+	void FreeFactorizationData(void);
+	
+#endif
+
+#ifdef daeSuperLU
 	superlu_options_t& GetOptions(void);
 #endif
 	
@@ -78,15 +99,35 @@ public:
 	daeDenseArray		m_arrTimeDerivatives;
 	daeDenseArray		m_arrResiduals;
 	daeSuperLUMatrix	m_matJacobian;
+	bool				m_bFactorizationDone;
 
 #ifdef daeSuperLU_MT
-    superlumt_options_t	m_Options;
-    superlu_memusage_t	m_memUsage;
-	equed_t				m_equed;
+	SuperMatrix			m_matA;
+	SuperMatrix			m_matB;
+	SuperMatrix			m_matX;
+	SuperMatrix			m_matL;	
+	SuperMatrix			m_matU;	
 	SuperMatrix			m_matAC;
+
+    superlumt_options_t	m_Options;
     Gstat_t				m_Stats;
+    int*				m_perm_c;
+    int*				m_perm_r;
+	int					m_lwork;
+	void*				m_work;
+#endif
 	
-#elif daeSuperLU
+#ifdef daeSuperLU_CUDA
+    superlu_mt_gpu_solver	m_superlu_mt_gpuSolver;
+#endif
+	
+#ifdef daeSuperLU
+	SuperMatrix			m_matA;
+	SuperMatrix			m_matB;
+	SuperMatrix			m_matX;
+	SuperMatrix			m_matL;	
+	SuperMatrix			m_matU;	
+
     superlu_options_t	m_Options;
     mem_usage_t			m_memUsage;
     SuperLUStat_t		m_Stats;
@@ -100,17 +141,11 @@ public:
 	
 	int					m_lwork;
 	void*				m_work;
-#endif
-
-	SuperMatrix			m_matA;
-	SuperMatrix			m_matB;
-	SuperMatrix			m_matX;
-	SuperMatrix			m_matL;	
-	SuperMatrix			m_matU;	
-	
     int*				m_perm_c;
     int*				m_perm_r;
-	bool				m_bFactorizationDone;
+#endif
+	
+	uint64_t m_solve, m_factorize;
 };
 
 }

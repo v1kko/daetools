@@ -3,9 +3,7 @@
 #include <boost/python.hpp>
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
+
 
 namespace dae
 {
@@ -27,6 +25,12 @@ int solve_la(IDAMem ida_mem,
 			  N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 	
+int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
+{
+	return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
+	       ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
+}
+
 daeIDALASolver_t* daeCreateSuperLUSolver(void)
 {
 	return new daeSuperLUSolver;
@@ -37,12 +41,15 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_pBlock	= NULL;
 	m_vecB		= NULL;
 	m_vecX		= NULL;
-	m_perm_c	= NULL;
-	m_perm_r	= NULL;
 	m_bFactorizationDone = false;
+	m_solve     = 0;
+	m_factorize = 0;
 	
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
+	m_perm_c	= NULL;
+	m_perm_r	= NULL;
+
     m_Options.nprocs			= 4;
     m_Options.fact				= EQUILIBRATE;
     m_Options.trans				= NOTRANS;
@@ -59,12 +66,19 @@ daeSuperLUSolver::daeSuperLUSolver(void)
     m_Options.perm_r			= NULL;
     m_Options.work				= NULL;
     m_Options.lwork				= 0;
+#endif
 	
-#elif daeSuperLU
+#ifdef daeSuperLU_CUDA
+    m_superlu_mt_gpuSolver.SetDimensions(1, 512);
+#endif
+	
+#ifdef daeSuperLU
 	m_etree		= NULL;
 	m_R			= NULL;
 	m_C			= NULL;
 
+	m_perm_c	= NULL;
+	m_perm_r	= NULL;
     m_work		= NULL;
     m_lwork		= 0;
 	
@@ -151,24 +165,36 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	}
 	StatFree(&m_Stats);
 	
-#elif daeSuperLU
+// We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
+// This is in agreement with what the SuperLU documentation says about compressed row storage matrices
+	m_Options.trans	= TRANS;
+	Destroy_SuperMatrix_Store(&m_matA);
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
+#endif
+
+#ifdef daeSuperLU_CUDA
+	cudaError_t ce = m_superlu_mt_gpuSolver.Reinitialize(m_matJacobian.NNZ, m_matJacobian.N, m_matJacobian.IA, m_matJacobian.JA);
+	if(ce != cudaSuccess)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to reinitialize superlu_mt_gpu solver" << cudaGetErrorString(ce);
+		throw e;
+	}
+#endif
+	
+#ifdef daeSuperLU
 	if(m_bFactorizationDone)
 	{
 		Destroy_CompCol_Permuted(&m_matAC);
 		Destroy_SuperNode_Matrix(&m_matL);
 		Destroy_CompCol_Matrix(&m_matU);
 	}
-#endif
-
+	
 // We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
 // This is in agreement with what the SuperLU documentation says about compressed row storage matrices
+	m_Options.Trans	= TRANS;
 	Destroy_SuperMatrix_Store(&m_matA);
 	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
-
-#ifdef daeSuperLU_MT
-	m_Options.trans	= TRANS;
-#elif daeSuperLU
-	m_Options.Trans	= TRANS;
 #endif
 
 	return IDA_SUCCESS;
@@ -176,50 +202,17 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 
 void daeSuperLUSolver::FreeMemory(void)
 {
+	std::cout << "Total factorization time = " << m_factorize / 1.E9 << " s" << std::endl;
+	std::cout << "Total solve time = "         << m_solve / 1.E9     << " s" << std::endl;
+	
 #ifdef daeSuperLU_MT
     pxgstrf_finalize(&m_Options, &m_matAC);	
-	if(m_bFactorizationDone && m_Options.lwork >= 0)
+	if(m_bFactorizationDone)
 	{
 		Destroy_SuperNode_SCP(&m_matL);
 		Destroy_CompCol_NCP(&m_matU);
 	}
 	StatFree(&m_Stats);
-	
-#elif daeSuperLU
-	
-	if(m_work && m_lwork > 0)
-		free(m_work);
-    m_work	= NULL;
-    m_lwork	= 0;
-
-//	blasMemory_& blasMemory = *get_blasMemory();
-//	if(blasMemory.a)
-//		cublasFree(blasMemory.a);
-//	if(blasMemory.b)
-//		cublasFree(blasMemory.b);
-//	if(blasMemory.c)
-//		cublasFree(blasMemory.c);
-	
-	
-	if(m_etree)
-		SUPERLU_FREE(m_etree);
-	if(m_R)
-		SUPERLU_FREE(m_R);
-	if(m_C)
-		SUPERLU_FREE(m_C);
-	
-	if(m_bFactorizationDone)
-	{
-		Destroy_CompCol_Permuted(&m_matAC);
-		
-// If lwork = 0		
-		Destroy_SuperNode_Matrix(&m_matL);
-		Destroy_CompCol_Matrix(&m_matU);
-// If lwork > 0		
-		Destroy_SuperMatrix_Store(&m_matL);
-		Destroy_SuperMatrix_Store(&m_matU);
-	}
-#endif
 
 	if(m_vecB)
 		SUPERLU_FREE(m_vecB);
@@ -234,15 +227,65 @@ void daeSuperLUSolver::FreeMemory(void)
     Destroy_SuperMatrix_Store(&m_matA);
 	Destroy_SuperMatrix_Store(&m_matB);
 	Destroy_SuperMatrix_Store(&m_matX);
+#endif
+
+#ifdef daeSuperLU_CUDA
+	cudaError_t ce = m_superlu_mt_gpuSolver.FreeMemory();
+	if(ce != cudaSuccess)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to free memory for superlu_mt_gpu solver" << cudaGetErrorString(ce);
+		throw e;
+	}
+#endif
+	
+#ifdef daeSuperLU
+	
+	if(m_work && m_lwork > 0)
+	{
+	//	cudaFreeHost(m_work);
+		free(m_work);
+	}
+    m_work	= NULL;
+    m_lwork	= 0;
+
+	if(m_etree)
+		SUPERLU_FREE(m_etree);
+	if(m_R)
+		SUPERLU_FREE(m_R);
+	if(m_C)
+		SUPERLU_FREE(m_C);
+	
+	if(m_bFactorizationDone)
+	{
+		Destroy_CompCol_Permuted(&m_matAC);
+		
+// If lwork == 0		
+//		Destroy_SuperNode_Matrix(&m_matL);
+//		Destroy_CompCol_Matrix(&m_matU);
+// If lwork > 0		
+		Destroy_SuperMatrix_Store(&m_matL);
+		Destroy_SuperMatrix_Store(&m_matU);
+	}
+	
+	if(m_vecB)
+		SUPERLU_FREE(m_vecB);
+	if(m_vecX)
+		SUPERLU_FREE(m_vecX);
+	if(m_perm_c)
+		SUPERLU_FREE(m_perm_c);
+	if(m_perm_r)
+		SUPERLU_FREE(m_perm_r);
+	
+	m_matJacobian.Free();
+    Destroy_SuperMatrix_Store(&m_matA);
+	Destroy_SuperMatrix_Store(&m_matB);
+	Destroy_SuperMatrix_Store(&m_matX);
+#endif
 }
 
 void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 {
-	m_vecB					= doubleMalloc(m_nNoEquations);
-	m_vecX					= doubleMalloc(m_nNoEquations);
-	m_perm_c				= intMalloc(m_nNoEquations);
-	m_perm_r				= intMalloc(m_nNoEquations);
-	
 // Initialize sparse matrix
 	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
 	m_matJacobian.ResetCounters();
@@ -250,6 +293,11 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 	m_matJacobian.Sort();
 	
 #ifdef daeSuperLU_MT
+	m_vecB				= doubleMalloc(m_nNoEquations);
+	m_vecX				= doubleMalloc(m_nNoEquations);
+	m_perm_c			= intMalloc(m_nNoEquations);
+	m_perm_r			= intMalloc(m_nNoEquations);
+	
     m_Options.perm_c	= m_perm_c;
     m_Options.perm_r	= m_perm_r;
     m_Options.work		= NULL;
@@ -262,10 +310,33 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 		throw e;
 	}
 	
-#elif daeSuperLU
-	m_etree	= intMalloc(m_nNoEquations);
-	m_R		= doubleMalloc(m_nNoEquations);
-	m_C		= doubleMalloc(m_nNoEquations);
+// We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
+// This is in agreement with what the SuperLU documentation says about compressed row storage matrices
+	m_Options.trans	= TRANS;
+	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
+	dCreate_Dense_Matrix(&m_matB, m_nNoEquations, 1, m_vecB, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
+#endif
+
+#ifdef daeSuperLU_CUDA
+	cudaError_t ce = m_superlu_mt_gpuSolver.Initialize(m_matJacobian.NNZ, m_matJacobian.N, m_matJacobian.IA, m_matJacobian.JA);
+	if(ce != cudaSuccess)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to initialize superlu_mt_gpu solver" << cudaGetErrorString(ce);
+		throw e;
+	}
+#endif
+	
+#ifdef daeSuperLU
+	m_vecB	 = doubleMalloc(m_nNoEquations);
+	m_vecX	 = doubleMalloc(m_nNoEquations);
+	m_perm_c = intMalloc(m_nNoEquations);
+	m_perm_r = intMalloc(m_nNoEquations);
+	
+	m_etree	 = intMalloc(m_nNoEquations);
+	m_R		 = doubleMalloc(m_nNoEquations);
+	m_C		 = doubleMalloc(m_nNoEquations);
 	
 	if(!m_vecB || !m_vecX || !m_perm_c || !m_perm_r || !m_R || !m_C || !m_etree)
 	{
@@ -274,50 +345,12 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 		throw e;
 	}
 	
-//	cublasStatus ce;
-//	
-//	blasMemory_& blasMemory = *get_blasMemory();
-//	blasMemory.sizeA = m_matJacobian.NNZ * 3 * sizeof(real_t);
-//	blasMemory.sizeB = m_matJacobian.NNZ * 3 * sizeof(real_t);
-//	blasMemory.sizeC = m_matJacobian.NNZ * 3 * sizeof(real_t);
-////	printf("blasMemory.sizeA = %d \n", blasMemory.sizeA);
-////	printf("blasMemory.sizeB = %d \n", blasMemory.sizeB);
-////	printf("blasMemory.sizeC = %d \n", blasMemory.sizeC);
-//			
-//	ce = cublasAlloc(blasMemory.sizeA, sizeof(real_t), (void**)&blasMemory.a);
-//	if(ce != CUBLAS_STATUS_SUCCESS)
-//	{
-//		daeDeclareException(exMiscellanous);
-//		e << "Unable to allocate memory for GPU A";
-//		throw e;
-//	}
-//	ce = cublasAlloc(blasMemory.sizeB, sizeof(real_t), (void**)&blasMemory.b);
-//	if(ce != cudaSuccess)
-//	{
-//		daeDeclareException(exMiscellanous);
-//		e << "Unable to allocate memory for GPU B";
-//		throw e;
-//	}
-//	ce = cublasAlloc(blasMemory.sizeC, sizeof(real_t), (void**)&blasMemory.c);
-//	if(ce != cudaSuccess)
-//	{
-//		daeDeclareException(exMiscellanous);
-//		e << "Unable to allocate memory for GPU C";
-//		throw e;
-//	}
-
-#endif
-
 // We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
 // This is in agreement with what the SuperLU documentation says about compressed row storage matrices
+	m_Options.Trans	= TRANS;
 	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matB, m_nNoEquations, 1, m_vecB, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
 	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
-
-#ifdef daeSuperLU_MT
-	m_Options.trans	= TRANS;
-#elif daeSuperLU
-	m_Options.Trans	= TRANS;
 #endif
 	
 	m_bFactorizationDone = false;
@@ -330,14 +363,18 @@ int daeSuperLUSolver::SaveAsXPM(const std::string& strFileName)
 }
 
 #ifdef daeSuperLU_MT
-superlumt_options_t& 		
-#elif daeSuperLU
-superlu_options_t& 
-#endif
-daeSuperLUSolver::GetOptions(void)
+superlumt_options_t& daeSuperLUSolver::GetOptions(void)
 {
 	return m_Options;
 }
+#endif
+
+#ifdef daeSuperLU
+superlu_options_t& daeSuperLUSolver::GetOptions(void)
+{
+	return m_Options;
+}
+#endif
 
 int daeSuperLUSolver::Init(void* ida)
 {
@@ -384,6 +421,9 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_arrTimeDerivatives, 
 							    m_matJacobian, 
 							    dInverseTimeStep);
+
+	struct timespec start, end;
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	
 #ifdef daeSuperLU_MT
 	if(m_bFactorizationDone)
@@ -437,8 +477,31 @@ int daeSuperLUSolver::Setup(void*		ida,
 	}
 	
 	PrintStats();
+#endif
 	
-#elif daeSuperLU
+#ifdef daeSuperLU_CUDA
+	cudaError_t ce;
+	
+	ce = m_superlu_mt_gpuSolver.SetMatrixValues(m_matJacobian.A);
+	if(ce != cudaSuccess)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to copy matrix values to the device (CUDA error: " << cudaGetErrorString(ce) << ")";
+		throw e;
+	}
+
+	ce = m_superlu_mt_gpuSolver.Factorize(info);
+	if(ce != cudaSuccess || info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to factorize matrix (CUDA error: " << cudaGetErrorString(ce) << "; "
+		  << "info: " << info << ")";
+		throw e;
+	}
+
+#endif
+	
+#ifdef daeSuperLU
     int panel_size = sp_ienv(1);
     int relax      = sp_ienv(2);
 
@@ -449,16 +512,14 @@ int daeSuperLUSolver::Setup(void*		ida,
 	// but we may run into a numerical instability. Therefore we will sacrify some speed for stability!
 		m_Options.Fact = SamePattern;
 		
-// If lwork > 0		
-	// Destroy matrices L and U
-		Destroy_SuperNode_Matrix(&m_matL);
-		Destroy_CompCol_Matrix(&m_matU);
-
-// If lwork > 0		
-//		Destroy_SuperMatrix_Store(&m_matL);
-//		Destroy_SuperMatrix_Store(&m_matU);
+	// If lwork == 0		
+		//Destroy_SuperNode_Matrix(&m_matL);
+		//Destroy_CompCol_Matrix(&m_matU);
 		
-		
+	// If lwork > 0		
+		Destroy_SuperMatrix_Store(&m_matL);
+		Destroy_SuperMatrix_Store(&m_matU);
+				
 	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
 		Destroy_CompCol_Permuted(&m_matAC);
 	}
@@ -480,77 +541,14 @@ int daeSuperLUSolver::Setup(void*		ida,
 // Determine the amount of memory:
 	if(m_lwork == 0)
 	{
-		cudaError_t ce;
-		cublasStatus cse;
-		size_t free;
-		size_t total;
-		cudaDeviceProp dp;
-	
-//		CUdevice dev;
-//		CUcontext ctx;
-//		cuInit(0);
-//		cuDeviceGet(&dev,0);
-//		cuCtxCreate(&ctx, 0, dev);
-		
-		cudaSetDevice(0);
-		
-		ce = cudaGetDeviceProperties(&dp, 0); 	
-		if(ce != cudaSuccess)
-		{
-			std::cout << "Cannot get device properties" << std::endl;
-			return IDA_LSETUP_FAIL;		
-		}
-		
-//		if(dp.canMapHostMemory != 1)
-//		{
-//			std::cout << "GPU device cannot map host memory" << std::endl;
-//			return IDA_LSETUP_FAIL;		
-//		}
-	
 		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 		m_lwork = 1.2 * info;
-		std::cout << "Memory requirements = " << m_lwork << " bytes" << std::endl;
-
-		m_work = realloc(m_work, m_lwork);
+		std::cout << "Predicted memory requirements = " << real_t(m_lwork)/1E6 << " MB" << std::endl;
+		
+		m_work = malloc(m_lwork);
 		if(!m_work)
 		{
-			std::cout << "Cannot allocate memory (" << m_lwork << " bytes)" << std::endl;
-			return IDA_LSETUP_FAIL;		
-		}
-		
-//		ce = cudaSetDeviceFlags(cudaDeviceMapHost);
-//		if(ce != cudaSuccess)
-//		{
-//			std::cout << "Cannot set cudaDeviceMapHost flag" << std::endl;
-//			return IDA_LSETUP_FAIL;		
-//		}
-//
-//		ce = cudaHostAlloc(&m_work, m_lwork, cudaHostAllocMapped);
-//		if(ce != cudaSuccess)
-//		{
-//			std::cout << "Cannot allocate mapped GPU device memory (" << m_lwork << " bytes)" << std::endl;
-//			return IDA_LSETUP_FAIL;		
-//		}
-//
-//		void* dev_work;
-//		ce = cudaHostGetDevicePointer(&dev_work, m_work, 0);
-//		if(ce != cudaSuccess)
-//		{
-//			if(ce == cudaErrorInvalidValue)
-//				printf("Cannot get device pointer: cudaErrorInvalidValue \n");
-//			else if(ce == cudaErrorMemoryAllocation)
-//				printf("Cannot get device pointer: cudaErrorMemoryAllocation \n");
-//			else
-//				printf("Cannot get device pointer: %d \n", ce);
-//				
-//			return -1;
-//		}
-//		std::cout << "Allocated " << m_lwork << " bytes" << std::endl;
-		
-		cse = cublasInit(); 	
-		if(cse != CUBLAS_STATUS_SUCCESS)
-		{
-			std::cout << "Cannot init cublas" << std::endl;
+			std::cout << "Cannot allocate Work memory (size of " << real_t(m_lwork)/1E6 << " MB)" << std::endl;
 			return IDA_LSETUP_FAIL;		
 		}
 	}
@@ -566,6 +564,11 @@ int daeSuperLUSolver::Setup(void*		ida,
 	StatFree(&m_Stats);
 
 #endif
+
+	clock_gettime(CLOCK_MONOTONIC, &end);
+	uint64_t timeElapsed = timespecDiff(&end, &start);
+	std::cout << "Factorization time = " << timeElapsed / 1.E9 << " s" << std::endl;
+	m_factorize += timeElapsed;
 
 	m_bFactorizationDone = true;
 	
@@ -592,9 +595,21 @@ int daeSuperLUSolver::Solve(void*		ida,
 	size_t Neq = m_nNoEquations;
 	pdB        = NV_DATA_S(vectorB);
 	
-	::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+	struct timespec start, end;
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	
 #ifdef daeSuperLU_MT
+	::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+
+/**********************************************/
+//	daeDenseArray x;
+//	x.InitArray(Neq, m_vecB);
+//	std::cout << "A matrix:" << std::endl;
+//	m_matJacobian.Print(false, true);
+//	std::cout << "B vector:" << std::endl;
+//	x.Print();
+/**********************************************/    
+
 // Note the order: (..., Pr, Pc, ...) and not (..., Pc, Pr, ...) as in superlu
     dgstrs(m_Options.trans, &m_matL, &m_matU, m_perm_r, m_perm_c, &m_matB, &m_Stats, &info);
 	if(info != 0)
@@ -604,10 +619,32 @@ int daeSuperLUSolver::Solve(void*		ida,
 	}
 	
 	PrintStats();
-	
+/**********************************************/
+//	std::cout << "X vector:" << std::endl;
+//	x.Print();
+/**********************************************/
 	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
+#endif
 	
-#elif daeSuperLU
+#ifdef daeSuperLU_CUDA
+	cudaError_t ce = m_superlu_mt_gpuSolver.Solve(&pdB, info);
+	if(ce != cudaSuccess || info != 0)
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Unable to solve the system (CUDA error: " << cudaGetErrorString(ce) << "; "
+		  << "info: " << info << ")";
+		throw e;
+	}
+	
+	daeDenseArray ba;
+	ba.InitArray(Neq, pdB);
+	std::cout << "X: " << std::endl;
+	ba.Print();
+#endif
+	
+#ifdef daeSuperLU
+	::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+	
 	StatInit(&m_Stats);
 	
 // Note the order: (..., Pc, Pr, ...) and not (..., Pr, Pc, ...) as in superlu_mt
@@ -620,10 +657,14 @@ int daeSuperLUSolver::Solve(void*		ida,
 	
 	PrintStats();
 	StatFree(&m_Stats);
-	
-	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
-	
+		
+	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));	
 #endif
+	
+	clock_gettime(CLOCK_MONOTONIC, &end);
+	uint64_t timeElapsed = timespecDiff(&end, &start);
+	std::cout << "Solve time = " << timeElapsed / 1.E9 << " s" << std::endl;
+	m_solve += timeElapsed;
 	
 	if(ida_mem->ida_cjratio != 1.0)
 	{
@@ -638,8 +679,13 @@ int daeSuperLUSolver::Solve(void*		ida,
 void daeSuperLUSolver::PrintStats(void)
 {
 #ifdef daeSuperLU_MT
+#endif
 	
-#elif daeSuperLU
+#ifdef daeSuperLU_CUDA
+#endif
+	
+#ifdef daeSuperLU
+	
 //	if(m_Options.PrintStat == YES)
 //	{
 //		StatPrint(&m_Stats);

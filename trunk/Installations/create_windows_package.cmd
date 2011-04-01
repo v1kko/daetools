@@ -78,10 +78,12 @@ copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
 copy pyBONMIN.pyd                   %ROOT%\pyDAE
+copy pyIPOPT.pyd                    %ROOT%\pyDAE
 copy pyTrilinos.pyd                 %ROOT%\pyTrilinos
 copy pyMagma.pyd                    %ROOT%\pyMagma
 copy pySuperLU.pyd                  %ROOT%\pySuperLU
 copy pySuperLU_MT.pyd               %ROOT%\pySuperLU
+copy pySuperLU_CUDA.pyd             %ROOT%\pySuperLU
 
 REM copy pyAmdACML.pyd              %ROOT%\pyAmdACML
 REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL

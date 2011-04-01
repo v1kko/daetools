@@ -17,13 +17,6 @@ QT -= core \
 TARGET = Lapack
 TEMPLATE = lib
 
-####################################################################################
-#                       Suppress some warnings
-####################################################################################
-#unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CXXFLAGS += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-
 ######################################################################################
 #                                 SOLVER SPECIFICATION
 # IntelMKL, AmdACML, Magma or Lapack   

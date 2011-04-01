@@ -4,7 +4,12 @@
 #include <numpy/core/include/numpy/noprefix.h>
 using namespace boost::python;
 
+#ifdef daeBONMIN	
 BOOST_PYTHON_MODULE(pyBONMIN)
+#endif
+#ifdef daeIPOPT
+BOOST_PYTHON_MODULE(pyIPOPT)
+#endif
 {
     import_array();
     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
@@ -14,7 +19,12 @@ BOOST_PYTHON_MODULE(pyBONMIN)
         .def("Solve",                    pure_virtual(&daeNLPSolver_t::Solve))
 		;
 	
+#ifdef daeBONMIN	
     class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeBONMIN")
+#endif
+#ifdef daeIPOPT
+	class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeIPOPT")
+#endif
 		.def("Initialize",	&daeBONMINSolver::Initialize)
 		.def("Solve",	    &daeBONMINSolver::Solve)
 		

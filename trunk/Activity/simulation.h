@@ -65,8 +65,8 @@ public:
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 	
-	daeOptimizationConstraint* CreateInequalityConstraint(real_t LB, real_t UB, string strDescription = "");
-	daeOptimizationConstraint* CreateEqualityConstraint(real_t EqualTo, string strDescription = "");
+	daeOptimizationConstraint* CreateInequalityConstraint(string strDescription = "");// <= 0
+	daeOptimizationConstraint* CreateEqualityConstraint(string strDescription = "");  // == 0
 
 	void SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
 	void SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);

@@ -502,24 +502,24 @@ void daeSimulation::ReRun(void)
 	Run();
 }
 
-daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(real_t LB, real_t UB, string strDescription)
+daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strDescription)
 {
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
 	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, LB, UB, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }
 
-daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(real_t EqualTo, string strDescription)
+daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDescription)
 {
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
 	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, EqualTo, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }

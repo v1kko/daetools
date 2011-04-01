@@ -705,14 +705,14 @@ public:
 	
 	virtual bool IsLinear(void) const = 0;
 	
-	virtual void SetLB(real_t value) = 0;
-	virtual real_t GetLB(void) const = 0;
-
-	virtual void SetUB(real_t value) = 0;
-	virtual real_t GetUB(void) const = 0;
-	
-	virtual void SetEqualityValue(real_t value) = 0;
-	virtual real_t GetEqualityValue(void) const = 0;
+//	virtual void SetLB(real_t value) = 0;
+//	virtual real_t GetLB(void) const = 0;
+//
+//	virtual void SetUB(real_t value) = 0;
+//	virtual real_t GetUB(void) const = 0;
+//	
+//	virtual void SetEqualityValue(real_t value) = 0;
+//	virtual real_t GetEqualityValue(void) const = 0;
 
 	virtual std::string GetName(void) const = 0;
 	virtual real_t GetValue(void) const = 0;

@@ -35,14 +35,17 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-#from daetools.pySuperLU import pySuperLU_MT as superlu
-from daetools.pySuperLU import pySuperLU    as superlu
-#import daetools.pyTrilinos       as pyTrilinos
-#import daetools.pyIntelPardiso   as pyIntelPardiso
-#import daetools.pyAmdACML        as pyAmdACML
-#import daetools.pyIntelMKL       as pyIntelMKL
-#import daetools.pyLapack         as pyLapack
-#import daetools.pyAtlas          as pyAtlas
+#from daetools.solvers import pyCUSPARSE
+#from daetools.solvers import pyCUSP
+#from daetools.solvers import pySuperLU_MT as superlu
+from daetools.solvers import pySuperLU as superlu
+#from daetools.solvers import pySuperLU_CUDA as superlu
+#from daetools.solvers import as pyTrilinos
+#from daetools.solvers import as pyIntelPardiso
+#from daetools.solvers import as pyAmdACML
+#from daetools.solvers import as pyIntelMKL
+#from daetools.solvers import as pyLapack
+#from daetools.solvers import as pyAtlas
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
 typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
@@ -102,7 +105,7 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
 
     def SetUpParametersAndDomains(self):
-        n = 20
+        n = 50
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
@@ -162,9 +165,12 @@ def consoleRun():
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
-    lasolver      = superlu.daeCreateSuperLUSolver()
-    options = lasolver.GetOptions()
+    lasolver     = superlu.daeCreateSuperLUSolver()
+    #lasolver     = pyCUSPARSE.daeCreateCUSPARSESolver()
 
+    #options = lasolver.GetOptions()
+
+    #lasolver      = pyCUSP.daeCreateCUSPSolver()
     daesolver.SetLASolver(lasolver)
 
     # SuperLU options:
@@ -187,7 +193,7 @@ def consoleRun():
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
+    simulation.TimeHorizon = 100
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

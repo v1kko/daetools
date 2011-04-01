@@ -119,50 +119,62 @@ mkdir ${PACKAGE_NAME}/examples/images
 mkdir ${PACKAGE_NAME}/pyDAE
 mkdir ${PACKAGE_NAME}/daeSimulator
 mkdir ${PACKAGE_NAME}/daeSimulator/images
+mkdir ${PACKAGE_NAME}/solvers
 
 # Python extension modules and LA solvers
 cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
 cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
 cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
 cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyBONMIN.so           ${PACKAGE_NAME}/pyDAE
 
-mkdir ${PACKAGE_NAME}/pyAmdACML
-#if [ -e ../release/pyAmdACML.so ]; then
-#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/pyAmdACML
-#fi
-
-mkdir ${PACKAGE_NAME}/pyIntelMKL
-#if [ -e ../release/pyIntelMKL.so ]; then
-#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/pyIntelMKL
-#fi
-
-mkdir ${PACKAGE_NAME}/pyLapack
-#if [ -e ../release/pyLapack.so ]; then
-#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/pyLapack
-#fi
-
-mkdir ${PACKAGE_NAME}/pyMagma
-if [ -e ../release/pyMagma.so ]; then
-  cp ../release/pyMagma.so             ${PACKAGE_NAME}/pyMagma
+if [ -e ../release/pyBONMIN.so ]; then
+  cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers
 fi
 
-mkdir ${PACKAGE_NAME}/pySuperLU
+if [ -e ../release/pyIPOPT.so ]; then
+  cp ../release/pyIPOPT.so          ${PACKAGE_NAME}/solvers
+fi
+
+if [ -e ../release/pyNLOPT.so ]; then
+  cp ../release/pyNLOPT.so          ${PACKAGE_NAME}/solvers
+fi
+
+#if [ -e ../release/pyAmdACML.so ]; then
+#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/solvers
+#fi
+
+#if [ -e ../release/pyIntelMKL.so ]; then
+#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/solvers
+#fi
+
+#if [ -e ../release/pyLapack.so ]; then
+#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
+#fi
+
+if [ -e ../release/pyMagma.so ]; then
+  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
+fi
+
+if [ -e ../release/pyCUSP.so ]; then
+  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
+fi
+
 if [ -e ../release/pySuperLU.so ]; then
-  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/pySuperLU
+  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers
 fi
 if [ -e ../release/pySuperLU_MT.so ]; then
-  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/pySuperLU
+  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/solvers
+fi
+if [ -e ../release/pySuperLU_CUDA.so ]; then
+  cp ../release/pySuperLU_CUDA.so      ${PACKAGE_NAME}/solvers
 fi
 
-mkdir ${PACKAGE_NAME}/pyIntelPardiso
 #if [ -e ../release/pyIntelPardiso.so ]; then
-#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/pyIntelPardiso
+#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/solvers
 #fi
 
-mkdir ${PACKAGE_NAME}/pyTrilinos
 if [ -e ../release/pyTrilinos.so ]; then
-  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/pyTrilinos
+  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/solvers
 fi
 
 # Licences
@@ -173,13 +185,7 @@ cp ../ReadMe.txt                                 ${PACKAGE_NAME}
 cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
 cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
-cp ../python-files/pyAmdACML__init__.py          ${PACKAGE_NAME}/pyAmdACML/__init__.py
-cp ../python-files/pyIntelMKL__init__.py         ${PACKAGE_NAME}/pyIntelMKL/__init__.py
-cp ../python-files/pyLapack__init__.py           ${PACKAGE_NAME}/pyLapack/__init__.py
-cp ../python-files/pyMagma__init__.py            ${PACKAGE_NAME}/pyMagma/__init__.py
-cp ../python-files/pyIntelPardiso__init__.py     ${PACKAGE_NAME}/pyIntelPardiso/__init__.py
-cp ../python-files/pyTrilinos__init__.py         ${PACKAGE_NAME}/pyTrilinos/__init__.py
-cp ../python-files/pySuperLU__init__.py          ${PACKAGE_NAME}/pySuperLU/__init__.py
+cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
 cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
 
@@ -227,7 +233,7 @@ echo "      license='GNU GPL v3', " >> setup.py
 echo "      platforms='${ARCH}', " >> setup.py
 echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pySuperLU/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} " >> setup.py
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']} " >> setup.py
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
