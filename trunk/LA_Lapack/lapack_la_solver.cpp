@@ -113,6 +113,22 @@ int daeLapackSolver::SaveAsMatrixMarketFile(const std::string& strFileName, cons
 	return 0;
 }
 
+std::string daeLapackSolver::GetName(void) const
+{
+#ifdef daeHasMagma	
+	return string("Magma Lapack");
+#endif
+#ifdef daeHasIntelMKL
+	return string("Intel MKL Lapack");
+#endif
+#ifdef daeHasLapack
+	return string("Lapack");
+#endif
+#ifdef daeHasAmdACML
+	return string("AMD ACML Lapack");
+#endif
+}
+
 bool daeLapackSolver::CheckData() const
 {
 	if(!m_vecPivot || !m_matLAPACK || !m_nNoEquations > 0)

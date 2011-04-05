@@ -198,6 +198,9 @@ def CreateLASolver():
 
     return lasolver
 
+def setOptions(lasolver):
+    print 'setOptions'
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -205,7 +208,9 @@ def guiRun(app):
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
     la = CreateLASolver()
-    simulator = daeSimulator(app, simulation=sim, lasolver=la)
+    simulator = daeSimulator(app, simulation = sim,
+                                  lasolver = la,
+                                  lasolver_setoptions_fn = setOptions)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -232,6 +237,9 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
+
+    # Set the solver options
+    setOptions(lasolver)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

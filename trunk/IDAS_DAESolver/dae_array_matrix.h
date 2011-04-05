@@ -9,7 +9,7 @@
 #include "solver_class_factory.h"
 extern "C"
 {
-#include "../IDAS_DAESolver/mmio.h" 
+#include "../mmio.h" 
 }
 
 namespace dae

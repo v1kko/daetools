@@ -41,13 +41,16 @@ double constraint(unsigned n, const double *x, double *grad, void *data)
 /******************************************************************
 	daeNLOPTSolver
 *******************************************************************/
-daeNLOPTSolver::daeNLOPTSolver(void)
+daeNLOPTSolver::daeNLOPTSolver(nlopt_algorithm algorithm)
 {
-	m_nlopt				 = NULL;
-	m_nlopt_algorithm    = NLOPT_NUM_ALGORITHMS;
-	
-	daeConfig& cfg = daeConfig::GetConfig();
-	m_bPrintInfo = cfg.Get<bool>("daetools.NLOPT.printInfo", false);
+	m_nlopt			  = NULL;
+	m_nlopt_algorithm = algorithm;
+}
+
+daeNLOPTSolver::daeNLOPTSolver(const string& algorithm)
+{
+	m_nlopt	= NULL;
+	SetAlgorithm(algorithm);
 }
 
 daeNLOPTSolver::~daeNLOPTSolver(void)
@@ -62,6 +65,8 @@ void daeNLOPTSolver::Initialize(daeSimulation_t* pSimulation,
 								daeLog_t* pLog)
 {
 	daeNLPCommon::Init(pSimulation, pDAESolver, pDataReporter, pLog);
+	
+	daeNLPCommon::CheckProblem(m_ptrarrOptVariables);
 
 	size_t Nv = m_ptrarrOptVariables.size();
 	if(Nv == 0)
@@ -77,13 +82,21 @@ void daeNLOPTSolver::Initialize(daeSimulation_t* pSimulation,
 	SetConstraints();
 	
 	daeConfig& cfg = daeConfig::GetConfig();
-	double xtolerance = cfg.Get<double>("daetools.NLOPT.opt_variables_tolerance", 1E-5);
-	double ftol_rel   = cfg.Get<double>("daetools.NLOPT.ftol_rel", 1E-5);
-	double ftol_abs   = cfg.Get<double>("daetools.NLOPT.ftol_abs", 1E-5);
+	double xtol_rel   = cfg.Get<double>("daetools.NLOPT.xtol_rel",   1E-6);
+	double xtol_abs   = cfg.Get<double>("daetools.NLOPT.xtol_abs",   1E-6);
+	double ftol_rel   = cfg.Get<double>("daetools.NLOPT.ftol_rel",   1E-6);
+	double ftol_abs   = cfg.Get<double>("daetools.NLOPT.ftol_abs",   1E-6);
+	m_bPrintInfo      = cfg.Get<bool>  ("daetools.NLOPT.printInfo",  false);
+	int maxeval       = cfg.Get<int>   ("daetools.NLOPT.ftol_abs",  1000);
+	double maxtime    = cfg.Get<double>("daetools.NLOPT.maxtime",   0);
 	
-	nlopt_set_xtol_rel(m_nlopt, xtolerance);	
+	nlopt_set_xtol_rel(m_nlopt, xtol_rel);	
+	nlopt_set_xtol_abs(m_nlopt, xtol_abs);	
 	nlopt_set_ftol_rel(m_nlopt, ftol_rel);
 	nlopt_set_ftol_abs(m_nlopt, ftol_abs);
+	nlopt_set_maxeval(m_nlopt, maxeval);
+	nlopt_set_maxtime(m_nlopt, maxtime);
+	
 	nlopt_set_min_objective(m_nlopt, function, this);
 	
 	if(m_bPrintInfo) 
@@ -95,6 +108,17 @@ void daeNLOPTSolver::Initialize(daeSimulation_t* pSimulation,
 		PrintStartingPoint();
 		PrintBoundsInfo();
 	}
+}
+
+void daeNLOPTSolver::PrintOptions(void)
+{
+	m_pLog->Message(string("NLOPT options:"), 0);
+	m_pLog->Message(string("  xtol_rel: ") + toStringFormatted<real_t>(nlopt_get_xtol_rel(m_nlopt), -1, 1, true), 0);
+	m_pLog->Message(string("  xtol_abs: ") + toStringFormatted<real_t>(nlopt_get_xtol_abs(m_nlopt), -1, 1, true), 0);
+	m_pLog->Message(string("  ftol_rel: ") + toStringFormatted<real_t>(nlopt_get_ftol_rel(m_nlopt), -1, 1, true), 0);
+	m_pLog->Message(string("  ftol_abs: ") + toStringFormatted<real_t>(nlopt_get_ftol_abs(m_nlopt), -1, 1, true), 0);	
+	m_pLog->Message(string("  maxtime: ") + toStringFormatted<real_t>(nlopt_get_maxtime(m_nlopt), -1, 1, true), 0);	
+	m_pLog->Message(string("  maxeval: ") + toString(nlopt_get_maxeval(m_nlopt)), 0);	
 }
 
 void daeNLOPTSolver::Solve(void)
@@ -114,6 +138,99 @@ void daeNLOPTSolver::Solve(void)
 	}
 
 	PrintSolution(&m_darrX[0], optResult, status);
+}
+
+std::string daeNLOPTSolver::GetName(void) const
+{
+	return string("NLOPT MINLP");
+}
+
+double daeNLOPTSolver::get_xtol_rel(void) const
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	return nlopt_get_xtol_rel(m_nlopt);	
+}
+
+double daeNLOPTSolver::get_xtol_abs(void) const
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	return nlopt_get_xtol_abs(m_nlopt);	
+}
+
+double daeNLOPTSolver::get_ftol_rel(void) const
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	return nlopt_get_ftol_rel(m_nlopt);	
+}
+
+double daeNLOPTSolver::get_ftol_abs(void) const
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	return nlopt_get_ftol_abs(m_nlopt);	
+}
+
+void daeNLOPTSolver::set_xtol_rel(double tol)
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	nlopt_set_xtol_rel(m_nlopt, tol);	
+}
+
+void daeNLOPTSolver::set_xtol_abs(double tol)
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	nlopt_set_xtol_abs(m_nlopt, tol);	
+}
+
+void daeNLOPTSolver::set_ftol_rel(double tol)
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	nlopt_set_ftol_rel(m_nlopt, tol);	
+}
+
+void daeNLOPTSolver::set_ftol_abs(double tol)
+{
+	if(!m_nlopt)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "NLOPT options cannot be get/set before the optimization is initialized.";
+		throw e;
+	}
+	nlopt_set_ftol_abs(m_nlopt, tol);	
 }
 
 double daeNLOPTSolver::eval_f(unsigned n, const double* x)
@@ -157,7 +274,7 @@ void daeNLOPTSolver::SetConstraints(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	double tolerance = cfg.Get<double>("daetools.NLOPT.constraints_tolerance", 1E-5);
+	double tolerance = cfg.Get<double>("daetools.NLOPT.constr_tol", 1E-6);
 
 	size_t Nc = m_ptrarrConstraints.size();
 	m_arrConstraintData.resize(Nc);
@@ -287,11 +404,6 @@ void daeNLOPTSolver::PrintSolution(const double* x, double obj_value, nlopt_resu
 	daeNLPCommon::PrintSolution(obj_value, x, NULL);
 }
 
-void daeNLOPTSolver::SetAlgorithm(nlopt_algorithm algorithm)
-{
-	m_nlopt_algorithm = algorithm;
-}
-
 void daeNLOPTSolver::SetAlgorithm(string algorithm)
 {
 	if(algorithm == "NLOPT_GN_DIRECT")
@@ -398,11 +510,6 @@ void daeNLOPTSolver::SetAlgorithm(string algorithm)
 		m_nlopt_algorithm = NLOPT_LD_SLSQP;
 	else
 		daeDeclareAndThrowException(exNotImplemented);
-}
-
-nlopt_algorithm daeNLOPTSolver::GetAlgorithm(void)
-{
-	return m_nlopt_algorithm;
 }
 
 

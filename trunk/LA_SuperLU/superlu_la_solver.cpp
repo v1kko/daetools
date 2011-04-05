@@ -152,10 +152,20 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	
 #ifdef daeSuperLU_MT
     pxgstrf_finalize(&m_Options, &m_matAC);	
-	if(m_bFactorizationDone && m_Options.lwork >= 0)
+	
+	if(m_bFactorizationDone)
 	{
-		Destroy_SuperNode_SCP(&m_matL);
-		Destroy_CompCol_NCP(&m_matU);
+		if(m_lwork > 0)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "daeSuperLU_MT: unsupported case: m_lwork > 0" << cudaGetErrorString(ce);
+			throw e;
+		}
+		else
+		{
+			Destroy_SuperNode_SCP(&m_matL);
+			Destroy_CompCol_NCP(&m_matU);
+		}
 	}
 	StatFree(&m_Stats);
 	
@@ -180,8 +190,19 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	if(m_bFactorizationDone)
 	{
 		Destroy_CompCol_Permuted(&m_matAC);
-		Destroy_SuperNode_Matrix(&m_matL);
-		Destroy_CompCol_Matrix(&m_matU);
+		
+	// If memory was pre-allocated in m_work then destroy only SuperMatrix_Store
+	// Otherwise destroy the whole matrix
+		if(m_lwork > 0)
+		{
+			Destroy_SuperMatrix_Store(&m_matL);
+			Destroy_SuperMatrix_Store(&m_matU);
+		}
+		else
+		{
+			Destroy_SuperNode_Matrix(&m_matL);
+			Destroy_CompCol_Matrix(&m_matU);
+		}
 	}
 	
 // We deliberately create SLU_NC matrix (although it is SLU_NR), and then ask superlu to solve a transposed system 
@@ -198,12 +219,27 @@ void daeSuperLUSolver::FreeMemory(void)
 {
 #ifdef daeSuperLU_MT
     pxgstrf_finalize(&m_Options, &m_matAC);	
+	
 	if(m_bFactorizationDone)
 	{
-		Destroy_SuperNode_SCP(&m_matL);
-		Destroy_CompCol_NCP(&m_matU);
+		if(m_lwork > 0)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "daeSuperLU_MT: unsupported case: m_lwork > 0" << cudaGetErrorString(ce);
+			throw e;
+		}
+		else
+		{
+			Destroy_SuperNode_SCP(&m_matL);
+			Destroy_CompCol_NCP(&m_matU);
+		}
 	}
 	StatFree(&m_Stats);
+
+	if(m_work && m_lwork > 0)
+		SUPERLU_FREE(m_work);
+    m_work	= NULL;
+    m_lwork	= 0;
 
 	if(m_vecB)
 		SUPERLU_FREE(m_vecB);
@@ -233,16 +269,7 @@ void daeSuperLUSolver::FreeMemory(void)
 	std::cout << "Total solve time = "         << m_solve / 1.E9     << " s" << std::endl;
 #endif
 	
-#ifdef daeSuperLU
-	
-	if(m_work && m_lwork > 0)
-	{
-	//	cudaFreeHost(m_work);
-		free(m_work);
-	}
-    m_work	= NULL;
-    m_lwork	= 0;
-
+#ifdef daeSuperLU	
 	if(m_etree)
 		SUPERLU_FREE(m_etree);
 	if(m_R)
@@ -254,13 +281,24 @@ void daeSuperLUSolver::FreeMemory(void)
 	{
 		Destroy_CompCol_Permuted(&m_matAC);
 		
-// If lwork == 0		
-//		Destroy_SuperNode_Matrix(&m_matL);
-//		Destroy_CompCol_Matrix(&m_matU);
-// If lwork > 0		
-		Destroy_SuperMatrix_Store(&m_matL);
-		Destroy_SuperMatrix_Store(&m_matU);
+	// If memory was pre-allocated in m_work then destroy only SuperMatrix_Store
+	// Otherwise destroy the whole matrix
+		if(m_lwork > 0)
+		{
+			Destroy_SuperMatrix_Store(&m_matL);
+			Destroy_SuperMatrix_Store(&m_matU);
+		}
+		else
+		{
+			Destroy_SuperNode_Matrix(&m_matL);
+			Destroy_CompCol_Matrix(&m_matU);
+		}
 	}
+
+	if(m_work && m_lwork > 0)
+		SUPERLU_FREE(m_work);
+    m_work	= NULL;
+    m_lwork	= 0;
 	
 	if(m_vecB)
 		SUPERLU_FREE(m_vecB);
@@ -360,6 +398,19 @@ int daeSuperLUSolver::SaveAsMatrixMarketFile(const std::string& strFileName, con
 {
 	m_matJacobian.SaveAsMatrixMarketFile(strFileName, strMatrixName, strMatrixDescription);
 	return 0;
+}
+
+std::string daeSuperLUSolver::GetName(void) const
+{
+#ifdef daeSuperLU_MT	
+	return string("SuperLU_MT");
+#endif
+#ifdef daeSuperLU
+	return string("SuperLU");
+#endif
+#ifdef daeSuperLU_CUDA
+	return string("SuperLU_CUDA");
+#endif
 }
 
 #ifdef daeSuperLU_MT
@@ -513,14 +564,19 @@ int daeSuperLUSolver::Setup(void*		ida,
 	// but we may run into a numerical instability. Therefore we will sacrify some speed for stability!
 		m_Options.Fact = SamePattern;
 		
-	// If lwork == 0		
-		//Destroy_SuperNode_Matrix(&m_matL);
-		//Destroy_CompCol_Matrix(&m_matU);
+	// If memory was pre-allocated in m_work then destroy only SuperMatrix_Store
+	// Otherwise destroy the whole matrix
+		if(m_lwork > 0)
+		{
+			Destroy_SuperMatrix_Store(&m_matL);
+			Destroy_SuperMatrix_Store(&m_matU);
+		}
+		else
+		{
+			Destroy_SuperNode_Matrix(&m_matL);
+			Destroy_CompCol_Matrix(&m_matU);
+		}
 		
-	// If lwork > 0		
-		Destroy_SuperMatrix_Store(&m_matL);
-		Destroy_SuperMatrix_Store(&m_matU);
-				
 	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
 		Destroy_CompCol_Permuted(&m_matAC);
 	}

@@ -151,13 +151,13 @@ fi
 #  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
 #fi
 
-if [ -e ../release/pyMagma.so ]; then
-  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
-fi
+#if [ -e ../release/pyMagma.so ]; then
+#  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
+#fi
 
-if [ -e ../release/pyCUSP.so ]; then
-  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
-fi
+#if [ -e ../release/pyCUSP.so ]; then
+#  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
+#fi
 
 if [ -e ../release/pySuperLU.so ]; then
   cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers

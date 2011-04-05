@@ -137,6 +137,11 @@ int daeIntelPardisoSolver::SaveAsMatrixMarketFile(const std::string& strFileName
 	return 0;
 }
 
+std::string daeIntelPardisoSolver::GetName(void) const
+{
+	return string("Intel Pardiso");
+}
+
 void daeIntelPardisoSolver::ResetMatrix(size_t nnz)
 {
 	m_vecB = (real_t*)realloc(m_vecB, m_nNoEquations * sizeof(real_t));

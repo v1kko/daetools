@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "nlpsolver_class_factory.h"
 #include "../Core/optimization.h"
-#include "../BONMIN_MINLPSolver/nlp_common.h"
+#include "../nlp_common.h"
 #include <stdio.h>
 #include <time.h>
 #include <nlopt.h>
@@ -37,7 +37,8 @@ class DAE_NLPSOLVER_API daeNLOPTSolver: public daeNLPSolver_t,
                                         public daeNLPCommon
 {
 public:
-	daeNLOPTSolver(void);
+	daeNLOPTSolver(nlopt_algorithm algorithm);
+	daeNLOPTSolver(const string& algorithm);
 	virtual ~daeNLOPTSolver(void);
 
 public:
@@ -46,15 +47,28 @@ public:
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog);
 	virtual void Solve(void);
-	
-	void            SetAlgorithm(nlopt_algorithm algorithm);
-	void            SetAlgorithm(string algorithm);
-	nlopt_algorithm GetAlgorithm(void);
+	virtual string GetName(void) const;
 	
 	double eval_f(unsigned n, const double* x);
 	void   eval_grad_f(unsigned n, const double* x, double* grad_f);
 	double eval_g(daeOptimizationConstraint_t* pConstraint, unsigned n, const double* x);
 	void   eval_grad_g(daeOptimizationConstraint_t* pConstraint,  unsigned n, const double* x, double* grad) ;
+	
+	double get_xtol_rel(void) const;
+	double get_xtol_abs(void) const;
+	double get_ftol_rel(void) const;
+	double get_ftol_abs(void) const;
+	double get_maxtime(void) const;
+	int    get_maxeval(void) const;
+
+	void set_xtol_rel(double tol);
+	void set_xtol_abs(double tol);
+	void set_ftol_rel(double tol);
+	void set_ftol_abs(double tol);
+	void set_maxtime(double time);
+	void set_maxeval(int eval);
+	
+	void PrintOptions(void);
 	
 protected:
 	string CreateNLOPTErrorMessage(nlopt_result status);
@@ -62,6 +76,7 @@ protected:
 	void SetConstraints(void);
 	void SetOptimizationVariables(void);
 	void CheckAndRun(const double* x);
+	void SetAlgorithm(string algorithm);
 		
 protected:
 	nlopt_opt				m_nlopt;

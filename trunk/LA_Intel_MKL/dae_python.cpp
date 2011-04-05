@@ -17,6 +17,7 @@ BOOST_PYTHON_MODULE(pyIntelPardiso)
 		;
 
 	class_<daeIntelPardisoSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeIntelPardisoSolver")
+		.add_property("Name",			&daeIntelPardisoSolver::GetName)
 		.def("Create",					&daeIntelPardisoSolver::Create)
 		.def("Reinitialize",			&daeIntelPardisoSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeIntelPardisoSolver::SaveAsXPM)

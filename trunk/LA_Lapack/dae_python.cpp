@@ -25,6 +25,7 @@ BOOST_PYTHON_MODULE(pyAmdACML)
 		;
 
 	class_<daeLapackSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeLapackSolver")
+		.add_property("Name",			&daeLapackSolver::GetName)
 		.def("Create",					&daeLapackSolver::Create)
 		.def("Reinitialize",			&daeLapackSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeLapackSolver::SaveAsXPM)

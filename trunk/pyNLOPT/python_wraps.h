@@ -48,20 +48,9 @@ class daeNLOPTWrapper : public daeNLOPTSolver,
                         public boost::python::wrapper<daeNLOPTSolver>
 {
 public:
-    daeNLOPTWrapper(void)
+    daeNLOPTWrapper(string algorithm) : daeNLOPTSolver(algorithm)
     {
     }
-	
-	void SetAlgorithm1(nlopt_algorithm algorithm)
-	{
-		daeNLOPTSolver::SetAlgorithm(algorithm);
-	}
-	
-	void SetAlgorithm2(string algorithm)
-	{
-		daeNLOPTSolver::SetAlgorithm(algorithm);
-	}
-
 	
 //	void SetOptionS(const string& strOptionName, const string& strValue)
 //	{

@@ -46,12 +46,14 @@ OBJECTS_DIR   = release/
 SOURCES       = stdafx.cpp \
 		dllmain.cpp \
 		dae_python.cpp \
-		cusp_la_solver.cpp
+		cusp_la_solver.cpp \
+	        ../mmio.c
 OBJECTS       = release/stdafx.o \
 		release/dllmain.o \
 		release/dae_python.o \
 		release/cusp_la_solver.o \
-		release/cusp_solver.o
+		release/cusp_solver.o \
+	        release/mmio.o
 DIST          = /usr/share/qt4/mkspecs/common/g++.conf \
 		/usr/share/qt4/mkspecs/common/unix.conf \
 		/usr/share/qt4/mkspecs/common/linux.conf \
@@ -128,47 +130,7 @@ $(TARGETA):  $(OBJECTS) $(OBJCOMP)
 	-$(DEL_FILE) $(TARGETA)
 	$(AR) $(TARGETA) $(OBJECTS)
 
-Makefile: LA_CUSP.pro  /usr/share/qt4/mkspecs/linux-g++-64/qmake.conf /usr/share/qt4/mkspecs/common/g++.conf \
-		/usr/share/qt4/mkspecs/common/unix.conf \
-		/usr/share/qt4/mkspecs/common/linux.conf \
-		/usr/share/qt4/mkspecs/qconfig.pri \
-		/usr/share/qt4/mkspecs/features/qt_functions.prf \
-		/usr/share/qt4/mkspecs/features/qt_config.prf \
-		/usr/share/qt4/mkspecs/features/exclusive_builds.prf \
-		/usr/share/qt4/mkspecs/features/default_pre.prf \
-		../dae.pri \
-		/usr/share/qt4/mkspecs/features/release.prf \
-		/usr/share/qt4/mkspecs/features/default_post.prf \
-		/usr/share/qt4/mkspecs/features/warn_on.prf \
-		/usr/share/qt4/mkspecs/features/qt.prf \
-		/usr/share/qt4/mkspecs/features/unix/thread.prf \
-		/usr/share/qt4/mkspecs/features/moc.prf \
-		/usr/share/qt4/mkspecs/features/resources.prf \
-		/usr/share/qt4/mkspecs/features/uic.prf \
-		/usr/share/qt4/mkspecs/features/yacc.prf \
-		/usr/share/qt4/mkspecs/features/lex.prf \
-		/usr/share/qt4/mkspecs/features/include_source_dir.prf
-	$(QMAKE) -spec /usr/share/qt4/mkspecs/linux-g++-64 -unix -o Makefile LA_CUSP.pro
-/usr/share/qt4/mkspecs/common/g++.conf:
-/usr/share/qt4/mkspecs/common/unix.conf:
-/usr/share/qt4/mkspecs/common/linux.conf:
-/usr/share/qt4/mkspecs/qconfig.pri:
-/usr/share/qt4/mkspecs/features/qt_functions.prf:
-/usr/share/qt4/mkspecs/features/qt_config.prf:
-/usr/share/qt4/mkspecs/features/exclusive_builds.prf:
-/usr/share/qt4/mkspecs/features/default_pre.prf:
-../dae.pri:
-/usr/share/qt4/mkspecs/features/release.prf:
-/usr/share/qt4/mkspecs/features/default_post.prf:
-/usr/share/qt4/mkspecs/features/warn_on.prf:
-/usr/share/qt4/mkspecs/features/qt.prf:
-/usr/share/qt4/mkspecs/features/unix/thread.prf:
-/usr/share/qt4/mkspecs/features/moc.prf:
-/usr/share/qt4/mkspecs/features/resources.prf:
-/usr/share/qt4/mkspecs/features/uic.prf:
-/usr/share/qt4/mkspecs/features/yacc.prf:
-/usr/share/qt4/mkspecs/features/lex.prf:
-/usr/share/qt4/mkspecs/features/include_source_dir.prf:
+
 qmake:  FORCE
 	@$(QMAKE) -spec /usr/share/qt4/mkspecs/linux-g++-64 -unix -o Makefile LA_CUSP.pro
 
@@ -192,27 +154,6 @@ distclean: clean
 
 check: first
 
-mocclean: compiler_moc_header_clean compiler_moc_source_clean
-
-mocables: compiler_moc_header_make_all compiler_moc_source_make_all
-
-compiler_moc_header_make_all:
-compiler_moc_header_clean:
-compiler_rcc_make_all:
-compiler_rcc_clean:
-compiler_image_collection_make_all: qmake_image_collection.cpp
-compiler_image_collection_clean:
-	-$(DEL_FILE) qmake_image_collection.cpp
-compiler_moc_source_make_all:
-compiler_moc_source_clean:
-compiler_uic_make_all:
-compiler_uic_clean:
-compiler_yacc_decl_make_all:
-compiler_yacc_decl_clean:
-compiler_yacc_impl_make_all:
-compiler_yacc_impl_clean:
-compiler_lex_make_all:
-compiler_lex_clean:
 compiler_clean:
 
 ####### Compile
@@ -248,6 +189,9 @@ release/cusp_la_solver.o: cusp_la_solver.cpp stdafx.h \
 		../Core/helpers.h \
 		cusp_solver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release/cusp_la_solver.o cusp_la_solver.cpp
+
+release/mmio.o: ../mmio.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o release/mmio.o ../mmio.c
 
 release/cusp_solver.o: cusp_solver.cu cusp_solver.h
 	nvcc --compiler-options "$(CXXFLAGS)" $(INCPATH) -c -o release/cusp_solver.o cusp_solver.cu

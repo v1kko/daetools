@@ -53,6 +53,7 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		;
 	
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
@@ -63,6 +64,7 @@ BOOST_PYTHON_MODULE(pySuperLU)
 	
 #ifdef daeSuperLU_CUDA
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
@@ -97,6 +99,7 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		;
 
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)

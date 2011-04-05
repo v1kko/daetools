@@ -130,6 +130,11 @@ void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType)
 	m_pLASolver = NULL;
 }
 
+std::string daeIDASolver::GetName(void) const
+{
+	return string("Sundials IDAS");
+}
+
 size_t daeIDASolver::GetNumberOfVariables(void) const
 {
 	return m_nNumberOfEquations;

@@ -18,7 +18,11 @@ daeMINLP::daeMINLP(daeSimulation_t*   pSimulation,
 			       daeLog_t*          pLog)
 {
 	daeNLPCommon::Init(pSimulation, pDAESolver, pDataReporter, pLog);
-	
+
+#ifdef daeIPOPT	
+	daeNLPCommon::CheckProblem(m_ptrarrOptVariables);
+#endif
+
 	size_t n = m_ptrarrOptVariables.size();
 	if(n == 0)
 		daeDeclareAndThrowException(exInvalidCall)
@@ -691,7 +695,7 @@ void daeBONMINSolver::Initialize(daeSimulation_t* pSimulation,
 	m_pDataReporter	= pDataReporter;
 	m_pLog			= pLog;
 	
-#ifdef daeBONMIN	
+#ifdef daeBONMIN
 	m_MINLP = new daeMINLP(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 	m_Bonmin.initialize(GetRawPtr(m_MINLP));	
 #endif
@@ -762,16 +766,32 @@ void daeBONMINSolver::Solve(void)
 #endif
 }
 
+std::string daeBONMINSolver::GetName(void) const
+{
+#ifdef daeBONMIN	
+	return string("BONMIN MINLP");
+#endif
+#ifdef daeIPOPT
+	return string("IPOPT NLP");
+#endif
+}
+
 void daeBONMINSolver::SetOption(const string& strOptionName, const string& strValue)
 {
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be set before the optimization is initialized.";
+		throw e;
+	}
 	m_Bonmin.options()->SetStringValue(strOptionName, strValue);
 #endif
 #ifdef daeIPOPT
 	if(IsNull(m_Application))
 	{
 		daeDeclareException(exInvalidCall);
-		e << "daeIPOPT object has not been initialized.";
+		e << "daeIPOPT options cannot be set before the optimization is initialized.";
 		throw e;
 	}	
 	m_Application->Options()->SetStringValue(strOptionName, strValue);
@@ -781,13 +801,19 @@ void daeBONMINSolver::SetOption(const string& strOptionName, const string& strVa
 void daeBONMINSolver::SetOption(const string& strOptionName, real_t dValue)
 {
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be set before the optimization is initialized.";
+		throw e;
+	}
 	m_Bonmin.options()->SetNumericValue(strOptionName, dValue);
 #endif
 #ifdef daeIPOPT
 	if(IsNull(m_Application))
 	{
 		daeDeclareException(exInvalidCall);
-		e << "daeIPOPT object has not been initialized.";
+		e << "daeIPOPT options cannot be set before the optimization is initialized.";
 		throw e;
 	}
 	m_Application->Options()->SetNumericValue(strOptionName, dValue);
@@ -797,13 +823,19 @@ void daeBONMINSolver::SetOption(const string& strOptionName, real_t dValue)
 void daeBONMINSolver::SetOption(const string& strOptionName, int iValue)
 {
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be set before the optimization is initialized.";
+		throw e;
+	}
 	m_Bonmin.options()->SetIntegerValue(strOptionName, iValue);
 #endif
 #ifdef daeIPOPT
 	if(IsNull(m_Application))
 	{
 		daeDeclareException(exInvalidCall);
-		e << "daeIPOPT object has not been initialized.";
+		e << "daeIPOPT options cannot be set before the optimization is initialized.";
 		throw e;
 	}	
 	m_Application->Options()->SetIntegerValue(strOptionName, iValue);
@@ -813,49 +845,99 @@ void daeBONMINSolver::SetOption(const string& strOptionName, int iValue)
 void daeBONMINSolver::ClearOptions(void)
 {
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be cleared before the optimization is initialized.";
+		throw e;
+	}
 	m_Bonmin.options()->clear();
 #endif
 #ifdef daeIPOPT
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT options cannot be cleared before the optimization is initialized.";
+		throw e;
+	}	
+	m_Application->Options()->clear();
 #endif
 }
 
 void daeBONMINSolver::PrintOptions(void)
 {	
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be printed before the optimization is initialized.";
+		throw e;
+	}
 	string strOptions;
 	m_Bonmin.options()->PrintList(strOptions);
 	m_pLog->Message(string("BONMIN options:"), 0);
 	m_pLog->Message(strOptions, 0);
 #endif
 #ifdef daeIPOPT
+	string strOptions;
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT options cannot be printed before the optimization is initialized.";
+		throw e;
+	}	
+	m_Application->Options()->PrintList(strOptions);
+	m_pLog->Message(string("IPOPT options:"), 0);
+	m_pLog->Message(strOptions, 0);
 #endif
 }
 
 void daeBONMINSolver::PrintUserOptions(void)
 {
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options cannot be printed before the optimization is initialized.";
+		throw e;
+	}
 	string strOptions;
 	m_Bonmin.options()->PrintUserOptions(strOptions);
 	m_pLog->Message(string("BONMIN options set by user:"), 0);
 	m_pLog->Message(strOptions, 0);
 #endif
 #ifdef daeIPOPT
+	string strOptions;
+	if(IsNull(m_Application))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIPOPT options cannot be printed before the optimization is initialized.";
+		throw e;
+	}	
+	m_Application->Options()->PrintUserOptions(strOptions);
+	m_pLog->Message(string("IPOPT options set by user:"), 0);
+	m_pLog->Message(strOptions, 0);
 #endif
 }
 
 void daeBONMINSolver::LoadOptionsFile(const string& strOptionsFile)
 {	
 #ifdef daeBONMIN	
+	if(IsNull(m_Bonmin.options()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeBONMIN options file cannot be loaded before the optimization is initialized.";
+		throw e;
+	}
 	if(strOptionsFile.empty())
 		m_Bonmin.readOptionsFile(daeConfig::GetBONMINOptionsFile());
 	else
 		m_Bonmin.readOptionsFile(strOptionsFile);
 #endif
 #ifdef daeIPOPT
+	m_pLog->Message(string("IPOPT LoadOptionsFile() function is not supported"), 0);
 #endif
 }
-
-
 
 
 

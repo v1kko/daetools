@@ -40,6 +40,7 @@ public:
 	virtual void						Reinitialize(bool bCopyDataFromBlock);
 	virtual void						Reset(void);
 	virtual daeMatrix<real_t>&			GetSensitivities(void);
+	virtual std::string					GetName(void) const;
 	
 	void SetLASolver(daeeIDALASolverType eLASolverType);
 	void SetLASolver(daeIDALASolver_t* pLASolver);

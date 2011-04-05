@@ -72,7 +72,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Bonmin MINLP</string>
+         <string>BONMIN MINLP</string>
         </property>
        </item>
       </widget>
@@ -145,6 +145,11 @@
        <item>
         <property name="text">
          <string>AMD ACML Lapack (dense, OpenMP, direct)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lapack (dense, sequential, direct)</string>
         </property>
        </item>
        <item>
@@ -222,7 +227,7 @@
      <item>
       <widget class="QPushButton" name="ExportButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Export Matrix...</string>
@@ -232,7 +237,7 @@
      <item>
       <widget class="QPushButton" name="MatrixButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Matrix Preview...</string>

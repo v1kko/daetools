@@ -8,7 +8,7 @@
 #include <time.h>
 #include <iomanip>
 #include <fstream>
-#include "nlp_common.h"
+#include "../nlp_common.h"
 
 #ifdef daeIPOPT
 #include <IpTNLP.hpp>
@@ -211,6 +211,7 @@ public:
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog);
 	virtual void Solve(void);
+	virtual std::string GetName(void) const;
 	
 	void SetOption(const string& strOptionName, const string& strValue);
 	void SetOption(const string& strOptionName, real_t dValue);

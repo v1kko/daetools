@@ -14,23 +14,15 @@ BOOST_PYTHON_MODULE(pyNLOPT)
         .def("Solve",                    pure_virtual(&daeNLPSolver_t::Solve))
 		;
 	
-    class_<daepython::daeNLOPTWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeNLOPT")
-		.def("Initialize",	 &daeNLOPTSolver::Initialize)
-		.def("Solve",	     &daeNLOPTSolver::Solve)
-		
-		.def("SetAlgorithm", &daepython::daeNLOPTWrapper::SetAlgorithm1) 
-		.def("SetAlgorithm", &daepython::daeNLOPTWrapper::SetAlgorithm2) 
-		.def("GetAlgorithm", &daeNLOPTSolver::GetAlgorithm) 
-		
-//        .def("SetOption",	&daepython::daeNLOPTWrapper::SetOptionS)
-//        .def("SetOption",	&daepython::daeNLOPTWrapper::SetOptionN)
-//        .def("SetOption",	&daepython::daeNLOPTWrapper::SetOptionI) 
-//		
-//        .def("ClearOptions",		&daeNLOPTSolver::ClearOptions) 
-//        .def("PrintOptions",		&daeNLOPTSolver::PrintOptions) 
-//        .def("PrintUserOptions",	&daeNLOPTSolver::PrintUserOptions) 
-//        .def("LoadOptionsFile",	&daeNLOPTSolver::LoadOptionsFile) 
+    class_<daepython::daeNLOPTWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeNLOPT", init<string>())
+		.add_property("Name",		&daeNLOPTSolver::GetName)
+		.add_property("xtol_rel",	&daeNLOPTSolver::get_xtol_rel, &daeNLOPTSolver::set_xtol_rel)
+		.add_property("xtol_abs",	&daeNLOPTSolver::get_xtol_abs, &daeNLOPTSolver::set_xtol_abs)
+		.add_property("ftol_rel",	&daeNLOPTSolver::get_ftol_rel, &daeNLOPTSolver::set_ftol_rel)
+		.add_property("ftol_abs",	&daeNLOPTSolver::get_ftol_abs, &daeNLOPTSolver::set_ftol_abs)
+		.def("Initialize",			&daeNLOPTSolver::Initialize)
+		.def("Solve",				&daeNLOPTSolver::Solve)
+        .def("PrintOptions",		&daeNLOPTSolver::PrintOptions) 
         ; 
 }
-
 

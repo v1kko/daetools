@@ -158,14 +158,14 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	
 	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
 	node->AddVariableIndexToArray(mapVariableIndexes, true);
-	
+/*	
 	map<size_t, size_t>::iterator iter;
 	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
 	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
 		std::cout << iter->first << " ";
 	std::cout << std::endl;
 	std::cout.flush();	
-
+*/
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
 		pOptVariable = arrOptimizationVariables[i];
@@ -176,12 +176,13 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
-
+/*
 	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
 	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
 		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
 	std::cout << std::endl;
 	std::cout.flush();	
+*/
 }
 
 bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
@@ -432,14 +433,14 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	
 	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
 	node->AddVariableIndexToArray(mapVariableIndexes, true);
-
+/*
 	map<size_t, size_t>::iterator iter;
 	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
 	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
 		std::cout << iter->first << " ";
 	std::cout << std::endl;
 	std::cout.flush();
-
+*/
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
 		pOptVariable = arrOptimizationVariables[i];
@@ -450,12 +451,13 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	
 // 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
-
+/*
 	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
 	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
 		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
 	std::cout << std::endl;
 	std::cout.flush();
+*/
 }
 
 bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const

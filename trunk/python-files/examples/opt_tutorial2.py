@@ -16,6 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
+This tutorial introduces Bonmin MINLP solver, its setup and options.
 """
 
 import sys
@@ -44,7 +45,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("opt_tutorial2")
-        self.m.Description = "This tutorial explains how to define a simple optimization problem. Here we use the steady-state test HS-71 ()"
+        self.m.Description = "This tutorial introduces Bonmin MINLP solver, its setup and options."
 
     def SetUpParametersAndDomains(self):
         pass
@@ -78,6 +79,20 @@ class simTutorial(daeSimulation):
         self.SetContinuousOptimizationVariable(self.m.y2, 0, 2e19, 0)
         self.SetIntegerOptimizationVariable(self.m.z, 0, 5, 0)
 
+def setOptions(nlpsolver):
+    # 1) Set the options manually
+    nlpsolver.SetOption('bonmin.algorithm', 'B-Hyb')
+
+    # 2) Load the options file (if file name is empty load the default: /etc/daetools/bonfig.cfg)
+    nlpsolver.LoadOptionsFile("")
+
+    # Print options loaded at pyBonmin startup and the user set options:
+    nlpsolver.PrintOptions()
+    nlpsolver.PrintUserOptions()
+
+    # ClearOptions can clear all options:
+    #nlpsolver.ClearOptions()
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -86,7 +101,13 @@ def guiRun(app):
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
-    simulator = daeSimulator(app, simulation=sim, optimization=opt, nlpsolver=nlp)
+    # Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()
+    # Otherwise seg. fault occurs for some reasons.
+    # That is why we send a callback function to set the options after Initialize()
+    simulator = daeSimulator(app, simulation = sim,
+                                  optimization = opt,
+                                  nlpsolver = nlp,
+                                  nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -114,16 +135,9 @@ def consoleRun():
     # Initialize the simulation
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    #nlpsolver.PrintOptions()
-    #nlpsolver.PrintUserOptions()
-    nlpsolver.LoadOptionsFile("")
-
-    #nlpsolver.PrintOptions()
-    #nlpsolver.PrintUserOptions()
-    #nlpsolver.ClearOptions()
-
-    #nlpsolver.SetOption('hessian_approximation', 'limited-memory')
-    #nlpsolver.SetOption('tol', 1e-7)
+    # Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()
+    # Otherwise seg. fault occurs for some reasons.
+    setOptions(nlpsolver)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

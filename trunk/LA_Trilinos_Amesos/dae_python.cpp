@@ -101,6 +101,7 @@ BOOST_PYTHON_MODULE(pyTrilinos)
 		;
 
 	class_<daeTrilinosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosSolver", init<string, string>())
+		.add_property("Name",			&daeTrilinosSolver::GetName)
 		.def_readwrite("NumIters",		&daeTrilinosSolver::m_nNumIters)
 		.def_readwrite("Tolerance",		&daeTrilinosSolver::m_dTolerance)
 		.def("Create",					&daeTrilinosSolver::Create)

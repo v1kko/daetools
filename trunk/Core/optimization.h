@@ -38,6 +38,7 @@ public:
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog) = 0;
 	virtual void Solve() = 0;
+	virtual std::string GetName(void) const = 0;
 };
 
 }

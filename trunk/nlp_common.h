@@ -398,6 +398,25 @@ protected:
 		}	
 	}
 	
+	static void CheckProblem(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables)
+	{
+		size_t i;
+		daeOptimizationVariable_t* pOptVariable;
+		
+		for(i = 0; i < ptrarrOptVariables.size(); i++)
+		{
+			pOptVariable = ptrarrOptVariables[i];
+			
+			if(pOptVariable->GetType() == eIntegerVariable ||
+			   pOptVariable->GetType() == eBinaryVariable)
+			{
+				daeDeclareException(exRuntimeCheck);
+				e << "NLP solvers does not support integer/binary optimization variables - use a MINLP solver";
+				throw e;
+			}
+		}
+	}
+	
 public:
 	daeSimulation_t*	m_pSimulation;
 	daeDAESolver_t*		m_pDAESolver;

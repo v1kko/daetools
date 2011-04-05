@@ -16,11 +16,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
+This tutorial introduces IPOPT NLP solver, its setup and options.
 """
 
 import sys
 from daetools.pyDAE import *
-from daetools.solvers import pyNLOPT
+from daetools.solvers import pyIPOPT
 from time import localtime, strftime
 
 typeNone = daeVariableType("None", "-",  -1E20, 1E20,   1, 1e-6)
@@ -44,7 +45,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("opt_tutorial1")
-        self.m.Description = "This tutorial explains how to define a simple optimization problem. Here we use the steady-state test HS-71 ()"
+        self.m.Description = "This tutorial introduces IPOPT NLP solver, its setup and options."
 
     def SetUpParametersAndDomains(self):
         pass
@@ -69,20 +70,37 @@ class simTutorial(daeSimulation):
         c2 = self.CreateEqualityConstraint("Constraint 2") # h(x) == 40
         c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
 
-        # Set the optimization variables and their lower and upper bounds
+        # Set the optimization variables and their lower and upper bounds and starting point
         self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
         self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
         self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
         self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
+def setOptions(nlpsolver):
+    # 1) Set the options manually
+    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('tol', 1e-7)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+
+    # Print options loaded at pyIPOPT startup and the user set options:
+    nlpsolver.PrintOptions()
+    nlpsolver.PrintUserOptions()
+
+    # ClearOptions can clear all options:
+    #nlpsolver.ClearOptions()
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
     opt = daeOptimization()
+    nlp = pyIPOPT.daeIPOPT()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
-    simulator = daeSimulator(app, simulation=sim, optimization=opt)
+    simulator = daeSimulator(app, simulation = sim,
+                                  optimization = opt,
+                                  nlpsolver = nlp,
+                                  nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -90,9 +108,7 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    #nlpsolver    = pyIPOPT.daeIPOPT()
-    nlpsolver    = pyNLOPT.daeNLOPT()
-    nlpsolver.SetAlgorithm('NLOPT_LD_SLSQP')
+    nlpsolver    = pyIPOPT.daeIPOPT()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
     optimization = daeOptimization()
@@ -112,11 +128,9 @@ def consoleRun():
     # Initialize the simulation
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    #nlpsolver.SetOption('print_level', 5)
-    #nlpsolver.SetOption('hessian_approximation', 'limited-memory')
-    #nlpsolver.SetOption('tol', 1e-7)
-    #nlpsolver.SetOption('linear_solver', 'mumps')
-    #nlpsolver.SetOption('mu_strategy', 'adaptive')
+    # Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()
+    # Otherwise seg. fault occurs for some reasons.
+    setOptions(nlpsolver)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

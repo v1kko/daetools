@@ -223,6 +223,7 @@ public:
 	int Reinitialize(void* ida);
 	int SaveAsXPM(const std::string& strFileName);
 	int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);	
+	string GetName(void) const;
 	
 	int Init(void* ida);
 	int Setup(void* ida,

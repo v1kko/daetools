@@ -530,18 +530,30 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetReportingOn",			&daePort::SetReportingOn)
 		;
 	
+	class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)
+		;
+
 	class_<daeObjectiveFunction_t, boost::noncopyable>("daeObjectiveFunction_t", no_init)
 		;
 
 	class_<daeOptimizationConstraint_t, boost::noncopyable>("daeOptimizationConstraint_t", no_init)
 		;
 
+	class_<daeOptimizationVariable, bases<daeOptimizationVariable_t>, boost::noncopyable>("daeOptimizationVariable", no_init)
+		.add_property("LowerBound",		&daeOptimizationVariable::GetLB,			&daeOptimizationVariable::SetLB)
+		.add_property("UpperBound",		&daeOptimizationVariable::GetUB,			&daeOptimizationVariable::SetUB)
+		.add_property("StartingPoint",	&daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint)
+		;
+
 	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t>, boost::noncopyable>("daeObjectiveFunction", no_init)
-		.add_property("Residual",	&daeObjectiveFunction::GetResidual,  &daeObjectiveFunction::SetResidual)
+		.add_property("Residual",		&daeObjectiveFunction::GetResidual,		&daeObjectiveFunction::SetResidual)
+		.add_property("AbsTolerance",	&daeObjectiveFunction::GetAbsTolerance,	&daeObjectiveFunction::SetAbsTolerance)
 		;
 
 	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t>, boost::noncopyable>("daeOptimizationConstraint", no_init)
-		.add_property("Residual",	&daeOptimizationConstraint::GetResidual,  &daeOptimizationConstraint::SetResidual)
+		.add_property("Residual",		&daeOptimizationConstraint::GetResidual,		&daeOptimizationConstraint::SetResidual)
+		.add_property("AbsTolerance",	&daeOptimizationConstraint::GetAbsTolerance,	&daeOptimizationConstraint::SetAbsTolerance)
+		.add_property("RelTolerance",	&daeOptimizationConstraint::GetRelTolerance,	&daeOptimizationConstraint::SetRelTolerance)
 		;
 	
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel")

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Thu Mar 31 11:46:18 2011
+# Created: Sat Apr  2 07:47:37 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -70,6 +70,7 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
         self.LASolverComboBox.addItem("")
+        self.LASolverComboBox.addItem("")
         self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.LASolverComboBox)
         self.TimeHorizonLabel = QtGui.QLabel(SimulatorDialog)
         self.TimeHorizonLabel.setObjectName("TimeHorizonLabel")
@@ -91,11 +92,11 @@ class Ui_SimulatorDialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.ExportButton = QtGui.QPushButton(SimulatorDialog)
-        self.ExportButton.setEnabled(False)
+        self.ExportButton.setEnabled(True)
         self.ExportButton.setObjectName("ExportButton")
         self.horizontalLayout.addWidget(self.ExportButton)
         self.MatrixButton = QtGui.QPushButton(SimulatorDialog)
-        self.MatrixButton.setEnabled(False)
+        self.MatrixButton.setEnabled(True)
         self.MatrixButton.setObjectName("MatrixButton")
         self.horizontalLayout.addWidget(self.MatrixButton)
         self.RunButton = QtGui.QPushButton(SimulatorDialog)
@@ -155,7 +156,7 @@ class Ui_SimulatorDialog(object):
         self.MINLPSolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "(MI)NLP Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.MINLPSolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "IPOPT NLP", None, QtGui.QApplication.UnicodeUTF8))
         self.MINLPSolverComboBox.setItemText(1, QtGui.QApplication.translate("SimulatorDialog", "NLOPT NLP", None, QtGui.QApplication.UnicodeUTF8))
-        self.MINLPSolverComboBox.setItemText(2, QtGui.QApplication.translate("SimulatorDialog", "Bonmin MINLP", None, QtGui.QApplication.UnicodeUTF8))
+        self.MINLPSolverComboBox.setItemText(2, QtGui.QApplication.translate("SimulatorDialog", "BONMIN MINLP", None, QtGui.QApplication.UnicodeUTF8))
         self.DAESolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "DAE Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.DAESolverComboBox.setItemText(0, QtGui.QApplication.translate("SimulatorDialog", "Sundials IDAS", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
@@ -168,11 +169,12 @@ class Ui_SimulatorDialog(object):
         self.LASolverComboBox.setItemText(6, QtGui.QApplication.translate("SimulatorDialog", "Intel Pardiso (sparse, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(7, QtGui.QApplication.translate("SimulatorDialog", "Intel MKL Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
         self.LASolverComboBox.setItemText(8, QtGui.QApplication.translate("SimulatorDialog", "AMD ACML Lapack (dense, OpenMP, direct)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(9, QtGui.QApplication.translate("SimulatorDialog", "Magma Lapack (dense, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(10, QtGui.QApplication.translate("SimulatorDialog", "SuperLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(11, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_MT (sparse, POSIX threads, direct)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(12, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_CUDA (sparse, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverComboBox.setItemText(13, QtGui.QApplication.translate("SimulatorDialog", "CUSP (sparse, CUDA, iterative)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(9, QtGui.QApplication.translate("SimulatorDialog", "Lapack (dense, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(10, QtGui.QApplication.translate("SimulatorDialog", "Magma Lapack (dense, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(11, QtGui.QApplication.translate("SimulatorDialog", "SuperLU (sparse, sequential, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(12, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_MT (sparse, POSIX threads, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(13, QtGui.QApplication.translate("SimulatorDialog", "SuperLU_CUDA (sparse, CUDA, direct)", None, QtGui.QApplication.UnicodeUTF8))
+        self.LASolverComboBox.setItemText(14, QtGui.QApplication.translate("SimulatorDialog", "CUSP (sparse, CUDA, iterative)", None, QtGui.QApplication.UnicodeUTF8))
         self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
         self.ExportButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Export Matrix...", None, QtGui.QApplication.UnicodeUTF8))

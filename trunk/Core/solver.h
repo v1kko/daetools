@@ -32,7 +32,8 @@ public:
 	virtual ~daeLASolver_t(void){}
 
 public:
-	virtual bool Initialize(void)											= 0;
+	virtual bool		Initialize(void)									= 0;
+	virtual std::string GetName(void) const									= 0;
 //	virtual void Solve(const daeMatrix& A, const daeArray& B, daeArray& x)	= 0;
 };
 
@@ -75,6 +76,7 @@ public:
 	virtual void						Reinitialize(bool bCopyDataFromBlock)						= 0;
 	virtual void						Reset(void)													= 0;
 	virtual daeMatrix<real_t>&			GetSensitivities(void)										= 0;
+	virtual std::string					GetName(void) const											= 0;
 };
 
 /*********************************************************************************************

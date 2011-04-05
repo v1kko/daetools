@@ -31,6 +31,26 @@ class daeTextEditLog(daeBaseLog):
         self.App.processEvents()
 
 class daeSimulator(QtGui.QDialog):
+    laSundialsLU        = 0
+    laAmesos_Klu        = 1
+    laAmesos_Superlu    = 2
+    laAmesos_Umfpack    = 3
+    laAmesos_Lapack     = 4
+    laAztecOO           = 5
+    laIntelPardiso      = 6
+    laIntelMKL          = 7
+    laAmdACML           = 8
+    laLapack            = 9
+    laMagmaLapack       = 10
+    laSuperLU           = 11
+    laSuperLU_MT        = 12
+    laSuperLU_CUDA      = 13
+    laCUSP              = 14
+
+    nlpIPOPT            = 0
+    nlpNLOPT            = 1
+    nlpBONMIN           = 2
+
     def __init__(self, app, **kwargs):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
@@ -51,33 +71,45 @@ class daeSimulator(QtGui.QDialog):
         self.connect(self.ui.MatrixButton, QtCore.SIGNAL('clicked()'), self.slotOpenSparseMatrixImage)
         self.connect(self.ui.ExportButton, QtCore.SIGNAL('clicked()'), self.slotExportSparseMatrixAsMatrixMarketFormat)
 
-        self.app          = app
-        self.simulation   = kwargs.get('simulation',   None)
-        self.optimization = kwargs.get('optimization', None)
-        self.datareporter = kwargs.get('datareporter', None)
-        self.log          = kwargs.get('log',          None)
-        self.daesolver    = kwargs.get('daesolver',    None)
-        self.lasolver     = kwargs.get('lasolver',     None)
-        self.nlpsolver    = kwargs.get('nlpsolver',    None)
+        self.app = app
+        self.simulation              = kwargs.get('simulation',   None)
+        self.optimization            = kwargs.get('optimization', None)
+        self.datareporter            = kwargs.get('datareporter', None)
+        self.log                     = kwargs.get('log',          None)
+        self.daesolver               = kwargs.get('daesolver',    None)
+        self.lasolver                = kwargs.get('lasolver',     None)
+        self.nlpsolver               = kwargs.get('nlpsolver',    None)
+        self.nlpsolver_setoptions_fn = kwargs.get('nlpsolver_setoptions_fn', None)
+        self.lasolver_setoptions_fn  = kwargs.get('lasolver_setoptions_fn',  None)
 
         if self.app == None:
             raise RuntimeError('daeSimulator: app object must not be None')
         if self.simulation == None:
             raise RuntimeError('daeSimulator: simulation object must not be None')
 
+        self.ui.DAESolverComboBox.setEnabled(False)
+
         if self.lasolver == None:
             self.ui.LASolverComboBox.setEnabled(True)
         else:
+            # If LA solver has been sent then clear and disable LASolver combo box
+            self.ui.LASolverComboBox.clear()
+            self.ui.LASolverComboBox.addItem(self.lasolver.Name)
             self.ui.LASolverComboBox.setEnabled(False)
 
         if self.optimization == None:
+            # If we are simulating then clear and disable MINLPSolver combo box
             self.ui.simulationLabel.setText('Simulation')
+            self.ui.MINLPSolverComboBox.clear()
             self.ui.MINLPSolverComboBox.setEnabled(False)
         else:
             self.ui.simulationLabel.setText('Optimization')
             if(self.nlpsolver == None):
                 self.ui.MINLPSolverComboBox.setEnabled(True)
             else:
+                # If nlpsolver has been sent then clear and disable MINLPSolver combo box
+                self.ui.MINLPSolverComboBox.clear()
+                self.ui.MINLPSolverComboBox.addItem(self.nlpsolver.Name)
                 self.ui.MINLPSolverComboBox.setEnabled(False)
         self.ui.SimulationLineEdit.insert(self.simulation.m.Name)
 
@@ -118,130 +150,128 @@ class daeSimulator(QtGui.QDialog):
             if self.daesolver == None:
                 self.daesolver = daeIDAS()
 
-            minlpsolverIndex = self.ui.MINLPSolverComboBox.currentIndex()
+            lasolverIndex    = -1
+            minlpsolverIndex = -1
+
+            # If nlpsolver is not sent then choose it from the selection
+            if (self.nlpsolver == None):
+                minlpsolverIndex = self.ui.MINLPSolverComboBox.currentIndex()
 
             # If lasolver is not sent then create it based on the selection
             if (self.lasolver == None):
                 lasolverIndex = self.ui.LASolverComboBox.currentIndex()
 
-                if lasolverIndex == 0:
+                if lasolverIndex == self.laSundialsLU:
                     pass
 
-                elif lasolverIndex == 1:
+                elif lasolverIndex == self.laAmesos_Klu:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 2:
+                elif lasolverIndex == self.laAmesos_Superlu:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 3:
+                elif lasolverIndex == self.laAmesos_Umfpack:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 4:
+                elif lasolverIndex == self.laAmesos_Lapack:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 5:
+                elif lasolverIndex == self.laAztecOO:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 6:
+                elif lasolverIndex == self.laIntelPardiso:
                     try:
                         from daetools.solvers import pyIntelPardiso
                         self.lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelPardiso LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 7:
+                elif lasolverIndex == self.laIntelMKL:
                     try:
                         from daetools.solvers import pyIntelMKL
                         self.lasolver = pyIntelMKL.daeCreateLapackSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelMKL LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 8:
+                elif lasolverIndex == self.laAmdACML:
                     try:
                         from daetools.solvers import pyAmdACML
                         self.lasolver = pyAmdACML.daeCreateLapackSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create AmdACML LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 9:
+                elif lasolverIndex == self.laLapack:
                     try:
-                        from daetools.solvers import pyMagma
-                        self.lasolver = pyMagma.daeCreateLapackSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
+                        from daetools.solvers import pyLapack
+                        self.lasolver = pyLapack.daeCreateLapackSolver()
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Lapack LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 10:
+                elif lasolverIndex == self.laMagmaLapack:
+                    try:
+                        from daetools.solvers import pyMagma
+                        self.lasolver = pyMagma.daeCreateLapackSolver()
+                    except Exception, e:
+                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Magma Lapack LA solver\nError: " + str(e))
+                        return
+
+                elif lasolverIndex == self.laSuperLU:
                     try:
                         from daetools.solvers import pySuperLU
                         self.lasolver = pySuperLU.daeCreateSuperLUSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 11:
+                elif lasolverIndex == self.laSuperLU_MT:
                     try:
                         from daetools.solvers import pySuperLU_MT
                         self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_MT LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 12:
+                elif lasolverIndex == self.laSuperLU_CUDA:
                     try:
                         from daetools.solvers import pySuperLU_CUDA
                         self.lasolver = pySuperLU_CUDA.daeCreateSuperLUSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
                         return
 
-                elif lasolverIndex == 13:
-                    raise RuntimeError("CUSP is currently unsupported")
+                elif lasolverIndex == self.laCUSP:
                     try:
-                        pass
                         from daetools.solvers import pyCUSP
-                        self.lasolver = pyCUSP.daeCreateSuperLUSolver()
-                        self.daesolver.SetLASolver(self.lasolver)
+                        self.lasolver = pyCUSP.daeCreateCUSPSolver()
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create CUSP LA solver\nError: " + str(e))
                         return
@@ -250,10 +280,9 @@ class daeSimulator(QtGui.QDialog):
                     raise RuntimeError("Unsupported LA Solver selected")
 
             self.ui.RunButton.setEnabled(False)
-            if(lasolverIndex in [1, 2, 3, 5, 6, 10, 11, 12, 13]):
-                self.ui.MatrixButton.setEnabled(True)
-            if(lasolverIndex in [1, 2, 3, 5, 10, 11, 12, 13]):
-                self.ui.ExportButton.setEnabled(True)
+            if not (lasolverIndex in [self.laAmesos_Klu, self.laAmesos_Superlu, self.laAmesos_Umfpack, self.laAztecOO, self.laIntelPardiso,
+                                      self.laSuperLU, self.laSuperLU_MT, self.laSuperLU_CUDA, self.laCUSP]):
+                self.ui.MatrixButton.setEnabled(False)
             self.ui.MINLPSolverComboBox.setEnabled(False)
             self.ui.DAESolverComboBox.setEnabled(False)
             self.ui.LASolverComboBox.setEnabled(False)
@@ -261,15 +290,21 @@ class daeSimulator(QtGui.QDialog):
             self.ui.ReportingIntervalDoubleSpinBox.setEnabled(False)
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
 
+            if self.lasolver:
+                QtGui.QMessageBox.warning(None, "daeSimulator", self.lasolver.Name)
+                self.daesolver.SetLASolver(self.lasolver)
+
             if self.optimization == None:
                 self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
+                if(self.lasolver_setoptions_fn):
+                    self.lasolver_setoptions_fn(self.lasolver)
                 self.simulation.SolveInitial()
                 self.simulation.Run()
                 self.simulation.Finalize()
             else:
                 # If nlpsolver is not sent then create it based on the selection
                 if(self.nlpsolver == None):
-                    if minlpsolverIndex == 0:
+                    if minlpsolverIndex == self.nlpIPOPT:
                         try:
                             from daetools.solvers import pyIPOPT
                             self.nlpsolver = pyIPOPT.daeIPOPT()
@@ -277,27 +312,28 @@ class daeSimulator(QtGui.QDialog):
                             QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IPOPT NLP solver\nError: " + str(e))
                             return
 
-                    elif minlpsolverIndex == 1:
+                    elif minlpsolverIndex == self.nlpNLOPT:
                         try:
                             from daetools.solvers import pyNLOPT
-                            self.nlpsolver = pyNLOPT.daeNLOPT()
+                            from PyQt4 import QtCore, QtGui
                             algorithms = ['NLOPT_GN_DIRECT','NLOPT_GN_DIRECT_L','NLOPT_GN_DIRECT_L_RAND','NLOPT_GN_DIRECT_NOSCAL','NLOPT_GN_DIRECT_L_NOSCAL',
-                                          'NLOPT_GN_DIRECT_L_RAND_NOSCAL','NLOPT_GN_ORIG_DIRECT','NLOPT_GN_ORIG_DIRECT_L','NLOPT_GD_STOGO','NLOPT_GD_STOGO_RAND',
-                                          'NLOPT_LD_LBFGS_NOCEDAL','NLOPT_LD_LBFGS','NLOPT_LN_PRAXIS','NLOPT_LD_VAR1','NLOPT_LD_VAR2','NLOPT_LD_TNEWTON',
-                                          'NLOPT_LD_TNEWTON_RESTART','NLOPT_LD_TNEWTON_PRECOND','NLOPT_LD_TNEWTON_PRECOND_RESTART','NLOPT_GN_CRS2_LM',
-                                          'NLOPT_GN_MLSL','NLOPT_GD_MLSL','NLOPT_GN_MLSL_LDS','NLOPT_GD_MLSL_LDS','NLOPT_LD_MMA','NLOPT_LN_COBYLA',
-                                          'NLOPT_LN_NEWUOA','NLOPT_LN_NEWUOA_BOUND','NLOPT_LN_NELDERMEAD','NLOPT_LN_SBPLX','NLOPT_LN_AUGLAG','NLOPT_LD_AUGLAG',
-                                          'NLOPT_LN_AUGLAG_EQ','NLOPT_LD_AUGLAG_EQ','NLOPT_LN_BOBYQA','NLOPT_GN_ISRES',
-                                          'NLOPT_AUGLAG','NLOPT_AUGLAG_EQ','NLOPT_G_MLSL','NLOPT_G_MLSL_LDS','NLOPT_LD_SLSQP']
-                            algorithm, ok = QtGui.QInputDialog.getItem(self, "NLOPT Algorithm", "Choose the NLOPT algorithm:", algorithms, 0, False)
+                                        'NLOPT_GN_DIRECT_L_RAND_NOSCAL','NLOPT_GN_ORIG_DIRECT','NLOPT_GN_ORIG_DIRECT_L','NLOPT_GD_STOGO','NLOPT_GD_STOGO_RAND',
+                                        'NLOPT_LD_LBFGS_NOCEDAL','NLOPT_LD_LBFGS','NLOPT_LN_PRAXIS','NLOPT_LD_VAR1','NLOPT_LD_VAR2','NLOPT_LD_TNEWTON',
+                                        'NLOPT_LD_TNEWTON_RESTART','NLOPT_LD_TNEWTON_PRECOND','NLOPT_LD_TNEWTON_PRECOND_RESTART','NLOPT_GN_CRS2_LM',
+                                        'NLOPT_GN_MLSL','NLOPT_GD_MLSL','NLOPT_GN_MLSL_LDS','NLOPT_GD_MLSL_LDS','NLOPT_LD_MMA','NLOPT_LN_COBYLA',
+                                        'NLOPT_LN_NEWUOA','NLOPT_LN_NEWUOA_BOUND','NLOPT_LN_NELDERMEAD','NLOPT_LN_SBPLX','NLOPT_LN_AUGLAG','NLOPT_LD_AUGLAG',
+                                        'NLOPT_LN_AUGLAG_EQ','NLOPT_LD_AUGLAG_EQ','NLOPT_LN_BOBYQA','NLOPT_GN_ISRES',
+                                        'NLOPT_AUGLAG','NLOPT_AUGLAG_EQ','NLOPT_G_MLSL','NLOPT_G_MLSL_LDS','NLOPT_LD_SLSQP']
+                            # Show the input box to choose the algorithm (the default is len(algorithms)-1 that is: NLOPT_LD_SLSQP)
+                            algorithm, ok = QtGui.QInputDialog.getItem(None, "NLOPT Algorithm", "Choose the NLOPT algorithm:", algorithms, len(algorithms)-1, False)
                             if not ok:
-                                return
-                            self.nlpsolver.SetAlgorithm(str(algorithm))
-
+                                algorithm = 'NLOPT_LD_SLSQP'
+                            self.nlpsolver = pyNLOPT.daeNLOPT(str(algorithm))
                         except Exception, e:
                             QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create NLOPT NLP solver\nError: " + str(e))
                             return
-                    elif minlpsolverIndex == 2:
+
+                    elif minlpsolverIndex == self.nlpBONMIN:
                         try:
                             from daetools.solvers import pyBONMIN
                             self.nlpsolver = pyBONMIN.daeBONMIN()
@@ -309,6 +345,8 @@ class daeSimulator(QtGui.QDialog):
                         raise RuntimeError("Unsupported (MI)NLP Solver selected")
 
                 self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
+                if(self.nlpsolver_setoptions_fn):
+                    self.nlpsolver_setoptions_fn(self.nlpsolver)
                 self.optimization.Run()
                 self.optimization.Finalize()
 

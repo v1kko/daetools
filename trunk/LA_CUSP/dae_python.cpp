@@ -17,6 +17,7 @@ BOOST_PYTHON_MODULE(pyCUSP)
 		;
 
 	class_<daeCUSPSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeCUSPSolver")
+		.add_property("Name",			&daeCUSPSolver::GetName)
 		.def("Create",					&daeCUSPSolver::Create)
 		.def("Reinitialize",			&daeCUSPSolver::Reinitialize)
 		.def("SaveAsXPM",				&daeCUSPSolver::SaveAsXPM)

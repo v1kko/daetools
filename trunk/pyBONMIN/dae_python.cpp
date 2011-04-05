@@ -25,12 +25,13 @@ BOOST_PYTHON_MODULE(pyIPOPT)
 #ifdef daeIPOPT
 	class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeIPOPT")
 #endif
-		.def("Initialize",	&daeBONMINSolver::Initialize)
-		.def("Solve",	    &daeBONMINSolver::Solve)
+		.add_property("Name",		&daeBONMINSolver::GetName)
+		.def("Initialize",			&daeBONMINSolver::Initialize)
+		.def("Solve",				&daeBONMINSolver::Solve)
 		
-        .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionS)
-        .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionN)
-        .def("SetOption",	&daepython::daeBONMINWrapper::SetOptionI) 
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionS)
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionN)
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionI) 
 		
         .def("ClearOptions",		&daeBONMINSolver::ClearOptions) 
         .def("PrintOptions",		&daeBONMINSolver::PrintOptions) 

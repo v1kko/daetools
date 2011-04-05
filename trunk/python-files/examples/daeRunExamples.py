@@ -44,7 +44,7 @@ except Exception, e:
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12
-    import opt_tutorial1, opt_tutorial2
+    import opt_tutorial1, opt_tutorial2, opt_tutorial3
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
 
@@ -105,6 +105,8 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.setItemText(13, "opt_tutorial1")
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(14, "opt_tutorial2")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(15, "opt_tutorial3")
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -162,6 +164,8 @@ class RunExamples(QtGui.QDialog):
                 opt_tutorial1.guiRun(self.app)
             elif simName == "opt_tutorial2":
                 opt_tutorial2.guiRun(self.app)
+            elif simName == "opt_tutorial3":
+                opt_tutorial3.guiRun(self.app)
             else:
                 pass
         except RuntimeError, e:

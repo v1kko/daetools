@@ -129,6 +129,11 @@ int daeCUSPSolver::SaveAsMatrixMarketFile(const std::string& strFileName, const 
 	return 0;
 }
 
+std::string daeCUSPSolver::GetName(void) const
+{
+	return string("CUSP");
+}
+
 int daeCUSPSolver::Init(void* ida)
 {
 	return IDA_SUCCESS;
