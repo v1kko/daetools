@@ -634,24 +634,26 @@ inline void FillDomains(const vector<daeArrayRange>& arrRanges, vector<string>& 
 	strarrDomains.resize(n);
 	for(size_t i = 0; i < n; i++)
 	{
-		if(arrRanges[i].m_eType == eRangeConstantIndex)
-		{
-			strarrDomains[i] = toString<size_t>(arrRanges[i].m_nIndex);
-		}
-		else if(arrRanges[i].m_eType == eRangeDomainIterator)
-		{
-			if(!arrRanges[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			strarrDomains[i] = arrRanges[i].m_pDEDI->GetName();
-		}
-		else if(arrRanges[i].m_eType == eRange)
-		{
-			strarrDomains[i] = arrRanges[i].m_Range.ToString();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exXMLIOError);
-		}
+		strarrDomains[i] = arrRanges[i].GetRangeAsString();
+
+//		if(arrRanges[i].m_eType == eRangeConstantIndex)
+//		{
+//			strarrDomains[i] = toString<size_t>(arrRanges[i].m_nIndex);
+//		}
+//		else if(arrRanges[i].m_eType == eRangeDomainIterator)
+//		{
+//			if(!arrRanges[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			strarrDomains[i] = arrRanges[i].m_pDEDI->GetName();
+//		}
+//		else if(arrRanges[i].m_eType == eRange)
+//		{
+//			strarrDomains[i] = arrRanges[i].m_Range.ToString();
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exXMLIOError);
+//		}
 	}
 }
 

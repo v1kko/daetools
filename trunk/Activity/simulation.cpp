@@ -336,6 +336,8 @@ void daeSimulation::SolveInitial(void)
 
 // Start initialization
 	clock_gettime(CLOCK_MONOTONIC, &m_InitializationStart);
+	clock_gettime(CLOCK_MONOTONIC, &m_IntegrationStart);
+	clock_gettime(CLOCK_MONOTONIC, &m_IntegrationEnd);
 
 // Ask DAE solver to initialize the system
 	m_pDAESolver->SolveInitial();

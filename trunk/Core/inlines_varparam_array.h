@@ -2,14 +2,9 @@
 // Their purpose is to allow program to compile 
 // only if acceptable arguments have been sent.
 // They should forbid calls to: Array(), dt_array(), d_array(), d2_array() 
-// with any arguments but simple integers, daeDEDI* or daeIndexRange
+// with any arguments but daeDomainIndex(which includes integers, daeDEDI*, incremented daeDEDI*) or daeIndexRange
 
-inline daeArrayRange CreateRange(daeDEDI* arg)
-{
-	return daeArrayRange(arg);
-}
-
-inline daeArrayRange CreateRange(size_t arg)
+inline daeArrayRange CreateRange(const daeDomainIndex& arg)
 {
 	return daeArrayRange(arg);
 }

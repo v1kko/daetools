@@ -523,6 +523,18 @@ adouble daeDistributedEquationDomainInfo::operator()(void) const
 	return tmp;
 }
 
+daeDomainIndex daeDistributedEquationDomainInfo::operator+(size_t increment) const
+{
+	daeDistributedEquationDomainInfo* pDEDI = const_cast<daeDistributedEquationDomainInfo*>(this);
+	return daeDomainIndex(pDEDI, int(increment));
+}
+
+daeDomainIndex daeDistributedEquationDomainInfo::operator-(size_t increment) const
+{
+	daeDistributedEquationDomainInfo* pDEDI = const_cast<daeDistributedEquationDomainInfo*>(this);
+	return daeDomainIndex(pDEDI, -int(increment));
+}
+
 void daeDistributedEquationDomainInfo::Open(io::xmlTag_t* pTag)
 {
 	string strName;

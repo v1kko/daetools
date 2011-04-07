@@ -13,8 +13,9 @@ namespace daepython
 *******************************************************/
 daeDomainIndex CreateDomainIndex(object& o)
 {
-	extract<size_t>   size(o);
-	extract<daeDEDI*> DEDI(o);
+	extract<size_t>          size(o);
+	extract<daeDEDI*>        DEDI(o);
+	extract<daeDomainIndex>  domainIndex(o);
 	
 	if(size.check())
 	{
@@ -25,6 +26,10 @@ daeDomainIndex CreateDomainIndex(object& o)
 	{
 		daeDEDI* pDEDI = DEDI();
 		return daeDomainIndex(pDEDI);
+	}
+	else if(domainIndex.check())
+	{
+		return domainIndex();
 	}
 	else
 	{

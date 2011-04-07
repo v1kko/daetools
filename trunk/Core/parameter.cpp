@@ -179,7 +179,8 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
 // Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
-		if(indexes[i].m_eType == eDomainIterator)
+		if(indexes[i].m_eType == eDomainIterator ||
+		   indexes[i].m_eType == eIncrementedDomainIterator)
 		{
 			if(m_ptrDomains[i] != indexes[i].m_pDEDI->m_pDomain)
 			{
@@ -212,26 +213,37 @@ void daeParameter::Fill_adouble_array(vector<adouble>& arrValues, const daeArray
 	else // continue iterating
 	{
 		const daeArrayRange& r = ranges[currentN];
-		if(r.m_eType == eRangeConstantIndex)
+		
+		vector<size_t> narrPoints;
+	// If the size is 1 it is going to call Fill_adouble_array() only once
+	// Otherwise, narrPoints.size() times
+		r.GetPoints(narrPoints);
+		for(size_t i = 0; i < narrPoints.size(); i++)
 		{
-			indexes[currentN] = r.m_nIndex;
+			indexes[currentN] = narrPoints[i]; // Wasn't it bug below??? It should be narrPoints[i]!!
 			Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
 		}
-		else if(r.m_eType == eRangeDomainIterator)
-		{
-			indexes[currentN] = r.m_pDEDI->GetCurrentIndex();
-			Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
-		}
-		else if(r.m_eType == eRange)
-		{
-			vector<size_t> narrPoints;
-			r.m_Range.GetPoints(narrPoints);
-			for(size_t i = 0; i < narrPoints.size(); i++)
-			{
-				indexes[currentN] = i;
-				Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
-			}
-		}
+		
+//		if(r.m_eType == eRangeConstantIndex)
+//		{
+//			indexes[currentN] = r.m_nIndex;
+//			Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
+//		}
+//		else if(r.m_eType == eRangeDomainIterator)
+//		{
+//			indexes[currentN] = r.m_pDEDI->GetCurrentIndex();
+//			Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
+//		}
+//		else if(r.m_eType == eRange)
+//		{
+//			vector<size_t> narrPoints;
+//			r.m_Range.GetPoints(narrPoints);
+//			for(size_t i = 0; i < narrPoints.size(); i++)
+//			{
+//				indexes[currentN] = i; // BUG !!!!!!!! Shouldn't it be narrPoints[i]???
+//				Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
+//			}
+//		}
 	}
 }
 
@@ -281,15 +293,19 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 	// Check if domains in indexes correspond to domains here
 	for(size_t i = 0; i < N; i++)
 	{
-		if(ranges[i].m_eType == eRangeDomainIterator)
+		if(ranges[i].m_eType == eRangeDomainIndex)
 		{
-			if(m_ptrDomains[i] != ranges[i].m_pDEDI->m_pDomain)
+			if(ranges[i].m_domainIndex.m_eType == eDomainIterator ||
+			   ranges[i].m_domainIndex.m_eType == eIncrementedDomainIterator)
 			{
-				daeDeclareException(exInvalidCall);
-				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_pDEDI->m_pDomain->GetCanonicalName() 
-				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in parameter [" << m_strCanonicalName << "] in function array()";
-				throw e;
+				if(m_ptrDomains[i] != ranges[i].m_domainIndex.m_pDEDI->m_pDomain)
+				{
+					daeDeclareException(exInvalidCall);
+					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
+					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
+					  << "in parameter [" << m_strCanonicalName << "] in function array()";
+					throw e;
+				}
 			}
 		}
 		else if(ranges[i].m_eType == eRange)

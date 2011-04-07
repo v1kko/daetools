@@ -53,8 +53,9 @@ LIBS += $${DAE_SIMULATION_LIB} \
 
 HEADERS += stdafx.h \ 
     nlpsolver_class_factory.h \
-    nlpsolver.h \
-	../nlp_common.h
+    nlpsolver.h \ 
+    base_solvers.h \
+	../nlp_common.h 
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     nlpsolver.cpp

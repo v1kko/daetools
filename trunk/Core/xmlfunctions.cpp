@@ -296,11 +296,16 @@ xmlTag_t* xmlPresentationCreator::Constant(xmlTag_t* parent, real_t value)
 void xmlPresentationCreator::WrapIdentifier(xmlTag_t* parent, string name)
 {
 	xmlTag_t *temp, *msub, *mrow;
-	string strName, strSub;
-	string::size_type iFound, iDotFound;
+	string strName, strRest;
+	string::size_type iUnderscoreFound, iAmpersendFound, iDotFound, iSemicolonFound;
 
-	iFound = name.find('_');
-	if(iFound == std::string::npos) // not found
+	iUnderscoreFound = name.find('_');
+	iDotFound        = name.find('.');
+	iAmpersendFound  = name.find('&');
+	
+	if((iUnderscoreFound == std::string::npos) && 
+	   (iDotFound        == std::string::npos) &&
+	   (iAmpersendFound  == std::string::npos) ) // _.& not found or the empty string
 	{
 		strName = name;
 		temp = parent->AddTag(string("mi"), strName);
@@ -308,18 +313,7 @@ void xmlPresentationCreator::WrapIdentifier(xmlTag_t* parent, string name)
 	}
 	else
 	{
-		iDotFound = name.find('.');
-		if(iDotFound == std::string::npos) // not found
-		{
-			strName = name.substr(0, iFound);
-			strSub  = name.substr(iFound+1, string::npos);
-			msub = parent->AddTag(string("msub"), string(""));
-				temp = msub->AddTag(string("mi"), strName);
-				temp->AddAttribute(string("mathvariant"), string("italic"));
-				
-				xmlPresentationCreator::WrapIdentifier(msub, strSub);
-		}
-		else
+		if(iDotFound != std::string::npos) // Canonical name
 		{
 			vector<string> strParse;
 			strParse = ParseString(name, '.');
@@ -332,6 +326,36 @@ void xmlPresentationCreator::WrapIdentifier(xmlTag_t* parent, string name)
 				xmlPresentationCreator::WrapIdentifier(mrow, strParse[i]);
 			}
 			
+		}
+		else if(iUnderscoreFound != std::string::npos) // Simple name: _ found
+		{
+			strName = name.substr(0, iUnderscoreFound);              // H_1 -> H
+			strRest = name.substr(iUnderscoreFound+1, string::npos); // H_1 -> 1
+			
+			msub = parent->AddTag(string("msub"), string(""));
+				mrow = msub->AddTag(string("mrow"), string(""));
+				xmlPresentationCreator::WrapIdentifier(mrow, strName);				
+				mrow = msub->AddTag(string("mrow"), string(""));
+				xmlPresentationCreator::WrapIdentifier(mrow, strRest);
+		}
+		else if(iAmpersendFound != std::string::npos) // Simple name: & found
+		{
+			iSemicolonFound = name.find(';');
+			if(iAmpersendFound == 0) // & is the first character
+			{
+				strName = name.substr(iAmpersendFound, iSemicolonFound+1); // &Delta;H1 -> &Delta; 
+				strRest = name.substr(iSemicolonFound+1, string::npos);    // &Delta;H1 -> H1
+			}
+			else // & is not the first character
+			{
+				strName = name.substr(0, iAmpersendFound);            // HH&Delta;H1 -> HH
+				strRest = name.substr(iAmpersendFound, string::npos); // HH&Delta;H1 -> &Delta;H1
+			}
+			
+			temp = parent->AddTag(string("mi"), strName);
+			temp->AddAttribute(string("mathvariant"), string("italic"));
+				
+			xmlPresentationCreator::WrapIdentifier(parent, strRest);
 		}
 	}
 }

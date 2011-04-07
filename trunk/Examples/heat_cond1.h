@@ -220,23 +220,23 @@ public:
 	
 	void SetUpOptimization(void)
 	{
-	// Set the objective function (min)
-		m_pObjectiveFunction->SetResidual( m.y1() + m.y2() );
-		
-	// Set the constraints (inequality, equality)
-		daeOptimizationConstraint* c1 = CreateInequalityConstraint(-1, 1, "Constraint 1");
-		c1->SetResidual( m.p1() );
-		
-		daeOptimizationConstraint* c2 = CreateInequalityConstraint(-2, 2, "Constraint 2");
-		c2->SetResidual( m.p2() );
-		
-		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-1, 1, "Constraint 3");
-		c3->SetResidual( m.p3() );
-		
-	// Set the optimization variables and their lower and upper bounds
-		SetContinuousOptimizationVariable(m.p1, -1E5, 1E5, 0);
-		SetContinuousOptimizationVariable(m.p2, -2E5, 2E5, 0);
-		SetContinuousOptimizationVariable(m.p3, -3E5, 3E5, 0);
+//	// Set the objective function (min)
+//		m_pObjectiveFunction->SetResidual( m.y1() + m.y2() );
+//		
+//	// Set the constraints (inequality, equality)
+//		daeOptimizationConstraint* c1 = CreateInequalityConstraint(-1, 1, "Constraint 1");
+//		c1->SetResidual( m.p1() );
+//		
+//		daeOptimizationConstraint* c2 = CreateInequalityConstraint(-2, 2, "Constraint 2");
+//		c2->SetResidual( m.p2() );
+//		
+//		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-1, 1, "Constraint 3");
+//		c3->SetResidual( m.p3() );
+//		
+//	// Set the optimization variables and their lower and upper bounds
+//		SetContinuousOptimizationVariable(m.p1, -1E5, 1E5, 0);
+//		SetContinuousOptimizationVariable(m.p2, -2E5, 2E5, 0);
+//		SetContinuousOptimizationVariable(m.p3, -3E5, 3E5, 0);
 	}
 
 };
@@ -369,11 +369,11 @@ public:
 		m_pObjectiveFunction->SetResidual( m.x1() * m.x4() * (m.x1() + m.x2() + m.x3()) + m.x3() );
 		
 	// Set the constraints (inequality, equality)
-		daeOptimizationConstraint* c1 = CreateInequalityConstraint(25, 2E19, "Constraint 1");
-		c1->SetResidual( m.x1() * m.x2() * m.x3() * m.x4() );
+		daeOptimizationConstraint* c1 = CreateInequalityConstraint("Constraint 1");
+		c1->SetResidual( 25 - m.x1() * m.x2() * m.x3() * m.x4() );
 		
-		daeOptimizationConstraint* c2 = CreateEqualityConstraint(40, "Constraint 2");
-		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() );
+		daeOptimizationConstraint* c2 = CreateEqualityConstraint("Constraint 2");
+		c2->SetResidual( m.x1() * m.x1() + m.x2() * m.x2() + m.x3() * m.x3() + m.x4() * m.x4() - 40 );
 		
 	// Set the optimization variables and their lower and upper bounds
 		SetContinuousOptimizationVariable(m.x1, 1, 5, 1);
@@ -462,14 +462,14 @@ public:
 		m_pObjectiveFunction->SetResidual( -m.x() - m.y1() - m.y2() );
 		
 	// Set the constraints (inequality, equality)
-		daeOptimizationConstraint* c1 = CreateInequalityConstraint(-2E19, 0.25, "Constraint 1");
-		c1->SetResidual(pow(m.y1() - 0.5, 2) + pow(m.y2() - 0.5, 2));
+		daeOptimizationConstraint* c1 = CreateInequalityConstraint("Constraint 1");
+		c1->SetResidual(pow(m.y1() - 0.5, 2) + pow(m.y2() - 0.5, 2) - 0.25);
 		
-		daeOptimizationConstraint* c2 = CreateInequalityConstraint(-2E19, 0, "Constraint 2");
+		daeOptimizationConstraint* c2 = CreateInequalityConstraint("Constraint 2");
 		c2->SetResidual( m.x() - m.y1() );
 				
-		daeOptimizationConstraint* c3 = CreateInequalityConstraint(-2E19, 2, "Constraint 3");
-		c3->SetResidual( m.x() + m.y2() + m.z() );
+		daeOptimizationConstraint* c3 = CreateInequalityConstraint("Constraint 3");
+		c3->SetResidual( m.x() + m.y2() + m.z() -2 );
 		
 	// Set the optimization variables and their lower and upper bounds
 		SetBinaryOptimizationVariable(m.x, 0);

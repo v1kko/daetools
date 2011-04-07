@@ -120,6 +120,7 @@ mkdir ${PACKAGE_NAME}/pyDAE
 mkdir ${PACKAGE_NAME}/daeSimulator
 mkdir ${PACKAGE_NAME}/daeSimulator/images
 mkdir ${PACKAGE_NAME}/solvers
+mkdir ${PACKAGE_NAME}/model_library
 
 # Python extension modules and LA solvers
 cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
@@ -182,12 +183,13 @@ cp ../licence*                                   ${PACKAGE_NAME}
 cp ../ReadMe.txt                                 ${PACKAGE_NAME}
 
 # Python files
-cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
-cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
-cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
+cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
+cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
+cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
+cp ../python-files/model_library__init__.py      ${PACKAGE_NAME}/model_library/__init__.py
 
 # daeSimulator
 cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator
@@ -198,6 +200,9 @@ cp ../python-files/daeSimulator/images/*.*       ${PACKAGE_NAME}/daeSimulator/im
 # daePlotter
 cp ../python-files/daePlotter/*.py          ${PACKAGE_NAME}/daePlotter
 cp ../python-files/daePlotter/images/*.*    ${PACKAGE_NAME}/daePlotter/images
+
+# Model Library
+cp ../python-files/model_library/*.py    ${PACKAGE_NAME}/model_library
 
 # Examples and Tutorials
 cp ../python-files/examples/*.css        ${PACKAGE_NAME}/examples
@@ -233,7 +238,7 @@ echo "      license='GNU GPL v3', " >> setup.py
 echo "      platforms='${ARCH}', " >> setup.py
 echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']} " >> setup.py
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']} " >> setup.py
 echo "      ) " >> setup.py
 echo " " >> setup.py
 

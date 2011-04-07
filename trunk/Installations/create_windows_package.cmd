@@ -43,6 +43,8 @@ mkdir docs
 mkdir daePlotter
 mkdir daeSimulator
 mkdir pyDAE
+mkdir solvers
+mkdir model_library
 
 cd examples
 mkdir images
@@ -61,51 +63,35 @@ cd daeSimulator
 mkdir images
 cd..
 
-
-REM Python modules
-mkdir pyAmdACML
-mkdir pyIntelMKL
-mkdir pyIntelPardiso
-mkdir pyTrilinos
-mkdir pyMagma
-mkdir pySuperLU
-
-echo on
-
 cd %TRUNK%\release
 copy pyCore.pyd                     %ROOT%\pyDAE
 copy pyActivity.pyd                 %ROOT%\pyDAE
 copy pyDataReporting.pyd            %ROOT%\pyDAE
 copy pyIDAS.pyd                     %ROOT%\pyDAE
-copy pyBONMIN.pyd                   %ROOT%\pyDAE
-copy pyIPOPT.pyd                    %ROOT%\pyDAE
-copy pyTrilinos.pyd                 %ROOT%\pyTrilinos
-copy pyMagma.pyd                    %ROOT%\pyMagma
-copy pySuperLU.pyd                  %ROOT%\pySuperLU
-copy pySuperLU_MT.pyd               %ROOT%\pySuperLU
-copy pySuperLU_CUDA.pyd             %ROOT%\pySuperLU
+copy pyBONMIN.pyd                   %ROOT%\solvers
+copy pyIPOPT.pyd                    %ROOT%\solvers
+copy pyTrilinos.pyd                 %ROOT%\solvers
+copy pySuperLU.pyd                  %ROOT%\solvers
+copy pySuperLU_MT.pyd               %ROOT%\solvers
+copy pySuperLU_CUDA.pyd             %ROOT%\solvers
 
-REM copy pyAmdACML.pyd              %ROOT%\pyAmdACML
-REM copy pyIntelMKL.pyd             %ROOT%\pyIntelMKL
-REM copy pyIntelPardiso.pyd         %ROOT%\pyIntelPardiso
+REM copy pyMagma.pyd                %ROOT%\solvers
+REM copy pyAmdACML.pyd              %ROOT%\solvers
+REM copy pyIntelMKL.pyd             %ROOT%\solvers
+REM copy pyIntelPardiso.pyd         %ROOT%\solvers
 
 copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
 
 cd ..\python-files
 
 REM Python files
+copy daetools__init__.py         %ROOT%\__init__.py
 copy daeLogs.py                  %ROOT%\pyDAE
 copy WebView_ui.py               %ROOT%\pyDAE
 copy WebViewDialog.py            %ROOT%\pyDAE
-
-copy daetools__init__.py         %ROOT%\__init__.py
 copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
-copy pyAmdACML__init__.py        %ROOT%\pyAmdACML\__init__.py
-copy pyIntelMKL__init__.py       %ROOT%\pyIntelMKL\__init__.py
-copy pyIntelPardiso__init__.py   %ROOT%\pyIntelPardiso\__init__.py
-copy pyTrilinos__init__.py       %ROOT%\pyTrilinos\__init__.py
-copy pyMagma__init__.py          %ROOT%\pyMagma\__init__.py
-copy pySuperLU__init__.py        %ROOT%\pySuperLU\__init__.py
+copy solvers__init__.py          %ROOT%\solvers\__init__.py
+copy model_library__init__.py    %ROOT%\model_library\__init__.py
 
 REM daePlotter
 cd daePlotter
@@ -139,6 +125,10 @@ cd images
 copy *.*                %ROOT%\examples\images
 cd ..
 cd ..
+
+REM Model Library
+cd model_library
+copy *.py               %ROOT%\model_library
 
 REM Website
 cd ..\Website
@@ -177,7 +167,7 @@ ECHO       license='GNU GPL v3',  >> setup.py
 ECHO       platforms='%PLATFORM%',  >> setup.py
 ECHO       packages=['%PACKAGE_NAME%'],  >> setup.py
 ECHO       package_dir={'%PACKAGE_NAME%': '%DEST%'},  >> setup.py
-ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'pyAmdACML/*.*', 'pyIntelMKL/*.*', 'pyLapack/*.*', 'pyMagma/*.*', 'pySuperLU/*.*', 'pyIntelPardiso/*.*', 'pyTrilinos/*.*']} >> setup.py
+ECHO       package_data={'%DEST%': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']} >> setup.py
 ECHO       )  >> setup.py
 
 SET EXE=%PACKAGE_NAME%_%VER_MAJOR%.%VER_MINOR%.%VER_BUILD%_%PLATFORM%_%OS%_python%PYTHON_VERSION%.exe

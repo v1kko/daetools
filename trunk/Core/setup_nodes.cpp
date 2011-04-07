@@ -40,22 +40,30 @@ adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionCont
 
 	for(size_t i = 0; i < N; i++)
 	{
-		if(m_arrDomains[i].m_eType == eConstantIndex)
-		{
-			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_nIndex;
-		}
-		else if(m_arrDomains[i].m_eType == eDomainIterator)
-		{
-			if(!m_arrDomains[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall)
-		}
+		indexes[i] = m_arrDomains[i].GetCurrentIndex();
+		
+//		if(m_arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_nIndex;
+//		}
+//		else if(m_arrDomains[i].m_eType == eDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
+//		}
+//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exInvalidCall)
+//		}
 	}
 
 	tmp = m_pParameter->Create_adouble(indexes, N);
@@ -245,22 +253,30 @@ adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionConte
 
 	for(size_t i = 0; i < N; i++)
 	{
-		if(m_arrDomains[i].m_eType == eConstantIndex)
-		{
-			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_nIndex;
-		}
-		else if(m_arrDomains[i].m_eType == eDomainIterator)
-		{
-			if(!m_arrDomains[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall)
-		}
+		indexes[i] = m_arrDomains[i].GetCurrentIndex();
+		
+//		if(m_arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_nIndex;
+//		}
+//		else if(m_arrDomains[i].m_eType == eDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
+//		}
+//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exInvalidCall)
+//		}
 	}
 
 	tmp = m_pVariable->Create_adouble(indexes, N);
@@ -368,22 +384,30 @@ adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutio
 
 	for(size_t i = 0; i < N; i++)
 	{
-		if(m_arrDomains[i].m_eType == eConstantIndex)
-		{
-			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_nIndex;
-		}
-		else if(m_arrDomains[i].m_eType == eDomainIterator)
-		{
-			if(!m_arrDomains[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall)
-		}
+		indexes[i] = m_arrDomains[i].GetCurrentIndex();
+		
+//		if(m_arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_nIndex;
+//		}
+//		else if(m_arrDomains[i].m_eType == eDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
+//		}
+//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exInvalidCall)
+//		}
 	}
 
 	tmp = m_pVariable->Calculate_dt(indexes, N);
@@ -489,22 +513,30 @@ adouble adSetupPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecu
 
 	for(size_t i = 0; i < N; i++)
 	{
-		if(m_arrDomains[i].m_eType == eConstantIndex)
-		{
-			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_nIndex;
-		}
-		else if(m_arrDomains[i].m_eType == eDomainIterator)
-		{
-			if(!m_arrDomains[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall);
-		}
+		indexes[i] = m_arrDomains[i].GetCurrentIndex();
+		
+//		if(m_arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_nIndex;
+//		}
+//		else if(m_arrDomains[i].m_eType == eDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
+//		}
+//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
+//		{
+//			if(!m_arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exInvalidCall);
+//		}
 	}
 
 	tmp = m_pVariable->partial(m_nDegree, *m_pDomain, indexes, N);

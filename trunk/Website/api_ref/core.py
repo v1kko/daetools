@@ -1,5 +1,5 @@
 """
-daetools.pyDAE.core module contains classes necessary to build models. 
+daetools.pyDAE.core module contains classes necessary to build models.
 Every model consists of the following information:
  - Domains
  - Parameters
@@ -45,8 +45,7 @@ Integer constants defined in the module:
      - eDomainIterator
 
     daeeRangeType
-     - eRangeConstantIndex
-     - eRangeDomainIterator
+     - eRangeDomainIndex
      - eRange
 
     daeIndexRangeType
@@ -64,7 +63,7 @@ class daeObject:
      - Description: string
     """
     pass
-    
+
 def daeVersion(includeBuild):
     """
     Returns the version string (i.e. '1.1.0')
@@ -106,7 +105,7 @@ class daeVariableType:
         - AbsoluteTolerance: float
         """
         pass
-   
+
 class daeDomain(daeObject):
     """
     PROPERTIES:
@@ -120,34 +119,34 @@ class daeDomain(daeObject):
      - UpperBound: float (read-only)
     """
     def __init__(self, Model):
-        """ 
+        """
         ARGUMENTS:
          - Model: daeModel object
         """
         pass
 
     def __init__(self, Port):
-        """ 
+        """
         ARGUMENTS:
          - Port: daePort object
         """
         pass
 
     def CreateArray(self, NoIntervals):
-        """ 
-        A function called from within simulation object to create a discrete domain (that is an array). 
+        """
+        A function called from within simulation object to create a discrete domain (that is an array).
         ARGUMENTS:
          - NoIntervals: unsigned int
         RETURNS:
            Nothing
         """
         pass
-    
+
     def CreateDistributed(self, DiscretizationMethod, Order, NoIntervals, LowerBound, UpperBound):
         """
-        A function called from within simulation object to create a distributed domain. 
+        A function called from within simulation object to create a distributed domain.
         ARGUMENTS:
-         - DiscretizationMethod: daeeDiscretizationMethod 
+         - DiscretizationMethod: daeeDiscretizationMethod
          - Order: unsigned int (currently only 2nd order is implemented)
          - NoIntervals: unsigned int
          - LowerBound: float
@@ -156,7 +155,7 @@ class daeDomain(daeObject):
            Nothing
         """
         pass
-    
+
     def __call__(self, Indexes = None):
         """
         Function call operator () used to create an index range object.
@@ -184,7 +183,7 @@ class daeDomain(daeObject):
            adouble
         """
         pass
-    
+
     def GetPoint(self, Index):
         """
         Function to access the raw data (to get the value at the specified point within the domain).
@@ -215,16 +214,24 @@ class daeDomainIndex:
      - DEDI: daeDEDI object  (read-only), valid if the Type = eDomainIterator
     """
     def _init_(self, Index):
-        """ 
+        """
         ARGUMENTS:
          - Index: unsigned int
         """
         pass
-    
+
     def _init_(self, DEDI):
-        """ 
+        """
         ARGUMENTS:
          - DEDI: daeDEDI object
+        """
+        pass
+
+    def _init_(self, DEDI, Increment):
+        """
+        ARGUMENTS:
+         - DEDI: daeDEDI object
+         - Increment: unsigned int
         """
         pass
 
@@ -240,14 +247,14 @@ class daeIndexRange:
      - Step: unsigned int (read-only), valid if the Type = eRangeOfIndexes
     """
     def _init_(self, Domain):
-        """ 
+        """
         ARGUMENTS:
          - Domain: daeDomain object
         """
         pass
-    
+
     def _init_(self, Domain, Indexes):
-        """ 
+        """
         ARGUMENTS:
          - Domain: daeDomain object
          - Indexes: list of unsigned ints
@@ -255,7 +262,7 @@ class daeIndexRange:
         pass
 
     def _init_(self, Domain, StartIndex, EndIndex, Step):
-        """ 
+        """
         ARGUMENTS:
          - Domain: daeDomain object
          - StartIndex: int
@@ -263,34 +270,26 @@ class daeIndexRange:
          - Step: int
         """
         pass
-   
+
 class daeArrayRange:
     """
     Used as an argument of 'array' functions in daeParameter/daeVariable classes to create an array of parameters/variables.
-    Usually created automatically by the framework. 
+    Usually created automatically by the framework.
     PROPERTIES:
      - NoPoints: number of points (read-only)
      - Type: daeeRangeType (read-only)
      - Range: daeIndexRange object (read-only), valid if the Type = eRange
-     - Index: unsigned int (read-only), valid if the Type = eRangeConstantIndex
-     - DEDI: daeDEDI object (read-only), valid if the Type = eRangeDomainIterator
+     - DomainIndex: daeDomainIndex (read-only), valid if the Type = eRangeDomainIndex
     """
-    def _init_(self, Index):
-        """ 
-        ARGUMENTS:
-         - Index: unsigned int
+    def _init_(self, domainIndex):
         """
-        pass
-    
-    def _init_(self, DEDI):
-        """ 
         ARGUMENTS:
-         - DEDI: daeDEDI object
+         - domainIndex: daeDomainIndex object
         """
         pass
 
     def _init_(self, IndexRange):
-        """ 
+        """
         ARGUMENTS:
          - IndexRange: daeIndexRange object
         """
@@ -302,11 +301,33 @@ class daeDEDI(daeObject):
     Always created automatically by the framework (returned by daeEquation::DistributeOnDomain)
     """
     def __call__(self):
-        """ 
+        """
         ARGUMENTS:
            None
         RETURNS:
            adouble object
+        """
+        pass
+
+    def __add__(self, increment):
+        """
+        Mathematical operator +
+        Used in distributed equations to increment current index in daeDEDI
+        ARGUMENTS:
+         - increment: unsigned int
+        RETURNS:
+           daeDomainIndex
+        """
+        pass
+
+    def __sub__(self, increment):
+        """
+        Mathematical operator -
+        Used in distributed equations to decrement current index in daeDEDI
+        ARGUMENTS:
+         - increment: unsigned int
+        RETURNS:
+           daeDomainIndex
         """
         pass
 
@@ -324,7 +345,7 @@ class daeParameter(daeObject):
          - Parent: daeModel | daePort object
         """
         pass
-    
+
     def DistributeOnDomain(self, Domain):
         """
         ARGUMENTS:
@@ -333,7 +354,7 @@ class daeParameter(daeObject):
           Nothing
         """
         pass
-    
+
     def SetValue(self, D1, D2, D3, D4, D5, D6, D7, D8, Value):
         """
         Overloaded function, with 0 to 8 arguments for (D1 - D8):
@@ -350,7 +371,7 @@ class daeParameter(daeObject):
           Nothing
         """
         pass
-    
+
     def GetValue(self, D1, D2, D3, D4, D5, D6, D7, D8):
         """
         Overloaded function, with 0 to 8 arguments for (D1 - D8):
@@ -359,14 +380,14 @@ class daeParameter(daeObject):
          - GetValue(D1, D2, Value)
            ...
          - GetValue(D1, D2, D3, D4, D5, D6, D7, D8, Value)
-        Used to get the value of the parameter. It is rarely used. 
+        Used to get the value of the parameter. It is rarely used.
         ARGUMENTS:
          - D1 to D8: unsigned int(s)
         RETURNS:
           float
         """
         pass
-    
+
     def __call__(self, O1, O2, O3, O4, O5, O6, O7, O8):
         """
         Overloaded function call operator, with 0 to 8 arguments for (O1 - O8):
@@ -382,7 +403,7 @@ class daeParameter(daeObject):
           adouble object
         """
         pass
-        
+
     def array(self, O1, O2, O3, O4, O5, O6, O7, O8):
         """
         Overloaded function, with 0 to 8 arguments for (O1 - O8):
@@ -398,7 +419,7 @@ class daeParameter(daeObject):
           adouble_array object
         """
         pass
-    
+
     def GetNumPyArray(self):
         """
         Used to wrap parameter's values into the multi-dimensional numpy array.
@@ -425,7 +446,7 @@ class daeVariable(daeObject):
          - Parent: daeModel | daePort object
         """
         pass
-    
+
     def DistributeOnDomain(self, Domain):
         """
         ARGUMENTS:
@@ -434,7 +455,7 @@ class daeVariable(daeObject):
           Nothing
         """
         pass
-    
+
     def SetValue(self, D1, D2, D3, D4, D5, D6, D7, D8, Value):
         """
         Overloaded function, with 0 to 8 arguments for (D1 - D8):
@@ -444,7 +465,7 @@ class daeVariable(daeObject):
            ...
          - SetValue(D1, D2, D3, D4, D5, D6, D7, D8, Value)
         Used to set the value of the variable and can be used ONLY AFTER successful initialization (after the call to SolveInitial() function).
-        IT SHOULD NOT BE USED DIRECTLY IN SIMULATION (YOU SHOULD KNOW EXACTLY WHAT YOU ARE DOING!) SINCE IT ACCESSES THE VARIABLE RAW DATA AND CAN AFFECT THE SOLVER!! 
+        IT SHOULD NOT BE USED DIRECTLY IN SIMULATION (YOU SHOULD KNOW EXACTLY WHAT YOU ARE DOING!) SINCE IT ACCESSES THE VARIABLE RAW DATA AND CAN AFFECT THE SOLVER!!
         ARGUMENTS:
          - D1 to D8: unsigned int(s)
          - Value: float
@@ -452,7 +473,7 @@ class daeVariable(daeObject):
           Nothing
         """
         pass
-    
+
     def GetValue(self, D1, D2, D3, D4, D5, D6, D7, D8):
         """
         Overloaded function, with 0 to 8 arguments for (D1 - D8):
@@ -462,14 +483,14 @@ class daeVariable(daeObject):
            ...
          - GetValue(D1, D2, D3, D4, D5, D6, D7, D8, Value)
         Used to get the value of the variable.
-        It is rarely used. It access the variable raw data and can be used ONLY AFTER successful initialization (after the call to SolveInitial() function) 
+        It is rarely used. It access the variable raw data and can be used ONLY AFTER successful initialization (after the call to SolveInitial() function)
         ARGUMENTS:
          - D1 to D8: unsigned int(s)
         RETURNS:
           float
         """
         pass
-    
+
     def AssignValue(self, D1, D2, D3, D4, D5, D6, D7, D8, Value):
         """
         Overloaded function, with 0 to 8 arguments for (D1 - D8):
@@ -520,7 +541,7 @@ class daeVariable(daeObject):
           adouble object
         """
         pass
-        
+
     def d(self, Domain, O1, O2, O3, O4, O5, O6, O7, O8):
         """
         Overloaded function, with 0 to 8 arguments for (O1 - O8):
@@ -586,7 +607,7 @@ class daeVariable(daeObject):
           adouble_array object
         """
         pass
-    
+
     def d_array(self, Domain, O1, O2, O3, O4, O5, O6, O7, O8):
         """
         Overloaded function, with 0 to 8 arguments for (O1 - O8):
@@ -603,7 +624,7 @@ class daeVariable(daeObject):
           adouble_array object
         """
         pass
-    
+
     def d2_array(self, Domain, O1, O2, O3, O4, O5, O6, O7, O8):
         """
         Overloaded function, with 0 to 8 arguments for (O1 - O8):
@@ -698,7 +719,7 @@ class daeVariable(daeObject):
           Nothing
         """
         pass
-    
+
     def SetInitialGuesses(self, InitialGuess):
         """
         Used to set the initial guesses for all points in all domains of the variable (in SetUpVariables() function).
@@ -708,7 +729,7 @@ class daeVariable(daeObject):
           Nothing
         """
         pass
-    
+
     def GetNumPyArray(self):
         """
         Used to wrap parameter's values into the multi-dimensional numpy array.
@@ -730,7 +751,7 @@ class daePort(daeObject):
      - Variables: daeVariable list
     """
     def __init__(self, Name, Type, Model):
-        """ 
+        """
         ARGUMENTS:
          - Name: string
          - Type: daeePortType
@@ -806,7 +827,7 @@ class daeIF(daeSTN):
      - ParentState: daeState
     """
     pass
-  
+
 class daeModel(daeObject):
     """
      - Domains: daeDomain list
@@ -828,7 +849,7 @@ class daeModel(daeObject):
          - Parent: daeModel object
         """
         pass
-    
+
     def DeclareEquations(self):
         """
         (Abstract)
@@ -849,7 +870,7 @@ class daeModel(daeObject):
            daeEquation object
         """
         pass
-    
+
     def ConnectPorts(self, PortFrom, PortTo):
         """
         ARGUMENTS:
@@ -871,7 +892,7 @@ class daeModel(daeObject):
 
     def d(self, expression, domain):
         """
-        Calculates a partial derivative of an expression. 
+        Calculates a partial derivative of an expression.
         ARGUMENTS:
          - expression: adouble object
          - domain: daeDomain object
@@ -879,7 +900,7 @@ class daeModel(daeObject):
            adouble object
         """
         pass
-    
+
     def dt(self, expression):
         """
         Calculates a time derivative of an expression
@@ -925,7 +946,7 @@ class daeModel(daeObject):
            adouble object
         """
         pass
-  
+
     def max(self, adarr):
         """
         ARGUMENTS:
@@ -1082,7 +1103,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __pos__(self):
         """
         Prefix operator +
@@ -1102,7 +1123,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __sub__(self, adf):
         """
         Mathematical operator -
@@ -1112,7 +1133,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __mul__(self, adf):
         """
         Mathematical operator *
@@ -1122,7 +1143,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __div__(self, adf):
         """
         Mathematical operator /
@@ -1132,7 +1153,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __pow__(self, adf):
         """
         Mathematical operator **
@@ -1142,7 +1163,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __eq__(self, adf):
         """
         Mathematical operator ==
@@ -1152,7 +1173,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __neq__(self, adf):
         """
         Mathematical operator !=
@@ -1162,7 +1183,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __le__(self, adf):
         """
         Mathematical operator <=
@@ -1172,7 +1193,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __gt__(self, adf):
         """
         Mathematical operator >
@@ -1182,7 +1203,7 @@ class adouble:
            adouble
         """
         pass
-    
+
     def __ge__(self, adf):
         """
         Mathematical operator >=
@@ -1259,7 +1280,7 @@ class adouble_array:
            adouble
         """
         pass
-    
+
     def __sub__(self, adarr):
         """
         Mathematical operator -
@@ -1269,7 +1290,7 @@ class adouble_array:
            adouble
         """
         pass
-    
+
     def __mul__(self, adarr):
         """
         Mathematical operator *
@@ -1279,7 +1300,7 @@ class adouble_array:
            adouble
         """
         pass
-    
+
     def __div__(self, adarr):
         """
         Mathematical operator /
@@ -1289,13 +1310,13 @@ class adouble_array:
            adouble
         """
         pass
-    
+
 def Exp(adarr):
     """
     Calculates exponential of the argument adarr, which can be a constant adouble or adouble_array object
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1304,7 +1325,7 @@ def Log(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1313,7 +1334,7 @@ def Sqrt(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1322,7 +1343,7 @@ def Sin(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1331,7 +1352,7 @@ def Cos(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1340,7 +1361,7 @@ def Tan(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1349,7 +1370,7 @@ def ASin(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1358,7 +1379,7 @@ def ACos(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1367,7 +1388,7 @@ def ATan(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1376,7 +1397,7 @@ def Log10(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1385,7 +1406,7 @@ def Abs(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1394,7 +1415,7 @@ def Ceil(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1403,7 +1424,7 @@ def Floor(adarr):
     """
     ARGUMENTS:
      - adarr: adouble | adouble_array
-    RETURNS: 
+    RETURNS:
        adouble | adouble_array
     """
     pass
@@ -1414,36 +1435,36 @@ class daeCondition:
     def __init__(self, Name):
         """
         ARGUMENTS:
-         - Name: string 
+         - Name: string
         """
         pass
-    
+
     def __not__(self):
         """
         Logical operator not
         ARGUMENTS:
-           None 
-        RETURNS: 
+           None
+        RETURNS:
            daeCondition
         """
         pass
-    
+
     def __and__(self, Condition):
         """
         Logical operator & (AND)
         ARGUMENTS:
-         - Condition: daeCondition 
-        RETURNS: 
+         - Condition: daeCondition
+        RETURNS:
            daeCondition
         """
         pass
-    
+
     def __or__(self, Condition):
         """
-        Logical operator | (OR) 
+        Logical operator | (OR)
         ARGUMENTS:
-         - Condition: daeCondition 
-        RETURNS: 
+         - Condition: daeCondition
+        RETURNS:
            daeCondition
         """
         pass

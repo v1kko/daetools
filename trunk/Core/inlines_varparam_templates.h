@@ -2,7 +2,7 @@
 // Their purpose is to allow program to compile 
 // only if acceptable arguments have been sent.
 // They should forbid calls to: operator(), dt(), d(), d2() 
-// with any arguments but simple integers and daeDEDI*
+// with any arguments but simple integers, daeDEDI* and incremented daeDEDI*
 inline size_t CreateSize_tIndex(size_t arg)
 {
 	return arg;

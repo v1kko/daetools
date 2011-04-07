@@ -91,7 +91,7 @@ void daeNLOPTSolver::Initialize(daeSimulation_t* pSimulation,
 	double maxtime    = cfg.Get<double>("daetools.NLOPT.maxtime",   0);
 	
 	nlopt_set_xtol_rel(m_nlopt, xtol_rel);	
-	nlopt_set_xtol_abs(m_nlopt, xtol_abs);	
+	nlopt_set_xtol_abs1(m_nlopt, xtol_abs);	
 	nlopt_set_ftol_rel(m_nlopt, ftol_rel);
 	nlopt_set_ftol_abs(m_nlopt, ftol_abs);
 	nlopt_set_maxeval(m_nlopt, maxeval);
@@ -114,7 +114,7 @@ void daeNLOPTSolver::PrintOptions(void)
 {
 	m_pLog->Message(string("NLOPT options:"), 0);
 	m_pLog->Message(string("  xtol_rel: ") + toStringFormatted<real_t>(nlopt_get_xtol_rel(m_nlopt), -1, 1, true), 0);
-	m_pLog->Message(string("  xtol_abs: ") + toStringFormatted<real_t>(nlopt_get_xtol_abs(m_nlopt), -1, 1, true), 0);
+	//m_pLog->Message(string("  xtol_abs: ") + toStringFormatted<real_t>(nlopt_get_xtol_abs(m_nlopt), -1, 1, true), 0);
 	m_pLog->Message(string("  ftol_rel: ") + toStringFormatted<real_t>(nlopt_get_ftol_rel(m_nlopt), -1, 1, true), 0);
 	m_pLog->Message(string("  ftol_abs: ") + toStringFormatted<real_t>(nlopt_get_ftol_abs(m_nlopt), -1, 1, true), 0);	
 	m_pLog->Message(string("  maxtime: ") + toStringFormatted<real_t>(nlopt_get_maxtime(m_nlopt), -1, 1, true), 0);	
@@ -164,7 +164,8 @@ double daeNLOPTSolver::get_xtol_abs(void) const
 		e << "NLOPT options cannot be get/set before the optimization is initialized.";
 		throw e;
 	}
-	return nlopt_get_xtol_abs(m_nlopt);	
+//	return nlopt_get_xtol_abs(m_nlopt);	
+	return 0;
 }
 
 double daeNLOPTSolver::get_ftol_rel(void) const
@@ -208,7 +209,7 @@ void daeNLOPTSolver::set_xtol_abs(double tol)
 		e << "NLOPT options cannot be get/set before the optimization is initialized.";
 		throw e;
 	}
-	nlopt_set_xtol_abs(m_nlopt, tol);	
+	nlopt_set_xtol_abs1(m_nlopt, tol);	
 }
 
 void daeNLOPTSolver::set_ftol_rel(double tol)
@@ -236,33 +237,66 @@ void daeNLOPTSolver::set_ftol_abs(double tol)
 double daeNLOPTSolver::eval_f(unsigned n, const double* x)
 {
 	double value;
-
-	CheckAndRun(x);
-	daeNLPCommon::Calculate_fobj(value);
+	try
+	{
+		CheckAndRun(x);
+		daeNLPCommon::Calculate_fobj(value);
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		return 0;
+	}
 	
 	return value;
 }
 
 void daeNLOPTSolver::eval_grad_f(unsigned n, const double* x, double* grad_f)
 {
-	CheckAndRun(x);
-	daeNLPCommon::Calculate_fobj_gradient(grad_f);
+	try
+	{
+		CheckAndRun(x);
+		daeNLPCommon::Calculate_fobj_gradient(grad_f);
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		for(size_t i = 0; i < n; i++)
+			grad_f[i] = 0;
+	}
 }
 
 double daeNLOPTSolver::eval_g(daeOptimizationConstraint_t* pConstraint, unsigned n, const double* x)
 {
 	double value;
 	
-	CheckAndRun(x);
-	daeNLPCommon::Calculate_g(pConstraint, value);
+	try
+	{
+		CheckAndRun(x);
+		daeNLPCommon::Calculate_g(pConstraint, value);
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		return 0;
+	}
 
 	return value;
 }
 
 void daeNLOPTSolver::eval_grad_g(daeOptimizationConstraint_t* pConstraint,  unsigned n, const double* x, double* grad_g) 
 {
-	CheckAndRun(x);
-	daeNLPCommon::Calculate_g_gradient(pConstraint, grad_g);
+	try
+	{
+		CheckAndRun(x);
+		daeNLPCommon::Calculate_g_gradient(pConstraint, grad_g);
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		for(size_t i = 0; i < n; i++)
+			grad_g[i] = 0;
+	}
 }
 
 void daeNLOPTSolver::SetConstraints(void)

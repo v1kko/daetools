@@ -1,9 +1,11 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module core</title>
-</head><body bgcolor="#f0f0f8">
+<html><head><title>Python: module core</title></head><body bgcolor="#f0f0f8">
 
-    <p><tt>daetools.pyDAE.core&nbsp;module&nbsp;contains&nbsp;classes&nbsp;necessary&nbsp;to&nbsp;build&nbsp;models.&nbsp;<br>
+<table summary="heading" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#7799ee">
+<td valign="bottom">&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>core</strong></big></big></font></td></tr></tbody></table>
+    <p><tt>daetools.pyDAE.core&nbsp;module&nbsp;contains&nbsp;classes&nbsp;necessary&nbsp;to&nbsp;build&nbsp;models.<br>
 Every&nbsp;model&nbsp;consists&nbsp;of&nbsp;the&nbsp;following&nbsp;information:<br>
 &nbsp;-&nbsp;Domains<br>
 &nbsp;-&nbsp;Parameters<br>
@@ -58,9 +60,9 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRangeOfIndexes<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eCustomRange</tt></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ee77aa">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -95,13 +97,13 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 <dt><font face="helvetica, arial"><a href="core.html#daeVariableType">daeVariableType</a>
 </font></dt></dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="adouble">class <strong>adouble</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>ATTRIBUTES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>ATTRIBUTES:<br>
 &nbsp;-&nbsp;Value:&nbsp;float<br>
 &nbsp;-&nbsp;Derivative:&nbsp;float<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
@@ -178,10 +180,10 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a></tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="adouble_array">class <strong>adouble_array</strong></a></font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -222,15 +224,15 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a></tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeArrayRange">class <strong>daeArrayRange</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;create&nbsp;an&nbsp;array&nbsp;of&nbsp;parameters/variables.<br>
-Usually&nbsp;created&nbsp;automatically&nbsp;by&nbsp;the&nbsp;framework.&nbsp;<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;create&nbsp;an&nbsp;array&nbsp;of&nbsp;parameters/variables.<br>
+Usually&nbsp;created&nbsp;automatically&nbsp;by&nbsp;the&nbsp;framework.<br>
 PROPERTIES:<br>
 &nbsp;-&nbsp;NoPoints:&nbsp;number&nbsp;of&nbsp;points&nbsp;(read-only)<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeRangeType&nbsp;(read-only)<br>
@@ -238,18 +240,19 @@ PROPERTIES:<br>
 &nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeConstantIndex<br>
 &nbsp;-&nbsp;DEDI:&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeDomainIterator<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeCondition">class <strong>daeCondition</strong></a></font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="daeCondition-__and__"><strong>__and__</strong></a>(self, Condition)</dt><dd><tt>Logical&nbsp;operator&nbsp;&amp;&nbsp;(AND)<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a>&nbsp;<br>
-RETURNS:&nbsp;<br>
+&nbsp;-&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a><br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeCondition">daeCondition</a></tt></dd></dl>
 
 <dl><dt><a name="daeCondition-__init__"><strong>__init__</strong></a>(self, Name)</dt><dd><tt>ARGUMENTS:<br>
@@ -257,20 +260,20 @@ RETURNS:&nbsp;<br>
 
 <dl><dt><a name="daeCondition-__not__"><strong>__not__</strong></a>(self)</dt><dd><tt>Logical&nbsp;operator&nbsp;not<br>
 ARGUMENTS:<br>
-&nbsp;&nbsp;&nbsp;None&nbsp;<br>
-RETURNS:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeCondition">daeCondition</a></tt></dd></dl>
 
-<dl><dt><a name="daeCondition-__or__"><strong>__or__</strong></a>(self, Condition)</dt><dd><tt>Logical&nbsp;operator&nbsp;|&nbsp;(OR)&nbsp;<br>
+<dl><dt><a name="daeCondition-__or__"><strong>__or__</strong></a>(self, Condition)</dt><dd><tt>Logical&nbsp;operator&nbsp;|&nbsp;(OR)<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a>&nbsp;<br>
-RETURNS:&nbsp;<br>
+&nbsp;-&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a><br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeCondition">daeCondition</a></tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeConfig">class <strong>daeConfig</strong></a></font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -304,30 +307,44 @@ RETURNS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Noting</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeDEDI">class <strong>daeDEDI</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Also&nbsp;known&nbsp;as&nbsp;daeDistributedEquationDomainInfo.&nbsp;Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'operator&nbsp;()'&nbsp;and&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes.<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>Also&nbsp;known&nbsp;as&nbsp;daeDistributedEquationDomainInfo.&nbsp;Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'operator&nbsp;()'&nbsp;and&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes.<br>
 Always&nbsp;created&nbsp;automatically&nbsp;by&nbsp;the&nbsp;framework&nbsp;(returned&nbsp;by&nbsp;<a href="#daeEquation">daeEquation</a>::DistributeOnDomain)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeDEDI-__add__"><strong>__add__</strong></a>(self, increment)</dt><dd><tt>Mathematical&nbsp;operator&nbsp;+<br>
+Used&nbsp;in&nbsp;distributed&nbsp;equations&nbsp;to&nbsp;increment&nbsp;current&nbsp;index&nbsp;in&nbsp;<a href="#daeDEDI">daeDEDI</a><br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;increment:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;<a href="#daeDomainIndex">daeDomainIndex</a></tt></dd></dl>
+
 <dl><dt><a name="daeDEDI-__call__"><strong>__call__</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<dl><dt><a name="daeDEDI-__sub__"><strong>__sub__</strong></a>(self, increment)</dt><dd><tt>Mathematical&nbsp;operator&nbsp;-<br>
+Used&nbsp;in&nbsp;distributed&nbsp;equations&nbsp;to&nbsp;decrement&nbsp;current&nbsp;index&nbsp;in&nbsp;<a href="#daeDEDI">daeDEDI</a><br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;increment:&nbsp;unsigned&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;<a href="#daeDomainIndex">daeDomainIndex</a></tt></dd></dl>
+
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeDomain">class <strong>daeDomain</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeDomainType&nbsp;(read-only)<br>
 &nbsp;-&nbsp;NumberOfIntervals:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
 &nbsp;-&nbsp;NumberOfPoints:&nbsp;unsigned&nbsp;int&nbsp;(read-only)<br>
@@ -338,15 +355,15 @@ RETURNS:<br>
 &nbsp;-&nbsp;UpperBound:&nbsp;float&nbsp;(read-only)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeDomain-CreateArray"><strong>CreateArray</strong></a>(self, NoIntervals)</dt><dd><tt>A&nbsp;function&nbsp;called&nbsp;from&nbsp;within&nbsp;simulation&nbsp;object&nbsp;to&nbsp;create&nbsp;a&nbsp;discrete&nbsp;domain&nbsp;(that&nbsp;is&nbsp;an&nbsp;array).&nbsp;<br>
+<dl><dt><a name="daeDomain-CreateArray"><strong>CreateArray</strong></a>(self, NoIntervals)</dt><dd><tt>A&nbsp;function&nbsp;called&nbsp;from&nbsp;within&nbsp;simulation&nbsp;object&nbsp;to&nbsp;create&nbsp;a&nbsp;discrete&nbsp;domain&nbsp;(that&nbsp;is&nbsp;an&nbsp;array).<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;NoIntervals:&nbsp;unsigned&nbsp;int<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeDomain-CreateDistributed"><strong>CreateDistributed</strong></a>(self, DiscretizationMethod, Order, NoIntervals, LowerBound, UpperBound)</dt><dd><tt>A&nbsp;function&nbsp;called&nbsp;from&nbsp;within&nbsp;simulation&nbsp;object&nbsp;to&nbsp;create&nbsp;a&nbsp;distributed&nbsp;domain.&nbsp;<br>
+<dl><dt><a name="daeDomain-CreateDistributed"><strong>CreateDistributed</strong></a>(self, DiscretizationMethod, Order, NoIntervals, LowerBound, UpperBound)</dt><dd><tt>A&nbsp;function&nbsp;called&nbsp;from&nbsp;within&nbsp;simulation&nbsp;object&nbsp;to&nbsp;create&nbsp;a&nbsp;distributed&nbsp;domain.<br>
 ARGUMENTS:<br>
-&nbsp;-&nbsp;DiscretizationMethod:&nbsp;daeeDiscretizationMethod&nbsp;<br>
+&nbsp;-&nbsp;DiscretizationMethod:&nbsp;daeeDiscretizationMethod<br>
 &nbsp;-&nbsp;Order:&nbsp;unsigned&nbsp;int&nbsp;(currently&nbsp;only&nbsp;2nd&nbsp;order&nbsp;is&nbsp;implemented)<br>
 &nbsp;-&nbsp;NoIntervals:&nbsp;unsigned&nbsp;int<br>
 &nbsp;-&nbsp;LowerBound:&nbsp;float<br>
@@ -389,28 +406,29 @@ RETURNS:<br>
 <dl><dt><a name="daeDomain-__init__"><strong>__init__</strong></a>(self, Port)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;Port:&nbsp;<a href="#daePort">daePort</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeDomainIndex">class <strong>daeDomainIndex</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;the&nbsp;operator&nbsp;()&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;obtain&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;variable&nbsp;for&nbsp;specified&nbsp;domain&nbsp;indexes.<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;the&nbsp;operator&nbsp;()&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;obtain&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;variable&nbsp;for&nbsp;specified&nbsp;domain&nbsp;indexes.<br>
 Usually&nbsp;created&nbsp;automatically&nbsp;by&nbsp;the&nbsp;framework.&nbsp;It&nbsp;contains&nbsp;either&nbsp;Index&nbsp;(unsigned&nbsp;int)&nbsp;or&nbsp;DEDI&nbsp;(<a href="#daeDEDI">daeDEDI</a>&nbsp;object)&nbsp;property&nbsp;depending&nbsp;on&nbsp;its&nbsp;type.<br>
 PROPERTIES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeDomainIndexType&nbsp;(read-only)<br>
 &nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eConstantIndex<br>
 &nbsp;-&nbsp;DEDI:&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object&nbsp;&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eDomainIterator<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeEquation">class <strong>daeEquation</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
 &nbsp;-&nbsp;Residual:&nbsp;<a href="#adouble">adouble</a><br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
@@ -421,14 +439,14 @@ PROPERTIES:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeIF">class <strong>daeIF</strong></a>(<a href="core.html#daeSTN">daeSTN</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>-&nbsp;NumberOfStates:&nbsp;unsigned&nbsp;int<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>-&nbsp;NumberOfStates:&nbsp;unsigned&nbsp;int<br>
 -&nbsp;States:&nbsp;<a href="#daeState">daeState</a>&nbsp;list<br>
 -&nbsp;ActiveState:&nbsp;<a href="#daeState">daeState</a><br>
 -&nbsp;ParentState:&nbsp;<a href="#daeState">daeState</a><br>&nbsp;</tt></td></tr>
@@ -445,30 +463,30 @@ Methods inherited from <a href="core.html#daeSTN">daeSTN</a>:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeIndexRange">class <strong>daeIndexRange</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;create&nbsp;an&nbsp;array&nbsp;of&nbsp;parameters/variables.<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>Used&nbsp;as&nbsp;an&nbsp;argument&nbsp;of&nbsp;'array'&nbsp;functions&nbsp;in&nbsp;<a href="#daeParameter">daeParameter</a>/<a href="#daeVariable">daeVariable</a>&nbsp;classes&nbsp;to&nbsp;create&nbsp;an&nbsp;array&nbsp;of&nbsp;parameters/variables.<br>
 PROPERTIES:<br>
 &nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;object&nbsp;(read-only)<br>
 &nbsp;-&nbsp;NoPoints:&nbsp;number&nbsp;of&nbsp;points&nbsp;(read-only)<br>
-&nbsp;-&nbsp;Type:&nbsp;daeIndexRangeType&nbsp;(read-only)<br>
-&nbsp;-&nbsp;StartIndex:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeOfIndexes<br>
+&nbsp;-&nbsp;Type:&nbsp;daeIndexRangeType&nbsp;(read-only)<br>&nbsp;-&nbsp;StartIndex:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeOfIndexes<br>
 &nbsp;-&nbsp;EndIndex:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeOfIndexes<br>
 &nbsp;-&nbsp;Step:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeOfIndexes<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeModel">class <strong>daeModel</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
 -&nbsp;Parameters:&nbsp;<a href="#daeParameter">daeParameter</a>&nbsp;list<br>
 -&nbsp;Variables:&nbsp;<a href="#daeVariable">daeVariable</a>&nbsp;list<br>
 -&nbsp;Equations:&nbsp;<a href="#daeEquation">daeEquation</a>&nbsp;list<br>
@@ -492,8 +510,7 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#daeEquation">daeEquation</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeModel-DeclareEquations"><strong>DeclareEquations</strong></a>(self)</dt><dd><tt>(Abstract)<br>
-The&nbsp;function&nbsp;used&nbsp;to&nbsp;provide&nbsp;a&nbsp;definition&nbsp;of&nbsp;the&nbsp;model&nbsp;equations&nbsp;and&nbsp;state&nbsp;transition&nbsp;networks.<br>
+<dl><dt><a name="daeModel-DeclareEquations"><strong>DeclareEquations</strong></a>(self)</dt><dd><tt>(Abstract)<br>The&nbsp;function&nbsp;used&nbsp;to&nbsp;provide&nbsp;a&nbsp;definition&nbsp;of&nbsp;the&nbsp;model&nbsp;equations&nbsp;and&nbsp;state&nbsp;transition&nbsp;networks.<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
@@ -555,7 +572,7 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeModel-d"><strong>d</strong></a>(self, expression, domain)</dt><dd><tt>Calculates&nbsp;a&nbsp;partial&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression.&nbsp;<br>
+<dl><dt><a name="daeModel-d"><strong>d</strong></a>(self, expression, domain)</dt><dd><tt>Calculates&nbsp;a&nbsp;partial&nbsp;derivative&nbsp;of&nbsp;an&nbsp;expression.<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;expression:&nbsp;<a href="#adouble">adouble</a>&nbsp;object<br>
 &nbsp;-&nbsp;domain:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;object<br>
@@ -593,27 +610,28 @@ RETURNS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeObject">class <strong>daeObject</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>A&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;other&nbsp;classes&nbsp;in&nbsp;the&nbsp;module.<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>A&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;other&nbsp;classes&nbsp;in&nbsp;the&nbsp;module.<br>
 PROPERTIES:<br>
 &nbsp;-&nbsp;Name:&nbsp;string<br>
 &nbsp;-&nbsp;CanonicalName:&nbsp;string<br>
 &nbsp;-&nbsp;Description:&nbsp;string<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeParameter">class <strong>daeParameter</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeParameterType<br>
 &nbsp;-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
@@ -623,8 +641,7 @@ PROPERTIES:<br>
 RETURNS:<br>
 &nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeParameter-GetNumPyArray"><strong>GetNumPyArray</strong></a>(self)</dt><dd><tt>Used&nbsp;to&nbsp;wrap&nbsp;parameter's&nbsp;values&nbsp;into&nbsp;the&nbsp;multi-dimensional&nbsp;numpy&nbsp;array.<br>
-Dimensions&nbsp;are&nbsp;defined&nbsp;by&nbsp;the&nbsp;number&nbsp;of&nbsp;points&nbsp;in&nbsp;the&nbsp;domains&nbsp;that&nbsp;the&nbsp;parameter&nbsp;is&nbsp;distributed&nbsp;on.<br>
+<dl><dt><a name="daeParameter-GetNumPyArray"><strong>GetNumPyArray</strong></a>(self)</dt><dd><tt>Used&nbsp;to&nbsp;wrap&nbsp;parameter's&nbsp;values&nbsp;into&nbsp;the&nbsp;multi-dimensional&nbsp;numpy&nbsp;array.<br>Dimensions&nbsp;are&nbsp;defined&nbsp;by&nbsp;the&nbsp;number&nbsp;of&nbsp;points&nbsp;in&nbsp;the&nbsp;domains&nbsp;that&nbsp;the&nbsp;parameter&nbsp;is&nbsp;distributed&nbsp;on.<br>
 If&nbsp;the&nbsp;parameter&nbsp;is&nbsp;not&nbsp;distributed&nbsp;on&nbsp;any&nbsp;domains&nbsp;then&nbsp;one-dimensional&nbsp;numpy&nbsp;array&nbsp;of&nbsp;length&nbsp;1&nbsp;is&nbsp;returned.<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
@@ -637,7 +654,7 @@ RETURNS:<br>
 &nbsp;-&nbsp;<a href="#daeParameter-GetValue">GetValue</a>(D1,&nbsp;D2,&nbsp;Value)<br>
 &nbsp;&nbsp;&nbsp;...<br>
 &nbsp;-&nbsp;<a href="#daeParameter-GetValue">GetValue</a>(D1,&nbsp;D2,&nbsp;D3,&nbsp;D4,&nbsp;D5,&nbsp;D6,&nbsp;D7,&nbsp;D8,&nbsp;Value)<br>
-Used&nbsp;to&nbsp;get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;parameter.&nbsp;It&nbsp;is&nbsp;rarely&nbsp;used.&nbsp;<br>
+Used&nbsp;to&nbsp;get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;parameter.&nbsp;It&nbsp;is&nbsp;rarely&nbsp;used.<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;D1&nbsp;to&nbsp;D8:&nbsp;unsigned&nbsp;int(s)<br>
 RETURNS:<br>
@@ -685,14 +702,14 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;<a href="#adouble_array">adouble_array</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daePort">class <strong>daePort</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>ATTRIBUTES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>ATTRIBUTES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeePortType<br>
 &nbsp;-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
 &nbsp;-&nbsp;Parameters:&nbsp;<a href="#daeParameter">daeParameter</a>&nbsp;list<br>
@@ -709,14 +726,14 @@ RETURNS:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeePortType<br>
 &nbsp;-&nbsp;Model:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeSTN">class <strong>daeSTN</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>-&nbsp;NumberOfStates:&nbsp;unsigned&nbsp;int<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>-&nbsp;NumberOfStates:&nbsp;unsigned&nbsp;int<br>
 -&nbsp;States:&nbsp;<a href="#daeState">daeState</a>&nbsp;list<br>
 -&nbsp;ActiveState:&nbsp;<a href="#daeState">daeState</a><br>
 -&nbsp;ParentState:&nbsp;<a href="#daeState">daeState</a><br>&nbsp;</tt></td></tr>
@@ -727,39 +744,41 @@ RETURNS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeState">class <strong>daeState</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>-&nbsp;NumberOfEquations:&nbsp;unsigned&nbsp;int<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>-&nbsp;NumberOfEquations:&nbsp;unsigned&nbsp;int<br>
 -&nbsp;NumberOfStateTransitions:&nbsp;unsigned&nbsp;int<br>
 -&nbsp;NumberOfNestedSTNs:&nbsp;unsigned&nbsp;int<br>
 -&nbsp;Equations:&nbsp;<a href="#daeEquation">daeEquation</a>&nbsp;list<br>
 -&nbsp;StateTransitions:&nbsp;<a href="#daeStateTransition">daeStateTransition</a>&nbsp;list<br>
 -&nbsp;NestedSTNs:&nbsp;<a href="#daeSTN">daeSTN</a>&nbsp;list<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeStateTransition">class <strong>daeStateTransition</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>-&nbsp;StateFrom:&nbsp;<a href="#daeState">daeState</a><br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>-&nbsp;StateFrom:&nbsp;<a href="#daeState">daeState</a><br>
 -&nbsp;StateTo:&nbsp;<a href="#daeState">daeState</a><br>
 -&nbsp;Condition:&nbsp;<a href="#daeCondition">daeCondition</a><br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"></td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeVariable">class <strong>daeVariable</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
 &nbsp;-&nbsp;ReportingOn:&nbsp;boolean<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
@@ -769,8 +788,7 @@ RETURNS:<br>
 &nbsp;-&nbsp;<a href="#daeVariable-AssignValue">AssignValue</a>(D1,&nbsp;Value)<br>
 &nbsp;-&nbsp;<a href="#daeVariable-AssignValue">AssignValue</a>(D1,&nbsp;D2,&nbsp;Value)<br>
 &nbsp;&nbsp;&nbsp;...<br>
-&nbsp;-&nbsp;<a href="#daeVariable-AssignValue">AssignValue</a>(D1,&nbsp;D2,&nbsp;D3,&nbsp;D4,&nbsp;D5,&nbsp;D6,&nbsp;D7,&nbsp;D8,&nbsp;Value)<br>
-Used&nbsp;to&nbsp;set&nbsp;Degrees&nbsp;Of&nbsp;Freedom&nbsp;of&nbsp;the&nbsp;model&nbsp;(in&nbsp;SetUpVariables()&nbsp;function).<br>
+&nbsp;-&nbsp;<a href="#daeVariable-AssignValue">AssignValue</a>(D1,&nbsp;D2,&nbsp;D3,&nbsp;D4,&nbsp;D5,&nbsp;D6,&nbsp;D7,&nbsp;D8,&nbsp;Value)<br>Used&nbsp;to&nbsp;set&nbsp;Degrees&nbsp;Of&nbsp;Freedom&nbsp;of&nbsp;the&nbsp;model&nbsp;(in&nbsp;SetUpVariables()&nbsp;function).<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;D1&nbsp;to&nbsp;D8:&nbsp;unsigned&nbsp;int(s)<br>
 &nbsp;-&nbsp;Value:&nbsp;float<br>
@@ -797,7 +815,7 @@ RETURNS:<br>
 &nbsp;&nbsp;&nbsp;...<br>
 &nbsp;-&nbsp;<a href="#daeVariable-GetValue">GetValue</a>(D1,&nbsp;D2,&nbsp;D3,&nbsp;D4,&nbsp;D5,&nbsp;D6,&nbsp;D7,&nbsp;D8,&nbsp;Value)<br>
 Used&nbsp;to&nbsp;get&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;variable.<br>
-It&nbsp;is&nbsp;rarely&nbsp;used.&nbsp;It&nbsp;access&nbsp;the&nbsp;variable&nbsp;raw&nbsp;data&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;ONLY&nbsp;AFTER&nbsp;successful&nbsp;initialization&nbsp;(after&nbsp;the&nbsp;call&nbsp;to&nbsp;SolveInitial()&nbsp;function)&nbsp;<br>
+It&nbsp;is&nbsp;rarely&nbsp;used.&nbsp;It&nbsp;access&nbsp;the&nbsp;variable&nbsp;raw&nbsp;data&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;ONLY&nbsp;AFTER&nbsp;successful&nbsp;initialization&nbsp;(after&nbsp;the&nbsp;call&nbsp;to&nbsp;SolveInitial()&nbsp;function)<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;D1&nbsp;to&nbsp;D8:&nbsp;unsigned&nbsp;int(s)<br>
 RETURNS:<br>
@@ -876,7 +894,7 @@ RETURNS:<br>
 &nbsp;&nbsp;&nbsp;...<br>
 &nbsp;-&nbsp;<a href="#daeVariable-SetValue">SetValue</a>(D1,&nbsp;D2,&nbsp;D3,&nbsp;D4,&nbsp;D5,&nbsp;D6,&nbsp;D7,&nbsp;D8,&nbsp;Value)<br>
 Used&nbsp;to&nbsp;set&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;variable&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;ONLY&nbsp;AFTER&nbsp;successful&nbsp;initialization&nbsp;(after&nbsp;the&nbsp;call&nbsp;to&nbsp;SolveInitial()&nbsp;function).<br>
-IT&nbsp;SHOULD&nbsp;NOT&nbsp;BE&nbsp;USED&nbsp;DIRECTLY&nbsp;IN&nbsp;SIMULATION&nbsp;(YOU&nbsp;SHOULD&nbsp;KNOW&nbsp;EXACTLY&nbsp;WHAT&nbsp;YOU&nbsp;ARE&nbsp;DOING!)&nbsp;SINCE&nbsp;IT&nbsp;ACCESSES&nbsp;THE&nbsp;VARIABLE&nbsp;RAW&nbsp;DATA&nbsp;AND&nbsp;CAN&nbsp;AFFECT&nbsp;THE&nbsp;SOLVER!!&nbsp;<br>
+IT&nbsp;SHOULD&nbsp;NOT&nbsp;BE&nbsp;USED&nbsp;DIRECTLY&nbsp;IN&nbsp;SIMULATION&nbsp;(YOU&nbsp;SHOULD&nbsp;KNOW&nbsp;EXACTLY&nbsp;WHAT&nbsp;YOU&nbsp;ARE&nbsp;DOING!)&nbsp;SINCE&nbsp;IT&nbsp;ACCESSES&nbsp;THE&nbsp;VARIABLE&nbsp;RAW&nbsp;DATA&nbsp;AND&nbsp;CAN&nbsp;AFFECT&nbsp;THE&nbsp;SOLVER!!<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;D1&nbsp;to&nbsp;D8:&nbsp;unsigned&nbsp;int(s)<br>
 &nbsp;-&nbsp;Value:&nbsp;float<br>
@@ -988,14 +1006,14 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;<a href="#adouble_array">adouble_array</a>&nbsp;object</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeVariableType">class <strong>daeVariableType</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>PROPERTIES:<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Name:&nbsp;string<br>
 &nbsp;-&nbsp;Units:&nbsp;string<br>
 &nbsp;-&nbsp;LowerBound:&nbsp;float<br>
@@ -1012,53 +1030,53 @@ RETURNS:<br>
 -&nbsp;InitialGuess:&nbsp;float<br>
 -&nbsp;AbsoluteTolerance:&nbsp;float</tt></dd></dl>
 
-</td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table></p></td></tr></tbody></table></p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#eeaa77">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-ACos"><strong>ACos</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-ASin"><strong>ASin</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-ATan"><strong>ATan</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Abs"><strong>Abs</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Ceil"><strong>Ceil</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Cos"><strong>Cos</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Exp"><strong>Exp</strong></a>(adarr)</dt><dd><tt>Calculates&nbsp;exponential&nbsp;of&nbsp;the&nbsp;argument&nbsp;adarr,&nbsp;which&nbsp;can&nbsp;be&nbsp;a&nbsp;constant&nbsp;<a href="#adouble">adouble</a>&nbsp;or&nbsp;<a href="#adouble_array">adouble_array</a>&nbsp;object<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Floor"><strong>Floor</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Log"><strong>Log</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Log10"><strong>Log10</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Max"><strong>Max</strong></a>(adf1, adf2)</dt><dd><tt>Mathematical&nbsp;function&nbsp;max<br>
 ARGUMENTS:<br>
@@ -1080,15 +1098,15 @@ RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a></tt></dd></dl>
  <dl><dt><a name="-Sin"><strong>Sin</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Sqrt"><strong>Sqrt</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-Tan"><strong>Tan</strong></a>(adarr)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;adarr:&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a><br>
-RETURNS:&nbsp;<br>
+RETURNS:<br>
 &nbsp;&nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;|&nbsp;<a href="#adouble_array">adouble_array</a></tt></dd></dl>
  <dl><dt><a name="-daeGetConfig"><strong>daeGetConfig</strong></a>()</dt><dd><tt>Returns&nbsp;configuration&nbsp;object.<br>
 ARGUMENTS:<br>
@@ -1100,5 +1118,5 @@ ARGUMENTS:<br>
 &nbsp;-&nbsp;includeBuild:&nbsp;bool<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;string&nbsp;with&nbsp;the&nbsp;DAE&nbsp;Tools&nbsp;version</tt></dd></dl>
-</td></tr></table>
-</body></html>
+</td></tr></tbody></table>
+</p></body></html>

@@ -262,6 +262,8 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeDomainIn
 		pTag->AddTag(strEnumName, string("eConstantIndex"));
 	else if(eValue == eDomainIterator)
 		pTag->AddTag(strEnumName, string("eDomainIterator"));
+	else if(eValue == eIncrementedDomainIterator)
+		pTag->AddTag(strEnumName, string("eIncrementedDomainIterator"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -314,10 +316,8 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeIntegral
 
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeRangeType eValue)
 {
-	if(eValue == eRangeConstantIndex)
-		pTag->AddTag(strEnumName, string("eRangeConstantIndex"));
-	else if(eValue == eRangeDomainIterator)
-		pTag->AddTag(strEnumName, string("eRangeDomainIterator"));
+	if(eValue == eRangeDomainIndex)
+		pTag->AddTag(strEnumName, string("eRangeDomainIndex"));
 	else if(eValue == eRange)
 		pTag->AddTag(strEnumName, string("eRange"));
 	else
@@ -560,6 +560,8 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDomainIndexTyp
 		eValue = eConstantIndex;
 	else if(strValue == "eDomainIterator")
 		eValue = eDomainIterator;
+	else if(strValue == "eIncrementedDomainIterator")
+		eValue = eIncrementedDomainIterator;
 	else
 		eValue = eDITUnknown;
 }
@@ -627,10 +629,8 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeRangeType& eVa
 	string strValue;	
 	pTag->Open(strEnumName, strValue);
 
-	if(strValue == "eRangeConstantIndex")
-		eValue = eRangeConstantIndex;
-	else if(strValue == "eRangeDomainIterator")
-		eValue = eRangeDomainIterator;
+	if(strValue == "eRangeDomainIndex")
+		eValue = eRangeDomainIndex;
 	else if(strValue == "eRange")
 		eValue = eRange;
 	else

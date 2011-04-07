@@ -7,18 +7,19 @@
 #include "../DataReporting/datareporters.h"
 #include "../IDAS_DAESolver/ida_solver.h"
 #include "../Activity/simulation.h"
-#include "../BONMIN_MINLPSolver/nlpsolver.h"
+#define daeIPOPT
+#include "../BONMIN_MINLPSolver/base_solvers.h"
 
 int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial3 /*simRoberts*/ /*simHS71*/);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new /*simTutorial3*/ /*simRoberts*/ simHS71);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
 		boost::scoped_ptr<daeOptimization_t>	pOptimization(new daeOptimization());
-		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(new daeBONMINSolver());
+		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(daeCreateIPOPTSolver());
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
         pSimulation->SetTimeHorizon(200);
 		pSimulation->GetModel()->SetReportingOn(true);
 		
-		bool bRunOptimization = false;
+		bool bRunOptimization = true;
 		
 		if(bRunOptimization)
 		{	

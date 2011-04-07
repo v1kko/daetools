@@ -414,6 +414,32 @@ protected:
 	friend class daeBlock;
 };
 
+/*********************************************************************************************
+	daeDomainIndex
+**********************************************************************************************/
+class daeDistributedEquationDomainInfo;
+struct DAE_CORE_API daeDomainIndex
+{
+public:
+	daeDomainIndex(void);
+	daeDomainIndex(size_t nIndex);
+	daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI);
+	daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI, int iIncrement);
+
+public:
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	
+	size_t GetCurrentIndex(void) const;
+	string GetIndexAsString(void) const;
+	
+public:
+	daeeDomainIndexType					m_eType;
+	size_t								m_nIndex;
+	daeDistributedEquationDomainInfo*	m_pDEDI;
+	int									m_iIncrement;
+};
+
 /******************************************************************
 	daeDistributedEquationDomainInfo
 *******************************************************************/
@@ -443,6 +469,9 @@ public:
 	size_t			GetCurrentIndex(void) const;
 	adouble			operator()(void) const;
 	void			Initialize(void);
+	
+	daeDomainIndex	operator+(size_t increment) const;
+	daeDomainIndex	operator-(size_t increment) const;
 
 protected:
 //	void Initialize(daeDomain* pDomain, daeeDomainBounds eDomainBounds);
@@ -462,27 +491,6 @@ protected:
 };
 typedef daeDistributedEquationDomainInfo daeDEDI;
 
-
-/*********************************************************************************************
-	daeDomainIndex
-**********************************************************************************************/
-struct DAE_CORE_API daeDomainIndex
-{
-public:
-	daeDomainIndex(void);
-	daeDomainIndex(size_t nIndex);
-	daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI) ;
-
-public:
-	void Open(io::xmlTag_t* pTag);
-	void Save(io::xmlTag_t* pTag) const;
-	
-public:
-	daeeDomainIndexType					m_eType;
-	size_t								m_nIndex;
-	daeDistributedEquationDomainInfo*	m_pDEDI;
-};
-
 /*********************************************************************************************
 	daeArrayRange
 **********************************************************************************************/
@@ -490,21 +498,21 @@ struct DAE_CORE_API daeArrayRange
 {
 public:
 	daeArrayRange(void);
-	daeArrayRange(size_t nIndex);
-	daeArrayRange(daeDistributedEquationDomainInfo* pDEDI);
+	daeArrayRange(daeDomainIndex domainIndex);
 	daeArrayRange(daeIndexRange range);
 
 public:
-	size_t GetNoPoints(void) const;
-
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
 	
+	size_t GetNoPoints(void) const;
+	void   GetPoints(std::vector<size_t>& narrPoints) const;
+	string GetRangeAsString(void) const;
+	
 public:
-	daeeRangeType						m_eType;
-	daeIndexRange						m_Range;
-	size_t								m_nIndex;
-	daeDistributedEquationDomainInfo*	m_pDEDI;
+	daeeRangeType	m_eType;
+	daeIndexRange	m_Range;
+	daeDomainIndex	m_domainIndex;
 };
 
 /******************************************************************

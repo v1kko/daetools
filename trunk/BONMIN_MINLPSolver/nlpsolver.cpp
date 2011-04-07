@@ -9,6 +9,22 @@ namespace dae
 {
 namespace nlpsolver
 {
+#ifdef daeIPOPT
+	daeNLPSolver_t* daeCreateIPOPTSolver(void)
+	{
+		return new daeBONMINSolver;
+	}
+
+#endif
+
+#ifdef daeBONMIN
+	daeNLPSolver_t* daeCreateBONMINSolver(void)
+	{
+		return new daeBONMINSolver;
+	}
+
+#endif
+	
 /******************************************************************
 	daeNLP
 *******************************************************************/
@@ -250,10 +266,18 @@ bool daeMINLP::eval_f(Index n,
 					  bool new_x, 
 					  Number& obj_value)
 {
-	if(new_x)
-		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
-	
-	daeNLPCommon::Calculate_fobj(obj_value);	
+	try
+	{
+		if(new_x)
+			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+		
+		daeNLPCommon::Calculate_fobj(obj_value);	
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		return false;
+	}
 	return true;
 }
 
@@ -275,18 +299,26 @@ bool daeMINLP::eval_g(Index n,
 					  Index m, 
 					  Number* g)
 {
-	size_t i;
-	daeOptimizationConstraint_t* pConstraint;
-
-	if(m != m_ptrarrConstraints.size())
-		daeDeclareAndThrowException(exInvalidCall)
-	if(new_x)
-		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
-
-	for(i = 0; i < m_ptrarrConstraints.size(); i++)
+	try
 	{
-		pConstraint = m_ptrarrConstraints[i];
-		daeNLPCommon::Calculate_g(pConstraint, g[i]);
+		size_t i;
+		daeOptimizationConstraint_t* pConstraint;
+	
+		if(m != m_ptrarrConstraints.size())
+			daeDeclareAndThrowException(exInvalidCall)
+		if(new_x)
+			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+	
+		for(i = 0; i < m_ptrarrConstraints.size(); i++)
+		{
+			pConstraint = m_ptrarrConstraints[i];
+			daeNLPCommon::Calculate_g(pConstraint, g[i]);
+		}
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		return false;
 	}
 
 	return true;
@@ -301,14 +333,22 @@ bool daeMINLP::eval_gi(Index n,
 {
 	daeOptimizationConstraint_t* pConstraint;
 
-	if(new_x)
-		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
-
-	if(i >= m_ptrarrConstraints.size())
-		daeDeclareAndThrowException(exInvalidCall)
-
-	pConstraint = m_ptrarrConstraints[i];
-	daeNLPCommon::Calculate_g(pConstraint, gi);
+	try
+	{
+		if(new_x)
+			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+	
+		if(i >= m_ptrarrConstraints.size())
+			daeDeclareAndThrowException(exInvalidCall)
+	
+		pConstraint = m_ptrarrConstraints[i];
+		daeNLPCommon::Calculate_g(pConstraint, gi);
+	}
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
+		return false;
+	}
 
 	return true;
 }
@@ -405,9 +445,9 @@ bool daeMINLP::eval_jac_g(Index n,
 			}
 		}
 	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_jac_g): ") + e.what(), 0);
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
 		return false;
 	}
 
@@ -501,9 +541,9 @@ bool daeMINLP::eval_grad_gi(Index n,
 			}
 		}
 	}
-	catch(std::exception& e)
-	{
-		m_pLog->Message(string("Exception occured in daeBONMIN (eval_grad_gi): ") + e.what(), 0);
+	catch(std::exception& e) 	 
+	{ 	 
+		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
 		return false;
 	}
 

@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <fstream>
 #include "../nlp_common.h"
+#include "base_solvers.h"
 
 #ifdef daeIPOPT
 #include <IpTNLP.hpp>

@@ -220,14 +220,14 @@ enum daeeDomainIndexType
 {
 	eDITUnknown = 0,
 	eConstantIndex, 
-	eDomainIterator
+	eDomainIterator,
+	eIncrementedDomainIterator
 };
 
 enum daeeRangeType
 {
 	eRaTUnknown = 0,
-	eRangeConstantIndex, 
-	eRangeDomainIterator,
+	eRangeDomainIndex, 
 	eRange
 };
 

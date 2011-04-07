@@ -9,32 +9,23 @@ namespace core
 	daeArrayRange
 *******************************************************************************/
 daeArrayRange::daeArrayRange(void) 
-		: m_eType(eRaTUnknown), m_nIndex(ULONG_MAX), m_pDEDI(NULL)
+		: m_eType(eRaTUnknown)
 {
 }
 
-daeArrayRange::daeArrayRange(size_t nIndex) 
-		: m_eType(eRangeConstantIndex), m_nIndex(nIndex), m_pDEDI(NULL)
-{
-}
-
-daeArrayRange::daeArrayRange(daeDistributedEquationDomainInfo* pDEDI) 
-		: m_eType(eRangeDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI)
+daeArrayRange::daeArrayRange(daeDomainIndex domainIndex) 
+		: m_eType(eRangeDomainIndex), m_domainIndex(domainIndex)
 {
 }
 
 daeArrayRange::daeArrayRange(daeIndexRange range) 
-		: m_eType(eRange), m_Range(range), m_nIndex(ULONG_MAX), m_pDEDI(NULL)
+		: m_eType(eRange), m_Range(range)
 {
 }
 
 size_t daeArrayRange::GetNoPoints(void) const
 {
-	if(m_eType == eRangeConstantIndex)
-	{
-		return 1;
-	}
-	else if(m_eType == eRangeDomainIterator)
+	if(m_eType == eRangeDomainIndex)
 	{
 		return 1;
 	}
@@ -44,37 +35,51 @@ size_t daeArrayRange::GetNoPoints(void) const
 		m_Range.GetPoints(narrPoints);
 		return narrPoints.size();
 	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
 	return 0;
+}
+
+void daeArrayRange::GetPoints(vector<size_t>& narrPoints) const
+{
+	narrPoints.clear();
+	
+	if(m_eType == eRangeDomainIndex)
+	{
+		narrPoints.push_back(m_domainIndex.GetCurrentIndex());
+	}
+	else if(m_eType == eRange)
+	{
+		m_Range.GetPoints(narrPoints);
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+}
+
+string daeArrayRange::GetRangeAsString(void) const
+{
+	if(m_eType == eRangeDomainIndex)
+	{
+		return m_domainIndex.GetIndexAsString();
+	}
+	else if(m_eType == eRange)
+	{
+		return m_Range.ToString();
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+	return string("?");
 }
 
 void daeArrayRange::Open(io::xmlTag_t* pTag)
 {
 	daeDeclareAndThrowException(exNotImplemented)
-
-//	string strName;
-//
-//	strName = "Type";
-//	OpenEnum(pTag, strName, m_eType);
-//
-//	if(m_eType == eRangeConstantIndex)
-//	{
-//		strName = "Index";
-//		pTag->Open(strName, m_nIndex);
-//	}
-//	else if(m_eType == eRangeDomainIterator)
-//	{
-//		strName = "DEDI";
-//		m_pDEDI = pTag->OpenObjectRef(strName);
-//	}
-//	else if(m_eType == eRange)
-//	{
-//		strName = "DEDI";
-//		m_pDEDI = pTag->OpenObjectRef(strName);
-//	}
-//	else
-//	{
-//		daeDeclareAndThrowException(exXMLIOError);
-//	}
 }
 
 void daeArrayRange::Save(io::xmlTag_t* pTag) const
@@ -84,15 +89,10 @@ void daeArrayRange::Save(io::xmlTag_t* pTag) const
 	strName = "Type";
 	SaveEnum(pTag, strName, m_eType);
 
-	if(m_eType == eRangeConstantIndex)
+	if(m_eType == eRangeDomainIndex)
 	{
-		strName = "Index";
-		pTag->Save(strName, m_nIndex);
-	}
-	else if(m_eType == eRangeDomainIterator)
-	{
-		strName = "DEDI";
-		pTag->SaveObjectRef(strName, m_pDEDI);
+		strName = "DomainIndex";
+		pTag->SaveObject(strName, &m_domainIndex);
 	}
 	else if(m_eType == eRange)
 	{
@@ -283,17 +283,77 @@ string daeIndexRange::ToString(void) const
 	daeDomainIndex
 *******************************************************************/
 daeDomainIndex::daeDomainIndex(void) 
-		: m_eType(eDITUnknown), m_nIndex(ULONG_MAX), m_pDEDI(NULL)
+		: m_eType(eDITUnknown), m_nIndex(ULONG_MAX), m_pDEDI(NULL), m_iIncrement(0)
 {
 }
 
 daeDomainIndex::daeDomainIndex(size_t nIndex) 
-		: m_eType(eConstantIndex), m_nIndex(nIndex), m_pDEDI(NULL)
+		: m_eType(eConstantIndex), m_nIndex(nIndex), m_pDEDI(NULL), m_iIncrement(0)
 {
 }
+
 daeDomainIndex::daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI) 
-		: m_eType(eDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI)
+		: m_eType(eDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(0)
 {
+}
+
+daeDomainIndex::daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI, int iIncrement)
+		: m_eType(eIncrementedDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(iIncrement)
+{
+}
+
+size_t daeDomainIndex::GetCurrentIndex(void) const
+{
+	if(m_eType == eConstantIndex)
+	{
+		if(m_nIndex == ULONG_MAX)
+			daeDeclareAndThrowException(exInvalidCall);
+		return m_nIndex;
+	}
+	else if(m_eType == eDomainIterator)
+	{
+		if(!m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return m_pDEDI->GetCurrentIndex();
+	}
+	else if(m_eType == eIncrementedDomainIterator)
+	{
+		if(!m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return m_pDEDI->GetCurrentIndex() + m_iIncrement;
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+	
+	return ULONG_MAX;
+}
+
+string daeDomainIndex::GetIndexAsString(void) const
+{
+	if(m_eType == eConstantIndex)
+	{
+		return toString<size_t>(m_nIndex);
+	}
+	else if(m_eType == eDomainIterator)
+	{
+		if(!m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return m_pDEDI->GetName();
+	}
+	else if(m_eType == eIncrementedDomainIterator)
+	{
+		if(!m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return (m_pDEDI->GetName() + (m_iIncrement >= 0 ? "+" : "") + toString<int>(m_iIncrement));
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+	
+	return string("?");
 }
 
 void daeDomainIndex::Open(io::xmlTag_t* pTag)
@@ -315,9 +375,12 @@ void daeDomainIndex::Open(io::xmlTag_t* pTag)
 		//strName = "DEDI";
 		//m_pDEDI = pTag->OpenObjectRef(strName);
 	}
+	else if(m_eType == eIncrementedDomainIterator)
+	{
+	}
 	else
 	{
-		daeDeclareAndThrowException(exXMLIOError)
+		daeDeclareAndThrowException(exNotImplemented)
 	}
 }
 
@@ -338,9 +401,17 @@ void daeDomainIndex::Save(io::xmlTag_t* pTag) const
 		strName = "DEDI";
 		pTag->SaveObjectRef(strName, m_pDEDI);
 	}
+	else if(m_eType == eIncrementedDomainIterator)
+	{
+		strName = "DEDI";
+		pTag->SaveObjectRef(strName, m_pDEDI);
+		
+		strName = "Increment";
+		pTag->Save(strName, m_iIncrement);
+	}
 	else
 	{
-		daeDeclareAndThrowException(exXMLIOError)
+		daeDeclareAndThrowException(exNotImplemented)
 	}
 }
 

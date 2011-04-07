@@ -1,14 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module logging</title>
-</head><body bgcolor="#f0f0f8">
+<html><head><title>Python: module logging</title></head><body bgcolor="#f0f0f8">
 
+<table summary="heading" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#7799ee">
+<td valign="bottom">&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>logging</strong></big></big></font></td></tr></tbody></table>
     <p><tt>dae.logging&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;log&nbsp;messages&nbsp;from&nbsp;different&nbsp;parts&nbsp;of&nbsp;the&nbsp;pyDAE&nbsp;framework&nbsp;(core,&nbsp;solver,&nbsp;simulation).<br>
 All&nbsp;classes&nbsp;are&nbsp;derived&nbsp;from&nbsp;the&nbsp;base&nbsp;<a href="#daeLog_t">daeLog_t</a>&nbsp;class&nbsp;which&nbsp;contains&nbsp;only&nbsp;one&nbsp;method&nbsp;used&nbsp;for&nbsp;message&nbsp;reporting.</tt></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ee77aa">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -29,13 +31,13 @@ All&nbsp;classes&nbsp;are&nbsp;derived&nbsp;from&nbsp;the&nbsp;base&nbsp;<a href
 <dt><font face="helvetica, arial"><a href="logging.html#daeTCPIPLogServer">daeTCPIPLogServer</a>
 </font></dt></dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeBaseLog">class <strong>daeBaseLog</strong></a>(<a href="logging.html#daeLog_t">daeLog_t</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;implementation&nbsp;of&nbsp;the&nbsp;simple&nbsp;log&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;implementation&nbsp;of&nbsp;the&nbsp;simple&nbsp;log&nbsp;class.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="daeBaseLog-DecreaseIndent"><strong>DecreaseIndent</strong></a>(self, offset)</dt></dl>
@@ -44,14 +46,14 @@ All&nbsp;classes&nbsp;are&nbsp;derived&nbsp;from&nbsp;the&nbsp;base&nbsp;<a href
 
 <dl><dt><a name="daeBaseLog-Message"><strong>Message</strong></a>(self, Message, Priority)</dt></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeFileLog">class <strong>daeFileLog</strong></a>(<a href="logging.html#daeBaseLog">daeBaseLog</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;save&nbsp;received&nbsp;messages&nbsp;to&nbsp;the&nbsp;given&nbsp;text&nbsp;file.<br>&nbsp;</tt></td></tr>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;save&nbsp;received&nbsp;messages&nbsp;to&nbsp;the&nbsp;given&nbsp;text&nbsp;file.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="logging.html#daeFileLog">daeFileLog</a></dd>
@@ -71,14 +73,14 @@ Methods inherited from <a href="logging.html#daeBaseLog">daeBaseLog</a>:<br>
 
 <dl><dt><a name="daeFileLog-Message"><strong>Message</strong></a>(self, Message, Priority)</dt></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeLog_t">class <strong>daeLog_t</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;base&nbsp;log&nbsp;class&nbsp;(abstract).<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;base&nbsp;log&nbsp;class&nbsp;(abstract).<br>
 Properties:<br>
 &nbsp;-&nbsp;Enabled:&nbsp;boolean<br>
 &nbsp;-&nbsp;Indent:&nbsp;unsigned&nbsp;integer<br>
@@ -96,14 +98,14 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeStdOutLog">class <strong>daeStdOutLog</strong></a>(<a href="logging.html#daeBaseLog">daeBaseLog</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;redirect&nbsp;received&nbsp;messages&nbsp;to&nbsp;the&nbsp;standard&nbsp;output.<br>&nbsp;</tt></td></tr>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;redirect&nbsp;received&nbsp;messages&nbsp;to&nbsp;the&nbsp;standard&nbsp;output.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="logging.html#daeStdOutLog">daeStdOutLog</a></dd>
@@ -118,14 +120,14 @@ Methods inherited from <a href="logging.html#daeBaseLog">daeBaseLog</a>:<br>
 
 <dl><dt><a name="daeStdOutLog-Message"><strong>Message</strong></a>(self, Message, Priority)</dt></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeTCPIPLog">class <strong>daeTCPIPLog</strong></a>(<a href="logging.html#daeBaseLog">daeBaseLog</a>)</font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;send&nbsp;messages&nbsp;to&nbsp;<a href="#daeTCPIPLogServer">daeTCPIPLogServer</a>&nbsp;by&nbsp;TCPIP&nbsp;protocol.<br>&nbsp;</tt></td></tr>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;log&nbsp;class&nbsp;used&nbsp;to&nbsp;send&nbsp;messages&nbsp;to&nbsp;<a href="#daeTCPIPLogServer">daeTCPIPLogServer</a>&nbsp;by&nbsp;TCPIP&nbsp;protocol.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="logging.html#daeTCPIPLog">daeTCPIPLog</a></dd>
@@ -146,14 +148,14 @@ Methods inherited from <a href="logging.html#daeBaseLog">daeBaseLog</a>:<br>
 
 <dl><dt><a name="daeTCPIPLog-Message"><strong>Message</strong></a>(self, Message, Priority)</dt></dl>
 
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeTCPIPLogServer">class <strong>daeTCPIPLogServer</strong></a></font></td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>The&nbsp;abstract&nbsp;server&nbsp;class&nbsp;used&nbsp;to&nbsp;receive&nbsp;messages&nbsp;sent&nbsp;by&nbsp;<a href="#daeTCPIPLog">daeTCPIPLog</a>&nbsp;log&nbsp;class.<br>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>The&nbsp;abstract&nbsp;server&nbsp;class&nbsp;used&nbsp;to&nbsp;receive&nbsp;messages&nbsp;sent&nbsp;by&nbsp;<a href="#daeTCPIPLog">daeTCPIPLog</a>&nbsp;log&nbsp;class.<br>
 User&nbsp;has&nbsp;to&nbsp;implement&nbsp;the&nbsp;method&nbsp;<a href="#daeTCPIPLogServer-MessageReceived">MessageReceived</a>()<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
@@ -166,5 +168,5 @@ RETURNS:<br>
 <dl><dt><a name="daeTCPIPLogServer-__init__"><strong>__init__</strong></a>(self, Port)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;Port:&nbsp;unsigned&nbsp;int</tt></dd></dl>
 
-</td></tr></table></td></tr></table>
-</body></html>
+</td></tr></tbody></table></p></td></tr></tbody></table>
+</p></body></html>

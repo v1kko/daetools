@@ -62,16 +62,16 @@ BOOST_PYTHON_MODULE(pyCore)
 	;
 
 	enum_<daeeDomainIndexType>("daeeDomainIndexType")
-		.value("eDITUnknown",		dae::core::eDITUnknown)
-		.value("eConstantIndex",	dae::core::eConstantIndex)
-		.value("eDomainIterator",	dae::core::eDomainIterator)
+		.value("eDITUnknown",					dae::core::eDITUnknown)
+		.value("eConstantIndex",				dae::core::eConstantIndex)
+		.value("eDomainIterator",				dae::core::eDomainIterator)
+		.value("eIncrementedDomainIterator",	dae::core::eIncrementedDomainIterator)
 		.export_values()
 	;
 
 	enum_<daeeRangeType>("daeeRangeType")
 		.value("eRaTUnknown",			dae::core::eRaTUnknown)
-		.value("eRangeConstantIndex",	dae::core::eRangeConstantIndex)
-		.value("eRangeDomainIterator",	dae::core::eRangeDomainIterator)
+		.value("eRangeDomainIndex",		dae::core::eRangeDomainIndex)
 		.value("eRange",				dae::core::eRange)
 		.export_values()
 	;
@@ -263,21 +263,21 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daeArrayRange>("daeArrayRange")
-		.def(init<size_t>())
-		.def(init<daeDistributedEquationDomainInfo*>())
+		.def(init<daeDomainIndex>())
 		.def(init<daeIndexRange>())
 		
-		.add_property("NoPoints",	&daeArrayRange::GetNoPoints)
+		.add_property("NoPoints",		&daeArrayRange::GetNoPoints)
 
-		.def_readonly("Type",	&daeArrayRange::m_eType)
-		.def_readonly("Range",	&daeArrayRange::m_Range)
-		.def_readonly("Index",	&daeArrayRange::m_nIndex)
-		.def_readonly("DEDI",	&daeArrayRange::m_pDEDI)
+		.def_readonly("Type",			&daeArrayRange::m_eType)
+		.def_readonly("Range",			&daeArrayRange::m_Range)
+		.def_readonly("DomainIndex",	&daeArrayRange::m_domainIndex)
 		;
  
 	class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", no_init)
 		.def("__str__",		&daepython::daeDEDI_str)
 		.def("__call__",	&daeDEDI::operator())
+		.def(self + size_t())
+		.def(self - size_t())
 		;
 
 	class_<daeDomain, bases<daeObject> >("daeDomain")
@@ -547,13 +547,13 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t>, boost::noncopyable>("daeObjectiveFunction", no_init)
 		.add_property("Residual",		&daeObjectiveFunction::GetResidual,		&daeObjectiveFunction::SetResidual)
-		.add_property("AbsTolerance",	&daeObjectiveFunction::GetAbsTolerance,	&daeObjectiveFunction::SetAbsTolerance)
+		//.add_property("AbsTolerance",	&daeObjectiveFunction::GetAbsTolerance,	&daeObjectiveFunction::SetAbsTolerance)
 		;
 
 	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t>, boost::noncopyable>("daeOptimizationConstraint", no_init)
 		.add_property("Residual",		&daeOptimizationConstraint::GetResidual,		&daeOptimizationConstraint::SetResidual)
-		.add_property("AbsTolerance",	&daeOptimizationConstraint::GetAbsTolerance,	&daeOptimizationConstraint::SetAbsTolerance)
-		.add_property("RelTolerance",	&daeOptimizationConstraint::GetRelTolerance,	&daeOptimizationConstraint::SetRelTolerance)
+		//.add_property("AbsTolerance",	&daeOptimizationConstraint::GetAbsTolerance,	&daeOptimizationConstraint::SetAbsTolerance)
+		//.add_property("RelTolerance",	&daeOptimizationConstraint::GetRelTolerance,	&daeOptimizationConstraint::SetRelTolerance)
 		;
 	
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel")

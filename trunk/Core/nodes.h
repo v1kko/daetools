@@ -601,20 +601,28 @@ inline void FillDomains(const vector<daeDomainIndex>& arrDomains, vector<string>
 	strarrDomains.resize(n);
 	for(size_t i = 0; i < n; i++)
 	{
-		if(arrDomains[i].m_eType == eConstantIndex)
-		{
-			strarrDomains[i] = toString<size_t>(arrDomains[i].m_nIndex);
-		}
-		else if(arrDomains[i].m_eType == eDomainIterator)
-		{
-			if(!arrDomains[i].m_pDEDI)
-				daeDeclareAndThrowException(exInvalidCall);
-			strarrDomains[i] = arrDomains[i].m_pDEDI->GetName();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall);
-		}
+		strarrDomains[i] = arrDomains[i].GetIndexAsString();
+		
+//		if(arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			strarrDomains[i] = toString<size_t>(arrDomains[i].m_nIndex);
+//		}
+//		else if(arrDomains[i].m_eType == eDomainIterator)
+//		{
+//			if(!arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			strarrDomains[i] = arrDomains[i].m_pDEDI->GetName();
+//		}
+//		else if(arrDomains[i].m_eType == eIncrementedDomainIterator)
+//		{
+//			if(!arrDomains[i].m_pDEDI)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			strarrDomains[i] = arrDomains[i].m_pDEDI->GetName() + (arrDomains[i].m_iIncrement >= 0 ? "+" : "") + toString<int>(arrDomains[i].m_iIncrement);
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exInvalidCall);
+//		}
 	}
 }
 
