@@ -23,6 +23,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "core.h"
 #include "class_factory.h"
 #include "adouble.h"
+#include "export.h"
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 // Some M$ crap
@@ -90,12 +91,12 @@ enum daeeResultType
 };
 
 /******************************************************************
-	daeRuntimeCheck
+	daeRuntimeCheck_t
 *******************************************************************/
-class daeRuntimeCheck
+class daeRuntimeCheck_t
 {
 public:
-	virtual ~daeRuntimeCheck(void){}
+	virtual ~daeRuntimeCheck_t(void){}
 
 public:
 	virtual bool CheckObject(std::vector<string>& strarrErrors) const = 0;
@@ -106,7 +107,8 @@ public:
 *******************************************************************/
 class DAE_CORE_API daeVariableType : public daeVariableType_t,
 	                                 public io::daeSerializable,
-									 public daeRuntimeCheck
+									 public daeRuntimeCheck_t,
+									 public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeVariableType)
@@ -138,8 +140,10 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
-
+	
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 protected:
 	string	m_strName;
@@ -158,7 +162,8 @@ protected:
 class daeModel;
 class DAE_CORE_API daeObject : virtual public daeObject_t, 
 	                           virtual public io::daeSerializable,
-	                           public daeRuntimeCheck
+	                           public daeRuntimeCheck_t,
+							   public daeExportable_t
 	                           
 {
 public:
@@ -180,20 +185,22 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
+	
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void SaveNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag) const;
 	void SaveRelativeNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag, const daeObject* pParent = NULL) const;
-	
-	bool CheckObject(std::vector<string>& strarrErrors) const;
 
 	void SetCanonicalName(const string& strCanonicalName);
 	void SetName(const string& strName);
 	void SetDescription(const string& strName);
 	void SetModel(daeModel* pModel);
 
-	static string GetRelativeName(const daeObject* parent, const daeObject* child);
-	static string GetRelativeName(const string& strParent, const string& strChild);
 	string GetNameRelativeToParentModel(void) const;
+	string GetStrippedName(void) const;
+	string GetStrippedNameRelativeToParentModel(void) const;
 	
 protected:
 	string			m_strCanonicalName;
@@ -214,6 +221,10 @@ protected:
 	friend class daeModelArray;
 	friend class daeDistributedEquationDomainInfo;
 };
+
+string daeGetRelativeName(const daeObject* parent, const daeObject* child);
+string daeGetRelativeName(const string& strParent, const string& strChild);
+string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child);
 
 /******************************************************************
 	daePartialDerivativeVariable
@@ -314,6 +325,8 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	adouble_array	array(void);
 	adouble_array	array(int start, int end, int step);
@@ -573,7 +586,7 @@ public:
 		m_bGatherInfo				= false;
 		m_nTotalNumberOfVariables	= 0;
 		m_nNumberOfParameters		= 0;
-		m_eModelType				= eMTUnknown;
+		m_eLanguage				= eMTUnknown;
 //		m_pCondition				= NULL;
 		m_pmatSValues				= NULL;
 		m_pmatSTimeDerivatives		= NULL; 
@@ -822,6 +835,20 @@ public:
 
 		m_pdTimeDerivatives[nIndex] = Value;
 	}
+	
+	void PrintTimeDerivatives()
+	{
+		std::cout << "m_pdTimeDerivatives" << std::endl;
+		for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
+		{
+			if(i != 0)
+				std::cout << ", ";
+			std::cout << dae::toStringFormatted(m_pdTimeDerivatives[i], 15, 8, true);
+		}
+		std::cout << "};" << std::endl;
+		std::cout.flush();
+	}
+			
 
 // S value: S[nParameterIndex][nVariableIndex]
 	real_t GetSValue(size_t nParameterIndex, size_t nVariableIndex) const
@@ -969,7 +996,7 @@ public:
 	
 	daeeModelType GetModelType(void)
 	{
-		if(m_eModelType == eMTUnknown)
+		if(m_eLanguage == eMTUnknown)
 		{
 			if(!m_pnVariablesTypesGathered || m_nTotalNumberOfVariables == 0)
 				daeDeclareAndThrowException(exInvalidCall)
@@ -984,12 +1011,12 @@ public:
 				}
 			}
 			if(bFoundDiffVariables)
-				m_eModelType = eDynamicModel;
+				m_eLanguage = eDynamicModel;
 			else
-				m_eModelType = eSteadyStateModel;
+				m_eLanguage = eSteadyStateModel;
 		}
 		
-		return m_eModelType;
+		return m_eLanguage;
 	}
 	
 //	void SetGlobalCondition(daeCondition condition)
@@ -1065,7 +1092,7 @@ protected:
 	//daeExecutionContext*			m_pExecutionContexts;
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
-	daeeModelType					m_eModelType;
+	daeeModelType					m_eLanguage;
 	std::vector<size_t>				m_narrOptimizationParametersIndexes;
 	daeMatrix<real_t>*				m_pmatSValues;
 	daeMatrix<real_t>*				m_pmatSTimeDerivatives; 
@@ -1078,7 +1105,7 @@ protected:
 class daeSTN;
 class DAE_CORE_API daeBlock : public daeBlock_t,
 						      public io::daeSerializable,
-							  public daeRuntimeCheck
+							  public daeRuntimeCheck_t
 {
 public:
 	daeDeclareDynamicClass(daeBlock)
@@ -1132,6 +1159,8 @@ public:
 	virtual size_t	GetNumberOfRoots(void) const;
 
 	virtual daeeDiscontinuityType CheckDiscontinuities(void);
+	
+	virtual void	SetAllInitialConditions(real_t value);
 	
 	virtual void	CalcNonZeroElements(int& NNZ);
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
@@ -1238,8 +1267,10 @@ class DAE_CORE_API daeParameter : virtual public daeObject,
 {
 public:
 	daeDeclareDynamicClass(daeParameter)
-	daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription = "");
-	daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription = "");
+	daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription = "", 
+				 daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
+	daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription = "", 
+				 daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
 	daeParameter(void);
 	virtual ~daeParameter(void);
 
@@ -1269,12 +1300,16 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
 public:	
-	void	Open(io::xmlTag_t* pTag);
-	void	Save(io::xmlTag_t* pTag) const;
-	void	OpenRuntime(io::xmlTag_t* pTag);
-	void	SaveRuntime(io::xmlTag_t* pTag) const;
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	void	DistributeOnDomain(daeDomain& rDomain);
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
+	void DistributeOnDomain(daeDomain& rDomain);
 
 	adouble	operator()(void);
 	template<typename TYPE1>
@@ -1311,8 +1346,6 @@ public:
 	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
 		adouble_array array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
-	bool CheckObject(std::vector<string>& strarrErrors) const;
-
 protected:
 	void SetParameterType(daeeParameterType eParameterType);
 	void Initialize(void);
@@ -1344,8 +1377,11 @@ class DAE_CORE_API daeVariable : virtual public daeObject,
 public:
 	daeDeclareDynamicClass(daeVariable)
 	daeVariable(void);
-	daeVariable(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "");
-	daeVariable(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "");
+	daeVariable(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", 
+				daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
+	daeVariable(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", 
+				daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
+	
 	virtual ~daeVariable(void);
 
 public:	
@@ -1460,12 +1496,16 @@ public:
 	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
 public:
-	void	Open(io::xmlTag_t* pTag);
-	void	Save(io::xmlTag_t* pTag) const;
-	void	OpenRuntime(io::xmlTag_t* pTag);
-	void	SaveRuntime(io::xmlTag_t* pTag) const;
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	void	DistributeOnDomain(daeDomain& rDomain);
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
+	void DistributeOnDomain(daeDomain& rDomain);
 
 public:
 	adouble	operator()(void);
@@ -1605,8 +1645,6 @@ public:
 		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
 	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
 		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
-
-	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 protected:
 	adouble	Create_adouble(const size_t* indexes, const size_t N) const;
@@ -1707,14 +1745,17 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	void SetType(daeePortType eType);
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
+	void CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
+	void SetType(daeePortType eType);
 	void AddDomain(daeDomain& rDomain, const string& strName, string strDescription = "");
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
 	void AddParameter(daeParameter& rParameter, const string& strName, daeeParameterType eParameterType, string strDescription = "");
-
+	
 protected:
 	void			InitializeParameters(void);
 	void			InitializeVariables(void);
@@ -1768,7 +1809,10 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	bool   CheckObject(std::vector<string>& strarrErrors) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
 	void   GetEquations(std::vector<daeEquation*>& ptrarrEquations) const;
 	size_t GetTotalNumberOfEquations(void) const;
 
@@ -1834,7 +1878,7 @@ public:
 	
 	virtual daeeInitialConditionMode GetInitialConditionMode(void) const;
 	virtual void SetInitialConditionMode(daeeInitialConditionMode eMode);
-	virtual void SetInitialConditions(real_t value);
+//	virtual void SetInitialConditions(real_t value);
 	
 	virtual void StoreInitializationValues(const std::string& strFileName) const;
 	virtual void LoadInitializationValues(const std::string& strFileName) const;
@@ -1848,6 +1892,13 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
+	
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	string ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModelLanguage eLanguage) const;
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
+	void CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void daeSaveRuntimeNodes(string strFileName);
 
@@ -1878,8 +1929,6 @@ public:
 	const adouble __max__(const adouble_array& a) const;
 	const adouble __average__(const adouble_array& a) const;
 	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<size_t>& narrPoints) const;
-
-	bool CheckObject(std::vector<string>& strarrErrors) const;
 
 	daeEquation* CreateEquation(const string& strName, string strDescription = "");
 
@@ -1985,7 +2034,7 @@ protected:
 	void		CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	void		SetModelAndCanonicalName(daeObject* pObject);
 	bool		DetectObject(string& strShortName, std::vector<size_t>& narrDomains, daeeObjectType& eType, daeObject_t** ppObject);
-
+	
 // Used to nest States
 	daeState*	GetStateFromStack(void);
 	void		PutStateToStack(daeState* pState);
@@ -2060,13 +2109,18 @@ public:
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
 
 public:
-	void DistributeOnDomain(daeDomain& rDomain);
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;	
+	
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
+
+	void DistributeOnDomain(daeDomain& rDomain);
+
 	size_t GetVariablesStartingIndex(void) const;
 	void   SetVariablesStartingIndex(size_t nVariablesStartingIndex);
 
@@ -2123,13 +2177,18 @@ public:
 	virtual daePort_t* GetPort(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
 	
 public:
-	void DistributeOnDomain(daeDomain& rDomain);
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	bool   CheckObject(std::vector<string>& strarrErrors) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
+
+	void DistributeOnDomain(daeDomain& rDomain);
+	
 	size_t GetVariablesStartingIndex(void) const;
 	void   SetVariablesStartingIndex(size_t nVariablesStartingIndex);
 	
@@ -2177,6 +2236,10 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
 	void AddEquation(daeEquation* pEquation);
 	//daeEquation* AddEquation(const string& strEquationExpression);
 
@@ -2203,7 +2266,6 @@ public:
 	template<class Model>
 		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t));
 
-	bool CheckObject(std::vector<string>& strarrErrors) const;
 	void CalcNonZeroElements(int& NNZ);
 	void FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
@@ -2253,10 +2315,13 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
 	void Initialize(void);
 	void CreateSTN(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
 	void CreateIF(const string& strCondition,  daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
-	bool CheckObject(std::vector<string>& strarrErrors) const;
 	string GetConditionAsString() const;
 	
 protected:
@@ -2301,15 +2366,19 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
 	virtual void		Initialize(void);
 	virtual bool		CheckDiscontinuities(void);
 	virtual size_t		GetNumberOfEquations(void) const;
 	virtual daeState*	AddState(string strName);
 
 	size_t			GetNumberOfStates(void) const;
-	void			SetActiveState(const string& strStateName);
+	string			GetActiveState2(void) const;
+	void			SetActiveState2(const string& strStateName);
 	void			SetActiveState(daeState* pState);
-	bool			CheckObject(std::vector<string>& strarrErrors) const;
 	void			CalcNonZeroElements(int& NNZ);
 	void			FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
@@ -2374,9 +2443,12 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	daeState* CreateElse(void);
-	bool      CheckObject(std::vector<string>& strarrErrors) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
+	daeState* CreateElse(void);
+	
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
 	bool			CheckState(daeState* pState);
@@ -2410,7 +2482,11 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
 	void InitializeDEDIs(void);
 
 	virtual size_t	GetNumberOfEquations(void) const;
@@ -2467,9 +2543,12 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	void	Initialize(daeVariable* pLeft, daeVariable* pRight);
-	bool	CheckObject(std::vector<string>& strarrErrors) const;
-	size_t	GetNumberOfEquations(void) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
+	void Initialize(daeVariable* pLeft, daeVariable* pRight);
+	size_t GetNumberOfEquations(void) const;
 
 protected:
 	daeVariable* m_pLeft;
@@ -2499,7 +2578,8 @@ public:
 	daeOptimizationVariable
 *******************************************************************/
 class DAE_CORE_API daeOptimizationVariable : public daeOptimizationVariable_t,
-		                                     public daeRuntimeCheck
+		                                     public daeRuntimeCheck_t,
+											 public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationVariable)
@@ -2531,6 +2611,8 @@ public:
 	
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
 protected:
 	daeVariable*					m_pVariable;
 	real_t							m_dLB;
@@ -2545,7 +2627,8 @@ protected:
 	daeObjectiveFunction
 *******************************************************************/
 class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
-		                                  public daeRuntimeCheck
+		                                  public daeRuntimeCheck_t,
+										  public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeObjectiveFunction)
@@ -2554,6 +2637,8 @@ public:
 
 public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	bool IsLinear(void) const;
 
@@ -2582,7 +2667,8 @@ protected:
 	daeOptimizationConstraint
 *******************************************************************/
 class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_t,
-                                               public daeRuntimeCheck
+                                               public daeRuntimeCheck_t,
+											   public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
@@ -2593,6 +2679,8 @@ public:
 
 public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void               SetType(daeeConstraintType value);
 	daeeConstraintType GetType(void) const;

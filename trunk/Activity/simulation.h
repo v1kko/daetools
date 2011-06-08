@@ -78,7 +78,7 @@ public:
 	
 protected:
 	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
-	void	SetInitialConditionsToZero(void);
+//	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);
 

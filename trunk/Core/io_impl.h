@@ -173,6 +173,113 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeIn
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeRangeType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeIndexRangeType eValue);
 
+/*********************************************************************************************
+	daeEnumStringMap
+**********************************************************************************************/
+template<typename ENUM> 
+class daeEnumStringMap
+{
+public:
+  typedef map<string, ENUM> map_string_enum;
+  typedef map<ENUM, string> map_enum_string;
+  typedef typename map<string, ENUM>::const_iterator iter_string_enum;
+  typedef typename map<ENUM, string>::const_iterator iter_enum_string;
+  typedef std::pair<string, ENUM> pair_string_enum;
+  typedef std::pair<ENUM, string> pair_enum_string;
+
+public:
+	void Add(ENUM key, string value)
+	{
+		pair_enum_string pes(key, value);
+		pair_string_enum pse(value, key);
+		
+		m_mapStringEnum.insert(pse);
+		m_mapEnumString.insert(pes);
+	}
+
+	ENUM GetEnum(const string& value) const
+	{
+		iter_string_enum iter = m_mapStringEnum.find(value);
+		if(iter != m_mapStringEnum.end())
+			return iter->second;
+		else
+			return (ENUM)-1;
+	}
+	
+	string GetString(ENUM value) const
+	{
+		iter_enum_string iter = m_mapEnumString.find(value);
+		if(iter != m_mapEnumString.end())
+			return iter->second;
+		else
+			return "Unknown";
+	}
+
+protected:
+	map_enum_string m_mapEnumString;
+	map_string_enum m_mapStringEnum;
+};
+
+#define daeesmapAdd1(ESMAP, E1)								ESMAP.Add(E1, string(#E1));
+
+#define daeesmapAdd2(ESMAP, E1, E2)							ESMAP.Add(E1, string(#E1)); \
+															ESMAP.Add(E2, string(#E2)); 
+															
+#define daeesmapAdd3(ESMAP, E1, E2, E3)						ESMAP.Add(E1, string(#E1)); \
+															ESMAP.Add(E2, string(#E2)); \
+															ESMAP.Add(E3, string(#E3)); 
+															
+#define daeesmapAdd4(ESMAP, E1, E2, E3, E4)					ESMAP.Add(E1, #E1); \
+															ESMAP.Add(E2, #E2); \
+															ESMAP.Add(E3, #E3); \
+															ESMAP.Add(E4, #E4); 
+															
+#define daeesmapAdd5(ESMAP, E1, E2, E3, E4, E5)				ESMAP.Add(E1, #E1); \
+															ESMAP.Add(E2, #E2); \
+															ESMAP.Add(E3, #E3); \
+															ESMAP.Add(E4, #E4); \
+															ESMAP.Add(E5, #E5); 
+															
+#define daeesmapAdd6(ESMAP, E1, E2, E3, E4, E5, E6)			ESMAP.Add(E1, #E1); \
+															ESMAP.Add(E2, #E2); \
+															ESMAP.Add(E3, #E3); \
+															ESMAP.Add(E4, #E4); \
+															ESMAP.Add(E5, #E5); \
+															ESMAP.Add(E6, #E6); 
+															
+#define daeesmapAdd7(ESMAP, E1, E2, E3, E4, E5, E6, E7)		ESMAP.Add(E1, #E1); \
+															ESMAP.Add(E2, #E2); \
+															ESMAP.Add(E3, #E3); \
+															ESMAP.Add(E4, #E4); \
+															ESMAP.Add(E5, #E5); \
+															ESMAP.Add(E6, #E6); \
+															ESMAP.Add(E7, #E7); 
+															
+#define daeesmapAdd8(ESMAP, E1, E2, E3, E4, E5, E6, E7, E8)	ESMAP.Add(E1, #E1); \
+															ESMAP.Add(E2, #E2); \
+															ESMAP.Add(E3, #E3); \
+															ESMAP.Add(E4, #E4); \
+															ESMAP.Add(E5, #E5); \
+															ESMAP.Add(E6, #E6); \
+															ESMAP.Add(E7, #E7); \
+															ESMAP.Add(E8, #E8);
+
+
+class daeEnumTypesCollection
+{
+public:
+	daeEnumTypesCollection(void)
+	{
+		using namespace dae::core;
+		daeesmapAdd2(esmap_daeDomainType, eArray, eDistributed);
+		daeesmapAdd3(esmap_daeeParameterType, eReal, eInteger, eBool);		
+	}
+
+	daeEnumStringMap<core::daeeDomainType>		esmap_daeDomainType;
+	daeEnumStringMap<core::daeeParameterType>	esmap_daeeParameterType;	
+};
+
+static boost::shared_ptr<daeEnumTypesCollection> g_EnumTypesCollection = boost::shared_ptr<daeEnumTypesCollection>(new daeEnumTypesCollection());
 
 }
 }

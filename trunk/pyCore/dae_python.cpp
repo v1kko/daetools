@@ -55,9 +55,10 @@ BOOST_PYTHON_MODULE(pyCore)
 	;
 
 	enum_<daeeInitialConditionMode>("daeeInitialConditionMode")
-		.value("eICTUnknown",				dae::core::eICTUnknown)
-		.value("eAlgebraicValuesProvided",	dae::core::eAlgebraicValuesProvided)
-		.value("eSteadyState",				dae::core::eSteadyState)
+		.value("eICTUnknown",					dae::core::eICTUnknown)
+		.value("eAlgebraicValuesProvided",		dae::core::eAlgebraicValuesProvided)
+		.value("eDifferentialValuesProvided",	dae::core::eDifferentialValuesProvided)
+		.value("eQuasySteadyState",				dae::core::eQuasySteadyState)
 		.export_values()
 	;
 
@@ -81,6 +82,13 @@ BOOST_PYTHON_MODULE(pyCore)
 		.value("eAllPointsInDomain",	dae::core::eAllPointsInDomain)
 		.value("eRangeOfIndexes",		dae::core::eRangeOfIndexes)
 		.value("eCustomRange",			dae::core::eCustomRange)
+		.export_values()
+	;
+	
+	enum_<daeeModelLanguage>("daeeModelLanguage")
+		.value("eMLNone",	dae::core::eMLNone)
+		.value("eCDAE",		dae::core::eCDAE)
+		.value("ePYDAE",	dae::core::ePYDAE)
 		.export_values()
 	;
 	
@@ -307,8 +315,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter")
-		.def(init<string, daeeParameterType, daePort*, optional<string> >())
-		.def(init<string, daeeParameterType, daeModel*, optional<string> >())
+		.def(init<string, daeeParameterType, daePort*, optional<string, list> >())
+		.def(init<string, daeeParameterType, daeModel*, optional<string, list> >())
 
 		.add_property("Type",		&daeParameter::GetParameterType)
 		.add_property("Domains",	&daepython::daeParameterWrapper::GetDomains)
@@ -359,8 +367,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
  
 	class_<daepython::daeVariableWrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
-		.def(init<string, const daeVariableType&, daeModel*, optional<string> >())
-		.def(init<string, const daeVariableType&, daePort*, optional<string> >())
+		.def(init<string, const daeVariableType&, daeModel*, optional<string, list> >())
+		.def(init<string, const daeVariableType&, daePort*, optional<string, list> >())
 		.add_property("Domains",		&daepython::daeVariableWrapper::GetDomains)
 		.add_property("VariableType",	make_function(&daepython::daeVariableWrapper::GetVariableType, return_internal_reference<>()) )
 		.add_property("ReportingOn",	&daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
@@ -518,6 +526,11 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("d2_array", &daepython::Get_d2_array8)
 		;
  
+	class_<daeModelExportContext>("daeModelExportContext")
+		.def_readonly("PythonIndentLevel",	&daeModelExportContext::m_nPythonIndentLevel)
+		.def_readonly("ExportDefinition",	&daeModelExportContext::m_bExportDefinition)
+		;
+	
 	class_<daepython::daePortWrapper, bases<daeObject>, boost::noncopyable>("daePort")
 		.def(init<string, daeePortType, daeModel*, optional<string> >())
 		
@@ -528,6 +541,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		
 		.def("__str__",					&daepython::daePort_str)
 		.def("SetReportingOn",			&daePort::SetReportingOn)
+		.def("Export",					&daePort::Export)
 		;
 	
 	class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)
@@ -598,6 +612,8 @@ BOOST_PYTHON_MODULE(pyCore)
 
 		.def("SaveModelReport",			&daeModel::SaveModelReport)
 		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)	
+		.def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects)	
+		.def("Export",					&daeModel::Export)
 		; 
         
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation")
@@ -622,13 +638,9 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Condition",	&daepython::daeStateTransitionWrapper::GetCondition)
 		;
 
-    class_<daepython::daeSTNWrapper, bases<daeObject>, boost::noncopyable>("daeSTN")
-        .add_property("NumberOfStates",		&daeSTN::GetNumberOfStates)
-        .add_property("States",				&daepython::daeSTNWrapper::GetStates)
-        .add_property("ActiveState",		make_function(&daepython::daeSTNWrapper::GetActState, return_internal_reference<>()))
-        .add_property("ParentState",		make_function(&daeSTN::GetParentState, return_internal_reference<>()))
-
-        .def("SetActiveState",				&daepython::daeSTNWrapper::SetActState)
+    class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN")
+        .add_property("ActiveState",	&daeSTN::GetActiveState2, &daeSTN::SetActiveState2)
+        .add_property("States",			&daepython::GetStatesSTN)
         ;
 	
 	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")

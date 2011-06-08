@@ -12,6 +12,8 @@
 #include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/python/call_method.hpp>
+#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
@@ -120,14 +122,28 @@ public:
 	{
 	}
 
-	daeParameterWrapper(string strName, daeeParameterType eType, daeModel* pModel, string strDescription = "")
+	daeParameterWrapper(string strName, daeeParameterType eType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeParameter(strName, eType, pModel, strDescription)
 	{
+		daeDomain* pDomain;
+		boost::python::ssize_t n = boost::python::len(domains);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			pDomain = boost::python::extract<daeDomain*>(domains[i]);
+			m_ptrDomains.push_back(pDomain);
+		}
 	}
 
-	daeParameterWrapper(string strName, daeeParameterType eType, daePort* pPort, string strDescription = "")
+	daeParameterWrapper(string strName, daeeParameterType eType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeParameter(strName, eType, pPort, strDescription)
 	{
+		daeDomain* pDomain;
+		boost::python::ssize_t n = boost::python::len(domains);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			pDomain = boost::python::extract<daeDomain*>(domains[i]);
+			m_ptrDomains.push_back(pDomain);
+		}
 	}
 
 public:
@@ -242,14 +258,28 @@ public:
 	{
 	}
 
-	daeVariableWrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "")
+	daeVariableWrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeVariable(strName, varType, pModel, strDescription)
 	{
+		daeDomain* pDomain;
+		boost::python::ssize_t n = boost::python::len(domains);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			pDomain = boost::python::extract<daeDomain*>(domains[i]);
+			m_ptrDomains.push_back(pDomain);
+		}
 	}
 
-	daeVariableWrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "")
+	daeVariableWrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeVariable(strName, varType, pPort, strDescription)
 	{
+		daeDomain* pDomain;
+		boost::python::ssize_t n = boost::python::len(domains);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			pDomain = boost::python::extract<daeDomain*>(domains[i]);
+			m_ptrDomains.push_back(pDomain);
+		}
 	}
 
 public:
@@ -509,6 +539,16 @@ public:
 		}
 		return l;
 	}
+	
+	std::string GetObjectClassName(void) const 
+	{
+		boost::python::reference_existing_object::apply<const daePort*>::type converter;
+		PyObject* pyobj = converter( this );
+		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
+		boost::python::object o_class = obj.attr("__class__");
+		string name = boost::python::extract<string>(o_class.attr("__name__"));	
+		return name;
+	}
 };
 
 /*******************************************************
@@ -708,6 +748,31 @@ public:
 		}
 		return l;
 	}
+	
+	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
+	{
+		daeObject* pObject;
+		std::vector<daeObject*> ptrarrObjects;
+		boost::python::ssize_t n = boost::python::len(objects);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			pObject = boost::python::extract<daeObject*>(objects[i]);
+			ptrarrObjects.push_back(pObject);
+		}
+		
+		return daeModel::ExportObjects(ptrarrObjects, eLanguage);
+	}
+	
+	std::string GetObjectClassName(void) const 
+	{
+		boost::python::reference_existing_object::apply<const daeModel*>::type converter;
+		PyObject* pyobj = converter( this );
+		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
+		boost::python::object o_class = obj.attr("__class__");
+		string name = boost::python::extract<string>(o_class.attr("__name__"));	
+		return name;
+	}
+	
 };
 
 /*******************************************************
@@ -765,39 +830,30 @@ public:
 /*******************************************************
 	daeSTN
 *******************************************************/
-class daeSTNWrapper : public daeSTN,
-                      public boost::python::wrapper<daeSTN>
-{
-public:
-	daeSTNWrapper(void)
-	{
-	}
+boost::python::list GetStatesSTN(daeSTN& stn);
 
-public:
-	boost::python::list GetStates(void)
-	{
-		boost::python::list l;
-		daeState* obj;
-	
-		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
-		{
-			obj = m_ptrarrStates[i];
-			l.append(obj);
-		}
-		return l;
-	}
-	
-    daeState* GetActState(void)
-	{
-		return m_pActiveState;
-	}
-	
-	void SetActState(const string& strStateName)
-	{
-		daeSTN::SetActiveState(strStateName);
-	}
-	
-};
+//class daeSTNWrapper : public daeSTN,
+//                      public boost::python::wrapper<daeSTN>
+//{
+//public:
+//	daeSTNWrapper(void)
+//	{
+//	}
+//
+//public:
+//	boost::python::list GetStates(void)
+//	{
+//		boost::python::list l;
+//		daeState* obj;
+//	
+//		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+//		{
+//			obj = m_ptrarrStates[i];
+//			l.append(obj);
+//		}
+//		return l;
+//	}
+//};
 
 /*******************************************************
 	daeIF

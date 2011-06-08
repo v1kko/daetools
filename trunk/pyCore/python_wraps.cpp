@@ -1250,4 +1250,24 @@ daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python:
 	 return eq.DistributeOnDomain(rDomain, narrDomainIndexes);
 }
 
+/*******************************************************
+	daeSTN
+*******************************************************/
+boost::python::list GetStatesSTN(daeSTN& stn)
+{
+	std::vector<daeState_t*> ptrarrStates;
+	boost::python::list l;
+	daeState* obj;
+	
+	stn.GetStates(ptrarrStates);
+
+	for(size_t i = 0; i < ptrarrStates.size(); i++)
+	{
+		obj = dynamic_cast<daeState*>(ptrarrStates[i]);
+		l.append(obj);
+	}
+	return l;
+}
+
+
 }

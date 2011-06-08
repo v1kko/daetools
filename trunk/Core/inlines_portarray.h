@@ -25,6 +25,13 @@ public:
 			it->ReportAllVariables(bOn);
 	}
 	
+	virtual void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+	{
+		iterator it = this->m_ptrarrObjects.begin();
+		if(it != this->m_ptrarrObjects.end())
+			it->DetectVariableTypesForExport(ptrarrVariableTypes);
+	}
+	
 protected:
 	virtual void DeclareData(void)
 	{

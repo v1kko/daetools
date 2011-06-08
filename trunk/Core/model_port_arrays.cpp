@@ -115,6 +115,14 @@ void daePortArray::Save(io::xmlTag_t* pTag) const
 	//io::daeSaveObjectRefArray<unsigned long>(pTag, arrIDs, strName);
 }
 
+void daePortArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{	
+}
+
+void daePortArray::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+{
+}
+
 void daePortArray::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeObject::OpenRuntime(pTag);
@@ -314,6 +322,14 @@ void daeModelArray::Save(io::xmlTag_t* pTag) const
 	//for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
 	//	arrIDs.push_back(m_ptrarrDomains[i]->GetID());
 	//io::daeSaveObjectRefArray<unsigned long>(pTag, arrIDs, strName);
+}
+
+void daeModelArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+}
+
+void daeModelArray::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+{
 }
 
 void daeModelArray::OpenRuntime(io::xmlTag_t* pTag)

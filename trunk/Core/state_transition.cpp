@@ -57,6 +57,11 @@ void daeStateTransition::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObject(strName, &m_Condition);
 }
 
+void daeStateTransition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 void daeStateTransition::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeObject::OpenRuntime(pTag);

@@ -70,6 +70,11 @@ void daeState::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectRef(strName, m_pSTN);
 }
 
+void daeState::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 void daeState::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeObject::OpenRuntime(pTag);

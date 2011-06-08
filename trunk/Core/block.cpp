@@ -314,6 +314,22 @@ void daeBlock::SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues
 	} 
 }
 
+void daeBlock::SetAllInitialConditions(real_t value)
+{
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t n = m_pDataProxy->GetTotalNumberOfVariables();
+	for(size_t i = 0; i < n; i++)
+	{
+		if(m_pDataProxy->GetVariableTypeGathered(i) == cnDifferential)
+		{
+			m_pDataProxy->SetTimeDerivative(i, value);
+			m_pDataProxy->SetVariableType(i, cnDifferential);
+		}
+	}
+}
+
 size_t daeBlock::FindVariableBlockIndex(size_t nVariableOverallIndex) const
 {
 	map<size_t, size_t>::const_iterator iter = m_mapVariableIndexes.find(nVariableOverallIndex);

@@ -31,7 +31,7 @@ enum daeeDomainType
 	eArray,
 	eDistributed
 };
-
+		
 enum daeeParameterType
 {
 	ePTUnknown = 0,
@@ -66,7 +66,8 @@ enum daeeInitialConditionMode
 {
 	eICTUnknown = 0,
 	eAlgebraicValuesProvided,
-	eSteadyState
+	eDifferentialValuesProvided,
+	eQuasySteadyState
 };
 
 enum daeeEquationCalculationMode
@@ -252,6 +253,14 @@ enum daeeOptimizationVariableType
 	eContinuousVariable
 };
 
+enum daeeModelLanguage
+{
+	eMLNone = 0,
+	eCDAE,
+	ePYDAE
+};
+
+		
 /******************************************************************
 	daeObject_t
 *******************************************************************/
@@ -630,6 +639,8 @@ public:
 	
 	virtual daeeDiscontinuityType CheckDiscontinuities(void) = 0;
 	
+	virtual void	SetAllInitialConditions(real_t value) = 0;
+
 	virtual void	CalcNonZeroElements(int& NNZ) = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
 	
@@ -764,7 +775,7 @@ public:
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;
 	
-	virtual void	SetInitialConditions(real_t value)							= 0;
+//	virtual void	SetInitialConditions(real_t value)							= 0;
 
 	virtual void	StoreInitializationValues(const std::string& strFileName) const		= 0;
 	virtual void	LoadInitializationValues(const std::string& strFileName) const		= 0;

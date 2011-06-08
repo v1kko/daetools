@@ -82,9 +82,9 @@ std::string toString(const T value)
 
 template<class T>
 std::string toStringFormatted(T value, 
-						 std::streamsize width = -1, 
-						 std::streamsize precision = -1, 
-						 bool scientific = false)
+							  std::streamsize width = -1, 
+							  std::streamsize precision = -1, 
+							  bool scientific = false)
 {
 	std::stringstream ss;
 	if(scientific)
@@ -132,6 +132,93 @@ std::string getClassName(bool bStripNamespaces = false)
 		return strClass.substr(found+1);
 	else
 		return strClass;
+}
+
+// T must be a pointer
+template<class T>
+std::vector<T> makeVector(T a1 = NULL, T a2 = NULL, T a3 = NULL, T a4 = NULL, T a5 = NULL, T a6 = NULL, T a7 = NULL, T a8 = NULL, T a9 = NULL, T a10 = NULL)
+{
+	std::vector<T> std_array;
+	T array[10] = {a1, a2, a3, a4, a5, a6, a7, a8, a9, a10};
+	
+	if(a1 != NULL)
+	{
+		for(T a = array[0]; a != NULL; a++)
+			std_array.push_back(a);
+	}
+	return std_array;
+}
+
+template<class T>
+std::string toString(const std::vector<T>& std_array)
+{
+	std::string result;
+	for(size_t i = 0; i < std_array.size(); i++)
+	{
+		if(i != 0)
+			result += ", ";
+		result += toString<T>(std_array[i]);
+	}
+	return result;
+}
+
+// T must be a pointer-type for a daeObject-derived object
+template<class T>
+std::string toStringFormatted(const std::vector<T>& std_array, 
+							  std::streamsize width = -1, 
+							  std::streamsize precision = -1, 
+							  bool scientific = false)
+{
+	std::string result;
+	for(size_t i = 0; i < std_array.size(); i++)
+	{
+		if(i != 0)
+			result += ", ";
+		result += toStringFormatted<T>(std_array[i], width, precision, scientific);
+	}
+	return result;
+}
+
+// T must be a pointer-type for a daeObject-derived object
+template<class T>
+std::string toString_Names(const std::vector<T>& std_array, const std::string& strPrependToEachObject = std::string(""))
+{
+	std::string result;
+	for(size_t i = 0; i < std_array.size(); i++)
+	{
+		if(i != 0)
+			result += ", ";
+		result += strPrependToEachObject + std_array[i]->GetName();
+	}
+	return result;
+}
+
+template<class T>
+std::string toString_StrippedNames(const std::vector<T>& std_array, const std::string& strPrependToEachObject = std::string(""))
+{
+	std::string result;
+	for(size_t i = 0; i < std_array.size(); i++)
+	{
+		if(i != 0)
+			result += ", ";
+		result += strPrependToEachObject + std_array[i]->GetStrippedName();
+	}
+	return result;
+}
+
+template<class T, class PARENT>
+std::string toString_StrippedRelativeNames(const std::vector<T>& std_array,
+										   const PARENT parent, 
+										   const std::string& strPrependToEachObject = std::string(""))
+{
+	std::string result;
+	for(size_t i = 0; i < std_array.size(); i++)
+	{
+		if(i != 0)
+			result += ", ";
+		result += strPrependToEachObject + daeGetStrippedRelativeName(parent, std_array[i]);
+	}
+	return result;
 }
 
 inline bool IsInteger(std::string& strValue)

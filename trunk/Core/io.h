@@ -584,7 +584,7 @@ public:
 		if(pObject)
 		{
 			string strName = "ID";
-			string strRelName = pObject->GetRelativeName(pParent, pObject);
+			string strRelName = daeGetRelativeName(pParent, pObject);
 			
 			pChildTag = this->AddTag(strObjectRefName, strRelName);
 			pChildTag->AddAttribute(strName, pObject->GetID());

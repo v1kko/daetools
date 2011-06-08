@@ -97,9 +97,9 @@ void daeObject::SaveRelativeNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag
 		daeDeclareAndThrowException(exXMLIOError);
 	
 	if(pParent)
-		strRelName = daeObject::GetRelativeName(pParent, this);
+		strRelName = daeGetRelativeName(pParent, this);
 	else
-		strRelName = daeObject::GetNameRelativeToParentModel();
+		strRelName = GetNameRelativeToParentModel();
 	
 	xml::xmlPresentationCreator::WrapIdentifier(mrow, strRelName);
 }
@@ -149,6 +149,22 @@ void daeObject::SetDescription(const string& strDescription)
 	m_strDescription = strDescription;
 }
 
+string daeObject::GetStrippedName(void) const
+{
+	string strStrippedName = m_strShortName;
+	dae::RemoveAll(strStrippedName, string("&"));
+	dae::RemoveAll(strStrippedName, string(";"));
+	return strStrippedName;
+}
+
+string daeObject::GetStrippedNameRelativeToParentModel(void) const
+{
+	string strStrippedName = GetNameRelativeToParentModel();
+	dae::RemoveAll(strStrippedName, string("&"));
+	dae::RemoveAll(strStrippedName, string(";"));
+	return strStrippedName;
+}
+
 string daeObject::GetNameRelativeToParentModel(void) const
 {
 	if(!m_pModel)
@@ -157,20 +173,20 @@ string daeObject::GetNameRelativeToParentModel(void) const
 	}
 	else
 	{		
-		return daeObject::GetRelativeName(m_pModel->GetCanonicalName(), GetCanonicalName());
+		return daeGetRelativeName(m_pModel->GetCanonicalName(), GetCanonicalName());
 	}
 }
 
-string daeObject::GetRelativeName(const daeObject* parent, const daeObject* child)
+string daeGetRelativeName(const daeObject* parent, const daeObject* child)
 {
 	if(!parent || !child)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	string strParent = parent->GetCanonicalName();
 	string strChild  = child->GetCanonicalName();
-	return daeObject::GetRelativeName(strParent, strChild);
+	return dae::core::daeGetRelativeName(strParent, strChild);
 }
 
-string daeObject::GetRelativeName(const string& strParent, const string& strChild)
+string daeGetRelativeName(const string& strParent, const string& strChild)
 {
 	string::size_type iFounded = strChild.find(strParent);
 	if(iFounded == string::npos || iFounded != 0)
@@ -181,6 +197,14 @@ string daeObject::GetRelativeName(const string& strParent, const string& strChil
 	LTrim(strName, ' ');
 	LTrim(strName, '.');
 	return strName;
+}
+
+string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child)
+{
+	string strStrippedName = dae::core::daeGetRelativeName(parent, child);
+	dae::RemoveAll(strStrippedName, string("&"));
+	dae::RemoveAll(strStrippedName, string(";"));
+	return strStrippedName;
 }
 
 string daeObject::GetName(void) const
@@ -308,6 +332,12 @@ bool daeObject::CheckObject(vector<string>& strarrErrors) const
 	
 	return bCheck;
 }
+
+void daeObject::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 
 }
 }

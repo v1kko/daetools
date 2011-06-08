@@ -186,7 +186,8 @@ cp ../ReadMe.txt                                 ${PACKAGE_NAME}
 cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
 cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
-cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
+cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
+cp ../python-files/daeVariableTypes.py           ${PACKAGE_NAME}/pyDAE
 cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
 cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
 cp ../python-files/model_library__init__.py      ${PACKAGE_NAME}/model_library/__init__.py

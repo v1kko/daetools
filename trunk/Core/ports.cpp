@@ -89,6 +89,146 @@ void daePort::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrVariables);
 }
 
+void daePort::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+		if(eLanguage == ePYDAE)
+		{
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "%1% %2%;\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetObjectClassName() % GetStrippedName();
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}		
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = %2%(\"%3%\", self, \"%4%\")\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% GetObjectClassName()
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", this, \"%3%\")";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
+}
+
+void daePort::CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	boost::format fmtFile;
+	string strComment, strFile, strCXXDeclaration, strConstructor;
+	
+	if(eLanguage == ePYDAE)
+	{
+		strComment = "#"; 
+		
+	/* Arguments:
+	   1. Class name
+	   4. Constructor contents (domains, params, variables)
+	*/
+		strFile  = 
+		"class %1%(daePort):\n"
+		"    def __init__(self, Name, PortType, Model, Description = \"\"):\n"
+		"        daePort.__init__(self, Name, PortType, Model, Description)\n\n"
+		"%2%\n"
+		"\n";
+		
+		c.m_bExportDefinition = false;
+		c.m_nPythonIndentLevel = 2;
+		
+		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Domains \n";
+		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
+	
+		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Parameters \n";
+		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
+	
+		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Variables \n";
+		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+	
+		fmtFile.parse(strFile);
+		fmtFile % GetObjectClassName() % strConstructor;
+	}
+	else if(eLanguage == eCDAE)
+	{
+		strComment   = "//"; 
+		
+		strFile  = 
+		"class %1% : public daePort\n"
+		"{\n"
+		"daeDeclareDynamicClass(%1%)\n"
+		"public:\n"
+		"%2%\n"
+		"\n"
+		"    %1%(string strName, daeePortType portType, daeModel* parent, string strDescription = \"\")\n"
+		"      : daePort(strName, portType, parent, strDescription)"
+		"%3%\n"
+		"    {\n"
+		"    }\n"
+		"};\n";
+		
+		c.m_bExportDefinition = true;
+		c.m_nPythonIndentLevel = 1;
+		
+		ExportObjectArray(m_ptrarrDomains, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables, strCXXDeclaration, eLanguage, c);
+
+		c.m_bExportDefinition = false;
+		c.m_nPythonIndentLevel = 2;
+
+		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+
+		fmtFile.parse(strFile);
+		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor;
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented); 
+	}
+	
+	strContent += fmtFile.str();
+}
+
+void daePort::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+{
+	size_t i;
+	std::vector<const daeVariableType*>::iterator fiter;
+
+	for(i = 0; i < m_ptrarrVariables.size(); i++)
+	{
+		fiter = std::find(ptrarrVariableTypes.begin(), ptrarrVariableTypes.end(), &m_ptrarrVariables[i]->m_VariableType);
+		if(fiter == ptrarrVariableTypes.end()) // If not found add it to the array
+			ptrarrVariableTypes.push_back(&m_ptrarrVariables[i]->m_VariableType);
+	}
+}
+
 void daePort::OpenRuntime(io::xmlTag_t* pTag)
 {
 //	string strName;
@@ -636,6 +776,11 @@ void daePortConnection::Save(io::xmlTag_t* pTag) const
 
 	strName = "PortTo";
 	pTag->SaveObjectRef(strName, m_pPortTo, m_pModel);
+}
+
+void daePortConnection::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
 }
 
 void daePortConnection::OpenRuntime(io::xmlTag_t* pTag)

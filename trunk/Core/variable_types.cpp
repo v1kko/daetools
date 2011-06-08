@@ -138,6 +138,42 @@ void daeVariableType::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_dAbsoluteTolerance);
 }
 
+void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strFile;
+	boost::format fmtFile;
+	
+	if(eLanguage == ePYDAE)
+	{
+		strFile = c.CalculateIndent(c.m_nPythonIndentLevel) + "%1% = daeVariableType(\"%2%\", \"%3%\", %4%, %5%, %6%, %7%)\n";
+		fmtFile.parse(strFile);
+		fmtFile % m_strName 
+				% m_strName 
+				% m_strUnits 
+				% m_dLowerBound
+				% m_dUpperBound
+				% m_dInitialGuess
+				% m_dAbsoluteTolerance;
+	}
+	else if(eLanguage == eCDAE)
+	{
+		strFile = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeVariableType %1%(\"%2%\", \"%3%\", %4%, %5%, %6%, %7%);\n";
+		fmtFile.parse(strFile);
+		fmtFile % m_strName 
+				% m_strName 
+				% m_strUnits 
+				% m_dLowerBound
+				% m_dUpperBound
+				% m_dInitialGuess
+				% m_dAbsoluteTolerance;
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented); 
+	}
+	
+	strContent += fmtFile.str();	
+}
 
 void daeVariableType::OpenRuntime(io::xmlTag_t* /*pTag*/)
 {

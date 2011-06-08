@@ -116,6 +116,9 @@ class simTutorial(daeSimulation):
         self.m.Tsurr.SetValue(283)
 
     def SetUpVariables(self):
+        # Set the state active at the beginning (the default is the first declared state; here 'Heating')
+        self.m.stnRegulator.ActiveState = "Heating"
+
         self.m.T.SetInitialCondition(283)
         self.m.time.SetInitialCondition(0)
 

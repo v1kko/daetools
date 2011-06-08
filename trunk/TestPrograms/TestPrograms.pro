@@ -19,7 +19,7 @@ LIBS += $${DAE_SIMULATION_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${IPOPT_LIBS} \
-        $${MUMPS_LIBS}
+        $${MUMPS_LIBS} -lrt -lgfortran
 
 SOURCES += main.cpp \
     stdafx.cpp

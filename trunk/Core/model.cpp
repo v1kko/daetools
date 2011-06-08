@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include <typeinfo> 
 
 namespace dae 
 {
@@ -364,11 +365,310 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 */
 }
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-#include <***.h>
-#else
-#include <dlfcn.h>
-#endif
+// Objects can be models and ports
+string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModelLanguage eLanguage) const
+{
+	size_t i;
+	daeModelExportContext c;
+	boost::format fmtFile;
+	daeModel* pModel;
+	daePort* pPort;
+	std::vector<daeModel*> ptrarrModels;
+	std::vector<daePort*>  ptrarrPorts;
+	std::vector<const daeVariableType*> ptrarrVariableTypes;
+	string strFile, strVariableTypes, strPorts, strModels;
+
+	for(i = 0; i < ptrarrObjects.size(); i++)
+	{
+		pModel = dynamic_cast<daeModel*>(ptrarrObjects[i]);
+		pPort  = dynamic_cast<daePort*>(ptrarrObjects[i]);
+		
+		if(pModel)
+			ptrarrModels.push_back(pModel); 
+		else if(pPort)
+			ptrarrPorts.push_back(pPort); 
+		else
+			daeDeclareAndThrowException(exRuntimeCheck); 
+	}
+
+// Detect all variable types
+	for(i = 0; i < ptrarrModels.size(); i++)
+		ptrarrModels[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+	for(i = 0; i < ptrarrPorts.size(); i++)
+		ptrarrPorts[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+	
+	c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+
+	//c.m_strClassName = strClassName;
+	//c.m_bExportDefinition = false;
+
+	if(eLanguage == ePYDAE)
+	{
+	/* Arguments:
+	   1. Variable types
+	   2. Ports
+	   3. Models
+	*/
+		strFile  = 
+		"\"\"\"********************************************************************************\n"
+		"                 DAE Tools: pyDAE module, www.daetools.com\n"
+		"                 Copyright (C) Dragan Nikolic, 2010\n"
+		"***********************************************************************************\n"
+		"DAE Tools is free software; you can redistribute it and/or modify it under the\n"
+		"terms of the GNU General Public License version 3 as published by the Free Software\n"
+		"Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT\n"
+		"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A\n"
+		"PARTICULAR PURPOSE. See the GNU General Public License for more details.\n"
+		"You should have received a copy of the GNU General Public License along with the\n"
+		"DAE Tools software; if not, see <http://www.gnu.org/licenses/>.\n"
+		"********************************************************************************\"\"\"\n"
+		"\n"
+		"import sys\n"		
+		"from daetools.pyDAE import *\n"
+		"from time import localtime, strftime\n"
+		"from daeVariableTypes import *\n\n"
+		"%1%\n"
+		"%2%\n"
+		"%3%\n";
+		
+		strVariableTypes = "# Variable types\n";
+		ExportObjectArray(ptrarrVariableTypes, strVariableTypes, eLanguage, c);
+		
+		strPorts   = "# Ports\n";
+		CreateDefinitionObjectArray(ptrarrPorts, strPorts, eLanguage, c);
+
+		strModels  = "# Models\n";
+		CreateDefinitionObjectArray(ptrarrModels, strModels, eLanguage, c);
+	}
+	else if(eLanguage == eCDAE)
+	{
+		strFile  += 
+		"/********************************************************************************\n"
+		"                 DAE Tools: cDAE module, www.daetools.com\n"
+		"                 Copyright (C) Dragan Nikolic, 2010\n"
+		"*********************************************************************************\n"
+		"DAE Tools is free software; you can redistribute it and/or modify it under the\n"
+		"terms of the GNU General Public License version 3 as published by the Free Software\n"
+		"Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT\n"
+		"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A\n"
+		"PARTICULAR PURPOSE. See the GNU General Public License for more details.\n"
+		"You should have received a copy of the GNU General Public License along with the\n"
+		"DAE Tools software; if not, see <http://www.gnu.org/licenses/>.\n"
+		"*********************************************************************************/\n"
+		"\n"
+		"#include \"variable_types.h\";\n\n"
+		"%1%\n"
+		"%2%\n"
+		"%3%\n";
+		
+		strVariableTypes = "// Variable types\n";
+		ExportObjectArray(ptrarrVariableTypes, strVariableTypes, eLanguage, c);
+		
+		strPorts  = "// Ports\n";
+		CreateDefinitionObjectArray(ptrarrPorts, strPorts, eLanguage, c);
+		
+		strModels = "// Models\n";
+		CreateDefinitionObjectArray(ptrarrModels, strModels, eLanguage, c);
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented); 
+	}
+	
+	fmtFile.parse(strFile);
+	fmtFile % strVariableTypes % strPorts % strModels;
+	
+	return fmtFile.str();
+}
+
+void daeModel::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+		if(eLanguage == ePYDAE)
+		{
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "%1% %2%;\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetObjectClassName() % GetStrippedName();
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}		
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = %2%(\"%3%\", self, \"%4%\")\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% GetObjectClassName()
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", this, \"%3%\")";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
+}
+
+void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	boost::format fmtFile;
+	string strComment, strFile, strFormat, strCXXDeclaration, strConstructor, strDeclareEquations;
+	
+	if(eLanguage == ePYDAE)
+	{
+		strComment = "#"; 
+		
+	/* Arguments:
+	   1. Class name
+	   2. Variable types
+	   3. Port classes
+	   4. Constructor contents (domains, params, variables, ports, units ...)
+	   5. Equations and STNs/IFs
+	*/
+		strFile  = 
+		"class %1%(daeModel):\n"
+		"    def __init__(self, Name, Parent = None, Description = \"\"):\n"
+		"        daeModel.__init__(self, Name, Parent, Description)\n\n"
+		"%2%\n"
+		"\n"
+		"    def DeclareEquations(self):\n"
+		"%3%\n"
+		"\n";
+		
+		c.m_bExportDefinition = false;
+		c.m_nPythonIndentLevel = 2;
+		
+		//strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Domains \n";
+		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrEquations, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
+		
+		fmtFile.parse(strFile);
+		fmtFile % GetObjectClassName() % strConstructor % strDeclareEquations;
+	}
+	else if(eLanguage == eCDAE)
+	{
+		strComment   = "//"; 
+		
+		strFile  = 
+		"class %1% : public daeModel\n"
+		"{\n"
+		"daeDeclareDynamicClass(%1%)\n"
+		"public:\n"
+		"%2%\n"
+		"\n"
+		"    %1%(string strName, daeModel* pParent = NULL, string strDescription = \"\") \n"
+		"      : daeModel(strName, pParent, strDescription)"
+		"%3%\n"
+		"    {\n"
+		"    }\n"
+		"\n"
+		"    void DeclareEquations(void)\n"
+		"    {\n"
+		"%4%\n"
+		"    }\n"
+		"};\n";
+		
+		c.m_bExportDefinition = true;
+		c.m_nPythonIndentLevel = 1;
+		
+		ExportObjectArray(m_ptrarrDomains, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrModelArrays, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays, strCXXDeclaration, eLanguage, c);
+
+
+		c.m_bExportDefinition = false;
+		c.m_nPythonIndentLevel = 2;
+
+		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays, strConstructor, eLanguage, c);
+
+		c.m_bExportDefinition = false;
+		c.m_nPythonIndentLevel = 2;
+		
+		ExportObjectArray(m_ptrarrEquations, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
+		
+		fmtFile.parse(strFile);
+		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor % strDeclareEquations;
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented); 
+	}
+	
+	strContent += fmtFile.str();
+}
+
+void daeModel::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+{
+	size_t i;
+	std::vector<const daeVariableType*>::iterator fiter;
+
+	for(i = 0; i < m_ptrarrVariables.size(); i++)
+	{
+		fiter = std::find(ptrarrVariableTypes.begin(), ptrarrVariableTypes.end(), &m_ptrarrVariables[i]->m_VariableType);
+		if(fiter == ptrarrVariableTypes.end()) // If not found add it to the array
+			ptrarrVariableTypes.push_back(&m_ptrarrVariables[i]->m_VariableType);
+	}
+
+	for(i = 0; i < m_ptrarrPorts.size(); i++)
+		m_ptrarrPorts[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+
+	for(i = 0; i < m_ptrarrModels.size(); i++)
+		m_ptrarrModels[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+
+	for(i = 0; i < m_ptrarrPortArrays.size(); i++)
+		m_ptrarrPortArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+
+	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+		m_ptrarrModelArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+}
+
+//#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+//#include <***.h>
+//#else
+//#include <dlfcn.h>
+//#endif
 
 boost::shared_ptr<daeExternalObject_t> daeModel::LoadExternalObject(const string& strPath)
 {
@@ -2704,28 +3004,29 @@ bool daeModel::IsModelDynamic() const
 	return m_pDataProxy->IsModelDynamic();		
 }
 
-void daeModel::SetInitialConditions(real_t value)
-{
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
+//void daeModel::SetInitialConditions(real_t value)
+//{
+//	if(!m_pDataProxy)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//
+//	if(GetInitialConditionMode() != eQuasySteadyState)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "To set steady state conditions you should first set the InitialConditionMode to eQuasySteadyState";
+//		throw e;
+//	}
+//
+//	size_t n = m_pDataProxy->GetTotalNumberOfVariables();
+//	for(size_t i = 0; i < n; i++)
+//	{
+//		if(m_pDataProxy->GetVariableTypeGathered(i) == cnDifferential)
+//		{
+//			m_pDataProxy->SetTimeDerivative(i, value);
+//			m_pDataProxy->SetVariableType(i, cnDifferential);
+//		}
+//	}
+//}
 
-	if(GetInitialConditionMode() != eSteadyState)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "To set steady state conditions you should first set the InitialConditionMode to eSteadyState";
-		throw e;
-	}
-
-	size_t n = m_pDataProxy->GetTotalNumberOfVariables();
-	for(size_t i = 0; i < n; i++)
-	{
-		if(m_pDataProxy->GetVariableTypeGathered(i) == cnDifferential)
-		{
-			m_pDataProxy->SetTimeDerivative(i, value);
-			m_pDataProxy->SetVariableType(i, cnDifferential);
-		}
-	}
-}
 void daeModel::GetModelInfo(daeModelInfo& mi) const
 {
 	if(!m_pDataProxy)

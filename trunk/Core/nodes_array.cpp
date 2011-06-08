@@ -959,6 +959,8 @@ bool adRuntimeSpecialFunctionNode::IsLinear(void) const
 	{
 	case eSum:
 	case eAverage:
+	case eMinInArray:
+	case eMaxInArray:
 		if(type == LIN || type == LIN_FUN)
 			return true;
 		break;
@@ -1047,7 +1049,7 @@ string adRuntimeIntegralNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) c
 string adRuntimeIntegralNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
 	string strResult;
-	string strDomain = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
 
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -1092,7 +1094,7 @@ void adRuntimeIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const d
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	string strDomain = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
 
 	strName  = "mrow";
 	strValue = "";
@@ -2859,7 +2861,7 @@ string adSetupExpressionPartialDerivativeNode::SaveAsPlainText(const daeSaveAsMa
 {
 	vector<string> strarrIndexes;
 	string strExpression = node->SaveAsPlainText(c);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	return textCreator::PartialDerivative(m_nDegree, strExpression, strDomainName, strarrIndexes, true);
 }
 
@@ -2867,7 +2869,7 @@ string adSetupExpressionPartialDerivativeNode::SaveAsLatex(const daeSaveAsMathML
 {
 	vector<string> strarrIndexes;
 	string strExpression = node->SaveAsLatex(c);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	return latexCreator::PartialDerivative(m_nDegree, strExpression, strDomainName, strarrIndexes, true);
 }
 
@@ -2899,7 +2901,7 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 	string strName, strValue;
 	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
 
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 
 	strName  = "mrow";
 	strValue = "";
@@ -3067,7 +3069,7 @@ string adSetupIntegralNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) con
 string adSetupIntegralNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
 	string strResult;
-	string strDomain = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
 
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -3124,7 +3126,7 @@ void adSetupIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	string strDomain = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
 
 	strName  = "mrow";
 	strValue = "";

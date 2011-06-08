@@ -218,6 +218,11 @@ bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
 	return bCheck;
 }
 
+void daeObjectiveFunction::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 
 /******************************************************************
 	daeOptimizationConstraint
@@ -491,6 +496,11 @@ bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
 	}
 	
 	return bCheck;
+}
+
+void daeOptimizationConstraint::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
 }
 
 /******************************************************************
@@ -797,6 +807,10 @@ bool daeOptimizationVariable::CheckObject(vector<string>& strarrErrors) const
 	return bCheck;
 }
 
+void daeOptimizationVariable::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
 
 
 

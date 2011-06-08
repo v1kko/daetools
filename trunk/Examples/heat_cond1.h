@@ -13,8 +13,8 @@ class modTutorial3 : public daeModel
 	daeDeclareDynamicClass(modTutorial3)
 public:
 	daeDomain    x, y;
-	daeParameter Qb, Qt, ro, cp, k;
-	daeVariable	 T, Tres, Tres_arr, Tres_arr2, Ty, A, B;
+	daeParameter ro, cp, k;
+	daeVariable	 T, Tave, Tsum, Qb, Qt, Ty;
 
 public:
 	modTutorial3(string strName, daeModel* pParent = NULL, string strDescription = "") : daeModel(strName, pParent, strDescription),
@@ -23,36 +23,22 @@ public:
 		y("y", this, "Y axis domain"),
 		
 	// Parameters:
-		Qb("Q_b",	   eReal, this, "Heat flux at the bottom edge of the plate, W/m2"),
-		Qt("Q_t",      eReal, this, "Heat flux at the top edge of the plate, W/m2"),
 		ro("&rho;",    eReal, this, "Density of the plate, kg/m3"),
 		cp("c_p",      eReal, this, "Specific heat capacity of the plate, J/kgK"),
 		k ("&lambda;", eReal, this, "Thermal conductivity of the plate, W/mK"),
 		
 	// Variables:
-		T   ("T",     temperature, this, "Temperature of the plate, K"),
-		
-//		A  ("A",             temperature, this, "A, K"),
-//		B  ("B",             temperature, this, "B, K"),
-		Ty  ("Ty",           temperature, this, "Ty, K"),
-		Tres("T_res",        temperature, this, "The function result"),
-		Tres_arr("Tres_arr", temperature, this, "The array function result"),
-		Tres_arr2("Tres_arr2", temperature, this, "The array function result")
-/*
-		Tplus("T_plus", temperature, this, "The "),
-		Tminus("T_minus", temperature, this, "The "),
-		Tmulty("T_multy", temperature, this, "The "),
-		Tdivide("T_divide", temperature, this, "The "),
-		
-		Tave("T_ave", temperature, this, "The average"),
-		Tsum("T_sum", temperature, this, "The sum"),
-		Tpro("T_pro", temperature, this, "The product"),
-*/
+		Qb  ("Q_b",	    heat_flux,   this, "Heat flux at the bottom edge of the plate, W/m2"),
+		Qt  ("Q_t",     heat_flux,   this, "Heat flux at the top edge of the plate, W/m2"),
+		T   ("T",		temperature, this, "Temperature of the plate, K", &x, &y),
+		Ty  ("Ty",		temperature, this, "Ty, K", &y)/*,
+		Tave("T_ave",	temperature, this, "The average temperature"),
+		Tsum("T_sum",	temperature, this, "The sum of the temperatures")*/
 	{
-		T.DistributeOnDomain(x);
-		T.DistributeOnDomain(y);
-		
-		Ty.DistributeOnDomain(y);		
+//		T.DistributeOnDomain(x);
+//		T.DistributeOnDomain(y);
+//		
+//		Ty.DistributeOnDomain(y);		
 	}
 
 	void DeclareEquations(void)
@@ -85,23 +71,14 @@ public:
         ny = eq->DistributeOnDomain(y, eOpenOpen);
         eq->SetResidual( T.d(x, nx, ny) );
 
-        daeIndexRange xr(&x);
-        daeIndexRange yr(&y);
-		
-		eq = CreateEquation("T_ave", "The average temperature of the plate");
-		eq->SetResidual( Tres() - average( T.array(xr, yr) ) - x[0] );
-        
-        eq = CreateEquation("Tres_array", "The array function result");
-		eq->SetResidual( Tres_arr() - d(T(1,1) / T(1,2), x) );
-
-        eq = CreateEquation("Tres_array2", "The array function result2");  
-		eq->SetResidual( Tres_arr2() - sum( k() * T.array(xr, 0) ) );
-  
-        //eq = CreateEquation("T_ave", "The average temperature of the plate");
-        //eq->SetResidual( Tave() - average(T.array(xr, yr)) );
-
-        //eq = CreateEquation("T_sum", "The sum of the plate temperatures");
-        //eq->SetResidual( Tsum() + k() * sum(T.d_array(y, xr, 0)) );
+//        daeIndexRange xr(&x);
+//        daeIndexRange yr(&y);
+//		
+//        eq = CreateEquation("T_ave", "The average temperature of the plate");
+//        eq->SetResidual( Tave() - average(T.array(xr, yr)) );
+//
+//        eq = CreateEquation("T_sum", "The sum of the plate temperatures");
+//        eq->SetResidual( Tsum() + k() * sum(T.d_array(y, xr, 0)) );
 	}
 };
 
@@ -119,7 +96,7 @@ public:
 public:
 	void SetUpParametersAndDomains(void)
 	{
-        int n = 10;
+        int n = 25;
         
         m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1);
         m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1);
@@ -127,21 +104,40 @@ public:
         m.ro.SetValue(8960);
         m.cp.SetValue(385);
         m.k.SetValue(401);
-
-        m.Qb.SetValue(1e6);
-        m.Qt.SetValue(0);
 	}
 
 	void SetUpVariables(void)
 	{
-		//m.A.AssignValue(8);
-		//m.B.AssignValue(2);
+        m.Qb.AssignValue(0);
+        m.Qt.AssignValue(0);
 		for(size_t iy = 0; iy < m.x.GetNumberOfPoints(); iy++)
 			m.Ty.AssignValue(iy, 100 + iy);
 
+	// Here I set diff. values of values with time derivatives (to zero)
+		m.SetInitialConditionMode(eDifferentialValuesProvided);
 		for(size_t ix = 1; ix < m.x.GetNumberOfPoints()-1; ix++)
 			for(size_t iy = 1; iy < m.x.GetNumberOfPoints()-1; iy++)
-				m.T.SetInitialCondition(ix, iy, 300);
+				m.T.SetInitialCondition(ix, iy, 0);
+	}
+	
+	void Run(void)
+	{
+	// Now I have my system initialized (got algebraic and diff. part of all variables)
+	// so I can set InitialConditionMode to eAlgebraicValuesProvided
+		m.SetInitialConditionMode(eAlgebraicValuesProvided);
+		m.Qb.ReAssignValue(1E6);
+		Reinitialize();
+        ReportData();
+		
+		for(real_t time = m_dCurrentTime+m_dReportingInterval; time <= m_dTimeHorizon; time += m_dReportingInterval)
+		{
+			if(time > m_dTimeHorizon)
+				time = m_dTimeHorizon;
+			
+			m_pLog->Message(string("Integrating to ") + toString(time) + string(" ..."), 0);
+			IntegrateUntilTime(time, eDoNotStopAtDiscontinuity);
+			ReportData();
+		}
 	}
 };
 

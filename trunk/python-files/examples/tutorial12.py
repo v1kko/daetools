@@ -67,9 +67,9 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
-        self.T.DistributeOnDomain(self.x)
-        self.T.DistributeOnDomain(self.y)
+        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K", [self.x, self.y])
+        #self.T.DistributeOnDomain(self.x)
+        #self.T.DistributeOnDomain(self.y)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
@@ -102,7 +102,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial12")
-        self.m.Description = "This tutorial explains how to create 3rd part linear solvers. "
+        self.m.Description = "This tutorial explains how to create 3rd party linear solvers. "
 
     def SetUpParametersAndDomains(self):
         n = 20
@@ -165,13 +165,13 @@ def consoleRun():
     #lasolver     = pyAmdACML.daeCreateLapackSolver()
     #lasolver     = pyIntelMKL.daeCreateLapackSolver()
     #lasolver     = pyLapack.daeCreateLapackSolver()
-    lasolver     = superlu.daeCreateSuperLUSolver()
+    #lasolver     = superlu.daeCreateSuperLUSolver()
     #lasolver     = pyCUSPARSE.daeCreateCUSPARSESolver()
 
     #options = lasolver.GetOptions()
 
     #lasolver      = pyCUSP.daeCreateCUSPSolver()
-    daesolver.SetLASolver(lasolver)
+    #daesolver.SetLASolver(lasolver)
 
     # SuperLU options:
     #options.PrintStat       = superlu.YES       # {YES, NO}
@@ -206,6 +206,8 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    print simulation.m.ExportObjects([simulation.m], ePYDAE)
+    print simulation.m.ExportObjects([simulation.m], eCDAE)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

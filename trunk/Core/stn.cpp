@@ -61,6 +61,11 @@ void daeSTN::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectRef(strName, m_pParentState);
 }
 
+void daeSTN::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 void daeSTN::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeObject::OpenRuntime(pTag);
@@ -701,7 +706,7 @@ void daeSTN::GetStates(vector<daeState_t*>& ptrarrStates)
 		ptrarrStates.push_back(m_ptrarrStates[i]);
 }
 
-void daeSTN::SetActiveState(const string& strStateName)
+void daeSTN::SetActiveState2(const string& strStateName)
 {
 	daeState* pState = FindState(strStateName);
 
@@ -713,6 +718,14 @@ void daeSTN::SetActiveState(const string& strStateName)
 	}
 	
 	SetActiveState(pState);
+}
+
+string daeSTN::GetActiveState2(void) const
+{
+	if(!m_pActiveState)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	
+	return m_pActiveState->GetName();
 }
 
 void daeSTN::SetActiveState(daeState* pState)

@@ -805,19 +805,9 @@ class daeStateTransition(daeObject):
 
 class daeSTN(daeObject):
     """
-     - NumberOfStates: unsigned int
      - States: daeState list
-     - ActiveState: daeState
-     - ParentState: daeState
+     - ActiveState: string (read/write)
     """
-    def SetActiveState(self, StateName):
-        """
-        ARGUMENTS:
-         - StateName: string
-        RETURNS:
-           Nothing
-        """
-        pass
 
 class daeIF(daeSTN):
     """

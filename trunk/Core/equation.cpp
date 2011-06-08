@@ -831,6 +831,11 @@ void daeEquation::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
 }
 
+void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 void daeEquation::OpenRuntime(io::xmlTag_t* pTag)
 {
 //	string strName;
@@ -1754,6 +1759,11 @@ void daePortEqualityEquation::Save(io::xmlTag_t* pTag) const
 
 	strName = "RightVariable";
 	pTag->SaveObjectRef(strName, m_pRight);
+}
+
+void daePortEqualityEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
 }
 
 void daePortEqualityEquation::OpenRuntime(io::xmlTag_t* pTag)

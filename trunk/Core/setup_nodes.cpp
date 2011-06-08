@@ -80,7 +80,7 @@ string adSetupParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) co
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pParameter);
+	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
 	return textCreator::Variable(strName, strarrIndexes);
 }
 
@@ -88,7 +88,7 @@ string adSetupParameterNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pParameter);
+	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
 	return latexCreator::Variable(strName, strarrIndexes);
 }
 
@@ -111,7 +111,7 @@ void adSetupParameterNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSave
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pParameter);
+	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
 	xmlContentCreator::Variable(pTag, strName, strarrIndexes);
 }
 
@@ -119,7 +119,7 @@ void adSetupParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const da
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pParameter);
+	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
@@ -293,7 +293,7 @@ string adSetupVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) con
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	return textCreator::Variable(strName, strarrIndexes);
 }
 
@@ -301,7 +301,7 @@ string adSetupVariableNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	return latexCreator::Variable(strName, strarrIndexes);
 }
 
@@ -324,7 +324,7 @@ void adSetupVariableNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveA
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	xmlContentCreator::Variable(pTag, strName, strarrIndexes);
 }
 
@@ -332,7 +332,7 @@ void adSetupVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const dae
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
@@ -424,7 +424,7 @@ string adSetupTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* 
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
 }
 
@@ -432,7 +432,7 @@ string adSetupTimeDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) c
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	return latexCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
 }
 
@@ -458,7 +458,7 @@ void adSetupTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const da
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	xmlContentCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
@@ -466,7 +466,7 @@ void adSetupTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
 	xmlPresentationCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
@@ -553,8 +553,8 @@ string adSetupPartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContex
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
@@ -562,8 +562,8 @@ string adSetupPartialDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	return latexCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
@@ -592,8 +592,8 @@ void adSetupPartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	xmlContentCreator::PartialDerivative(pTag, m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
@@ -601,8 +601,8 @@ void adSetupPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeObject::GetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeObject::GetRelativeName(c->m_pModel, m_pDomain);
+	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
 	xmlPresentationCreator::PartialDerivative(pTag, m_nDegree, strName, strDomainName, strarrIndexes);
 }
 

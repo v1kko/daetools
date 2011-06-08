@@ -28,6 +28,11 @@ void daeIF::Save(io::xmlTag_t* pTag) const
 	daeSTN::Save(pTag);
 }
 
+void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
 void daeIF::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeSTN::OpenRuntime(pTag);

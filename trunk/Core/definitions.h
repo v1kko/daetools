@@ -39,6 +39,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 namespace dae 
 {
 using std::string;
+using std::map;
 
 const string daeAuthorInfo  =	"Dragan Nikolic, 2011 DAE Tools project, dnikolic at daetools.com";
 const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute it and/or modify "

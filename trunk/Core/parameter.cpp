@@ -15,7 +15,8 @@ daeParameter::daeParameter(void)
 	m_pModel			= NULL;
 }
 	
-daeParameter::daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription)
+daeParameter::daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription, 
+						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
 	m_eParameterType	= ePTUnknown;
 	m_pModel			= NULL;
@@ -23,9 +24,12 @@ daeParameter::daeParameter(string strName, daeeParameterType paramType, daeModel
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pModel->AddParameter(*this, strName, paramType, strDescription);
+	
+	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 	
-daeParameter::daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription)
+daeParameter::daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription, 
+						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
 	m_eParameterType	= ePTUnknown;
 	m_pModel			= NULL;
@@ -33,6 +37,8 @@ daeParameter::daeParameter(string strName, daeeParameterType paramType, daePort*
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pPort->AddParameter(*this, strName, paramType, strDescription);
+	
+	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeParameter::~daeParameter(void)
@@ -70,6 +76,64 @@ void daeParameter::Save(io::xmlTag_t* pTag) const
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
+}
+
+void daeParameter::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport, strDomains;
+	boost::format fmtFile(strExport);
+
+	if(c.m_bExportDefinition)
+	{
+		if(eLanguage == ePYDAE)
+		{
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeParameter %1%;\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName();
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}		
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			if(!m_ptrDomains.empty())
+				strDomains = ", [" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "self.") + "]";
+			
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = daeParameter(\"%2%\", %3%, self, \"%4%\"%5%)\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% dae::io::g_EnumTypesCollection->esmap_daeeParameterType.GetString(m_eParameterType) 
+					% m_strDescription
+					% strDomains;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			if(!m_ptrDomains.empty())
+				strDomains = ", " + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "&");
+
+			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", %3%, this, \"%4%\"%5%)";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% dae::io::g_EnumTypesCollection->esmap_daeeParameterType.GetString(m_eParameterType) 
+					% m_strDescription
+					% strDomains;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
 }
 
 void daeParameter::OpenRuntime(io::xmlTag_t* pTag)

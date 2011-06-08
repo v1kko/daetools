@@ -23,6 +23,13 @@ public:
 			it->ReportAllVariables(bOn);
 	}
 	
+	virtual void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
+	{
+		iterator it = this->m_ptrarrObjects.begin();
+		if(it != this->m_ptrarrObjects.end())
+			it->DetectVariableTypesForExport(ptrarrVariableTypes);
+	}
+	
 protected:
 	virtual size_t GetTotalNumberOfVariables(void) const
 	{
@@ -133,7 +140,7 @@ protected:
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
 			it->SetDefaultInitialGuesses();
-	}	
+	}
 
 protected:
 	boost::multi_array<TYPE, M> m_ptrarrObjects;

@@ -107,6 +107,7 @@ daeIDASolver::daeIDASolver(void)
 	m_strSensitivityMethod           = cfg.Get<string>("daetools.IDAS.sensitivityMethod",             "Simultaneous");
 	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.errorControl",                  false);
 	m_bPrintInfo                     = cfg.Get<bool>  ("daetools.IDAS.printInfo",                     false);
+	//m_bPrintInfo                     = true;
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -228,7 +229,6 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 */
 	daeDenseArray arrInitialConditionsTypes;
 	arrInitialConditionsTypes.InitArray(m_nNumberOfEquations, pInitialConditionsTypes);
-
 	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
 
 // Determine if the model is dynamic or steady-state
@@ -517,9 +517,14 @@ void daeIDASolver::SolveInitial(void)
 		throw e;
 	}
 	
+	if(m_eInitialConditionMode == eQuasySteadyState)
+		m_pBlock->SetAllInitialConditions(0.0);
+
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eSteadyState)
+	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
+		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
+	else if(m_eInitialConditionMode == eQuasySteadyState)
 		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
 	else
 		daeDeclareAndThrowException(exNotImplemented);
@@ -571,11 +576,14 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
 	
 // Calculate initial conditions again
-// Here we should not use eSteadyState but ONLY eAlgebraicValuesProvided since we already have results
-// Check this !!!!
+	if(m_eInitialConditionMode == eQuasySteadyState)
+		m_pBlock->SetAllInitialConditions(0.0);
+
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eSteadyState)
+	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
+		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
+	else if(m_eInitialConditionMode == eQuasySteadyState)
 		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
 	else
 		daeDeclareAndThrowException(exNotImplemented);
@@ -923,9 +931,13 @@ int residuals(realtype	time,
 
 	if(pSolver->m_bPrintInfo)
 	{
-		cout << "Residuals function:" << endl;
-		cout << "Variable values:" << endl;
+		cout << "---- Residuals function ----" << endl;
+		cout << "Variables:" << endl;
 		pSolver->m_arrValues.Print();
+		cout << "Time derivatives:" << endl;
+		pSolver->m_arrTimeDerivatives.Print();
+		cout << "Residuals:" << endl;
+		pSolver->m_arrResiduals.Print();
 	}
 	
 	return 0;
@@ -1012,9 +1024,11 @@ int jacobian(int	    Neq,
 							  dInverseTimeStep);
 	if(pSolver->m_bPrintInfo)
 	{
-		cout << "Jacobian function:" << endl;
-		cout << "Variable values:" << endl;
+		cout << "---- Jacobian function ----" << endl;
+		cout << "Variables:" << endl;
 		pSolver->m_arrValues.Print();
+		cout << "Time derivatives:" << endl;
+		pSolver->m_arrTimeDerivatives.Print();
 		cout << "Jacobian matrix:" << endl;
 		pSolver->m_matJacobian.Print();
 	}

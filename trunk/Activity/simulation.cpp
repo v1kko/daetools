@@ -199,11 +199,11 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 // Create equation execution infos in models and stns
 	m_pModel->InitializeStage4();
 
-// Set the solver's InitialConditionMode
-	daeeInitialConditionMode eMode = GetInitialConditionMode();
-	m_pDAESolver->SetInitialConditionMode(eMode);
-	if(eMode == eSteadyState)
-		SetInitialConditionsToZero();
+//// Set the solver's InitialConditionMode
+//	daeeInitialConditionMode eMode = GetInitialConditionMode();
+//	m_pDAESolver->SetInitialConditionMode(eMode);
+//	if(eMode == eQuasySteadyState)
+//		SetInitialConditionsToZero();
 
 // Now I have everything set up and I should check for inconsistences
 	CheckSystem();
@@ -611,12 +611,12 @@ void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** vari
 	}
 }  
 
-void daeSimulation::SetInitialConditionsToZero(void)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer)
-	m_pModel->SetInitialConditions(0);
-}
+//void daeSimulation::SetInitialConditionsToZero(void)
+//{
+//	if(!m_pModel)
+//		daeDeclareAndThrowException(exInvalidPointer)
+//	m_pModel->SetInitialConditions(0);
+//}
 
 void daeSimulation::CheckSystem(void) const
 {
@@ -691,14 +691,23 @@ real_t daeSimulation::GetCurrentTime(void) const
 void daeSimulation::SetInitialConditionMode(daeeInitialConditionMode eMode)
 {
 	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
 	m_pModel->SetInitialConditionMode(eMode);
+	m_pDAESolver->SetInitialConditionMode(eMode);
 }
 
 daeeInitialConditionMode daeSimulation::GetInitialConditionMode(void) const
 {
 	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(m_pModel->GetInitialConditionMode() != m_pDAESolver->GetInitialConditionMode())
+		daeDeclareAndThrowException(exRuntimeCheck);
+	
 	return m_pModel->GetInitialConditionMode();
 }
 

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		boost::scoped_ptr<daeSimulation_t>		pSimulation(new /*simTutorial3*/ /*simRoberts*/ simHS71);  
+		boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial3 /*simRoberts*/ /*simHS71*/);  
 		boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 		boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         pSimulation->SetTimeHorizon(200);
 		pSimulation->GetModel()->SetReportingOn(true);
 		
-		bool bRunOptimization = true;
+		bool bRunOptimization = false;
 		
 		if(bRunOptimization)
 		{	
@@ -59,8 +59,6 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			pDAESolver->SetLASolver(dae::solver::eSundialsGMRES);
-			
 			pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
 			pSimulation->SolveInitial();
 			

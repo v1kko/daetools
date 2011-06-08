@@ -17,7 +17,11 @@ daeVariable::daeVariable()
 	m_pModel			= NULL;
 }
 
-daeVariable::daeVariable(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription)
+daeVariable::daeVariable(string strName, 
+						 const daeVariableType& varType, 
+						 daeModel* pModel, 
+						 string strDescription, 
+						 daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
 	m_bReportingOn		= false;
 	m_nOverallIndex		= ULONG_MAX;
@@ -26,9 +30,15 @@ daeVariable::daeVariable(string strName, const daeVariableType& varType, daeMode
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pModel->AddVariable(*this, strName, varType, strDescription);
+	
+	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
-daeVariable::daeVariable(string strName, const daeVariableType& varType, daePort* pPort, string strDescription)
+daeVariable::daeVariable(string strName, 
+						 const daeVariableType& varType, 
+						 daePort* pPort, 
+						 string strDescription, 
+						 daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
 	m_bReportingOn		= false;
 	m_nOverallIndex		= ULONG_MAX;
@@ -37,6 +47,8 @@ daeVariable::daeVariable(string strName, const daeVariableType& varType, daePort
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pPort->AddVariable(*this, strName, varType, strDescription);
+	
+	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeVariable::~daeVariable()
@@ -108,6 +120,64 @@ void daeVariable::Save(io::xmlTag_t* pTag) const
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
+}
+
+void daeVariable::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport, strDomains;
+	boost::format fmtFile(strExport);
+
+	if(c.m_bExportDefinition)
+	{
+		if(eLanguage == ePYDAE)
+		{
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeVariable %1%;\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName();
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}		
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			if(!m_ptrDomains.empty())
+				strDomains = ", [" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "self.") + "]";
+			
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = daeVariable(\"%2%\", %3%, self, \"%4%\"%5%)\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_VariableType.GetName() 
+					% m_strDescription
+					% strDomains;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			if(!m_ptrDomains.empty())
+				strDomains = ", " + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "&");
+			
+			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", %3%, this, \"%4%\"%5%)";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_VariableType.GetName() 
+					% m_strDescription
+					% strDomains;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
 }
 
 void daeVariable::OpenRuntime(io::xmlTag_t* pTag)

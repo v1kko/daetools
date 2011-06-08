@@ -75,6 +75,55 @@ void daeDomain::Save(io::xmlTag_t* pTag) const
 	SaveEnum(pTag, strName, m_eDomainType);
 }
 	
+void daeDomain::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+		if(eLanguage == ePYDAE)
+		{
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeDomain %1%;\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName();
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+		
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = daeDomain(\"%2%\", self, \"%3%\")\n";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", this, \"%3%\")";
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% m_strDescription;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
+}
+
 void daeDomain::OpenRuntime(io::xmlTag_t* pTag)
 {
 //	daeObject::OpenRuntime(pTag);
