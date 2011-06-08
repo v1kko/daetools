@@ -432,13 +432,8 @@ string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModel
 		"%2%\n"
 		"%3%\n";
 		
-		strVariableTypes = "# Variable types\n";
 		ExportObjectArray(ptrarrVariableTypes, strVariableTypes, eLanguage, c);
-		
-		strPorts   = "# Ports\n";
 		CreateDefinitionObjectArray(ptrarrPorts, strPorts, eLanguage, c);
-
-		strModels  = "# Models\n";
 		CreateDefinitionObjectArray(ptrarrModels, strModels, eLanguage, c);
 	}
 	else if(eLanguage == eCDAE)
@@ -462,13 +457,8 @@ string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModel
 		"%2%\n"
 		"%3%\n";
 		
-		strVariableTypes = "// Variable types\n";
 		ExportObjectArray(ptrarrVariableTypes, strVariableTypes, eLanguage, c);
-		
-		strPorts  = "// Ports\n";
 		CreateDefinitionObjectArray(ptrarrPorts, strPorts, eLanguage, c);
-		
-		strModels = "// Models\n";
 		CreateDefinitionObjectArray(ptrarrModels, strModels, eLanguage, c);
 	}
 	else
@@ -534,7 +524,7 @@ void daeModel::Export(std::string& strContent, daeeModelLanguage eLanguage, daeM
 void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 	boost::format fmtFile;
-	string strComment, strFile, strFormat, strCXXDeclaration, strConstructor, strDeclareEquations;
+	string strComment, strFile, strCXXDeclaration, strConstructor, strDeclareEquations;
 	
 	if(eLanguage == ePYDAE)
 	{
@@ -551,29 +541,29 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		"class %1%(daeModel):\n"
 		"    def __init__(self, Name, Parent = None, Description = \"\"):\n"
 		"        daeModel.__init__(self, Name, Parent, Description)\n\n"
-		"%2%\n"
+		"%2%"
 		"\n"
 		"    def DeclareEquations(self):\n"
-		"%3%\n"
-		"\n";
+		"%3%";
 		
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 		
 		//strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Domains \n";
-		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrPorts, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrPortArrays, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrEquations, strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrSTNs, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrDomains,         strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters,      strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,       strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts,           strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels,          strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModelArrays,     strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays,      strConstructor, eLanguage, c);
+		
+		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
-		fmtFile % GetObjectClassName() % strConstructor % strDeclareEquations;
+		fmtFile % GetObjectClassName() % strConstructor % (strDeclareEquations.empty() ? (c.CalculateIndent(c.m_nPythonIndentLevel) + "pass\n") : strDeclareEquations);
 	}
 	else if(eLanguage == eCDAE)
 	{
@@ -585,7 +575,6 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		"daeDeclareDynamicClass(%1%)\n"
 		"public:\n"
 		"%2%\n"
-		"\n"
 		"    %1%(string strName, daeModel* pParent = NULL, string strDescription = \"\") \n"
 		"      : daeModel(strName, pParent, strDescription)"
 		"%3%\n"
@@ -594,38 +583,38 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		"\n"
 		"    void DeclareEquations(void)\n"
 		"    {\n"
-		"%4%\n"
+		"%4%"
 		"    }\n"
 		"};\n";
 		
 		c.m_bExportDefinition = true;
 		c.m_nPythonIndentLevel = 1;
 		
-		ExportObjectArray(m_ptrarrDomains, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrParameters, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrVariables, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrPorts, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrDomains,     strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters,  strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,   strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts,       strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels,      strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrModelArrays, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrPortArrays, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays,  strCXXDeclaration, eLanguage, c);
 
 
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 
-		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrPorts, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrDomains,     strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrParameters,  strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,   strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPorts,       strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrModels,      strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrPortArrays, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortArrays,  strConstructor, eLanguage, c);
 
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 		
-		ExportObjectArray(m_ptrarrEquations, strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrSTNs, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);

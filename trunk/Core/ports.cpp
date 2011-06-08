@@ -155,20 +155,15 @@ void daePort::CreateDefinition(std::string& strContent, daeeModelLanguage eLangu
 		"class %1%(daePort):\n"
 		"    def __init__(self, Name, PortType, Model, Description = \"\"):\n"
 		"        daePort.__init__(self, Name, PortType, Model, Description)\n\n"
-		"%2%\n"
-		"\n";
+		"%2%\n";
 		
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 		
-		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Domains \n";
-		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
-	
-		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Parameters \n";
+		//strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Domains \n";
+		ExportObjectArray(m_ptrarrDomains,    strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
-	
-		strConstructor += c.CalculateIndent(c.m_nPythonIndentLevel) + strComment + " Variables \n";
-		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,  strConstructor, eLanguage, c);
 	
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strConstructor;
@@ -183,7 +178,6 @@ void daePort::CreateDefinition(std::string& strContent, daeeModelLanguage eLangu
 		"daeDeclareDynamicClass(%1%)\n"
 		"public:\n"
 		"%2%\n"
-		"\n"
 		"    %1%(string strName, daeePortType portType, daeModel* parent, string strDescription = \"\")\n"
 		"      : daePort(strName, portType, parent, strDescription)"
 		"%3%\n"
@@ -194,16 +188,16 @@ void daePort::CreateDefinition(std::string& strContent, daeeModelLanguage eLangu
 		c.m_bExportDefinition = true;
 		c.m_nPythonIndentLevel = 1;
 		
-		ExportObjectArray(m_ptrarrDomains, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrDomains,    strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrParameters, strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrVariables, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,  strCXXDeclaration, eLanguage, c);
 
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 
-		ExportObjectArray(m_ptrarrDomains, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrDomains,    strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrParameters, strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrVariables, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrVariables,  strConstructor, eLanguage, c);
 
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor;

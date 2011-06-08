@@ -66,6 +66,8 @@ void CreateDefinitionObjectArray(const std::vector<TYPE>& ptrarrObjects, std::st
 	
 	for(size_t i = 0; i < ptrarrObjects.size(); i++)
 	{
+		if(i != 0)
+			strContent += "\n";
 		pObject = ptrarrObjects[i];
 		pObject->CreateDefinition(strContent, eLanguage, c);
 	}
