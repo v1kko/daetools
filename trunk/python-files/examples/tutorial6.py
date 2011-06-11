@@ -138,8 +138,9 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-    print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], ePYDAE)
-    print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], eCDAE)
+
+    #print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], ePYDAE)
+    #print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], eCDAE)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

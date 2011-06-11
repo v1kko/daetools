@@ -30,10 +30,10 @@ bool condDoEnclose(const condNode* node);
 class DAE_CORE_API adNodeImpl : public adNode
 {
 public:
-	void	ExportAsPlainText(string strFileName);
-	void	ExportAsLatex(string strFileName);
-	bool	IsLinear(void) const;
-	bool	IsFunctionOfVariables(void) const;
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void ExportAsLatex(string strFileName);
+	bool IsLinear(void) const;
+	bool IsFunctionOfVariables(void) const;
 };
 
 /*********************************************************************************************
@@ -53,7 +53,7 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -83,7 +83,6 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -115,7 +114,6 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -148,7 +146,6 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -186,7 +183,6 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -224,7 +220,6 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -259,12 +254,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	boost::shared_ptr<adNode>	node;
@@ -288,12 +283,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	boost::shared_ptr<adNode>	left;
@@ -322,13 +317,13 @@ public:
 	virtual void		Open(io::xmlTag_t* pTag);
 	virtual void		Save(io::xmlTag_t* pTag) const;
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string		SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext, 
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	boost::shared_ptr<adNode>	m_pLeft;
@@ -355,13 +350,13 @@ public:
 	virtual void		Open(io::xmlTag_t* pTag);
 	virtual void		Save(io::xmlTag_t* pTag) const;
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string		SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	boost::shared_ptr<condNode>		m_pNode;
@@ -387,13 +382,13 @@ public:
 	virtual void		Open(io::xmlTag_t* pTag);
 	virtual void		Save(io::xmlTag_t* pTag) const;
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string		SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	boost::shared_ptr<condNode>		m_pLeft;
@@ -422,12 +417,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	daeParameter*			m_pParameter;
@@ -451,12 +446,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	daeDistributedEquationDomainInfo* m_pDEDI;
@@ -480,12 +475,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -511,10 +506,10 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -542,10 +537,10 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -570,12 +565,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 public:
 };

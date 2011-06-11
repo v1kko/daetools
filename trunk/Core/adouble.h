@@ -38,6 +38,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "definitions.h"
 #include "io_impl.h"
+#include "export.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -359,7 +360,8 @@ static const string strarrUnaryFns[12]={"minus",
 										};
 
 class daeSaveAsMathMLContext;
-class DAE_CORE_API adNode
+class DAE_CORE_API adNode : public daeExportable_t
+
 {
 public:
 	virtual ~adNode(void){}
@@ -372,7 +374,7 @@ public:
 	virtual void	Save(io::xmlTag_t* pTag) const									= 0;
 
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const				= 0;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const			= 0;
+	//virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const		= 0;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
 		                                const daeSaveAsMathMLContext* c) const		= 0;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
@@ -398,7 +400,7 @@ public:
 /*********************************************************************************************
 	adNodeArray
 **********************************************************************************************/
-class DAE_CORE_API adNodeArray
+class DAE_CORE_API adNodeArray : public daeExportable_t
 {
 public:
 	virtual ~adNodeArray(void){}
@@ -412,7 +414,7 @@ public:
 	virtual void	Save(io::xmlTag_t* pTag) const											= 0;
 
 	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const						= 0;
-	virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const					= 0;
+	//virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const					= 0;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
 		                                const daeSaveAsMathMLContext* c) const				= 0;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
@@ -433,14 +435,14 @@ public:
 														         const daeSaveAsMathMLContext* c);
 	static string		SaveRuntimeNodeArrayAsLatex(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
 											        const daeSaveAsMathMLContext* c);
-	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
-												        const daeSaveAsMathMLContext* c);
+//	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+//												        const daeSaveAsMathMLContext* c);
 };
 
 /*********************************************************************************************
 	condNode
 **********************************************************************************************/
-class DAE_CORE_API condNode
+class DAE_CORE_API condNode : public daeExportable_t
 {
 public:
 	virtual ~condNode(void){}
@@ -454,7 +456,7 @@ public:
 	virtual void		Save(io::xmlTag_t* pTag) const														= 0;
 
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const									= 0;
-	virtual string		SaveAsPlainText(const daeSaveAsMathMLContext* c) const								= 0;
+	//virtual string	SaveAsPlainText(const daeSaveAsMathMLContext* c) const								= 0;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const		= 0;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const = 0;
 

@@ -75,8 +75,9 @@ void daeCondition::SaveRuntime(io::xmlTag_t* pTag) const
 
 string daeCondition::SaveNodeAsPlainText(void) const
 {
-	daeSaveAsMathMLContext c(m_pModel);
-	return m_pConditionNode->SaveAsPlainText(&c);
+	daeDeclareAndThrowException(exNotImplemented);
+//	daeSaveAsMathMLContext c(m_pModel);
+//	return m_pConditionNode->SaveAsPlainText(&c);
 }
 
 void daeCondition::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const

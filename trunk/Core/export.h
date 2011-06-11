@@ -8,6 +8,7 @@ namespace dae
 {
 namespace core 
 {
+class daeModel;
 /********************************************************************
 	daeModelExportContext
 *********************************************************************/
@@ -27,9 +28,9 @@ public:
 	}
 	
 public:
-	size_t m_nPythonIndentLevel;
-	//string m_strClassName;
-	bool   m_bExportDefinition;
+	size_t			m_nPythonIndentLevel;
+	const daeModel*	m_pModel;
+	bool			m_bExportDefinition;
 };
 
 /********************************************************************

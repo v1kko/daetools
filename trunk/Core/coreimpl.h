@@ -2473,6 +2473,7 @@ public:
 	adouble	 GetResidual(void) const;
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds);
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes);
+	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n);
 
 	daeeEquationDefinitionMode	GetEquationDefinitionMode(void) const;
 	daeeEquationEvaluationMode	GetEquationEvaluationMode(void) const;

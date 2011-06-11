@@ -76,13 +76,27 @@ adNode* adSetupParameterNode::Clone(void) const
 	return new adSetupParameterNode(*this);
 }
 
-string adSetupParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupParameterNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strName;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
-	return textCreator::Variable(strName, strarrIndexes);
+	
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
+//string adSetupParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrDomains, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adSetupParameterNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -169,12 +183,18 @@ adNode* adSetupDomainIteratorNode::Clone(void) const
 	return new adSetupDomainIteratorNode(*this);
 }
 
-string adSetupDomainIteratorNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+void adSetupDomainIteratorNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 	vector<string> strarrIndexes;
 	string strName = m_pDEDI->GetName();
-	return textCreator::Variable(strName, strarrIndexes);
+	strContent += textCreator::Variable(strName, strarrIndexes);
 }
+//string adSetupDomainIteratorNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//	vector<string> strarrIndexes;
+//	string strName = m_pDEDI->GetName();
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adSetupDomainIteratorNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
@@ -289,13 +309,27 @@ adNode* adSetupVariableNode::Clone(void) const
 	return new adSetupVariableNode(*this);
 }
 
-string adSetupVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strName;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::Variable(strName, strarrIndexes);
+	
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
+//string adSetupVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrDomains, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adSetupVariableNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -420,13 +454,38 @@ adNode* adSetupTimeDerivativeNode::Clone(void) const
 	return new adSetupTimeDerivativeNode(*this);
 }
 
-string adSetupTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupTimeDerivativeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport;
+	boost::format fmtFile;
 	vector<string> strarrIndexes;
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+	string strName = daeGetRelativeName(c.m_pModel, m_pVariable);
+	
+	if(eLanguage == eCDAE)
+	{
+		strExport = "%1%.dt(%2%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % toString(strarrIndexes);
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		strExport = "self.%1%.dt(%2%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % toString(strarrIndexes);
+	}
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+
+	strContent += fmtFile.str();
 }
+//string adSetupTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrDomains, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+//}
 
 string adSetupTimeDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -549,14 +608,41 @@ adNode* adSetupPartialDerivativeNode::Clone(void) const
 	return new adSetupPartialDerivativeNode(*this);
 }
 
-string adSetupPartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupPartialDerivativeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport;
+	boost::format fmtFile;
 	vector<string> strarrIndexes;
+	
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
-	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
+	string strName       = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
+	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
+	
+	if(eLanguage == eCDAE)
+	{
+		strExport = "%1%.%2%(%3%, %4%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % (m_nDegree == 1 ? "d" : "d2") % strDomainName % toString(strarrIndexes);
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		strExport = "self.%1%.%2%(self.%3%, %4%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % (m_nDegree == 1 ? "d" : "d2") % strDomainName % toString(strarrIndexes);
+	}
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+
+	strContent += fmtFile.str();
 }
+//string adSetupPartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrDomains, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
+//	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
+//}
 
 string adSetupPartialDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {

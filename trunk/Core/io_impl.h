@@ -273,10 +273,14 @@ public:
 		using namespace dae::core;
 		daeesmapAdd2(esmap_daeDomainType, eArray, eDistributed);
 		daeesmapAdd3(esmap_daeeParameterType, eReal, eInteger, eBool);		
+		daeesmapAdd2(esmap_daeeModelLanguage, eCDAE, ePYDAE);		
+		daeesmapAdd8(esmap_daeeDomainBounds, eOpenOpen, eOpenClosed, eClosedOpen, eClosedClosed, eLowerBound, eUpperBound, eFunctor, eCustomBound);		
 	}
 
 	daeEnumStringMap<core::daeeDomainType>		esmap_daeDomainType;
 	daeEnumStringMap<core::daeeParameterType>	esmap_daeeParameterType;	
+	daeEnumStringMap<core::daeeModelLanguage>	esmap_daeeModelLanguage;	
+	daeEnumStringMap<core::daeeDomainBounds>	esmap_daeeDomainBounds;	
 };
 
 static boost::shared_ptr<daeEnumTypesCollection> g_EnumTypesCollection = boost::shared_ptr<daeEnumTypesCollection>(new daeEnumTypesCollection());

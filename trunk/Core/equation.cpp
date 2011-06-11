@@ -833,7 +833,91 @@ void daeEquation::Save(io::xmlTag_t* pTag) const
 
 void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	daeDEDI* pDEDI;
+	string strExport, strResidual, strBounds;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "eq = self.CreateEquation(\"%1%\", \"%2%\")\n";
+			if(!m_ptrarrDistributedEquationDomainInfos.empty())
+			{
+				for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
+				{
+					pDEDI = m_ptrarrDistributedEquationDomainInfos[i];
+					if(pDEDI->m_eDomainBounds == eCustomBound)
+					{
+						strBounds = "[" + toString(pDEDI->m_narrDomainPoints) + "]";
+					}
+					else
+					{
+						strBounds = g_EnumTypesCollection->esmap_daeeDomainBounds.GetString(pDEDI->m_eDomainBounds);
+					}
+					
+					strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + 
+								 pDEDI->GetStrippedName() + 
+								 " = eq.DistributeOnDomain(self." + pDEDI->m_pDomain->GetStrippedName() +
+								 ", " + strBounds + ")\n";
+				}
+			}
+			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "eq.Residual = %3%\n\n";
+
+			m_pResidualNode->Export(strResidual, eLanguage, c);
+
+			fmtFile.parse(strExport);
+			fmtFile % m_strShortName 
+					% m_strDescription
+					% strResidual;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport  = c.CalculateIndent(c.m_nPythonIndentLevel) + "{\n";
+			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "eq = CreateEquation(\"%1%\", \"%2%\");\n";
+			if(!m_ptrarrDistributedEquationDomainInfos.empty())
+			{
+				for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
+				{
+					pDEDI = m_ptrarrDistributedEquationDomainInfos[i];
+					if(pDEDI->m_eDomainBounds == eCustomBound)
+					{
+						strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + 
+									 "const size_t domainIndexes[" + toString(pDEDI->m_narrDomainPoints.size()) + "] = {" + 
+									    toString(pDEDI->m_narrDomainPoints) + "};\n";
+						strBounds = "domainIndexes, " + toString(pDEDI->m_narrDomainPoints.size());
+					}
+					else
+					{
+						strBounds = g_EnumTypesCollection->esmap_daeeDomainBounds.GetString(pDEDI->m_eDomainBounds);
+					}
+					
+					strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + 
+								 pDEDI->GetStrippedName() + 
+								 " = eq->DistributeOnDomain(" + pDEDI->m_pDomain->GetStrippedName() +
+								 ", " + strBounds + ")\n";
+				}
+			}
+			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "eq->SetResidual(%3%);\n";
+			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "}\n\n";
+
+			m_pResidualNode->Export(strResidual, eLanguage, c);
+
+			fmtFile.parse(strExport);
+			fmtFile % m_strShortName 
+					% m_strDescription
+					% strResidual;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += fmtFile.str();
 }
 
 void daeEquation::OpenRuntime(io::xmlTag_t* pTag)
@@ -1588,6 +1672,15 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const vector<size_t
 	return pDEDI;
 }
 
+daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n)
+{
+	vector<size_t> narrDomainIndexes;
+	for(size_t i = 0; i < n; i++)
+		narrDomainIndexes.push_back(pnarrDomainIndexes[i]);
+
+	return DistributeOnDomain(rDomain, narrDomainIndexes);	
+}
+
 void daeEquation::GetDomainDefinitions(vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo)
 {
 	arrDistributedEquationDomainInfo.clear();
@@ -1763,7 +1856,6 @@ void daePortEqualityEquation::Save(io::xmlTag_t* pTag) const
 
 void daePortEqualityEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	
 }
 
 void daePortEqualityEquation::OpenRuntime(io::xmlTag_t* pTag)

@@ -332,13 +332,17 @@ void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag,
 /*********************************************************************************************
 	adNodeImpl
 **********************************************************************************************/
-void adNodeImpl::ExportAsPlainText(string strFileName)
+void adNodeImpl::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strLatex;
-	ofstream file(strFileName.c_str());
-	file << SaveAsPlainText(NULL);
-	file.close();
 }
+
+//void adNodeImpl::ExportAsPlainText(string strFileName)
+//{
+//	string strLatex;
+//	ofstream file(strFileName.c_str());
+//	file << SaveAsPlainText(NULL);
+//	file.close();
+//}
 
 void adNodeImpl::ExportAsLatex(string strFileName)
 {
@@ -394,10 +398,14 @@ adNode* adConstantNode::Clone(void) const
 	return new adConstantNode(*this);
 }
 
-string adConstantNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+void adConstantNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	return textCreator::Constant(m_dValue);
+	strContent += textCreator::Constant(m_dValue);
 }
+//string adConstantNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//	return textCreator::Constant(m_dValue);
+//}
 
 string adConstantNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
@@ -480,15 +488,15 @@ adNode* adRuntimeParameterNode::Clone(void) const
 	return new adRuntimeParameterNode(*this);
 }
 
-string adRuntimeParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
-{
-	vector<string> strarrIndexes;
-	for(size_t i = 0; i < m_narrDomains.size(); i++)
-		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
-
-	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
-	return textCreator::Variable(strName, strarrIndexes);
-}
+//string adRuntimeParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	for(size_t i = 0; i < m_narrDomains.size(); i++)
+//		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
+//
+//	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adRuntimeParameterNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -605,12 +613,12 @@ adNode* adDomainIndexNode::Clone(void) const
 	return new adDomainIndexNode(*this);
 }
 
-string adDomainIndexNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
-{
-	string strName  = daeGetRelativeName(c->m_pModel, m_pDomain);
-	string strIndex = toString<size_t>(m_nIndex);
-	return textCreator::Domain(strName, strIndex);
-}
+//string adDomainIndexNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strName  = daeGetRelativeName(c->m_pModel, m_pDomain);
+//	string strIndex = toString<size_t>(m_nIndex);
+//	return textCreator::Domain(strName, strIndex);
+//}
 
 string adDomainIndexNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -765,15 +773,15 @@ adNode* adRuntimeVariableNode::Clone(void) const
 	return new adRuntimeVariableNode(*this);
 }
 
-string adRuntimeVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
-{
-	vector<string> strarrIndexes;
-	for(size_t i = 0; i < m_narrDomains.size(); i++)
-		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
-
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::Variable(strName, strarrIndexes);
-}
+//string adRuntimeVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	for(size_t i = 0; i < m_narrDomains.size(); i++)
+//		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
+//
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adRuntimeVariableNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -966,15 +974,15 @@ adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 	return new adRuntimeTimeDerivativeNode(*this);
 }
 
-string adRuntimeTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
-{
-	vector<string> strarrIndexes;
-	for(size_t i = 0; i < m_narrDomains.size(); i++)
-		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
-
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
-}
+//string adRuntimeTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	for(size_t i = 0; i < m_narrDomains.size(); i++)
+//		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
+//
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+//}
 
 string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -1102,17 +1110,10 @@ adNode* adRuntimePartialDerivativeNode::Clone(void) const
 	return new adRuntimePartialDerivativeNode(*this);
 }
 
-string adRuntimePartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
-{
-//	vector<string> strarrIndexes;
-//	for(size_t i = 0; i < m_narrDomains.size(); i++)
-//		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
-
-//	string strVariableName = daeGetRelativeName(c->m_pModel, m_pVariable);
-//	string strDomainName   = daeGetRelativeName(c->m_pModel, m_pDomain);
-//	return textCreator::PartialDerivative(m_nDegree, strVariableName, strDomainName, strarrIndexes);
-	return pardevnode->SaveAsPlainText(c);
-}
+//string adRuntimePartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	return pardevnode->SaveAsPlainText(c);
+//}
 
 string adRuntimePartialDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -1281,86 +1282,229 @@ adNode* adUnaryNode::Clone(void) const
 	return new adUnaryNode(eFunction, n);
 }
 
-string adUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strResult;
 	switch(eFunction)
 	{
 	case eSign:
-		strResult += "(-";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		strContent += "(-";
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eSin:
-		strResult += "sin(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "sin(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Sin(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eCos:
-		strResult += "cos(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "cos(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Cos(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eTan:
-		strResult += "tan(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "tan(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Tan(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eArcSin:
-		strResult += "asin(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "asin(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ASin(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eArcCos:
-		strResult += "acos(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "acos(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ACos(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eArcTan:
-		strResult += "atan(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "atan(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ATan(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eSqrt:
-		strResult += "sqrt(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "sqrt(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Sqrt(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eExp:
-		strResult += "exp(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "exp(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Exp(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eLn:
-		strResult += "log(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "log(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Log(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eLog:
-		strResult += "log10(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "log10(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Log10(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eAbs:
-		strResult += "abs(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "abs(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Abs(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eCeil:
-		strResult += "ceil(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "ceil(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Ceil(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	case eFloor:
-		strResult += "floor(";
-		strResult += node->SaveAsPlainText(c);
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "floor(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Floor(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
 		break;
 	default:
-		daeDeclareAndThrowException(exInvalidPointer);
+		daeDeclareAndThrowException(exNotImplemented);
 	}
-	return strResult;
 }
+//string adUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strResult;
+//	switch(eFunction)
+//	{
+//	case eSign:
+//		strResult += "(-";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eSin:
+//		strResult += "sin(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eCos:
+//		strResult += "cos(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eTan:
+//		strResult += "tan(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eArcSin:
+//		strResult += "asin(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eArcCos:
+//		strResult += "acos(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eArcTan:
+//		strResult += "atan(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eSqrt:
+//		strResult += "sqrt(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eExp:
+//		strResult += "exp(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eLn:
+//		strResult += "log(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eLog:
+//		strResult += "log10(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eAbs:
+//		strResult += "abs(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eCeil:
+//		strResult += "ceil(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	case eFloor:
+//		strResult += "floor(";
+//		strResult += node->SaveAsPlainText(c);
+//		strResult += ")";
+//		break;
+//	default:
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	}
+//	return strResult;
+//}
 
 string adUnaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -1863,80 +2007,175 @@ adNode* adBinaryNode::Clone(void) const
 	return new adBinaryNode(eFunction, l, r);
 }
 
-string adBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strResult, strLeft, strRight;
+	string strLeft, strRight;
 
 	if(adDoEnclose(left.get()))
 	{
 		strLeft  = "(";
-		strLeft += left->SaveAsPlainText(c);
+		left->Export(strLeft, eLanguage, c);
 		strLeft += ")";
 	}
 	else
 	{
-		strLeft = left->SaveAsPlainText(c);
+		left->Export(strLeft, eLanguage, c);
 	}
 
 	if(adDoEnclose(right.get()))
 	{
 		strRight  = "(";
-		strRight += right->SaveAsPlainText(c);
+		right->Export(strRight, eLanguage, c);
 		strRight += ")";
 	}
 	else
 	{
-		strRight = right->SaveAsPlainText(c);
+		right->Export(strRight, eLanguage, c);
 	}
 
 	switch(eFunction)
 	{
 	case ePlus:
-		strResult += strLeft;
-		strResult += " + ";
-		strResult += strRight;
+		strContent += strLeft;
+		strContent += " + ";
+		strContent += strRight;
 		break;
 	case eMinus:
-		strResult += strLeft;
-		strResult += " - ";
-		strResult += strRight;
+		strContent += strLeft;
+		strContent += " - ";
+		strContent += strRight;
 		break;
 	case eMulti:
-		strResult += strLeft;
-		strResult += " * ";
-		strResult += strRight;
+		strContent += strLeft;
+		strContent += " * ";
+		strContent += strRight;
 		break;
 	case eDivide:
-		strResult += strLeft;
-		strResult += " / ";
-		strResult += strRight;
+		strContent += strLeft;
+		strContent += " / ";
+		strContent += strRight;
 		break;
 	case ePower:
-		strResult += "pow(";
-		strResult += strLeft;
-		strResult += ", ";
-		strResult += strRight;
-		strResult += ")";
+		if(eLanguage == eCDAE)
+		{
+			strContent += "pow(";
+			strContent += strLeft;
+			strContent += ", ";
+			strContent += strRight;
+			strContent += ")";
+		}
+		else if(eLanguage == ePYDAE)
+		{
+			strContent += strLeft;
+			strContent += " ** ";
+			strContent += strRight;
+		}
+		else
+			daeDeclareAndThrowException(exNotImplemented);
 		break;
 	case eMin:
-		strResult += "min(";
-		strResult += strLeft;
-		strResult += ", ";
-		strResult += strRight;
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "min(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Min(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		strContent += strLeft;
+		strContent += ", ";
+		strContent += strRight;
+		strContent += ")";
 		break;
 	case eMax:
-		strResult += "max(";
-		strResult += strLeft;
-		strResult += ", ";
-		strResult += strRight;
-		strResult += ")";
+		if(eLanguage == eCDAE)
+			strContent += "max(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Max(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		strContent += strLeft;
+		strContent += ", ";
+		strContent += strRight;
+		strContent += ")";
 		break;
 	default:
-		daeDeclareAndThrowException(exInvalidPointer);
+		daeDeclareAndThrowException(exNotImplemented);
 	}
-	return strResult;
 }
+
+//string adBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strResult, strLeft, strRight;
+//
+//	if(adDoEnclose(left.get()))
+//	{
+//		strLeft  = "(";
+//		strLeft += left->SaveAsPlainText(c);
+//		strLeft += ")";
+//	}
+//	else
+//	{
+//		strLeft = left->SaveAsPlainText(c);
+//	}
+//
+//	if(adDoEnclose(right.get()))
+//	{
+//		strRight  = "(";
+//		strRight += right->SaveAsPlainText(c);
+//		strRight += ")";
+//	}
+//	else
+//	{
+//		strRight = right->SaveAsPlainText(c);
+//	}
+//
+//	switch(eFunction)
+//	{
+//	case ePlus:
+//		strResult += strLeft;
+//		strResult += " + ";
+//		strResult += strRight;
+//		break;
+//	case eMinus:
+//		strResult += strLeft;
+//		strResult += " - ";
+//		strResult += strRight;
+//		break;
+//	case eMulti:
+//		strResult += strLeft;
+//		strResult += " * ";
+//		strResult += strRight;
+//		break;
+//	case eDivide:
+//		strResult += strLeft;
+//		strResult += " / ";
+//		strResult += strRight;
+//		break;
+//	case ePower:
+//		strResult += "pow(";
+//		strResult += strLeft;
+//		strResult += ", ";
+//		strResult += strRight;
+//		strResult += ")";
+//		break;
+//	case eMin:
+//		strResult += "min(";
+//		strResult += strLeft;
+//		strResult += ", ";
+//		strResult += strRight;
+//		strResult += ")";
+//		break;
+//	case eMax:
+//		strResult += "max(";
+//		strResult += strLeft;
+//		strResult += ", ";
+//		strResult += strRight;
+//		strResult += ")";
+//		break;
+//	default:
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	}
+//	return strResult;
+//}
 
 string adBinaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -2339,10 +2578,13 @@ adNode* adExternalFunctionNode::Clone(void) const
 	return new adExternalFunctionNode(*this);
 }
 
-string adExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+void adExternalFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	return string("");
 }
+//string adExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//	return string("");
+//}
 
 string adExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {

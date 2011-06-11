@@ -526,6 +526,8 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 	boost::format fmtFile;
 	string strComment, strFile, strCXXDeclaration, strConstructor, strDeclareEquations;
 	
+	c.m_pModel = this;
+	
 	if(eLanguage == ePYDAE)
 	{
 		strComment = "#"; 
@@ -583,6 +585,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		"\n"
 		"    void DeclareEquations(void)\n"
 		"    {\n"
+		"        daeEquation* eq;\n\n"
 		"%4%"
 		"    }\n"
 		"};\n";
@@ -630,13 +633,21 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 
 void daeModel::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
 {
-	size_t i;
-	std::vector<const daeVariableType*>::iterator fiter;
+	size_t i, j;
+	bool bFound;
 
 	for(i = 0; i < m_ptrarrVariables.size(); i++)
 	{
-		fiter = std::find(ptrarrVariableTypes.begin(), ptrarrVariableTypes.end(), &m_ptrarrVariables[i]->m_VariableType);
-		if(fiter == ptrarrVariableTypes.end()) // If not found add it to the array
+		bFound = false;
+		for(j = 0; j < ptrarrVariableTypes.size(); j++)
+		{
+			if(ptrarrVariableTypes[j]->GetName() == m_ptrarrVariables[i]->m_VariableType.GetName())
+			{
+				bFound = true;
+				break;
+			}
+		}
+		if(!bFound)
 			ptrarrVariableTypes.push_back(&m_ptrarrVariables[i]->m_VariableType);
 	}
 

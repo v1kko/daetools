@@ -212,13 +212,21 @@ void daePort::CreateDefinition(std::string& strContent, daeeModelLanguage eLangu
 
 void daePort::DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const
 {
-	size_t i;
-	std::vector<const daeVariableType*>::iterator fiter;
+	size_t i, j;
+	bool bFound;
 
 	for(i = 0; i < m_ptrarrVariables.size(); i++)
 	{
-		fiter = std::find(ptrarrVariableTypes.begin(), ptrarrVariableTypes.end(), &m_ptrarrVariables[i]->m_VariableType);
-		if(fiter == ptrarrVariableTypes.end()) // If not found add it to the array
+		bFound = false;
+		for(j = 0; j < ptrarrVariableTypes.size(); j++)
+		{
+			if(ptrarrVariableTypes[j]->GetName() == m_ptrarrVariables[i]->m_VariableType.GetName())
+			{
+				bFound = true;
+				break;
+			}
+		}
+		if(!bFound)
 			ptrarrVariableTypes.push_back(&m_ptrarrVariables[i]->m_VariableType);
 	}
 }
@@ -774,7 +782,35 @@ void daePortConnection::Save(io::xmlTag_t* pTag) const
 
 void daePortConnection::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.ConnectPorts(self.%1%, self.%2%)\n";
+			fmtFile.parse(strExport);
+			fmtFile % daeGetStrippedRelativeName(m_pModel, m_pPortFrom) 
+					% daeGetStrippedRelativeName(m_pModel, m_pPortTo);
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "ConnectPorts(&%1%, &%2%);\n";
+			fmtFile.parse(strExport);
+			fmtFile % daeGetStrippedRelativeName(m_pModel, m_pPortFrom) 
+					% daeGetStrippedRelativeName(m_pModel, m_pPortTo);
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += fmtFile.str();
 }
 
 void daePortConnection::OpenRuntime(io::xmlTag_t* pTag)

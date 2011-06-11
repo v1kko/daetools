@@ -213,31 +213,53 @@ void condExpressionNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, m_pRight.get());
 }
 
-string condExpressionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void condExpressionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strValue;
-
-	strValue += m_pLeft->SaveAsPlainText(c);
+	m_pLeft->Export(strContent, eLanguage, c);
 	
 	if(m_eConditionType == eNotEQ)
-		strValue += " != ";
+		strContent += " != ";
 	else if(m_eConditionType == eEQ)
-		strValue += " == ";
+		strContent += " == ";
 	else if(m_eConditionType == eGT)
-		strValue += " > ";
+		strContent += " > ";
 	else if(m_eConditionType == eGTEQ)
-		strValue += " >= ";
+		strContent += " >= ";
 	else if(m_eConditionType == eLT)
-		strValue += " < ";
+		strContent += " < ";
 	else if(m_eConditionType == eLTEQ)
-		strValue += " <= ";
+		strContent += " <= ";
 	else
-		daeDeclareAndThrowException(exInvalidCall);  
+		daeDeclareAndThrowException(exNotImplemented);  
 
-	strValue += m_pRight->SaveAsPlainText(c);
-
-	return strValue;
+	m_pRight->Export(strContent, eLanguage, c);
 }
+
+//string condExpressionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strValue;
+//
+//	strValue += m_pLeft->SaveAsPlainText(c);
+//	
+//	if(m_eConditionType == eNotEQ)
+//		strValue += " != ";
+//	else if(m_eConditionType == eEQ)
+//		strValue += " == ";
+//	else if(m_eConditionType == eGT)
+//		strValue += " > ";
+//	else if(m_eConditionType == eGTEQ)
+//		strValue += " >= ";
+//	else if(m_eConditionType == eLT)
+//		strValue += " < ";
+//	else if(m_eConditionType == eLTEQ)
+//		strValue += " <= ";
+//	else
+//		daeDeclareAndThrowException(exInvalidCall);  
+//
+//	strValue += m_pRight->SaveAsPlainText(c);
+//
+//	return strValue;
+//}
 
 string condExpressionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
@@ -517,21 +539,44 @@ void condUnaryNode::Save(io::xmlTag_t* pTag) const
 	condNode::SaveNode(pTag, strName, m_pNode.get());
 }
 
-string condUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void condUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strValue;
-
-	if(m_eLogicalOperator == eNot)
-		strValue += "not ";
+	if(eLanguage == eCDAE)
+	{
+		if(m_eLogicalOperator == eNot)
+			strContent += "!";
+		else
+			daeDeclareAndThrowException(exNotImplemented);  
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		if(m_eLogicalOperator == eNot)
+			strContent += "NOT ";
+		else
+			daeDeclareAndThrowException(exNotImplemented);  
+	}
 	else
-		daeDeclareAndThrowException(exInvalidCall);  
+		daeDeclareAndThrowException(exNotImplemented);
 
-	strValue += "(";
-	strValue += m_pNode->SaveAsPlainText(c);
-	strValue += ")";
-
-	return strValue;
+	strContent += "(";
+	m_pNode->Export(strContent, eLanguage, c);
+	strContent += ")";
 }
+//string condUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strValue;
+//
+//	if(m_eLogicalOperator == eNot)
+//		strValue += "not ";
+//	else
+//		daeDeclareAndThrowException(exInvalidCall);  
+//
+//	strValue += "(";
+//	strValue += m_pNode->SaveAsPlainText(c);
+//	strValue += ")";
+//
+//	return strValue;
+//}
 
 string condUnaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -660,27 +705,58 @@ void condBinaryNode::Save(io::xmlTag_t* pTag) const
 	condNode::SaveNode(pTag, strName, m_pRight.get());
 }
 
-string condBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void condBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strValue;
+	strContent += "(";
+	m_pLeft->Export(strContent, eLanguage, c);
+	strContent += ")";
 
-	strValue += "(";
-	strValue += m_pLeft->SaveAsPlainText(c);
-	strValue += ")";
-	
-	if(m_eLogicalOperator == eAnd)
-		strValue += " and ";
-	else if(m_eLogicalOperator == eOr)
-		strValue += " or ";
+	if(eLanguage == eCDAE)
+	{
+		if(m_eLogicalOperator == eAnd)
+			strContent += " && ";
+		else if(m_eLogicalOperator == eOr)
+			strContent += " || ";
+		else
+			daeDeclareAndThrowException(exNotImplemented);  
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		if(m_eLogicalOperator == eAnd)
+			strContent += " & ";
+		else if(m_eLogicalOperator == eOr)
+			strContent += " | ";
+		else
+			daeDeclareAndThrowException(exNotImplemented);  
+	}
 	else
-		daeDeclareAndThrowException(exInvalidCall);  
-
-	strValue += "(";
-	strValue += m_pRight->SaveAsPlainText(c);
-	strValue += ")";
-
-	return strValue;
+		daeDeclareAndThrowException(exNotImplemented);
+	
+	strContent += "(";
+	m_pRight->Export(strContent, eLanguage, c);
+	strContent += ")";
 }
+//string condBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	string strValue;
+//
+//	strValue += "(";
+//	strValue += m_pLeft->SaveAsPlainText(c);
+//	strValue += ")";
+//	
+//	if(m_eLogicalOperator == eAnd)
+//		strValue += " and ";
+//	else if(m_eLogicalOperator == eOr)
+//		strValue += " or ";
+//	else
+//		daeDeclareAndThrowException(exNotImplemented);  
+//
+//	strValue += "(";
+//	strValue += m_pRight->SaveAsPlainText(c);
+//	strValue += ")";
+//
+//	return strValue;
+//}
 
 string condBinaryNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {

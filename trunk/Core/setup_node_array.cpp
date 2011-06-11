@@ -66,13 +66,27 @@ adNodeArray* adSetupParameterNodeArray::Clone(void) const
 	return new adSetupParameterNodeArray(*this);
 }
 
-string adSetupParameterNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupParameterNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strName;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrRanges, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
-	return textCreator::Variable(strName, strarrIndexes);
+	
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
+//string adSetupParameterNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrRanges, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pParameter);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adSetupParameterNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -173,13 +187,27 @@ adNodeArray* adSetupVariableNodeArray::Clone(void) const
 	return new adSetupVariableNodeArray(*this);
 }
 
-string adSetupVariableNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupVariableNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strName;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrRanges, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::Variable(strName, strarrIndexes);
+	
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
+//string adSetupVariableNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrRanges, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::Variable(strName, strarrIndexes);
+//}
 
 string adSetupVariableNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -283,13 +311,38 @@ adNodeArray* adSetupTimeDerivativeNodeArray::Clone(void) const
 	return new adSetupTimeDerivativeNodeArray(*this);
 }
 
-string adSetupTimeDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupTimeDerivativeNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport;
+	boost::format fmtFile;
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+	string strName = daeGetRelativeName(c.m_pModel, m_pVariable);
+	
+	if(eLanguage == eCDAE)
+	{
+		strExport = "%1%.dt_array(%2%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % toString(strarrIndexes);
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		strExport = "self.%1%.dt_array(%2%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % toString(strarrIndexes);
+	}
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+
+	strContent += fmtFile.str();
 }
+//string adSetupTimeDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrRanges, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+//}
 
 string adSetupTimeDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
@@ -399,14 +452,41 @@ adNodeArray* adSetupPartialDerivativeNodeArray::Clone(void) const
 	return new adSetupPartialDerivativeNodeArray(*this);
 }
 
-string adSetupPartialDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+void adSetupPartialDerivativeNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport;
+	boost::format fmtFile;
 	vector<string> strarrIndexes;
+	
 	FillDomains(m_arrRanges, strarrIndexes);
-	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
-	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
+	string strName       = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
+	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
+	
+	if(eLanguage == eCDAE)
+	{
+		strExport = "%1%.%2%(%3%, %4%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % (m_nDegree == 1 ? "d_array" : "d2_array") % strDomainName % toString(strarrIndexes);
+	}
+	else if(eLanguage == ePYDAE)
+	{
+		strExport = "self.%1%.%2%(self.%3%, %4%)";
+		fmtFile.parse(strExport);
+		fmtFile % strName % (m_nDegree == 1 ? "d_array" : "d2_array") % strDomainName % toString(strarrIndexes);
+	}
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+
+	strContent += fmtFile.str();
 }
+//string adSetupPartialDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	FillDomains(m_arrRanges, strarrIndexes);
+//	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
+//	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
+//	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
+//}
 
 string adSetupPartialDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
