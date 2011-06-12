@@ -570,6 +570,7 @@ xmlTag_t* xmlPresentationCreator::PartialDerivative(xmlTag_t* parent,
 /*********************************************************************************************
     textCreator
 *********************************************************************************************/
+/*
 string textCreator::Constant(real_t value)
 {
 	string strValue = toStringFormatted<real_t>(value, -1, 10, false);
@@ -692,6 +693,7 @@ string textCreator::PartialDerivative(size_t order,
 
 	return strResult;
 }
+*/
 
 /*********************************************************************************************
     latexCreator

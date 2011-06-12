@@ -40,6 +40,8 @@ void		MakeLower(std::string& strSource);
 std::string	Replace(std::string strSource,    char cFind = ' ', char cReplace = '_');
 std::string	ReplaceAll(std::string strSource, char cFind = ' ', char cReplace = '_');
 void		RemoveAll(std::string& strSource, const std::string& strFind);
+void		RemoveAllNonAlphaNumericCharacters(std::string& strSource);
+inline void RemoveAllNonAlphaNumericCharacters(std::vector<std::string>& strarrSource);
 void		LTrim(std::string& strSource, char cTrim = ' ');
 void		RTrim(std::string& strSource, char cTrim = ' ');
 
@@ -84,23 +86,41 @@ template<class T>
 std::string toStringFormatted(T value, 
 							  std::streamsize width = -1, 
 							  std::streamsize precision = -1, 
-							  bool scientific = false)
+							  bool scientific = false,
+							  bool strip_if_integer = false)
 {
 	std::stringstream ss;
+	
 	if(scientific)
 		ss << std::setiosflags(std::ios_base::scientific);
 	else
 		ss << std::setiosflags(std::ios_base::fixed);
+	
 	if(width != -1)
 		ss << std::setw(width);
+	
 	if(precision != -1)
 		ss << std::setprecision(precision);
-	if(!(ss << value))
+	
+	if(strip_if_integer && value == (T)(int)(value))
 	{
-		std::string strError = "Runtime error: cannot convert number to formatted string";
-		std::invalid_argument e(strError.c_str());
-		throw e;
+		if(!(ss << (int)(value)))
+		{
+			std::string strError = "Runtime error: cannot convert number to formatted string";
+			std::invalid_argument e(strError.c_str());
+			throw e;
+		}
 	}
+	else
+	{
+		if(!(ss << value))
+		{
+			std::string strError = "Runtime error: cannot convert number to formatted string";
+			std::invalid_argument e(strError.c_str());
+			throw e;
+		}
+	}
+	
 	return ss.str();
 }
 
@@ -167,14 +187,15 @@ template<class T>
 std::string toStringFormatted(const std::vector<T>& std_array, 
 							  std::streamsize width = -1, 
 							  std::streamsize precision = -1, 
-							  bool scientific = false)
+							  bool scientific = false,
+							  bool strip_if_integer = false)
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
 			result += ", ";
-		result += toStringFormatted<T>(std_array[i], width, precision, scientific);
+		result += toStringFormatted<T>(std_array[i], width, precision, scientific, strip_if_integer);
 	}
 	return result;
 }
@@ -464,6 +485,19 @@ inline void RemoveAll(std::string& strSource, const std::string& strFind)
 		strSource.erase(iFounded, iFounded+n);
 		iFounded = strSource.find(strFind, iFounded);
 	}
+} 
+
+inline void RemoveAllNonAlphaNumericCharacters(std::string& strSource)
+{
+	static std::string strNonAlphaNumerics[10] = {"!","~","@","#","$","%","^","&","*",";"};
+	for(size_t i = 0; i < 10; i++)
+		RemoveAll(strSource, strNonAlphaNumerics[i]);
+} 
+
+inline void RemoveAllNonAlphaNumericCharacters(std::vector<std::string>& strarrSource)
+{
+	for(size_t i = 0; i < strarrSource.size(); i++)
+		RemoveAllNonAlphaNumericCharacters(strarrSource[i]);
 } 
 
 inline void LTrim(std::string& strSource, char cTrim /*= ' '*/)

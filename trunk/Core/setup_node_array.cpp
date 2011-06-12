@@ -72,6 +72,7 @@ void adSetupParameterNodeArray::Export(std::string& strContent, daeeModelLanguag
 	vector<string> strarrIndexes;
 
 	FillDomains(m_arrRanges, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 	
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
@@ -193,6 +194,7 @@ void adSetupVariableNodeArray::Export(std::string& strContent, daeeModelLanguage
 	vector<string> strarrIndexes;
 
 	FillDomains(m_arrRanges, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 	
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
@@ -316,8 +318,11 @@ void adSetupTimeDerivativeNodeArray::Export(std::string& strContent, daeeModelLa
 	string strExport;
 	boost::format fmtFile;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrRanges, strarrIndexes);
-	string strName = daeGetRelativeName(c.m_pModel, m_pVariable);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+
+	string strName = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
 	
 	if(eLanguage == eCDAE)
 	{
@@ -459,6 +464,8 @@ void adSetupPartialDerivativeNodeArray::Export(std::string& strContent, daeeMode
 	vector<string> strarrIndexes;
 	
 	FillDomains(m_arrRanges, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+
 	string strName       = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
 	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
 	

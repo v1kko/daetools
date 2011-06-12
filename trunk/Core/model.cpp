@@ -400,9 +400,6 @@ string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModel
 	c.m_nPythonIndentLevel = 0;
 	c.m_bExportDefinition  = true;
 
-	//c.m_strClassName = strClassName;
-	//c.m_bExportDefinition = false;
-
 	if(eLanguage == ePYDAE)
 	{
 	/* Arguments:
@@ -524,14 +521,12 @@ void daeModel::Export(std::string& strContent, daeeModelLanguage eLanguage, daeM
 void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 	boost::format fmtFile;
-	string strComment, strFile, strCXXDeclaration, strConstructor, strDeclareEquations;
+	string strFile, strCXXDeclaration, strConstructor, strDeclareEquations;
 	
 	c.m_pModel = this;
 	
 	if(eLanguage == ePYDAE)
 	{
-		strComment = "#"; 
-		
 	/* Arguments:
 	   1. Class name
 	   2. Variable types
@@ -569,8 +564,6 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 	}
 	else if(eLanguage == eCDAE)
 	{
-		strComment   = "//"; 
-		
 		strFile  = 
 		"class %1% : public daeModel\n"
 		"{\n"

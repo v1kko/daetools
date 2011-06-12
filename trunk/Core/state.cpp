@@ -72,7 +72,53 @@ void daeState::Save(io::xmlTag_t* pTag) const
 
 void daeState::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport, strEquations, strStateTransitions, strSTNs;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.STATE(\"%1%\")\n" + 
+						"%2%"+
+						"%3%"+
+						"%4%\n";
+			ExportObjectArray(m_ptrarrEquations,        strEquations,        eLanguage, c);
+			ExportObjectArray(m_ptrarrSTNs,             strSTNs,             eLanguage, c);
+			ExportObjectArray(m_ptrarrStateTransitions, strStateTransitions, eLanguage, c);
+			
+			fmtFile.parse(strExport);
+			fmtFile % m_strShortName
+					% strEquations 
+					% strSTNs 
+					% strStateTransitions;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "STATE(\"%1%\");\n" + 
+						"%2%"+
+						"%3%"+
+						"%4%\n";
+			ExportObjectArray(m_ptrarrEquations,        strEquations,        eLanguage, c);
+			ExportObjectArray(m_ptrarrSTNs,             strSTNs,             eLanguage, c);
+			ExportObjectArray(m_ptrarrStateTransitions, strStateTransitions, eLanguage, c);
+			
+			fmtFile.parse(strExport);
+			fmtFile % m_strShortName
+					% strEquations 
+					% strSTNs 
+					% strStateTransitions;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += fmtFile.str();
 }
 
 void daeState::OpenRuntime(io::xmlTag_t* pTag)

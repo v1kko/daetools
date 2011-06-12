@@ -59,7 +59,8 @@ class adNode;
 class adNodeArray;
 class daeModel;
 class daeExecutionContext;
-class DAE_CORE_API daeCondition : public io::daeSerializable
+class DAE_CORE_API daeCondition : public io::daeSerializable,
+							      public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeCondition)
@@ -68,13 +69,15 @@ public:
 	virtual ~daeCondition(void);
 
 public:
-	virtual void	Open(io::xmlTag_t* pTag);
-	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual void	OpenRuntime(io::xmlTag_t* pTag);
-	virtual void	SaveRuntime(io::xmlTag_t* pTag) const;
+	virtual void Open(io::xmlTag_t* pTag);
+	virtual void Save(io::xmlTag_t* pTag) const;
+	virtual void OpenRuntime(io::xmlTag_t* pTag);
+	virtual void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	virtual bool	Evaluate(const daeExecutionContext* pExecutionContext) const;
-					operator bool(void);
+	virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
+	virtual bool Evaluate(const daeExecutionContext* pExecutionContext) const;
+		operator bool(void);
 
     daeCondition operator ||(const daeCondition& rCondition) const;
     daeCondition operator &&(const daeCondition& rCondition) const;
@@ -94,6 +97,7 @@ protected:
 public:
 	daeModel*									m_pModel;
 	boost::shared_ptr<condNode>					m_pConditionNode;
+	boost::shared_ptr<condNode>					m_pSetupConditionNode;
 	std::vector< boost::shared_ptr<adNode> >	m_ptrarrExpressions;
 	real_t										m_dEventTolerance;
 };

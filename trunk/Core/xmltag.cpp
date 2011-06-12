@@ -1210,11 +1210,11 @@ void xmlAttribute::SetValue(unsigned int Value)
 } 
 void xmlAttribute::SetValue(float Value)
 {
-	m_strValue = toStringFormatted<float>(Value, -1, 20, false);
+	m_strValue = toStringFormatted<float>(Value, -1, 14, false, true);
 } 
 void xmlAttribute::SetValue(double Value)
 {
-	m_strValue = toStringFormatted<double>(Value, -1, 30, false);
+	m_strValue = toStringFormatted<double>(Value, -1, 20, false, true);
 } 
 void xmlAttribute::SetValue(bool Value)
 {

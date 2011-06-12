@@ -82,6 +82,7 @@ void adSetupParameterNode::Export(std::string& strContent, daeeModelLanguage eLa
 	vector<string> strarrIndexes;
 
 	FillDomains(m_arrDomains, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 	
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
@@ -185,9 +186,12 @@ adNode* adSetupDomainIteratorNode::Clone(void) const
 
 void adSetupDomainIteratorNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	vector<string> strarrIndexes;
-	string strName = m_pDEDI->GetName();
-	strContent += textCreator::Variable(strName, strarrIndexes);
+	if(eLanguage == eCDAE)
+		strContent += m_pDEDI->GetStrippedName();
+	else if(eLanguage == ePYDAE)
+		strContent += m_pDEDI->GetStrippedName();
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 //string adSetupDomainIteratorNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
 //{
@@ -315,6 +319,7 @@ void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLan
 	vector<string> strarrIndexes;
 
 	FillDomains(m_arrDomains, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 	
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
@@ -459,8 +464,11 @@ void adSetupTimeDerivativeNode::Export(std::string& strContent, daeeModelLanguag
 	string strExport;
 	boost::format fmtFile;
 	vector<string> strarrIndexes;
+
 	FillDomains(m_arrDomains, strarrIndexes);
-	string strName = daeGetRelativeName(c.m_pModel, m_pVariable);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+
+	string strName = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
 	
 	if(eLanguage == eCDAE)
 	{
@@ -615,6 +623,8 @@ void adSetupPartialDerivativeNode::Export(std::string& strContent, daeeModelLang
 	vector<string> strarrIndexes;
 	
 	FillDomains(m_arrDomains, strarrIndexes);
+	dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+
 	string strName       = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
 	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
 	

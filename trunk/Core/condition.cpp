@@ -47,6 +47,7 @@ void daeCondition::Open(io::xmlTag_t* pTag)
 
 	string strName = "Expression";
 	condNode* node = condNode::OpenNode(pTag, strName);
+	// Or m_pSetupConditionNode ???
 	m_pConditionNode.reset(node);
 }
 
@@ -55,7 +56,7 @@ void daeCondition::Save(io::xmlTag_t* pTag) const
 	io::daeSerializable::Save(pTag);
 
 	string strName = "Expression";
-	condNode::SaveNode(pTag, strName, m_pConditionNode.get());
+	condNode::SaveNode(pTag, strName, m_pSetupConditionNode.get());
 
 	strName = "MathML";
 	SaveNodeAsMathML(pTag, strName);
@@ -73,18 +74,31 @@ void daeCondition::SaveRuntime(io::xmlTag_t* pTag) const
 	SaveNodeAsMathML(pTag, strName);
 }
 
+void daeCondition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	m_pSetupConditionNode->Export(strContent, eLanguage, c);
+}
+
 string daeCondition::SaveNodeAsPlainText(void) const
 {
-	daeDeclareAndThrowException(exNotImplemented);
-//	daeSaveAsMathMLContext c(m_pModel);
-//	return m_pConditionNode->SaveAsPlainText(&c);
+	string strContent;
+	daeModelExportContext c;
+	
+	c.m_pModel             = m_pModel;
+	c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+
+	m_pSetupConditionNode->Export(strContent, eCDAE, c);
+
+	return strContent;
 }
 
 void daeCondition::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;
 	daeSaveAsMathMLContext c(m_pModel);
-	condNode* node = m_pConditionNode.get();
+	
+	condNode* node = m_pSetupConditionNode.get();
 	if(!node)
 		daeDeclareAndThrowException(exXMLIOError);
 

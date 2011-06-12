@@ -76,15 +76,15 @@ public:
 	static void WrapIdentifier(xmlTag_t* parent, string name);
 };
 
-class textCreator
-{
-public:
-	static string Constant(real_t value);
-	static string Variable(string name, const vector<string>& domains);
-	static string Domain(string name, string strIndex);
-	static string TimeDerivative(size_t order, string name, const vector<string>& domains, bool bBracketsAroundName = false);
-	static string PartialDerivative(size_t order, string name, string domain, const vector<string>& domains, bool bBracketsAroundName = false);
-};
+//class textCreator
+//{
+//public:
+//	static string Constant(real_t value);
+//	static string Variable(string name, const vector<string>& domains);
+//	static string Domain(string name, string strIndex);
+//	static string TimeDerivative(size_t order, string name, const vector<string>& domains, bool bBracketsAroundName = false);
+//	static string PartialDerivative(size_t order, string name, string domain, const vector<string>& domains, bool bBracketsAroundName = false);
+//};
 
 class latexCreator
 {

@@ -95,7 +95,6 @@ void daeDomain::Export(std::string& strContent, daeeModelLanguage eLanguage, dae
 		{
 			daeDeclareAndThrowException(exNotImplemented); 
 		}
-		
 	}
 	else
 	{

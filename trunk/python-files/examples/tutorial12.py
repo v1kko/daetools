@@ -67,6 +67,8 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
+        # Domains that variables/parameters are distributed on can be given in a constructor
+        # or by using DistributeOnDomain() function
         self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K", [self.x, self.y])
         #self.T.DistributeOnDomain(self.x)
         #self.T.DistributeOnDomain(self.y)

@@ -63,7 +63,45 @@ void daeSTN::Save(io::xmlTag_t* pTag) const
 
 void daeSTN::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport, strStates;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = self.STN(\"%2%\")\n\n" + 
+						"%3%"+
+						c.CalculateIndent(c.m_nPythonIndentLevel) + "self.END_STN()\n\n";
+			ExportObjectArray(m_ptrarrStates, strStates, eLanguage, c);
+			
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% strStates;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeSTN* %1% = STN(\"%2%\");\n\n" + 
+						"%3%"+
+						c.CalculateIndent(c.m_nPythonIndentLevel) + "END_STN();\n\n";
+			ExportObjectArray(m_ptrarrStates, strStates, eLanguage, c);
+
+			fmtFile.parse(strExport);
+			fmtFile % GetStrippedName() 
+					% m_strShortName 
+					% strStates;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += fmtFile.str();
 }
 
 void daeSTN::OpenRuntime(io::xmlTag_t* pTag)

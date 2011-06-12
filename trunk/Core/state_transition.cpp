@@ -59,7 +59,39 @@ void daeStateTransition::Save(io::xmlTag_t* pTag) const
 
 void daeStateTransition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	string strExport, strCondition;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.SWITCH_TO(\"%1%\", %2%)\n";
+			m_Condition.Export(strCondition, eLanguage, c);
+			
+			fmtFile.parse(strExport);
+			fmtFile % m_pStateTo->GetName()
+					% strCondition;
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "SWITCH_TO(\"%1%\", %2%);\n";
+			m_Condition.Export(strCondition, eLanguage, c);
+			
+			fmtFile.parse(strExport);
+			fmtFile % m_pStateTo->GetName()
+					% strCondition;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += fmtFile.str();
 }
 
 void daeStateTransition::OpenRuntime(io::xmlTag_t* pTag)
@@ -154,9 +186,10 @@ void daeStateTransition::Initialize(void)
 	if(!m_Condition.m_pConditionNode)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	
-// This creates runtime node from setup nodes	
+// This creates a runtime node from a setup node, and stores the original setup node in m_pSetupConditionNode	
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-	m_Condition.m_pConditionNode = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo).m_pConditionNode;
+	m_Condition.m_pSetupConditionNode = m_Condition.m_pConditionNode;
+	m_Condition.m_pConditionNode      = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo).m_pConditionNode;
 }
 
 daeCondition* daeStateTransition::GetCondition(void)

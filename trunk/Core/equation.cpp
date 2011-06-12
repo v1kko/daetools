@@ -877,6 +877,7 @@ void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		else if(eLanguage == eCDAE)
 		{
 			strExport  = c.CalculateIndent(c.m_nPythonIndentLevel) + "{\n";
+			c.m_nPythonIndentLevel++;
 			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "eq = CreateEquation(\"%1%\", \"%2%\");\n";
 			if(!m_ptrarrDistributedEquationDomainInfos.empty())
 			{
@@ -887,7 +888,7 @@ void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 					{
 						strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + 
 									 "const size_t domainIndexes[" + toString(pDEDI->m_narrDomainPoints.size()) + "] = {" + 
-									    toString(pDEDI->m_narrDomainPoints) + "};\n";
+									 toString(pDEDI->m_narrDomainPoints) + "};\n";
 						strBounds = "domainIndexes, " + toString(pDEDI->m_narrDomainPoints.size());
 					}
 					else
@@ -895,13 +896,14 @@ void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 						strBounds = g_EnumTypesCollection->esmap_daeeDomainBounds.GetString(pDEDI->m_eDomainBounds);
 					}
 					
-					strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + 
+					strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "daeDEDI* " + 
 								 pDEDI->GetStrippedName() + 
 								 " = eq->DistributeOnDomain(" + pDEDI->m_pDomain->GetStrippedName() +
-								 ", " + strBounds + ")\n";
+								 ", " + strBounds + ");\n";
 				}
 			}
 			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "eq->SetResidual(%3%);\n";
+			c.m_nPythonIndentLevel--;
 			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "}\n\n";
 
 			m_pResidualNode->Export(strResidual, eLanguage, c);

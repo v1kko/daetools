@@ -152,16 +152,14 @@ void daeObject::SetDescription(const string& strDescription)
 string daeObject::GetStrippedName(void) const
 {
 	string strStrippedName = m_strShortName;
-	dae::RemoveAll(strStrippedName, string("&"));
-	dae::RemoveAll(strStrippedName, string(";"));
+	dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
 	return strStrippedName;
 }
 
 string daeObject::GetStrippedNameRelativeToParentModel(void) const
 {
 	string strStrippedName = GetNameRelativeToParentModel();
-	dae::RemoveAll(strStrippedName, string("&"));
-	dae::RemoveAll(strStrippedName, string(";"));
+	dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
 	return strStrippedName;
 }
 
@@ -202,8 +200,7 @@ string daeGetRelativeName(const string& strParent, const string& strChild)
 string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child)
 {
 	string strStrippedName = dae::core::daeGetRelativeName(parent, child);
-	dae::RemoveAll(strStrippedName, string("&"));
-	dae::RemoveAll(strStrippedName, string(";"));
+	dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
 	return strStrippedName;
 }
 

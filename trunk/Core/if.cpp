@@ -30,7 +30,70 @@ void daeIF::Save(io::xmlTag_t* pTag) const
 
 void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
+	daeState* pState;
+	string strExport, strState, strSTNs, strStateTransition, strEquations;
+	boost::format fmtState;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+			{
+				pState = m_ptrarrStates[i];
+				
+				strEquations.clear();
+				strStateTransition.clear();
+				if(i == 0) // The first one: IF
+				{
+					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.IF(%1%)\n\n" + "%2%%3%\n";
+
+					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
+					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
+				
+					fmtState.parse(strState);
+					fmtState % strStateTransition % strEquations % strSTNs;
+				}
+				else if(i == m_ptrarrStates.size()-1)  // The last one: ELSE
+				{
+					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.ELSE()\n\n" + "%1%%2%\n";
+					
+					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
+					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
+				
+					fmtState.parse(strState);
+					fmtState % strEquations % strSTNs;
+				}
+				else // ELSE_IF
+				{
+					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.ELSE_IF(%1%)\n\n" + "%2%3%\n";
+					
+					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
+					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
+				
+					fmtState.parse(strState);
+					fmtState % strStateTransition % strEquations % strSTNs;
+				}
+				strExport += fmtState.str();
+			}
+			
+			strExport += c.CalculateIndent(c.m_nPythonIndentLevel) + "self.END_IF()\n\n";
+		}
+		else if(eLanguage == eCDAE)
+		{
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
 	
+	strContent += strExport;
 }
 
 void daeIF::OpenRuntime(io::xmlTag_t* pTag)

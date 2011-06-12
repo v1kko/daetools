@@ -262,7 +262,10 @@ adNodeArray* adConstantNodeArray::Clone(void) const
 
 void adConstantNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {	
-	strContent += textCreator::Constant(m_dValue);
+	if(m_dValue < 0)
+		strContent += "(" + toStringFormatted<real_t>(m_dValue, -1, 12, false, true) + ")";
+	else
+		strContent += toStringFormatted<real_t>(m_dValue, -1, 12, false, true);
 }
 
 //string adConstantNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
