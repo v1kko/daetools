@@ -30,6 +30,7 @@ daeSimulation::daeSimulation(void)
 
 daeSimulation::~daeSimulation(void)
 {
+	Finalize();
 }
 
 void daeSimulation::SetUpParametersAndDomains()
@@ -437,20 +438,8 @@ void daeSimulation::Run(void)
 		
 		m_dCurrentTime = t;
 	}
-}
 
-void daeSimulation::Finalize(void)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pDAESolver)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pDataReporter)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pLog)
-		daeDeclareAndThrowException(exInvalidPointer);
-	
-// Finalize the simulation		
+// Print the ned of the simulation info if not in the optimization mode		
 	if(!m_bSetupOptimization)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &m_IntegrationEnd);
@@ -464,11 +453,17 @@ void daeSimulation::Finalize(void)
 		m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(integration,                             -1, 3) + string(" s"), 0);
 		m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(creation + initialization + integration, -1, 3) + string(" s"), 0);
 	}
-	
-// Notify the receiver that there is no more data, and disconnect it		
-	m_pDataReporter->EndOfData();
-	m_pDataReporter->Disconnect();
+}
 
+void daeSimulation::Finalize(void)
+{
+// Notify the receiver that there is no more data, and disconnect it
+	if(m_pDataReporter)
+	{
+		m_pDataReporter->EndOfData();
+		m_pDataReporter->Disconnect();
+	}
+	
 	m_pModel		= NULL;
 	m_pDAESolver	= NULL;
 	m_pDataReporter = NULL;

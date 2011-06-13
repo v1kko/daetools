@@ -23,6 +23,7 @@ daeOptimization::daeOptimization(void)
 
 daeOptimization::~daeOptimization(void)
 {
+	Finalize();
 }
 
 void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
@@ -99,31 +100,28 @@ void daeOptimization::Run(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 	m_pNLPSolver->Solve();
-}
-
-void daeOptimization::Finalize(void)
-{
-	if(!m_bIsInitialized)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Optimization has not been initialized";
-		throw e;
-	}
 	
-	if(!m_pSimulation)
-		daeDeclareAndThrowException(exInvalidPointer);
-
 	clock_t end = time(NULL);
 	m_Optimization = difftime(end, m_Optimization);
 
 	m_pLog->Message(string(" "), 0);
 	m_pLog->Message(string("The optimization finished."), 0);
 	m_pLog->Message(string("Total run time = ") + toStringFormatted<real_t>(real_t(m_Initialization + m_Optimization), -1, 0) + string(" s"), 0);
-
-	m_pSimulation->Finalize();
 }
 
-
+void daeOptimization::Finalize(void)
+{
+	if(m_pSimulation)
+		m_pSimulation->Finalize();
+	
+	m_pSimulation	= NULL;
+	m_pLog			= NULL;
+	m_pNLPSolver	= NULL;
+	m_pDataReporter = NULL;
+	m_pDAESolver	= NULL;
+	
+	m_bIsInitialized = false;
+}
 
 }
 }

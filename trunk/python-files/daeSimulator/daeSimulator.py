@@ -121,6 +121,14 @@ class daeSimulator(QtGui.QDialog):
         port  = cfg.GetInteger("daetools.datareporting.tcpipDataReceiverPort", 50000)
         self.ui.DataReporterTCPIPAddressLineEdit.setText( tcpip + ':' + str(port) )
 
+    def __del__(self):
+        # Calling Finalize is not mandatory since it will be called
+        # in a simulation/optimization destructor
+        if self.simulation:
+            self.simulation.Finalize()
+        elif self.optimization:
+            self.optimization.Finalize()
+
     #@QtCore.pyqtSlot()
     def slotResume(self):
         self.simulation.Resume()
@@ -300,7 +308,7 @@ class daeSimulator(QtGui.QDialog):
                     self.lasolver_setoptions_fn(self.lasolver)
                 self.simulation.SolveInitial()
                 self.simulation.Run()
-                self.simulation.Finalize()
+
             else:
                 # If nlpsolver is not sent then create it based on the selection
                 if(self.nlpsolver == None):
@@ -348,7 +356,6 @@ class daeSimulator(QtGui.QDialog):
                 if(self.nlpsolver_setoptions_fn):
                     self.nlpsolver_setoptions_fn(self.nlpsolver)
                 self.optimization.Run()
-                self.optimization.Finalize()
 
         except Exception, error:
             self.ui.textEdit.append(str(error))
