@@ -53,7 +53,8 @@ class daeEpetraCSRMatrix : public daeSparseMatrix<double>
 public:
 	daeEpetraCSRMatrix(void)
 	{
-		indexing = CSR_C_STYLE;
+		indexing   = CSR_C_STYLE;
+		rowCounter = 0;
 	}
 	
 	~daeEpetraCSRMatrix(void)
@@ -63,8 +64,9 @@ public:
 public:
 	void InitMatrix(size_t n, Epetra_CrsMatrix* m)
 	{
-		N = n;
-		matrix = m;
+		N          = n;
+		matrix     = m;
+		rowCounter = 0;
 	}
 
 	bool GetIndexing(void)

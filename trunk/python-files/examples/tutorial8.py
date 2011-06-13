@@ -18,6 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 In this example we use a similar problem as in the tutorial 5.
 Here we introduce:
+ - Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)
  - Custom data reporters
 
 Some time it is not enough to send the result to daePlotter but it is desirable to
@@ -35,6 +36,7 @@ some other ways).
 
 import sys, tempfile
 from daetools.pyDAE import *
+from daetools.pyDAE.daeDataReporters import *
 from time import localtime, strftime
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
@@ -140,25 +142,33 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.T.SetInitialCondition(300)
 
-# This function does not work!!
-# It seems the class daeDelegateDataReporter cant iterate over
-# data reporters!!???
-def setupDataReporters(simulationName):
+# All data reporters should be members of let's say simulation object, otherwise
+# the objects are destroyed at the exit of setupDataReporters function and
+# we get dangling daeDataReporter_t pointers stored in the daeDelegateDataReporter list and
+# receive the 'pure virtual method called' error
+def setupDataReporters(simulation):
     # Create daeDelegateDataReporter and the add 2 data reporters:
     # - MyDataReporterLocal (to write data to the file 'tutorial8.out')
     # - daeTCPIPDataReporter (to send data to the daePlotter)
+    # - daeMatlabMATFileDataReporter (to export the results into the Matlab .mat file format)
     datareporter = daeDelegateDataReporter()
-    dr1 = MyDataReporter()
-    dr2 = daeTCPIPDataReporter()
-    datareporter.AddDataReporter(dr1)
-    datareporter.AddDataReporter(dr2)
+    simulation.dr1 = MyDataReporter()
+    simulation.dr2 = daeTCPIPDataReporter()
+    simulation.dr3 = daeMatlabMATFileDataReporter()
+    datareporter.AddDataReporter(simulation.dr1)
+    datareporter.AddDataReporter(simulation.dr2)
+    datareporter.AddDataReporter(simulation.dr3)
 
-    # Connect data reporter
-    simName = simulationName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    # Connect data reporters
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     filename = tempfile.gettempdir() + "/tutorial8.out"
-    if(dr1.Connect(filename, simName) == False):
+    matfilename = tempfile.gettempdir() + "/tutorial8.mat"
+
+    if(simulation.dr1.Connect(filename, simName) == False):
         sys.exit()
-    if(dr2.Connect("", simName) == False):
+    if(simulation.dr2.Connect("", simName) == False):
+        sys.exit()
+    if(simulation.dr3.Connect(matfilename, simName) == False):
         sys.exit()
 
     return datareporter
@@ -182,7 +192,7 @@ def consoleRun():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
-    datareporter = MyDataReporter()
+    datareporter = setupDataReporters(simulation)
 
     filename = tempfile.gettempdir() + "/tutorial8.out"
     if(datareporter.Connect(filename, simulation.m.Name) == False):

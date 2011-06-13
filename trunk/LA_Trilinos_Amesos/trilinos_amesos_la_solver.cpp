@@ -234,10 +234,13 @@ int daeTrilinosSolver::Reinitialize(void* ida)
 	if(!m_pBlock)
 		return IDA_MEM_NULL;
 	
-// Re-initialize sparse matrix
-// ACHTUNG, ACHTUNG!!! It doesn't work, should be checked
-// If the matrix structure changes I cannot change Epetra_Crs_Matrix - I have to re-built it!
+// ACHTUNG, ACHTUNG!!! 
+// If the matrix structure changes I cannot modify Epetra_Crs_Matrix - only to re-built it!
+// Therefore, here we create a new Epetra_CrsMatrix and use it to re-init the Jacobian matrix
+	m_matEPETRA.reset(new Epetra_CrsMatrix(Copy, *m_map, 0));
+	m_matJacobian.InitMatrix(m_nNoEquations, m_matEPETRA.get());	
 	m_matJacobian.ResetCounters();
+	
 	m_pBlock->FillSparseMatrix(&m_matJacobian);
 	m_matJacobian.Sort();
 	//m_matJacobian.Print();

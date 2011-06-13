@@ -90,6 +90,7 @@ copy daeLogs.py                  %ROOT%\pyDAE
 copy WebView_ui.py               %ROOT%\pyDAE
 copy WebViewDialog.py            %ROOT%\pyDAE
 copy daeVariableTypes.py         %ROOT%\pyDAE
+copy daeDataReporters.py         %ROOT%\pyDAE
 copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
 copy solvers__init__.py          %ROOT%\solvers\__init__.py
 copy model_library__init__.py    %ROOT%\model_library\__init__.py

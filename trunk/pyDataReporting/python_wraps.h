@@ -12,6 +12,8 @@
 #include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/python/call_method.hpp>
+#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
@@ -494,13 +496,13 @@ public:
 	bool IsConnected(void)
 	{
         if(boost::python::override f = this->get_override("IsConnected"))
-            return f();
+			return f();
 		else
 			return this->daeDelegateDataReporter::IsConnected();
 	}
 	bool def_IsConnected(void)
 	{
-        return this->daeDelegateDataReporter::IsConnected();
+        return daeDelegateDataReporter::IsConnected();
 	}
 
 	bool StartRegistration(void)
@@ -586,18 +588,6 @@ public:
 	{
         return this->daeDelegateDataReporter::SendVariable(pVariableValue);
 	}
-//	
-//	void AddDataReporter(daeDataReporter_t* pDataReporter)
-//	{
-//        if(boost::python::override f = this->get_override("AddDataReporter"))
-//            f(pDataReporter);
-//		else
-//			this->daeDelegateDataReporter::AddDataReporter(pDataReporter);
-//	}
-//	void def_AddDataReporter(daeDataReporter_t* pDataReporter)
-//	{
-//        this->daeDelegateDataReporter::AddDataReporter(pDataReporter);
-//	}
 };
 
 class daeDataReporterRemoteWrapper : public daeDataReporterRemote,
