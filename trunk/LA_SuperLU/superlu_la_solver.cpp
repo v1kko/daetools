@@ -43,6 +43,8 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 #ifdef daeSuperLU_MT
 	m_perm_c	= NULL;
 	m_perm_r	= NULL;
+    m_work		= NULL;
+    m_lwork		= 0;
 
     m_Options.nprocs			= 4;
     m_Options.fact				= EQUILIBRATE;
@@ -158,7 +160,7 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 		if(m_lwork > 0)
 		{
 			daeDeclareException(exMiscellanous);
-			e << "daeSuperLU_MT: unsupported case: m_lwork > 0" << cudaGetErrorString(ce);
+			e << "daeSuperLU_MT: unsupported case: m_lwork > 0";
 			throw e;
 		}
 		else
@@ -225,7 +227,7 @@ void daeSuperLUSolver::FreeMemory(void)
 		if(m_lwork > 0)
 		{
 			daeDeclareException(exMiscellanous);
-			e << "daeSuperLU_MT: unsupported case: m_lwork > 0" << cudaGetErrorString(ce);
+			e << "daeSuperLU_MT: unsupported case: m_lwork > 0";
 			throw e;
 		}
 		else

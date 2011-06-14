@@ -179,6 +179,7 @@ def consoleRun():
     #      The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
     simulation.Initialize(daesolver, datareporter, log)
 
+    # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 

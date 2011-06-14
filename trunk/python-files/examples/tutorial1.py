@@ -88,7 +88,7 @@ Also, we need to write the following 5 equations:
 
 """
 
-import sys
+import sys, tempfile
 from daetools.pyDAE import *
 from time import localtime, strftime
 
@@ -118,11 +118,11 @@ class modTutorial(daeModel):
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
-        self.Qb = daeParameter("Q_b",      eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t",      eReal, self, "Heat flux at the top edge of the plate, W/m2")
-        self.ro = daeParameter("&rho;",    eReal, self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p",      eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;", eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.Qb = daeParameter("Q_b",        eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
+        self.Qt = daeParameter("Q_t",        eReal, self, "Heat flux at the top edge of the plate, W/m2")
+        self.ro = daeParameter("&rho;",      eReal, self, "Density of the plate, kg/m3")
+        self.cp = daeParameter("c_p",        eReal, self, "Specific heat capacity of the plate, J/kgK")
+        self.k  = daeParameter("&lambda;_p", eReal, self, "Thermal conductivity of the plate, W/mK")
 
         # In this example we need a variable T which is distributed on the domains x and y. Variables (but also other objects)
         # can be distributed by using a function DistributeOnDomain, which accepts a domain object as
@@ -218,6 +218,18 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)
 
+def export(simulation, objects_to_export):
+    pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)
+    cdae_model  = simulation.m.ExportObjects(objects_to_export, eCDAE)
+
+    file_pydae = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.py", "w")
+    file_cdae  = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.h",  "w")
+
+    file_pydae.write(pydae_model)
+    file_cdae.write(cdae_model)
+    file_pydae.close()
+    file_cdae.close()
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -253,6 +265,13 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+
+    # Models and ports now can be exported into some other modelling language
+    # At the moment, models can be exported into pyDAE (python) and cDAE (c++)
+    # but other languages will be supported in the future (such as OpenModelica, EMSO ...)
+    # export() auxiliary function exports the model into pyDAE and cDAE and saves the
+    # exported models into the temporary folder (/tmp or c:\temp)
+    export(simulation, [simulation.m])
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

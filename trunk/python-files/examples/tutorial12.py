@@ -35,17 +35,10 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-#from daetools.solvers import pyCUSPARSE
 #from daetools.solvers import pyCUSP
 #from daetools.solvers import pySuperLU_MT as superlu
 from daetools.solvers import pySuperLU as superlu
 #from daetools.solvers import pySuperLU_CUDA as superlu
-#from daetools.solvers import pyTrilinos
-#from daetools.solvers import pyIntelPardiso
-#from daetools.solvers import pyAmdACML
-#from daetools.solvers import pyIntelMKL
-#from daetools.solvers import pyLapack
-#from daetools.solvers import pyAtlas
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
 typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
@@ -141,45 +134,18 @@ def consoleRun():
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
-    # The default linear solver is Sundials dense sequential solver (LU decomposition).
-    # It is possible to set the following 3rd party direct linear solvers:
-    #  1. Sparse solvers:
-    #      - IntelPardiso (multi-threaded - OMP)
-    #      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack
-    #  3. Dense lapack wrappers:
-    #      - Amd ACML (OMP)
-    #      - Intel MKL (OMP)
-    #      - Generic Lapack (Sequential)
-    #      - Magma lapack (GPU)
-    # If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).
-    # If you are using OMP capable solvers you should set the number of threads to the number of cores.
-    # For instance:
-    #    export OMP_NUM_THREADS=4
-    # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
-
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    #print "Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", ""))
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-    #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
-    #lasolver     = pyAmdACML.daeCreateLapackSolver()
-    #lasolver     = pyIntelMKL.daeCreateLapackSolver()
-    #lasolver     = pyLapack.daeCreateLapackSolver()
-    #lasolver     = superlu.daeCreateSuperLUSolver()
-    #lasolver     = pyCUSPARSE.daeCreateCUSPARSESolver()
+    #lasolver = pyCUSP.daeCreateCUSPSolver()
+    lasolver = superlu.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
-    #options = lasolver.GetOptions()
-
-    #lasolver      = pyCUSP.daeCreateCUSPSolver()
-    #daesolver.SetLASolver(lasolver)
+    options = lasolver.GetOptions()
 
     # SuperLU options:
-    #options.PrintStat       = superlu.YES       # {YES, NO}
-    #options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
-    #options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
-    #options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
+    options.PrintStat       = superlu.YES       # {YES, NO}
+    options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+    options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
+    options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
 
     # SuperLU_MT options:
     #options.nprocs            = 4                 # No. of threads (= no. of CPUs/Cores)
@@ -208,8 +174,6 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-    print simulation.m.ExportObjects([simulation.m], ePYDAE)
-    print simulation.m.ExportObjects([simulation.m], eCDAE)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

@@ -21,6 +21,8 @@ Here we introduce:
  - Third party linear equations solvers
 
 Currently there are 3rd party linear equations solvers:
+ - SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)
+ - SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)
  - Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
  - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
  - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)
@@ -36,6 +38,8 @@ from time import localtime, strftime
 
 # First import desired solver's module:
 from daetools.solvers import pyTrilinos
+#from daetools.solvers import pySuperLU
+#from daetools.solvers import pySuperLU_MT
 #from daetools.solvers import pyIntelPardiso
 #from daetools.solvers import pyAmdACML
 #from daetools.solvers import pyIntelMKL
@@ -134,9 +138,11 @@ def consoleRun():
     simulation   = simTutorial()
 
     # The default linear solver is Sundials dense sequential solver (LU decomposition).
-    # It is possible to set the following 3rd party direct linear solvers:
+    # The following 3rd party direct linear solvers are supported:
     #  1. Sparse solvers:
     #      - IntelPardiso (multi-threaded - OMP)
+    #      - SuperLU (sequential)
+    #      - SuperLU_MT (multi-threaded - pthreads, OMP)
     #      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack
     #  3. Dense lapack wrappers:
     #      - Amd ACML (OMP)

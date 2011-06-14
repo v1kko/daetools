@@ -142,29 +142,29 @@ protected:
 		daeOptimizationConstraint_t* pConstraint;
 			
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-		strMessage = toStringFormatted("Objective function", 25) +  
-					 toStringFormatted("Final value",        16) +
-					 toStringFormatted("Type",               5);
+		strMessage = toString("Objective function", 25) +  
+					 toString("Final value",        16) +
+					 toString("Type",               5);
 		m_pLog->Message(strMessage, 0);
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-		strMessage = toStringFormatted(m_pObjectiveFunction->GetName(), 25)          +   
-					 toStringFormatted(fobj,                            16, 6, true) +
-					 toStringFormatted((m_pObjectiveFunction->IsLinear() ? "L" : "NL"), 5);
+		strMessage = toString(m_pObjectiveFunction->GetName(), 25) +   
+					 toStringFormatted(fobj, 16, 6, true) +
+					 toString((m_pObjectiveFunction->IsLinear() ? "L" : "NL"), 5);
 		m_pLog->Message(strMessage, 0);
 		m_pLog->Message(string(" "), 0);
 	
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-		strMessage = toStringFormatted("Optimization variable", 25) +  
-					 toStringFormatted("Final value",           16) +
-					 toStringFormatted("Lower bound",           16) +
-					 toStringFormatted("Upper bound",           16);
+		strMessage = toString("Optimization variable", 25) +  
+					 toString("Final value",           16) +
+					 toString("Lower bound",           16) +
+					 toString("Upper bound",           16);
 		m_pLog->Message(strMessage, 0);
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 		for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 		{
 			pOptVariable = m_ptrarrOptVariables[i];
 				
-			strMessage = toStringFormatted(pOptVariable->GetName(), 25)          +   
+			strMessage = toString(pOptVariable->GetName(),          25)          +   
 						 toStringFormatted(x[i],                    16, 6, true) +
 						 toStringFormatted(pOptVariable->GetLB(),   16, 6, true) + 
 						 toStringFormatted(pOptVariable->GetUB(),   16, 6, true);
@@ -173,18 +173,18 @@ protected:
 		m_pLog->Message(string(" "), 0);
 	
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
-		strMessage = toStringFormatted("Constraint",  25) +  
-					 toStringFormatted("Final value", 16) +
-					 toStringFormatted("Type",         5);
+		strMessage = toString("Constraint",  25) +  
+					 toString("Final value", 16) +
+					 toString("Type",         5);
 		m_pLog->Message(strMessage, 0);
 		m_pLog->Message(string("-------------------------------------------------------------------------------"), 0);
 		for(i = 0; i < m_ptrarrConstraints.size(); i++)
 		{
 			pConstraint = m_ptrarrConstraints[i];
 				
-			strMessage = toStringFormatted(pConstraint->GetName(),                 25)          + 
-						 toStringFormatted(g ? g[i] : pConstraint->GetValue(),     16, 6, true) +
-						 toStringFormatted((pConstraint->IsLinear() ? "L" : "NL"),  5);
+			strMessage = toString(pConstraint->GetName(), 25)  + 
+						 toStringFormatted(g ? g[i] : pConstraint->GetValue(), 16, 6, true) +
+						 toString((pConstraint->IsLinear() ? "L" : "NL"),  5);
 			m_pLog->Message(strMessage, 0);
 		}	
 		m_pLog->Message(string(" "), 0);

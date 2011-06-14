@@ -54,5 +54,5 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
                          do_compression=False,
                          oned_as='row')
 
-        mat = scipy.io.loadmat(self.ConnectionString)
-        print mat
+        #mat = scipy.io.loadmat(self.ConnectionString)
+        #print mat

@@ -28,15 +28,11 @@ The wrapper model 'modTutorial' instantiate these two models as its units and co
 by connecting their ports.
 """
 
-import sys
+import sys, tempfile
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
+typeNone = daeVariableType("typeNone", "-", 0, 1E10, 0, 1e-5)
 
 # Ports, like models, consist of domains, parameters and variables. Parameters and variables
 # can be distributed as well. Here we define a very simple port, with only one variable.
@@ -103,6 +99,18 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.mpout.time.SetInitialCondition(0)
 
+def export(simulation, objects_to_export):
+    pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)
+    cdae_model  = simulation.m.ExportObjects(objects_to_export, eCDAE)
+
+    file_pydae = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.py", "w")
+    file_cdae  = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.h",  "w")
+
+    file_pydae.write(pydae_model)
+    file_cdae.write(cdae_model)
+    file_pydae.close()
+    file_cdae.close()
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -139,8 +147,8 @@ def consoleRun():
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], ePYDAE)
-    print simulation.m.ExportObjects([simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m], eCDAE)
+    # Export models and ports
+    export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

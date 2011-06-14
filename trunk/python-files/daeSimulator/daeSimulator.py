@@ -288,18 +288,28 @@ class daeSimulator(QtGui.QDialog):
                     raise RuntimeError("Unsupported LA Solver selected")
 
             self.ui.RunButton.setEnabled(False)
-            if not (lasolverIndex in [self.laAmesos_Klu, self.laAmesos_Superlu, self.laAmesos_Umfpack, self.laAztecOO, self.laIntelPardiso,
-                                      self.laSuperLU, self.laSuperLU_MT, self.laSuperLU_CUDA, self.laCUSP]):
-                self.ui.MatrixButton.setEnabled(False)
             self.ui.MINLPSolverComboBox.setEnabled(False)
             self.ui.DAESolverComboBox.setEnabled(False)
             self.ui.LASolverComboBox.setEnabled(False)
             self.ui.DataReporterTCPIPAddressLineEdit.setEnabled(False)
             self.ui.ReportingIntervalDoubleSpinBox.setEnabled(False)
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
+            self.ui.MatrixButton.setEnabled(False)
+            self.ui.ExportButton.setEnabled(False)
+            if lasolverIndex in [self.laAmesos_Klu,
+                                 self.laAmesos_Superlu,
+                                 self.laAmesos_Umfpack,
+                                 self.laAztecOO,
+                                 self.laIntelPardiso,
+                                 self.laSuperLU,
+                                 self.laSuperLU_MT,
+                                 self.laSuperLU_CUDA,
+                                 self.laCUSP]:
+                self.ui.MatrixButton.setEnabled(True)
+                self.ui.ExportButton.setEnabled(True)
 
             if self.lasolver:
-                QtGui.QMessageBox.warning(None, "daeSimulator", self.lasolver.Name)
+                #QtGui.QMessageBox.warning(None, "daeSimulator", self.lasolver.Name)
                 self.daesolver.SetLASolver(self.lasolver)
 
             if self.optimization == None:

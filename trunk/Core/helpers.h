@@ -14,6 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define DAE_HELPERS_H
 
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <vector>
@@ -70,9 +71,13 @@ T fromString(const std::string& value)
 }
 
 template<class T>
-std::string toString(const T value)
+std::string toString(const T value, std::streamsize width = -1)
 {
 	std::stringstream ss;
+	
+	if(width != -1)
+		ss << std::setw(width);
+	
 	if(!(ss << value))
 	{
 		std::string strError = "Runtime error: cannot convert number to string";
@@ -472,17 +477,13 @@ inline void RemoveAll(std::string& strSource, const std::string& strFind)
 	std::string::size_type iFounded;
 	std::string::size_type n = strFind.length();
 
-// Look for the delimiter
+// Look for the string to find
 	iFounded = strSource.find(strFind);
-
-// If not found return only one element (even if it is empty!)
-	if(iFounded == std::string::npos)
-		return;
 
 // Iterate through std::string and add substrings
 	while(iFounded != std::string::npos)
 	{
-		strSource.erase(iFounded, iFounded+n);
+		strSource.erase(iFounded, n);
 		iFounded = strSource.find(strFind, iFounded);
 	}
 } 

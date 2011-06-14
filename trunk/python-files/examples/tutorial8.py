@@ -147,14 +147,16 @@ class simTutorial(daeSimulation):
 # we get dangling daeDataReporter_t pointers stored in the daeDelegateDataReporter list and
 # receive the 'pure virtual method called' error
 def setupDataReporters(simulation):
-    # Create daeDelegateDataReporter and the add 2 data reporters:
+    # Create daeDelegateDataReporter and add 3 data reporters:
     # - MyDataReporterLocal (to write data to the file 'tutorial8.out')
     # - daeTCPIPDataReporter (to send data to the daePlotter)
     # - daeMatlabMATFileDataReporter (to export the results into the Matlab .mat file format)
     datareporter = daeDelegateDataReporter()
+
     simulation.dr1 = MyDataReporter()
     simulation.dr2 = daeTCPIPDataReporter()
     simulation.dr3 = daeMatlabMATFileDataReporter()
+
     datareporter.AddDataReporter(simulation.dr1)
     datareporter.AddDataReporter(simulation.dr2)
     datareporter.AddDataReporter(simulation.dr3)
@@ -176,10 +178,7 @@ def setupDataReporters(simulation):
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
-    dr  = MyDataReporter()
-    filename = tempfile.gettempdir() + "/tutorial8.out"
-    if(dr.Connect(filename, sim.m.Name) == False):
-        sys.exit()
+    dr  = setupDataReporters(sim)
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 100
@@ -193,10 +192,6 @@ def consoleRun():
     daesolver    = daeIDAS()
     simulation   = simTutorial()
     datareporter = setupDataReporters(simulation)
-
-    filename = tempfile.gettempdir() + "/tutorial8.out"
-    if(datareporter.Connect(filename, simulation.m.Name) == False):
-        sys.exit()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

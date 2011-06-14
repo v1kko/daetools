@@ -4,7 +4,7 @@ QT -= core gui
 TEMPLATE = lib
 CONFIG += staticlib
 
-CONFIG += IPOPT
+CONFIG += BONMIN
 
 ######################################################################################
 #                                BONMIN

@@ -4,7 +4,7 @@ QT -= core \
 TARGET = pyBIMINLP
 TEMPLATE = lib
 
-CONFIG += IPOPT
+CONFIG += BONMIN
 
 ######################################################################################
 #                                BONMIN
