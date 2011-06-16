@@ -66,9 +66,11 @@ class modTutorial(daeModel):
         # In this example the density is now a variable
         self.ro = daeVariable("&rho;", typeDensity, self, "Density of the plate, kg/m3")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
-        self.T.DistributeOnDomain(self.x)
-        self.T.DistributeOnDomain(self.y)
+        # Domains that variables/parameters are distributed on can be specified in a constructor:
+        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K", [self.x, self.y])
+        # Another way would be by using DistributeOnDomain() function:
+        #self.T.DistributeOnDomain(self.x)
+        #self.T.DistributeOnDomain(self.y)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")

@@ -43,6 +43,7 @@ Integer constants defined in the module:
     daeeDomainIndexType
      - eConstantIndex
      - eDomainIterator
+     - eIncrementedDomainIterator
 
     daeeRangeType
      - eRangeDomainIndex
@@ -52,6 +53,16 @@ Integer constants defined in the module:
      - eAllPointsInDomain
      - eRangeOfIndexes
      - eCustomRange
+     
+    daeeOptimizationVariableType
+     - eIntegerVariable
+     - eBinaryVariable
+     - eContinuousVariable
+
+    daeeModelLanguage
+     - eMLNone
+     - eCDAE
+     - ePYDAE
 """
 
 class daeObject:
@@ -211,7 +222,8 @@ class daeDomainIndex:
     PROPERTIES:
      - Type: daeeDomainIndexType (read-only)
      - Index: unsigned int (read-only), valid if the Type = eConstantIndex
-     - DEDI: daeDEDI object  (read-only), valid if the Type = eDomainIterator
+     - DEDI: daeDEDI object  (read-only), valid if the Type = eDomainIterator or eIncrementedDomainIterator
+     - Increment: int (read-only), valid if the Type = eDomainIterator or eIncrementedDomainIterator
     """
     def _init_(self, Index):
         """
@@ -337,12 +349,14 @@ class daeParameter(daeObject):
      - Type: daeeParameterType
      - Domains: daeDomain list
     """
-    def __init__(self, Name, Type, Parent):
+    def __init__(self, Name, Type, Parent, Description, Domains):
         """
         ARGUMENTS:
          - Name: string
          - Type: daeeParameterType
          - Parent: daeModel | daePort object
+         - Description: string
+         - Domains: list of daeDomain objects
         """
         pass
 
@@ -438,12 +452,14 @@ class daeVariable(daeObject):
      - Domains: daeDomain list
      - ReportingOn: boolean
     """
-    def __init__(self, Name, VariableType, Parent):
+    def __init__(self, Name, VariableType, Parent, Description, Domains):
         """
         ARGUMENTS:
          - Name: string
          - VariableType: daeVariableType object
          - Parent: daeModel | daePort object
+         - Description: string
+         - Domains: list of daeDomain objects
         """
         pass
 
@@ -744,7 +760,7 @@ class daeVariable(daeObject):
 
 class daePort(daeObject):
     """
-    ATTRIBUTES:
+    PROPERTIES:
      - Type: daeePortType
      - Domains: daeDomain list
      - Parameters: daeParameter list
@@ -1023,6 +1039,16 @@ class daeModel(daeObject):
          - StateName: string
          - Condition: daeCondition object
          - EventTolerance: real_t
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def ExportObjects(self, ObjectsToExport, ModelLanguage):
+        """
+        ARGUMENTS:
+         - ObjectsToExport: list of models and ports objects
+         - ModelLanguage: enum daeeModelLanguage
         RETURNS:
            Nothing
         """
@@ -1421,6 +1447,8 @@ def Floor(adarr):
 
 class daeCondition:
     """
+    PROPERTIES:
+     - EventTolerance: float
     """
     def __init__(self, Name):
         """
@@ -1459,3 +1487,23 @@ class daeCondition:
         """
         pass
 
+class daeOptimizationVariable:
+    """
+    PROPERTIES:
+     - Type: daeeOptimizationVariableType
+     - LowerBound: float
+     - UpperBound: float
+     - StartingPoint: float
+    """
+    
+class daeObjectiveFunction:
+    """
+    PROPERTIES:
+     - Residual: adouble
+    """
+
+class daeOptimizationConstraint:
+    """
+    PROPERTIES:
+     - Residual: adouble
+    """

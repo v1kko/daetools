@@ -85,6 +85,13 @@ BOOST_PYTHON_MODULE(pyCore)
 		.export_values()
 	;
 	
+	enum_<daeeOptimizationVariableType>("daeeOptimizationVariableType")
+		.value("eIntegerVariable",		dae::core::eIntegerVariable)
+		.value("eBinaryVariable",		dae::core::eBinaryVariable)
+		.value("eContinuousVariable",	dae::core::eContinuousVariable)
+		.export_values()
+	;
+
 	enum_<daeeModelLanguage>("daeeModelLanguage")
 		.value("eMLNone",	dae::core::eMLNone)
 		.value("eCDAE",		dae::core::eCDAE)
@@ -249,11 +256,14 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daeDomainIndex>("daeDomainIndex")
 		.def(init<size_t>())
+		.def(init<daeDistributedEquationDomainInfo*>())
+		.def(init<daeDistributedEquationDomainInfo*, int>())
 		.def(init<daeDomainIndex>())
 		
-		.def_readonly("Type",	&daeDomainIndex::m_eType)
-		.def_readonly("Index",	&daeDomainIndex::m_nIndex)
-		.def_readonly("DEDI",	&daeDomainIndex::m_pDEDI)
+		.def_readonly("Type",		&daeDomainIndex::m_eType)
+		.def_readonly("Index",		&daeDomainIndex::m_nIndex)
+		.def_readonly("DEDI",		&daeDomainIndex::m_pDEDI)
+		.def_readonly("Increment",	&daeDomainIndex::m_iIncrement)
 		;
 
 	class_<daeIndexRange>("daeIndexRange")
@@ -554,6 +564,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daeOptimizationVariable, bases<daeOptimizationVariable_t>, boost::noncopyable>("daeOptimizationVariable", no_init)
+		.add_property("Type",			&daeOptimizationVariable::GetType)
 		.add_property("LowerBound",		&daeOptimizationVariable::GetLB,			&daeOptimizationVariable::SetLB)
 		.add_property("UpperBound",		&daeOptimizationVariable::GetUB,			&daeOptimizationVariable::SetUB)
 		.add_property("StartingPoint",	&daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint)

@@ -49,16 +49,26 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;daeeDomainIndexType<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eConstantIndex<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eDomainIterator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eIncrementedDomainIterator<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;daeeRangeType<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRangeConstantIndex<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRangeDomainIterator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRangeDomainIndex<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRange<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;daeIndexRangeType<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eAllPointsInDomain<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eRangeOfIndexes<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eCustomRange</tt></p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eCustomRange<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;daeeOptimizationVariableType<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eIntegerVariable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eBinaryVariable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eContinuousVariable<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;daeeModelLanguage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eMLNone<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;eCDAE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;ePYDAE</tt></p>
 <p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ee77aa">
@@ -94,7 +104,10 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 </font></dt><dt><font face="helvetica, arial"><a href="core.html#daeVariable">daeVariable</a>
 </font></dt></dl>
 </dd>
-<dt><font face="helvetica, arial"><a href="core.html#daeVariableType">daeVariableType</a>
+<dt><font face="helvetica, arial"><a href="core.html#daeObjectiveFunction">daeObjectiveFunction</a>
+</font></dt><dt><font face="helvetica, arial"><a href="core.html#daeOptimizationConstraint">daeOptimizationConstraint</a>
+</font></dt><dt><font face="helvetica, arial"><a href="core.html#daeOptimizationVariable">daeOptimizationVariable</a>
+</font></dt><dt><font face="helvetica, arial"><a href="core.html#daeVariableType">daeVariableType</a>
 </font></dt></dl>
  <p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
@@ -237,8 +250,7 @@ PROPERTIES:<br>
 &nbsp;-&nbsp;NoPoints:&nbsp;number&nbsp;of&nbsp;points&nbsp;(read-only)<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeRangeType&nbsp;(read-only)<br>
 &nbsp;-&nbsp;Range:&nbsp;<a href="#daeIndexRange">daeIndexRange</a>&nbsp;object&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRange<br>
-&nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeConstantIndex<br>
-&nbsp;-&nbsp;DEDI:&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeDomainIterator<br>&nbsp;</tt></td></tr>
+&nbsp;-&nbsp;DomainIndex:&nbsp;<a href="#daeDomainIndex">daeDomainIndex</a>&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eRangeDomainIndex<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><br>
 </td></tr></tbody></table> </p><p>
@@ -247,7 +259,10 @@ PROPERTIES:<br>
 <td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeCondition">class <strong>daeCondition</strong></a></font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;EventTolerance:&nbsp;float<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="daeCondition-__and__"><strong>__and__</strong></a>(self, Condition)</dt><dd><tt>Logical&nbsp;operator&nbsp;&amp;&nbsp;(AND)<br>
 ARGUMENTS:<br>
@@ -418,7 +433,8 @@ Usually&nbsp;created&nbsp;automatically&nbsp;by&nbsp;the&nbsp;framework.&nbsp;It
 PROPERTIES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeDomainIndexType&nbsp;(read-only)<br>
 &nbsp;-&nbsp;Index:&nbsp;unsigned&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eConstantIndex<br>
-&nbsp;-&nbsp;DEDI:&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object&nbsp;&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eDomainIterator<br>&nbsp;</tt></td></tr>
+&nbsp;-&nbsp;DEDI:&nbsp;<a href="#daeDEDI">daeDEDI</a>&nbsp;object&nbsp;&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eDomainIterator&nbsp;or&nbsp;eIncrementedDomainIterator<br>
+&nbsp;-&nbsp;Increment:&nbsp;int&nbsp;(read-only),&nbsp;valid&nbsp;if&nbsp;the&nbsp;Type&nbsp;=&nbsp;eDomainIterator&nbsp;or&nbsp;eIncrementedDomainIterator<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><br>
 </td></tr></tbody></table> </p><p>
@@ -456,13 +472,6 @@ RETURNS:<br>
 <dd><a href="core.html#daeSTN">daeSTN</a></dd>
 <dd><a href="core.html#daeObject">daeObject</a></dd>
 </dl>
-<hr>
-Methods inherited from <a href="core.html#daeSTN">daeSTN</a>:<br>
-<dl><dt><a name="daeIF-SetActiveState"><strong>SetActiveState</strong></a>(self, StateName)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;StateName:&nbsp;string<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
 </td></tr></tbody></table> </p><p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ffc8d8">
@@ -531,6 +540,12 @@ RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
 <dl><dt><a name="daeModel-END_STN"><strong>END_STN</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeModel-ExportObjects"><strong>ExportObjects</strong></a>(self, ObjectsToExport, ModelLanguage)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;ObjectsToExport:&nbsp;list&nbsp;of&nbsp;models&nbsp;and&nbsp;ports&nbsp;objects<br>
+&nbsp;-&nbsp;ModelLanguage:&nbsp;enum&nbsp;daeeModelLanguage<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
@@ -628,6 +643,42 @@ PROPERTIES:<br>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ffc8d8">
 <td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeObjectiveFunction">class <strong>daeObjectiveFunction</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Residual:&nbsp;<a href="#adouble">adouble</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeOptimizationConstraint">class <strong>daeOptimizationConstraint</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Residual:&nbsp;<a href="#adouble">adouble</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeOptimizationVariable">class <strong>daeOptimizationVariable</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Type:&nbsp;daeeOptimizationVariableType<br>
+&nbsp;-&nbsp;LowerBound:&nbsp;float<br>
+&nbsp;-&nbsp;UpperBound:&nbsp;float<br>
+&nbsp;-&nbsp;StartingPoint:&nbsp;float<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="daeParameter">class <strong>daeParameter</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
@@ -685,10 +736,12 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeParameter-__init__"><strong>__init__</strong></a>(self, Name, Type, Parent)</dt><dd><tt>ARGUMENTS:<br>
+<dl><dt><a name="daeParameter-__init__"><strong>__init__</strong></a>(self, Name, Type, Parent, Description, Domains)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;Name:&nbsp;string<br>
 &nbsp;-&nbsp;Type:&nbsp;daeeParameterType<br>
-&nbsp;-&nbsp;Parent:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;|&nbsp;<a href="#daePort">daePort</a>&nbsp;object</tt></dd></dl>
+&nbsp;-&nbsp;Parent:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;|&nbsp;<a href="#daePort">daePort</a>&nbsp;object<br>
+&nbsp;-&nbsp;Description:&nbsp;string<br>
+&nbsp;-&nbsp;Domains:&nbsp;list&nbsp;of&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;objects</tt></dd></dl>
 
 <dl><dt><a name="daeParameter-array"><strong>array</strong></a>(self, O1, O2, O3, O4, O5, O6, O7, O8)</dt><dd><tt>Overloaded&nbsp;function,&nbsp;with&nbsp;0&nbsp;to&nbsp;8&nbsp;arguments&nbsp;for&nbsp;(O1&nbsp;-&nbsp;O8):<br>
 &nbsp;-&nbsp;<a href="#daeParameter-array">array</a>()<br>
@@ -709,7 +762,7 @@ RETURNS:<br>
 <font color="#000000" face="helvetica, arial"><a name="daePort">class <strong>daePort</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan="2"><tt>ATTRIBUTES:<br>
+<td colspan="2"><tt>PROPERTIES:<br>
 &nbsp;-&nbsp;Type:&nbsp;daeePortType<br>
 &nbsp;-&nbsp;Domains:&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;list<br>
 &nbsp;-&nbsp;Parameters:&nbsp;<a href="#daeParameter">daeParameter</a>&nbsp;list<br>
@@ -733,17 +786,10 @@ RETURNS:<br>
 <font color="#000000" face="helvetica, arial"><a name="daeSTN">class <strong>daeSTN</strong></a>(<a href="core.html#daeObject">daeObject</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan="2"><tt>-&nbsp;NumberOfStates:&nbsp;unsigned&nbsp;int<br>
--&nbsp;States:&nbsp;<a href="#daeState">daeState</a>&nbsp;list<br>
--&nbsp;ActiveState:&nbsp;<a href="#daeState">daeState</a><br>
--&nbsp;ParentState:&nbsp;<a href="#daeState">daeState</a><br>&nbsp;</tt></td></tr>
+<td colspan="2"><tt>-&nbsp;States:&nbsp;<a href="#daeState">daeState</a>&nbsp;list<br>
+-&nbsp;ActiveState:&nbsp;string&nbsp;(read/write)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeSTN-SetActiveState"><strong>SetActiveState</strong></a>(self, StateName)</dt><dd><tt>ARGUMENTS:<br>
-&nbsp;-&nbsp;StateName:&nbsp;string<br>
-RETURNS:<br>
-&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
-
+<td width="100%"><br>
 </td></tr></tbody></table> </p><p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ffc8d8">
@@ -913,10 +959,12 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;<a href="#adouble">adouble</a>&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="daeVariable-__init__"><strong>__init__</strong></a>(self, Name, VariableType, Parent)</dt><dd><tt>ARGUMENTS:<br>
+<dl><dt><a name="daeVariable-__init__"><strong>__init__</strong></a>(self, Name, VariableType, Parent, Description, Domains)</dt><dd><tt>ARGUMENTS:<br>
 &nbsp;-&nbsp;Name:&nbsp;string<br>
 &nbsp;-&nbsp;VariableType:&nbsp;<a href="#daeVariableType">daeVariableType</a>&nbsp;object<br>
-&nbsp;-&nbsp;Parent:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;|&nbsp;<a href="#daePort">daePort</a>&nbsp;object</tt></dd></dl>
+&nbsp;-&nbsp;Parent:&nbsp;<a href="#daeModel">daeModel</a>&nbsp;|&nbsp;<a href="#daePort">daePort</a>&nbsp;object<br>
+&nbsp;-&nbsp;Description:&nbsp;string<br>
+&nbsp;-&nbsp;Domains:&nbsp;list&nbsp;of&nbsp;<a href="#daeDomain">daeDomain</a>&nbsp;objects</tt></dd></dl>
 
 <dl><dt><a name="daeVariable-array"><strong>array</strong></a>(self, O1, O2, O3, O4, O5, O6, O7, O8)</dt><dd><tt>Overloaded&nbsp;function,&nbsp;with&nbsp;0&nbsp;to&nbsp;8&nbsp;arguments&nbsp;for&nbsp;(O1&nbsp;-&nbsp;O8):<br>
 &nbsp;-&nbsp;<a href="#daeVariable-array">array</a>()<br>

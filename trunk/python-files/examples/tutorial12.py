@@ -16,28 +16,23 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
-In this example we use the same conduction problem as in the tutorial 1.
-Here we introduce:
- - Third party linear equations solvers
+As of the version 1.1.1 the main linear algebraic equations solver is superLU.
+Originally it comes in three variates:
+ - sequential (superlu)
+ - multithreaded (OpenMP/posix threads) superlu_MT
+ - MPI (superlu_MPI)
+The first two are available in daetools with the addition of a new port: superlu_CUDA
+that works on computers with NVidia CUDA enabled video cards. However, the later is
+still in an early stage of the development and some help would be appreciated.
 
-Currently there are 3rd party linear equations solvers:
- - Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
- - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
- - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)
- - IntelMKL: multi-threaded dense lapack direct solver defined in pyIntelMKL (proprietary)
- - Lapack: generic sequential dense lapack direct solver defined in pyLapack module
-           (The University of Tennessee free license)
- - Magma: implementation of the sequential dense Lapack direct solver on CUDA NVidia GPUs
+In this example, usage and available options of superlu and superlu_MT are explored.
 """
 
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-
-# First import desired solver's module:
-#from daetools.solvers import pyCUSP
-#from daetools.solvers import pySuperLU_MT as superlu
 from daetools.solvers import pySuperLU as superlu
+#from daetools.solvers import pySuperLU_MT as superlu
 #from daetools.solvers import pySuperLU_CUDA as superlu
 
 typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
@@ -60,11 +55,9 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
-        # Domains that variables/parameters are distributed on can be given in a constructor
-        # or by using DistributeOnDomain() function
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K", [self.x, self.y])
-        #self.T.DistributeOnDomain(self.x)
-        #self.T.DistributeOnDomain(self.y)
+        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
+        self.T.DistributeOnDomain(self.x)
+        self.T.DistributeOnDomain(self.y)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
@@ -117,13 +110,38 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)
 
+def CreateLASolver():
+    lasolver = superlu.daeCreateSuperLUSolver()
+
+    options = lasolver.GetOptions()
+
+    if lasolver.Name == 'SuperLU':
+        # SuperLU options:
+        options.PrintStat       = superlu.YES       # {YES, NO}
+        options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+        options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
+        options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
+
+    elif lasolver.Name == 'SuperLU_MT':
+        # SuperLU_MT options:
+        options.nprocs            = 4                 # No. of threads (= no. of CPUs/Cores)
+        options.PrintStat         = superlu.YES       # {YES, NO}
+        options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+        options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0
+        options.panel_size        = 8                 # Integer value
+        options.relax             = 6                 # Integer value
+        options.drop_tol          = 0.0               # Floating point value
+
+    return lasolver
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
     sim.TimeHorizon       = 1000
-    simulator  = daeSimulator(app, simulation=sim)
+    la = CreateLASolver()
+    simulator = daeSimulator(app, simulation = sim, lasolver = la)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -133,35 +151,15 @@ def consoleRun():
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
-
-    # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    #lasolver = pyCUSP.daeCreateCUSPSolver()
-    lasolver = superlu.daeCreateSuperLUSolver()
+    lasolver     = CreateLASolver()
     daesolver.SetLASolver(lasolver)
-
-    options = lasolver.GetOptions()
-
-    # SuperLU options:
-    options.PrintStat       = superlu.YES       # {YES, NO}
-    options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
-    options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
-    options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
-
-    # SuperLU_MT options:
-    #options.nprocs            = 4                 # No. of threads (= no. of CPUs/Cores)
-    #options.PrintStat         = superlu.YES       # {YES, NO}
-    #options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
-    #options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0
-    #options.panel_size        = 8                 # Integer value
-    #options.relax             = 6                 # Integer value
-    #options.drop_tol          = 0.0               # Floating point value
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 100
+    simulation.TimeHorizon = 1000
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

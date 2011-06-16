@@ -12,6 +12,10 @@ Integer constants defined in the module:
 class daeSimulation_t:
     """
     The base simulation class (abstract).
+    Properties:
+     - OptimizationConstraints: list of daeOptimizationConstraint_t objects
+     - OptimizationVariables: list of daeOptimizationVariable_t objects
+     - ObjectiveFunction: daeObjectiveFunction_t
     """
     def GetModel(self):
         """
@@ -266,6 +270,26 @@ class daeSimulation_t:
         """
         pass
 
+    def StoreInitializationValues(self, fileName):
+        """
+        (Abstract)
+        ARGUMENTS:
+         - fileName: string
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def LoadInitializationValues(self, fileName):
+        """
+        (Abstract)
+        ARGUMENTS:
+         - fileName: string
+        RETURNS:
+           Nothing
+        """
+        pass
+
 class daeSimulation(daeSimulation_t):
     """
     An implementation of the daeSimulation_t.
@@ -275,7 +299,57 @@ class daeSimulation(daeSimulation_t):
      - SetUpOptimization (for optimization only)
     Also, the user can reimplement the Run() method to provide a custom operating procedure of the process.  
     """
+    def CreateEqualityConstraint(self, Description):
+        """
+        ARGUMENTS:
+         - Description: string
+        RETURNS:
+           daeOptimizationConstraint object
+        """
+        pass
 
+    def CreateInequalityConstraint(self, Description):
+        """
+        ARGUMENTS:
+           None
+        RETURNS:
+           daeOptimizationConstraint object
+        """
+        pass
+
+    def SetContinuousOptimizationVariable(self, Variable, LB, UB, defaultValue):
+        """
+        ARGUMENTS:
+         - Variable: daeVariable|adouble
+         - LB: float
+         - UB: float
+         - defaultValue: float
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def SetIntegerOptimizationVariable(self, Variable, LB, UB, defaultValue):
+        """
+        ARGUMENTS:
+         - Variable: daeVariable|adouble
+         - LB: int
+         - UB: int
+         - defaultValue: int
+        RETURNS:
+           Nothing
+        """
+        pass
+
+    def SetBinaryOptimizationVariable(self, Variable, defaultValue):
+        """
+        ARGUMENTS:
+         - Variable: daeVariable|adouble
+         - defaultValue: bool
+        RETURNS:
+           Nothing
+        """
+        pass
 
 class daeOptimization_t:
     """

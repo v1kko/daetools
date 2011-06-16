@@ -275,6 +275,31 @@ class daeTEXTFileDataReporter(daeDataReporterFile):
         """
         pass
 
+class daeMatlabMATFileDataReporter(daeDataReporterLocal):
+    """
+    Writes the results in the Matlab MAT file format.
+    Connect takes as 
+    """
+    def Connect(self, ConnectionString, ProcessName):
+        """
+        ARGUMENTS:
+         - ConnectionString: string
+           The output file name (with extension .mat)
+         - ProcessName: string
+        RETURNS:
+           bool
+        """
+        pass
+
+    def Write(self):
+        """
+        ARGUMENTS:
+           None
+        RETURNS:
+           Nothing
+        """
+        pass
+
 class daeDataReporterRemote(daeDataReporter_t):
     """
     Class which does not keep the data received but sends them immediately to the appropriate server (daeDataReceiver_t).

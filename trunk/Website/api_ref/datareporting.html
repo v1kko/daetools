@@ -48,7 +48,8 @@ The&nbsp;main&nbsp;class&nbsp;is&nbsp;<a href="#daeDataReceiver_t">daeDataReceiv
 <dt><font face="helvetica, arial"><a href="datareporting.html#daeTEXTFileDataReporter">daeTEXTFileDataReporter</a>
 </font></dt></dl>
 </dd>
-</dl>
+<dt><font face="helvetica, arial"><a href="datareporting.html#daeMatlabMATFileDataReporter">daeMatlabMATFileDataReporter</a>
+</font></dt></dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="datareporting.html#daeDataReporterRemote">daeDataReporterRemote</a>
 </font></dt><dd>
@@ -685,6 +686,91 @@ RETURNS:<br>
 &nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
 
 <dl><dt><a name="daeDelegateDataReporter-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeMatlabMATFileDataReporter">class <strong>daeMatlabMATFileDataReporter</strong></a>(<a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>Writes&nbsp;the&nbsp;results&nbsp;in&nbsp;the&nbsp;Matlab&nbsp;MAT&nbsp;file&nbsp;format.<br>
+Connect&nbsp;takes&nbsp;as<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="datareporting.html#daeMatlabMATFileDataReporter">daeMatlabMATFileDataReporter</a></dd>
+<dd><a href="datareporting.html#daeDataReporterLocal">daeDataReporterLocal</a></dd>
+<dd><a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="daeMatlabMATFileDataReporter-Connect"><strong>Connect</strong></a>(self, ConnectionString, ProcessName)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;ConnectionString:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;The&nbsp;output&nbsp;file&nbsp;name&nbsp;(with&nbsp;extension&nbsp;.mat)<br>
+&nbsp;-&nbsp;ProcessName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-Write"><strong>Write</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="datareporting.html#daeDataReporter_t">daeDataReporter_t</a>:<br>
+<dl><dt><a name="daeMatlabMATFileDataReporter-Disconnect"><strong>Disconnect</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-EndOfData"><strong>EndOfData</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-EndRegistration"><strong>EndRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-IsConnected"><strong>IsConnected</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-RegisterDomain"><strong>RegisterDomain</strong></a>(self, Domain)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Domain:&nbsp;<a href="#daeDataReporterDomain">daeDataReporterDomain</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-RegisterVariable"><strong>RegisterVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariable">daeDataReporterVariable</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-SendVariable"><strong>SendVariable</strong></a>(self, Variable)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;<a href="#daeDataReporterVariableValue">daeDataReporterVariableValue</a><br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-StartNewResultSet"><strong>StartNewResultSet</strong></a>(self, Time)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Time:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="daeMatlabMATFileDataReporter-StartRegistration"><strong>StartRegistration</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>

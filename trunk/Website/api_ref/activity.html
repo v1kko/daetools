@@ -112,7 +112,41 @@ The&nbsp;user&nbsp;has&nbsp;to&nbsp;implement&nbsp;the&nbsp;following&nbsp;metho
 &nbsp;-&nbsp;SetUpOptimization&nbsp;(for&nbsp;optimization&nbsp;only)<br>
 Also,&nbsp;the&nbsp;user&nbsp;can&nbsp;reimplement&nbsp;the&nbsp;<a href="#daeSimulation-Run">Run</a>()&nbsp;method&nbsp;to&nbsp;provide&nbsp;a&nbsp;custom&nbsp;operating&nbsp;procedure&nbsp;of&nbsp;the&nbsp;process.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods inherited from <a href="activity.html#daeSimulation_t">daeSimulation_t</a>:<br>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeSimulation-CreateEqualityConstraint"><strong>CreateEqualityConstraint</strong></a>(self, Description)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Description:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeOptimizationConstraint&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-CreateInequalityConstraint"><strong>CreateInequalityConstraint</strong></a>(self, Description)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;daeOptimizationConstraint&nbsp;object</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetBinaryOptimizationVariable"><strong>SetBinaryOptimizationVariable</strong></a>(self, Variable, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;daeVariable|adouble<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;bool<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetContinuousOptimizationVariable"><strong>SetContinuousOptimizationVariable</strong></a>(self, Variable, LB, UB, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;daeVariable|adouble<br>
+&nbsp;-&nbsp;LB:&nbsp;float<br>
+&nbsp;-&nbsp;UB:&nbsp;float<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;float<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-SetIntegerOptimizationVariable"><strong>SetIntegerOptimizationVariable</strong></a>(self, Variable, LB, UB, defaultValue)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;Variable:&nbsp;daeVariable|adouble<br>
+&nbsp;-&nbsp;LB:&nbsp;int<br>
+&nbsp;-&nbsp;UB:&nbsp;int<br>
+&nbsp;-&nbsp;defaultValue:&nbsp;int<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="activity.html#daeSimulation_t">daeSimulation_t</a>:<br>
 <dl><dt><a name="daeSimulation-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
@@ -181,6 +215,12 @@ ARGUMENTS:<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation-LoadInitializationValues"><strong>LoadInitializationValues</strong></a>(self, fileName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
 <dl><dt><a name="daeSimulation-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
@@ -266,6 +306,12 @@ ARGUMENTS:<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
+<dl><dt><a name="daeSimulation-StoreInitializationValues"><strong>StoreInitializationValues</strong></a>(self, fileName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
 </td></tr></tbody></table> </p><p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ffc8d8">
@@ -273,7 +319,11 @@ RETURNS:<br>
 <font color="#000000" face="helvetica, arial"><a name="daeSimulation_t">class <strong>daeSimulation_t</strong></a></font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan="2"><tt>The&nbsp;base&nbsp;simulation&nbsp;class&nbsp;(abstract).<br>&nbsp;</tt></td></tr>
+<td colspan="2"><tt>The&nbsp;base&nbsp;simulation&nbsp;class&nbsp;(abstract).<br>
+Properties:<br>
+&nbsp;-&nbsp;OptimizationConstraints:&nbsp;list&nbsp;of&nbsp;daeOptimizationConstraint_t&nbsp;objects<br>
+&nbsp;-&nbsp;OptimizationVariables:&nbsp;list&nbsp;of&nbsp;daeOptimizationVariable_t&nbsp;objects<br>
+&nbsp;-&nbsp;ObjectiveFunction:&nbsp;daeObjectiveFunction_t<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="daeSimulation_t-Finalize"><strong>Finalize</strong></a>(self)</dt><dd><tt>(Abstract)<br>
@@ -344,6 +394,12 @@ ARGUMENTS:<br>
 &nbsp;-&nbsp;StopCriterion:&nbsp;daeeStopCriterion<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-LoadInitializationValues"><strong>LoadInitializationValues</strong></a>(self, fileName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
 <dl><dt><a name="daeSimulation_t-Pause"><strong>Pause</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
@@ -426,6 +482,12 @@ RETURNS:<br>
 <dl><dt><a name="daeSimulation_t-SolveInitial"><strong>SolveInitial</strong></a>(self)</dt><dd><tt>(Abstract)<br>
 ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeSimulation_t-StoreInitializationValues"><strong>StoreInitializationValues</strong></a>(self, fileName)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 

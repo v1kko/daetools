@@ -6,6 +6,7 @@
 <td valign="bottom">&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>solver</strong></big></big></font></td></tr></tbody></table>
     <p><tt>daetools.pyDAE.solver&nbsp;module&nbsp;implements&nbsp;several&nbsp;types&nbsp;of&nbsp;numerical&nbsp;solvers:<br>
+
 &nbsp;-&nbsp;For&nbsp;solution&nbsp;of&nbsp;systems&nbsp;of&nbsp;equations:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;linear&nbsp;equations&nbsp;(LA&nbsp;solver)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;System&nbsp;of&nbsp;nonlinear&nbsp;equations&nbsp;(NLA&nbsp;solver)<br>
@@ -34,10 +35,13 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 <dt><font face="helvetica, arial"><a href="solver.html#daeIDAS">daeIDAS</a>
 </font></dt></dl>
 </dd>
-<dt><font face="helvetica, arial"><a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>
+<dt><font face="helvetica, arial"><a href="solver.html#daeIDALASolver_t">daeIDALASolver_t</a>
+</font></dt><dt><font face="helvetica, arial"><a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="solver.html#daeBONMIN">daeBONMIN</a>
+</font></dt><dt><font face="helvetica, arial"><a href="solver.html#daeIPOPT">daeIPOPT</a>
+</font></dt><dt><font face="helvetica, arial"><a href="solver.html#daeNLOPT">daeNLOPT</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -51,8 +55,9 @@ Integer&nbsp;constants&nbsp;defined&nbsp;in&nbsp;the&nbsp;module:<br>
 <td colspan="2"><tt>BONMIN&nbsp;MINLP&nbsp;solver&nbsp;wrapper.<br>
 https://projects.coin-or.org/Bonmin<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="daeBONMIN-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>ARGUMENTS:<br>
+<td width="100%">Methods inherited from <a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>:<br>
+<dl><dt><a name="daeBONMIN-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
 &nbsp;-&nbsp;Simulation:&nbsp;daeSimulation_t&nbsp;object<br>
 &nbsp;-&nbsp;DAESolver:&nbsp;<a href="#daeDAESolver_t">daeDAESolver_t</a>&nbsp;object<br>
 &nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
@@ -60,7 +65,8 @@ https://projects.coin-or.org/Bonmin<br>&nbsp;</tt></td></tr>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 
-<dl><dt><a name="daeBONMIN-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>ARGUMENTS:<br>
+<dl><dt><a name="daeBONMIN-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
 &nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
@@ -74,11 +80,35 @@ RETURNS:<br>
 <tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan="2"><tt>DAE&nbsp;Solver&nbsp;interface.<br>
 PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>
 &nbsp;-&nbsp;Log:&nbsp;daeLog&nbsp;object<br>
 &nbsp;-&nbsp;RelativeTolerance:&nbsp;float<br>
 &nbsp;-&nbsp;InitialConditionMode:&nbsp;daeeInitialConditionMode<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><br>
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeIDALASolver_t">class <strong>daeIDALASolver_t</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>PROPERTIES:<br>
+&nbsp;-&nbsp;Name:&nbsp;string<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="daeIDALASolver_t-SaveAsMatrixMarketFile"><strong>SaveAsMatrixMarketFile</strong></a>(fileName, matrixName, matrixDescription)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
+&nbsp;-&nbsp;matrixName:&nbsp;string<br>
+&nbsp;-&nbsp;matrixDescription:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="daeIDALASolver_t-SaveAsXPM"><strong>SaveAsXPM</strong></a>(self, fileName)</dt><dd><tt>ARGUMENTS:<br>
+&nbsp;-&nbsp;fileName:&nbsp;string<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;int</tt></dd></dl>
+
 </td></tr></tbody></table> </p><p>
 <table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
 <tbody><tr bgcolor="#ffc8d8">
@@ -102,6 +132,58 @@ RETURNS:<br>
 &nbsp;-&nbsp;Sparse&nbsp;Intel&nbsp;Pardiso&nbsp;[SMP]<br>
 ARGUMENTS:<br>
 &nbsp;-&nbsp;LASolver:&nbsp;daeIDALASolver&nbsp;object<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeIPOPT">class <strong>daeIPOPT</strong></a>(<a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>IPOPT&nbsp;NLP&nbsp;solver&nbsp;wrapper.<br>
+https://projects.coin-or.org/Ipopt<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods inherited from <a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>:<br>
+<dl><dt><a name="daeIPOPT-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Simulation:&nbsp;daeSimulation_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;<a href="#daeDAESolver_t">daeDAESolver_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeIPOPT-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+</td></tr></tbody></table> </p><p>
+<table summary="section" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr bgcolor="#ffc8d8">
+<td colspan="3" valign="bottom">&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="daeNLOPT">class <strong>daeNLOPT</strong></a>(<a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan="2"><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2"><tt>NLOPT&nbsp;NLP&nbsp;solver&nbsp;wrapper.<br>
+<a href="http://ab-initio.mit.edu/wiki/index.php/NLopt">http://ab-initio.mit.edu/wiki/index.php/NLopt</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods inherited from <a href="solver.html#daeNLPSolver_t">daeNLPSolver_t</a>:<br>
+<dl><dt><a name="daeNLOPT-Initialize"><strong>Initialize</strong></a>(self, Simulation, DAESolver, DataReporter, Log)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;-&nbsp;Simulation:&nbsp;daeSimulation_t&nbsp;object<br>
+&nbsp;-&nbsp;DAESolver:&nbsp;<a href="#daeDAESolver_t">daeDAESolver_t</a>&nbsp;object<br>
+&nbsp;-&nbsp;DataReporter:&nbsp;daeDataReporter_t&nbsp;object<br>
+&nbsp;-&nbsp;Log:&nbsp;daeLog_t&nbsp;object<br>
+RETURNS:<br>
+&nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
+
+<dl><dt><a name="daeNLOPT-Solve"><strong>Solve</strong></a>(self)</dt><dd><tt>(Abstract)<br>
+ARGUMENTS:<br>
+&nbsp;&nbsp;&nbsp;None<br>
 RETURNS:<br>
 &nbsp;&nbsp;&nbsp;Nothing</tt></dd></dl>
 

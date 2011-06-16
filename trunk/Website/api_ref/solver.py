@@ -16,10 +16,36 @@ Integer constants defined in the module:
      - eThirdParty
 """
   
+class daeIDALASolver_t:
+    """
+    PROPERTIES:
+     - Name: string
+    """
+    def SaveAsXPM(self, fileName):
+        """
+        ARGUMENTS:
+         - fileName: string
+        RETURNS:
+           int
+        """
+        pass
+    
+    def SaveAsMatrixMarketFile(fileName, matrixName, matrixDescription):
+        """
+        ARGUMENTS:
+         - fileName: string
+         - matrixName: string
+         - matrixDescription: string
+        RETURNS:
+           int
+        """
+        pass
+
 class daeDAESolver_t:
     """
     DAE Solver interface.
     PROPERTIES:
+     - Name: string
      - Log: daeLog object
      - RelativeTolerance: float
      - InitialConditionMode: daeeInitialConditionMode
@@ -80,28 +106,20 @@ class daeNLPSolver_t:
         """
         pass
 
+class daeIPOPT(daeNLPSolver_t):
+    """
+    IPOPT NLP solver wrapper.
+    https://projects.coin-or.org/Ipopt
+    """
+
 class daeBONMIN(daeNLPSolver_t):
     """
     BONMIN MINLP solver wrapper.
     https://projects.coin-or.org/Bonmin
     """
-    def Initialize(self, Simulation, DAESolver, DataReporter, Log):
-        """
-        ARGUMENTS:
-         - Simulation: daeSimulation_t object
-         - DAESolver: daeDAESolver_t object
-         - DataReporter: daeDataReporter_t object
-         - Log: daeLog_t object
-        RETURNS:
-           Nothing
-        """
-        pass
 
-    def Solve(self):
-        """
-        ARGUMENTS:
-           None
-        RETURNS:
-           Nothing
-        """
-        pass
+class daeNLOPT(daeNLPSolver_t):
+    """
+    NLOPT NLP solver wrapper.
+    http://ab-initio.mit.edu/wiki/index.php/NLopt
+    """
