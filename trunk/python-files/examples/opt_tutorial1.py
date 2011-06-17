@@ -24,18 +24,18 @@ from daetools.pyDAE import *
 from daetools.solvers import pyIPOPT
 from time import localtime, strftime
 
-typeNone = daeVariableType("None", "-",  -1E20, 1E20,   1, 1e-6)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x1 = daeVariable("x1", typeNone, self)
-        self.x2 = daeVariable("x2", typeNone, self)
-        self.x3 = daeVariable("x3", typeNone, self)
-        self.x4 = daeVariable("x4", typeNone, self)
+        self.x1 = daeVariable("x1", no_t, self)
+        self.x2 = daeVariable("x2", no_t, self)
+        self.x3 = daeVariable("x3", no_t, self)
+        self.x4 = daeVariable("x4", no_t, self)
 
-        self.dummy = daeVariable("dummy", typeNone, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
+        self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
@@ -64,13 +64,13 @@ class simTutorial(daeSimulation):
         # Constraints are in the following form:
         #  - Inequality: g(i) <= 0
         #  - Equality: h(i) = 0
-        c1 = self.CreateInequalityConstraint("Constraint 1") # g(x) >= 25
+        c1 = self.CreateInequalityConstraint("Constraint 1") # g(x) >= 25:  25 - x1*x2*x3*x4 <= 0
         c1.Residual = 25 - self.m.x1() * self.m.x2() * self.m.x3() * self.m.x4()
 
         c2 = self.CreateEqualityConstraint("Constraint 2") # h(x) == 40
         c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
 
-        # Set the optimization variables and their lower and upper bounds and starting point
+        # Set the optimization variables, their lower/upper bounds and the starting point
         self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
         self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
         self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);

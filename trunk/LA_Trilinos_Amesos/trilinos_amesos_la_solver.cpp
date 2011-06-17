@@ -266,6 +266,11 @@ std::string daeTrilinosSolver::GetName(void) const
 	return m_strSolverName + (m_strPreconditionerName.empty() ? "" : " (" + m_strPreconditionerName + ")");
 }
 
+std::string daeTrilinosSolver::GetPreconditionerName(void) const
+{
+	return m_strPreconditionerName;
+}
+
 bool daeTrilinosSolver::CheckData() const
 {
 	if(m_matEPETRA && m_vecB && m_vecX && m_nNoEquations > 0)

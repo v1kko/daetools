@@ -40,12 +40,7 @@
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b>*</b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 
-typeNone         <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;None&quot;</span>,         <span style='color:#bf0303;'>&quot;-&quot;</span>,          <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Temperature&quot;</span>,  <span style='color:#bf0303;'>&quot;K&quot;</span>,        <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>300</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeConductivity <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Conductivity&quot;</span>, <span style='color:#bf0303;'>&quot;W/mK&quot;</span>,       <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeDensity      <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Density&quot;</span>,      <span style='color:#bf0303;'>&quot;kg/m3&quot;</span>,      <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeHeatCapacity <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;HeatCapacity&quot;</span>, <span style='color:#bf0303;'>&quot;J/KgK&quot;</span>,      <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeHeatFlux     <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;HeatFlux&quot;</span>,     <span style='color:#bf0303;'>&quot;W/m2&quot;</span> ,  <b>-</b><span style='color:#c000c0;'>1E10</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
+<span style='color:#008000;'># Standard variable types are defined in daeVariableTypes.py</span>
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b>=</b> <span style='color:#0000ff;'>None</span>, Description <b>=</b> <span style='color:#bf0303;'>&quot;&quot;</span>):
@@ -54,14 +49,14 @@ typeHeatFlux     <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Hea
         <span style='color:#0000ff;'>self</span>.x  <b>=</b> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
         <span style='color:#0000ff;'>self</span>.y  <b>=</b> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Qb <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>, typeHeatFlux, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate, W/m2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Qb <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>, heat_flux_t, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate, W/m2&quot;</span>)
         <span style='color:#0000ff;'>self</span>.Qt <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate, W/m2&quot;</span>)
 
         <span style='color:#0000ff;'>self</span>.ro <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate, kg/m3&quot;</span>)
         <span style='color:#0000ff;'>self</span>.cp <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k  <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.T <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, typeTemperature, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.T <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
 

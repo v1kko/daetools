@@ -28,9 +28,9 @@
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 <span style='color:#008000;'> This tutorial shows the use of Trilinos group of solvers: Amesos and AztecOO iterative</span>
 <span style='color:#008000;'> linear equation solvers with different preconditioners (built-in AztecOO, Ifpack or ML)</span>
-<span style='color:#008000;'> and corresponding linbear solver options.</span>
+<span style='color:#008000;'> and corresponding linear solver options.</span>
 <span style='color:#008000;'> Iterative solvers are not fully working yet and this example is given just as a showcase</span>
-<span style='color:#008000;'> and for preconditioner options experimenting purposes. </span>
+<span style='color:#008000;'> and for preconditioner options experimenting purposes.</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
@@ -39,8 +39,7 @@
 <span style='color:#0000ff;'>from</span> daetools.solvers <span style='color:#0000ff;'>import</span> pyTrilinos
 <span style='color:#0000ff;'>from</span> daetools.solvers.aztecoo_options <span style='color:#0000ff;'>import</span> daeAztecOptions
 
-typeNone         <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;None&quot;</span>,         <span style='color:#bf0303;'>&quot;-&quot;</span>,      <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
-typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Temperature&quot;</span>,  <span style='color:#bf0303;'>&quot;K&quot;</span>,    <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>500</span>, <span style='color:#c000c0;'>1e-5</span>)
+<span style='color:#008000;'># Standard variable types are defined in daeVariableTypes.py</span>
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b>=</b> <span style='color:#0000ff;'>None</span>, Description <b>=</b> <span style='color:#bf0303;'>&quot;&quot;</span>):
@@ -55,7 +54,7 @@ typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Tem
         <span style='color:#0000ff;'>self</span>.cp <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,      eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k  <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.T <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, typeTemperature, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.T <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
         <span style='color:#0000ff;'>self</span>.T.Description <b>=</b> <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>
@@ -94,7 +93,7 @@ typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Tem
         <span style='color:#0000ff;'>self</span>.m.Description <b>=</b> <span style='color:#bf0303;'>&quot;&quot;</span>
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        n <b>=</b> <span style='color:#c000c0;'>20</span>
+        n <b>=</b> <span style='color:#c000c0;'>5</span>
         <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
         <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
@@ -109,106 +108,114 @@ typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Tem
             <b>for</b> y <b>in</b> <span style='color:#0057ae;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <b>-</b> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>Function to create and set-up the Trilinos linear equation solver. Possible choices:</span>
-<span style='color:#008000;'> - Direct: {Amesos_KLU, Amesos_Superlu, Amesos_Umfpack, Amesos_Lapack}</span>
-<span style='color:#008000;'> - Iterative: {AztecOO, AztecOO_Ifpack, AztecOO_ML}</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<b>def</b> CreateLASolver():
-    <b>print</b> <span style='color:#bf0303;'>&quot;Supported Trilinos 3rd party LA solvers:&quot;</span>, <span style='color:#0057ae;'>str</span>(pyTrilinos.daeTrilinosSupportedSolvers())
+<span style='color:#008000;'># Function to create the Trilinos linear equation solver.</span>
+<span style='color:#008000;'># AztecOO solvers do not work well yet</span>
+<b>def</b> createLASolver():
+    <b>print</b> <span style='color:#bf0303;'>&quot;Supported Trilinos solvers:&quot;</span>, <span style='color:#0057ae;'>str</span>(pyTrilinos.daeTrilinosSupportedSolvers())
+    
+    <span style='color:#008000;'># Amesos SuperLU solver</span>
+    <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Superlu&quot;, &quot;&quot;)</span>
+    
+    <span style='color:#008000;'># AztecOO built-in preconditioners are specified through AZ_precond option</span>
+    <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO&quot;, &quot;&quot;)</span>
 
-    <span style='color:#008000;'>#</span>
-    <span style='color:#008000;'># 1) Amesos group of solvers:</span>
-    <span style='color:#008000;'>#</span>
-<span style='color:#008000;'>    &quot;&quot;&quot;</span>
-<span style='color:#008000;'>    lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Superlu&quot;)</span>
-<span style='color:#008000;'>    paramListAmesos = pyTrilinos.TeuchosParameterList()</span>
+    <span style='color:#008000;'># Ifpack preconditioner can be one of: [ILU, ILUT, PointRelaxation, BlockRelaxation, IC, ICT]</span>
+    <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO_Ifpack&quot;, &quot;PointRelaxation&quot;)</span>
+    
+    <span style='color:#008000;'># ML preconditioner can be one of: [SA, DD, DD-ML, DD-ML-LU, maxwell, NSSA]</span>
+    lasolver <b>=</b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;AztecOO_ML&quot;</span>, <span style='color:#bf0303;'>&quot;maxwell&quot;</span>)
+    
+    <b>return</b> lasolver
 
-<span style='color:#008000;'>    # Amesos status options:</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;OutputLevel&quot;, 0)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;DebugLevel&quot;, 0)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;PrintTiming&quot;, False)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;PrintStatus&quot;, False)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;ComputeVectorNorms&quot;, False)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;ComputeTrueResidual&quot;, False)</span>
+<span style='color:#008000;'># Function to set-up the Trilinos linear equation solver. Possible choices:</span>
+<span style='color:#008000;'>#  - Direct: {Amesos_KLU, Amesos_Superlu, Amesos_Umfpack, Amesos_Lapack}</span>
+<span style='color:#008000;'>#  - Iterative: {AztecOO, AztecOO_Ifpack, AztecOO_ML}</span>
+<b>def</b> setOptions(lasolver):
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'># Amesos_Superlu solver</span>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <b>if</b> lasolver.Name <b>==</b> <span style='color:#bf0303;'>&quot;Amesos_Superlu&quot;</span>:
+        paramListAmesos <b>=</b> lasolver.GetAmesosOptions()
 
-<span style='color:#008000;'>    # Amesos control options:</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;AddZeroToDiag&quot;, False)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;AddToDiag&quot;, 0.0)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;Refactorize&quot;, False)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;RcondThreshold&quot;, 0.0)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;MaxProcs&quot;, 0)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;MatrixProperty&quot;, &quot;&quot;)</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;ScaleMethod&quot;, 0);</span>
-<span style='color:#008000;'>    paramListAmesos.set(&quot;Reindex&quot;, False)</span>
+        <span style='color:#008000;'># Amesos status options:</span>
+        paramListAmesos.set_int(<span style='color:#bf0303;'>&quot;OutputLevel&quot;</span>, <span style='color:#c000c0;'>0</span>)
+        paramListAmesos.set_int(<span style='color:#bf0303;'>&quot;DebugLevel&quot;</span>, <span style='color:#c000c0;'>0</span>)
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;PrintTiming&quot;</span>, <span style='color:#0000ff;'>False</span>)
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;PrintStatus&quot;</span>, <span style='color:#0000ff;'>False</span>)
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;ComputeVectorNorms&quot;</span>, <span style='color:#0000ff;'>False</span>)
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;ComputeTrueResidual&quot;</span>, <span style='color:#0000ff;'>False</span>)
 
-<span style='color:#008000;'>    lasolver.SetAmesosOptions(paramListAmesos)</span>
-<span style='color:#008000;'>    &quot;&quot;&quot;</span>
-
-    <span style='color:#008000;'>#</span>
-    <span style='color:#008000;'># 2) AztecOO solver:</span>
-    <span style='color:#008000;'>#</span>
-    lasolver <b>=</b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;AztecOO_Ifpack&quot;</span>, <span style='color:#bf0303;'>&quot;PointRelaxation&quot;</span>)
-    paramListAztec <b>=</b> lasolver.GetAztecOOOptions()
+        <span style='color:#008000;'># Amesos control options:</span>
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;AddZeroToDiag&quot;</span>, <span style='color:#0000ff;'>False</span>)
+        paramListAmesos.set_float(<span style='color:#bf0303;'>&quot;AddToDiag&quot;</span>, <span style='color:#c000c0;'>0.0</span>)
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;Refactorize&quot;</span>, <span style='color:#0000ff;'>False</span>)
+        paramListAmesos.set_float(<span style='color:#bf0303;'>&quot;RcondThreshold&quot;</span>, <span style='color:#c000c0;'>0.0</span>)
+        paramListAmesos.set_int(<span style='color:#bf0303;'>&quot;MaxProcs&quot;</span>, <span style='color:#c000c0;'>0</span>)
+        paramListAmesos.set_string(<span style='color:#bf0303;'>&quot;MatrixProperty&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
+        paramListAmesos.set_int(<span style='color:#bf0303;'>&quot;ScaleMethod&quot;</span>, <span style='color:#c000c0;'>0</span>)<b>;</b>
+        paramListAmesos.set_bool(<span style='color:#bf0303;'>&quot;Reindex&quot;</span>, <span style='color:#0000ff;'>False</span>)
 
     <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
     <span style='color:#008000;'># AztecOO solver options consist of:</span>
-    <span style='color:#008000;'># a) solver options (given below)</span>
-    <span style='color:#008000;'># b) preconditioner options given in 2a, b or c</span>
+    <span style='color:#008000;'>#  - solver options (given below)</span>
+    <span style='color:#008000;'>#  - preconditioner options given</span>
     <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
-    lasolver.NumIters  <b>=</b> <span style='color:#c000c0;'>500</span>
-    lasolver.Tolerance <b>=</b> <span style='color:#c000c0;'>1e-6</span>
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#c000c0;'>500</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#c000c0;'>0</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#c000c0;'>1</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_all) <span style='color:#008000;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
-    paramListAztec.Print()
+    <b>if</b> (<span style='color:#bf0303;'>&quot;AztecOO&quot;</span> <b>in</b> lasolver.Name) <b>or</b> (<span style='color:#bf0303;'>&quot;AztecOO_Ifpack&quot;</span> <b>in</b> lasolver.Name) <b>or</b> (<span style='color:#bf0303;'>&quot;AztecOO_ML&quot;</span> <b>in</b> lasolver.Name):
+        paramListAztec <b>=</b> lasolver.GetAztecOOOptions()
+
+        lasolver.NumIters  <b>=</b> <span style='color:#c000c0;'>500</span>
+        lasolver.Tolerance <b>=</b> <span style='color:#c000c0;'>1e-6</span>
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#c000c0;'>500</span>)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#c000c0;'>0</span>)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#c000c0;'>1</span>)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_all) <span style='color:#008000;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
+        paramListAztec.Print()
 
     <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
     <span style='color:#008000;'># AztecOO preconditioner options</span>
     <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <b>if</b> <span style='color:#bf0303;'>&quot;AztecOO_Ifpack&quot;</span> <b>in</b> lasolver.Name:
+        <span style='color:#008000;'># 2b) Ifpack preconditioner:</span>
+        paramListIfpack <b>=</b> lasolver.GetIfpackOptions()
+        paramListIfpack.set_string(<span style='color:#bf0303;'>&quot;relaxation: type&quot;</span>,               <span style='color:#bf0303;'>&quot;Jacobi&quot;</span>)
+        paramListIfpack.set_float (<span style='color:#bf0303;'>&quot;relaxation: min diagonal value&quot;</span>, <span style='color:#c000c0;'>1e-2</span>)
+        paramListIfpack.set_int   (<span style='color:#bf0303;'>&quot;relaxation: sweeps&quot;</span>,             <span style='color:#c000c0;'>5</span>)
+        <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: ilut level-of-fill&quot;,        3.0)</span>
+        <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: absolute threshold&quot;,        1e8)</span>
+        <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: relative threshold&quot;,        0.0)</span>
+        paramListIfpack.Print()
 
-    <span style='color:#008000;'># 2a) AztecOO built-in preconditioner:</span>
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_dom_decomp)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_subdomain_solve&quot;</span>, daeAztecOptions.AZ_ilut)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_overlap&quot;</span>,         daeAztecOptions.AZ_none)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_graph_fill&quot;</span>,      <span style='color:#c000c0;'>1</span>)
-    <span style='color:#008000;'>#paramListAztec.set_int(&quot;AZ_type_overlap&quot;,    daeAztecOptions.AZ_standard)</span>
-    <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_ilut_fill&quot;,     3.0)</span>
-    <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_drop&quot;,          0.0)</span>
-    <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_athresh&quot;,       1e8)</span>
-    <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_rthresh&quot;,       0.0)</span>
-    paramListAztec.Print()
+    <b>elif</b> <span style='color:#bf0303;'>&quot;AztecOO_ML&quot;</span> <b>in</b> lasolver.Name:
+        <span style='color:#008000;'># 2c) ML preconditioner:</span>
+        paramListML <b>=</b> lasolver.GetMLOptions()
+        paramListML.set_bool(<span style='color:#bf0303;'>&quot;reuse: enable&quot;</span>, <span style='color:#0000ff;'>True</span>)
+        paramListML.Print()
 
-    <span style='color:#008000;'># 2b) Ifpack preconditioner:</span>
-    <span style='color:#008000;'>#paramListIfpack = lasolver.GetIfpackOptions()</span>
-    <span style='color:#008000;'>#paramListIfpack.set_string(&quot;relaxation: type&quot;,               &quot;Jacobi&quot;)</span>
-    <span style='color:#008000;'>#paramListIfpack.set_float (&quot;relaxation: min diagonal value&quot;, 1e-2)</span>
-    <span style='color:#008000;'>#paramListIfpack.set_int   (&quot;relaxation: sweeps&quot;,             5)</span>
-    <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: ilut level-of-fill&quot;,   3.0)</span>
-    <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: absolute threshold&quot;,   1e8)</span>
-    <span style='color:#008000;'>#paramListIfpack.set_float(&quot;fact: relative threshold&quot;,   0.0)</span>
-    <span style='color:#008000;'>#paramListIfpack.Print()</span>
-
-    <span style='color:#008000;'>#</span>
-    <span style='color:#008000;'># 2c) ML preconditioner:</span>
-    <span style='color:#008000;'>#</span>
-    <span style='color:#008000;'>#paramListML = lasolver.GetMLOptions()</span>
-    <span style='color:#008000;'>#paramListML.set(&quot;reuse: enable&quot;, true)</span>
-
-    <b>return</b> lasolver
-
+    <b>elif</b> <span style='color:#bf0303;'>&quot;AztecOO&quot;</span> <b>in</b> lasolver.Name:
+        <span style='color:#008000;'># 2a) AztecOO built-in preconditioner:</span>
+        paramListAztec <b>=</b> lasolver.GetAztecOOOptions()
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_dom_decomp)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_subdomain_solve&quot;</span>, daeAztecOptions.AZ_ilut)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_overlap&quot;</span>,         daeAztecOptions.AZ_none)
+        paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_graph_fill&quot;</span>,      <span style='color:#c000c0;'>1</span>)
+        <span style='color:#008000;'>#paramListAztec.set_int(&quot;AZ_type_overlap&quot;,    daeAztecOptions.AZ_standard)</span>
+        <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_ilut_fill&quot;,     3.0)</span>
+        <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_drop&quot;,          0.0)</span>
+        <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_athresh&quot;,       1e8)</span>
+        <span style='color:#008000;'>#paramListAztec.set_float(&quot;AZ_rthresh&quot;,       0.0)</span>
+        paramListAztec.Print()
+    
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <b>=</b> simTutorial()
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     sim.ReportingInterval <b>=</b> <span style='color:#c000c0;'>10</span>
     sim.TimeHorizon       <b>=</b> <span style='color:#c000c0;'>1000</span>
-    la <b>=</b> CreateLASolver()
-    simulator <b>=</b> daeSimulator(app, simulation <b>=</b> sim, lasolver <b>=</b> la)
+    la <b>=</b> createLASolver()
+    simulator <b>=</b> daeSimulator(app, simulation <b>=</b> sim, lasolver <b>=</b> la, lasolver_setoptions_fn<b>=</b>setOptions)
     simulator.exec_()
 
 <span style='color:#008000;'># Setup everything manually and run in a console</span>
@@ -218,7 +225,7 @@ typeTemperature  <b>=</b> daeVariableType(<span style='color:#bf0303;'>&quot;Tem
     datareporter <b>=</b> daeTCPIPDataReporter()
     simulation   <b>=</b> simTutorial()
     daesolver    <b>=</b> daeIDAS()
-    lasolver     <b>=</b> CreateLASolver()
+    lasolver     <b>=</b> createLASolver()
     daesolver.SetLASolver(lasolver)
 
     <span style='color:#008000;'># Enable reporting of all variables</span>

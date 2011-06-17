@@ -30,12 +30,7 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",          0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",        100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",       0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",      0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",      0, 1E10, 100, 1e-5)
-typeHeatFlux     = daeVariableType("HeatFlux",     "W/m2" ,  -1E10, 1E10,   0, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -44,14 +39,14 @@ class modTutorial(daeModel):
         self.x  = daeDomain("x", self, "X axis domain")
         self.y  = daeDomain("y", self, "Y axis domain")
 
-        self.Qb = daeVariable("Q_b", typeHeatFlux, self, "Heat flux at the bottom edge of the plate, W/m2")
+        self.Qb = daeVariable("Q_b", heat_flux_t, self, "Heat flux at the bottom edge of the plate, W/m2")
         self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")
 
         self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 

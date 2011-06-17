@@ -101,21 +101,16 @@ BOOST_PYTHON_MODULE(pyTrilinos)
 		;
 
 	class_<daeTrilinosSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeTrilinosSolver", init<string, string>())
-		.add_property("Name",			&daeTrilinosSolver::GetName)
-		.def_readwrite("NumIters",		&daeTrilinosSolver::m_nNumIters)
-		.def_readwrite("Tolerance",		&daeTrilinosSolver::m_dTolerance)
-		.def("Create",					&daeTrilinosSolver::Create)
-		.def("Reinitialize",			&daeTrilinosSolver::Reinitialize)
+		.add_property("Name",				&daeTrilinosSolver::GetName)
+		.add_property("PreconditionerName",	&daeTrilinosSolver::GetPreconditionerName)
+		.def_readwrite("NumIters",			&daeTrilinosSolver::m_nNumIters)
+		.def_readwrite("Tolerance",			&daeTrilinosSolver::m_dTolerance)
 		
+		.def("Create",					&daeTrilinosSolver::Create)
+		.def("Reinitialize",			&daeTrilinosSolver::Reinitialize)		
 		.def("SaveAsXPM",				&daeTrilinosSolver::SaveAsXPM)
 		.def("SaveAsMatrixMarketFile",	&daeTrilinosSolver::SaveAsMatrixMarketFile)
-		
 		.def("PrintPreconditionerInfo",	&daeTrilinosSolver::PrintPreconditionerInfo)
-
-//		.def("SetAztecOOOptions",		&daeTrilinosSolver::SetAztecOOOptions)
-//		.def("SetIfpackOptions",		&daeTrilinosSolver::SetIfpackOptions)
-//		.def("SetMLOptions",			&daeTrilinosSolver::SetMLOptions)
-//		.def("SetAmesosOptions",		&daeTrilinosSolver::SetAmesosOptions)
 
 		.def("GetAztecOOOptions",		&daeTrilinosSolver::GetAztecOOOptions, return_value_policy<reference_existing_object>())
 		.def("GetIfpackOptions",		&daeTrilinosSolver::GetIfpackOptions,  return_value_policy<reference_existing_object>())

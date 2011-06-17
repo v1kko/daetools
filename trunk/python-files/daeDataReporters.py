@@ -38,13 +38,8 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
 
     def Write(self):
         mdict = {}
-        variables = self.Process.Variables
-        for var in variables:
-            values  = var.Values
-            domains = var.Domains
-            times   = var.TimeValues
-            varName = var.Name
-            mdict[varName] = values
+        for var in self.Process.Variables:
+            mdict[var.Name] = var.Values
 
         scipy.io.savemat(self.ConnectionString,
                          mdict,
@@ -53,6 +48,3 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
                          long_field_names=False,
                          do_compression=False,
                          oned_as='row')
-
-        #mat = scipy.io.loadmat(self.ConnectionString)
-        #print mat

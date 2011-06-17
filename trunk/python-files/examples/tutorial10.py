@@ -28,11 +28,7 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",          0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",        100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",       0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",      0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",      0, 1E10, 100, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -51,17 +47,17 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
-        self.Q_int = daeVariable("Q_int", typeTemperature, self, "The heat input per unit of length, W/m")
+        self.Q_int = daeVariable("Q_int", temperature_t, self, "The heat input per unit of length, W/m")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 
         # Data needed to calculate the area of a semi-circle
         self.c  = daeDomain("c", self, "Domain for a circle")
-        self.semicircle = daeVariable("SemiCircle", typeNone, self, "Semi-circle")
+        self.semicircle = daeVariable("SemiCircle", no_t, self, "Semi-circle")
         self.semicircle.DistributeOnDomain(self.c)
-        self.area = daeVariable("area", typeNone, self, "Area of the semi-circle, m2")
+        self.area = daeVariable("area", no_t, self, "Area of the semi-circle, m2")
 
     def DeclareEquations(self):
         # All equations are written so that they use only functions d() and dt() from daeModel

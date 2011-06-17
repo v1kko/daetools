@@ -34,12 +34,7 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
-typePower        = daeVariableType("Power",        "W",  -1E10, 1E10,   0, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -51,9 +46,9 @@ class modTutorial(daeModel):
         self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
         self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
 
-        self.Qin  = daeVariable("Q_in",  typePower,       self, "Power of the heater, W")
-        self.time = daeVariable("&tau;", typeNone,        self, "Time elapsed in the process, s")
-        self.T    = daeVariable("T",     typeTemperature, self, "Temperature of the plate, K")
+        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
+        self.time = daeVariable("&tau;", no_t,          self, "Time elapsed in the process, s")
+        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")

@@ -85,7 +85,7 @@ class daeMainWindow(QtGui.QMainWindow):
         
         help = menubar.addMenu('&Help')
         help.addAction(about)
-        help.addAction(docs)
+        #help.addAction(docs)
 
         self.toolbar = self.addToolBar('Main toolbar')
 

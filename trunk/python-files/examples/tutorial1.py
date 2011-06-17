@@ -92,11 +92,7 @@ import sys, tempfile
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -128,7 +124,7 @@ class modTutorial(daeModel):
         # can be distributed by using a function DistributeOnDomain, which accepts a domain object as
         # the argument (previously declared in the constructor).
         # Also a description of the object can be set by using the property Description.
-        self.T = daeVariable("T", typeTemperature, self)
+        self.T = daeVariable("T", temperature_t, self)
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
         self.T.Description = "Temperature of the plate, K"

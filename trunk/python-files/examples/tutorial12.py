@@ -35,11 +35,7 @@ from daetools.solvers import pySuperLU as superlu
 #from daetools.solvers import pySuperLU_MT as superlu
 #from daetools.solvers import pySuperLU_CUDA as superlu
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -55,7 +51,7 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 

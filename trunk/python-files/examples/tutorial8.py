@@ -39,11 +39,7 @@ from daetools.pyDAE import *
 from daetools.pyDAE.daeDataReporters import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 # The best starting point in creating custom data reporters that can export the results
 # into a file is daeDataReporterLocal class. It internally does all the processing
@@ -120,7 +116,7 @@ class modTutorial(daeModel):
         self.m  = daeParameter("m",   eReal, self, "Mass of the plate, kg")
         self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
 
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation.")

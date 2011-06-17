@@ -28,11 +28,7 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-typeNone         = daeVariableType("None",         "-",      0, 1E10,   0, 1e-5)
-typeTemperature  = daeVariableType("Temperature",  "K",    100, 1000, 300, 1e-5)
-typeConductivity = daeVariableType("Conductivity", "W/mK",   0, 1E10, 100, 1e-5)
-typeDensity      = daeVariableType("Density",      "kg/m3",  0, 1E10, 100, 1e-5)
-typeHeatCapacity = daeVariableType("HeatCapacity", "J/KgK",  0, 1E10, 100, 1e-5)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -46,7 +42,7 @@ class modTutorial(daeModel):
 
         # In this example the heat capacity is not a constant value but the temperature dependent (at every point in x and y domains).
         # To calculate cp a simple temperature dependency is proposed which depends on 2 parameters: a and b
-        self.cp = daeVariable("c_p", typeConductivity, self, "Specific heat capacity of the plate, J/kgK")
+        self.cp = daeVariable("c_p", specific_heat_capacity_t, self, "Specific heat capacity of the plate, J/kgK")
         self.cp.DistributeOnDomain(self.x)
         self.cp.DistributeOnDomain(self.y)
 
@@ -64,10 +60,10 @@ class modTutorial(daeModel):
         self.k.DistributeOnDomain(self.y)
 
         # In this example the density is now a variable
-        self.ro = daeVariable("&rho;", typeDensity, self, "Density of the plate, kg/m3")
+        self.ro = daeVariable("&rho;", density_t, self, "Density of the plate, kg/m3")
 
         # Domains that variables/parameters are distributed on can be specified in a constructor:
-        self.T = daeVariable("T", typeTemperature, self, "Temperature of the plate, K", [self.x, self.y])
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K", [self.x, self.y])
         # Another way would be by using DistributeOnDomain() function:
         #self.T.DistributeOnDomain(self.x)
         #self.T.DistributeOnDomain(self.y)

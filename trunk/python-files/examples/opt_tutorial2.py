@@ -24,18 +24,18 @@ from daetools.pyDAE import *
 from daetools.solvers import pyBONMIN
 from time import localtime, strftime
 
-typeNone = daeVariableType("None", "-",  -1E20, 1E20,   1, 1e-6)
+# Standard variable types are defined in daeVariableTypes.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeVariable("x", typeNone, self)
-        self.y1 = daeVariable("y1", typeNone, self)
-        self.y2 = daeVariable("y2", typeNone, self)
-        self.z  = daeVariable("z", typeNone, self)
+        self.x  = daeVariable("x",  no_t, self)
+        self.y1 = daeVariable("y1", no_t, self)
+        self.y2 = daeVariable("y2", no_t, self)
+        self.z  = daeVariable("z",  no_t, self)
 
-        self.dummy = daeVariable("dummy", typeNone, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
+        self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
@@ -65,7 +65,9 @@ class simTutorial(daeSimulation):
         #  - Inequality: g(i) <= 0
         #  - Equality: h(i) = 0
         c1 = self.CreateInequalityConstraint("Constraint 1")
-        c1.Residual = Pow(self.m.y1() - 0.5, 2) + Pow(self.m.y2() - 0.5, 2) - 0.25
+        c1.Residual = (self.m.y1() - 0.5) ** 2 + (self.m.y2() - 0.5) ** 2 - 0.25
+        # Or by using daetools Pow() function:
+        #c1.Residual = Pow(self.m.y1() - 0.5, 2) + Pow(self.m.y2() - 0.5, 2) - 0.25
 
         c2 = self.CreateInequalityConstraint("Constraint 2")
         c2.Residual = self.m.x() - self.m.y1()
@@ -73,7 +75,7 @@ class simTutorial(daeSimulation):
         c3 = self.CreateInequalityConstraint("Constraint 3")
         c3.Residual = self.m.x() + self.m.y2() + self.m.z() - 2
 
-        # Set the optimization variables and their lower and upper bounds
+        # Set the optimization variables, their lower/upper bounds and the starting point
         self.SetBinaryOptimizationVariable(self.m.x, 0)
         self.SetContinuousOptimizationVariable(self.m.y1, 0, 2e19, 0)
         self.SetContinuousOptimizationVariable(self.m.y2, 0, 2e19, 0)
