@@ -27,7 +27,7 @@ win32-msvc2008::SUPERLU_PATH = ..\superlu
 linux-g++::SUPERLU_PATH      = ../superlu
 linux-g++-64::SUPERLU_PATH   = ../superlu
 
-SUPERLU_LIBPATH = $${SUPERLU_PATH}\lib
+SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
@@ -48,13 +48,13 @@ win32-msvc2008::SUPERLU_PATH = ..\superlu_mt
 linux-g++::SUPERLU_PATH      = ../superlu_mt
 linux-g++-64::SUPERLU_PATH   = ../superlu_mt
 
-SUPERLU_LIBPATH = $${SUPERLU_PATH}\lib
+SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_PATH} superlu_mt.lib
-linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_PATH} -lcdaesuperlu_mt
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_PATH} -lcdaesuperlu_mt
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu_mt.lib
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu_mt
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu_mt
 
 pyObject = pySuperLU_MT
 }
