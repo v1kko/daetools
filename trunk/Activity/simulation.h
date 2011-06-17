@@ -105,12 +105,12 @@ protected:
 	daeDAESolver_t*				m_pDAESolver;
 	daePtrVector<daeBlock_t*>	m_ptrarrBlocks;
 	daeeActivityAction			m_eActivityAction;
-	timespec					m_ProblemCreationStart;
-	timespec					m_ProblemCreationEnd;
-	timespec					m_InitializationStart;
-	timespec					m_InitializationEnd;
-	timespec					m_IntegrationStart;
-	timespec					m_IntegrationEnd;
+	double						m_ProblemCreationStart;
+	double						m_ProblemCreationEnd;
+	double						m_InitializationStart;
+	double						m_InitializationEnd;
+	double						m_IntegrationStart;
+	double						m_IntegrationEnd;
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
@@ -146,8 +146,8 @@ protected:
 	daeDataReporter_t*			m_pDataReporter;
 	daeDAESolver_t*				m_pDAESolver;
 	bool						m_bIsInitialized;
-	clock_t						m_Initialization;
-	clock_t						m_Optimization;
+	double						m_Initialization;
+	double						m_Optimization;
 };
 
 

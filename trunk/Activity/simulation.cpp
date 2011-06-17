@@ -142,7 +142,7 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	m_pDataReporter	= pDataReporter;
 	m_pLog			= pLog;
 
-	clock_gettime(CLOCK_MONOTONIC, &m_ProblemCreationStart);
+	m_ProblemCreationStart = dae::GetTimeInSeconds();
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 	bool bPrintInfo = cfg.Get<bool>("daetools.activity.printHeader", true);
@@ -226,9 +226,9 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	m_bIsInitialized = true;
 
 // Announce success	
-	clock_gettime(CLOCK_MONOTONIC, &m_ProblemCreationEnd);
+	m_ProblemCreationEnd = dae::GetTimeInSeconds();
 	m_pLog->Message(string("The system created successfully in: ") + 
-					toStringFormatted<real_t>(timespecDiff(&m_ProblemCreationEnd, &m_ProblemCreationStart) / 1.0E9, -1, 3) + 
+					toStringFormatted<real_t>(m_ProblemCreationEnd - m_ProblemCreationStart, -1, 3) + 
 					string(" s"), 0);
 }
 
@@ -336,9 +336,9 @@ void daeSimulation::SolveInitial(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 // Start initialization
-	clock_gettime(CLOCK_MONOTONIC, &m_InitializationStart);
-	clock_gettime(CLOCK_MONOTONIC, &m_IntegrationStart);
-	clock_gettime(CLOCK_MONOTONIC, &m_IntegrationEnd);
+	m_InitializationStart = dae::GetTimeInSeconds();
+	m_IntegrationStart    = dae::GetTimeInSeconds();
+	m_IntegrationEnd      = dae::GetTimeInSeconds();
 
 // Ask DAE solver to initialize the system
 	m_pDAESolver->SolveInitial();
@@ -350,7 +350,7 @@ void daeSimulation::SolveInitial(void)
 	m_bIsSolveInitial = true;
 
 // Announce success	
-	clock_gettime(CLOCK_MONOTONIC, &m_InitializationEnd);
+	m_InitializationEnd = dae::GetTimeInSeconds();
 	m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
 }
 
@@ -394,7 +394,7 @@ void daeSimulation::Run(void)
 	
 	if(m_dCurrentTime == 0)
 	{
-		clock_gettime(CLOCK_MONOTONIC, &m_IntegrationStart);
+		m_IntegrationStart = dae::GetTimeInSeconds();
 	}
 	if(m_dCurrentTime >= m_dTimeHorizon)
 	{
@@ -442,10 +442,11 @@ void daeSimulation::Run(void)
 // Print the ned of the simulation info if not in the optimization mode		
 	if(!m_bSetupOptimization)
 	{
-		clock_gettime(CLOCK_MONOTONIC, &m_IntegrationEnd);
-		real_t creation       = timespecDiff(&m_ProblemCreationEnd, &m_ProblemCreationStart) / 1.0E9;
-		real_t initialization = timespecDiff(&m_InitializationEnd,  &m_InitializationStart)  / 1.0E9;
-		real_t integration    = timespecDiff(&m_IntegrationEnd,     &m_IntegrationStart)     / 1.0E9;
+		m_IntegrationEnd = dae::GetTimeInSeconds();
+		
+		double creation       = m_ProblemCreationEnd - m_ProblemCreationStart;
+		double initialization = m_InitializationEnd  - m_InitializationStart;
+		double integration    = m_IntegrationEnd     - m_IntegrationStart;
 		
 		m_pLog->Message(string(" "), 0);
 		m_pLog->Message(string("The simulation has finished successfuly!"), 0);
