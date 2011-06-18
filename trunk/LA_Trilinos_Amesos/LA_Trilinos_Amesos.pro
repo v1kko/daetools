@@ -22,7 +22,10 @@ TEMPLATE = lib
 # ####################################################################################
 SUPERLU_DIR      = ../superlu
 TRILINOS_DIR     = ../trilinos/build
-TRILINOS_INCLUDE = $${TRILINOS_DIR}/include
+
+win32-msvc2008::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
+                                   $${TRILINOS_DIR}/../commonTools/WinInterface/include
+unix::TRILINOS_INCLUDE           = $${TRILINOS_DIR}/include
 
 win32-msvc2008::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
 linux-g++::BLAS_LAPACK_LIBDIR      = /usr/lib/atlas
@@ -31,7 +34,7 @@ linux-g++-64::BLAS_LAPACK_LIBDIR   = /usr/lib/atlas
 win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
                                 BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
                                 superlu.lib \
-                                aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib teuchos.lib
+                                aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
 linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_DIR}/lib \
 							  -lblas -llapack \

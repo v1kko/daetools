@@ -16,7 +16,7 @@ SET PLATFORM=%4
 SET TRUNK=c:\Data\daetools\trunk
 SET INSTALL=%TRUNK%\Installations
 SET ROOT=%INSTALL%\%DEST%
-SET IDAS=%TRUNK%\idas-1.0.0\build
+SET IDAS=%TRUNK%\idas\build
 SET BONMIN=%TRUNK%\bonmin\build
 SET SUPERLU=%TRUNK%\superlu
 SET SUPERLU_MT=%TRUNK%\superlu_mt
@@ -64,23 +64,24 @@ mkdir images
 cd..
 
 cd %TRUNK%\release
-copy pyCore.pyd                     %ROOT%\pyDAE
-copy pyActivity.pyd                 %ROOT%\pyDAE
-copy pyDataReporting.pyd            %ROOT%\pyDAE
-copy pyIDAS.pyd                     %ROOT%\pyDAE
-copy pyBONMIN.pyd                   %ROOT%\solvers
-copy pyIPOPT.pyd                    %ROOT%\solvers
-copy pyTrilinos.pyd                 %ROOT%\solvers
-copy pySuperLU.pyd                  %ROOT%\solvers
-copy pySuperLU_MT.pyd               %ROOT%\solvers
-copy pySuperLU_CUDA.pyd             %ROOT%\solvers
+copy pyCore.pyd                      %ROOT%\pyDAE
+copy pyActivity.pyd                  %ROOT%\pyDAE
+copy pyDataReporting.pyd             %ROOT%\pyDAE
+copy pyIDAS.pyd                      %ROOT%\pyDAE
+copy pyBONMIN.pyd                    %ROOT%\solvers
+copy pyIPOPT.pyd                     %ROOT%\solvers
+copy pyNLOPT.pyd                     %ROOT%\solvers
+copy pyTrilinos.pyd                  %ROOT%\solvers
+REM copy pySuperLU.pyd               %ROOT%\solvers
+REM copy pySuperLU_MT.pyd            %ROOT%\solvers
+REM copy pySuperLU_CUDA.pyd          %ROOT%\solvers
 
-REM copy pyMagma.pyd                %ROOT%\solvers
-REM copy pyAmdACML.pyd              %ROOT%\solvers
-REM copy pyIntelMKL.pyd             %ROOT%\solvers
-REM copy pyIntelPardiso.pyd         %ROOT%\solvers
+REM copy pyMagma.pyd                 %ROOT%\solvers
+REM copy pyAmdACML.pyd               %ROOT%\solvers
+REM copy pyIntelMKL.pyd              %ROOT%\solvers
+REM copy pyIntelPardiso.pyd          %ROOT%\solvers
 
-copy boost_python-vc90-mt-1_43.dll  %ROOT%\pyDAE
+copy boost_python-vc90-mt-1_46_1.dll %ROOT%\pyDAE
 
 cd ..\python-files
 
@@ -162,7 +163,7 @@ ECHO from distutils.core import setup >> setup.py
 ECHO setup(name='%PACKAGE_NAME%',  >> setup.py
 ECHO       version='%VERSION%',  >> setup.py
 ECHO       description='DAE Tools',  >> setup.py
-ECHO       long_description='DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules).',  >> setup.py
+ECHO       long_description='DAE Tools: A cross-platform equation-oriented process modelling and optimization software.',  >> setup.py
 ECHO       author='Dragan Nikolic',  >> setup.py
 ECHO       author_email='dnikolic@daetools.com',  >> setup.py
 ECHO       url='http:\\www.daetools.com',  >> setup.py

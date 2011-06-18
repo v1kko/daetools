@@ -15,7 +15,7 @@ QT -= core gui
 TARGET = SuperLU
 TEMPLATE = lib
 
-CONFIG += SuperLU
+CONFIG += SuperLU_MT
 
 ######################################################################################
 #                                   SuperLU

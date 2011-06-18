@@ -267,8 +267,8 @@ void daeSuperLUSolver::FreeMemory(void)
 		throw e;
 	}
 	
-	std::cout << "Total factorization time = " << m_factorize / 1.E9 << " s" << std::endl;
-	std::cout << "Total solve time = "         << m_solve / 1.E9     << " s" << std::endl;
+	std::cout << "Total factorization time = " << toStringFormatted(m_factorize, -1, 3) << " s" << std::endl;
+	std::cout << "Total solve time = "         << toStringFormatted(m_solve, -1, 3)     << " s" << std::endl;
 #endif
 	
 #ifdef daeSuperLU	
@@ -475,8 +475,8 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_matJacobian, 
 							    dInverseTimeStep);
 
-	struct timespec start, end, memcopy;
-	clock_gettime(CLOCK_MONOTONIC, &start);
+	double start, end, memcopy;
+	start = dae::GetTimeInSeconds();
 	
 #ifdef daeSuperLU_MT
 	if(m_bFactorizationDone)
@@ -542,7 +542,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		e << "Unable to copy matrix values to the device (CUDA error: " << cudaGetErrorString(ce) << ")";
 		throw e;
 	}
-	clock_gettime(CLOCK_MONOTONIC, &memcopy);
+	memcopy = dae::GetTimeInSeconds();
 
 	ce = m_superlu_mt_gpuSolver.Factorize(info);
 	if(ce != cudaSuccess || info != 0)
@@ -624,16 +624,16 @@ int daeSuperLUSolver::Setup(void*		ida,
 
 #endif
 
-	clock_gettime(CLOCK_MONOTONIC, &end);
-	uint64_t timeMemcopy = timespecDiff(&memcopy, &start);
-	uint64_t timeFactor  = timespecDiff(&end, &memcopy);
-	uint64_t timeElapsed = timespecDiff(&end, &start);
+	end = dae::GetTimeInSeconds();
+	double timeMemcopy = memcopy - start;
+	double timeFactor  = end     - memcopy;
+	double timeElapsed = end     - start;
 	m_factorize += timeElapsed;
 	
 #ifdef daeSuperLU_CUDA
-	std::cout << "  Memcopy time = "     << timeMemcopy / 1.E9 << " s" << std::endl
-	          << "  Factor time = "      << timeFactor  / 1.E9 << " s" << std::endl
-	          << "  Total fact. time = " << timeElapsed / 1.E9 << " s" << std::endl;
+	std::cout << "  Memcopy time = "     << toStringFormatted(timeMemcopy, -1, 3) << " s" << std::endl
+	          << "  Factor time = "      << toStringFormatted(timeFactor, -1, 3) << " s" << std::endl
+	          << "  Total fact. time = " << toStringFormatted(timeElapsed, -1, 3) << " s" << std::endl;
 #endif
 
 	m_bFactorizationDone = true;
@@ -661,8 +661,8 @@ int daeSuperLUSolver::Solve(void*		ida,
 	size_t Neq = m_nNoEquations;
 	pdB        = NV_DATA_S(vectorB);
 	
-	struct timespec start, end;
-	clock_gettime(CLOCK_MONOTONIC, &start);
+	double start, end;
+	start = dae::GetTimeInSeconds();
 	
 #ifdef daeSuperLU_MT
 	::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
@@ -727,11 +727,11 @@ int daeSuperLUSolver::Solve(void*		ida,
 	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));	
 #endif
 	
-	clock_gettime(CLOCK_MONOTONIC, &end);
-	uint64_t timeElapsed = timespecDiff(&end, &start);
+	end = dae::GetTimeInSeconds();
+	double timeElapsed = end - start;
 	m_solve += timeElapsed;
 #ifdef daeSuperLU_CUDA
-	std::cout << "  Solve time = " << timeElapsed / 1.E9 << " s" << std::endl;
+	std::cout << "  Solve time = " << toStringFormatted(timeElapsed, -1, 3) << " s" << std::endl;
 #endif
 	
 	if(ida_mem->ida_cjratio != 1.0)

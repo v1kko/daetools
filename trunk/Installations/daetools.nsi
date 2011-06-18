@@ -6,7 +6,7 @@ OutFile "daetools.exe"
 
 ; The default installation directory
 ; Python version: PYTHON_VERSION=`$PYTHON -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
-InstallDir C:\Python26\Lib\site-packages\daetools
+InstallDir C:\Python27\Lib\site-packages\daetools
 
 ; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
@@ -37,12 +37,7 @@ Section "daetools (required)"
   SetOutPath $INSTDIR
   File /r   "daetools\*.*"
 
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyAmdACML
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelMKL
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyIntelPardiso
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyTrilinosAmesos
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pyMagma
-  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_43.dll  $INSTDIR\pySuperLU
+  CopyFiles $INSTDIR\pyDAE\boost_python-vc90-mt-1_46_1.dll  $INSTDIR\solvers
 
   ; Config file
   CreateDirectory c:\daetools

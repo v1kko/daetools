@@ -145,7 +145,7 @@ public:
     int*				m_perm_r;
 #endif
 	
-	uint64_t m_solve, m_factorize;
+	double m_solve, m_factorize;
 };
 
 }
