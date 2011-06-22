@@ -410,7 +410,7 @@ elif [ ${PCKG_TYPE} = "deb" ]; then
   if [ ${DISTRO} = "Debian-5" ]; then
     echo "Depends: python2.5, libboost1.35-dev, python-qt4, python-numpy, python-matplotlib, libc6" >> ${CONTROL}
   else
-    echo "Depends: python2.6, libboost-all-dev, python-qt4, python-numpy, python-matplotlib, libc6" >> ${CONTROL}
+    echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, libc6" >> ${CONTROL}
   fi
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}

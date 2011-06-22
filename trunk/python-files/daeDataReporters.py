@@ -41,10 +41,13 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
         for var in self.Process.Variables:
             mdict[var.Name] = var.Values
 
-        scipy.io.savemat(self.ConnectionString,
-                         mdict,
-                         appendmat=False,
-                         format='5',
-                         long_field_names=False,
-                         do_compression=False,
-                         oned_as='row')
+        try:
+            scipy.io.savemat(self.ConnectionString,
+                             mdict,
+                             appendmat=False,
+                             format='5',
+                             long_field_names=False,
+                             do_compression=False,
+                             oned_as='row')
+        except Exception, e:
+            print 'Cannot call scipy.io.savemat(); is SciPy installed?\n' + str(e)

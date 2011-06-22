@@ -162,8 +162,6 @@
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b>+</b> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <b>+</b> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
-    <b>print</b> simulation.m.ExportObjects([simulation.m], ePYDAE)
-    <b>print</b> simulation.m.ExportObjects([simulation.m], eCDAE)
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

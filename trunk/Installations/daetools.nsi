@@ -66,9 +66,6 @@ Section "Start Menu Shortcuts"
   SetOutPath $INSTDIR\daePlotter
   CreateShortCut "$SMPROGRAMS\DAE Tools\daePlotter.lnk" "$INSTDIR\daePlotter\daePlotter.pyw" "50000" "$INSTDIR\daePlotter\daePlotter.pyw" 0
 
-  SetOutPath $INSTDIR\docs
-  CreateShortCut "$SMPROGRAMS\DAE Tools\Documentation.lnk" "$INSTDIR\docs\documentation.html" "" "$INSTDIR\docs\documentation.html" 0
-
   SetOutPath $INSTDIR\examples
   CreateShortCut "$SMPROGRAMS\DAE Tools\DAE Tools Examples.lnk" "$INSTDIR\examples\daeRunExamples.pyw" "" "$INSTDIR\examples\daeRunExamples.pyw" 0
 

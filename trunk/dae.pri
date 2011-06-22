@@ -256,7 +256,7 @@ NLOPT_DIR = ../nlopt/build
 NLOPT_INCLUDE = $${NLOPT_DIR}/include
 NLOPT_LIBDIR  = $${NLOPT_DIR}/lib
 
-win32-msvc2008::NLOPT_LIBS = 
+win32-msvc2008::NLOPT_LIBS = nlopt.lib
 unix::NLOPT_LIBS           = -lnlopt -lm
 
 
