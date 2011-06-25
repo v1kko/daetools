@@ -80,8 +80,6 @@ public:
 		if(Nv != matSens.GetNrows())
 			daeDeclareAndThrowException(exInvalidCall)
 		
-		::memset(grad_f, 0, Nv * sizeof(double));
-		
 		m_pObjectiveFunction->GetGradients(matSens, grad_f, Nv);
 		
 		if(m_bPrintInfo) 
@@ -109,25 +107,18 @@ public:
 
 	void Calculate_g_gradient(daeOptimizationConstraint_t* pConstraint, double* grad_g)
 	{
-		size_t j, paramIndex;
-		std::vector<size_t> narrOptimizationVariablesIndexes;
-	
 		size_t Nv = m_ptrarrOptVariables.size();
 		daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 		if(Nv != matSens.GetNrows())
 			daeDeclareAndThrowException(exInvalidCall)
 	
-		::memset(grad_g, 0, Nv * sizeof(double));
-		
-	// Call GetGradients to fill the array m_pdTempStorage with gradients
-	// ONLY the values for indexes in the current constraint are set!! The rest is left as it is (zero)
 		pConstraint->GetGradients(matSens, grad_g, Nv);
 	
 		if(m_bPrintInfo) 
 		{
 			string strMessage;
 			m_pLog->Message(pConstraint->GetName() + " gradient: ", 0);
-			for(j = 0; j < Nv; j++)
+			for(size_t j = 0; j < Nv; j++)
 				strMessage += toStringFormatted<real_t>(grad_g[j], -1, 10, true) + " ";
 			m_pLog->Message(strMessage, 0);
 		}		

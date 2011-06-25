@@ -39,7 +39,7 @@ class modTutorial(daeModel):
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
-        eq.Residual = self.dummy()
+        eq.Residual = self.dummy() - self.x1() - self.x4()
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -64,17 +64,17 @@ class simTutorial(daeSimulation):
         # Constraints are in the following form:
         #  - Inequality: g(i) <= 0
         #  - Equality: h(i) = 0
-        c1 = self.CreateInequalityConstraint("Constraint 1") # g(x) >= 25:  25 - x1*x2*x3*x4 <= 0
-        c1.Residual = 25 - self.m.x1() * self.m.x2() * self.m.x3() * self.m.x4()
+        self.c1 = self.CreateInequalityConstraint("Constraint 1") # g(x) >= 25:  25 - x1*x2*x3*x4 <= 0
+        self.c1.Residual = 25 - self.m.x1() * self.m.x2() * self.m.x3() * self.m.x4()
 
-        c2 = self.CreateEqualityConstraint("Constraint 2") # h(x) == 40
-        c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
+        self.c2 = self.CreateEqualityConstraint("Constraint 2") # h(x) == 40
+        self.c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
 
         # Set the optimization variables, their lower/upper bounds and the starting point
-        self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
+        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
+        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
+        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
+        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
 def setOptions(nlpsolver):
     # 1) Set the options manually
@@ -138,6 +138,28 @@ def consoleRun():
 
     # Run
     optimization.Run()
+    
+    print 'Fobj'
+    print simulation.ObjectiveFunction.Value
+    print simulation.ObjectiveFunction.Gradients
+    
+    print 'c1'
+    print simulation.c1.Value
+    print simulation.c1.Gradients
+
+    print 'c2'
+    print simulation.c2.Value
+    print simulation.c2.Gradients
+
+    print 'ov1'
+    print simulation.ov1.Value
+    print 'ov2'
+    print simulation.ov2.Value
+    print 'ov3'
+    print simulation.ov3.Value
+    print 'ov4'
+    print simulation.ov4.Value
+
     optimization.Finalize()
 
 if __name__ == "__main__":

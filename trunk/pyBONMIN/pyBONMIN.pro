@@ -4,12 +4,28 @@ QT -= core \
 TARGET = pyBIMINLP
 TEMPLATE = lib
 
-CONFIG += IPOPT
+###############################
+# Could be: BONMIN, IPOPT
+###############################
+CONFIG += BONMIN
+
+#####################################################################
+# Small hack used when compiling from compile_linux.sh shell script
+#####################################################################
+shellCompile:message(shellCompile) {
+shellIPOPT {
+  CONFIG += IPOPT
+}
+shellBONMIN {
+  CONFIG += BONMIN
+}
+}
 
 ######################################################################################
 #                                BONMIN
 ######################################################################################
-BONMIN { 
+CONFIG(BONMIN, BONMIN|IPOPT):message(BONMIN) { 
+
 QMAKE_CXXFLAGS += -DdaeBONMIN
 pyObject = pyBONMIN
 
@@ -38,7 +54,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
 ######################################################################################
 #                                IPOPT
 ######################################################################################
-IPOPT { 
+CONFIG(IPOPT, BONMIN|IPOPT):message(IPOPT) { 
+
 QMAKE_CXXFLAGS += -DdaeIPOPT
 pyObject = pyIPOPT
 

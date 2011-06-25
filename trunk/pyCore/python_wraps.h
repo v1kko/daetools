@@ -895,6 +895,13 @@ public:
 	}
 };
 
+
+/*******************************************************
+	daeObjectiveFunction, daeOptimizationConstraint
+*******************************************************/
+boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction& f);
+boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimizationConstraint& c);
+
 /*******************************************************
 	daeLog
 *******************************************************/

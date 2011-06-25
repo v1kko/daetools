@@ -68,13 +68,13 @@ public:
 	daeOptimizationConstraint* CreateInequalityConstraint(string strDescription = "");// <= 0
 	daeOptimizationConstraint* CreateEqualityConstraint(string strDescription = "");  // == 0
 
-	void SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
-	void SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);
-	void SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue);
+	daeOptimizationVariable* SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
+	daeOptimizationVariable* SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);
+	daeOptimizationVariable* SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue);
 
-	void SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue);
-	void SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
-	void SetBinaryOptimizationVariable(adouble a, bool defaultValue);
+	daeOptimizationVariable* SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue);
+	daeOptimizationVariable* SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
+	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
 protected:
 	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
@@ -93,7 +93,7 @@ protected:
 	void	ReportPort(daePort_t* pPort, real_t time);
 	void	ReportVariable(daeVariable_t* pVariable, real_t time);
 	
-	void	GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const;
+//	void	GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const;
 
 protected:
 	real_t						m_dCurrentTime;

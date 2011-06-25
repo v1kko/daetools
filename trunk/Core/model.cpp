@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include <typeinfo> 
+#include "nodes.h"
 
 namespace dae 
 {
@@ -3481,6 +3482,47 @@ daeObjectType::~daeObjectType(void)
 {
 
 }
+
+/*********************************************************************************************
+	daeGetVariableAndIndexesFromNode
+**********************************************************************************************/
+void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes)
+{
+	size_t i, n;
+	
+	adSetupVariableNode* node = dynamic_cast<adSetupVariableNode*>(a.node.get());
+	if(!node)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The first argument of daeGetVariableAndIndexesFromNode() function "
+		  << "can only be a variable or a distributed variable with constant indexes";
+		throw e;
+	}
+	
+	*variable = node->m_pVariable;
+	if(!(*variable))
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	n = node->m_arrDomains.size();
+	for(i = 0; i < n; i++)
+	{
+	// Only constant indexes are supported here!!!
+		if(node->m_arrDomains[i].m_eType == eConstantIndex)
+		{
+			if(node->m_arrDomains[i].m_nIndex == ULONG_MAX)
+				daeDeclareAndThrowException(exInvalidCall);
+			
+			narrDomainIndexes.push_back(node->m_arrDomains[i].m_nIndex);
+		}
+		else
+		{
+			daeDeclareException(exInvalidCall);
+			e << "The first argument of daeGetVariableAndIndexesFromNode() function "
+			  << "can only be a variable or a distributed variable with constant indexes";
+			throw e;
+		}
+	}
+}  
 
 }
 }

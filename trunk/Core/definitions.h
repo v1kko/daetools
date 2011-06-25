@@ -302,6 +302,7 @@ public:
 	virtual REAL	GetItem(size_t i) const			= 0;
 	virtual void	SetItem(size_t i, REAL value)	= 0;
 	virtual size_t	GetSize(void) const				= 0;
+	virtual void	Print(void) const				= 0;
 };
 
 /*********************************************************************************************
@@ -343,8 +344,8 @@ public:
 	virtual void AddRow(const std::map<size_t, size_t>& mapIndexes) = 0;
 
 // If true then C type, otherwise FORTRAN indexing starting from 1
-	virtual bool GetIndexing(void)				= 0;
-	virtual void SetIndexing(bool index)		= 0;	
+	virtual bool GetIndexing(void)		 = 0;
+	virtual void SetIndexing(bool index) = 0;	
 };
 
 

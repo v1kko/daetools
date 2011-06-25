@@ -99,6 +99,12 @@ BOOST_PYTHON_MODULE(pyCore)
 		.export_values()
 	;
 	
+	enum_<daeeConstraintType>("daeeConstraintType")
+		.value("eInequalityConstraint",	dae::core::eInequalityConstraint)
+		.value("eEqualityConstraint",	dae::core::eEqualityConstraint)
+		.export_values()
+	;
+	
 /**************************************************************
 	Global functions
 ***************************************************************/
@@ -108,6 +114,14 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
 	Classes
 ***************************************************************/
+	class_<daeThirdPartyVariable>("daeThirdPartyVariable", no_init)
+		.def(init<daeVariable&, optional<string> >())
+		.def(init<adouble&, optional<string> >())
+
+		.def_readwrite("Name", &daeThirdPartyVariable::m_strName)
+		.add_property("Value", &daeThirdPartyVariable::GetValue, &daeThirdPartyVariable::SetValue)
+	;
+
 	class_<daeConfig>("daeConfig")
 		.def("GetBoolean",	   &daepython::GetBoolean1)
 		.def("GetFloat",	   &daepython::GetFloat1)
@@ -564,7 +578,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daeOptimizationVariable, bases<daeOptimizationVariable_t>, boost::noncopyable>("daeOptimizationVariable", no_init)
-		.add_property("Type",			&daeOptimizationVariable::GetType)
+		.add_property("Type",			&daeOptimizationVariable::GetType,			&daeOptimizationVariable::SetType)
+		.add_property("Value",			&daeOptimizationVariable::GetValue,			&daeOptimizationVariable::SetValue)
 		.add_property("LowerBound",		&daeOptimizationVariable::GetLB,			&daeOptimizationVariable::SetLB)
 		.add_property("UpperBound",		&daeOptimizationVariable::GetUB,			&daeOptimizationVariable::SetUB)
 		.add_property("StartingPoint",	&daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint)
@@ -572,11 +587,16 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t>, boost::noncopyable>("daeObjectiveFunction", no_init)
 		.add_property("Residual",		&daeObjectiveFunction::GetResidual,		&daeObjectiveFunction::SetResidual)
+		.add_property("Value",			&daeObjectiveFunction::GetValue)
+		.add_property("Gradients",		&daepython::GetGradientsObjectiveFunction)
 		//.add_property("AbsTolerance",	&daeObjectiveFunction::GetAbsTolerance,	&daeObjectiveFunction::SetAbsTolerance)
 		;
 
 	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t>, boost::noncopyable>("daeOptimizationConstraint", no_init)
 		.add_property("Residual",		&daeOptimizationConstraint::GetResidual,		&daeOptimizationConstraint::SetResidual)
+		.add_property("Type",			&daeOptimizationConstraint::GetType,			&daeOptimizationConstraint::SetType)
+		.add_property("Value",			&daeOptimizationConstraint::GetValue)
+		.add_property("Gradients",		&daepython::GetGradientsOptimizationConstraint)
 		//.add_property("AbsTolerance",	&daeOptimizationConstraint::GetAbsTolerance,	&daeOptimizationConstraint::SetAbsTolerance)
 		//.add_property("RelTolerance",	&daeOptimizationConstraint::GetRelTolerance,	&daeOptimizationConstraint::SetRelTolerance)
 		;

@@ -417,9 +417,6 @@ bool daeMINLP::eval_jac_g(Index n,
 				pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
 
 			// The function GetGradients needs an array of size n (number of opt. variables)
-			// Therefore, first I should to set all values to zero (I dont have to, but just in case)
-				::memset(m_pdTempStorage, 0, n * sizeof(real_t));
-				
 			// Call GetGradients to fill the array m_pdTempStorage with gradients
 			// ONLY the values for indexes in the current constraint are set!! The rest is left as it is (zero)
 				pConstraint->GetGradients(matSens, m_pdTempStorage, n);
@@ -513,9 +510,6 @@ bool daeMINLP::eval_grad_gi(Index n,
 			pConstraint->GetOptimizationVariableIndexes(narrOptimizationVariablesIndexes);
 
 		// The function GetGradients needs an array of size n (number of opt. variables)
-		// Therefore, first I should to set all values to zero (I dont have to, but just in case)
-			::memset(m_pdTempStorage, 0, n * sizeof(real_t));
-			
 		// Call GetGradients to fill the array m_pdTempStorage with gradients
 		// ONLY the values for indexes in the current constraint are set!! The rest is left as it is (zero)
 			pConstraint->GetGradients(matSens, m_pdTempStorage, n);

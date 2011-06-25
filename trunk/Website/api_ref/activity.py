@@ -12,10 +12,6 @@ Integer constants defined in the module:
 class daeSimulation_t:
     """
     The base simulation class (abstract).
-    Properties:
-     - OptimizationConstraints: list of daeOptimizationConstraint_t objects
-     - OptimizationVariables: list of daeOptimizationVariable_t objects
-     - ObjectiveFunction: daeObjectiveFunction_t
     """
     def GetModel(self):
         """
@@ -293,11 +289,15 @@ class daeSimulation_t:
 class daeSimulation(daeSimulation_t):
     """
     An implementation of the daeSimulation_t.
+    Properties:
+     - OptimizationConstraints: list of daeOptimizationConstraint objects
+     - OptimizationVariables: list of daeOptimizationVariable objects
+     - ObjectiveFunction: daeObjectiveFunction object
     The user has to implement the following methods:
      - SetUpParametersAndDomains
      - SetUpVariables
      - SetUpOptimization (for optimization only)
-    Also, the user can reimplement the Run() method to provide a custom operating procedure of the process.  
+    Also, the user can reimplement the Run() method to provide a custom operating procedure.  
     """
     def CreateEqualityConstraint(self, Description):
         """

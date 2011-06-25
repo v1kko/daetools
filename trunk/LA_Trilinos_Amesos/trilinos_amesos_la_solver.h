@@ -157,7 +157,7 @@ public:
 		matrix->FillComplete(true);
 	}
 	
-	void Print(void) const
+	void Print(bool bStructureOnly = false) const
 	{
 		if(!matrix)
 			daeDeclareException(exInvalidPointer);

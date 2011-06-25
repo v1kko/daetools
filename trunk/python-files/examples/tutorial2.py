@@ -185,6 +185,20 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
+    # daeThirdPartyVariable class is used when interfacing DAE Tools with a 3rd party software.
+    # The variable obviously must not be a state variable (that is it must have assigned value).
+    # The class has attribute Value for a quick access to the variable value and it hides the
+    # particulars about getting/setting a variable value.
+    # It should be straightforward to create a wrapper around DAE Tools simulation,
+    # which sets the inputs from the 3rd party software, runs a simulation with daeSimulation.ReRun()
+    # and finally gets the results from DAE Tools. 
+    # This procedure can be repeated as many times as necessary.
+    ro = daeThirdPartyVariable(simulation.m.ro, 'ro')
+    print ro.Name
+    print ro.Value
+    ro.Value = 9000
+    print ro.Value
+
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

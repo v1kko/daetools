@@ -38,12 +38,12 @@ QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
 QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
 QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
-CONFIG(debug, debug|release){
+CONFIG(debug, debug|release):message(debug){
 	DAE_DEST_DIR = ../debug
     OBJECTS_DIR = debug
 }
 
-CONFIG(release, debug|release){
+CONFIG(release, debug|release):message(release){
 	DAE_DEST_DIR = ../release
     OBJECTS_DIR = release
 }

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "simulation.h"
-#include "../Core/nodes.h"
+//#include "../Core/nodes.h"
 #include <stdio.h>
 #include <time.h>
 
@@ -183,7 +183,7 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 	{
 		daeConfig& cfg = daeConfig::GetConfig();
 		real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
-		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(m_pModel, dAbsTolerance));
+		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(this, dAbsTolerance));
 		
 		SetUpOptimization();
 	}
@@ -495,8 +495,7 @@ daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strD
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(this, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }
@@ -506,106 +505,111 @@ daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDes
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(pModel, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(this, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }
 
-void daeSimulation::SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 {
 	std::vector<size_t> narrDomainIndexes;
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue)
+daeOptimizationVariable* daeSimulation::SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue)
 {
 	std::vector<size_t> narrDomainIndexes;
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue)
+daeOptimizationVariable* daeSimulation::SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue)
 {
 	std::vector<size_t> narrDomainIndexes;
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue)
+daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue)
 {
 	daeVariable* variable;
 	std::vector<size_t> narrDomainIndexes;
 	
-	GetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
+	daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::SetBinaryOptimizationVariable(adouble a, bool defaultValue)
+daeOptimizationVariable* daeSimulation::SetBinaryOptimizationVariable(adouble a, bool defaultValue)
 {
 	daeVariable* variable;
 	std::vector<size_t> narrDomainIndexes;
 	
-	GetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
+	daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue)
+daeOptimizationVariable* daeSimulation::SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue)
 {
 	daeVariable* variable;
 	std::vector<size_t> narrDomainIndexes;
 	
-	GetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
+	daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
 	size_t nOptVarIndex = m_arrOptimizationVariables.size();
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
 	m_arrOptimizationVariables.push_back(pVar);	
+	return pVar.get();
 }
 
-void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const
-{
-	size_t i, n;
-	
-	adSetupVariableNode* node = dynamic_cast<adSetupVariableNode*>(a.node.get());
-	if(!node)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
-		  << "can only be a variable or a distributed variable with constant indexes";
-		throw e;
-	}
-	
-	*variable = node->m_pVariable;
-	if(!(*variable))
-		daeDeclareAndThrowException(exInvalidPointer)
-	
-	n = node->m_arrDomains.size();
-	for(i = 0; i < n; i++)
-	{
-	// Only constant indexes are supported here!!!
-		if(node->m_arrDomains[i].m_eType == eConstantIndex)
-		{
-			if(node->m_arrDomains[i].m_nIndex == ULONG_MAX)
-				daeDeclareAndThrowException(exInvalidCall);
-			
-			narrDomainIndexes.push_back(node->m_arrDomains[i].m_nIndex);
-		}
-		else
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
-			  << "can only be a variable or a distributed variable with constant indexes";
-			throw e;
-		}
-	}
-}  
+//void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const
+//{
+//	size_t i, n;
+//	
+//	adSetupVariableNode* node = dynamic_cast<adSetupVariableNode*>(a.node.get());
+//	if(!node)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
+//		  << "can only be a variable or a distributed variable with constant indexes";
+//		throw e;
+//	}
+//	
+//	*variable = node->m_pVariable;
+//	if(!(*variable))
+//		daeDeclareAndThrowException(exInvalidPointer)
+//	
+//	n = node->m_arrDomains.size();
+//	for(i = 0; i < n; i++)
+//	{
+//	// Only constant indexes are supported here!!!
+//		if(node->m_arrDomains[i].m_eType == eConstantIndex)
+//		{
+//			if(node->m_arrDomains[i].m_nIndex == ULONG_MAX)
+//				daeDeclareAndThrowException(exInvalidCall);
+//			
+//			narrDomainIndexes.push_back(node->m_arrDomains[i].m_nIndex);
+//		}
+//		else
+//		{
+//			daeDeclareException(exInvalidCall);
+//			e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
+//			  << "can only be a variable or a distributed variable with constant indexes";
+//			throw e;
+//		}
+//	}
+//}  
 
 //void daeSimulation::SetInitialConditionsToZero(void)
 //{

@@ -1491,6 +1491,7 @@ class daeOptimizationVariable:
     """
     PROPERTIES:
      - Type: daeeOptimizationVariableType
+     - Value: float
      - LowerBound: float
      - UpperBound: float
      - StartingPoint: float
@@ -1500,10 +1501,14 @@ class daeObjectiveFunction:
     """
     PROPERTIES:
      - Residual: adouble
+     - Value: float (read-only)
+     - Gradients: numpy array (read-only)
     """
 
 class daeOptimizationConstraint:
     """
     PROPERTIES:
      - Residual: adouble
+     - Value: float (read-only)
+     - Gradients: numpy array (read-only)
     """

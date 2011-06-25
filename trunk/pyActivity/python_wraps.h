@@ -210,41 +210,67 @@ public:
         this->daeSimulation::SetUpOptimization();
     }
 	
-	void SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+	daeOptimizationVariable* SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 	{
-        this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);
+        return this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);
 	}
 	
-	void SetBinaryOptimizationVariable1(daeVariable& variable, bool defaultValue)
+	daeOptimizationVariable* SetBinaryOptimizationVariable1(daeVariable& variable, bool defaultValue)
 	{
-        this->daeSimulation::SetBinaryOptimizationVariable(variable, defaultValue);
+        return this->daeSimulation::SetBinaryOptimizationVariable(variable, defaultValue);
 	}
 	
-	void SetIntegerOptimizationVariable1(daeVariable& variable, int LB, int UB, int defaultValue)
+	daeOptimizationVariable* SetIntegerOptimizationVariable1(daeVariable& variable, int LB, int UB, int defaultValue)
 	{
-        this->daeSimulation::SetIntegerOptimizationVariable(variable, LB, UB, defaultValue);
+        return this->daeSimulation::SetIntegerOptimizationVariable(variable, LB, UB, defaultValue);
 	}
 	
-	void SetContinuousOptimizationVariable2(adouble a, real_t LB, real_t UB, real_t defaultValue)
+	daeOptimizationVariable* SetContinuousOptimizationVariable2(adouble a, real_t LB, real_t UB, real_t defaultValue)
 	{
-        this->daeSimulation::SetContinuousOptimizationVariable(a, LB, UB, defaultValue);
+        return this->daeSimulation::SetContinuousOptimizationVariable(a, LB, UB, defaultValue);
 	}
 	
-	void SetBinaryOptimizationVariable2(adouble a, bool defaultValue)
+	daeOptimizationVariable* SetBinaryOptimizationVariable2(adouble a, bool defaultValue)
 	{
-        this->daeSimulation::SetBinaryOptimizationVariable(a, defaultValue);
+        return this->daeSimulation::SetBinaryOptimizationVariable(a, defaultValue);
 	}
 	
-	void SetIntegerOptimizationVariable2(adouble a, int LB, int UB, int defaultValue)
+	daeOptimizationVariable* SetIntegerOptimizationVariable2(adouble a, int LB, int UB, int defaultValue)
 	{
-        this->daeSimulation::SetIntegerOptimizationVariable(a, LB, UB, defaultValue);
+        return this->daeSimulation::SetIntegerOptimizationVariable(a, LB, UB, defaultValue);
 	}
 	
 	daeObjectiveFunction* GetObjectiveFunction(void) const
 	{
 		return m_pObjectiveFunction.get();
 	}
-    
+
+	boost::python::list GetOptimizationVariables(void) const
+	{
+		daeOptimizationVariable* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
+		{
+			obj = m_arrOptimizationVariables[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+ 
+	boost::python::list GetConstraints(void) const
+	{
+		daeOptimizationConstraint* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrConstraints.size(); i++)
+		{
+			obj = m_arrConstraints[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+	
 public:
 	boost::python::object model;	
 };

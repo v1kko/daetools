@@ -15,12 +15,31 @@ QT -= core gui
 TARGET = SuperLU
 TEMPLATE = lib
 
-CONFIG += SuperLU_MT
+#################################################
+# Could be: SuperLU, SuperLU_MT, SuperLU_CUDA
+#################################################
+CONFIG += SuperLU
+
+#####################################################################
+# Small hack used when compiling from compile_linux.sh shell script
+#####################################################################
+shellCompile:message(shellCompile) {
+shellSuperLU {
+  CONFIG += SuperLU
+}
+shellSuperLU_MT {
+  CONFIG += SuperLU_MT
+}
+shellSuperLU_CUDA {
+  CONFIG += SuperLU_CUDA
+}
+}
 
 ######################################################################################
 #                                   SuperLU
 ######################################################################################
-SuperLU { 
+CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) { 
+
 QMAKE_CXXFLAGS += -DdaeSuperLU
 
 win32-msvc2008::SUPERLU_PATH = ..\superlu
@@ -41,7 +60,8 @@ pyObject = pySuperLU
 ######################################################################################
 #                                SuperLU_MT
 ######################################################################################
-SuperLU_MT { 
+CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) { 
+
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
 
 win32-msvc2008::SUPERLU_PATH = ..\superlu_mt
@@ -63,7 +83,8 @@ pyObject = pySuperLU_MT
 #                                SuperLU_CUDA
 # compile it with: make --file=gpuMakefile
 ######################################################################################
-SuperLU_CUDA { 
+CONFIG(SuperLU_CUDA, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_CUDA) { 
+
 QMAKE_CXXFLAGS += -DdaeSuperLU_CUDA
 
 win32-msvc2008::CUDA_PATH = 

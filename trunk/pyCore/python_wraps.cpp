@@ -1269,5 +1269,39 @@ boost::python::list GetStatesSTN(daeSTN& stn)
 	return l;
 }
 
+/*******************************************************
+	daeObjectiveFunction, daeOptimizationConstraint
+*******************************************************/
+boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction& f)
+{
+	size_t nType;
+	npy_intp dimensions;
+
+	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
+	dimensions = f.GetNumberOfOptimizationVariables();
+	
+	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+	::memset(values, 0, dimensions * sizeof(real_t));
+	f.GetGradients(values, dimensions);
+
+	return numpy_array;
+}
+
+boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimizationConstraint& c)
+{
+	size_t nType;
+	npy_intp dimensions;
+
+	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
+	dimensions = c.GetNumberOfOptimizationVariables();
+	
+	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+	::memset(values, 0, dimensions * sizeof(real_t));
+	c.GetGradients(values, dimensions);
+
+	return numpy_array;
+}
 
 }

@@ -57,7 +57,7 @@ public:
 		data = pData;
 	}
 	
-	void Print()
+	void Print(void) const
 	{
 		std::cout << "vector[" << N << "] = {";
 		for(size_t i = 0; i < N; i++)
@@ -152,7 +152,7 @@ public:
 		data        = pData;
 	}
 	
-	void Print(bool bStructureOnly = false)
+	void Print(bool bStructureOnly = false) const
 	{
 		for(size_t row = 0; row < Nrow; row++)
 		{
@@ -365,7 +365,7 @@ public:
 		data        = pData;
 	}
 	
-	void Print(bool bStructureOnly = false)
+	void Print(bool bStructureOnly = false) const
 	{
 		for(size_t i = 0; i < Nrow; i++)
 		{
@@ -607,7 +607,7 @@ public:
 		return -1;
 	}
 
-	real_t CalculateRatio() const
+	real_t CalculateRatio(void) const
 	{
 		real_t sparse = 2 * NNZ + N + 1;
 		real_t dense  = N * N;
@@ -615,7 +615,7 @@ public:
 		return sparse/dense; 
 	}
 	
-	void Print(bool bStructureOnly = false, bool bPrintValues = false) const
+	void Print(bool bStructureOnly = false) const
 	{
 		INT n, i, k;
 		real_t value;
@@ -641,42 +641,40 @@ public:
 		}
 		std::cout << "};" << std::endl;
 	
-		if(bPrintValues)
+		std::cout << "A[" << NNZ << "] = {";
+		for(i = 0; i < NNZ; i++)
 		{
-			std::cout << "A[" << NNZ << "] = {";
-			for(i = 0; i < NNZ; i++)
-			{
-				if(i != 0)
-					std::cout << ", ";
-				std::cout << A[i];
-			}
-			std::cout << "};" << std::endl;
-
-			for(i = 0; i < N; i++)
-			{
-				for(k = 0; k < N; k++)
-				{				
-					if(indexing == CSR_C_STYLE)
-						n = CalcIndex(i, k);
-					else
-						n = CalcIndex(i+1, k+1);
-					
-					if(n < 0)
-						value = 0.0;
-					else
-						value = A[n];				
-					
-					if(k != 0)
-						std::cout << " ";
-					if(bStructureOnly)
-						std::cout << (n < 0 ? "-" : "X");
-					else
-						std::cout << dae::toStringFormatted(value, 15, 8, true);				
-				}
-				std::cout << std::endl;
-			}
-			std::cout << std::endl;	
+			if(i != 0)
+				std::cout << ", ";
+			std::cout << A[i];
 		}
+		std::cout << "};" << std::endl;
+
+		for(i = 0; i < N; i++)
+		{
+			for(k = 0; k < N; k++)
+			{				
+				if(indexing == CSR_C_STYLE)
+					n = CalcIndex(i, k);
+				else
+					n = CalcIndex(i+1, k+1);
+				
+				if(n < 0)
+					value = 0.0;
+				else
+					value = A[n];				
+				
+				if(k != 0)
+					std::cout << " ";
+				if(bStructureOnly)
+					std::cout << (n < 0 ? "-" : "X");
+				else
+					std::cout << dae::toStringFormatted(value, 15, 8, true);				
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;	
+
 		std::cout.flush();
 	}
 
