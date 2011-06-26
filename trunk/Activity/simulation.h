@@ -40,8 +40,8 @@ public:
 	virtual void				Pause(void);
 	virtual daeeActivityAction	GetActivityAction(void) const;
 
-	virtual void				Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
-	virtual void				InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities = false);
+//	virtual void				InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -77,7 +77,7 @@ public:
 	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
 protected:
-	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+//	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);

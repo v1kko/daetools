@@ -93,33 +93,33 @@ daeeActivityAction daeSimulation::GetActivityAction(void) const
 	return m_eActivityAction;
 }
 
-void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
-{
-	if(m_bIsInitialized)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Simulation has already been initialized";
-		throw e;
-	}
-		
-	m_bSetupOptimization = false;
-	Init(pDAESolver, pDataReporter, pLog);
-}
+//void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities)
+//{
+//	if(m_bIsInitialized)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Simulation has already been initialized";
+//		throw e;
+//	}
+//		
+//	m_bSetupOptimization = bCalculateSensitivities;
+//	Init(pDAESolver, pDataReporter, pLog);
+//}
+//
+//void daeSimulation::InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+//{
+//	if(m_bIsInitialized)
+//	{
+//		daeDeclareException(exInvalidCall);
+//		e << "Simulation has already been initialized";
+//		throw e;
+//	}
+//	
+//	m_bSetupOptimization = true;
+//	Init(pDAESolver, pDataReporter, pLog);
+//}
 
-void daeSimulation::InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
-{
-	if(m_bIsInitialized)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Simulation has already been initialized";
-		throw e;
-	}
-	
-	m_bSetupOptimization = true;
-	Init(pDAESolver, pDataReporter, pLog);
-}
-
-void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -129,6 +129,15 @@ void daeSimulation::Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataRep
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
+	
+	if(m_bIsInitialized)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Simulation has already been initialized";
+		throw e;
+	}
+	
+	m_bSetupOptimization = bCalculateSensitivities;
 
 // Check data reporter
 	if(!pDataReporter->IsConnected())

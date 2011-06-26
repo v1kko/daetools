@@ -68,7 +68,7 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 	m_pDataReporter		 = pDataReporter;
 	m_pLog			     = pLog;
 	
-	m_pSimulation->InitializeOptimization(m_pDAESolver, m_pDataReporter, m_pLog);
+	m_pSimulation->Initialize(m_pDAESolver, m_pDataReporter, m_pLog, true);
 	m_pNLPSolver->Initialize(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 
 	m_bIsInitialized = true;

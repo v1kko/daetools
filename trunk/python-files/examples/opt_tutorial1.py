@@ -38,8 +38,8 @@ class modTutorial(daeModel):
         self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
-        eq.Residual = self.dummy() - self.x1() - self.x4()
+        eq = self.CreateEquation("Dummy")
+        eq.Residual = self.dummy()
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -71,14 +71,14 @@ class simTutorial(daeSimulation):
         self.c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
 
         # Set the optimization variables, their lower/upper bounds and the starting point
-        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
-        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
-        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
-        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
+        self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
+        self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
+        self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
+        self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
 def setOptions(nlpsolver):
     # 1) Set the options manually
-    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('print_level', 0)
     nlpsolver.SetOption('tol', 1e-7)
     nlpsolver.SetOption('mu_strategy', 'adaptive')
 
@@ -138,28 +138,6 @@ def consoleRun():
 
     # Run
     optimization.Run()
-    
-    print 'Fobj'
-    print simulation.ObjectiveFunction.Value
-    print simulation.ObjectiveFunction.Gradients
-    
-    print 'c1'
-    print simulation.c1.Value
-    print simulation.c1.Gradients
-
-    print 'c2'
-    print simulation.c2.Value
-    print simulation.c2.Gradients
-
-    print 'ov1'
-    print simulation.ov1.Value
-    print 'ov2'
-    print simulation.ov2.Value
-    print 'ov3'
-    print simulation.ov3.Value
-    print 'ov4'
-    print simulation.ov4.Value
-
     optimization.Finalize()
 
 if __name__ == "__main__":

@@ -245,7 +245,7 @@ public:
 		return m_pObjectiveFunction.get();
 	}
 
-	boost::python::list GetOptimizationVariables(void) const
+	boost::python::list GetOptimizationVariables(void)
 	{
 		daeOptimizationVariable* obj;
 		boost::python::list l;
@@ -258,7 +258,7 @@ public:
 		return l;
 	}
  
-	boost::python::list GetConstraints(void) const
+	boost::python::list GetConstraints(void)
 	{
 		daeOptimizationConstraint* obj;
 		boost::python::list l;

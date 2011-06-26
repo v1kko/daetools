@@ -38,7 +38,7 @@ class modTutorial(daeModel):
         self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        eq = self.CreateEquation("Dummy")
         eq.Residual = self.dummy()
 
 class simTutorial(daeSimulation):
