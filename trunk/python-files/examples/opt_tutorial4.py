@@ -72,110 +72,82 @@ class simTutorial(daeSimulation):
                                           100 * (self.m.x3() - self.m.x3()**2)**2 + (1 - self.m.x3())**2 + \
                                           100 * (self.m.x5() - self.m.x4()**2)**2 + (1 - self.m.x4())**2 
         
-        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
-        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
-        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
-        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
-        self.ov5 = self.SetContinuousOptimizationVariable(self.m.x5, 1, 5, 2);
-
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    opt = daeOptimization()
-    nlp = pyIPOPT.daeIPOPT()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 1
-    sim.TimeHorizon       = 5
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  nlpsolver = nlp)
-    simulator.exec_()
+        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, -10, 10, 1.3);
+        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, -10, 10, 0.7);
+        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, -10, 10, 0.8);
+        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, -10, 10, 1.9);
+        self.ov5 = self.SetContinuousOptimizationVariable(self.m.x5, -10, 10, 1.2);
 
 def Function(x, *params):
     simulation = params[0]
     
+    # This function will be called repeadetly to obtain the values of the objective function.
+    # In order to call DAE Tools repedeatly the following sequence of calls is necessary:
+    # 1. Set initial conditions, initial guesses, initially active states etc (function simulation.SetUpVariables)
+    #    In general, variables values, active states, initial consitions etc can be saved in some arrays and
+    #    later re-used. However, keeping the initialization data in SetUpVariables looks much better.
     simulation.SetUpVariables()
-    # 1) Use OptimizationVariables attribute to get a list of optimization variables:
+    
+    # 2. Change values of optimization variables (this will call function daeVariable.ReAssignValue) by setting 
+    #    the optimization variable's Value property. Optimization variables can be obtained in two ways:
+    # 2a) Use OptimizationVariables attribute to get a list of optimization variables and then set their values:
     opt_vars = simulation.OptimizationVariables
     opt_vars[0].Value = x[0]
     opt_vars[1].Value = x[1]
     opt_vars[2].Value = x[2]
     opt_vars[3].Value = x[3]
     opt_vars[4].Value = x[4]
-    
-    # 2) Or by using the stored daeOptimization variables (ov1, ..., ov5):
+    # 2b) Use stored optimization variable objects in simulation object (ov1, ..., ov5):
     #simulation.ov1.Value = x[0]
     #simulation.ov2.Value = x[1]
     #simulation.ov3.Value = x[2]
     #simulation.ov4.Value = x[3]
     #simulation.ov5.Value = x[4]
+    
+    # 3. Call simulations's Reset (to reset simulation and DAE solver objects), SolveInitial (to re-initialize the system),
+    #    and Run (to simulate the model and to calculate sensitivities) functions.
     simulation.Reset()
     simulation.SolveInitial()
     simulation.Run()
+    
+    # 4. Once finished with simulation, use ObjectiveFunction and Constraints properties of simulation object.
+    #    Objective function and constraints have Value (float) and Gradients (numpy array) properties where
+    #    their values and gradients in respect to optimization variables are stored. Here, as the example,
+    #    the value and gradients of the objective function are printed (since no constraints are involved).
+    print 'Objective function, x =', x
+    print '   .Value     =', simulation.ObjectiveFunction.Value
+    print '   .Gradients =', simulation.ObjectiveFunction.Gradients
+    print '-----------------------------------------------------------------------------------------------'
 
     return simulation.ObjectiveFunction.Value
     
-def Function_der(x, *params):
-    simulation = params[0]
-    
-    simulation.SetUpVariables()
-    simulation.ov1.Value = x[0]
-    simulation.ov2.Value = x[1]
-    simulation.ov3.Value = x[2]
-    simulation.ov4.Value = x[3]
-    simulation.ov5.Value = x[4]
-    simulation.Reset()
-    simulation.SolveInitial()
-    simulation.Run()
+log          = daePythonStdOutLog()
+daesolver    = daeIDAS()
+datareporter = daeTCPIPDataReporter()
+simulation   = simTutorial()
 
-    return simulation.ObjectiveFunction.Gradients
+simulation.m.SetReportingOn(True)
 
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+simulation.ReportingInterval = 1
+simulation.TimeHorizon = 5
 
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
+simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+if(datareporter.Connect("", simName) == False):
+    sys.exit()
 
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 5
+# ACHTUNG, ACHTUNG!!
+# To request simulation to calculate sensitivities use the function:
+#     simulation.Initialize(..., CalculateSensitivities = True)!!
+simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
 
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
+simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    # ACHTUNG, ACHTUNG!!
-    # To request simulation to calculate sensitivities use the function:
-    #     simulation.Initialize(..., CalculateSensitivities = True)!!
-    simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
+# Get the starting point from optimization variables
+x0 = [simulation.ov1.StartingPoint, 
+        simulation.ov2.StartingPoint, 
+        simulation.ov3.StartingPoint, 
+        simulation.ov4.StartingPoint,
+        simulation.ov5.StartingPoint]
 
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    x0 = [1.3, 0.7, 0.8, 1.9, 1.2]
-    #x0 = [simulation.ov1.StartingPoint, 
-    #      simulation.ov2.StartingPoint, 
-    #      simulation.ov3.StartingPoint, 
-    #      simulation.ov4.StartingPoint]
-    #xbounds = [(simulation.ov1.LowerBound, simulation.ov1.UpperBound), 
-    #           (simulation.ov2.LowerBound, simulation.ov2.UpperBound),
-    #           (simulation.ov3.LowerBound, simulation.ov3.UpperBound),
-    #           (simulation.ov4.LowerBound, simulation.ov4.UpperBound)]
-    #print fmin_l_bfgs_b(Function, x0, args=([simulation]), fprime=Function_der, bounds=xbounds, pgtol=1e-07)
-    
-    print fmin(Function, x0, args=([simulation]), xtol=1e-8)
-    
-if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
-        guiRun(app)
+print fmin(Function, x0, args=[simulation], xtol=1e-8)

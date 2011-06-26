@@ -2659,6 +2659,7 @@ class DAE_CORE_API daeOptimizationVariable : public daeOptimizationVariable_t,
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationVariable)
+	daeOptimizationVariable(void);
 	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, real_t LB, real_t UB, real_t defaultValue);
 	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, int LB, int UB, int defaultValue);
 	daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, bool defaultValue);
@@ -2708,6 +2709,7 @@ class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
 {
 public:
 	daeDeclareDynamicClass(daeObjectiveFunction)
+	daeObjectiveFunction(void);
 	daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol);
 	virtual ~daeObjectiveFunction(void);
 
@@ -2756,6 +2758,7 @@ class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
+	daeOptimizationConstraint(void);
 	daeOptimizationConstraint(daeSimulation_t* pSimulation, bool bIsInequalityConstraint, real_t abstol, size_t N, string strDescription);
 	virtual ~daeOptimizationConstraint(void);
 

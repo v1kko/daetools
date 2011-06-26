@@ -9,6 +9,16 @@ namespace core
 /******************************************************************
 	daeObjectiveFunction
 *******************************************************************/
+daeObjectiveFunction::daeObjectiveFunction(void)
+{
+	m_pModel                         = NULL;
+	m_nEquationIndexInBlock          = ULONG_MAX;
+	m_nVariableIndexInBlock          = ULONG_MAX;
+	m_pEquationExecutionInfo         = NULL;
+	m_pSimulation					 = NULL;
+	m_nNumberOfOptimizationVariables = 0;
+}
+
 daeObjectiveFunction::daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol)
 {
 	m_pModel = dynamic_cast<daeModel*>(pSimulation->GetModel());
@@ -124,30 +134,6 @@ void daeObjectiveFunction::GetGradients(real_t* gradients, size_t Nparams) const
 	daeMatrix<real_t>& matSensitivities = GetSensitivitiesMatrix();
 	GetGradients(matSensitivities, gradients, Nparams);
 }
-
-//void daeObjectiveFunction::GetGradients(real_t* gradients, size_t Nparams) const
-//{
-//	size_t varIndex, paramIndex;
-//	daeMatrix<real_t>& matSensitivities = GetSensitivitiesMatrix();
-//	
-//	if(m_nNumberOfOptimizationVariables != Nparams || m_nNumberOfOptimizationVariables != matSensitivities.GetNrows())
-//		daeDeclareAndThrowException(exInvalidCall);
-//
-//	if(m_pModel->IsModelDynamic())
-//		varIndex = m_nVariableIndexInBlock;
-//	else
-//		varIndex = m_nEquationIndexInBlock;
-//
-//	::memset(gradients, 0, Nparams * sizeof(real_t));
-//	
-//	// Set only values for parameters that obj. fun. depends on 
-//	for(size_t j = 0; j < m_narrOptimizationVariablesIndexes.size(); j++)
-//	{
-//		paramIndex = m_narrOptimizationVariablesIndexes[j];
-//		gradients[paramIndex] = matSensitivities.GetItem(paramIndex, // Index of the parameter
-//							                             varIndex);  // Index of the variable
-//	}
-//}
 
 daeMatrix<real_t>& daeObjectiveFunction::GetSensitivitiesMatrix(void) const
 {
@@ -288,6 +274,16 @@ size_t daeObjectiveFunction::GetNumberOfOptimizationVariables(void) const
 /******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
+daeOptimizationConstraint::daeOptimizationConstraint(void)
+{
+	m_pModel                         = NULL;
+	m_nEquationIndexInBlock          = ULONG_MAX;
+	m_nVariableIndexInBlock          = ULONG_MAX;
+	m_pEquationExecutionInfo         = NULL;
+	m_pSimulation					 = NULL;
+	m_nNumberOfOptimizationVariables = 0;
+}
+
 daeOptimizationConstraint::daeOptimizationConstraint(daeSimulation_t* pSimulation, bool bIsInequalityConstraint, real_t abstol, size_t N, string strDescription)
 {
 	m_pModel = dynamic_cast<daeModel*>(pSimulation->GetModel());
@@ -303,7 +299,7 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeSimulation_t* pSimulatio
 	m_nVariableIndexInBlock = ULONG_MAX;
 	m_pConstraintVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeConstraint, m_pModel, strDescription));
 	m_pConstraintVariable->SetReportingOn(true);
-	m_pConstraintFunction	= m_pModel->CreateEquation(strFName, strDescription);
+	m_pConstraintFunction	         = m_pModel->CreateEquation(strFName, strDescription);
 	m_pEquationExecutionInfo		 = NULL;
 	m_pSimulation					 = pSimulation;
 	m_nNumberOfOptimizationVariables = 0;
@@ -381,28 +377,6 @@ void daeOptimizationConstraint::GetGradients(real_t* gradients, size_t Nparams) 
 	daeMatrix<real_t>& matSensitivities = GetSensitivitiesMatrix();
 	GetGradients(matSensitivities, gradients, Nparams);
 }
-
-//void daeOptimizationConstraint::GetGradients(std::vector<real_t>& darrGradients) const
-//{
-//	size_t varIndex, paramIndex;
-//	
-//	daeMatrix<real_t>& matSensitivities = GetSensitivitiesMatrix();
-//
-//	if(m_pModel->IsModelDynamic())
-//		varIndex = m_nVariableIndexInBlock;
-//	else
-//		varIndex = m_nEquationIndexInBlock;
-//
-//	darrGradients.resize(m_nNumberOfOptimizationVariables, 0.0);
-//	
-//	// Set only values for parameters that obj. fun. depends on 
-//	for(size_t j = 0; j < m_narrOptimizationVariablesIndexes.size(); j++)
-//	{
-//		paramIndex = m_narrOptimizationVariablesIndexes[j];
-//		darrGradients[paramIndex] = matSensitivities.GetItem(paramIndex, // Index of the parameter
-//							                                 varIndex);  // Index of the variable
-//	}
-//}
 
 daeMatrix<real_t>& daeOptimizationConstraint::GetSensitivitiesMatrix(void) const
 {
@@ -551,6 +525,15 @@ size_t daeOptimizationConstraint::GetNumberOfOptimizationVariables(void) const
 /******************************************************************
 	daeOptimizationVariable
 *******************************************************************/
+daeOptimizationVariable::daeOptimizationVariable(void)
+{
+	m_pVariable                  = NULL;
+	m_dLB						 = 0;
+	m_dUB						 = 0;
+	m_dDefaultValue				 = 0;
+	m_nOptimizationVariableIndex = ULONG_MAX;
+}
+
 daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, real_t LB, real_t UB, real_t defaultValue)
 {
 	if(!pVariable)

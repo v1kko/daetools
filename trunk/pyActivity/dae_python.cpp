@@ -69,7 +69,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("ReportingInterval",  &daeSimulation::GetReportingInterval,    &daeSimulation::SetReportingInterval)
         .add_property("ActivityAction",     &daeSimulation::GetActivityAction)
         
-        .add_property("CurrentTime",            make_function(&daeSimulation::GetCurrentTime))       
+        .add_property("CurrentTime",            &daeSimulation::GetCurrentTime)       
         .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,  &daeSimulation::SetInitialConditionMode)
 
         .add_property("ObjectiveFunction",		make_function(&daepython::daeDefaultSimulationWrapper::GetObjectiveFunction, return_internal_reference<>()))

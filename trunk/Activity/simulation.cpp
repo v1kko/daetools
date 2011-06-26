@@ -582,44 +582,6 @@ daeOptimizationVariable* daeSimulation::SetIntegerOptimizationVariable(adouble a
 	return pVar.get();
 }
 
-//void daeSimulation::GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const
-//{
-//	size_t i, n;
-//	
-//	adSetupVariableNode* node = dynamic_cast<adSetupVariableNode*>(a.node.get());
-//	if(!node)
-//	{
-//		daeDeclareException(exInvalidCall);
-//		e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
-//		  << "can only be a variable or a distributed variable with constant indexes";
-//		throw e;
-//	}
-//	
-//	*variable = node->m_pVariable;
-//	if(!(*variable))
-//		daeDeclareAndThrowException(exInvalidPointer)
-//	
-//	n = node->m_arrDomains.size();
-//	for(i = 0; i < n; i++)
-//	{
-//	// Only constant indexes are supported here!!!
-//		if(node->m_arrDomains[i].m_eType == eConstantIndex)
-//		{
-//			if(node->m_arrDomains[i].m_nIndex == ULONG_MAX)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			
-//			narrDomainIndexes.push_back(node->m_arrDomains[i].m_nIndex);
-//		}
-//		else
-//		{
-//			daeDeclareException(exInvalidCall);
-//			e << "Simulation cowardly refused to set the optimization variable: the first argument of Set[...]OptimizationVariable() functions "
-//			  << "can only be a variable or a distributed variable with constant indexes";
-//			throw e;
-//		}
-//	}
-//}  
-
 //void daeSimulation::SetInitialConditionsToZero(void)
 //{
 //	if(!m_pModel)

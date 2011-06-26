@@ -577,7 +577,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<daeOptimizationConstraint_t, boost::noncopyable>("daeOptimizationConstraint_t", no_init)
 		;
 
-	class_<daeOptimizationVariable, bases<daeOptimizationVariable_t>, boost::noncopyable>("daeOptimizationVariable", no_init)
+	class_<daeOptimizationVariable, bases<daeOptimizationVariable_t> >("daeOptimizationVariable")
 		.add_property("Type",			&daeOptimizationVariable::GetType,			&daeOptimizationVariable::SetType)
 		.add_property("Value",			&daeOptimizationVariable::GetValue,			&daeOptimizationVariable::SetValue)
 		.add_property("LowerBound",		&daeOptimizationVariable::GetLB,			&daeOptimizationVariable::SetLB)
@@ -585,14 +585,14 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("StartingPoint",	&daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint)
 		;
 
-	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t>, boost::noncopyable>("daeObjectiveFunction", no_init)
+	class_<daeObjectiveFunction, bases<daeObjectiveFunction_t> >("daeObjectiveFunction")
 		.add_property("Residual",		&daeObjectiveFunction::GetResidual,		&daeObjectiveFunction::SetResidual)
 		.add_property("Value",			&daeObjectiveFunction::GetValue)
 		.add_property("Gradients",		&daepython::GetGradientsObjectiveFunction)
 		//.add_property("AbsTolerance",	&daeObjectiveFunction::GetAbsTolerance,	&daeObjectiveFunction::SetAbsTolerance)
 		;
 
-	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t>, boost::noncopyable>("daeOptimizationConstraint", no_init)
+	class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t> >("daeOptimizationConstraint")
 		.add_property("Residual",		&daeOptimizationConstraint::GetResidual,		&daeOptimizationConstraint::SetResidual)
 		.add_property("Type",			&daeOptimizationConstraint::GetType,			&daeOptimizationConstraint::SetType)
 		.add_property("Value",			&daeOptimizationConstraint::GetValue)
