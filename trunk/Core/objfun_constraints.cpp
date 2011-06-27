@@ -19,21 +19,26 @@ daeObjectiveFunction::daeObjectiveFunction(void)
 	m_nNumberOfOptimizationVariables = 0;
 }
 
-daeObjectiveFunction::daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol)
+daeObjectiveFunction::daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol, size_t N)
 {
 	m_pModel = dynamic_cast<daeModel*>(pSimulation->GetModel());
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 		
+	string strVName = string("V_obj") + toString<size_t>(N + 1); 
+	string strFName = string("F_obj") + toString<size_t>(N + 1); 
+
 	const daeVariableType typeObjectiveFunction("typeObjectiveFunction", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
 	m_nEquationIndexInBlock = ULONG_MAX;
 	m_nVariableIndexInBlock = ULONG_MAX;
-	m_pObjectiveVariable	= boost::shared_ptr<daeVariable>(new daeVariable("V_obj", typeObjectiveFunction, m_pModel, "Objective value"));
+	m_pObjectiveVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVName, typeObjectiveFunction, m_pModel, "Objective value" + strVName));
 	m_pObjectiveVariable->SetReportingOn(true);
-	m_pObjectiveFunction = m_pModel->CreateEquation("F_obj", "Objective function");
+	m_pObjectiveFunction = m_pModel->CreateEquation(strFName, "Objective function " + strFName);
 	m_pEquationExecutionInfo = NULL;
 	m_pSimulation = pSimulation;
 	m_nNumberOfOptimizationVariables = 0;
+	
+	m_pObjectiveFunction->SetResidual( (*m_pObjectiveVariable)() );
 }
 
 daeObjectiveFunction::~daeObjectiveFunction(void)
@@ -303,6 +308,8 @@ daeOptimizationConstraint::daeOptimizationConstraint(daeSimulation_t* pSimulatio
 	m_pEquationExecutionInfo		 = NULL;
 	m_pSimulation					 = pSimulation;
 	m_nNumberOfOptimizationVariables = 0;
+	
+	m_pConstraintFunction->SetResidual( (*m_pConstraintVariable)() );
 }
 
 daeOptimizationConstraint::~daeOptimizationConstraint(void)

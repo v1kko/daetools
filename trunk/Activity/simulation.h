@@ -40,8 +40,11 @@ public:
 	virtual void				Pause(void);
 	virtual daeeActivityAction	GetActivityAction(void) const;
 
-	virtual void				Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities = false);
-//	virtual void				InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
+	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
+										   daeDataReporter_t* pDataReporter, 
+										   daeLog_t* pLog, 
+										   bool bCalculateSensitivities = false, 
+										   size_t nNoOfObjectiveFunctions = 1);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -55,11 +58,8 @@ public:
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
 	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const;
+	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const;
-
-//	void GetOptimizationConstraints(std::vector< boost::shared_ptr<daeOptimizationConstraint> >& ptrarrConstraints);
-//	void GetOptimizationVariables  (std::vector< boost::shared_ptr<daeOptimizationVariable> >&   ptrarrOptVariables);
-//	boost::shared_ptr<daeObjectiveFunction> GetObjectiveFunction(void);
 
 	real_t						GetCurrentTime(void) const;
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
@@ -76,11 +76,14 @@ public:
 	daeOptimizationVariable* SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
 	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
+	size_t GetNumberOfObjectiveFunctions(void) const;
+	
 protected:
 //	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);
+	void    CreateObjectiveFunctions(size_t n);
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
@@ -93,8 +96,6 @@ protected:
 	void	ReportPort(daePort_t* pPort, real_t time);
 	void	ReportVariable(daeVariable_t* pVariable, real_t time);
 	
-//	void	GetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes) const;
-
 protected:
 	real_t						m_dCurrentTime;
 	real_t						m_dTimeHorizon;
@@ -115,8 +116,8 @@ protected:
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
 // Optimization related data	
-	bool														m_bSetupOptimization;
-	boost::shared_ptr<daeObjectiveFunction>						m_pObjectiveFunction;
+	bool														m_bCalculateSensitivities;
+	std::vector< boost::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
 	std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
 	std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
 };
@@ -135,7 +136,8 @@ public:
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog);
+							daeLog_t*          pLog,
+							size_t             nNoOfObjectiveFunctions = 1);
 	virtual void Run(void);
 	virtual void Finalize(void);
 	

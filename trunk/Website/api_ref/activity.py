@@ -133,13 +133,14 @@ class daeSimulation_t:
         """
         pass
     
-    def Initialize(self, DAESolver, DataReporter, Log):
+    def Initialize(self, DAESolver, DataReporter, Log, CalculateSensitivities = False):
         """
         (Abstract)
         ARGUMENTS:
          - DAESolver: daeDAESolver_t
          - DataReporter: daeDataReporter_t
          - Log: daeLog_t
+         - CalculateSensitivities: bool
         RETURNS:
            Nothing
         """

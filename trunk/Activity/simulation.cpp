@@ -10,18 +10,18 @@ namespace activity
 {
 daeSimulation::daeSimulation(void)
 {
-	m_dCurrentTime		 = 0;
-	m_dTimeHorizon		 = 0;
-	m_dReportingInterval = 0;
-	m_pDAESolver		 = NULL;
-	m_pDataReporter		 = NULL;
-	m_pModel		     = NULL;
-	m_pLog			     = NULL;
-	m_eActivityAction    = eAAUnknown;	
-	m_bConditionalIntegrationMode = false;
-	m_bIsInitialized	 = false;
-	m_bIsSolveInitial	 = false;
-	m_bSetupOptimization = false;
+	m_dCurrentTime					= 0;
+	m_dTimeHorizon					= 0;
+	m_dReportingInterval			= 0;
+	m_pDAESolver					= NULL;
+	m_pDataReporter					= NULL;
+	m_pModel						= NULL;
+	m_pLog							= NULL;
+	m_eActivityAction				= eAAUnknown;	
+	m_bConditionalIntegrationMode	= false;
+	m_bIsInitialized				= false;
+	m_bIsSolveInitial				= false;
+	m_bCalculateSensitivities		= false;
 
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_dTimeHorizon       = cfg.Get<real_t>("daetools.activity.timeHorizon", 100);
@@ -93,33 +93,11 @@ daeeActivityAction daeSimulation::GetActivityAction(void) const
 	return m_eActivityAction;
 }
 
-//void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities)
-//{
-//	if(m_bIsInitialized)
-//	{
-//		daeDeclareException(exInvalidCall);
-//		e << "Simulation has already been initialized";
-//		throw e;
-//	}
-//		
-//	m_bSetupOptimization = bCalculateSensitivities;
-//	Init(pDAESolver, pDataReporter, pLog);
-//}
-//
-//void daeSimulation::InitializeOptimization(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
-//{
-//	if(m_bIsInitialized)
-//	{
-//		daeDeclareException(exInvalidCall);
-//		e << "Simulation has already been initialized";
-//		throw e;
-//	}
-//	
-//	m_bSetupOptimization = true;
-//	Init(pDAESolver, pDataReporter, pLog);
-//}
-
-void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog, bool bCalculateSensitivities)
+void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, 
+							   daeDataReporter_t* pDataReporter, 
+							   daeLog_t* pLog, 
+							   bool bCalculateSensitivities, 
+							   size_t nNoOfObjectiveFunctions)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -137,9 +115,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pD
 		throw e;
 	}
 	
-	m_bSetupOptimization = bCalculateSensitivities;
-
-// Check data reporter
+	m_bCalculateSensitivities = bCalculateSensitivities;
+	
 	if(!pDataReporter->IsConnected())
 	{
 		daeDeclareException(exInvalidCall);
@@ -188,13 +165,20 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pD
 	SetUpParametersAndDomains();
 
 // Define the optimization problem: objective function and constraints
-	if(m_bSetupOptimization)
+	if(m_bCalculateSensitivities)
 	{
-		daeConfig& cfg = daeConfig::GetConfig();
-		real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
-		m_pObjectiveFunction = boost::shared_ptr<daeObjectiveFunction>(new daeObjectiveFunction(this, dAbsTolerance));
+		CreateObjectiveFunctions(nNoOfObjectiveFunctions);
 		
+	// Call SetUpOptimization to define obj. function(s), constraints and opt. variables
 		SetUpOptimization();
+	
+	// Check if there are any opt. variable set up; if not, raise an exception
+		if(m_arrOptimizationVariables.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Sensitivity calculation is enabled but no optimization variables have been defined";
+			throw e;
+		}
 	}
 	
 // Create params, domains, vars, ports
@@ -248,20 +232,21 @@ void daeSimulation::SetupSolver(void)
 	daeBlock_t* pBlock;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
 	boost::shared_ptr<daeOptimizationConstraint> pConstraint;
+	boost::shared_ptr<daeObjectiveFunction> pObjectiveFunction;
 	vector<string> strarrErrors;
 
 	if(m_ptrarrBlocks.size() != 1)
 		daeDeclareAndThrowException(exInvalidCall);
 	pBlock = m_ptrarrBlocks[0];
 	
-	if(m_bSetupOptimization)
+	if(m_bCalculateSensitivities)
 	{
 	// 1. First check ObjFunction, Constraints and optimization variables
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			pOptVariable = m_arrOptimizationVariables[i];
 			if(!pOptVariable)
-				daeDeclareAndThrowException(exInvalidPointer)
+				daeDeclareAndThrowException(exInvalidPointer);
 				
 			if(!pOptVariable->CheckObject(strarrErrors))
 			{
@@ -276,7 +261,7 @@ void daeSimulation::SetupSolver(void)
 		{
 			pConstraint = m_arrConstraints[i];
 			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer)
+				daeDeclareAndThrowException(exInvalidPointer);
 				
 			if(!pConstraint->CheckObject(strarrErrors))
 			{
@@ -287,41 +272,44 @@ void daeSimulation::SetupSolver(void)
 			}
 		}
 		
-		if(!m_pObjectiveFunction)
-			daeDeclareAndThrowException(exInvalidPointer)
-		if(!m_pObjectiveFunction->CheckObject(strarrErrors))
+		for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
 		{
-			daeDeclareException(exRuntimeCheck);
-			for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
-				e << *it << "\n";
-			throw e;
+			pObjectiveFunction = m_arrObjectiveFunctions[i];
+			if(!pObjectiveFunction)
+				daeDeclareAndThrowException(exInvalidPointer);
+			
+			if(!pObjectiveFunction->CheckObject(strarrErrors))
+			{
+				daeDeclareException(exRuntimeCheck);
+				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+					e << *it << "\n";
+				throw e;
+			}
 		}
 		
 	// 2. Fill the parameters indexes (optimization variables)
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			pOptVariable = m_arrOptimizationVariables[i];
-			if(!pOptVariable)
-				daeDeclareAndThrowException(exInvalidPointer)
-				
 			narrParametersIndexes.push_back(pOptVariable->GetOverallIndex());
 		}
 		
-	// 3. Initialize the objective function
-		m_pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+	// 3. Initialize the objective functions
+		for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
+		{
+			pObjectiveFunction = m_arrObjectiveFunctions[i];
+			pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+		}
 		
 	// 4. Initialize the constraints
 		for(i = 0; i < m_arrConstraints.size(); i++)
 		{  
 			pConstraint = m_arrConstraints[i];
-			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer)
-				
 			pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
 		}
 	}
 
-	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bSetupOptimization, narrParametersIndexes);
+	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
 }
 
 void daeSimulation::SolveInitial(void)
@@ -449,7 +437,7 @@ void daeSimulation::Run(void)
 	}
 
 // Print the ned of the simulation info if not in the optimization mode		
-	if(!m_bSetupOptimization)
+	if(!m_bCalculateSensitivities)
 	{
 		m_IntegrationEnd = dae::GetTimeInSeconds();
 		
@@ -649,9 +637,45 @@ void daeSimulation::GetOptimizationVariables(std::vector<daeOptimizationVariable
 		ptrarrOptVariables.push_back(m_arrOptimizationVariables[i].get());
 }
 
+void daeSimulation::GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const
+{
+	for(size_t i = 0; i < m_arrObjectiveFunctions.size(); i++)
+		ptrarrObjectiveFunctions.push_back(m_arrObjectiveFunctions[i].get());
+}
+
 daeObjectiveFunction_t* daeSimulation::GetObjectiveFunction(void) const
 {
-	return m_pObjectiveFunction.get();
+	if(m_arrObjectiveFunctions.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	return m_arrObjectiveFunctions[0].get();
+}
+
+void daeSimulation::CreateObjectiveFunctions(size_t n)
+{
+	if(!m_bCalculateSensitivities)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(n == 0)
+		daeDeclareAndThrowException(exInvalidCall);
+		
+	daeConfig& cfg = daeConfig::GetConfig();
+	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
+	
+	for(size_t i = 0; i < n; i++)
+	{
+		boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(this, dAbsTolerance, i));
+		objfun->SetResidual(adouble(0));
+		
+		m_arrObjectiveFunctions.push_back(objfun);
+	}
+}
+
+size_t daeSimulation::GetNumberOfObjectiveFunctions(void) const
+{
+	if(!m_bCalculateSensitivities)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	return m_arrObjectiveFunctions.size();
 }
 
 real_t daeSimulation::GetCurrentTime(void) const

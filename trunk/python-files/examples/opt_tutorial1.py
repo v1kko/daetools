@@ -57,7 +57,14 @@ class simTutorial(daeSimulation):
         self.m.x4.AssignValue(1)
 
     def SetUpOptimization(self):
-        # Set the objective function (min)
+        # Set the objective function (minimization).
+        # The objective function can be accessed by using ObjectiveFunction property which always returns the 1st obj. function,
+        # for in general case more than one obj. function. can be defined, so ObjectiveFunctions[0] can be used as well:
+        #       self.ObjectiveFunctions[0].Residual = ...
+        # Obviously defining more than one obj. function has no meaning when using opt. software such as Ipopt, Bonmin or Nlopt
+        # which cannot do the multi-objective optimization. The number of obj. functions can be defined in the function
+        # optimization.Initialize by using the named argument NumberOfObjectiveFunctions (the default is 1).
+        # Other obj. functions can be obtained by using ObjectiveFunctions[i] property.
         self.ObjectiveFunction.Residual = self.m.x1() * self.m.x4() * (self.m.x1() + self.m.x2() + self.m.x3()) + self.m.x3()
 
         # Set the constraints (inequality, equality)
@@ -71,10 +78,12 @@ class simTutorial(daeSimulation):
         self.c2.Residual = self.m.x1() * self.m.x1() + self.m.x2() * self.m.x2() + self.m.x3() * self.m.x3() + self.m.x4() * self.m.x4() - 40
 
         # Set the optimization variables, their lower/upper bounds and the starting point
-        self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
-        self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
+        # The optimization variables can be stored and used later to get the optimization results or
+        # to interact with some 3rd party software.
+        self.x1 = self.SetContinuousOptimizationVariable(self.m.x1, 1, 5, 2);
+        self.x2 = self.SetContinuousOptimizationVariable(self.m.x2, 1, 5, 2);
+        self.x3 = self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
+        self.x4 = self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
 def setOptions(nlpsolver):
     # 1) Set the options manually
@@ -128,7 +137,7 @@ def consoleRun():
     # Initialize the simulation
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    # Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()
+    # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
     setOptions(nlpsolver)
 

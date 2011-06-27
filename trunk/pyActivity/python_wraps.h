@@ -176,6 +176,8 @@ public:
 
 	void SetUpVariables(void)
 	{
+		std::cout << "SetUpVariables" << std::endl;
+		std::cout.flush();
         if(boost::python::override f = this->get_override("SetUpVariables"))
             f();
 		else
@@ -183,6 +185,8 @@ public:
 	}
 	void def_SetUpVariables(void)
 	{
+		std::cout << "def_SetUpVariables" << std::endl;
+		std::cout.flush();
 		this->daeSimulation::SetUpVariables();
 	}
 
@@ -242,7 +246,10 @@ public:
 	
 	daeObjectiveFunction* GetObjectiveFunction(void) const
 	{
-		return m_pObjectiveFunction.get();
+		if(m_arrObjectiveFunctions.empty())
+			daeDeclareAndThrowException(exInvalidCall);
+		
+		return m_arrObjectiveFunctions[0].get();
 	}
 
 	boost::python::list GetOptimizationVariables(void)
@@ -266,6 +273,19 @@ public:
 		for(size_t i = 0; i < m_arrConstraints.size(); i++)
 		{
 			obj = m_arrConstraints[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+
+	boost::python::list GetObjectiveFunctions(void)
+	{
+		daeObjectiveFunction* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrObjectiveFunctions.size(); i++)
+		{
+			obj = m_arrObjectiveFunctions[i].get();
 			l.append(obj);
 		}
 		return l;

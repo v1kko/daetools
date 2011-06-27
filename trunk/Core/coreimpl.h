@@ -2710,7 +2710,7 @@ class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
 public:
 	daeDeclareDynamicClass(daeObjectiveFunction)
 	daeObjectiveFunction(void);
-	daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol);
+	daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol, size_t N);
 	virtual ~daeObjectiveFunction(void);
 
 public:

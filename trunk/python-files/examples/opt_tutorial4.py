@@ -78,8 +78,8 @@ class simTutorial(daeSimulation):
         self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, -10, 10, 1.9);
         self.ov5 = self.SetContinuousOptimizationVariable(self.m.x5, -10, 10, 1.2);
 
-def Function(x, *params):
-    simulation = params[0]
+def ObjectiveFunction(x, *args):
+    simulation = args[0]
     
     # This function will be called repeadetly to obtain the values of the objective function.
     # In order to call DAE Tools repedeatly the following sequence of calls is necessary:
@@ -120,7 +120,8 @@ def Function(x, *params):
     print '-----------------------------------------------------------------------------------------------'
 
     return simulation.ObjectiveFunction.Value
-    
+
+
 log          = daePythonStdOutLog()
 daesolver    = daeIDAS()
 datareporter = daeTCPIPDataReporter()
@@ -145,9 +146,9 @@ simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
 # Get the starting point from optimization variables
 x0 = [simulation.ov1.StartingPoint, 
-        simulation.ov2.StartingPoint, 
-        simulation.ov3.StartingPoint, 
-        simulation.ov4.StartingPoint,
-        simulation.ov5.StartingPoint]
+      simulation.ov2.StartingPoint, 
+      simulation.ov3.StartingPoint, 
+      simulation.ov4.StartingPoint,
+      simulation.ov5.StartingPoint]
 
-print fmin(Function, x0, args=[simulation], xtol=1e-8)
+print fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8)

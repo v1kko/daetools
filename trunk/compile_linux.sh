@@ -56,7 +56,7 @@ case ${PROJECTS} in
         rm -rf *
         cd ${TRUNK}
 
-        compile dae                "-j5"
+        #compile dae                "-j5"
         compile LA_SuperLU         "-j1"                     "CONFIG+=shellCompile CONFIG+=shellSuperLU"
         compile LA_SuperLU         "-j1"                     "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
         #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
