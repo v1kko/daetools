@@ -43,8 +43,7 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog, 
-										   bool bCalculateSensitivities = false, 
-										   size_t nNoOfObjectiveFunctions = 1);
+										   bool bCalculateSensitivities = false);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -77,13 +76,12 @@ public:
 	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
 	size_t GetNumberOfObjectiveFunctions(void) const;
+	void   SetNumberOfObjectiveFunctions(size_t nObjFuns);
 	
 protected:
-//	void	Init(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog);
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);
-	void    CreateObjectiveFunctions(size_t n);
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
@@ -136,8 +134,7 @@ public:
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog,
-							size_t             nNoOfObjectiveFunctions = 1);
+							daeLog_t*          pLog);
 	virtual void Run(void);
 	virtual void Finalize(void);
 	

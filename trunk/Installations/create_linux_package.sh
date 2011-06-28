@@ -29,7 +29,7 @@ VER_MINOR=$2
 VER_BUILD=$3
 PACKAGE_NAME=daetools
 PCKG_TYPE=
-PLATFORM=
+PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 HOST_ARCH=`uname -m`
 ARCH=
@@ -37,14 +37,19 @@ LIB=
 ARCH_RPM=
 SITE_PACK=
 INSTALLATIONS_DIR=`pwd`
-DISTRO=$5
-BOOST=boost_$5
-PYTHON_VERSION=$6
-IDAS=../idas-1.0.0/build
+#DISTRO=$5
+DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
+CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
+DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
+#PYTHON_VERSION=$6
+IDAS=../idas/build
 BONMIN=../bonmin/build
+NLOPT=../nlopt
 SUPERLU=../superlu
 SUPERLU_MT=../superlu_mt
 MAGMA=../magma
+TRILINOS=../trilinos/build
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -67,41 +72,52 @@ if [ ${HOST_ARCH} = "i686" ]; then
   ARCH_RPM=i386
 fi
 
-if [ $4 = "deb" ]; then
-  PCKG_TYPE=deb
-  PLATFORM=linux
-  if [ ${DISTRO} = "Debian-5" ]; then
-    SITE_PACK=site-packages
+if [ ${DISTRIBUTOR_ID} = "debian" ]; then
+  PCKG_TYPE="deb"
+  if [ ${CODENAME} = "lenny" ]; then
+    SITE_PACK="site-packages"
   else
-    SITE_PACK=dist-packages
+    SITE_PACK="dist-packages"
   fi
-elif [ $4 = "tgz" ]; then
-  PCKG_TYPE=tgz
-  PLATFORM=linux
-  SITE_PACK=site-packages
-elif [ $4 = "rpm" ]; then
-  PCKG_TYPE=rpm
-  PLATFORM=linux
-  SITE_PACK=site-packages
 else
-  echo "ERROR: undefined type of a package"
-  return
+  PCKG_TYPE="rpm"
+  SITE_PACK="site-packages"
 fi
 
-TRILINOS=../trilinos-10.4.0-Source/build-extras/lib
+#if [ $4 = "deb" ]; then
+#  PCKG_TYPE=deb
+#  PLATFORM=linux
+#  if [ ${DISTRO} = "debian-lenny" ]; then
+#    SITE_PACK=site-packages
+#  else
+#    SITE_PACK=dist-packages
+#  fi
+#elif [ $4 = "tgz" ]; then
+#  PCKG_TYPE=tgz
+#  PLATFORM=linux
+#  SITE_PACK=site-packages
+#elif [ $4 = "rpm" ]; then
+#  PCKG_TYPE=rpm
+#  PLATFORM=linux
+#  SITE_PACK=site-packages
+#else
+#  echo "ERROR: undefined type of a package"
+#  return
+#fi
 
 echo " "
 echo "****************************************************************"
-echo "*            SETTINGS                                          *"
+echo "  Create installation package with the following settings:      "
 echo "****************************************************************"
-echo "  Version:           " ${VERSION}
+echo "  DAE Tools:         " ${VERSION}
 echo "  Platform:          " ${PLATFORM}
+echo "  OS:                " ${DISTRO}
 echo "  Package type:      " ${PCKG_TYPE}
-echo "  Host-Architecture: " ${HOST_ARCH}
+echo "  Host architecture: " ${HOST_ARCH}
 echo "  Architecture:      " ${ARCH}
 echo "  Lib prefix:        " ${LIB}
-echo "  Install. dir:      " ${INSTALLATIONS_DIR}
-echo "  Python pckg. dir:  " ${SITE_PACK}
+echo "  Python version:    " ${PYTHON_VERSION}
+echo "  Site-packages dir: " ${SITE_PACK}
 echo "****************************************************************"
 echo " "
 
@@ -193,6 +209,7 @@ cp ../python-files/daeDataReporters.py           ${PACKAGE_NAME}/pyDAE
 cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
 cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
 cp ../python-files/aztecoo_options.py            ${PACKAGE_NAME}/solvers
+cp ../python-files/daeMinpackLeastSq.py          ${PACKAGE_NAME}/solvers
 cp ../python-files/model_library__init__.py      ${PACKAGE_NAME}/model_library/__init__.py
 
 # daeSimulator
@@ -218,14 +235,8 @@ cp ../python-files/examples/*.png        ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.init       ${PACKAGE_NAME}/examples
 cp ../python-files/examples/images/*.*   ${PACKAGE_NAME}/examples/images
 
-# Website
-cp ../Website/images/*.png    ${PACKAGE_NAME}/docs/images
-cp ../Website/images/*.css    ${PACKAGE_NAME}/docs/images
-cp ../Website/images/*.gif    ${PACKAGE_NAME}/docs/images
-cp ../Website/images/*.jpg    ${PACKAGE_NAME}/docs/images
-cp ../Website/*.html          ${PACKAGE_NAME}/docs
+# Documentation
 cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
-#rm ${PACKAGE_NAME}/docs/downloads.html
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
@@ -259,7 +270,7 @@ if [ ${PCKG_TYPE} = "tgz" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
 elif [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
-  if [ ${DISTRO} = "Debian-5" ]; then
+  if [ ${DISTRO} = "debian-lenny" ]; then
     python setup.py install --root=${BUILD_DIR}
   else
     python setup.py install --install-layout=deb --root=${BUILD_DIR}

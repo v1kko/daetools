@@ -94,7 +94,8 @@ copy daeVariableTypes.py         %ROOT%\pyDAE
 copy daeDataReporters.py         %ROOT%\pyDAE
 copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
 copy solvers__init__.py          %ROOT%\solvers\__init__.py
-copy aztecoo_options.py          %ROOT%\solvers\aztecoo_options.py
+copy aztecoo_options.py          %ROOT%\solvers
+copy daeMinpackLeastSq.py        %ROOT%\solvers
 copy model_library__init__.py    %ROOT%\model_library\__init__.py
 
 REM daePlotter
@@ -135,16 +136,7 @@ cd model_library
 copy *.py               %ROOT%\model_library
 
 REM Website
-cd ..\Website
-copy *.html  %ROOT%\docs
-del %ROOT%\docs\downloads.html
-
-cd images
-copy *.png    %ROOT%\docs\images
-copy *.css    %ROOT%\docs\images
-copy *.gif    %ROOT%\docs\images
-copy *.jpg    %ROOT%\docs\images
-cd ..\api_ref
+cd ..\Website\api_ref
 copy *.html   %ROOT%\docs\api_ref
 cd %ROOT%
 

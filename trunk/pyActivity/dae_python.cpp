@@ -46,8 +46,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       pure_virtual(&daeSimulation_t::Pause))
         .def("Resume",                      pure_virtual(&daeSimulation_t::Resume))
         
-        .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize), ( arg("CalculateSensitivities") = false,
-			                                                                              arg("NumberOfObjectiveFunctions") = 1 ) )
+        .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize), ( arg("CalculateSensitivities") = false ) )
         .def("Reinitialize",                pure_virtual(&daeSimulation_t::Reinitialize))
         .def("SolveInitial",                pure_virtual(&daeSimulation_t::SolveInitial))
         .def("Integrate",                   pure_virtual(&daeSimulation_t::Integrate))
@@ -74,7 +73,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("CurrentTime",            &daeSimulation::GetCurrentTime)       
         .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,  &daeSimulation::SetInitialConditionMode)
 
-        .add_property("NumberOfObjectiveFunctions",		&daeSimulation::GetNumberOfObjectiveFunctions)
+        .add_property("NumberOfObjectiveFunctions",		&daeSimulation::GetNumberOfObjectiveFunctions, &daeSimulation::SetNumberOfObjectiveFunctions)
         .add_property("ObjectiveFunction",				make_function(&daepython::daeDefaultSimulationWrapper::GetObjectiveFunction, return_internal_reference<>()))
         .add_property("ObjectiveFunctions",				&daepython::daeDefaultSimulationWrapper::GetObjectiveFunctions)
         .add_property("OptimizationVariables",			&daepython::daeDefaultSimulationWrapper::GetOptimizationVariables)
@@ -98,8 +97,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       &daeSimulation::Pause)
         .def("Resume",                      &daeSimulation::Resume)
    
-        .def("Initialize",					&daeSimulation::Initialize, ( arg("CalculateSensitivities") = false,
-			                                                              arg("NumberOfObjectiveFunctions") = 1 ) )
+        .def("Initialize",					&daeSimulation::Initialize, ( arg("CalculateSensitivities") = false ) )
         .def("Reinitialize",                &daeSimulation::Reinitialize)
         .def("SolveInitial",                &daeSimulation::SolveInitial)
         .def("Integrate",                   &daeSimulation::Integrate)
@@ -125,13 +123,13 @@ BOOST_PYTHON_MODULE(pyActivity)
 	daeOptimization_t
 ***************************************************************/
 	class_<daepython::daeOptimizationWrapper, boost::noncopyable>("daeOptimization_t", no_init)
-		.def("Initialize",             pure_virtual(&daeOptimization_t::Initialize), ( arg("NumberOfObjectiveFunctions") = 1 ) )
+		.def("Initialize",             pure_virtual(&daeOptimization_t::Initialize))
 		.def("Run",                    pure_virtual(&daeOptimization_t::Run))
 		.def("Finalize",               pure_virtual(&daeOptimization_t::Finalize))
 	;
 	
 	class_<daeOptimization, bases<daeOptimization_t>, boost::noncopyable>("daeOptimization")
-		.def("Initialize",             &daeOptimization::Initialize, ( arg("NumberOfObjectiveFunctions") = 1 ) )
+		.def("Initialize",             &daeOptimization::Initialize)
 		.def("Run",                    &daeOptimization::Run)
 		.def("Finalize",               &daeOptimization::Finalize)
 	 ;

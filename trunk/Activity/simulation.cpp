@@ -96,8 +96,7 @@ daeeActivityAction daeSimulation::GetActivityAction(void) const
 void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, 
 							   daeDataReporter_t* pDataReporter, 
 							   daeLog_t* pLog, 
-							   bool bCalculateSensitivities, 
-							   size_t nNoOfObjectiveFunctions)
+							   bool bCalculateSensitivities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -167,7 +166,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Define the optimization problem: objective function and constraints
 	if(m_bCalculateSensitivities)
 	{
-		CreateObjectiveFunctions(nNoOfObjectiveFunctions);
+	// Default number of obj. functions is 1
+		SetNumberOfObjectiveFunctions(1);
 		
 	// Call SetUpOptimization to define obj. function(s), constraints and opt. variables
 		SetUpOptimization();
@@ -651,17 +651,23 @@ daeObjectiveFunction_t* daeSimulation::GetObjectiveFunction(void) const
 	return m_arrObjectiveFunctions[0].get();
 }
 
-void daeSimulation::CreateObjectiveFunctions(size_t n)
+void daeSimulation::SetNumberOfObjectiveFunctions(size_t nObjFuns)
 {
 	if(!m_bCalculateSensitivities)
 		daeDeclareAndThrowException(exInvalidCall);
-	if(n == 0)
-		daeDeclareAndThrowException(exInvalidCall);
-		
+
+	int n0 = (int)m_arrObjectiveFunctions.size();
+	int n  = (int)nObjFuns - n0;
+	
+	// The number of obj. functions can only be increased, it can't be decreased!
+	// Therefore if the number of functions to add is <= 0 then do nothing and return.
+	if(n <= 0)
+		return;
+	
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
-	
-	for(size_t i = 0; i < n; i++)
+
+	for(size_t i = n0; i < nObjFuns; i++)
 	{
 		boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(this, dAbsTolerance, i));
 		objfun->SetResidual(adouble(0));

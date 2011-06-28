@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """********************************************************************************
-                             opt_tutorial5.py
+                             daeMinpackLeastSq.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -15,64 +15,75 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-"""
-This tutorial shows the interoperability between DAE Tools and 3rd party optimization 
-software (scipy.optimize) used to fit the simple function with experimental data.
-DAE Tools simulation is used to calculate the objective function and its gradients,
-while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder)
-implementing  algorithm is used to estimate the parameters."""
-
 import sys
+from numpy import *
 from daetools.pyDAE import *
 from time import localtime, strftime
-from numpy import *
 from scipy.optimize import leastsq
-import matplotlib.pyplot as plt
 
-# Standard variable types are defined in daeVariableTypes.py
-
-class modTutorial(daeModel):
-    def __init__(self, Name, Parent = None, Description = ""):
-        daeModel.__init__(self, Name, Parent, Description)
-
-        self.x     = daeVariable("x", no_t, self)
-        self.A     = daeVariable("A", no_t, self)
-        self.k     = daeVariable("k", no_t, self)
-        self.theta = daeVariable("&theta;", no_t, self)
-        self.y     = daeVariable("y", no_t, self)
-
-    def DeclareEquations(self):
-        eq = self.CreateEquation("y")
-        eq.Residual = self.y() - self.A() * Sin(2 * pi * self.k() * self.x() + self.theta())
-
-class simTutorial(daeSimulation):
+class daeMinpackLeastSq:
     def __init__(self):
-        daeSimulation.__init__(self)
-        self.m = modTutorial("opt_tutorial5")
-        self.m.Description = "This tutorial shows the interoperability between DAE Tools and 3rd party optimization " \
-                             "software (scipy.optimize) used to fit the simple function with experimental data. " \
-                             "DAE Tools simulation is used to calculate the objective function and its gradients, " \
-                             "while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder) " \
-                             "implementing  algorithm is used to estimate the parameters."
+        self.simulation   = None
+        self.daesolver    = None
+        self.datareporter = None
+        self.log          = None
+        self.functions    = None
+        self.parameters   = None
+        self.x_inputs     = None
+        self.y_outputs    = None
+        self.x_data       = None
+        self.y_data       = None
+        self.Nparameters  = 0
+        self.Nfunctions   = 0
+        self.Ninputs      = 0
+        self.Nexperiments = 0
 
-    def SetUpParametersAndDomains(self):
-        pass
-
-    def SetUpVariables(self):
-        self.m.x.AssignValue(1)
-        self.m.A.AssignValue(1)
-        self.m.k.AssignValue(1)
-        self.m.theta.AssignValue(1)
-
-    def SetUpOptimization(self):
-        self.NumberOfObjectiveFunctions = 2
-        self.ObjectiveFunctions[0].Residual = self.m.A() * Sin(2 * pi * self.m.k() * self.m.x() + self.m.theta())
-        self.ObjectiveFunctions[1].Residual = self.m.y()
+    def Initialize(self, simulation, daesolver, datareporter, log, **kwargs):
+        self.simulation   = simulation
+        self.daesolver    = daesolver
+        self.datareporter = datareporter
+        self.log          = log
         
-        self.A     = self.SetContinuousOptimizationVariable(self.m.A,     -10, 10, 0.7);
-        self.k     = self.SetContinuousOptimizationVariable(self.m.k,     -10, 10, 0.8);
-        self.theta = self.SetContinuousOptimizationVariable(self.m.theta, -10, 10, 1.9);
+        self.functions    = kwargs.get('functions',  None)
+        self.parameters   = kwargs.get('parameters', None)
+        self.x_inputs     = kwargs.get('x_inputs',   None)
+        self.y_outputs    = kwargs.get('y_outputs',  None)
+        self.x_data       = kwargs.get('x_data',     None)
+        self.y_data       = kwargs.get('y_data',     None)
+        
+        self.Nparameters  = len(parameters)
+        self.Nfunctions   = len(functions)
+        self.Ninputs      = len(x_inputs)
+        self.Noutputs     = x_data.shape[0]
+        
+        if ( (self.functions == None) or (len(self.functions) == 0) ):
+            raise RuntimeError('Argument [functions] has not been provided or the number of functions is zero') 
+        if ( (self.parameters == None) or (len(self.parameters) == 0) ):
+            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters is zero') 
+        if ( (self.x_inputs == None) or (len(self.x_inputs) == 0) ):
+            raise RuntimeError('Argument [x_inputs] has not been provided or the number of x_inputs is zero') 
+        if ( (self.y_outputs == None) or (len(self.y_outputs) == 0) ):
+            raise RuntimeError('Argument [y_outputs] has not been provided or the number of y_outputs is zero') 
+        if ( (self.x_data == None) or (len(self.x_data) == 0) ):
+            raise RuntimeError('Argument [x_data] has not been provided or the number of x_data is zero') 
+        if ( (self.y_data == None) or (len(self.y_data) == 0) ):
+            raise RuntimeError('Argument [y_data] has not been provided or the number of y_data is zero') 
 
+        if ( (self.x_data.ndim != 2) or (self.y_data.ndim != 2)):
+            raise RuntimeError('Number of numpy array dimensions od x_data and y_data must be 2') 
+        if ( (self.x_data.shape[0] != self.Noutputs) or (self.y_data.shape[0] != self.Noutputs) or (self.x_data.shape[0] != self.y_data.shape[0])):
+            raise RuntimeError('The shapes of x_data and y_data do not match') 
+        if ( (self.x_data.shape[1] != self.Ninputs) or (self.y_data.shape[1] != self.Nfunctions) ):
+            raise RuntimeError('') 
+
+        self.simulation.Initialize(self.daesolver, self.datareporter, self.log, CalculateSensitivities = True, NumberOfObjectiveFunctions = self.Nfunctions)
+
+    def Run(self):
+        pass
+    
+    def Finalize(self):
+        pass
+    
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Function(p, simulation, xin, ymeas, calc_values):
     Nparams = len(p)
@@ -152,7 +163,7 @@ simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
 if(datareporter.Connect("", simName) == False):
     sys.exit()
 
-simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
+simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True, NumberOfObjectiveFunctions = 1)
 
 simulation.m.SaveModelReport(simulation.m.Name + ".xml")
 simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
