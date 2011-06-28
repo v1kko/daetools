@@ -62,6 +62,20 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("SendVariable",	    pure_virtual(&daeDataReporter_t::SendVariable))
 		;
 
+
+	class_<daeBlackHoleDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeBlackHoleDataReporter")
+		.def("Connect",				&daeBlackHoleDataReporter::Connect)
+		.def("Disconnect",			&daeBlackHoleDataReporter::Disconnect)
+		.def("IsConnected",			&daeBlackHoleDataReporter::IsConnected)
+		.def("StartRegistration",	&daeBlackHoleDataReporter::StartRegistration)
+		.def("RegisterDomain",		&daeBlackHoleDataReporter::RegisterDomain)
+		.def("RegisterVariable",	&daeBlackHoleDataReporter::RegisterVariable)
+		.def("EndRegistration",		&daeBlackHoleDataReporter::EndRegistration)
+		.def("StartNewResultSet",	&daeBlackHoleDataReporter::StartNewResultSet)
+		.def("EndOfData",	    	&daeBlackHoleDataReporter::EndOfData)
+		.def("SendVariable",	  	&daeBlackHoleDataReporter::SendVariable)
+		;
+
 	class_<daepython::daeDelegateDataReporterWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDelegateDataReporter")
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDelegateDataReporterWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDelegateDataReporterWrapper::def_Disconnect)

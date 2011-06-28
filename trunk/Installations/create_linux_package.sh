@@ -1,26 +1,24 @@
-#!/bin/sh
-#                            $1        $2        $3         $4             $5                                                         $6
-# sh create_linux_package.sh ver_major ver_minor ver_build  pckg_type      Distro                          OR  boost version          Python version
-# sh create_linux_package.sh 1         0         0          deb/tgz/rpm    Debian-6/Ubuntu-10.4/Fedora-13      1.40/1.41/1.42 ...     2.6
-#
-# Examples:
-# sh create_linux_package.sh 1 0 2 deb Debian-6
-# sh create_linux_package.sh 1 0 2 tgz 1.41
+#!/bin/bash
 
 set -e
 
-if [ "$1" = "-help" ]; then
-  echo "Usage:"
-  echo "                        1     2     3      4              5                            6  "
-  echo "create_linux_package.sh major minor build  pckg_type      Distro    OR  boost version  Python version"
-  echo "create_linux_package.sh 1     0     0      deb/tgz/rpm    Debian-6      1.40           2.6"
-  echo " "
-  echo "If pckg = tgz then boost version should be supplied"
-  echo "Distros: Debian-5, Debian-6, Ubuntu-10.4, Ubuntu-10.10, Fedora-13"
-  echo " "
-  echo "Examples:"
-  echo "sh create_linux_package.sh 1 0 2 deb Debian-6 2.6"
-  echo "sh create_linux_package.sh 1 0 2 tgz 1.41 2.6"
+case $1 in
+  -h* ) echo "Usage:"
+        echo "create_linux_package.sh major minor build"
+        echo " "
+        echo "Examples:"
+        echo "sh create_linux_package.sh 1 1 2"
+        return
+        ;;
+esac
+
+if [ ! -n "$1" ]; then
+  return
+fi
+if [ ! -n "$2" ]; then
+  return
+fi
+if [ ! -n "$3" ]; then
   return
 fi
 
@@ -29,20 +27,16 @@ VER_MINOR=$2
 VER_BUILD=$3
 PACKAGE_NAME=daetools
 PCKG_TYPE=
-PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
-VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
-HOST_ARCH=`uname -m`
 ARCH=
 LIB=
 ARCH_RPM=
 SITE_PACK=
 INSTALLATIONS_DIR=`pwd`
-#DISTRO=$5
+HOST_ARCH=`uname -m`
+PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
 DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
 CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
-DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
-#PYTHON_VERSION=$6
 IDAS=../idas/build
 BONMIN=../bonmin/build
 NLOPT=../nlopt
@@ -50,6 +44,9 @@ SUPERLU=../superlu
 SUPERLU_MT=../superlu_mt
 MAGMA=../magma
 TRILINOS=../trilinos/build
+
+VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
+DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -79,47 +76,47 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   else
     SITE_PACK="dist-packages"
   fi
-else
+elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   PCKG_TYPE="rpm"
   SITE_PACK="site-packages"
+else
+  echo "ERROR: undefined type of a package"
+  exit -1
 fi
 
-#if [ $4 = "deb" ]; then
-#  PCKG_TYPE=deb
-#  PLATFORM=linux
-#  if [ ${DISTRO} = "debian-lenny" ]; then
-#    SITE_PACK=site-packages
-#  else
-#    SITE_PACK=dist-packages
-#  fi
-#elif [ $4 = "tgz" ]; then
-#  PCKG_TYPE=tgz
-#  PLATFORM=linux
-#  SITE_PACK=site-packages
-#elif [ $4 = "rpm" ]; then
-#  PCKG_TYPE=rpm
-#  PLATFORM=linux
-#  SITE_PACK=site-packages
-#else
-#  echo "ERROR: undefined type of a package"
-#  return
-#fi
+TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
+RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
+BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
+
+if [ -d ${BUILD_DIR}/usr/lib ]; then
+  USRLIB=/usr/lib
+else
+  USRLIB=/usr/lib64
+fi
+
+USRBIN=${BUILD_DIR}/usr/bin
+DAE_TOOLS_DIR=${USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 
 echo " "
-echo "****************************************************************"
-echo "  Create installation package with the following settings:      "
-echo "****************************************************************"
-echo "  DAE Tools:         " ${VERSION}
-echo "  Platform:          " ${PLATFORM}
-echo "  OS:                " ${DISTRO}
-echo "  Package type:      " ${PCKG_TYPE}
-echo "  Host architecture: " ${HOST_ARCH}
-echo "  Architecture:      " ${ARCH}
-echo "  Lib prefix:        " ${LIB}
-echo "  Python version:    " ${PYTHON_VERSION}
-echo "  Site-packages dir: " ${SITE_PACK}
-echo "****************************************************************"
-echo " "
+echo " The package settings:"
+echo "    version:           " ${VERSION}
+echo "    platform:          " ${PLATFORM}
+echo "    os:                " ${DISTRO}
+echo "    package type:      " ${PCKG_TYPE}
+echo "    host architecture: " ${HOST_ARCH}
+echo "    architecture:      " ${ARCH}
+echo "    lib prefix:        " ${LIB}
+echo "    python version:    " ${PYTHON_VERSION}
+echo "    site-packages dir: " ${SITE_PACK}
+echo "    /usr/lib dir:      " ${USRLIB}
+echo "    install dir:       " ${DAE_TOOLS_DIR}
+echo " " 
+read -p " Proceed [y/n]? " do_proceed
+case ${do_proceed} in
+  [Yy]* ) break;;
+      * ) echo "Aborting ..."
+          exit;;
+esac
 
 if [ -d ${PACKAGE_NAME} ]; then
   rm -r ${PACKAGE_NAME}
@@ -257,10 +254,6 @@ echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
-TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
-RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
-BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
-
 if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
 fi
@@ -286,12 +279,6 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \*.py        | xargs chmod +x
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
-# If python is installed in /usr/lib then copy files there; otherwise to /usr/lib64
-if [ -d ${BUILD_DIR}/usr/lib ]; then
-  USRLIB=/usr/lib
-else
-  USRLIB=/usr/lib64
-fi
 # Check if USRLIB exists; if not make it
 if [ ! -d ${BUILD_DIR}${USRLIB} ]; then
   mkdir ${BUILD_DIR}${USRLIB}
@@ -324,9 +311,6 @@ fi
 chmod -x ${BUILD_DIR}/usr/${LIB}/*.so*
 find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip
 
-
-USRBIN=${BUILD_DIR}/usr/bin
-DAE_TOOLS_DIR=${USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
 echo "#!/bin/sh"                       > ${USRBIN}/daeplotter

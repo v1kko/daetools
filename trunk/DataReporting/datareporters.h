@@ -13,6 +13,28 @@ namespace dae
 namespace datareporting
 {
 /*********************************************************************
+	daeBlackHoleDataReporter
+*********************************************************************/
+class DAE_DATAREPORTERS_API daeBlackHoleDataReporter : public daeDataReporter_t
+{
+public:
+	daeBlackHoleDataReporter(void){}
+	virtual ~daeBlackHoleDataReporter(void){}
+
+public:
+	virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
+	virtual bool Disconnect(void){return true;}
+	virtual bool IsConnected(void){return true;}
+	virtual bool StartRegistration(void){return true;}
+	virtual bool RegisterDomain(const daeDataReporterDomain* pDomain){return true;}
+	virtual bool RegisterVariable(const daeDataReporterVariable* pVariable){return true;}
+	virtual bool EndRegistration(void){return true;}
+	virtual bool StartNewResultSet(real_t dTime){return true;}
+	virtual bool EndOfData(void){return true;}
+	virtual bool SendVariable(const daeDataReporterVariableValue* pVariableValue){return true;}
+};
+
+/*********************************************************************
 	daeDataReporterLocal (ABSTRACT)
 *********************************************************************/
 class DAE_DATAREPORTERS_API daeDataReporterLocal : public daeDataReporter_t

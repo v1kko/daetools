@@ -6,6 +6,11 @@ namespace dae
 {
 namespace datareporting
 {
+daeDataReporter_t* daeCreateBlackHoleDataReporter(void)
+{
+	return new daeBlackHoleDataReporter;
+}
+	
 daeDataReporter_t* daeCreateTextDataReporter(void)
 {
 	return new daeTEXTFileDataReporter;

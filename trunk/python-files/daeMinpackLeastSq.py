@@ -20,104 +20,35 @@ from numpy import *
 from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
+import matplotlib.pyplot as plt
 
-class daeMinpackLeastSq:
-    def __init__(self):
-        self.simulation   = None
-        self.daesolver    = None
-        self.datareporter = None
-        self.log          = None
-        self.functions    = None
-        self.parameters   = None
-        self.x_inputs     = None
-        self.y_outputs    = None
-        self.x_data       = None
-        self.y_data       = None
-        self.Nparameters  = 0
-        self.Nfunctions   = 0
-        self.Ninputs      = 0
-        self.Nexperiments = 0
-
-    def Initialize(self, simulation, daesolver, datareporter, log, **kwargs):
-        self.simulation   = simulation
-        self.daesolver    = daesolver
-        self.datareporter = datareporter
-        self.log          = log
-        
-        self.functions    = kwargs.get('functions',  None)
-        self.parameters   = kwargs.get('parameters', None)
-        self.x_inputs     = kwargs.get('x_inputs',   None)
-        self.y_outputs    = kwargs.get('y_outputs',  None)
-        self.x_data       = kwargs.get('x_data',     None)
-        self.y_data       = kwargs.get('y_data',     None)
-        
-        self.Nparameters  = len(parameters)
-        self.Nfunctions   = len(functions)
-        self.Ninputs      = len(x_inputs)
-        self.Noutputs     = x_data.shape[0]
-        
-        if ( (self.functions == None) or (len(self.functions) == 0) ):
-            raise RuntimeError('Argument [functions] has not been provided or the number of functions is zero') 
-        if ( (self.parameters == None) or (len(self.parameters) == 0) ):
-            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters is zero') 
-        if ( (self.x_inputs == None) or (len(self.x_inputs) == 0) ):
-            raise RuntimeError('Argument [x_inputs] has not been provided or the number of x_inputs is zero') 
-        if ( (self.y_outputs == None) or (len(self.y_outputs) == 0) ):
-            raise RuntimeError('Argument [y_outputs] has not been provided or the number of y_outputs is zero') 
-        if ( (self.x_data == None) or (len(self.x_data) == 0) ):
-            raise RuntimeError('Argument [x_data] has not been provided or the number of x_data is zero') 
-        if ( (self.y_data == None) or (len(self.y_data) == 0) ):
-            raise RuntimeError('Argument [y_data] has not been provided or the number of y_data is zero') 
-
-        if ( (self.x_data.ndim != 2) or (self.y_data.ndim != 2)):
-            raise RuntimeError('Number of numpy array dimensions od x_data and y_data must be 2') 
-        if ( (self.x_data.shape[0] != self.Noutputs) or (self.y_data.shape[0] != self.Noutputs) or (self.x_data.shape[0] != self.y_data.shape[0])):
-            raise RuntimeError('The shapes of x_data and y_data do not match') 
-        if ( (self.x_data.shape[1] != self.Ninputs) or (self.y_data.shape[1] != self.Nfunctions) ):
-            raise RuntimeError('') 
-
-        self.simulation.Initialize(self.daesolver, self.datareporter, self.log, CalculateSensitivities = True, NumberOfObjectiveFunctions = self.Nfunctions)
-
-    def Run(self):
-        pass
-    
-    def Finalize(self):
-        pass
-    
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
-def Function(p, simulation, xin, ymeas, calc_values):
-    Nparams = len(p)
-    Nexp    = len(xin)
+def Function(p, minpack, calc_values):
+    values = zeros((minpack.Nexperiments))
+    derivs = zeros((minpack.Nexperiments, minpack.Nparameters))
     
-    if(len(xin) != len(ymeas)):
-        raise RuntimeError('The number of input data and the number of measurements must be equal') 
-    
-    values = zeros((Nexp))
-    derivs = zeros((Nexp, Nparams))
-    
-    for e in range(0, Nexp):
+    for e in range(0, minpack.Nexperiments):
         # Set initial conditions, initial guesses, initially active states etc
-        # In this case it can be omitted; however, in general case it should be called
-        simulation.SetUpVariables()
+        minpack.simulation.SetUpVariables()
     
         # Assign the input data for the simulation
-        simulation.m.x.ReAssignValue(xin[e])
+        for i in range(0, minpack.Ninputs):
+            minpack.x_input_variables[i].ReAssignValue(minpack.x_data[i][e])
         
         # Set the parameters values
-        simulation.A.Value     = p[0]
-        simulation.k.Value     = p[1]
-        simulation.theta.Value = p[2]
+        for i in range(0, minpack.Nparameters):
+            minpack.parameters[i].Value = p[i]
         
         # Run the simulation
-        simulation.Reset()
-        simulation.SolveInitial()
-        simulation.Run()
+        minpack.simulation.Reset()
+        minpack.simulation.SolveInitial()
+        minpack.simulation.Run()
         
         # Get the results
-        values[e]    = simulation.m.y.GetValue() - ymeas[e]
-        derivs[e][:] = simulation.ObjectiveFunctions[0].Gradients
+        values[e] = minpack.y_measured_variable.Value - minpack.y_data[e]
+        derivs[e][:] = minpack.y_measured_variable.Gradients
         
-    print 'A =', simulation.A.Value, ', k =', simulation.k.Value, ', theta =', simulation.theta.Value
+    print 'Parameters:', p
     if calc_values:
         print '  Residuals:'
         print values
@@ -130,91 +61,115 @@ def Function(p, simulation, xin, ymeas, calc_values):
     else:
         return derivs
 
-# Function to calculate residuals R = ydata - f(xdata, params):
+# Function to calculate residuals R = f(x_data, parameters) - y_data:
 #   R[0], R[1], ..., R[n] 
-def Residuals(p, simulation, xin, ymeas):
-    return Function(p, simulation, xin, ymeas, True)
+def Residuals(p, args):
+    minpack = args[0]
+    return Function(p, minpack, True)
     
-# Function to calculate a Jacobian for residuals: 
+# Function to calculate Jacobian matrix for residuals R: 
 #   dR[0]/dp[0], dR[0]/dp[1], ..., dR[0]/dp[n] 
 #   dR[1]/dp[0], dR[1]/dp[1], ..., dR[1]/dp[n] 
 #   ...
 #   dR[n]/dp[0], dR[n]/dp[1], ..., dR[n]/dp[n] 
-def Derivatives(p, simulation, xin, ymeas):
-    return Function(p, simulation, xin, ymeas, False)
+def Derivatives(p, args):
+    minpack = args[0]
+    return Function(p, minpack, False)
+    
+class daeMinpackLeastSq:
+    def __init__(self, simulation, daesolver, datareporter, log):
+        self.simulation   = simulation
+        self.daesolver    = daesolver
+        self.datareporter = datareporter
+        self.log          = log
+        
+        self.parameters          = None
+        self.x_input_variables   = None
+        self.y_measured_variable = None
+        self.p0                  = None
+        self.x_data              = None
+        self.y_data              = None
+        
+        self.Nparameters  = 0
+        self.Ninputs      = 0
+        self.Nexperiments = 0
+        
+        self.simulation.Initialize(self.daesolver, 
+                                   self.datareporter, 
+                                   self.log, 
+                                   CalculateSensitivities = True)
+        
+    def Initialize(self, **kwargs):
+        # List of daeOptimizationVariable objects:
+        self.parameters = kwargs.get('parameters', None)
+        
+        # List of parameters' starting values:
+        self.p0 = kwargs.get('p0', None)
 
-# Function to calculate y  values for the estimated parameters
-def peval(x, p):
-    return p[0]*sin(2*pi*p[1]*x+p[2])
+        # List of daeVariable/adouble objects (must be assigned variables):
+        self.x_input_variables = kwargs.get('x_input_variables', None)
+        
+        # daeVariable/adouble object (must be state variable):
+        self.y_measured_variable = kwargs.get('y_measured_variable', None)
+        
+        # 2-dimensional numpy array [Nexperiments][Ninputs]:
+        self.x_data = kwargs.get('x_data', None)
+        
+        # 1-dimensional numpy array [Nexperiments]: 
+        self.y_data = kwargs.get('y_data', None)
+        
+        # Plot the comparison between the measured and fitted data?: 
+        self.plot_comparison = kwargs.get('plot_comparison', False)
 
+        self.Nparameters  = len(self.parameters)
+        self.Ninputs      = len(self.x_input_variables)
+        self.Nexperiments = len(self.y_data)
+        
+        if ( (self.parameters == None) or (len(self.parameters) == 0) ):
+            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters is zero') 
+        if ( (self.p0 == None) or (len(self.p0) == 0)):
+            raise RuntimeError('Argument [p_0] has not been provided or the number of P_0 is zero') 
+        if ( (self.x_input_variables == None) or (len(self.x_input_variables) == 0) ):
+            raise RuntimeError('Argument [x_input_variables] has not been provided or the number of x_input_variables is zero') 
+        if ( self.y_measured_variable == None ):
+            raise RuntimeError('Argument [y_measured_variable] has not been provided') 
+        if ( self.x_data == None ):
+            raise RuntimeError('Argument [x_data] has not been provided or the number of x_data is zero') 
+        if ( self.y_data == None ):
+            raise RuntimeError('Argument [y_data] has not been provided or the number of y_data is zero') 
 
+        if ( (self.x_data.ndim != 2) or (self.y_data.ndim != 1) ):
+            raise RuntimeError('Number of numpy array dimensions of x_data must be 2 and of y_data must be 1') 
+        if ( (self.x_data.shape[1] != self.Nexperiments) or (self.y_data.shape[0] != self.Nexperiments) ):
+            raise RuntimeError('Invalid shapes of x_data and y_data') 
+        if ( self.x_data.shape[0] != self.Ninputs ):
+            raise RuntimeError('The shapes of x_data and y_data do not match 2') 
 
-log          = daePythonStdOutLog()
-daesolver    = daeIDAS()
-datareporter = daeTCPIPDataReporter()
-simulation   = simTutorial()
+    def Run(self):
+        # Call scipy.optimize.leastsq (Minpack wrapper)
+        p, cov_x, infodict, msg, ier = leastsq(Residuals, self.p0, Dfun = Derivatives, args = [self], full_output = True)
+        
+        if ier in [1, 2, 3, 4]:
+            print 'Solution found!'
+        else:
+            print 'Least square method failed!'
+        print 'Status:', msg
 
-simulation.m.SetReportingOn(True)
-
-simulation.ReportingInterval = 1
-simulation.TimeHorizon = 5
-
-simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-if(datareporter.Connect("", simName) == False):
-    sys.exit()
-
-simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True, NumberOfObjectiveFunctions = 1)
-
-simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-# Exact values of the parameters
-A, k, theta = [10, 33.33333333, 0.523598333]
-
-# Starting point for parameters
-p0 = [8, 43.47826087, 1.047196667]
-
-# Input data for the model
-x = arange(0, 0.06, 0.002)
-
-# The values of y for given x and exact values of A, k, and theta
-y_true = A * sin(2 * pi * k * x + theta)
-
-# Measured values for y
-y_meas = zeros_like(x)
-y_meas = [ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
-           4.78842863,   2.87467755,  -3.93427325,  -6.13071010,  -9.26168083,
-          -9.25272475, -10.42850414,  -4.71175587,  -3.60403013,  -0.11039750,
-           3.80372890,   8.51512082,   9.78232718,   9.91931747,   5.17108061,
-           6.47468360,   0.66528089,  -5.10344027,  -7.12668123,  -9.42080566,
-          -8.23170543,  -6.56081590,  -6.28524014,  -2.30246340,  -0.79571452]
-
-# Call leastsq
-p, cov_x, infodict, msg, ier = leastsq(Residuals, p0, Dfun=Derivatives, args=(simulation, x, y_meas), full_output=True)
-
-# Print the results
-print '------------------------------------------------------'
-if ier in [1, 2, 3, 4]:
-    print 'Solution found!'
-else:
-    print 'Least square method failed!'
-print 'Status:', msg
-
-print 'Number of function evaluations =', infodict['nfev']
-chisq = (infodict['fvec']**2).sum()
-dof = len(x) - len(p0)
-rmse = sqrt(chisq / dof)
-print 'Root mean square deviation =', rmse
-
-A, k, theta = p
-print 'Estimated parameters values:'
-print '    A     =', A
-print '    k     =', k
-print '    theta =', theta
-print '------------------------------------------------------'
-
-# Plot the comparison between the exact values, measured and fitted data
-plt.plot(x, peval(x, p), x, y_meas, 'o', x, y_true)
-plt.title('Least-squares fit to experimental data')
-plt.legend(['Fit', 'Experimental', 'Exact'])
-plt.show()
+        print 'Number of function evaluations =', infodict['nfev']
+        chisq = (infodict['fvec']**2).sum()
+        dof = self.Nexperiments - self.Nparameters
+        rmse = sqrt(chisq / dof)
+        print 'Root mean square deviation =', rmse
+        print 'Estimated parameters values:', p
+        
+        # Plot the comparison between the measured and fitted data
+        if self.plot_comparison:
+            y_fit = infodict['fvec'] + self.y_data
+            plt.plot(self.x_data[0], y_fit, self.x_data[0], self.y_data, 'o')
+            plt.title('Least-squares fit to experimental data')
+            plt.legend(['Fit', 'Experimental'])
+            plt.show()
+            
+    def Finalize(self):
+        self.simulation.Finalize()
+ 
