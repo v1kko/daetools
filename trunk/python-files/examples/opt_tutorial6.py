@@ -23,16 +23,22 @@ from numpy import *
 from daetools.pyDAE import *
 from daetools.solvers.daeMinpackLeastSq import *
 from time import localtime, strftime
+import matplotlib.pyplot as plt
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
+        # Model inputs
         self.x     = daeVariable("x", no_t, self)
+        
+        # Model outputs (measured quantities)
+        self.y     = daeVariable("y", no_t, self)
+        
+        # Model parameters
         self.A     = daeVariable("A", no_t, self)
         self.k     = daeVariable("k", no_t, self)
         self.theta = daeVariable("&theta;", no_t, self)
-        self.y     = daeVariable("y", no_t, self)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("y")
@@ -54,8 +60,10 @@ class simTutorial(daeSimulation):
         self.m.theta.AssignValue(1)
 
     def SetUpOptimization(self):
+        # Obj. function must be a function of parameters
         self.ObjectiveFunctions[0].Residual = self.m.A() * Sin(2 * pi * self.m.k() * self.m.x() + self.m.theta())
         
+        # Parameters must be defined as optimization variables (preferably continuous)
         self.A     = self.SetContinuousOptimizationVariable(self.m.A,     -10, 10, 0.7);
         self.k     = self.SetContinuousOptimizationVariable(self.m.k,     -10, 10, 0.8);
         self.theta = self.SetContinuousOptimizationVariable(self.m.theta, -10, 10, 1.9);
@@ -79,6 +87,7 @@ if(datareporter.Connect("", simName) == False):
 
 # After constructing simulation, daesolver, datareporter, log and 
 # connecting the datareporter create daeMinpackLeastSq object
+# It will call simulation.Initialize()
 minpack = daeMinpackLeastSq(simulation, daesolver, datareporter, log)
 
 # Save the model report and the runtime model report
@@ -98,9 +107,12 @@ x_input_variables = [simulation.m.x]
 p0 = [8, 43.47826087, 1.047196667]
 
 # Model inputs:
-Nexp = 30
-x_data = zeros((1, Nexp))
-x_data[0] = arange(0, 0.06, 0.06 / Nexp)
+Ninputs = 1
+Noutputs = 1
+Nexperiments = 30
+
+x_data = zeros((Ninputs, Nexperiments))
+x_data[0] = arange(0, 0.06, 0.06 / Nexperiments)
 
 # Model outputs (measured quantity):
 y_data = array([ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
@@ -110,15 +122,33 @@ y_data = array([ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093
                  6.47468360,   0.66528089,  -5.10344027,  -7.12668123,  -9.42080566,
                 -8.23170543,  -6.56081590,  -6.28524014,  -2.30246340,  -0.79571452] )
 
-# Initialize the MinpackLeastSq
-minpack.Initialize(parameters          = parameters,
-                   x_input_variables   = x_input_variables,
-                   y_measured_variable = y_measured_variable,
-                   p0                  = p0,
-                   x_data              = x_data,
-                   y_data              = y_data,
-                   plot_comparison     = True)
+try:
+    # Initialize the MinpackLeastSq
+    minpack.Initialize(parameters          = parameters,
+                       x_input_variables   = x_input_variables,
+                       y_measured_variable = y_measured_variable,
+                       p0                  = p0,
+                       x_data              = x_data,
+                       y_data              = y_data)
 
-# Run
-minpack.Run()
-minpack.Finalize()
+    # Run
+    minpack.Run()
+
+    # Print the results and plot the comparison between the measured and fitted data
+    print 'Status:', minpack.msg
+    print 'Number of function evaluations =', minpack.infodict['nfev']
+    print 'Root mean square deviation =', minpack.rmse
+    print 'Estimated parameters values:', minpack.p_estimated
+
+    y_fit = minpack.infodict['fvec'] + minpack.y_data
+    plt.plot(minpack.x_data[0], y_fit, minpack.x_data[0], minpack.y_data, 'o')
+    plt.title('Least-squares fit to experimental data')
+    plt.legend(['Fit', 'Experimental'])
+    plt.show()
+
+except Exception, e:
+    print str(e)
+    
+finally:
+    minpack.Finalize()
+   

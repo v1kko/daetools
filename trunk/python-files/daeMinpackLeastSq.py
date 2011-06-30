@@ -20,12 +20,13 @@ from numpy import *
 from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
-import matplotlib.pyplot as plt
 
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
-def Function(p, minpack, calc_values):
+def Calculate(p, minpack, calc_values):
     values = zeros((minpack.Nexperiments))
-    derivs = zeros((minpack.Nexperiments, minpack.Nparameters))
+    # If col_deriv is True the shape of derivs is (Nparameters, Nexperiments)
+    # If col_deriv is False the shape of derivs is (Nexperiments, Nparameters)
+    derivs = zeros((minpack.Nparameters, minpack.Nexperiments))
     
     for e in range(0, minpack.Nexperiments):
         # Set initial conditions, initial guesses, initially active states etc
@@ -33,7 +34,7 @@ def Function(p, minpack, calc_values):
     
         # Assign the input data for the simulation
         for i in range(0, minpack.Ninputs):
-            minpack.x_input_variables[i].ReAssignValue(minpack.x_data[i][e])
+            minpack.x_input_variables[i].ReAssignValue(minpack.x_data[i, e])
         
         # Set the parameters values
         for i in range(0, minpack.Nparameters):
@@ -45,8 +46,8 @@ def Function(p, minpack, calc_values):
         minpack.simulation.Run()
         
         # Get the results
-        values[e] = minpack.y_measured_variable.Value - minpack.y_data[e]
-        derivs[e][:] = minpack.y_measured_variable.Gradients
+        values[e]    = minpack.y_measured_variable.Value - minpack.y_data[e]
+        derivs[:, e] = minpack.y_measured_variable.Gradients
         
     print 'Parameters:', p
     if calc_values:
@@ -65,7 +66,7 @@ def Function(p, minpack, calc_values):
 #   R[0], R[1], ..., R[n] 
 def Residuals(p, args):
     minpack = args[0]
-    return Function(p, minpack, True)
+    return Calculate(p, minpack, True)
     
 # Function to calculate Jacobian matrix for residuals R: 
 #   dR[0]/dp[0], dR[0]/dp[1], ..., dR[0]/dp[n] 
@@ -74,7 +75,7 @@ def Residuals(p, args):
 #   dR[n]/dp[0], dR[n]/dp[1], ..., dR[n]/dp[n] 
 def Derivatives(p, args):
     minpack = args[0]
-    return Function(p, minpack, False)
+    return Calculate(p, minpack, False)
     
 class daeMinpackLeastSq:
     def __init__(self, simulation, daesolver, datareporter, log):
@@ -93,6 +94,8 @@ class daeMinpackLeastSq:
         self.Nparameters  = 0
         self.Ninputs      = 0
         self.Nexperiments = 0
+        
+        self.rmse         = 0.0
         
         self.simulation.Initialize(self.daesolver, 
                                    self.datareporter, 
@@ -118,9 +121,6 @@ class daeMinpackLeastSq:
         # 1-dimensional numpy array [Nexperiments]: 
         self.y_data = kwargs.get('y_data', None)
         
-        # Plot the comparison between the measured and fitted data?: 
-        self.plot_comparison = kwargs.get('plot_comparison', False)
-
         self.Nparameters  = len(self.parameters)
         self.Ninputs      = len(self.x_input_variables)
         self.Nexperiments = len(self.y_data)
@@ -147,29 +147,20 @@ class daeMinpackLeastSq:
 
     def Run(self):
         # Call scipy.optimize.leastsq (Minpack wrapper)
-        p, cov_x, infodict, msg, ier = leastsq(Residuals, self.p0, Dfun = Derivatives, args = [self], full_output = True)
+        self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, 
+                                                                                  self.p0, 
+                                                                                  Dfun        = Derivatives, 
+                                                                                  args        = [self], 
+                                                                                  full_output = True,
+                                                                                  col_deriv   = True)
         
-        if ier in [1, 2, 3, 4]:
-            print 'Solution found!'
-        else:
-            print 'Least square method failed!'
-        print 'Status:', msg
-
-        print 'Number of function evaluations =', infodict['nfev']
-        chisq = (infodict['fvec']**2).sum()
+        if self.ier not in [1, 2, 3, 4]:
+            raise RuntimeError('MINPACK least square method failed (%s)' % self.msg)
+        
+        chisq = (self.infodict['fvec']**2).sum()
         dof = self.Nexperiments - self.Nparameters
-        rmse = sqrt(chisq / dof)
-        print 'Root mean square deviation =', rmse
-        print 'Estimated parameters values:', p
+        self.rmse = sqrt(chisq / dof)
         
-        # Plot the comparison between the measured and fitted data
-        if self.plot_comparison:
-            y_fit = infodict['fvec'] + self.y_data
-            plt.plot(self.x_data[0], y_fit, self.x_data[0], self.y_data, 'o')
-            plt.title('Least-squares fit to experimental data')
-            plt.legend(['Fit', 'Experimental'])
-            plt.show()
-            
     def Finalize(self):
         self.simulation.Finalize()
  

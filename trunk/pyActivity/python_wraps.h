@@ -176,8 +176,6 @@ public:
 
 	void SetUpVariables(void)
 	{
-		std::cout << "SetUpVariables" << std::endl;
-		std::cout.flush();
         if(boost::python::override f = this->get_override("SetUpVariables"))
             f();
 		else
@@ -185,8 +183,6 @@ public:
 	}
 	void def_SetUpVariables(void)
 	{
-		std::cout << "def_SetUpVariables" << std::endl;
-		std::cout.flush();
 		this->daeSimulation::SetUpVariables();
 	}
 
