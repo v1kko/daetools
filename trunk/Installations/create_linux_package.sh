@@ -113,9 +113,9 @@ echo "    install dir:       " ${DAE_TOOLS_DIR}
 echo " " 
 read -p " Proceed [y/n]? " do_proceed
 case ${do_proceed} in
-  [Yy]* ) break;;
-      * ) echo "Aborting ..."
+  [Nn]* ) echo "Aborting ..."
           exit;;
+      * ) break;;
 esac
 
 if [ -d ${PACKAGE_NAME} ]; then

@@ -43,7 +43,8 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog, 
-										   bool bCalculateSensitivities = false);
+										   bool bCalculateSensitivities = false,
+										   size_t nNumberOfObjectiveFunctions = 1);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -76,12 +77,12 @@ public:
 	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
 	size_t GetNumberOfObjectiveFunctions(void) const;
-	void   SetNumberOfObjectiveFunctions(size_t nObjFuns);
 	
 protected:
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);
+	void	CreateObjectiveFunctions(void);
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
@@ -115,6 +116,7 @@ protected:
 	bool						m_bIsSolveInitial;
 // Optimization related data	
 	bool														m_bCalculateSensitivities;
+	size_t														m_nNumberOfObjectiveFunctions;
 	std::vector< boost::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
 	std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
 	std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
@@ -134,7 +136,8 @@ public:
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog);
+							daeLog_t*          pLog,
+							size_t			   nNumberOfObjectiveFunctions = 1);
 	virtual void Run(void);
 	virtual void Finalize(void);
 	

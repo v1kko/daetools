@@ -133,7 +133,7 @@ class daeSimulation_t:
         """
         pass
     
-    def Initialize(self, DAESolver, DataReporter, Log, CalculateSensitivities = False):
+    def Initialize(self, DAESolver, DataReporter, Log, CalculateSensitivities = False, NumberOfObjectiveFunctions = 1):
         """
         (Abstract)
         ARGUMENTS:
@@ -141,6 +141,7 @@ class daeSimulation_t:
          - DataReporter: daeDataReporter_t
          - Log: daeLog_t
          - CalculateSensitivities: bool
+         - NumberOfObjectiveFunctions: unsigned integer
         RETURNS:
            Nothing
         """
@@ -366,7 +367,7 @@ class daeOptimization_t:
         """
         pass
     
-    def Initialize(self, Simulation, MINLPSolver, DAESolver, DataReporter, Log):
+    def Initialize(self, Simulation, MINLPSolver, DAESolver, DataReporter, Log, NumberOfObjectiveFunctions = 1):
         """
         (Abstract)
         ARGUMENTS:
@@ -375,6 +376,7 @@ class daeOptimization_t:
          - DAESolver: daeDAESolver_t object
          - DataReporter: daeDataReporter_t object
          - Log: daeLog_t object
+         - NumberOfObjectiveFunctions: unsigned integer
         RETURNS:
            Nothing
         """

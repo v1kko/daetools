@@ -66,7 +66,8 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog,
-										   bool bCalculateSensitivities = false)	   	= 0;
+										   bool bCalculateSensitivities = false,
+										   size_t nNumberOfObjectiveFunctions = 1)	   	= 0;
 	virtual void				Reinitialize(void)										= 0;
 	virtual void				SolveInitial(void)										= 0;
 	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;
@@ -82,7 +83,6 @@ public:
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
 	
 	virtual size_t GetNumberOfObjectiveFunctions(void) const													 = 0;
-	virtual void   SetNumberOfObjectiveFunctions(size_t nObjFuns)											     = 0;
 };
 
 /******************************************************************

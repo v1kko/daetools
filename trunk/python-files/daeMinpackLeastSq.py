@@ -23,17 +23,17 @@ from scipy.optimize import leastsq
 
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
-    values = zeros((minpack.Nexperiments))
+    values = zeros((minpack.Nexperiments * minpack.Nmeasured_variables))
     # If col_deriv is True the shape of derivs is (Nparameters, Nexperiments)
     # If col_deriv is False the shape of derivs is (Nexperiments, Nparameters)
-    derivs = zeros((minpack.Nparameters, minpack.Nexperiments))
+    derivs = zeros((minpack.Nparameters, minpack.Nexperiments * minpack.Nmeasured_variables))
     
     for e in range(0, minpack.Nexperiments):
         # Set initial conditions, initial guesses, initially active states etc
         minpack.simulation.SetUpVariables()
     
         # Assign the input data for the simulation
-        for i in range(0, minpack.Ninputs):
+        for i in range(0, minpack.Ninput_variables):
             minpack.x_input_variables[i].ReAssignValue(minpack.x_data[i, e])
         
         # Set the parameters values
@@ -45,17 +45,20 @@ def Calculate(p, minpack, calc_values):
         minpack.simulation.SolveInitial()
         minpack.simulation.Run()
         
-        # Get the results
-        values[e]    = minpack.y_measured_variable.Value - minpack.y_data[e]
-        derivs[:, e] = minpack.y_measured_variable.Gradients
+        # Get the results for each measured variable
+        for o in range(0, minpack.Nmeasured_variables):
+            values[e + o*minpack.Nexperiments]    = minpack.y_measured_variables[o].Value - minpack.y_data[o, e]
+            derivs[:, e + o*minpack.Nexperiments] = minpack.y_measured_variables[o].Gradients
+            #print 'values[{0}]'.format(e + o*minpack.Nexperiments), values[e + o*minpack.Nexperiments]
+            #print 'derivs[:, {0}]'.format(e + o*minpack.Nexperiments), derivs[:, e + o*minpack.Nexperiments]
         
-    print 'Parameters:', p
-    if calc_values:
-        print '  Residuals:'
-        print values
-    else:
-        print '  Derivatives:'
-        print derivs
+    #print 'Parameters:', p
+    #if calc_values:
+    #    print '  Residuals:'
+    #    print values
+    #else:
+    #    print '  Derivatives:'
+    #    print derivs
     
     if calc_values:
         return values
@@ -69,38 +72,50 @@ def Residuals(p, args):
     return Calculate(p, minpack, True)
     
 # Function to calculate Jacobian matrix for residuals R: 
-#   dR[0]/dp[0], dR[0]/dp[1], ..., dR[0]/dp[n] 
-#   dR[1]/dp[0], dR[1]/dp[1], ..., dR[1]/dp[n] 
-#   ...
-#   dR[n]/dp[0], dR[n]/dp[1], ..., dR[n]/dp[n] 
+# | dR[0]/dp[0] dR[0]/dp[1] ... dR[0]/dp[n] |
+# | dR[1]/dp[0] dR[1]/dp[1] ... dR[1]/dp[n] |
+# | ...                                     |
+# | dR[n]/dp[0] dR[n]/dp[1] ... dR[n]/dp[n] |
 def Derivatives(p, args):
     minpack = args[0]
     return Calculate(p, minpack, False)
     
 class daeMinpackLeastSq:
-    def __init__(self, simulation, daesolver, datareporter, log):
+    def __init__(self, simulation, daesolver, datareporter, log, **kwargs):
         self.simulation   = simulation
         self.daesolver    = daesolver
         self.datareporter = datareporter
         self.log          = log
         
-        self.parameters          = None
-        self.x_input_variables   = None
-        self.y_measured_variable = None
-        self.p0                  = None
-        self.x_data              = None
-        self.y_data              = None
+        self.parameters           = None
+        self.x_input_variables    = None
+        self.y_measured_variables = None
+        self.p0                   = None
+        self.x_data               = None
+        self.y_data               = None
         
-        self.Nparameters  = 0
-        self.Ninputs      = 0
-        self.Nexperiments = 0
+        self.rmse                = 0.0
+        self.Nparameters         = kwargs.get('Nparameters',         0)
+        self.Ninput_variables    = kwargs.get('Ninput_variables',    0)
+        self.Nmeasured_variables = kwargs.get('Nmeasured_variables', 0)
+        self.Nexperiments        = kwargs.get('Nexperiments',        0)
         
-        self.rmse         = 0.0
-        
+        if ( self.simulation == None ):
+            raise RuntimeError('The simulation object cannot be None') 
+        if ( self.Nparameters == 0 ):
+            raise RuntimeError('The number of parameters cannot be 0') 
+        if ( self.Ninput_variables == 0 ):
+            raise RuntimeError('The number of input variables cannot be 0') 
+        if ( self.Nmeasured_variables == 0 ):
+            raise RuntimeError('The number of measured variables cannot be 0') 
+        if ( self.Nexperiments == 0 ):
+            raise RuntimeError('The number of experiments cannot be 0') 
+
         self.simulation.Initialize(self.daesolver, 
                                    self.datareporter, 
                                    self.log, 
-                                   CalculateSensitivities = True)
+                                   CalculateSensitivities = True,
+                                   NumberOfObjectiveFunctions = self.Nmeasured_variables)
         
     def Initialize(self, **kwargs):
         # List of daeOptimizationVariable objects:
@@ -113,37 +128,31 @@ class daeMinpackLeastSq:
         self.x_input_variables = kwargs.get('x_input_variables', None)
         
         # daeVariable/adouble object (must be state variable):
-        self.y_measured_variable = kwargs.get('y_measured_variable', None)
+        self.y_measured_variables = kwargs.get('y_measured_variables', None)
         
-        # 2-dimensional numpy array [Nexperiments][Ninputs]:
+        # 2-dimensional numpy array [Nexperiments][Ninput_variables]:
         self.x_data = kwargs.get('x_data', None)
         
         # 1-dimensional numpy array [Nexperiments]: 
         self.y_data = kwargs.get('y_data', None)
         
-        self.Nparameters  = len(self.parameters)
-        self.Ninputs      = len(self.x_input_variables)
-        self.Nexperiments = len(self.y_data)
-        
-        if ( (self.parameters == None) or (len(self.parameters) == 0) ):
-            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters is zero') 
-        if ( (self.p0 == None) or (len(self.p0) == 0)):
-            raise RuntimeError('Argument [p_0] has not been provided or the number of P_0 is zero') 
-        if ( (self.x_input_variables == None) or (len(self.x_input_variables) == 0) ):
-            raise RuntimeError('Argument [x_input_variables] has not been provided or the number of x_input_variables is zero') 
-        if ( self.y_measured_variable == None ):
-            raise RuntimeError('Argument [y_measured_variable] has not been provided') 
+        if ( (self.parameters == None) or (len(self.parameters) != self.Nparameters) ):
+            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters (={0}) is not equal to Nparameters (={1})'.format(len(self.parameters), self.Nparameters)) 
+        if ( (self.p0 == None) or (len(self.p0) != self.Nparameters)):
+            raise RuntimeError('Argument [p0] has not been provided or the number of p0 (={0}) is not equal to Nparameters (={1})'.format(len(self.p0), self.Nparameters)) 
+        if ( (self.x_input_variables == None) or (len(self.x_input_variables) != self.Ninput_variables) ):
+            raise RuntimeError('Argument [x_input_variables] has not been provided or the number of x_input_variables (={0}) is not equal to Ninput_variables (={1})'.format(len(self.x_input_variables), self.Ninput_variables)) 
+        if ( (self.y_measured_variables == None) or (len(self.y_measured_variables) != self.Nmeasured_variables) ):
+            raise RuntimeError('Argument [y_measured_variables] has not been provided or the number of y_measured_variables (={0}) is not equal to Nmeasured_variables (={1})'.format(len(self.y_measured_variables), self.Nmeasured_variables)) 
         if ( self.x_data == None ):
-            raise RuntimeError('Argument [x_data] has not been provided or the number of x_data is zero') 
+            raise RuntimeError('Argument [x_data] has not been provided') 
         if ( self.y_data == None ):
-            raise RuntimeError('Argument [y_data] has not been provided or the number of y_data is zero') 
+            raise RuntimeError('Argument [y_data] has not been provided') 
 
-        if ( (self.x_data.ndim != 2) or (self.y_data.ndim != 1) ):
-            raise RuntimeError('Number of numpy array dimensions of x_data must be 2 and of y_data must be 1') 
-        if ( (self.x_data.shape[1] != self.Nexperiments) or (self.y_data.shape[0] != self.Nexperiments) ):
-            raise RuntimeError('Invalid shapes of x_data and y_data') 
-        if ( self.x_data.shape[0] != self.Ninputs ):
-            raise RuntimeError('The shapes of x_data and y_data do not match 2') 
+        if ( self.x_data.shape != (self.Ninput_variables, self.Nexperiments) ):
+            raise RuntimeError('x_data.shape must be ({0}, {1})'.format(self.Ninput_variables, self.Nexperiments)) 
+        if ( self.y_data.shape != (self.Nmeasured_variables, self.Nexperiments) ):
+            raise RuntimeError('y_data.shape must be ({0}, {1})'.format(self.Nmeasured_variables, self.Nexperiments)) 
 
     def Run(self):
         # Call scipy.optimize.leastsq (Minpack wrapper)
@@ -155,10 +164,10 @@ class daeMinpackLeastSq:
                                                                                   col_deriv   = True)
         
         if self.ier not in [1, 2, 3, 4]:
-            raise RuntimeError('MINPACK least square method failed (%s)' % self.msg)
+            raise RuntimeError('MINPACK least square method failed ({0})'.format(self.msg))
         
         chisq = (self.infodict['fvec']**2).sum()
-        dof = self.Nexperiments - self.Nparameters
+        dof = self.Nexperiments*self.Nmeasured_variables - self.Nparameters
         self.rmse = sqrt(chisq / dof)
         
     def Finalize(self):

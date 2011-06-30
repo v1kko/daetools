@@ -22,6 +22,7 @@ daeSimulation::daeSimulation(void)
 	m_bIsInitialized				= false;
 	m_bIsSolveInitial				= false;
 	m_bCalculateSensitivities		= false;
+	m_nNumberOfObjectiveFunctions	= 1;
 
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_dTimeHorizon       = cfg.Get<real_t>("daetools.activity.timeHorizon", 100);
@@ -96,7 +97,8 @@ daeeActivityAction daeSimulation::GetActivityAction(void) const
 void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, 
 							   daeDataReporter_t* pDataReporter, 
 							   daeLog_t* pLog, 
-							   bool bCalculateSensitivities)
+							   bool bCalculateSensitivities,
+							   size_t nNumberOfObjectiveFunctions)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -114,7 +116,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		throw e;
 	}
 	
-	m_bCalculateSensitivities = bCalculateSensitivities;
+	m_bCalculateSensitivities     = bCalculateSensitivities;
+	m_nNumberOfObjectiveFunctions = nNumberOfObjectiveFunctions;
 	
 	if(!pDataReporter->IsConnected())
 	{
@@ -166,9 +169,9 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Define the optimization problem: objective function and constraints
 	if(m_bCalculateSensitivities)
 	{
-	// Default number of obj. functions is 1
-		SetNumberOfObjectiveFunctions(1);
-		
+	// Create obj. functions (default number of obj. functions is 1)
+		CreateObjectiveFunctions();
+				
 	// Call SetUpOptimization to define obj. function(s), constraints and opt. variables
 		SetUpOptimization();
 	
@@ -651,23 +654,17 @@ daeObjectiveFunction_t* daeSimulation::GetObjectiveFunction(void) const
 	return m_arrObjectiveFunctions[0].get();
 }
 
-void daeSimulation::SetNumberOfObjectiveFunctions(size_t nObjFuns)
+void daeSimulation::CreateObjectiveFunctions(void)
 {
 	if(!m_bCalculateSensitivities)
 		daeDeclareAndThrowException(exInvalidCall);
-
-	int n0 = (int)m_arrObjectiveFunctions.size();
-	int n  = (int)nObjFuns - n0;
-	
-	// The number of obj. functions can only be increased, it can't be decreased!
-	// Therefore if the number of functions to add is <= 0 then do nothing and return.
-	if(n <= 0)
-		return;
+	if(m_nNumberOfObjectiveFunctions == 0)
+		m_nNumberOfObjectiveFunctions = 1;
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
 
-	for(size_t i = n0; i < nObjFuns; i++)
+	for(size_t i = 0; i < m_nNumberOfObjectiveFunctions; i++)
 	{
 		boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(this, dAbsTolerance, i));
 		objfun->SetResidual(adouble(0));

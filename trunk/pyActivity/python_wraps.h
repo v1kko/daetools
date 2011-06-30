@@ -92,9 +92,13 @@ public:
 		this->get_override("Stop")();
 	}
 
-	void Initialize(daeDAESolver_t* pDAESolver, daeDataReporter_t* pDataReporter, daeLog_t* pLog)
+	void Initialize(daeDAESolver_t* pDAESolver, 
+					daeDataReporter_t* pDataReporter, 
+					daeLog_t* pLog,
+					bool bCalculateSensitivities = false,
+					size_t nNumberOfObjectiveFunctions = 1)
 	{
-		this->get_override("Initialize")(pDAESolver, pDataReporter, pLog);
+		this->get_override("Initialize")(pDAESolver, pDataReporter, pLog, bCalculateSensitivities, nNumberOfObjectiveFunctions);
 	}
 	
 	void Reinitialize(void)
@@ -301,9 +305,10 @@ public:
 			        daeNLPSolver_t*    pNLPSolver, 
 					daeDAESolver_t*    pDAESolver, 
 					daeDataReporter_t* pDataReporter, 
-					daeLog_t*          pLog)
+					daeLog_t*          pLog,
+					size_t			   nNumberOfObjectiveFunctions = 1)
 	{
-		this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog);
+		this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog, nNumberOfObjectiveFunctions);
 	}
 	
 	void Run(void)
