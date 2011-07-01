@@ -23,10 +23,10 @@ from scipy.optimize import leastsq
 
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
-    values = zeros((minpack.Nexperiments * minpack.Nmeasured_variables))
     # If col_deriv is True the shape of derivs is (Nparameters, Nexperiments)
-    # If col_deriv is False the shape of derivs is (Nexperiments, Nparameters)
-    derivs = zeros((minpack.Nparameters, minpack.Nexperiments * minpack.Nmeasured_variables))
+    # If col_deriv is False the shape of derivs is (Nexperiments, Nparameters)    
+    values = zeros( (minpack.Nmeasured_variables, minpack.Nexperiments) )
+    derivs = zeros( (minpack.Nparameters, minpack.Nmeasured_variables, minpack.Nexperiments) )
     
     for e in range(0, minpack.Nexperiments):
         # Set initial conditions, initial guesses, initially active states etc
@@ -43,27 +43,52 @@ def Calculate(p, minpack, calc_values):
         # Run the simulation
         minpack.simulation.Reset()
         minpack.simulation.SolveInitial()
-        minpack.simulation.Run()
+        
+        if minpack.simulation.m.IsModelDynamic:
+            # minpack.simulation.Run()
+            
+            # Set the reporting times:
+            #minpack.simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
+            #print minpack.simulation.ReportingTimes
+
+            while minpack.simulation.CurrentTime < minpack.simulation.TimeHorizon:
+                t = minpack.simulation.NextReportingTime
+                while t > minpack.simulation.CurrentTime:
+                    print 'Integrating from {0} to {1}...'.format(minpack.simulation.CurrentTime, t)
+                    minpack.simulation.IntegrateUntilTime(t, eStopAtModelDiscontinuity)
+                    minpack.simulation.ReportData()
+                print 'v =', minpack.y_measured_variables[0].Value - minpack.y_data[0, e]
+                print 'd =', minpack.y_measured_variables[0].Gradients
+        else:
+            pass
         
         # Get the results for each measured variable
         for o in range(0, minpack.Nmeasured_variables):
-            values[e + o*minpack.Nexperiments]    = minpack.y_measured_variables[o].Value - minpack.y_data[o, e]
-            derivs[:, e + o*minpack.Nexperiments] = minpack.y_measured_variables[o].Gradients
-            #print 'values[{0}]'.format(e + o*minpack.Nexperiments), values[e + o*minpack.Nexperiments]
-            #print 'derivs[:, {0}]'.format(e + o*minpack.Nexperiments), derivs[:, e + o*minpack.Nexperiments]
+            values[o, e]    = minpack.y_measured_variables[o].Value - minpack.y_data[o, e]
+            derivs[:, o, e] = minpack.y_measured_variables[o].Gradients
         
-    #print 'Parameters:', p
-    #if calc_values:
-    #    print '  Residuals:'
-    #    print values
-    #else:
-    #    print '  Derivatives:'
-    #    print derivs
+    print 'Parameters:', p
+    if calc_values:
+        print '  Residuals:'
+        print values
+    else:
+        print '  Derivatives:'
+        print derivs
+    
+    r_values = values.reshape( (minpack.Nmeasured_variables * minpack.Nexperiments) )
+    r_derivs = derivs.reshape( (minpack.Nparameters, minpack.Nmeasured_variables * minpack.Nexperiments) )
     
     if calc_values:
-        return values
+        print '  Residuals reshaped:'
+        print r_values
     else:
-        return derivs
+        print '  Derivatives reshaped:'
+        print r_derivs
+    
+    if calc_values:
+        return r_values
+    else:
+        return r_derivs
 
 # Function to calculate residuals R = f(x_data, parameters) - y_data:
 #   R[0], R[1], ..., R[n] 

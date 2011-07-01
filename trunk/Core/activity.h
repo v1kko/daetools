@@ -55,13 +55,18 @@ public:
 	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const	= 0;
 
-	virtual void				SetTimeHorizon(real_t dTimeHorizon)				= 0;
-	virtual real_t				GetTimeHorizon(void) const						= 0;
-	virtual void				SetReportingInterval(real_t dReportingInterval)	= 0;
-	virtual real_t				GetReportingInterval(void) const				= 0;
-	virtual void				Resume(void)									= 0;
-	virtual void				Pause(void)										= 0;
-	virtual daeeActivityAction	GetActivityAction(void) const					= 0;
+	virtual real_t				GetCurrentTime(void) const											= 0;
+	virtual void				SetTimeHorizon(real_t dTimeHorizon)									= 0;
+	virtual real_t				GetTimeHorizon(void) const											= 0;
+	virtual void				SetReportingInterval(real_t dReportingInterval)						= 0;
+	virtual real_t				GetReportingInterval(void) const									= 0;
+	virtual void				GetReportingTimes(std::vector<real_t>& darrReportingTimes) const	= 0;
+	virtual void				SetReportingTimes(const std::vector<real_t>& darrReportingTimes)	= 0;
+	virtual real_t				GetNextReportingTime(void) const									= 0;
+	
+	virtual void				Resume(void)														= 0;
+	virtual void				Pause(void)															= 0;
+	virtual daeeActivityAction	GetActivityAction(void) const										= 0;
 
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 

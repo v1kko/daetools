@@ -32,10 +32,14 @@ public:
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
 
+	virtual real_t				GetCurrentTime(void) const;
+	virtual real_t				GetNextReportingTime(void) const;
 	virtual void				SetTimeHorizon(real_t dTimeHorizon);
 	virtual real_t				GetTimeHorizon(void) const;
 	virtual void				SetReportingInterval(real_t dReportingInterval);
 	virtual real_t				GetReportingInterval(void) const;
+	virtual void				GetReportingTimes(std::vector<real_t>& darrReportingTimes) const;
+	virtual void				SetReportingTimes(const std::vector<real_t>& darrReportingTimes);
 	virtual void				Resume(void);
 	virtual void				Pause(void);
 	virtual daeeActivityAction	GetActivityAction(void) const;
@@ -61,7 +65,6 @@ public:
 	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const;
 
-	real_t						GetCurrentTime(void) const;
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 	
@@ -99,6 +102,7 @@ protected:
 	real_t						m_dCurrentTime;
 	real_t						m_dTimeHorizon;
 	real_t						m_dReportingInterval;
+	std::vector<real_t>			m_darrReportingTimes;
 	daeLog_t*					m_pLog;
 	daeModel*					m_pModel;
 	daeDataReporter_t*			m_pDataReporter;

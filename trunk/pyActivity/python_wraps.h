@@ -291,6 +291,29 @@ public:
 		return l;
 	}
 	
+	boost::python::list GetReportingTimes(void) const
+	{
+		boost::python::list l;
+
+		for(size_t i = 0; i < m_darrReportingTimes.size(); i++)
+			l.append(m_darrReportingTimes[i]);
+		return l;
+	}
+	
+	void SetReportingTimes(boost::python::list l)
+	{
+		real_t value;
+		std::vector<real_t> darrReportingTimes;
+		boost::python::ssize_t n = boost::python::len(l);
+		for(boost::python::ssize_t i = 0; i < n; i++) 
+		{
+			value = boost::python::extract<real_t>(l[i]);
+			darrReportingTimes.push_back(value);
+		}
+		
+		daeSimulation::SetReportingTimes(darrReportingTimes);
+	}
+
 public:
 	boost::python::object model;	
 };

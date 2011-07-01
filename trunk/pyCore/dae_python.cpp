@@ -614,6 +614,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("ModelArrays",			&daepython::daeModelWrapper::GetChildModelArrays)
 		.add_property("STNs",					&daepython::daeModelWrapper::GetSTNs) 
 		.add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode)
+		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic) 
  
 		.def("__str__",          &daepython::daeModel_str)
 		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation1, return_internal_reference<>())

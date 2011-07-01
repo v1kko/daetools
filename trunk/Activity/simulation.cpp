@@ -3,6 +3,7 @@
 //#include "../Core/nodes.h"
 #include <stdio.h>
 #include <time.h>
+#include <algorithm>
 
 namespace dae
 {
@@ -23,10 +24,6 @@ daeSimulation::daeSimulation(void)
 	m_bIsSolveInitial				= false;
 	m_bCalculateSensitivities		= false;
 	m_nNumberOfObjectiveFunctions	= 1;
-
-	daeConfig& cfg = daeConfig::GetConfig();
-	m_dTimeHorizon       = cfg.Get<real_t>("daetools.activity.timeHorizon", 100);
-	m_dReportingInterval = cfg.Get<real_t>("daetools.activity.reportingInterval", 10);
 }
 
 daeSimulation::~daeSimulation(void)
@@ -386,11 +383,17 @@ void daeSimulation::Run(void)
 	
 // Check for some mistakes
 	if(m_dTimeHorizon <= 0)
-		daeDeclareAndThrowException(exInvalidCall);
-	if(m_dReportingInterval <= 0)
-		daeDeclareAndThrowException(exInvalidCall);
-	if(m_dReportingInterval > m_dTimeHorizon)
-		m_dReportingInterval = m_dTimeHorizon;
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid time horizon (less than or equal to zero); did you forget to set the TimeHorizon?";
+		throw e;
+	}
+	if(m_darrReportingTimes.empty())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid reporting times; did you forget to set the ReportingInterval or ReportingTimes array?";
+		throw e;
+	}
 	
 	if(m_dCurrentTime == 0)
 	{
@@ -406,7 +409,7 @@ void daeSimulation::Run(void)
 	real_t t;
 	while(m_dCurrentTime < m_dTimeHorizon)
 	{
-		t = m_dCurrentTime + m_dReportingInterval;
+		t = GetNextReportingTime();
 		if(t > m_dTimeHorizon)
 			t = m_dTimeHorizon;
 		
@@ -476,8 +479,8 @@ void daeSimulation::Finalize(void)
 
 void daeSimulation::Reset(void)
 {
-	m_dCurrentTime		 = 0;
-	m_eActivityAction    = eAAUnknown;	
+	m_dCurrentTime			= 0;
+	m_eActivityAction		= eAAUnknown;	
 
 	m_pDAESolver->Reset();
 }
@@ -681,6 +684,58 @@ size_t daeSimulation::GetNumberOfObjectiveFunctions(void) const
 	return m_arrObjectiveFunctions.size();
 }
 
+void daeSimulation::GetReportingTimes(std::vector<real_t>& darrReportingTimes) const
+{
+	darrReportingTimes = m_darrReportingTimes;
+}
+
+void daeSimulation::SetReportingTimes(const std::vector<real_t>& darrReportingTimes)
+{
+	if(darrReportingTimes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	
+// Copy the array
+	m_darrReportingTimes = darrReportingTimes;
+	
+// Sort the array
+	std::sort(m_darrReportingTimes.begin(), m_darrReportingTimes.end());
+
+// Remove duplicates and resize the array accordingly
+	std::vector<real_t> arrRepTimes = m_darrReportingTimes;
+	std::vector<real_t>::iterator iter  = std::unique_copy(arrRepTimes.begin(), arrRepTimes.end(), m_darrReportingTimes.begin());
+	m_darrReportingTimes.resize(iter - m_darrReportingTimes.begin());	
+	
+// Check the first element
+	std::vector<real_t>::iterator first = m_darrReportingTimes.begin();
+	if(*first <= 0)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid reporting time: " << *first << "  (less than or equal to zero)";
+		throw e;
+	}
+
+// Check the last element
+	std::vector<real_t>::iterator last  = m_darrReportingTimes.end() - 1;
+	if(*last != m_dTimeHorizon)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid reporting time; the last reporting time must be equal to the time horizon (" << m_dTimeHorizon << ")";
+		throw e;
+	}
+}
+
+real_t daeSimulation::GetNextReportingTime(void) const
+{
+	std::vector<real_t>::const_iterator next = std::upper_bound(m_darrReportingTimes.begin(), m_darrReportingTimes.end(), m_dCurrentTime);
+	
+	if(next == m_darrReportingTimes.end())
+		return m_dTimeHorizon;
+	if(*next > m_dTimeHorizon)
+		return m_dTimeHorizon;
+	
+	return (*next);
+}
+
 real_t daeSimulation::GetCurrentTime(void) const
 {
 	return m_dCurrentTime;
@@ -730,6 +785,19 @@ void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)
 	if(dTimeHorizon <= 0)
 		return;
 	m_dTimeHorizon = dTimeHorizon;
+	
+	m_darrReportingTimes.clear();
+	if(m_dReportingInterval <= 0)
+		return;
+
+	real_t t = 0;
+	while(t < m_dTimeHorizon)
+	{
+		t += m_dReportingInterval;
+		if(t > m_dTimeHorizon)
+			t = m_dTimeHorizon;
+		m_darrReportingTimes.push_back(t);
+	}
 }
 
 real_t daeSimulation::GetTimeHorizon(void) const
@@ -742,6 +810,17 @@ void daeSimulation::SetReportingInterval(real_t dReportingInterval)
 	if(dReportingInterval <= 0)
 		return;
 	m_dReportingInterval = dReportingInterval;
+
+	m_darrReportingTimes.clear();
+
+	real_t t = 0;
+	while(t < m_dTimeHorizon)
+	{
+		t += m_dReportingInterval;
+		if(t > m_dTimeHorizon)
+			t = m_dTimeHorizon;
+		m_darrReportingTimes.push_back(t);
+	}
 }
 
 real_t daeSimulation::GetReportingInterval(void) const

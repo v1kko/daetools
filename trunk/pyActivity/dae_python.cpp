@@ -63,15 +63,17 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("m",                      make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
                                                 make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
         
-        .add_property("DataReporter",       make_function(&daeSimulation::GetDataReporter, return_internal_reference<>()))
-        .add_property("Log",                make_function(&daeSimulation::GetLog,          return_internal_reference<>()))
-        .add_property("DAESolver",          make_function(&daeSimulation::GetDAESolver,    return_internal_reference<>()))
+        .add_property("DataReporter",			make_function(&daeSimulation::GetDataReporter, return_internal_reference<>()))
+        .add_property("Log",					make_function(&daeSimulation::GetLog,          return_internal_reference<>()))
+        .add_property("DAESolver",				make_function(&daeSimulation::GetDAESolver,    return_internal_reference<>()))
 
-        .add_property("TimeHorizon",        &daeSimulation::GetTimeHorizon,          &daeSimulation::SetTimeHorizon)
-        .add_property("ReportingInterval",  &daeSimulation::GetReportingInterval,    &daeSimulation::SetReportingInterval)
-        .add_property("ActivityAction",     &daeSimulation::GetActivityAction)
+        .add_property("CurrentTime",			&daeSimulation::GetCurrentTime)       
+        .add_property("TimeHorizon",			&daeSimulation::GetTimeHorizon,			&daeSimulation::SetTimeHorizon)
+        .add_property("ReportingInterval",		&daeSimulation::GetReportingInterval,	&daeSimulation::SetReportingInterval)
+        .add_property("NextReportingTime",		&daeSimulation::GetNextReportingTime)       
+        .add_property("ReportingTimes",			&daepython::daeDefaultSimulationWrapper::GetReportingTimes,    &daepython::daeDefaultSimulationWrapper::SetReportingTimes)
         
-        .add_property("CurrentTime",            &daeSimulation::GetCurrentTime)       
+		.add_property("ActivityAction",			&daeSimulation::GetActivityAction)
         .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,  &daeSimulation::SetInitialConditionMode)
 
         .add_property("NumberOfObjectiveFunctions",		&daeSimulation::GetNumberOfObjectiveFunctions)
