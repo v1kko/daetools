@@ -223,14 +223,14 @@ cp ../python-files/daePlotter/images/*.*    ${PACKAGE_NAME}/daePlotter/images
 cp ../python-files/model_library/*.py    ${PACKAGE_NAME}/model_library
 
 # Examples and Tutorials
-cp ../python-files/examples/*.css        ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.html       ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.xsl        ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.xml        ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.py         ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.png        ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.init       ${PACKAGE_NAME}/examples
-cp ../python-files/examples/images/*.*   ${PACKAGE_NAME}/examples/images
+cp ../python-files/examples/*.css           ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*.xsl           ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.html ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.xml  ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.py   ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*.init          ${PACKAGE_NAME}/examples
+#cp ../python-files/examples/*.png           ${PACKAGE_NAME}/examples
+cp ../python-files/examples/images/*.*      ${PACKAGE_NAME}/examples/images
 
 # Documentation
 cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref

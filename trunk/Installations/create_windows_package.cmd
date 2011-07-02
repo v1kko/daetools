@@ -117,15 +117,15 @@ cd ..
 
 REM Examples and Tutorials
 cd examples
-copy *.*                %ROOT%\examples
+REM copy *.*            %ROOT%\examples
 copy *.css              %ROOT%\examples
-copy *.html             %ROOT%\examples
 copy *.xsl              %ROOT%\examples
-copy *.xml              %ROOT%\examples
-copy *.py               %ROOT%\examples
-copy *.png              %ROOT%\examples
+copy *tutorial*.html    %ROOT%\examples
+copy *tutorial*.xml     %ROOT%\examples
+copy *tutorial*.py      %ROOT%\examples
 copy *.init             %ROOT%\examples
 copy daeRunExamples.py  %ROOT%\examples\daeRunExamples.pyw
+REM copy *.png          %ROOT%\examples
 cd images
 copy *.*                %ROOT%\examples\images
 cd ..
