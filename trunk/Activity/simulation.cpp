@@ -179,6 +179,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		if(!m_bCalculateSensitivities)
 			m_bCalculateSensitivities = true;
 		
+		SetNumberOfObjectiveFunctions(0);
+		
 	// Call SetUpParameterEstimation to define obj. function(s), constraints and opt. variables
 		SetUpParameterEstimation();
 	}
@@ -246,6 +248,7 @@ void daeSimulation::SetupSolver(void)
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
 	boost::shared_ptr<daeOptimizationConstraint> pConstraint;
 	boost::shared_ptr<daeObjectiveFunction> pObjectiveFunction;
+	boost::shared_ptr<daeMeasuredVariable> pMeasuredVariable;
 	vector<string> strarrErrors;
 
 	if(m_ptrarrBlocks.size() != 1)
@@ -254,7 +257,7 @@ void daeSimulation::SetupSolver(void)
 	
 	if(m_bCalculateSensitivities)
 	{
-	// 1. First check ObjFunction, Constraints and optimization variables
+	// 1. First check obj. functions, Constraints, optimization variables and measured variables
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			pOptVariable = m_arrOptimizationVariables[i];
@@ -269,21 +272,6 @@ void daeSimulation::SetupSolver(void)
 				throw e;
 			}
 		}	
-		
-		for(i = 0; i < m_arrConstraints.size(); i++)
-		{
-			pConstraint = m_arrConstraints[i];
-			if(!pConstraint)
-				daeDeclareAndThrowException(exInvalidPointer);
-				
-			if(!pConstraint->CheckObject(strarrErrors))
-			{
-				daeDeclareException(exRuntimeCheck);
-				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
-					e << *it << "\n";
-				throw e;
-			}
-		}
 		
 		for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
 		{
@@ -300,6 +288,39 @@ void daeSimulation::SetupSolver(void)
 			}
 		}
 		
+		for(i = 0; i < m_arrConstraints.size(); i++)
+		{
+			pConstraint = m_arrConstraints[i];
+			if(!pConstraint)
+				daeDeclareAndThrowException(exInvalidPointer);
+				
+			if(!pConstraint->CheckObject(strarrErrors))
+			{
+				daeDeclareException(exRuntimeCheck);
+				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+					e << *it << "\n";
+				throw e;
+			}
+		}
+		
+		for(i = 0; i < m_arrMeasuredVariables.size(); i++)
+		{
+			pMeasuredVariable = m_arrMeasuredVariables[i];
+			if(!pMeasuredVariable)
+				daeDeclareAndThrowException(exInvalidPointer);
+				
+			if(!pMeasuredVariable->CheckObject(strarrErrors))
+			{
+				daeDeclareException(exRuntimeCheck);
+				for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+					e << *it << "\n";
+				throw e;
+			}
+		}
+	}
+	
+	if(m_eSimulationMode == eOptimization)
+	{
 	// 2. Fill the parameters indexes (optimization variables)
 		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
@@ -321,7 +342,30 @@ void daeSimulation::SetupSolver(void)
 			pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
 		}
 	}
-
+	else if(m_eSimulationMode == eParameterEstimation)
+	{
+	// 2. Fill the parameters indexes (optimization variables)
+		for(i = 0; i < m_arrOptimizationVariables.size(); i++)
+		{
+			pOptVariable = m_arrOptimizationVariables[i];
+			narrParametersIndexes.push_back(pOptVariable->GetOverallIndex());
+		}
+		
+	// 3. Initialize objective functions
+		for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
+		{
+			pObjectiveFunction = m_arrObjectiveFunctions[i];
+			pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+		}
+		
+	// 4. Initialize measured variables
+		for(i = 0; i < m_arrMeasuredVariables.size(); i++)
+		{  
+			pMeasuredVariable = m_arrMeasuredVariables[i];
+			pMeasuredVariable->Initialize(m_arrOptimizationVariables, pBlock);
+		}
+	}
+	
 	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
 }
 
@@ -751,8 +795,6 @@ void daeSimulation::SetNumberOfObjectiveFunctions(size_t n)
 	
 	if(!m_bCalculateSensitivities)
 		daeDeclareAndThrowException(exInvalidCall);
-	if(n == 0)
-		daeDeclareAndThrowException(exInvalidCall);
 
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
@@ -764,6 +806,9 @@ void daeSimulation::SetNumberOfObjectiveFunctions(size_t n)
 		objfun->RemoveEquationFromModel();
 	}
 	m_arrObjectiveFunctions.clear();
+	
+	if(n == 0)
+		return;
 
 // Create new set of n objective functions
 	m_nNumberOfObjectiveFunctions = n;	

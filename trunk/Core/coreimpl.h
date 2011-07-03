@@ -2203,13 +2203,13 @@ public:
 		else
 			m_strName = strName;
 		
-		if(!m_pVariable->m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-		m_pDataProxy = m_pVariable->m_pModel->m_pDataProxy;
-		if(!m_pDataProxy)
-			daeDeclareAndThrowException(exInvalidPointer);
-
-		m_nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
+//		if(!m_pVariable->m_pModel)
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		m_pDataProxy = m_pVariable->m_pModel->m_pDataProxy;
+//		if(!m_pDataProxy)
+//			daeDeclareAndThrowException(exInvalidPointer);
+//
+//		m_nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
 	}
 
 	virtual ~daeVariableWrapper(void)
@@ -2223,26 +2223,144 @@ public:
 
     real_t GetValue(void) const
 	{
-		return *m_pDataProxy->GetValue(m_nOverallIndex);
+		//return *m_pDataProxy->GetValue(m_nOverallIndex);
+		
+		if(!m_pVariable)
+			daeDeclareAndThrowException(exInvalidPointer)
+		
+		size_t n = m_narrDomainIndexes.size();
+		
+		if(n == 0)
+			return m_pVariable->GetValue();
+		else if(n == 1)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0]);
+		else if(n == 2)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1]);
+		else if(n == 3)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2]);
+		else if(n == 4)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2],
+										 m_narrDomainIndexes[3]);
+		else if(n == 5)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2],
+										 m_narrDomainIndexes[3],
+										 m_narrDomainIndexes[4]);
+		else if(n == 6)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2],
+										 m_narrDomainIndexes[3],
+										 m_narrDomainIndexes[4],
+										 m_narrDomainIndexes[5]);
+		else if(n == 7)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2],
+										 m_narrDomainIndexes[3],
+										 m_narrDomainIndexes[4],
+										 m_narrDomainIndexes[5],
+										 m_narrDomainIndexes[6]);
+		else if(n == 8)
+			return m_pVariable->GetValue(m_narrDomainIndexes[0],
+										 m_narrDomainIndexes[1],
+										 m_narrDomainIndexes[2],
+										 m_narrDomainIndexes[3],
+										 m_narrDomainIndexes[4],
+										 m_narrDomainIndexes[5],
+										 m_narrDomainIndexes[6],
+										 m_narrDomainIndexes[7]);
+		else
+			daeDeclareAndThrowException(exInvalidCall)
+					
+		return 0;
 	}
 
     void SetValue(real_t value)
 	{
-		if(m_pDataProxy->GetVariableType(m_nOverallIndex) != cnFixed)
-		{	
-			daeDeclareException(exInvalidCall); 
-			e << "Cannot set the variable value for [" << m_strName << "]; it is a state variable";
-			throw e;
-		}
-		m_pDataProxy->SetValue(m_nOverallIndex, value);
+//		if(m_pDataProxy->GetVariableType(m_nOverallIndex) != cnFixed)
+//		{	
+//			daeDeclareException(exInvalidCall); 
+//			e << "Cannot set the variable value for [" << m_strName << "]; it is a state variable";
+//			throw e;
+//		}
+//		m_pDataProxy->SetValue(m_nOverallIndex, value);
+		
+		if(!m_pVariable)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		size_t n = m_narrDomainIndexes.size();
+		
+		if(n == 0)
+			m_pVariable->ReAssignValue(value);
+		else if(n == 1)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   value);
+		else if(n == 2)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   value);
+		else if(n == 3)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   value);
+		else if(n == 4)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   m_narrDomainIndexes[3],
+									   value);
+		else if(n == 5)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   m_narrDomainIndexes[3],
+									   m_narrDomainIndexes[4],
+									   value);
+		else if(n == 6)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   m_narrDomainIndexes[3],
+									   m_narrDomainIndexes[4],
+									   m_narrDomainIndexes[5],
+									   value);
+		else if(n == 7)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   m_narrDomainIndexes[3],
+									   m_narrDomainIndexes[4],
+									   m_narrDomainIndexes[5],
+									   m_narrDomainIndexes[6],
+									   value);
+		else if(n == 8)
+			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+									   m_narrDomainIndexes[1],
+									   m_narrDomainIndexes[2],
+									   m_narrDomainIndexes[3],
+									   m_narrDomainIndexes[4],
+									   m_narrDomainIndexes[5],
+									   m_narrDomainIndexes[6],
+									   m_narrDomainIndexes[7],
+									   value);
+		else
+			daeDeclareAndThrowException(exInvalidCall)
 	}
 
 public:
 	daeVariable*						m_pVariable;
 	std::vector<size_t>					m_narrDomainIndexes;
 	std::string							m_strName;
-	size_t								m_nOverallIndex;
-	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
+//	size_t								m_nOverallIndex;
+//	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
 };
 
 /******************************************************************

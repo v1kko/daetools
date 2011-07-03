@@ -20,22 +20,6 @@ from numpy import *
 from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
-"""
-    for exp in self.experimental_data:
-        if ( len(exp) != 3 )
-            raise RuntimeError('Each experiment in [experimental_data] must contain tuple: ([times], [input_variables], [measured_variables])'
-        
-        times = exp[0]
-        xin   = exp[1]
-        yout  = exp[2]
-        if ( len(xin) != self.Ninput_variables ):
-            raise RuntimeError('Number of input variables in each experiment must be {0}'.format(self.Ninput_variables))
-        if ( len(yout) != self.Nmeasured_variables ):
-            raise RuntimeError('Number of measured variables in each experiment must be {0}'.format(self.Nmeasured_variables))
-        for y in yout:
-            if ( len(y) != len(times) ):
-                raise RuntimeError('Number of values in each measured variable must be equal to number of time intervals') 
-"""
 
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
@@ -57,13 +41,13 @@ def Calculate(p, minpack, calc_values):
         
             # Assign the input data for the simulation
             for i in range(0, minpack.Ninput_variables):
-                minpack.x_input_variables[i].ReAssignValue(minpack.experimental_data[e][1][i])
-                #print minpack.x_input_variables[i].Name, minpack.x_input_variables[i].GetValue()
+                minpack.x_input_variables[i].Value = minpack.experimental_data[e][1][i]
+                # print minpack.x_input_variables[i].Name, minpack.x_input_variables[i].Value
             
             # Set the parameters values
             for i in range(0, minpack.Nparameters):
                 minpack.parameters[i].Value = p[i]
-                #print minpack.parameters[i].Name, minpack.parameters[i].Value
+                # print minpack.parameters[i].Name, minpack.parameters[i].Value
             
             # Run the simulation
             minpack.simulation.Reset()
@@ -73,11 +57,10 @@ def Calculate(p, minpack, calc_values):
             if minpack.simulation.m.IsModelDynamic:
                 while minpack.simulation.CurrentTime < minpack.simulation.TimeHorizon:
                     t = minpack.simulation.NextReportingTime
-                    #print 'Integrating from {0} to {1}...'.format(minpack.simulation.CurrentTime, t)
+                    # print 'Integrating from {0} to {1}...'.format(minpack.simulation.CurrentTime, t)
                     minpack.simulation.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
                     minpack.simulation.ReportData()
                     for o in range(0, minpack.Nmeasured_variables):
-                        #print 'e = {0}, o = {1}, ct = {2}'.format(e, o, ct)
                         values[o, e, ct]    = minpack.y_measured_variables[o].Value - minpack.experimental_data[e][2][o][ct]
                         derivs[:, o, e, ct] = minpack.y_measured_variables[o].Gradients
                         #print 'v =', values[o, e, ct]
@@ -96,16 +79,6 @@ def Calculate(p, minpack, calc_values):
     except Exception, e:
         print 'Exception in function Calculate, for parameters values: {0}'.format(p)
         print str(e)
-    
-    """
-    print 'Parameters:', p
-    if calc_values:
-        print '  Residuals:'
-        print values
-    else:
-        print '  Derivatives:'
-        print derivs
-    """
     
     r_values = values.reshape( (minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
     r_derivs = derivs.reshape( (minpack.Nparameters, minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
@@ -140,82 +113,86 @@ def Derivatives(p, args):
     return Calculate(p, minpack, False)
     
 class daeMinpackLeastSq:
-    def __init__(self, simulation, daesolver, datareporter, log, **kwargs):
+    def __init__(self):
+        self.simulation   = None
+        self.daesolver    = None
+        self.datareporter = None
+        self.log          = None
+        
+        self.parameters                 = []
+        self.x_input_variables          = []
+        self.y_measured_variables       = []
+        self.p0                         = []
+        self.experimental_data          = []
+        self.rmse                       = 0.0
+        self.Nparameters                = 0
+        self.Ninput_variables           = 0
+        self.Nmeasured_variables        = 0
+        self.Nexperiments               = 0
+        self.Ntime_points               = 0
+        self.PrintResidualsAndJacobian  = False
+        self.ftol                       = 1E-8
+        self.xtol                       = 1E-8
+        self.factor                     = 100.0
+        self.IsInitialized              = False
+        
+    def Initialize(self, simulation, daesolver, datareporter, log, **kwargs):
+        # Get the inputs
         self.simulation   = simulation
         self.daesolver    = daesolver
         self.datareporter = datareporter
         self.log          = log
+        if (self.simulation == None):
+            raise RuntimeError('The simulation object cannot be None') 
+        if (self.daesolver == None):
+            raise RuntimeError('The daesolver object cannot be None') 
+        if (self.datareporter == None):
+            raise RuntimeError('The datareporter object cannot be None') 
+        if (self.log == None):
+            raise RuntimeError('The log object cannot be None') 
         
-        self.parameters           = None
-        self.x_input_variables    = None
-        self.y_measured_variables = None
-        self.p0                   = None
-        self.experimental_data    = None
-        self.PrintResidualsAndJacobian = False
-        
-        self.rmse                       = 0.0
-        self.Nparameters                = kwargs.get('Nparameters',                    0)
-        self.Ninput_variables           = kwargs.get('Ninput_variables',               0)
-        self.Nmeasured_variables        = kwargs.get('Nmeasured_variables',            0)
-        self.Nexperiments               = kwargs.get('Nexperiments',                   0)
-        self.Ntime_points               = kwargs.get('Ntime_points',                   0)
         self.PrintResidualsAndJacobian  = kwargs.get('PrintResidualsAndJacobian',  False)
         self.ftol                       = kwargs.get('ftol',                        1E-8)
         self.xtol                       = kwargs.get('xtol',                        1E-8)
         self.factor                     = kwargs.get('factor',                     100.0)
+        self.experimental_data          = kwargs.get('experimental_data',           None)
         
-        if ( self.simulation == None ):
+        # Call simulation.Initialize (with eParameterEstimation mode)
+        self.simulation.SimulationMode = eParameterEstimation
+        self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
+        
+        # Check the inputs
+        if (self.simulation == None):
             raise RuntimeError('The simulation object cannot be None') 
-        if ( self.Nparameters == 0 ):
-            raise RuntimeError('The number of parameters cannot be 0') 
-        if ( self.Ninput_variables == 0 ):
-            raise RuntimeError('The number of input variables cannot be 0') 
-        if ( self.Nmeasured_variables == 0 ):
-            raise RuntimeError('The number of measured variables cannot be 0') 
-        if ( self.Nexperiments == 0 ):
-            raise RuntimeError('The number of experiments cannot be 0') 
-        if ( self.Ntime_points == 0 ):
-            raise RuntimeError('The number of time points cannot be 0') 
-
-        self.simulation.Initialize(self.daesolver, 
-                                   self.datareporter, 
-                                   self.log, 
-                                   CalculateSensitivities = True,
-                                   NumberOfObjectiveFunctions = self.Nmeasured_variables)
-        
-    def Initialize(self, **kwargs):
-        # List of daeOptimizationVariable objects:
-        self.parameters = kwargs.get('parameters', None)
-        
-        # List of parameters' starting values:
-        self.p0 = kwargs.get('p0', None)
-
-        # List of daeVariable/adouble objects (must be assigned variables):
-        self.x_input_variables = kwargs.get('x_input_variables', None)
-        
-        # daeVariable/adouble object (must be state variable):
-        self.y_measured_variables = kwargs.get('y_measured_variables', None)
-        
-        # 1-dimensional list of tuples (times, input_variables, measured_variables):
-        self.experimental_data = kwargs.get('experimental_data', None)
-        
-        if ( (self.parameters == None) or (len(self.parameters) != self.Nparameters) ):
-            raise RuntimeError('Argument [parameters] has not been provided or the number of parameters ({0}) is not equal to Nparameters ({1})'.format(len(self.parameters), self.Nparameters)) 
-        if ( (self.p0 == None) or (len(self.p0) != self.Nparameters)):
-            raise RuntimeError('Argument [p0] has not been provided or the number of p0 ({0}) is not equal to Nparameters ({1})'.format(len(self.p0), self.Nparameters)) 
-        if ( (self.x_input_variables == None) or (len(self.x_input_variables) != self.Ninput_variables) ):
-            raise RuntimeError('Argument [x_input_variables] has not been provided or the number of x_input_variables ({0}) is not equal to Ninput_variables ({1})'.format(len(self.x_input_variables), self.Ninput_variables)) 
-        if ( (self.y_measured_variables == None) or (len(self.y_measured_variables) != self.Nmeasured_variables) ):
-            raise RuntimeError('Argument [y_measured_variables] has not been provided or the number of y_measured_variables ({0}) is not equal to Nmeasured_variables ({1})'.format(len(self.y_measured_variables), self.Nmeasured_variables)) 
+        if (self.log == None):
+            raise RuntimeError('The log object cannot be None') 
         if ( self.experimental_data == None ):
             raise RuntimeError('Argument [experimental_data] has not been provided') 
-
+        
+        self.parameters           = self.simulation.ModelParameters
+        self.x_input_variables    = self.simulation.InputVariables
+        self.y_measured_variables = self.simulation.MeasuredVariables
+        self.Nparameters          = len(self.parameters)
+        self.Ninput_variables     = len(self.x_input_variables)
+        self.Nmeasured_variables  = len(self.y_measured_variables)
+        if ( self.Nparameters == 0 ):
+            raise RuntimeError('The number of parameters is equal to zero') 
+        if ( self.Ninput_variables == 0 ):
+            raise RuntimeError('The number of input variables is equal to zero') 
+        if ( self.Nmeasured_variables == 0 ):
+            raise RuntimeError('The number of measured variables is equal to zero') 
+        
+        self.Nexperiments = len(self.experimental_data)
         if ( len(self.experimental_data) != self.Nexperiments ):
             raise RuntimeError('[experimental_data] must contain Nexperiments ({0}) number of tuples: ([times], [input_variables], [measured_variables])'.format(self.Nexperiments))
         
+        if ( len(self.experimental_data[0]) != 3 ):
+            raise RuntimeError('Each experiment in [experimental_data] must contain tuple: ([time points], [input_variables], [measured_variables])')
+        self.Ntime_points = len(self.experimental_data[0][0])
+        
         for exp in self.experimental_data:
             if ( len(exp) != 3 ):
-                raise RuntimeError('Each experiment in [experimental_data] must contain tuple: ([times], [input_variables], [measured_variables])')
+                raise RuntimeError('Each experiment in [experimental_data] must contain tuple: ([time points], [input_variables], [measured_variables])')
             times = exp[0]
             xin   = exp[1]
             yout  = exp[2]
@@ -228,8 +205,17 @@ class daeMinpackLeastSq:
             for y in yout:
                 if ( len(y) != self.Ntime_points ):
                     raise RuntimeError('Number of values in each measured variable must be equal to number of time intervals') 
-
+        
+        self.p0 = []
+        for p in self.parameters:
+            self.p0.append(p.StartingPoint)
+            
+        self.IsInitialized = True
+        
     def Run(self):
+        if self.IsInitialized == False:
+            raise RuntimeError('daeMinpackLeastSq object has not been initialized') 
+        
         # Call scipy.optimize.leastsq (Minpack wrapper)
         self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, 
                                                                                   self.p0, 
@@ -241,6 +227,7 @@ class daeMinpackLeastSq:
                                                                                   factor      = self.factor,
                                                                                   col_deriv   = True)
         
+        # Check the info and calculate the least square statistics
         if self.ier not in [1, 2, 3, 4]:
             raise RuntimeError('MINPACK least square method failed ({0})'.format(self.msg))
         
@@ -250,4 +237,3 @@ class daeMinpackLeastSq:
         
     def Finalize(self):
         self.simulation.Finalize()
- 

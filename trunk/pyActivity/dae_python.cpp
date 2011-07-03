@@ -25,6 +25,12 @@ BOOST_PYTHON_MODULE(pyActivity)
         .value("ePauseActivity",    dae::activity::ePauseActivity)
         .export_values()
     ;
+    enum_<daeeSimulationMode>("daeeSimulationMode")
+        .value("eSimulation",			dae::activity::eSimulation)
+        .value("eOptimization",			dae::activity::eOptimization)
+        .value("eParameterEstimation",	dae::activity::eParameterEstimation)
+        .export_values()
+    ;
 	
 /**************************************************************
     daeSimulation_t

@@ -84,146 +84,123 @@ class simTutorial(daeSimulation):
         self.m.Tf.AssignValue(350)
         
         # Parameters 
-        self.m.dH.AssignValue(5)         # 5E4
-        self.m.E.AssignValue(7.27519625) # 72751.9625
-        self.m.k0.AssignValue(7.2)       # 7.2e10
+        self.m.dH.AssignValue(5)         # * 1E4
+        self.m.E.AssignValue(7.27519625) # * 1E4
+        self.m.k0.AssignValue(7.2)       # * 1E10
 
         self.m.T.SetInitialCondition(305)
         self.m.Ca.SetInitialCondition(0.9)
     
-    def SetUpOptimization(self):
-        # Obj. function must be a function of parameters; otherwise sensitivities will be equal to zero
-        self.ObjectiveFunctions[0].Residual = self.m.Ca()
-        self.ObjectiveFunctions[1].Residual = self.m.T()
+    def SetUpParameterEstimation(self):
+        self.SetMeasuredVariable(self.m.Ca)
+        self.SetMeasuredVariable(self.m.T)
         
-        # Parameters must be defined as optimization variables (preferably continuous)
-        self.dH = self.SetContinuousOptimizationVariable(self.m.dH, -10, 10, 0.0)
-        self.E  = self.SetContinuousOptimizationVariable(self.m.E,  -10, 10, 0.0)
-        self.k0 = self.SetContinuousOptimizationVariable(self.m.k0, -10, 10, 0.0)
+        self.SetInputVariable(self.m.Tf)
+        self.SetInputVariable(self.m.q)
+        
+        self.SetModelParameter(self.m.dH, -10, 10,  3.0)
+        self.SetModelParameter(self.m.E,  -10, 10, 10.0)
+        self.SetModelParameter(self.m.k0, -10, 10, 10.0)
 
 if __name__ == "__main__":
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 10
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # After constructing simulation, daesolver, datareporter, log and 
-    # connecting the datareporter create daeMinpackLeastSq object
-    # It will call simulation.Initialize()
-    Nparameters          = 3
-    Ninput_variables     = 2
-    Nmeasured_variables  = 2
-    Nexperiments         = 9
-    Ntime_points         = 5
-    minpack = daeMinpackLeastSq(simulation, 
-                                daesolver, 
-                                datareporter, 
-                                log, 
-                                Nparameters               = Nparameters,
-                                Ninput_variables          = Ninput_variables,
-                                Nmeasured_variables       = Nmeasured_variables,
-                                Nexperiments              = Nexperiments,
-                                Ntime_points              = Ntime_points,
-                                PrintResidualsAndJacobian = False,
-                                ftol                      = 1E-8,
-                                xtol                      = 1E-8,
-                                factor                    = 0.5)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Measured variables (daeObjectiveFunction objects)
-    y_measured_variables = simulation.ObjectiveFunctions
-
-    # Model parameters (list of daeOptimizationVariable objects):
-    parameters = [simulation.dH, 
-                  simulation.E, 
-                  simulation.k0]
-
-    # Model input variables (list of daeVariable objects; must be assigned variables):
-    x_input_variables = [simulation.m.Tf, simulation.m.q]
-
-    # Parameters values starting point: 
-    p0 = [3.0, 10.0, 10.0]  # REAL = 5.00000000, 7.27519625, 7.20000000 
-                            #        4.99870252  7.27508367  7.19905825
-
-    # Experimental data:
-    data = [
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [300.0, 80.0],
-                [[0.97732195658793863, 0.99382761129635511, 0.9971545852414353, 0.9978200659445241, 0.99795141821925282], 
-                 [278.50287635180217, 278.41462045030585, 278.41505803940998, 278.41522503544002, 278.41525337694367]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [350.0, 80.0],
-                [[0.97154663104358974, 0.98693919781932038, 0.99000039991628508, 0.99060677344976489, 0.99072791710437746], 
-                 [292.70308620725126, 292.66152000549755, 292.66388868120322, 292.66438921651689, 292.66446031579858]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [400.0, 80.0],
-                [[0.94926988426299097, 0.95733743128649029, 0.95881631119436961, 0.95908688799462405, 0.9591397959777177], 
-                 [308.24333375234033, 308.31506420994157, 308.32308886188093, 308.3244588191435, 308.32472199190562]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [300.0, 100.0],
-                [[0.98423763220581939, 0.99624175916252067, 0.99785934013575761, 0.99807447521841319, 0.99810543937631713], 
-                 [279.88582113257195, 279.82980257703701, 279.83015616568571, 279.83020653270233, 279.83020764015703]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [350.0, 100.0],
-                [[0.97653638028997192, 0.98736325854701645, 0.98879332575588563, 0.98897709690476976, 0.98900197570821757],
-                 [296.63070059597339, 296.61448339381525, 296.61629972946668, 296.61654843841842, 296.61657954901625]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [400.0, 100.0],
-                [[0.93540400392674161, 0.93389769972253289, 0.93360470373895299, 0.93357528353909969, 0.93357220324321666], 
-                 [316.33284141035926, 316.53808152856362, 316.53861078553973, 316.53781394674996, 316.53774998619286]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [300.0, 120.0],
-                [[0.98888455707714884, 0.99735652730280688, 0.99811830630270848, 0.99818614563997532, 0.9981925622615182], 
-                 [281.10836086186231, 281.07311420606504, 281.07337457397858, 281.07341709279234, 281.07340242412027]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [350.0, 120.0],
-                [[0.97907836158806061, 0.98636371669339051, 0.9870069933513016, 0.98705719777795065, 0.9870638393430804], 
-                 [300.1450376003076, 300.14640429635767, 300.14754885395024, 300.14763681376814, 300.14764772547164]]
-            ), 
-            (
-                [2.0, 4.0, 6.0, 8.0, 10.0],
-                [400.0, 120.0],
-                [[0.9004152748567531, 0.87761038942822822, 0.87535452144816661, 0.87547304059962017, 0.87551686721353328], 
-                 [325.86070801501398, 326.93848460304991, 326.90042861427992, 326.88096791516557, 326.8794366002345]]
-            )
-           ]
     try:
-        # Initialize the MinpackLeastSq
-        minpack.Initialize(parameters           = parameters,
-                           x_input_variables    = x_input_variables,
-                           y_measured_variables = y_measured_variables,
-                           p0                   = p0,
-                           experimental_data    = data)
+        log          = daePythonStdOutLog()
+        daesolver    = daeIDAS()
+        datareporter = daeTCPIPDataReporter()
+        simulation   = simTutorial()
+        minpack      = daeMinpackLeastSq()
+
+        # Enable reporting of all variables
+        simulation.m.SetReportingOn(True)
+
+        # Set the time horizon and the reporting interval
+        simulation.ReportingInterval = 2
+        simulation.TimeHorizon = 10
+
+        # Connect data reporter
+        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        if(datareporter.Connect("", simName) == False):
+            sys.exit()
+
+        # Some info about the experiments
+        Nparameters          = 3
+        Ninput_variables     = 2
+        Nmeasured_variables  = 2
+        Nexperiments         = 9
+        Ntime_points         = 5
+
+        # Experimental data:
+        data = [
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [300.0, 80.0],
+                    [[0.97732195658793863, 0.99382761129635511, 0.9971545852414353, 0.9978200659445241, 0.99795141821925282], 
+                    [278.50287635180217, 278.41462045030585, 278.41505803940998, 278.41522503544002, 278.41525337694367]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [350.0, 80.0],
+                    [[0.97154663104358974, 0.98693919781932038, 0.99000039991628508, 0.99060677344976489, 0.99072791710437746], 
+                    [292.70308620725126, 292.66152000549755, 292.66388868120322, 292.66438921651689, 292.66446031579858]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [400.0, 80.0],
+                    [[0.94926988426299097, 0.95733743128649029, 0.95881631119436961, 0.95908688799462405, 0.9591397959777177], 
+                    [308.24333375234033, 308.31506420994157, 308.32308886188093, 308.3244588191435, 308.32472199190562]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [300.0, 100.0],
+                    [[0.98423763220581939, 0.99624175916252067, 0.99785934013575761, 0.99807447521841319, 0.99810543937631713], 
+                    [279.88582113257195, 279.82980257703701, 279.83015616568571, 279.83020653270233, 279.83020764015703]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [350.0, 100.0],
+                    [[0.97653638028997192, 0.98736325854701645, 0.98879332575588563, 0.98897709690476976, 0.98900197570821757],
+                    [296.63070059597339, 296.61448339381525, 296.61629972946668, 296.61654843841842, 296.61657954901625]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [400.0, 100.0],
+                    [[0.93540400392674161, 0.93389769972253289, 0.93360470373895299, 0.93357528353909969, 0.93357220324321666], 
+                    [316.33284141035926, 316.53808152856362, 316.53861078553973, 316.53781394674996, 316.53774998619286]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [300.0, 120.0],
+                    [[0.98888455707714884, 0.99735652730280688, 0.99811830630270848, 0.99818614563997532, 0.9981925622615182], 
+                    [281.10836086186231, 281.07311420606504, 281.07337457397858, 281.07341709279234, 281.07340242412027]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [350.0, 120.0],
+                    [[0.97907836158806061, 0.98636371669339051, 0.9870069933513016, 0.98705719777795065, 0.9870638393430804], 
+                    [300.1450376003076, 300.14640429635767, 300.14754885395024, 300.14763681376814, 300.14764772547164]]
+                ), 
+                (
+                    [2.0, 4.0, 6.0, 8.0, 10.0],
+                    [400.0, 120.0],
+                    [[0.9004152748567531, 0.87761038942822822, 0.87535452144816661, 0.87547304059962017, 0.87551686721353328], 
+                    [325.86070801501398, 326.93848460304991, 326.90042861427992, 326.88096791516557, 326.8794366002345]]
+                )
+            ]
+       
+        # Initialize MinpackLeastSq
+        minpack.Initialize(simulation, 
+                           daesolver, 
+                           datareporter, 
+                           log, 
+                           PrintResidualsAndJacobian = False,
+                           ftol                      = 1E-8,
+                           xtol                      = 1E-8,
+                           factor                    = 0.5,
+                           experimental_data         = data)
+        
+        # Save the model report and the runtime model report
+        simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+        simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
         # Run
         minpack.Run()
