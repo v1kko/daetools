@@ -869,14 +869,10 @@ void daeSimulation::SetReportingTimes(const std::vector<real_t>& darrReportingTi
 		throw e;
 	}
 
-// Check the last element
+// Set the TimeHorizon to the last (the highest) value
 	std::vector<real_t>::iterator last  = m_darrReportingTimes.end() - 1;
 	if(*last != m_dTimeHorizon)
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Invalid reporting time; the last reporting time must be equal to the time horizon (" << m_dTimeHorizon << ")";
-		throw e;
-	}
+		m_dTimeHorizon = *last;
 }
 
 real_t daeSimulation::GetNextReportingTime(void) const

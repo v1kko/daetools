@@ -21,6 +21,18 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
 
+"""
+Levenberg–Marquardt algorithm (LMA) provides a numerical solution to the problem of 
+minimizing a function, generally nonlinear, over a space of parameters of the function.
+The main properties:
+ - LMA is a blend of Gradient descent and Gauss-Newton iteration
+ - LMA finds only a local minimum, not a global minimum
+ - It only optimises for residual errors in the dependant variable (y);
+   any errors in the independent variable are zero or considered to be negligible
+ - Fobj = sum[ (yi - f(xi, p))^2 ]; i = [1, m]
+ - Damping parameter λ (here given as argument called 'factor')
+"""
+
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
     # If col_deriv is True the shape of derivs is (Nparameters, Nexperiments)
@@ -33,7 +45,7 @@ def Calculate(p, minpack, calc_values):
         if minpack.simulation.m.IsModelDynamic:
             times = minpack.experimental_data[0][0]
             minpack.simulation.ReportingTimes = times
-            #print minpack.simulation.ReportingTimes
+            # print minpack.simulation.ReportingTimes
         
         for e in range(0, minpack.Nexperiments):
             # Set initial conditions, initial guesses, initially active states etc
@@ -114,11 +126,10 @@ def Derivatives(p, args):
     
 class daeMinpackLeastSq:
     def __init__(self):
-        self.simulation   = None
-        self.daesolver    = None
-        self.datareporter = None
-        self.log          = None
-        
+        self.simulation                 = None
+        self.daesolver                  = None
+        self.datareporter               = None
+        self.log                        = None
         self.parameters                 = []
         self.x_input_variables          = []
         self.y_measured_variables       = []
@@ -130,10 +141,8 @@ class daeMinpackLeastSq:
         self.Nmeasured_variables        = 0
         self.Nexperiments               = 0
         self.Ntime_points               = 0
+        self.minpack_leastsq_arguments  = {}
         self.PrintResidualsAndJacobian  = False
-        self.ftol                       = 1E-8
-        self.xtol                       = 1E-8
-        self.factor                     = 100.0
         self.IsInitialized              = False
         
     def Initialize(self, simulation, daesolver, datareporter, log, **kwargs):
@@ -151,11 +160,9 @@ class daeMinpackLeastSq:
         if (self.log == None):
             raise RuntimeError('The log object cannot be None') 
         
-        self.PrintResidualsAndJacobian  = kwargs.get('PrintResidualsAndJacobian',  False)
-        self.ftol                       = kwargs.get('ftol',                        1E-8)
-        self.xtol                       = kwargs.get('xtol',                        1E-8)
-        self.factor                     = kwargs.get('factor',                     100.0)
         self.experimental_data          = kwargs.get('experimental_data',           None)
+        self.PrintResidualsAndJacobian  = kwargs.get('PrintResidualsAndJacobian',  False)
+        self.minpack_leastsq_arguments  = kwargs.get('minpack_leastsq_arguments',     {})
         
         # Call simulation.Initialize (with eParameterEstimation mode)
         self.simulation.SimulationMode = eParameterEstimation
@@ -216,16 +223,13 @@ class daeMinpackLeastSq:
         if self.IsInitialized == False:
             raise RuntimeError('daeMinpackLeastSq object has not been initialized') 
         
+        self.minpack_leastsq_arguments['full_output'] = True
+        self.minpack_leastsq_arguments['col_deriv']   = True
+        print 'minpack.leastsq will proceed with the following arguments:', self.minpack_leastsq_arguments
+        
         # Call scipy.optimize.leastsq (Minpack wrapper)
-        self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, 
-                                                                                  self.p0, 
-                                                                                  Dfun        = Derivatives, 
-                                                                                  args        = [self], 
-                                                                                  full_output = True,
-                                                                                  ftol        = self.ftol,
-                                                                                  xtol        = self.xtol,
-                                                                                  factor      = self.factor,
-                                                                                  col_deriv   = True)
+        self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, self.p0, Dfun = Derivatives, args = [self], 
+                                                                                  **self.minpack_leastsq_arguments)
         
         # Check the info and calculate the least square statistics
         if self.ier not in [1, 2, 3, 4]:
