@@ -69,6 +69,7 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 	m_pDataReporter		 = pDataReporter;
 	m_pLog			     = pLog;
 	
+	m_pSimulation->SetSimulationMode(eOptimization);
 	m_pSimulation->Initialize(m_pDAESolver, m_pDataReporter, m_pLog, true, nNumberOfObjectiveFunctions);
 	m_pNLPSolver->Initialize(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 

@@ -1145,6 +1145,56 @@ boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
 	return m_pDataProxy;
 }
 
+void daeModel::RemoveModel(daeModel* pObject)
+{
+	m_ptrarrModels.Remove(pObject);
+}
+
+void daeModel::RemoveEquation(daeEquation* pObject)
+{
+	m_ptrarrEquations.Remove(pObject);
+}
+
+void daeModel::RemoveSTN(daeSTN* pObject)
+{
+	m_ptrarrSTNs.Remove(pObject);
+}
+
+void daeModel::RemovePortConnection(daePortConnection* pObject)
+{
+	m_ptrarrPortConnections.Remove(pObject);
+}
+
+void daeModel::RemoveDomain(daeDomain* pObject)
+{
+	m_ptrarrDomains.Remove(pObject);
+}
+
+void daeModel::RemoveParameter(daeParameter* pObject)
+{
+	m_ptrarrParameters.Remove(pObject);
+}
+
+void daeModel::RemoveVariable(daeVariable* pObject)
+{
+	m_ptrarrVariables.Remove(pObject);
+}
+
+void daeModel::RemovePort(daePort* pObject)
+{
+	m_ptrarrPorts.Remove(pObject);
+}
+
+void daeModel::RemovePortArray(daePortArray* pObject)
+{
+	m_ptrarrPortArrays.Remove(pObject);
+}
+
+void daeModel::RemoveModelArray(daeModelArray* pObject)
+{
+	m_ptrarrModelArrays.Remove(pObject);
+}
+
 daeeInitialConditionMode daeModel::GetInitialConditionMode(void) const
 {
 	if(!m_pDataProxy)

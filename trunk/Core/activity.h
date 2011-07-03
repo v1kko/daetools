@@ -34,6 +34,13 @@ enum daeeActivityAction
 	ePauseActivity
 };
 
+enum daeeSimulationMode
+{
+	eSimulation = 0,
+	eOptimization,
+	eParameterEstimation
+};
+
 /*********************************************************************
 	daeSimulation_t
 *********************************************************************/
@@ -47,6 +54,7 @@ public:
 	virtual void				SetUpParametersAndDomains(void)									= 0;
 	virtual void				SetUpVariables(void)											= 0;
 	virtual void				SetUpOptimization(void)											= 0;
+	virtual void				SetUpParameterEstimation(void)									= 0;
 	virtual void				Run(void)														= 0;
 	virtual void				Finalize(void)													= 0;
 	virtual void				ReRun(void)													    = 0;
@@ -66,8 +74,11 @@ public:
 	
 	virtual void				Resume(void)														= 0;
 	virtual void				Pause(void)															= 0;
+	
 	virtual daeeActivityAction	GetActivityAction(void) const										= 0;
-
+	virtual daeeSimulationMode	GetSimulationMode(void) const										= 0;
+	virtual void				SetSimulationMode(daeeSimulationMode eMode)							= 0;
+	
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog,
@@ -88,6 +99,7 @@ public:
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
 	
 	virtual size_t GetNumberOfObjectiveFunctions(void) const													 = 0;
+	virtual void   SetNumberOfObjectiveFunctions(size_t n)														 = 0;
 };
 
 /******************************************************************

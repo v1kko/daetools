@@ -1693,9 +1693,8 @@ protected:
 	friend class adRuntimeTimeDerivativeNode;
 	friend class adRuntimePartialDerivativeNode;
 	friend class daeOptimizationVariable;
-	friend class daeObjectiveFunction;
-	friend class daeOptimizationConstraint;
-	friend class daeThirdPartyVariable;
+	friend class daeFunctionWithGradients;
+	friend class daeVariableWrapper;
 };	
 
 /******************************************************************
@@ -2001,6 +2000,17 @@ public:
 
 	boost::shared_ptr<daeDataProxy_t> GetDataProxy(void) const;
 	
+	void RemoveModel(daeModel* pObject);
+	void RemoveEquation(daeEquation* pObject);
+	void RemoveSTN(daeSTN* pObject);
+	void RemovePortConnection(daePortConnection* pObject);
+	void RemoveDomain(daeDomain* pObject);
+	void RemoveParameter(daeParameter* pObject);
+	void RemoveVariable(daeVariable* pObject);
+	void RemovePort(daePort* pObject);
+	void RemovePortArray(daePortArray* pObject);
+	void RemoveModelArray(daeModelArray* pObject);
+
 // Internal functions
 protected:
 	void		InitializeParameters(void);
@@ -2086,7 +2096,7 @@ protected:
 	friend class daeEquationExecutionInfo;
 	friend class daeDistributedEquationDomainInfo;
 	friend class daeOptimizationVariable;
-	friend class daeThirdPartyVariable;
+	friend class daeVariableWrapper;
 };
 
 /******************************************************************
@@ -2158,26 +2168,26 @@ protected:
 };
 
 /******************************************************************
-	daeThirdPartyVariable
+	daeVariableWrapper
 *******************************************************************/
 void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes);
 
-class DAE_CORE_API daeThirdPartyVariable
+class DAE_CORE_API daeVariableWrapper : public daeVariableWrapper_t
 {
 public:
-	daeThirdPartyVariable(daeVariable& variable, std::string strName = "") 
+	daeVariableWrapper(daeVariable& variable, std::string strName = "") 
 	{
 		Initialize(&variable, strName);
 	}
 	
-	daeThirdPartyVariable(adouble& a, std::string strName = "") 
+	daeVariableWrapper(adouble& a, std::string strName = "") 
 	{
 		daeVariable* pVariable;
 		daeGetVariableAndIndexesFromNode(a, &pVariable, m_narrDomainIndexes);
 		if(!pVariable)
 		{
 			daeDeclareException(exInvalidCall);
-			e << "Invalid expression for daeThirdPartyVariable (cannot get variable)";
+			e << "Invalid expression for daeVariableWrapper (cannot get variable)";
 			throw e;
 		}
 		
@@ -2202,10 +2212,15 @@ public:
 		m_nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
 	}
 
-	virtual ~daeThirdPartyVariable(void)
+	virtual ~daeVariableWrapper(void)
 	{
 	}
 	
+    string GetName(void) const
+	{
+		return m_strName;
+	}
+
     real_t GetValue(void) const
 	{
 		return *m_pDataProxy->GetValue(m_nOverallIndex);
@@ -2701,17 +2716,21 @@ protected:
 };
 
 /******************************************************************
-	daeObjectiveFunction
+	daeFunctionWithGradients
 *******************************************************************/
-class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
-		                                  public daeRuntimeCheck_t,
-										  public daeExportable_t
+class DAE_CORE_API daeFunctionWithGradients : virtual public daeFunctionWithGradients_t,
+		                                      virtual public daeRuntimeCheck_t,
+										      virtual public daeExportable_t
 {
 public:
-	daeDeclareDynamicClass(daeObjectiveFunction)
-	daeObjectiveFunction(void);
-	daeObjectiveFunction(daeSimulation_t* pSimulation, real_t abstol, size_t N);
-	virtual ~daeObjectiveFunction(void);
+	daeDeclareDynamicClass(daeFunctionWithGradients)
+	daeFunctionWithGradients(void);
+	daeFunctionWithGradients(daeSimulation_t* pSimulation, 
+							 real_t abstol, 
+							 const string& strVariableName, 
+							 const string& strEquationName,
+							 const string& strDescription);
+	virtual ~daeFunctionWithGradients(void);
 
 public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
@@ -2734,14 +2753,16 @@ public:
 	
 	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
 
+	void RemoveEquationFromModel(void);
+	
 protected:
 	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
 	
 protected:
 	daeModel*						m_pModel;
 	daeSimulation_t*				m_pSimulation;
-	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
-	daeEquation*					m_pObjectiveFunction;
+	boost::shared_ptr<daeVariable>	m_pVariable;
+	daeEquation*					m_pEquation;
 	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
 	size_t							m_nEquationIndexInBlock;
 	size_t							m_nVariableIndexInBlock;
@@ -2750,56 +2771,142 @@ protected:
 };
 
 /******************************************************************
+	daeObjectiveFunction
+*******************************************************************/
+//class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
+//		                                  public daeRuntimeCheck_t,
+//										  public daeExportable_t
+
+class DAE_CORE_API daeObjectiveFunction : virtual public daeFunctionWithGradients,
+                                          virtual public daeObjectiveFunction_t                                         
+{
+public:
+	daeDeclareDynamicClass(daeObjectiveFunction)
+	daeObjectiveFunction(void);
+	daeObjectiveFunction(daeSimulation_t* pSimulation, 
+						 real_t abstol, 
+						 size_t nEquationIndex, 
+						 const string& strDescription);
+	virtual ~daeObjectiveFunction(void);
+
+//public:
+//	bool CheckObject(std::vector<string>& strarrErrors) const;
+//	
+//	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+//
+//	bool IsLinear(void) const;
+//
+//	std::string GetName(void) const;
+//	real_t GetValue(void) const;
+//	
+//	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
+//	void GetGradients(real_t* gradients, size_t Nparams) const;
+//
+//	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
+//	size_t GetNumberOfOptimizationVariables(void) const;
+//
+//	void	 SetResidual(adouble res);
+//	adouble	 GetResidual(void) const;
+//	
+//	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
+//
+//	void RemoveEquationFromModel(void);
+//	
+//protected:
+//	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
+//	
+//protected:
+//	daeModel*						m_pModel;
+//	daeSimulation_t*				m_pSimulation;
+//	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
+//	daeEquation*					m_pObjectiveFunction;
+//	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
+//	size_t							m_nEquationIndexInBlock;
+//	size_t							m_nVariableIndexInBlock;
+//	size_t							m_nNumberOfOptimizationVariables;
+//	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
+};
+
+/******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
-class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_t,
-                                               public daeRuntimeCheck_t,
-											   public daeExportable_t
+//class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_t,
+//                                               public daeRuntimeCheck_t,
+//											   public daeExportable_t
+
+class DAE_CORE_API daeOptimizationConstraint : virtual public daeFunctionWithGradients,
+                                               virtual public daeOptimizationConstraint_t
 {
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
 	daeOptimizationConstraint(void);
-	daeOptimizationConstraint(daeSimulation_t* pSimulation, bool bIsInequalityConstraint, real_t abstol, size_t N, string strDescription);
+	daeOptimizationConstraint(daeSimulation_t* pSimulation, 
+							  bool bIsInequalityConstraint, 
+							  real_t abstol, 
+							  size_t nEquationIndex, 
+							  const string& strDescription);
 	virtual ~daeOptimizationConstraint(void);
 
 public:
-	bool CheckObject(std::vector<string>& strarrErrors) const;
-	
-	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-
 	void               SetType(daeeConstraintType value);
 	daeeConstraintType GetType(void) const;
-	
-	bool IsLinear(void) const;
-	
-	std::string GetName(void) const;
-	real_t GetValue(void) const;
-	
-	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
-	void GetGradients(real_t* gradients, size_t Nparams) const;
 
-	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
-	size_t GetNumberOfOptimizationVariables(void) const;
-
-	void    SetResidual(adouble res);
-	adouble GetResidual(void) const;
-	
-	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
-
-protected:
-	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
+//	bool CheckObject(std::vector<string>& strarrErrors) const;
+//	
+//	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+//
+//	void               SetType(daeeConstraintType value);
+//	daeeConstraintType GetType(void) const;
+//	
+//	bool IsLinear(void) const;
+//	
+//	std::string GetName(void) const;
+//	real_t GetValue(void) const;
+//	
+//	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
+//	void GetGradients(real_t* gradients, size_t Nparams) const;
+//
+//	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
+//	size_t GetNumberOfOptimizationVariables(void) const;
+//
+//	void    SetResidual(adouble res);
+//	adouble GetResidual(void) const;
+//	
+//	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
+//
+//protected:
+//	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
+//
+//protected:
+//	daeeConstraintType				m_eConstraintType;
+//	daeModel*						m_pModel;
+//	daeSimulation_t*				m_pSimulation;
+//	size_t							m_nEquationIndexInBlock;
+//	size_t							m_nVariableIndexInBlock;
+//	size_t							m_nNumberOfOptimizationVariables;
+//	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
+//	daeEquation*					m_pConstraintFunction;
+//	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
+//	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 
 protected:
 	daeeConstraintType				m_eConstraintType;
-	daeModel*						m_pModel;
-	daeSimulation_t*				m_pSimulation;
-	size_t							m_nEquationIndexInBlock;
-	size_t							m_nVariableIndexInBlock;
-	size_t							m_nNumberOfOptimizationVariables;
-	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
-	daeEquation*					m_pConstraintFunction;
-	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
-	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
+};
+
+/******************************************************************
+	daeObjectiveFunction
+*******************************************************************/
+class DAE_CORE_API daeMeasuredVariable : virtual public daeFunctionWithGradients,
+                                         virtual public daeMeasuredVariable_t
+{
+public:
+	daeDeclareDynamicClass(daeMeasuredVariable)
+	daeMeasuredVariable(void);
+	daeMeasuredVariable(daeSimulation_t* pSimulation, 
+						real_t abstol, 
+						size_t nEquationIndex, 
+						const string& strDescription);
+	virtual ~daeMeasuredVariable(void);
 };
 
 /*********************************************************************************************

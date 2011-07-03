@@ -91,6 +91,21 @@ public:
 		return m_bOwnershipOnPointers;
 	}
 
+	void Remove(T object)
+	{
+		_iterator iter;
+		for(iter = this->begin(); iter != this->end(); iter++)
+		{
+			if(*iter == object)
+			{
+				if(*iter && m_bOwnershipOnPointers)
+					delete *iter;
+				this->erase(iter);
+				return;
+			}
+		}
+	}
+	
 	void EmptyAndFreeMemory(void)
 	{
 		if(m_bOwnershipOnPointers)

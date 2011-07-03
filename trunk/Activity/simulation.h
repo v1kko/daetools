@@ -42,7 +42,10 @@ public:
 	virtual void				SetReportingTimes(const std::vector<real_t>& darrReportingTimes);
 	virtual void				Resume(void);
 	virtual void				Pause(void);
+	
 	virtual daeeActivityAction	GetActivityAction(void) const;
+	virtual daeeSimulationMode	GetSimulationMode(void) const;
+	virtual void				SetSimulationMode(daeeSimulationMode eMode);
 
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
@@ -59,6 +62,7 @@ public:
 	virtual void				SetUpParametersAndDomains(void);
 	virtual void				SetUpVariables(void);
 	virtual void				SetUpOptimization(void);
+	virtual void				SetUpParameterEstimation(void);
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
 	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const;
@@ -79,13 +83,23 @@ public:
 	daeOptimizationVariable* SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
 	daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 	
+	daeMeasuredVariable*		SetMeasuredVariable(daeVariable& variable);
+	daeVariableWrapper*			SetInputVariable(daeVariable& variable);
+	daeOptimizationVariable*	SetModelParameter(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
+
+	daeMeasuredVariable*		SetMeasuredVariable(adouble a);
+	daeVariableWrapper*			SetInputVariable(adouble a);
+	daeOptimizationVariable*	SetModelParameter(adouble a, real_t LB, real_t UB, real_t defaultValue);
+
 	size_t GetNumberOfObjectiveFunctions(void) const;
+	void   SetNumberOfObjectiveFunctions(size_t n);
 	
 protected:
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
 	void	SetupSolver(void);
-	void	CreateObjectiveFunctions(void);
+	
+	boost::shared_ptr<daeObjectiveFunction> AddObjectiveFunction(void);
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
@@ -109,6 +123,7 @@ protected:
 	daeDAESolver_t*				m_pDAESolver;
 	daePtrVector<daeBlock_t*>	m_ptrarrBlocks;
 	daeeActivityAction			m_eActivityAction;
+	daeeSimulationMode			m_eSimulationMode;
 	double						m_ProblemCreationStart;
 	double						m_ProblemCreationEnd;
 	double						m_InitializationStart;
@@ -118,12 +133,17 @@ protected:
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
+
 // Optimization related data	
 	bool														m_bCalculateSensitivities;
 	size_t														m_nNumberOfObjectiveFunctions;
 	std::vector< boost::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
 	std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
 	std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
+
+// Parameter estimation related data
+	std::vector< boost::shared_ptr<daeVariableWrapper> >		m_arrInputVariables;
+	std::vector< boost::shared_ptr<daeMeasuredVariable> >		m_arrMeasuredVariables;
 };
 
 /*********************************************************************************************

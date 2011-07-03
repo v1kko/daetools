@@ -312,7 +312,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 	m_pIDASolverData->CreateSensitivityArrays(Ns, m_bIsModelDynamic);
 	
 // Only if the model is dynamic setup IDAS to create sensitivities
-// Otherwise the gradients will be calculated after the call tof SolveInitial()
+// Otherwise the gradients will be calculated after the call to SolveInitial()
 	if(m_bIsModelDynamic)
 	{
 		if(m_strSensitivityMethod == "Simultaneous")

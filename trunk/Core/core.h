@@ -684,12 +684,12 @@ public:
 };
 
 /******************************************************************
-	daeObjectiveFunction_t
+	daeFunctionWithGradients_t
 *******************************************************************/
-class daeObjectiveFunction_t
+class daeFunctionWithGradients_t
 {
 public:
-	virtual ~daeObjectiveFunction_t(void){}
+	virtual ~daeFunctionWithGradients_t(void){}
 	
 public:
 	virtual bool IsLinear(void) const = 0;
@@ -703,11 +703,19 @@ public:
 	virtual size_t GetNumberOfOptimizationVariables(void) const = 0;
 };
 
+/******************************************************************
+	daeObjectiveFunction_t
+*******************************************************************/
+class daeObjectiveFunction_t : virtual public daeFunctionWithGradients_t
+{
+public:
+	virtual ~daeObjectiveFunction_t(void){}
+};
 
 /******************************************************************
 	daeOptimizationConstraint_t
 *******************************************************************/
-class daeOptimizationConstraint_t
+class daeOptimizationConstraint_t : virtual public daeFunctionWithGradients_t
 {
 public:
 	virtual ~daeOptimizationConstraint_t(void){}
@@ -715,19 +723,29 @@ public:
 public:
 	virtual void               SetType(daeeConstraintType value) = 0;
 	virtual daeeConstraintType GetType(void) const = 0;
-	
-	virtual bool IsLinear(void) const = 0;
-	
-	virtual std::string GetName(void) const = 0;
-	virtual real_t GetValue(void) const = 0;
-	virtual void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const = 0;
-	virtual void GetGradients(real_t* gradients, size_t Nparams) const = 0;
-
-	virtual void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;
-	virtual size_t GetNumberOfOptimizationVariables(void) const = 0;
 };
 
+/******************************************************************
+	daeMeasuredVariable_t
+*******************************************************************/
+class daeMeasuredVariable_t : virtual public daeFunctionWithGradients_t
+{
+public:
+	virtual ~daeMeasuredVariable_t(void){}
+};
 
+/******************************************************************
+	daeVariableWrapper_t
+*******************************************************************/
+class daeVariableWrapper_t
+{
+public:
+	virtual ~daeVariableWrapper_t(void){}
+
+    virtual real_t GetValue(void) const   = 0;
+    virtual void   SetValue(real_t value) = 0;
+    virtual string GetName(void) const    = 0;
+};
 
 /******************************************************************
 	daeModelInfo

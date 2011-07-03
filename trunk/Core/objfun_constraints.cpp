@@ -7,8 +7,292 @@ namespace dae
 namespace core 
 {
 /******************************************************************
+	daeFunctionWithGradients
+*******************************************************************/
+daeFunctionWithGradients::daeFunctionWithGradients(void)
+{
+	m_pModel                         = NULL;
+	m_nEquationIndexInBlock          = ULONG_MAX;
+	m_nVariableIndexInBlock          = ULONG_MAX;
+	m_pEquationExecutionInfo         = NULL;
+	m_pSimulation					 = NULL;
+	m_nNumberOfOptimizationVariables = 0;
+}
+
+daeFunctionWithGradients::daeFunctionWithGradients(daeSimulation_t* pSimulation, 
+												   real_t abstol, 
+												   const string& strVariableName, 
+												   const string& strEquationName,
+												   const string& strDescription)
+{
+	if(!pSimulation)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	m_pModel = dynamic_cast<daeModel*>(pSimulation->GetModel());
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+		
+	const daeVariableType varType("gradient_function_t", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
+
+	m_nEquationIndexInBlock = ULONG_MAX;
+	m_nVariableIndexInBlock = ULONG_MAX;
+	
+	m_pVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVariableName, varType, m_pModel, strDescription));
+	m_pVariable->SetReportingOn(true);
+	
+	m_pEquation = m_pModel->CreateEquation(strEquationName, strDescription);
+	m_pEquation->SetResidual( (*m_pVariable)() );
+
+	m_pSimulation                    = pSimulation;
+	m_pEquationExecutionInfo         = NULL;
+	m_nNumberOfOptimizationVariables = 0;
+	
+}
+
+daeFunctionWithGradients::~daeFunctionWithGradients(void)
+{
+}
+
+void daeFunctionWithGradients::SetResidual(adouble res)
+{
+	if(!m_pEquation)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	m_pEquation->SetResidual( res - (*m_pVariable )() );
+}
+
+adouble daeFunctionWithGradients::GetResidual(void) const
+{
+	if(!m_pEquation)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	return m_pEquation->GetResidual();
+}
+
+std::string daeFunctionWithGradients::GetName(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	return m_pVariable->GetName();
+}
+
+real_t daeFunctionWithGradients::GetValue(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	return m_pVariable->GetValue();
+}
+/*
+ This function DOES NOT set gradients for ALL optimization variables but only for those that the obj.function depends on!!! 
+ Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
+ matSensitivities is a (Nparams) x (Nvariables) matrix
+
+ Here I need values for the column 'k' (marked with x below):
+	0     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 0 
+	1     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 1 
+	2     | . . . . . . . . x . . |
+	3     | . . . . . . . . x . . |
+	4     | . . . . . . . . x . . |
+	...   | ...                   |
+	Np-1  | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter Np-1 
+
+ a) Steady-state model
+ Index k is equal to m_nEquationIndexInBlock for the steady-state model since then we have the following equation:
+	Fobj(p1,p2,...,pm) - Vobj = 0  
+ and in that case the sensitivity of the variable Vobj is:
+	Si(Vobj) = ∂Vobj/∂pi = ∂Fobj/∂pi since from the equation above we have: Vobj = Fobj(p1,p2,...,pm)
+ therefore I can obtain the sensitivity values as:
+	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
+	where k = m_nEquationIndexInBlock
+
+ b) Dynamic model
+ If we have a dynamic model, then the sensitivity S(Vobj) has to satisfy the following equation:
+	S(Vobj) * ∂(Fobj)/∂(Vobj) + dS(Vobj)/dt * ∂(Fobj)/∂(dVobj/dt) + ∂(Fobj)/∂pi = 0 
+ and in that case the sensitivity of the variable Vobj is:
+	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
+	where k = index of m_pVariable in the block
+	
+ Exactly the same logic applies on constraints!!!
+*/
+void daeFunctionWithGradients::GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const
+{
+	size_t varIndex, paramIndex;
+
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(m_narrOptimizationVariablesIndexes.size() > Nparams)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(m_nNumberOfOptimizationVariables != Nparams)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	if(m_pModel->IsModelDynamic())
+		varIndex = m_nVariableIndexInBlock;
+	else
+		varIndex = m_nEquationIndexInBlock;
+	
+	::memset(gradients, 0, Nparams * sizeof(real_t));
+
+	for(size_t j = 0; j < m_narrOptimizationVariablesIndexes.size(); j++)
+	{
+		paramIndex = m_narrOptimizationVariablesIndexes[j];
+		gradients[paramIndex] = matSensitivities.GetItem(paramIndex, // Index of the parameter
+														 varIndex);  // Index of the variable
+	}
+}
+
+void daeFunctionWithGradients::GetGradients(real_t* gradients, size_t Nparams) const
+{
+	daeMatrix<real_t>& matSensitivities = GetSensitivitiesMatrix();
+	GetGradients(matSensitivities, gradients, Nparams);
+}
+
+daeMatrix<real_t>& daeFunctionWithGradients::GetSensitivitiesMatrix(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pSimulation)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	daeDAESolver_t* pDAESolver = m_pSimulation->GetDAESolver();
+	if(!pDAESolver)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeMatrix<real_t>& matSens = pDAESolver->GetSensitivities();
+	if(m_nNumberOfOptimizationVariables != matSens.GetNrows())
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return matSens;
+}
+
+bool daeFunctionWithGradients::IsLinear(void) const
+{
+	if(!m_pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+	return node->IsLinear();
+}
+
+void daeFunctionWithGradients::GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const
+{
+	narrOptimizationVariablesIndexes = m_narrOptimizationVariablesIndexes;
+}
+
+void daeFunctionWithGradients::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
+{
+	size_t i;
+	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
+	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
+
+	if(!m_pEquation)
+		daeDeclareAndThrowException(exInvalidPointer)
+	
+	m_pEquation->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+	if(ptrarrEquationExecutionInfos.size() != 1)
+		daeDeclareAndThrowException(exInvalidCall)
+		
+	m_pEquationExecutionInfo = ptrarrEquationExecutionInfos[0];
+	if(!m_pEquationExecutionInfo)
+		daeDeclareAndThrowException(exInvalidPointer)
+		
+// 1. Set the variable/equation index in the block it belongs
+	m_nEquationIndexInBlock = m_pEquationExecutionInfo->GetEquationIndexInBlock();
+	m_nVariableIndexInBlock = pBlock->FindVariableBlockIndex(m_pVariable->m_nOverallIndex);
+	if(m_nEquationIndexInBlock == ULONG_MAX || m_nVariableIndexInBlock == ULONG_MAX)
+		daeDeclareAndThrowException(exInvalidCall);
+
+// 2. Add all optimization variables indexes to list of indexes
+	m_nNumberOfOptimizationVariables = arrOptimizationVariables.size();
+
+	m_narrOptimizationVariablesIndexes.clear();
+	for(i = 0; i < arrOptimizationVariables.size(); i++)
+	{
+		pOptVariable = arrOptimizationVariables[i];
+		m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
+	}
+	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
+}
+
+void daeFunctionWithGradients::RemoveEquationFromModel(void)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	m_pModel->RemoveEquation(m_pEquation);
+}
+
+bool daeFunctionWithGradients::CheckObject(vector<string>& strarrErrors) const
+{
+	string strError;
+
+	bool bCheck = true;
+
+// Do not check daeObject since this is not an usual object
+//	if(!daeObject::CheckObject(strarrErrors))
+//		bCheck = false;
+
+	if(!m_pVariable)
+	{	
+		strError = "Invalid variable";
+		strarrErrors.push_back(strError);
+		return false;
+	}
+	if(!m_pEquation)
+	{	
+		strError = "Invalid equation";
+		strarrErrors.push_back(strError);
+		return false;
+	}
+	if(m_pEquation->GetEquationDefinitionMode() == eEDMUnknown ||
+	   m_pEquation->GetEquationEvaluationMode() == eEEMUnknown)
+	{	
+		strError = "Equation residual not specified [" + m_pEquation->GetCanonicalName() + "]";
+		strarrErrors.push_back(strError);
+		return false;
+	}
+	
+	return bCheck;
+}
+
+void daeFunctionWithGradients::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	
+}
+
+size_t daeFunctionWithGradients::GetNumberOfOptimizationVariables(void) const
+{
+	return m_nNumberOfOptimizationVariables;
+}
+
+/******************************************************************
 	daeObjectiveFunction
 *******************************************************************/
+daeObjectiveFunction::daeObjectiveFunction(void)
+{
+}
+
+daeObjectiveFunction::daeObjectiveFunction(daeSimulation_t* pSimulation, 
+										   real_t abstol, 
+										   size_t nEquationIndex,
+										   const string& strDescription)
+	  :	daeFunctionWithGradients(pSimulation, 
+								 abstol, 
+								 string("V_obj") + toString<size_t>(nEquationIndex + 1), 
+								 string("F_obj") + toString<size_t>(nEquationIndex + 1),
+								 strDescription)
+
+{
+}
+
+daeObjectiveFunction::~daeObjectiveFunction(void)
+{
+}
+
+/*
 daeObjectiveFunction::daeObjectiveFunction(void)
 {
 	m_pModel                         = NULL;
@@ -76,38 +360,37 @@ real_t daeObjectiveFunction::GetValue(void) const
 		
 	return m_pObjectiveVariable->GetValue();
 }
-/*
- This function DOES NOT set gradients for ALL optimization variables but only for those that the obj.function depends on!!! 
- Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
- matSensitivities is a (Nparams) x (Nvariables) matrix
 
- Here I need values for the column 'k' (marked with x below):
-	0     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 0 
-	1     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 1 
-	2     | . . . . . . . . x . . |
-	3     | . . . . . . . . x . . |
-	4     | . . . . . . . . x . . |
-	...   | ...                   |
-	Np-1  | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter Np-1 
-
- a) Steady-state model
- Index k is equal to m_nEquationIndexInBlock for the steady-state model since then we have the following equation:
-	Fobj(p1,p2,...,pm) - Vobj = 0  
- and in that case the sensitivity of the variable Vobj is:
-	Si(Vobj) = ∂Vobj/∂pi = ∂Fobj/∂pi since from the equation above we have: Vobj = Fobj(p1,p2,...,pm)
- therefore I can obtain the sensitivity values as:
-	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
-	where k = m_nEquationIndexInBlock
-
- b) Dynamic model
- If we have a dynamic model, then the sensitivity S(Vobj) has to satisfy the following equation:
-	S(Vobj) * ∂(Fobj)/∂(Vobj) + dS(Vobj)/dt * ∂(Fobj)/∂(dVobj/dt) + ∂(Fobj)/∂pi = 0 
- and in that case the sensitivity of the variable Vobj is:
-	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
-	where k = index of m_pObjectiveVariable in the block
-	
- Exactly the same logic applies on constraints!!!
-*/
+// This function DOES NOT set gradients for ALL optimization variables but only for those that the obj.function depends on!!! 
+// Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
+// matSensitivities is a (Nparams) x (Nvariables) matrix
+//
+// Here I need values for the column 'k' (marked with x below):
+//	0     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 0 
+//	1     | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter 1 
+//	2     | . . . . . . . . x . . |
+//	3     | . . . . . . . . x . . |
+//	4     | . . . . . . . . x . . |
+//	...   | ...                   |
+//	Np-1  | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter Np-1 
+//
+// a) Steady-state model
+// Index k is equal to m_nEquationIndexInBlock for the steady-state model since then we have the following equation:
+//	Fobj(p1,p2,...,pm) - Vobj = 0  
+// and in that case the sensitivity of the variable Vobj is:
+//	Si(Vobj) = ∂Vobj/∂pi = ∂Fobj/∂pi since from the equation above we have: Vobj = Fobj(p1,p2,...,pm)
+// therefore I can obtain the sensitivity values as:
+//	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
+//	where k = m_nEquationIndexInBlock
+//
+// b) Dynamic model
+// If we have a dynamic model, then the sensitivity S(Vobj) has to satisfy the following equation:
+//	S(Vobj) * ∂(Fobj)/∂(Vobj) + dS(Vobj)/dt * ∂(Fobj)/∂(dVobj/dt) + ∂(Fobj)/∂pi = 0 
+// and in that case the sensitivity of the variable Vobj is:
+//	S(Vobj) = [matSens(0, k), matSens(1, k), ..., matSens(m-1, k)]
+//	where k = index of m_pObjectiveVariable in the block
+//	
+// Exactly the same logic applies on constraints!!!
 void daeObjectiveFunction::GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const
 {
 	size_t varIndex, paramIndex;
@@ -177,7 +460,6 @@ void daeObjectiveFunction::GetOptimizationVariableIndexes(std::vector<size_t>& n
 void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
 {
 	size_t i;
-	map<size_t, size_t> mapVariableIndexes;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
 	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
@@ -196,40 +478,26 @@ void daeObjectiveFunction::Initialize(const std::vector< boost::shared_ptr<daeOp
 	m_nEquationIndexInBlock = m_pEquationExecutionInfo->GetEquationIndexInBlock();
 	m_nVariableIndexInBlock = pBlock->FindVariableBlockIndex(m_pObjectiveVariable->m_nOverallIndex);
 	if(m_nEquationIndexInBlock == ULONG_MAX || m_nVariableIndexInBlock == ULONG_MAX)
-		daeDeclareAndThrowException(exInvalidCall)
+		daeDeclareAndThrowException(exInvalidCall);
 
-// 2a. Add all optimization variables indexes that are found in this constraint
-//     This requires some iterating over the arrays of indexes
-	m_narrOptimizationVariablesIndexes.clear();
-	
-	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
-	node->AddVariableIndexToArray(mapVariableIndexes, true);
-/*	
-	map<size_t, size_t>::iterator iter;
-	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " indexes: ";
-	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-		std::cout << iter->first << " ";
-	std::cout << std::endl;
-	std::cout.flush();	
-*/
+// 2. Add all optimization variables indexes to list of indexes
 	m_nNumberOfOptimizationVariables = arrOptimizationVariables.size();
+
+	m_narrOptimizationVariablesIndexes.clear();
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
 		pOptVariable = arrOptimizationVariables[i];
-	// If I find the index in the optimization variable within the constraint - add it to the array
-		if( mapVariableIndexes.find(pOptVariable->GetOverallIndex()) != mapVariableIndexes.end() )
-			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
+		m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
 	}
-	
-// 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
-/*
-	std::cout << "ObjectiveFunction " << m_pObjectiveFunction->GetName() << " common indexes: ";
-	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-	std::cout << std::endl;
-	std::cout.flush();	
-*/
+}
+
+void daeObjectiveFunction::RemoveEquationFromModel(void)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	m_pModel->RemoveEquation(m_pObjectiveFunction);
 }
 
 bool daeObjectiveFunction::CheckObject(vector<string>& strarrErrors) const
@@ -274,11 +542,44 @@ size_t daeObjectiveFunction::GetNumberOfOptimizationVariables(void) const
 {
 	return m_nNumberOfOptimizationVariables;
 }
-
+*/
 
 /******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
+daeOptimizationConstraint::daeOptimizationConstraint(void)
+{
+}
+
+daeOptimizationConstraint::daeOptimizationConstraint(daeSimulation_t* pSimulation, 
+													 bool bIsInequalityConstraint, 
+													 real_t abstol, 
+													 size_t nEquationIndex,
+													 const string& strDescription)
+	: daeFunctionWithGradients(pSimulation, 
+							   abstol, 
+							   string("V_constraint") + toString<size_t>(nEquationIndex + 1), 
+							   string("F_constraint") + toString<size_t>(nEquationIndex + 1),
+							   strDescription)
+{
+	m_eConstraintType = (bIsInequalityConstraint ? eInequalityConstraint : eEqualityConstraint);
+}
+
+daeOptimizationConstraint::~daeOptimizationConstraint(void)
+{
+}
+
+void daeOptimizationConstraint::SetType(daeeConstraintType value)
+{
+	m_eConstraintType = value;	
+}
+
+daeeConstraintType daeOptimizationConstraint::GetType(void) const
+{
+	return m_eConstraintType;	
+}
+
+/*
 daeOptimizationConstraint::daeOptimizationConstraint(void)
 {
 	m_pModel                         = NULL;
@@ -348,11 +649,9 @@ real_t daeOptimizationConstraint::GetValue(void) const
 	return m_pConstraintVariable->GetValue();
 }
 
-/*
- This function DOES NOT set gradients for ALL optimization variables but only for those that the constraint depends on!!! 
- Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
- matSensitivities is a (Nparams) x (Nvariables) matrix ... see the discussion above (daeOptimizationFunction::GetGradients)
-*/
+// This function DOES NOT set gradients for ALL optimization variables but only for those that the constraint depends on!!! 
+// Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)
+// matSensitivities is a (Nparams) x (Nvariables) matrix ... see the discussion above (daeOptimizationFunction::GetGradients)
 void daeOptimizationConstraint::GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const
 {
 	size_t varIndex, paramIndex;
@@ -432,7 +731,6 @@ daeeConstraintType daeOptimizationConstraint::GetType(void) const
 void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
 {
 	size_t i;
-	map<size_t, size_t> mapVariableIndexes;
 	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
 	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
@@ -451,39 +749,18 @@ void daeOptimizationConstraint::Initialize(const std::vector< boost::shared_ptr<
 	m_nEquationIndexInBlock = m_pEquationExecutionInfo->GetEquationIndexInBlock();
 	m_nVariableIndexInBlock = pBlock->FindVariableBlockIndex(m_pConstraintVariable->m_nOverallIndex);
 	if(m_nEquationIndexInBlock == ULONG_MAX || m_nVariableIndexInBlock == ULONG_MAX)
-		daeDeclareAndThrowException(exInvalidCall)
+		daeDeclareAndThrowException(exInvalidCall);
 	
-// 2a. Add all optimization variables indexes that are found in this constraint
-	m_narrOptimizationVariablesIndexes.clear();
-	
-	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
-	node->AddVariableIndexToArray(mapVariableIndexes, true);
-/*
-	map<size_t, size_t>::iterator iter;
-	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " indexes: ";
-	for(iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
-		std::cout << iter->first << " ";
-	std::cout << std::endl;
-	std::cout.flush();
-*/
+// 2. Add all optimization variables indexes to list of indexes
 	m_nNumberOfOptimizationVariables = arrOptimizationVariables.size();
+
+	m_narrOptimizationVariablesIndexes.clear();
 	for(i = 0; i < arrOptimizationVariables.size(); i++)
 	{
 		pOptVariable = arrOptimizationVariables[i];
-	// If I find the index in the optimization variable within the constraint - add it to the array
-		if( mapVariableIndexes.find(pOptVariable->GetOverallIndex()) != mapVariableIndexes.end() )
-			m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
+		m_narrOptimizationVariablesIndexes.push_back(pOptVariable->GetOptimizationVariableIndex());
 	}
-	
-// 2b. Sort the array
 	std::sort(m_narrOptimizationVariablesIndexes.begin(), m_narrOptimizationVariablesIndexes.end());
-/*
-	std::cout << "Constraint " << m_pConstraintFunction->GetName() << " common indexes: ";
-	for(i = 0; i < m_narrOptimizationVariablesIndexes.size(); i++)
-		std::cout << m_narrOptimizationVariablesIndexes[i] << " ";
-	std::cout << std::endl;
-	std::cout.flush();
-*/
 }
 
 bool daeOptimizationConstraint::CheckObject(vector<string>& strarrErrors) const
@@ -527,6 +804,30 @@ void daeOptimizationConstraint::Export(std::string& strContent, daeeModelLanguag
 size_t daeOptimizationConstraint::GetNumberOfOptimizationVariables(void) const
 {
 	return m_nNumberOfOptimizationVariables;
+}
+*/
+
+/******************************************************************
+	daeMeasuredVariable
+*******************************************************************/
+daeMeasuredVariable::daeMeasuredVariable(void)
+{
+}
+
+daeMeasuredVariable::daeMeasuredVariable(daeSimulation_t* pSimulation, 
+										 real_t abstol, 
+										 size_t nEquationIndex,
+										 const string& strDescription)
+	: daeFunctionWithGradients(pSimulation, 
+							   abstol, 
+							   string("V_measured") + toString<size_t>(nEquationIndex + 1), 
+							   string("F_measured") + toString<size_t>(nEquationIndex + 1),
+							   strDescription)
+{
+}
+
+daeMeasuredVariable::~daeMeasuredVariable(void)
+{
 }
 
 /******************************************************************

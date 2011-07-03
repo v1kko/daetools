@@ -248,17 +248,17 @@ adouble_array ParameterArray7(daeParameter& param, boost::python::object o1, boo
 adouble_array ParameterArray8(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
 
 /*******************************************************
-	daeVariable
+	daeVariable_Wrapper
 *******************************************************/
-class daeVariableWrapper : public daeVariable,
-	                       public boost::python::wrapper<daeVariable>
+class daeVariable_Wrapper : public daeVariable,
+	                        public boost::python::wrapper<daeVariable>
 {
 public:
-	daeVariableWrapper(void)
+	daeVariable_Wrapper(void)
 	{
 	}
 
-	daeVariableWrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
+	daeVariable_Wrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeVariable(strName, varType, pModel, strDescription)
 	{
 		daeDomain* pDomain;
@@ -270,7 +270,7 @@ public:
 		}
 	}
 
-	daeVariableWrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
+	daeVariable_Wrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
 		: daeVariable(strName, varType, pPort, strDescription)
 	{
 		daeDomain* pDomain;

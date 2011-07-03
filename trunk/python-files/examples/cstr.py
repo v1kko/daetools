@@ -93,8 +93,8 @@ class simTutorial(daeSimulation):
     
     def SetUpOptimization(self):
         # Obj. function must be a function of parameters; otherwise sensitivities will be equal to zero
-        self.ObjectiveFunctions[0].Residual = self.m.Ca() #- self.m.dH() + self.m.dH() - self.m.E() + self.m.E() - self.m.k0() + self.m.k0()
-        self.ObjectiveFunctions[1].Residual = self.m.T() #- self.m.dH() + self.m.dH() - self.m.E() + self.m.E() - self.m.k0() + self.m.k0()
+        self.ObjectiveFunctions[0].Residual = self.m.Ca()
+        self.ObjectiveFunctions[1].Residual = self.m.T()
         
         # Parameters must be defined as optimization variables (preferably continuous)
         self.dH = self.SetContinuousOptimizationVariable(self.m.dH, -10, 10, 0.0)

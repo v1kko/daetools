@@ -114,12 +114,12 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
 	Classes
 ***************************************************************/
-	class_<daeThirdPartyVariable>("daeThirdPartyVariable", no_init)
+	class_<daeVariableWrapper>("daeVariableWrapper", no_init)
 		.def(init<daeVariable&, optional<string> >())
 		.def(init<adouble&, optional<string> >())
 
-		.def_readwrite("Name", &daeThirdPartyVariable::m_strName)
-		.add_property("Value", &daeThirdPartyVariable::GetValue, &daeThirdPartyVariable::SetValue)
+		.def_readwrite("Name", &daeVariableWrapper::m_strName)
+		.add_property("Value", &daeVariableWrapper::GetValue, &daeVariableWrapper::SetValue)
 	;
 
 	class_<daeConfig>("daeConfig")
@@ -390,11 +390,11 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("array", &daepython::ParameterArray8)
 		;
  
-	class_<daepython::daeVariableWrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
+	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
 		.def(init<string, const daeVariableType&, daeModel*, optional<string, list> >())
 		.def(init<string, const daeVariableType&, daePort*, optional<string, list> >())
-		.add_property("Domains",		&daepython::daeVariableWrapper::GetDomains)
-		.add_property("VariableType",	make_function(&daepython::daeVariableWrapper::GetVariableType, return_internal_reference<>()) )
+		.add_property("Domains",		&daepython::daeVariable_Wrapper::GetDomains)
+		.add_property("VariableType",	make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()) )
 		.add_property("ReportingOn",	&daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
 
 		.def("__str__",					&daepython::daeVariable_str)
@@ -422,15 +422,15 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetValue", &daepython::SetVariableValue7)
 		.def("SetValue", &daepython::SetVariableValue8)
 		
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue0)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue1)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue2)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue3)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue4)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue5)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue6)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue7)
-		.def("GetValue", &daepython::daeVariableWrapper::GetVariableValue8)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue0)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue1)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue2)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue3)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue4)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue5)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue6)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue7)
+		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue8)
 
 		.def("AssignValue", &daepython::AssignValue0)
 		.def("AssignValue", &daepython::AssignValue1)

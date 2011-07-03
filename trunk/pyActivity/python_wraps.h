@@ -214,6 +214,18 @@ public:
         this->daeSimulation::SetUpOptimization();
     }
 	
+    void SetUpParameterEstimation(void)
+    {
+        if(boost::python::override f = this->get_override("SetUpParameterEstimation"))
+            f();
+        else
+            this->daeSimulation::SetUpParameterEstimation();
+    }
+    void def_SetUpParameterEstimation(void)
+    {
+        this->daeSimulation::SetUpParameterEstimation();
+    }
+
 	daeOptimizationVariable* SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 	{
         return this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);
@@ -243,6 +255,36 @@ public:
 	{
         return this->daeSimulation::SetIntegerOptimizationVariable(a, LB, UB, defaultValue);
 	}
+
+    daeMeasuredVariable* SetMeasuredVariable1(daeVariable& variable)
+    {
+        return this->daeSimulation::SetMeasuredVariable(variable);
+    }
+
+    daeVariableWrapper* SetInputVariable1(daeVariable& variable)
+    {
+        return this->daeSimulation::SetInputVariable(variable);
+    }
+
+    daeOptimizationVariable* SetModelParameter1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+    {
+        return this->daeSimulation::SetModelParameter(variable, LB, UB, defaultValue);
+    }
+
+    daeMeasuredVariable* SetMeasuredVariable2(adouble a)
+    {
+        return this->daeSimulation::SetMeasuredVariable(a);
+    }
+
+    daeVariableWrapper* SetInputVariable2(adouble a)
+    {
+        return this->daeSimulation::SetInputVariable(a);
+    }
+
+    daeOptimizationVariable* SetModelParameter2(adouble a, real_t LB, real_t UB, real_t defaultValue)
+    {
+        return this->daeSimulation::SetModelParameter(a, LB, UB, defaultValue);
+    }
 	
 	daeObjectiveFunction* GetObjectiveFunction(void) const
 	{
@@ -290,6 +332,46 @@ public:
 		}
 		return l;
 	}
+	
+	boost::python::list GetInputVariables(void)
+	{
+		daeVariableWrapper* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrInputVariables.size(); i++)
+		{
+			obj = m_arrInputVariables[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+	
+	boost::python::list GetMeasuredVariables(void)
+	{
+		daeMeasuredVariable* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrMeasuredVariables.size(); i++)
+		{
+			obj = m_arrMeasuredVariables[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+	
+	boost::python::list GetModelParameters(void)
+	{
+		daeOptimizationVariable* obj;
+		boost::python::list l;
+	
+		for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
+		{
+			obj = m_arrOptimizationVariables[i].get();
+			l.append(obj);
+		}
+		return l;
+	}
+	
 	
 	boost::python::list GetReportingTimes(void) const
 	{
