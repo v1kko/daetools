@@ -8,7 +8,11 @@ if [ "$1" = "-help" ]; then
   return
 fi
 
-PROJECTS=$1
+if [ $1 = "" ]; then
+  PROJECTS=all
+else
+  PROJECTS=$1
+fi
 HOST_ARCH=`uname -m`
 TRUNK=`pwd`
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
@@ -55,10 +59,10 @@ compile () {
 case ${PROJECTS} in
   all)  echo Compile ALL projects
         cd ${TRUNK}/release
-        #rm -rf *
+        rm -rf *
         cd ${TRUNK}
 
-        #compile dae                "-j$Ncpu"
+        compile dae                "-j$Ncpu"
         compile LA_SuperLU         "-j1"                     "CONFIG+=shellCompile CONFIG+=shellSuperLU"
         compile LA_SuperLU         "-j1"                     "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
         #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
