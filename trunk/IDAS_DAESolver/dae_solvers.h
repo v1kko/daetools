@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	void CreateSensitivityArrays(size_t Ns, bool bIsModelDynamic)
+	void CreateSensitivityArrays(size_t Ns)
 	{
 		if(Ns == 0) 
 		{
@@ -130,7 +130,6 @@ public:
 
 		m_Ns = Ns;
 	
-	// This arrays will be always created, no matter if the model is dynamic or steady-state
 		ppdSValues = new realtype*[m_Ns];
 		m_pvectorSVariables = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
 		if(!m_pvectorSVariables) 
@@ -139,27 +138,21 @@ public:
 			e << "Unable to allocate vectorSVariables array";
 			throw e;
 		}
-	// Initialize m_pvectorSVariables to 0
 		for(size_t i = 0; i < m_Ns; i++)
 			N_VConst(0, m_pvectorSVariables[i]);
 
-	// If the model is dynamic then SD will be created - otherwise not!
-		if(bIsModelDynamic)
+		ppdSDValues      = new realtype*[m_Ns];
+		ppdSensResiduals = new realtype*[m_Ns];
+		
+		m_pvectorSTimeDerivatives = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
+		if(!m_pvectorSTimeDerivatives) 
 		{
-			ppdSDValues      = new realtype*[m_Ns];
-			ppdSensResiduals = new realtype*[m_Ns];
-			
-			m_pvectorSTimeDerivatives = N_VCloneVectorArray_Serial(m_Ns, m_vectorVariables);
-			if(!m_pvectorSTimeDerivatives) 
-			{
-				daeDeclareException(exMiscellanous);
-				e << "Unable to allocate vectorSTimeDerivatives array";
-				throw e;
-			}
-		// Initialize m_pvectorSTimeDerivatives to 0
-			for(size_t i = 0; i < m_Ns; i++)
-				N_VConst(0, m_pvectorSTimeDerivatives[i]);
+			daeDeclareException(exMiscellanous);
+			e << "Unable to allocate vectorSTimeDerivatives array";
+			throw e;
 		}
+		for(size_t i = 0; i < m_Ns; i++)
+			N_VConst(0, m_pvectorSTimeDerivatives[i]);
 	}
 	
 	void SetMaxElements()

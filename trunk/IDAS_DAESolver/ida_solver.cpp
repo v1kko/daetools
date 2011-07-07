@@ -107,7 +107,6 @@ daeIDASolver::daeIDASolver(void)
 	m_strSensitivityMethod           = cfg.Get<string>("daetools.IDAS.sensitivityMethod",             "Simultaneous");
 	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.errorControl",                  false);
 	m_bPrintInfo                     = cfg.Get<bool>  ("daetools.IDAS.printInfo",                     false);
-	//m_bPrintInfo                     = true;
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -307,50 +306,36 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		throw e;
 	}
 		
-// If the model is dynamic then matrixes S, SD and Sres will be created
-// Otherwise only the S matrix will be created
-	m_pIDASolverData->CreateSensitivityArrays(Ns, m_bIsModelDynamic);
+// Create matrixes S, SD and Sres
+	m_pIDASolverData->CreateSensitivityArrays(Ns);
 	
-// Only if the model is dynamic setup IDAS to create sensitivities
-// Otherwise the gradients will be calculated after the call to SolveInitial()
-	if(m_bIsModelDynamic)
+	if(m_strSensitivityMethod == "Simultaneous")
+		iSensMethod = IDA_SIMULTANEOUS;
+	else
+		iSensMethod = IDA_STAGGERED;
+	
+	retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+	if(!CheckFlag(retval)) 
 	{
-		if(m_strSensitivityMethod == "Simultaneous")
-			iSensMethod = IDA_SIMULTANEOUS;
-		else
-			iSensMethod = IDA_STAGGERED;
-		
-		retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver abjectly refused to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
-	
-		retval = IDASensEEtolerances(m_pIDA);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver abjectly refused to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
-	
-		retval = IDASetSensErrCon(m_pIDA, m_bErrorControl);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver abjectly refused to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
-	
-	//  retval = IDASetSensParams(m_pIDA, data->p, pbar, NULL);
-	//	if(!CheckFlag(retval)) 
-	//	{
-	//		daeDeclareException(exMiscellanous);
-	//		e << "Unable to setup sensitivity parameters; " << CreateIDAErrorMessage(retval);
-	//		throw e;
-	//	}
+		daeDeclareException(exMiscellanous);
+		e << "Sundials IDAS solver abjectly refused to setup sensitivity calculation; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+
+	retval = IDASensEEtolerances(m_pIDA);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Sundials IDAS solver abjectly refused to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+
+	retval = IDASetSensErrCon(m_pIDA, m_bErrorControl);
+	if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Sundials IDAS solver abjectly refused to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
+		throw e;
 	}
 }
 
@@ -364,15 +349,12 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 	if(!m_bCalculateSensitivities)
 		daeDeclareAndThrowException(exInvalidCall)
 		
-	if(m_bCalculateSensitivities && m_bIsModelDynamic)
+	retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
+	if(!CheckFlag(retval)) 
 	{
-		retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver spinelessly failed to return sensitivities; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+		daeDeclareException(exMiscellanous);
+		e << "Sundials IDAS solver spinelessly failed to return sensitivities; " << CreateIDAErrorMessage(retval);
+		throw e;
 	}
 	
 	if(!m_pIDASolverData->ppdSValues)
@@ -555,11 +537,6 @@ void daeIDASolver::SolveInitial(void)
 			throw e;
 		}
 	}
-	
-// Only if sensitivities are enabled and the model is steady-state calculate gradients
-// and store the results in the same matrix: SValues[Ns][Neq]
-	if(m_bCalculateSensitivities && !m_bIsModelDynamic)
-		CalculateGradients();
 }
 
 void daeIDASolver::Reset(void)
@@ -852,6 +829,8 @@ void daeIDASolver::SetInitialConditionMode(daeeInitialConditionMode eMode)
 	m_eInitialConditionMode = eMode;
 }
 
+// This function is not used anymore!!
+// IDAS will calculate sensitivities for both dynamic and steady-state models!
 void daeIDASolver::CalculateGradients(void)
 {
 	realtype *pdValues, *pdTimeDerivatives;

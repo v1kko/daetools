@@ -216,21 +216,22 @@ cp ../python-files/daeSimulator/Simulator_ui.py  ${PACKAGE_NAME}/daeSimulator
 cp ../python-files/daeSimulator/images/*.*       ${PACKAGE_NAME}/daeSimulator/images
 
 # daePlotter
-cp ../python-files/daePlotter/*.py          ${PACKAGE_NAME}/daePlotter
-cp ../python-files/daePlotter/images/*.*    ${PACKAGE_NAME}/daePlotter/images
+cp ../python-files/daePlotter/*.py               ${PACKAGE_NAME}/daePlotter
+cp ../python-files/daePlotter/images/*.*         ${PACKAGE_NAME}/daePlotter/images
 
 # Model Library
-cp ../python-files/model_library/*.py    ${PACKAGE_NAME}/model_library
+cp ../python-files/model_library/*.py            ${PACKAGE_NAME}/model_library
 
 # Examples and Tutorials
-cp ../python-files/examples/*.css           ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.xsl           ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.html ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.xml  ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.py   ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.init          ${PACKAGE_NAME}/examples
-#cp ../python-files/examples/*.png           ${PACKAGE_NAME}/examples
-cp ../python-files/examples/images/*.*      ${PACKAGE_NAME}/examples/images
+cp ../python-files/examples/*.css                ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*.xsl                ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.html      ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.xml       ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.py        ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*RunExamples*.py     ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*whats_the_time*.py  ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*.init               ${PACKAGE_NAME}/examples
+cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 
 # Documentation
 cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref

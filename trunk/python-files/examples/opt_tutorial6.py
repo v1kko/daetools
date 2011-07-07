@@ -41,14 +41,14 @@ class modTutorial(daeModel):
         self.k     = daeVariable("k", no_t, self)
         self.theta = daeVariable("&theta;", no_t, self)
         
-        self.time = daeVariable("&tau;", no_t, self, "Time elapsed in the process, s")
+        #self.time = daeVariable("&tau;", no_t, self, "Time elapsed in the process, s")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("y")
         eq.Residual = self.y() - self.A() * Sin(2 * pi * self.k() * self.x() + self.theta())
         
-        eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.time.dt() - 1.0
+        #eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
+        #eq.Residual = self.time.dt() - 1.0
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -65,7 +65,7 @@ class simTutorial(daeSimulation):
         self.m.k.AssignValue(1)
         self.m.theta.AssignValue(1)
         
-        self.m.time.SetInitialCondition(0)
+        #self.m.time.SetInitialCondition(0)
 
     def SetUpParameterEstimation(self):
         self.SetMeasuredVariable(self.m.y)

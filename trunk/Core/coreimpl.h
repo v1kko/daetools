@@ -2891,10 +2891,6 @@ protected:
 /******************************************************************
 	daeObjectiveFunction
 *******************************************************************/
-//class DAE_CORE_API daeObjectiveFunction : public daeObjectiveFunction_t,
-//		                                  public daeRuntimeCheck_t,
-//										  public daeExportable_t
-
 class DAE_CORE_API daeObjectiveFunction : virtual public daeFunctionWithGradients,
                                           virtual public daeObjectiveFunction_t                                         
 {
@@ -2906,52 +2902,11 @@ public:
 						 size_t nEquationIndex, 
 						 const string& strDescription);
 	virtual ~daeObjectiveFunction(void);
-
-//public:
-//	bool CheckObject(std::vector<string>& strarrErrors) const;
-//	
-//	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-//
-//	bool IsLinear(void) const;
-//
-//	std::string GetName(void) const;
-//	real_t GetValue(void) const;
-//	
-//	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
-//	void GetGradients(real_t* gradients, size_t Nparams) const;
-//
-//	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
-//	size_t GetNumberOfOptimizationVariables(void) const;
-//
-//	void	 SetResidual(adouble res);
-//	adouble	 GetResidual(void) const;
-//	
-//	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
-//
-//	void RemoveEquationFromModel(void);
-//	
-//protected:
-//	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
-//	
-//protected:
-//	daeModel*						m_pModel;
-//	daeSimulation_t*				m_pSimulation;
-//	boost::shared_ptr<daeVariable>	m_pObjectiveVariable;
-//	daeEquation*					m_pObjectiveFunction;
-//	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
-//	size_t							m_nEquationIndexInBlock;
-//	size_t							m_nVariableIndexInBlock;
-//	size_t							m_nNumberOfOptimizationVariables;
-//	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
 };
 
 /******************************************************************
 	daeOptimizationConstraint
 *******************************************************************/
-//class DAE_CORE_API daeOptimizationConstraint : public daeOptimizationConstraint_t,
-//                                               public daeRuntimeCheck_t,
-//											   public daeExportable_t
-
 class DAE_CORE_API daeOptimizationConstraint : virtual public daeFunctionWithGradients,
                                                virtual public daeOptimizationConstraint_t
 {
@@ -2969,46 +2924,8 @@ public:
 	void               SetType(daeeConstraintType value);
 	daeeConstraintType GetType(void) const;
 
-//	bool CheckObject(std::vector<string>& strarrErrors) const;
-//	
-//	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-//
-//	void               SetType(daeeConstraintType value);
-//	daeeConstraintType GetType(void) const;
-//	
-//	bool IsLinear(void) const;
-//	
-//	std::string GetName(void) const;
-//	real_t GetValue(void) const;
-//	
-//	void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const;
-//	void GetGradients(real_t* gradients, size_t Nparams) const;
-//
-//	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
-//	size_t GetNumberOfOptimizationVariables(void) const;
-//
-//	void    SetResidual(adouble res);
-//	adouble GetResidual(void) const;
-//	
-//	void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
-//
-//protected:
-//	daeMatrix<real_t>& GetSensitivitiesMatrix(void) const;
-//
-//protected:
-//	daeeConstraintType				m_eConstraintType;
-//	daeModel*						m_pModel;
-//	daeSimulation_t*				m_pSimulation;
-//	size_t							m_nEquationIndexInBlock;
-//	size_t							m_nVariableIndexInBlock;
-//	size_t							m_nNumberOfOptimizationVariables;
-//	boost::shared_ptr<daeVariable>	m_pConstraintVariable;
-//	daeEquation*					m_pConstraintFunction;
-//	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
-//	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
-
 protected:
-	daeeConstraintType				m_eConstraintType;
+	daeeConstraintType m_eConstraintType;
 };
 
 /******************************************************************
