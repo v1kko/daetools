@@ -18,13 +18,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 """
 
-import sys
+import sys, math
 from daetools.pyDAE import *
 from daetools.solvers.daeMinpackLeastSq import *
 from time import localtime, strftime
 from numpy import *
 import matplotlib.pyplot as plt
-
+from matplotlib.patches import Ellipse
        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -98,18 +98,41 @@ class simTutorial(daeSimulation):
         self.SetInputVariable(self.m.Tf)
         self.SetInputVariable(self.m.q)
         
-        self.SetModelParameter(self.m.dH, 0, 100,  3.0)
+        self.SetModelParameter(self.m.dH, 0, 100,  5.0)
         self.SetModelParameter(self.m.E,  0, 100, 10.0)
         self.SetModelParameter(self.m.k0, 0, 100, 10.0)
 
-import math
-import matplotlib
-import matplotlib.pyplot
-import numpy
-from numpy.linalg import svd
-from pylab import *
-from matplotlib.patches import Ellipse
-from scipy import linalg
+def plotConfidenceEllipsoids(minpack, x_param_index, y_param_index, confidences, x_label, y_label):
+    fig = plt.figure()
+    legend = []
+    for c in range(0, len(confidences)):
+        confidence = confidences[c]
+        x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = x_param_index, 
+                                                                      y_param_index = y_param_index, 
+                                                                      confidence    = confidence)
+        # print x_ellipse, y_ellipse
+        ax = fig.add_subplot(111, aspect='auto')
+        ax.plot(x_ellipse, y_ellipse)
+        legend.append(str(confidence)+'%')
+        if c == len(confidences)-1:
+            ax.plot(x0, y0, 'o')
+            legend.append('opt')
+        
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+    
+    ax.legend(legend, frameon=False)
+    return fig
+
+def plotExpFitComparison(minpack, measured_variable_index, experiment_index, x_label, y_label, legend):
+    fig = plt.figure()
+    x_axis, y_exp, y_fit = minpack.getFit_Dyn(measured_variable_index = measured_variable_index, experiment_index = experiment_index)
+    ax = fig.add_subplot(111, aspect='auto')
+    ax.plot(x_axis, y_fit, 'blue', x_axis, y_exp, 'o')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.legend(legend, frameon=False)
+    return fig
 
 if __name__ == "__main__":
     try:
@@ -225,64 +248,15 @@ if __name__ == "__main__":
         print 'Covariance matrix:'
         print minpack.cov_x
         
-        """
-        pos = [minpack.p_estimated[0], minpack.p_estimated[1]]
-        P = minpack.cov_x[0:2, 0:2]
-        print 'xy =', pos
-        print 'P:'
-        print P
-        v, w = linalg.eigh(P)
-        u = w[0] / linalg.norm(w[0])
-        angle = np.arctan(u[1]/u[0])
-        angle = 180 * angle / np.pi # convert to degrees
-        print 'v =', v, 'w =', w, 'u =', u, 'angle =', angle
-        width = 2 * v[0] ** 0.5
-        height = 2 * v[1] ** 0.5
+        plotConfidenceEllipsoids(minpack, 0, 1, [90,95,99], 'dHr', 'E')
+        plotConfidenceEllipsoids(minpack, 0, 2, [90,95,99], 'dHr', 'k0')
+        plotConfidenceEllipsoids(minpack, 1, 2, [90,95,99], 'E',   'k0')
         
-        s1  = P[0,0]
-        s2  = P[1,1]
-        s12 = P[0,1]
-        c = 2.448
-        fi = 0.5 * math.atan(2 * s12 / (s1 * s2)) * 180.0 / 3.14159
-        l1 = 0.5 * ( s1 + s2 + math.sqrt( (s1 + s2)**2 - 4 * (s1 * s2 - s12**2) ) )
-        l2 = 0.5 * ( s1 + s2 + math.sqrt( (s1 + s2)**2 - 4 * (s1 * s2 - s12**2) ) )
-        a = c * math.sqrt(l1)
-        b = c * math.sqrt(l2)
-        print 'fi =', fi, 'l1 =', l1, 'l2 =', l2, 'a =', a, 'b =', b
-        """
-        # Plot the comparison between the measured and fitted data
-        nExp = 4 # plot the 5th experiment
-        values = minpack.infodict['fvec'].reshape( (Nmeasured_variables, Nexperiments, Ntime_points) )
+        plotExpFitComparison(minpack, 0, 5, 'x', 'y', ['Ca-fit', 'Ca-exp'])
+        plotExpFitComparison(minpack, 1, 5, 'x', 'y', ['T-fit', 'T-exp'])
         
-        x_axis = data[nExp][0]
-        Ca_fit = data[nExp][2][0] + values[0, nExp, :]
-        T_fit  = data[nExp][2][1] + values[1, nExp, :]
-        Ca_exp = data[nExp][2][0]
-        T_exp  = data[nExp][2][1]
-        print 'x_axis=', x_axis
-        print 'Ca_fit=', Ca_fit
-        print 'Ca_exp=', Ca_exp
-
-        fig = plt.figure()
-        
-        yprops  = dict()
-        axprops = dict()
-
-        ax1 = fig.add_axes([0.10, 0.55, 0.85, 0.40], **axprops)
-        ax1.plot(x_axis, Ca_fit, 'blue', x_axis, Ca_exp, 'o')
-        ax1.set_ylabel('Ca', **yprops)
-        ax1.legend(['Ca-fit', 'Ca-exp'], frameon=False)
-
-        axprops['sharex'] = ax1
-        #axprops['sharey'] = ax1
-        
-        ax2 = fig.add_axes([0.10, 0.05, 0.85, 0.40], **axprops)
-        ax2.plot(x_axis, T_fit, 'green', x_axis, T_exp, 'o')
-        ax2.set_ylabel('T', **yprops)
-        ax2.legend(['T-fit', 'T-exp'], frameon=False)
-
         plt.show()
-    
+
     except Exception, e:
         print str(e)
         

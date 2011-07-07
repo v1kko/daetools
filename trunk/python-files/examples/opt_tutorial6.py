@@ -86,27 +86,20 @@ def plotConfidenceEllipsoids(minpack, x_param_index, y_param_index, confidences,
                                                                       confidence    = confidence)
         ax = fig.add_subplot(111, aspect='auto')
         ax.plot(x_ellipse, y_ellipse)
+        legend.append(str(confidence)+'%')
         if c == len(confidences)-1:
             ax.plot(x0, y0, 'o')
             legend.append('opt')
         
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
-        legend.append(str(confidence)+'%')
+    
     ax.legend(legend, frameon=False)
     return fig
 
-def plotConfidenceEllipsoid(x_ellipse, y_ellipse, x0, y0, x_label, y_label, legend):
+def plotExpFitComparison(minpack, input_variable_index, measured_variable_index, x_label, y_label, legend):
     fig = plt.figure()
-    ax = fig.add_subplot(111, aspect='auto')
-    ax.plot(x_ellipse, y_ellipse, 'pink', x0, y0, 'o')
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.legend(legend, frameon=False)
-    return fig
-
-def plotExpFitComparison(x_axis, y_exp, y_fit, x_label, y_label, legend):
-    fig = plt.figure()
+    x_axis, y_exp, y_fit = minpack.getFit_SS(input_variable_index = input_variable_index, measured_variable_index = measured_variable_index)
     ax = fig.add_subplot(111, aspect='auto')
     ax.plot(x_axis, y_fit, 'blue', x_axis, y_exp, 'o')
     ax.set_xlabel(x_label)
@@ -276,30 +269,13 @@ if __name__ == "__main__":
         print 'Covariance matrix:'
         print minpack.cov_x
         
-        """ 
-        # Plot 95% confidence ellipsoid for A-k pair 
-        fig = plt.figure()
-        x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = 0, y_param_index = 1, confidence = 95)
-        plotConfidenceEllipsoid(fig, x_ellipse, y_ellipse, x0, y0, 'A', 'k', ['95%'])
-        """
-        # Plot 90, 95, and 99% confidence ellipsoids for A-k pair
+        # Plot 90, 95, and 99% confidence ellipsoids
         plotConfidenceEllipsoids(minpack, 0, 1, [90,95,99], 'A', 'k')
-        
-        """
-        # Plot 95% confidence ellipsoids for all 3 combinations of parameters
-        x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = 0, y_param_index = 1, confidence = 95)
-        plotConfidenceEllipsoid(x_ellipse, y_ellipse, x0, y0, 'A', 'k', ['95%'])
-
-        x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = 0, y_param_index = 2, confidence = 95)
-        plotConfidenceEllipsoid(x_ellipse, y_ellipse, x0, y0, 'A', 'theta', ['95%'])
-
-        x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = 1, y_param_index = 2, confidence = 95)
-        plotConfidenceEllipsoid(x_ellipse, y_ellipse, x0, y0, 'k', 'theta', ['95%'])
-        """
+        plotConfidenceEllipsoids(minpack, 0, 2, [90,95,99], 'A', 'theta')
+        plotConfidenceEllipsoids(minpack, 1, 2, [90,95,99], 'k', 'theta')
         
         # Plot exp-fit comparison for y = f(x)
-        x, y_exp, y_fit = minpack.getFit_SS(input_variable_index = 0, measured_variable_index = 0)
-        plotExpFitComparison(x, y_exp, y_fit, 'x', 'y', ['y-fit', 'y-exp'])
+        plotExpFitComparison(minpack, 0, 0, 'x', 'y', ['y-fit', 'y-exp'])
         
         plt.show()
         

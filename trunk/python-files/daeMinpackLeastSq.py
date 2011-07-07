@@ -21,7 +21,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
 from numpy.linalg import cholesky
-from numpy.random import f, chisquare
+from scipy.stats import distributions
 
 """
 Levenberg–Marquardt algorithm (LMA) provides a numerical solution to the problem of 
@@ -268,24 +268,13 @@ class daeMinpackLeastSq:
         self.simulation.Finalize()
     
     def getConfidenceCoefficient(self, confidence):
-        Np   = self.Nmeasured_variables * self.Ntime_points * self.Nexperiments
-        Ndof = Np - self.Nparameters
+        Np   = self.Nparameters
+        Ndof = self.Nmeasured_variables * self.Ntime_points * self.Nexperiments - self.Nparameters
         
-        alpha = -1
-        if(confidence == 90):
-            alpha = 0.1
-        elif(confidence == 95):
-            alpha = 0.05
-        elif(confidence == 99):
-            alpha = 0.01
-        else:
-            raise RuntimeError('Confidence must be one of: [90, 95, 99]\%') 
-        
-        return (1.0 - alpha)
-        
-        #k = f(Np, Ndof) * (1.0 - alpha)
-        #print 'k =', k
-        #return k
+        alpha = 1 - confidence / 100.0
+        k = distributions.f.ppf(1-alpha, Np, Ndof) * self.sigma * self.Nparameters
+        # print 'F(1-a = {0}, m = {1}, n = {2}) = {3}'.format(1-alpha, Np, Ndof, k)
+        return k
         
     # Returns tuple: [x], [y] coordinates of the ellipse and [x], [y] coordinates of the center (optimal point)
     # for the given parameter indexes

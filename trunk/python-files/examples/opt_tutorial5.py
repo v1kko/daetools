@@ -65,7 +65,7 @@ class simTutorial(daeSimulation):
         self.m.theta.AssignValue(1)
 
     def SetUpSensitivityAnalysis(self):
-        self.ObjectiveFunction.Residual = self.m.A() * Sin(2 * pi * self.m.k() * self.m.x() + self.m.theta())
+        self.ObjectiveFunction.Residual = self.m.y()
         
         self.A     = self.SetContinuousOptimizationVariable(self.m.A,     -10, 10, 0.7);
         self.k     = self.SetContinuousOptimizationVariable(self.m.k,     -10, 10, 0.8);

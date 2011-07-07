@@ -372,10 +372,7 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 
 /*	
 	realtype* pdSValues;
-	if(m_bIsModelDynamic)
-		std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
-	else
-		std::cout << "Gradients: " << std::endl;
+	std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
 		
 	for(size_t i = 0; i < Ns; i++)
 	{
