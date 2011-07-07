@@ -20,6 +20,8 @@ from numpy import *
 from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
+from numpy.linalg import cholesky
+from numpy.random import f, chisquare
 
 """
 Levenberg–Marquardt algorithm (LMA) provides a numerical solution to the problem of 
@@ -35,10 +37,12 @@ The main properties:
 
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
-    # If col_deriv is True the shape of derivs is (Nparameters, Nexperiments)
-    # If col_deriv is False the shape of derivs is (Nexperiments, Nparameters)    
+    # col_deriv must be True
     values = zeros( (minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
     derivs = zeros( (minpack.Nparameters, minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
+    
+    r_values = values.reshape( (minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
+    r_derivs = derivs.reshape( (minpack.Nparameters, minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
 
     try:
         # Set the reporting times:
@@ -58,7 +62,15 @@ def Calculate(p, minpack, calc_values):
             
             # Set the parameters values
             for i in range(0, minpack.Nparameters):
-                minpack.parameters[i].Value = p[i]
+                if minpack.enforce_parameters_bounds == True:
+                    if p[i] < minpack.parameters[i].LowerBound:
+                        minpack.parameters[i].Value = minpack.parameters[i].LowerBound
+                    elif p[i] > minpack.parameters[i].UpperBound:
+                        minpack.parameters[i].Value = minpack.parameters[i].UpperBound
+                    else:
+                        minpack.parameters[i].Value = p[i]
+                else:
+                    minpack.parameters[i].Value = p[i]
                 # print minpack.parameters[i].Name, minpack.parameters[i].Value
             
             # Run the simulation
@@ -87,15 +99,12 @@ def Calculate(p, minpack, calc_values):
                     derivs[:, o, e, 0] = minpack.y_measured_variables[o].Gradients
                     #print 'v =', values[o, e, 0]
                     #print 'd =', derivs[:, o, e, 0]
-            
+        
     except Exception, e:
         print 'Exception in function Calculate, for parameters values: {0}'.format(p)
         print str(e)
     
-    r_values = values.reshape( (minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
-    r_derivs = derivs.reshape( (minpack.Nparameters, minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
-    
-    if minpack.PrintResidualsAndJacobian:
+    if minpack.print_residuals_and_jacobian:
         print 'Parameters:', p
         if calc_values:
             print '  Residuals:'
@@ -135,16 +144,26 @@ class daeMinpackLeastSq:
         self.y_measured_variables       = []
         self.p0                         = []
         self.experimental_data          = []
-        self.rmse                       = 0.0
+        self.x2                         = 0.0
+        self.Ndof                       = 0
+        self.sigma                      = 0.0
         self.Nparameters                = 0
         self.Ninput_variables           = 0
         self.Nmeasured_variables        = 0
         self.Nexperiments               = 0
         self.Ntime_points               = 0
-        self.minpack_leastsq_arguments  = {}
-        self.PrintResidualsAndJacobian  = False
-        self.IsInitialized              = False
+        self.minpack_leastsq_arguments     = {}
+        self.print_residuals_and_jacobian  = False
+        self.IsInitialized                 = False
+        self.enforce_parameters_bounds     = False
         
+        # Results
+        self.p_estimated                = None
+        self.cov_x                      = None
+        self.infodict                   = None
+        self.msg                        = ""
+        self.ier                        = -1 
+
     def Initialize(self, simulation, daesolver, datareporter, log, **kwargs):
         # Get the inputs
         self.simulation   = simulation
@@ -160,9 +179,10 @@ class daeMinpackLeastSq:
         if (self.log == None):
             raise RuntimeError('The log object cannot be None') 
         
-        self.experimental_data          = kwargs.get('experimental_data',           None)
-        self.PrintResidualsAndJacobian  = kwargs.get('PrintResidualsAndJacobian',  False)
-        self.minpack_leastsq_arguments  = kwargs.get('minpack_leastsq_arguments',     {})
+        self.experimental_data            = kwargs.get('experimental_data',              None)
+        self.print_residuals_and_jacobian = kwargs.get('print_residuals_and_jacobian',  False)
+        self.minpack_leastsq_arguments    = kwargs.get('minpack_leastsq_arguments',        {})
+        self.enforce_parameters_bounds    = kwargs.get('enforce_parameters_bounds',     False)
         
         # Call simulation.Initialize (with eParameterEstimation mode)
         self.simulation.SimulationMode = eParameterEstimation
@@ -217,7 +237,8 @@ class daeMinpackLeastSq:
         for p in self.parameters:
             self.p0.append(p.StartingPoint)
             
-        self.IsInitialized = True
+        self.IsInitialized      = True
+        self.NoOfCalculateCalls = 0
         
     def Run(self):
         if self.IsInitialized == False:
@@ -225,19 +246,127 @@ class daeMinpackLeastSq:
         
         self.minpack_leastsq_arguments['full_output'] = True
         self.minpack_leastsq_arguments['col_deriv']   = True
-        print 'minpack.leastsq will proceed with the following arguments:', self.minpack_leastsq_arguments
+        print 'minpack.leastsq will proceed with the following arguments:'
+        print '   ', self.minpack_leastsq_arguments
         
         # Call scipy.optimize.leastsq (Minpack wrapper)
-        self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, self.p0, Dfun = Derivatives, args = [self], 
+        self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, 
+                                                                                  self.p0, 
+                                                                                  Dfun = Derivatives, 
+                                                                                  args = [self], 
                                                                                   **self.minpack_leastsq_arguments)
         
         # Check the info and calculate the least square statistics
         if self.ier not in [1, 2, 3, 4]:
             raise RuntimeError('MINPACK least square method failed ({0})'.format(self.msg))
         
-        chisq = (self.infodict['fvec']**2).sum()
-        dof = self.Nexperiments*self.Nmeasured_variables - self.Nparameters
-        self.rmse = sqrt(chisq / dof)
+        self.x2 = (self.infodict['fvec']**2).sum()
+        self.Ndof = self.Nexperiments * self.Nmeasured_variables - self.Nparameters
+        self.sigma = sqrt(self.x2 / self.Ndof)
         
     def Finalize(self):
         self.simulation.Finalize()
+    
+    def getConfidenceCoefficient(self, confidence):
+        Np   = self.Nmeasured_variables * self.Ntime_points * self.Nexperiments
+        Ndof = Np - self.Nparameters
+        
+        alpha = -1
+        if(confidence == 90):
+            alpha = 0.1
+        elif(confidence == 95):
+            alpha = 0.05
+        elif(confidence == 99):
+            alpha = 0.01
+        else:
+            raise RuntimeError('Confidence must be one of: [90, 95, 99]\%') 
+        
+        return (1.0 - alpha)
+        
+        #k = f(Np, Ndof) * (1.0 - alpha)
+        #print 'k =', k
+        #return k
+        
+    # Returns tuple: [x], [y] coordinates of the ellipse and [x], [y] coordinates of the center (optimal point)
+    # for the given parameter indexes
+    def getConfidenceEllipsoid(self, x_param_index, y_param_index, **kwargs):
+        if self.IsInitialized == False:
+            raise RuntimeError('daeMinpackLeastSq object has not been initialized') 
+        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+            raise RuntimeError('daeMinpackLeastSq Run has not been called') 
+        if (x_param_index < 0) or (x_param_index >= self.Nparameters):
+            raise RuntimeError('Invalid [x_param_index] argument') 
+        if (y_param_index < 0) or (y_param_index >= self.Nparameters):
+            raise RuntimeError('Invalid [y_param_index] argument') 
+        
+        np         = kwargs.get('no_points',   100)
+        confidence = kwargs.get('confidence',   95)
+        if (np <= 0):
+            raise RuntimeError('Invalid [np] argument') 
+        if (confidence <= 0) or (confidence > 100):
+            raise RuntimeError('Invalid [confidence] argument') 
+
+        X = zeros((2, np))
+        chol = cholesky(self.cov_x)
+        C = zeros((2,2))
+        C[0, 0] = chol[x_param_index, x_param_index]
+        C[0, 1] = chol[x_param_index, y_param_index]
+        C[1, 0] = chol[y_param_index, x_param_index]
+        C[1, 1] = chol[y_param_index, y_param_index]
+        
+        fi = linspace(0, 2*pi, num = np)
+        X[0, :] = sin(fi)
+        X[1, :] = cos(fi)
+        M = zeros((2, np))
+        M[0, :] = self.p_estimated[x_param_index]
+        M[1, :] = self.p_estimated[y_param_index]
+        k = self.getConfidenceCoefficient(confidence)
+        Y = M + k * dot(C, X)
+        
+        return (Y[0, :], Y[1, :], [self.p_estimated[x_param_index]], [self.p_estimated[y_param_index]])
+
+    # Returns tuple: [x], [y_fit] and [y_exp] coordinates for the given input_variable and measured_variable indexes
+    def getFit_SS(self, input_variable_index, measured_variable_index, **kwargs):
+        if (self.IsInitialized == False) or (self.experimental_data == None) or (self.Nmeasured_variables == 0) or (self.Nexperiments == 0) or (self.Ntime_points == 0):
+            raise RuntimeError('daeMinpackLeastSq has not been initialized') 
+        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+            raise RuntimeError('daeMinpackLeastSq Run has not been called') 
+        if (measured_variable_index < 0) or (measured_variable_index >= self.Nmeasured_variables):
+            raise RuntimeError('Invalid [measured_variable_index] argument') 
+        if (input_variable_index < 0) or (input_variable_index >= self.Ninput_variables):
+            raise RuntimeError('Invalid [input_variable_index] argument') 
+        if (self.Ntime_points != 1):
+            raise RuntimeError('In order to call getFit_SS function the number of time points must be equal to 1') 
+        
+        values = self.infodict['fvec'].reshape( (self.Nmeasured_variables, self.Nexperiments, self.Ntime_points) )
+        
+        x_axis = []
+        y_fit  = []
+        y_exp  = []        
+        for e in range(0, self.Nexperiments):
+            x_axis.append(self.experimental_data[e][1][input_variable_index])
+            y_fit.append(self.experimental_data[e][2][measured_variable_index] + values[measured_variable_index][e][0])
+            y_exp.append(self.experimental_data[e][2][measured_variable_index])
+
+        return x_axis, y_exp, y_fit
+
+    def getFit_Dyn(self, measured_variable_index, experiment_index, **kwargs):
+        if (self.IsInitialized == False) or (self.experimental_data == None) or (self.Nmeasured_variables == 0) or (self.Nexperiments == 0) or (self.Ntime_points == 0):
+            raise RuntimeError('daeMinpackLeastSq has not been initialized') 
+        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+            raise RuntimeError('daeMinpackLeastSq Run has not been called') 
+        if (measured_variable_index < 0) or (measured_variable_index >= self.Nmeasured_variables):
+            raise RuntimeError('Invalid [measured_variable_index] argument') 
+        if (experiment_index < 0) or (experiment_index >= self.Nexperiments):
+            raise RuntimeError('Invalid [experiment_index] argument') 
+        if (self.Ntime_points == 1):
+            raise RuntimeError('In order to call getFit_Dyn function the number of time points must be greater than 1') 
+        
+        values = self.infodict['fvec'].reshape( (self.Nmeasured_variables, self.Nexperiments, self.Ntime_points) )
+        
+        # x_axis = time points
+        x_axis = self.experimental_data[experiment_index][0]
+        y_fit  = self.experimental_data[experiment_index][2][measured_variable_index] + values[measured_variable_index, experiment_index, :]
+        y_exp  = self.experimental_data[experiment_index][2][measured_variable_index]
+        
+        return x_axis, y_exp, y_fit

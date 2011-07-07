@@ -226,6 +226,18 @@ public:
         this->daeSimulation::SetUpParameterEstimation();
     }
 
+    void SetUpSensitivityAnalysis(void)
+    {
+        if(boost::python::override f = this->get_override("SetUpSensitivityAnalysis"))
+            f();
+        else
+            this->daeSimulation::SetUpSensitivityAnalysis();
+    }
+    void def_SetUpSensitivityAnalysis(void)
+    {
+        this->daeSimulation::SetUpSensitivityAnalysis();
+    }
+
 	daeOptimizationVariable* SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 	{
         return this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);

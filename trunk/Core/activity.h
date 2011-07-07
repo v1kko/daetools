@@ -55,6 +55,7 @@ public:
 	virtual void				SetUpVariables(void)											= 0;
 	virtual void				SetUpOptimization(void)											= 0;
 	virtual void				SetUpParameterEstimation(void)									= 0;
+	virtual void				SetUpSensitivityAnalysis(void)									= 0;
 	virtual void				Run(void)														= 0;
 	virtual void				Finalize(void)													= 0;
 	virtual void				ReRun(void)													    = 0;
@@ -82,8 +83,7 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog,
-										   bool bCalculateSensitivities = false,
-										   size_t nNumberOfObjectiveFunctions = 1)	   	= 0;
+										   bool bCalculateSensitivities = false)	   	= 0;
 	virtual void				Reinitialize(void)										= 0;
 	virtual void				SolveInitial(void)										= 0;
 	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;

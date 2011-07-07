@@ -50,8 +50,7 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog, 
-										   bool bCalculateSensitivities = false,
-										   size_t nNumberOfObjectiveFunctions = 1);
+										   bool bCalculateSensitivities = false);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
@@ -63,6 +62,7 @@ public:
 	virtual void				SetUpVariables(void);
 	virtual void				SetUpOptimization(void);
 	virtual void				SetUpParameterEstimation(void);
+	virtual void				SetUpSensitivityAnalysis(void);
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
 	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const;
@@ -160,8 +160,7 @@ public:
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog,
-							size_t			   nNumberOfObjectiveFunctions = 1);
+							daeLog_t*          pLog);
 	virtual void Run(void);
 	virtual void Finalize(void);
 	

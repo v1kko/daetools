@@ -102,6 +102,15 @@ class simTutorial(daeSimulation):
         self.SetModelParameter(self.m.E,  0, 100, 10.0)
         self.SetModelParameter(self.m.k0, 0, 100, 10.0)
 
+import math
+import matplotlib
+import matplotlib.pyplot
+import numpy
+from numpy.linalg import svd
+from pylab import *
+from matplotlib.patches import Ellipse
+from scipy import linalg
+
 if __name__ == "__main__":
     try:
         log          = daePythonStdOutLog()
@@ -192,11 +201,12 @@ if __name__ == "__main__":
                            daesolver, 
                            datareporter, 
                            log, 
-                           experimental_data         = data,
-                           PrintResidualsAndJacobian = False,
-                           minpack_leastsq_arguments = {'ftol'   : 1E-8, 
-                                                        'xtol'   : 1E-8, 
-                                                        'factor' : 0.1} )
+                           experimental_data            = data,
+                           print_residuals_and_jacobian = False,
+                           enforce_parameters_bounds    = False,
+                           minpack_leastsq_arguments    = {'ftol'   : 1E-8, 
+                                                           'xtol'   : 1E-8, 
+                                                           'factor' : 0.1} )
         
         # Save the model report and the runtime model report
         simulation.m.SaveModelReport(simulation.m.Name + ".xml")
@@ -208,10 +218,38 @@ if __name__ == "__main__":
         # Print the results
         print 'Status:', minpack.msg
         print 'Number of function evaluations =', minpack.infodict['nfev']
-        print 'Root mean square deviation =', minpack.rmse
         print 'Estimated parameters\' values:', minpack.p_estimated
         print 'The real parameters\' values:', ['5.0', '7.27519625', '7.2']
-
+        print 'χ2 =', minpack.x2
+        print 'Standard deviation =', minpack.sigma
+        print 'Covariance matrix:'
+        print minpack.cov_x
+        
+        """
+        pos = [minpack.p_estimated[0], minpack.p_estimated[1]]
+        P = minpack.cov_x[0:2, 0:2]
+        print 'xy =', pos
+        print 'P:'
+        print P
+        v, w = linalg.eigh(P)
+        u = w[0] / linalg.norm(w[0])
+        angle = np.arctan(u[1]/u[0])
+        angle = 180 * angle / np.pi # convert to degrees
+        print 'v =', v, 'w =', w, 'u =', u, 'angle =', angle
+        width = 2 * v[0] ** 0.5
+        height = 2 * v[1] ** 0.5
+        
+        s1  = P[0,0]
+        s2  = P[1,1]
+        s12 = P[0,1]
+        c = 2.448
+        fi = 0.5 * math.atan(2 * s12 / (s1 * s2)) * 180.0 / 3.14159
+        l1 = 0.5 * ( s1 + s2 + math.sqrt( (s1 + s2)**2 - 4 * (s1 * s2 - s12**2) ) )
+        l2 = 0.5 * ( s1 + s2 + math.sqrt( (s1 + s2)**2 - 4 * (s1 * s2 - s12**2) ) )
+        a = c * math.sqrt(l1)
+        b = c * math.sqrt(l2)
+        print 'fi =', fi, 'l1 =', l1, 'l2 =', l2, 'a =', a, 'b =', b
+        """
         # Plot the comparison between the measured and fitted data
         nExp = 4 # plot the 5th experiment
         values = minpack.infodict['fvec'].reshape( (Nmeasured_variables, Nexperiments, Ntime_points) )
@@ -221,6 +259,9 @@ if __name__ == "__main__":
         T_fit  = data[nExp][2][1] + values[1, nExp, :]
         Ca_exp = data[nExp][2][0]
         T_exp  = data[nExp][2][1]
+        print 'x_axis=', x_axis
+        print 'Ca_fit=', Ca_fit
+        print 'Ca_exp=', Ca_exp
 
         fig = plt.figure()
         
@@ -239,7 +280,7 @@ if __name__ == "__main__":
         ax2.plot(x_axis, T_fit, 'green', x_axis, T_exp, 'o')
         ax2.set_ylabel('T', **yprops)
         ax2.legend(['T-fit', 'T-exp'], frameon=False)
-    
+
         plt.show()
     
     except Exception, e:

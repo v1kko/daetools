@@ -48,6 +48,10 @@ void daeSimulation::SetUpParameterEstimation(void)
 {
 }
 
+void daeSimulation::SetUpSensitivityAnalysis(void)
+{
+}
+
 void daeSimulation::Resume(void)
 {
 	if(!m_bIsInitialized)
@@ -94,8 +98,7 @@ void daeSimulation::Pause(void)
 void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, 
 							   daeDataReporter_t* pDataReporter, 
 							   daeLog_t* pLog, 
-							   bool bCalculateSensitivities,
-							   size_t nNumberOfObjectiveFunctions)
+							   bool bCalculateSensitivities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -114,7 +117,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 	}
 	
 	m_bCalculateSensitivities     = bCalculateSensitivities;
-	m_nNumberOfObjectiveFunctions = nNumberOfObjectiveFunctions;
+	m_nNumberOfObjectiveFunctions = 0;
 	
 	if(!pDataReporter->IsConnected())
 	{
@@ -183,6 +186,17 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		
 	// Call SetUpParameterEstimation to define obj. function(s), constraints and opt. variables
 		SetUpParameterEstimation();
+	}
+	else
+	{
+		if(m_bCalculateSensitivities)
+		{
+			SetNumberOfObjectiveFunctions(1);
+		
+		// Call SetUpSensitivityAnalysis to define obj.function(s), constraint(s) and opt.variable(s)
+		// and whatever else is needed
+			SetUpSensitivityAnalysis();
+		}
 	}
 	
 	if(m_bCalculateSensitivities)
@@ -363,6 +377,32 @@ void daeSimulation::SetupSolver(void)
 		{  
 			pMeasuredVariable = m_arrMeasuredVariables[i];
 			pMeasuredVariable->Initialize(m_arrOptimizationVariables, pBlock);
+		}
+	}
+	else
+	{
+		if(m_bCalculateSensitivities)
+		{
+		// 2. Fill the parameters indexes (optimization variables)
+			for(i = 0; i < m_arrOptimizationVariables.size(); i++)
+			{
+				pOptVariable = m_arrOptimizationVariables[i];
+				narrParametersIndexes.push_back(pOptVariable->GetOverallIndex());
+			}
+			
+		// 3. Initialize the objective functions
+			for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
+			{
+				pObjectiveFunction = m_arrObjectiveFunctions[i];
+				pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+			}
+			
+		// 4. Initialize the constraints
+			for(i = 0; i < m_arrConstraints.size(); i++)
+			{  
+				pConstraint = m_arrConstraints[i];
+				pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
+			}
 		}
 	}
 	

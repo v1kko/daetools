@@ -64,10 +64,8 @@ class simTutorial(daeSimulation):
         self.m.k.AssignValue(1)
         self.m.theta.AssignValue(1)
 
-    def SetUpOptimization(self):
-        self.NumberOfObjectiveFunctions = 2
-        self.ObjectiveFunctions[0].Residual = self.m.A() * Sin(2 * pi * self.m.k() * self.m.x() + self.m.theta())
-        self.ObjectiveFunctions[1].Residual = self.m.y()
+    def SetUpSensitivityAnalysis(self):
+        self.ObjectiveFunction.Residual = self.m.A() * Sin(2 * pi * self.m.k() * self.m.x() + self.m.theta())
         
         self.A     = self.SetContinuousOptimizationVariable(self.m.A,     -10, 10, 0.7);
         self.k     = self.SetContinuousOptimizationVariable(self.m.k,     -10, 10, 0.8);
@@ -103,8 +101,8 @@ def Function(p, simulation, xin, ymeas, calc_values):
         simulation.Run()
         
         # Get the results
-        values[e]    = simulation.m.y.GetValue() - ymeas[e]
-        derivs[e][:] = simulation.ObjectiveFunctions[0].Gradients
+        values[e]    = simulation.ObjectiveFunction.Value - ymeas[e]
+        derivs[e][:] = simulation.ObjectiveFunction.Gradients
         
     print 'A =', simulation.A.Value, ', k =', simulation.k.Value, ', theta =', simulation.theta.Value
     if calc_values:
@@ -179,7 +177,11 @@ y_meas = [ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
           -8.23170543,  -6.56081590,  -6.28524014,  -2.30246340,  -0.79571452]
 
 # Call leastsq
-p, cov_x, infodict, msg, ier = leastsq(Residuals, p0, Dfun=Derivatives, args=(simulation, x, y_meas), full_output=True)
+p, cov_x, infodict, msg, ier = leastsq(Residuals, 
+                                       p0, 
+                                       Dfun=Derivatives, 
+                                       args=(simulation, x, y_meas), 
+                                       full_output=True)
 
 # Print the results
 print '------------------------------------------------------'
