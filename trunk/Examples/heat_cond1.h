@@ -96,7 +96,7 @@ public:
 public:
 	void SetUpParametersAndDomains(void)
 	{
-        int n = 25;
+        int n = 5;
         
         m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1);
         m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1);
@@ -120,25 +120,25 @@ public:
 				m.T.SetInitialCondition(ix, iy, 0);
 	}
 	
-	void Run(void)
-	{
-	// Now I have my system initialized (got algebraic and diff. part of all variables)
-	// so I can set InitialConditionMode to eAlgebraicValuesProvided
-		m.SetInitialConditionMode(eAlgebraicValuesProvided);
-		m.Qb.ReAssignValue(1E6);
-		Reinitialize();
-        ReportData();
-		
-		for(real_t time = m_dCurrentTime+m_dReportingInterval; time <= m_dTimeHorizon; time += m_dReportingInterval)
-		{
-			if(time > m_dTimeHorizon)
-				time = m_dTimeHorizon;
-			
-			m_pLog->Message(string("Integrating to ") + toString(time) + string(" ..."), 0);
-			IntegrateUntilTime(time, eDoNotStopAtDiscontinuity);
-			ReportData();
-		}
-	}
+//	void Run(void)
+//	{
+//	// Now I have my system initialized (got algebraic and diff. part of all variables)
+//	// so I can set InitialConditionMode to eAlgebraicValuesProvided
+//		m.SetInitialConditionMode(eAlgebraicValuesProvided);
+//		m.Qb.ReAssignValue(1E6);
+//		Reinitialize();
+//        ReportData();
+//		
+//		for(real_t time = m_dCurrentTime+m_dReportingInterval; time <= m_dTimeHorizon; time += m_dReportingInterval)
+//		{
+//			if(time > m_dTimeHorizon)
+//				time = m_dTimeHorizon;
+//			
+//			m_pLog->Message(string("Integrating to ") + toString(time) + string(" ..."), 0);
+//			IntegrateUntilTime(time, eDoNotStopAtDiscontinuity);
+//			ReportData();
+//		}
+//	}
 };
 
 
@@ -362,7 +362,7 @@ public:
 	void SetUpOptimization(void)
 	{
 	// Set the objective function (min)
-		m_pObjectiveFunction->SetResidual( m.x1() * m.x4() * (m.x1() + m.x2() + m.x3()) + m.x3() );
+		m_arrObjectiveFunctions[0]->SetResidual( m.x1() * m.x4() * (m.x1() + m.x2() + m.x3()) + m.x3() );
 		
 	// Set the constraints (inequality, equality)
 		daeOptimizationConstraint* c1 = CreateInequalityConstraint("Constraint 1");
@@ -455,7 +455,7 @@ public:
 	void SetUpOptimization(void)
 	{
 	// Set the objective function (min)
-		m_pObjectiveFunction->SetResidual( -m.x() - m.y1() - m.y2() );
+		m_arrObjectiveFunctions[0]->SetResidual( -m.x() - m.y1() - m.y2() );
 		
 	// Set the constraints (inequality, equality)
 		daeOptimizationConstraint* c1 = CreateInequalityConstraint("Constraint 1");
