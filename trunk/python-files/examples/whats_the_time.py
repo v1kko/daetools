@@ -178,7 +178,7 @@ def consoleRun():
     #      The function SaveModelReport exports the model report in the XML format which can be opened in a web browser
     #      (like Mozilla Firefox, or others that support XHTML+MathMl standard).
     #      The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
-    simulation.Initialize(daesolver, datareporter, log, True)
+    simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

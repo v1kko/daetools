@@ -193,7 +193,7 @@ def consoleRun():
     # which sets the inputs from the 3rd party software, runs a simulation with daeSimulation.ReRun()
     # and finally gets the results from DAE Tools. 
     # This procedure can be repeated as many times as necessary.
-    ro = daeThirdPartyVariable(simulation.m.ro, 'ro')
+    ro = daeVariableWrapper(simulation.m.ro, 'ro')
     print ro.Name
     print ro.Value
     ro.Value = 9000
