@@ -35,10 +35,10 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${BONMIN_LIBDIR} \
                 $${MUMPS_LIBDIR}
 
-LIBS += $${DAE_SIMULATION_LIB} \
-        $${DAE_DATAREPORTERS_LIB} \
+LIBS += $${DAE_ACTIVITY_LIB} \
+        $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
-        $${DAE_SOLVER_LIB} \
+        $${DAE_IDAS_SOLVER_LIB} \
         $${BOOST_LIBS} \
         $${BONMIN_LIBS} \
         $${MUMPS_LIBS}
@@ -58,10 +58,10 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${IPOPT_LIBDIR} \
                 $${MUMPS_LIBDIR}
 
-LIBS += $${DAE_SIMULATION_LIB} \
-        $${DAE_DATAREPORTERS_LIB} \
+LIBS += $${DAE_ACTIVITY_LIB} \
+        $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
-        $${DAE_SOLVER_LIB} \
+        $${DAE_IDAS_SOLVER_LIB} \
         $${BOOST_LIBS} \
         $${IPOPT_LIBS} \
         $${MUMPS_LIBS}

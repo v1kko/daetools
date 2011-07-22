@@ -12,8 +12,8 @@
 #************************************************************************************
 include(../dae.pri)
 QT -= core gui
+TARGET = pySuperLU
 TEMPLATE = lib
-CONFIG += staticlib
 
 #################################################
 # Could be: SuperLU, SuperLU_MT, SuperLU_CUDA
@@ -36,18 +36,19 @@ shellSuperLU_CUDA {
 }
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${SUNDIALS_INCLUDE}
+    $${PYTHON_INCLUDE_DIR} \
+    $${PYTHON_SITE_PACKAGES_DIR} \
+    $${SUNDIALS_INCLUDE}
+
+QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
+
+LIBS += $${BOOST_PYTHON_LIB}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \
-    superlu_la_solver.cpp \
-	../mmio.c
+    dae_python.cpp
 
-HEADERS += stdafx.h \
-    superlu_solvers.h \
-    superlu_la_solver.h \ 
-	superlu_mt_gpu.h \
-	../mmio.h 
+HEADERS += stdafx.h
 
 ######################################################################################
 #                                   SuperLU
@@ -55,9 +56,10 @@ HEADERS += stdafx.h \
 CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) { 
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
-TARGET = cdaeSuperLU_LASolver
+LIBS += $${SUPERLU_LIBS} \
+        $${DAE_SUPERLU_SOLVER_LIB}
 INCLUDEPATH += $${SUPERLU_INCLUDE}
-LIBS += $${SUPERLU_LIBS}
+pyObject = pySuperLU
 }
 
 ######################################################################################
@@ -66,9 +68,10 @@ LIBS += $${SUPERLU_LIBS}
 CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) { 
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
-TARGET = cdaeSuperLU_MT_LASolver
+LIBS += $${SUPERLU_MT_LIBS} \
+        $${DAE_SUPERLU_MT_SOLVER_LIB}
 INCLUDEPATH += $${SUPERLU_MT_INCLUDE}
-LIBS += $${SUPERLU_MT_LIBS}
+pyObject = pySuperLU_MT
 }
 
 ######################################################################################
@@ -78,10 +81,38 @@ LIBS += $${SUPERLU_MT_LIBS}
 CONFIG(SuperLU_CUDA, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_CUDA) { 
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_CUDA
-TARGET = cdaeSuperLU_CUDA_LASolver
+LIBS += $${SUPERLU_CUDA_LIBS} \
+        $${CUDA_LIBS} \
+        $${DAE_SUPERLU_CUDA_SOLVER_LIB}
 INCLUDEPATH += $${SUPERLU_CUDA_INCLUDE}
-LIBS += $${SUPERLU_CUDA_LIBS} $${CUDA_LIBS}
+pyObject = pySuperLU_CUDA
 }
 
 OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
+SuperLU {
+win32-msvc2008::QMAKE_POST_LINK = move \
+    /y \
+    $${DAE_DEST_DIR}/pySuperLU1.dll \
+    $${DAE_DEST_DIR}/pySuperLU.pyd
+
+}
+
+SuperLU_MT {
+win32-msvc2008::QMAKE_POST_LINK = move \
+    /y \
+    $${DAE_DEST_DIR}/pySuperLU1.dll \
+    $${DAE_DEST_DIR}/pySuperLU_MT.pyd
+}
+
+SuperLU_CUDA {
+win32-msvc2008::QMAKE_POST_LINK = move \
+    /y \
+    $${DAE_DEST_DIR}/pySuperLU1.dll \
+    $${DAE_DEST_DIR}/pySuperLU_CUDA.pyd
+}
+
+unix::QMAKE_POST_LINK = cp \
+    -f \
+    $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
+    $${DAE_DEST_DIR}/$${pyObject}.so

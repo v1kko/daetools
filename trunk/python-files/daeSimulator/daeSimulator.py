@@ -263,7 +263,7 @@ class daeSimulator(QtGui.QDialog):
                 elif lasolverIndex == self.laSuperLU_MT:
                     try:
                         from daetools.solvers import pySuperLU_MT
-                        self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
+                        self.lasolver = pySuperLU_MT.daeCreateSuperLU_MTSolver()
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_MT LA solver\nError: " + str(e))
                         return
@@ -271,7 +271,7 @@ class daeSimulator(QtGui.QDialog):
                 elif lasolverIndex == self.laSuperLU_CUDA:
                     try:
                         from daetools.solvers import pySuperLU_CUDA
-                        self.lasolver = pySuperLU_CUDA.daeCreateSuperLUSolver()
+                        self.lasolver = pySuperLU_CUDA.daeCreateSuperLU_CUDASolver()
                     except Exception, e:
                         QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
                         return

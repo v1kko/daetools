@@ -13,11 +13,11 @@ QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${NLOPT_LIBDIR}
 
 LIBS += $${BOOST_PYTHON_LIB} \
-        $${DAE_SIMULATION_LIB} \
-        $${DAE_DATAREPORTERS_LIB} \
+        $${DAE_ACTIVITY_LIB} \
+        $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
-        $${DAE_SOLVER_LIB} \
-        $${DAE_NLOPTSOLVER_LIB} \
+        $${DAE_IDAS_SOLVER_LIB} \
+        $${DAE_NLOPT_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${NLOPT_LIBS}

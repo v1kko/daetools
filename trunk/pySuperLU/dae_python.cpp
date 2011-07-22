@@ -1,18 +1,20 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
-#include "superlu_la_solver.h"
+#include "../LA_SuperLU/superlu_la_solver.h"
 using namespace boost::python;
 using namespace dae::solver;
+
+#ifdef daeSuperLU
+BOOST_PYTHON_MODULE(pySuperLU)
+#endif
 
 #ifdef daeSuperLU_MT
 BOOST_PYTHON_MODULE(pySuperLU_MT)
 #endif	
+
 #ifdef daeSuperLU_CUDA
 BOOST_PYTHON_MODULE(pySuperLU_CUDA)
-#endif
-#ifdef daeSuperLU
-BOOST_PYTHON_MODULE(pySuperLU)
 #endif
 {
 /**************************************************************
@@ -106,8 +108,9 @@ BOOST_PYTHON_MODULE(pySuperLU)
 		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
 		.def("GetOptions",				&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
 		;
+	
 #endif
-
+	
 	def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<reference_existing_object>());
 
 }

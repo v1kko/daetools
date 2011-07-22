@@ -11,12 +11,14 @@ QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${IPOPT_LIBDIR} \
                 $${MUMPS_LIBDIR}
 
-LIBS += $${DAE_SIMULATION_LIB} \
-        $${DAE_DATAREPORTERS_LIB} \
+LIBS += $${DAE_ACTIVITY_LIB} \
+        $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
-        $${DAE_SOLVER_LIB} \
-		$${DAE_IPOPTSOLVER_LIB} \
+        $${DAE_IDAS_SOLVER_LIB} \
+		$${DAE_IPOPT_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
+        $${SUPERLU_LIBS} \
+        $${DAE_SUPERLU_SOLVER_LIB} \
         $${BOOST_LIBS} \
         $${IPOPT_LIBS} \
         $${MUMPS_LIBS} -lrt -lgfortran

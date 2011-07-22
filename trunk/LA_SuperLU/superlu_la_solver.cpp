@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
-#include <boost/python.hpp>
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
 
@@ -597,7 +595,9 @@ int daeSuperLUSolver::Setup(void*		ida,
 // Therefore before each call to sp_preorder() destroy matrix AC with a call to Destroy_CompCol_Permuted(&AC)
 	sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
 
+// This will be disabled at the moment!!
 // Determine the amount of memory:
+/*
 	if(m_lwork == 0)
 	{
 		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
@@ -611,6 +611,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 			return IDA_LSETUP_FAIL;		
 		}
 	}
+*/
 	
 	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 	if(info != 0)

@@ -1,5 +1,5 @@
-#ifndef MKL_PARDISO_LA_SOLVER_H
-#define MKL_PARDISO_LA_SOLVER_H
+#ifndef SUPERLU_LA_SOLVER_H
+#define SUPERLU_LA_SOLVER_H
 
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
@@ -9,6 +9,7 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
+#include "superlu_solvers.h"
 
 #ifdef daeSuperLU_MT
 #include <pdsp_defs.h>
@@ -29,9 +30,6 @@ namespace dae
 {
 namespace solver
 {
-daeIDALASolver_t* daeCreateSuperLUSolver(void);
-
-
 class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
 {
 	typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;

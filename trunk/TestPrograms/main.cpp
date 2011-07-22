@@ -9,6 +9,8 @@
 #include "../Activity/simulation.h"
 #define daeIPOPT
 #include "../BONMIN_MINLPSolver/base_solvers.h"
+#define daeSuperLU
+#include "../LA_SuperLU/superlu_solvers.h"
 
 int main(int argc, char *argv[])
 { 
@@ -20,6 +22,7 @@ int main(int argc, char *argv[])
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
 		boost::scoped_ptr<daeOptimization_t>	pOptimization(new daeOptimization());
 		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(daeCreateIPOPTSolver());
+		boost::scoped_ptr<daeIDALASolver_t>	    pLASolver(daeCreateSuperLUSolver());
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 
@@ -40,7 +43,9 @@ int main(int argc, char *argv[])
 		if(!pDataReporter->Connect(string(""), simName))
 			daeDeclareAndThrowException(exInvalidCall); 
     
-        pSimulation->SetReportingInterval(1);
+		pDAESolver->SetLASolver(pLASolver.get());
+        
+		pSimulation->SetReportingInterval(1);
         pSimulation->SetTimeHorizon(200);
 		pSimulation->GetModel()->SetReportingOn(true);
 		

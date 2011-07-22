@@ -15,23 +15,30 @@ DAE_TOOLS_MAJOR = 1
 DAE_TOOLS_MINOR = 1
 DAE_TOOLS_BUILD = 2
 
+# Set CONFIG += use_system_python to use the default system's python
 # 1. On GNU/LINUX:
-#    Set PYTHON_MAJOR=2 and PYTHON_MINOR=7 to use Python located in /usr/lib/python2.7
-# 2. On Windows:set PYTHON_MAJOR=2 and PYTHON_MINOR=7 to use Python in c:\Python27
+#    Set CONFIG += use_custom_python and for instance PYTHON_MAJOR=2 and PYTHON_MINOR=7 
+#    to use Python located in /usr/lib/python2.7
+# 2. On Windows:
+#    Set CONFIG += use_custom_python and for instance PYTHON_MAJOR=2 and PYTHON_MINOR=7 
+#    to use Python located in c:\Python27
+CONFIG += use_system_python
 PYTHON_MAJOR = 2
 PYTHON_MINOR = 6
 
 # 1. On GNU/LINUX:
-#    a) Set CONFIG += use_custom_boost and set BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD
-#       Boost must be located in ../boost_1_42_0 (for instance)
-#    b) Set CONFIG += use_system_boost to use the system's default version
-# 2. On Windows:set BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD
-#    Boost must be located in ../boost_1_42_0 (for instance)
+#    a) Set CONFIG += use_system_boost to use the system's default version
+#    b) Set CONFIG += use_custom_boost and for instance BOOST_MAJOR = 1, BOOST_MINOR = 42 
+#       and BOOST_BUILD = 0 to use the boost build in ../boost_1_42_0
+# 2. On Windows: 
+#    BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
+#    and Boost build must be located in ../boost_1_42_0 (for instance)
 CONFIG += use_system_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 42
 BOOST_BUILD = 0
 
+# DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
 
 QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
@@ -93,25 +100,21 @@ unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unu
 #####################################################################################
 #                                   PYTHON
 #####################################################################################
-# Numpy must be installed
-# OS-specific stuff (python version and a location of site specific packages):
-#     Debian:  Lenny          Squeeze
-#              2.5            2.6
-#              site-packages  dist-packages
-#     Ubuntu:  10.4           10.10
-#              2.6            2.6
-#              site-packages  dist-packages
-#     Fedora:  13             14
-#              2.6            2.7
-#              site-packages  site-packages
-#     Windows: WinXP
-#              2.6            
-#              site-packages  
-#
+# Numpy and Scipy must be installed
 # Debian Squeeze: sometimes there are problems with _numpyconfig.h
 # Add: /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy 
 # to:  PYTHON_INCLUDE_DIR 
 #####################################################################################
+use_system_python {
+PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
+PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
+message(use_system_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
+}
+
+use_custom_python { 
+message(use_custom_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
+}
+
 win32-msvc2008::PYTHONDIR                = C:\Python$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-msvc2008::PYTHON_INCLUDE_DIR       = $${PYTHONDIR}\include
 win32-msvc2008::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}\Lib\site-packages
@@ -123,7 +126,8 @@ linux-g++-64::PYTHONDIR        = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MIN
 unix::PYTHON_INCLUDE_DIR       = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
 							     /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
                                  /usr/share/pyshared
-unix::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}/dist-packages
+unix::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}/dist-packages \
+                                 $${PYTHONDIR}/site-packages
 unix::PYTHON_LIB_DIR           =
 
 
@@ -260,24 +264,83 @@ win32-msvc2008::NLOPT_LIBS = nlopt.lib
 unix::NLOPT_LIBS           = -lnlopt -lm
 
 
+######################################################################################
+#                                   SuperLU
+######################################################################################
+win32-msvc2008::SUPERLU_PATH = ..\superlu
+linux-g++::SUPERLU_PATH      = ../superlu
+linux-g++-64::SUPERLU_PATH   = ../superlu
+
+SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
+
+SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
+
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
+
+
+######################################################################################
+#                                SuperLU_MT
+######################################################################################
+win32-msvc2008::SUPERLU_MT_PATH = ..\superlu_mt
+linux-g++::SUPERLU_MT_PATH      = ../superlu_mt
+linux-g++-64::SUPERLU_MT_PATH   = ../superlu_mt
+
+SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
+
+SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
+
+win32-msvc2008::SUPERLU_MT_LIBS = -L$${SUPERLU_MT_LIBPATH} superlu_mt.lib
+linux-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
+linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
+
+
+######################################################################################
+#                                SuperLU_CUDA
+######################################################################################
+win32-msvc2008::CUDA_PATH = 
+linux-g++::CUDA_PATH      = /usr/local/cuda
+linux-g++-64::CUDA_PATH   = /usr/local/cuda
+
+win32-msvc2008::SUPERLU_CUDA_PATH = ..\superlu_mt-GPU
+linux-g++::SUPERLU_CUDA_PATH      = ../superlu_mt-GPU
+linux-g++-64::SUPERLU_CUDA_PATH   = ../superlu_mt-GPU
+
+SUPERLU_CUDA_LIBPATH = $${SUPERLU_CUDA_PATH}/lib
+
+SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
+	                   $${CUDA_PATH}/include
+
+win32-msvc2008::CUDA_LIBS = -L$${CUDA_PATH}/lib cuda.lib cudart.lib
+linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib -lcuda -lcudart
+linux-g++-64::CUDA_LIBS   = -L$${CUDA_PATH}/lib64 -lcuda -lcudart
+
+
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32-msvc2008::DAE_CORE_LIB          = cdaeCore.lib
-win32-msvc2008::DAE_DATAREPORTERS_LIB = cdaeDataReporting.lib
-win32-msvc2008::DAE_SIMULATION_LIB    = cdaeActivity.lib
-win32-msvc2008::DAE_SOLVER_LIB        = cdaeIDAS_DAESolver.lib
-win32-msvc2008::DAE_BONMINSOLVER_LIB  = cdaeBONMIN_MINLPSolver.lib
-win32-msvc2008::DAE_IPOPTSOLVER_LIB   = cdaeIPOPT_NLPSolver.lib
-win32-msvc2008::DAE_NLOPTSOLVER_LIB   = cdaeNLOPT_NLPSolver.lib
+win32-msvc2008::DAE_CORE_LIB                = cdaeCore.lib
+win32-msvc2008::DAE_DATAREPORTING_LIB       = cdaeDataReporting.lib
+win32-msvc2008::DAE_ACTIVITY_LIB            = cdaeActivity.lib
+win32-msvc2008::DAE_IDAS_SOLVER_LIB         = cdaeIDAS_DAESolver.lib
+win32-msvc2008::DAE_SUPERLU_SOLVER_LIB      = cdaeSuperLU_LASolver.lib
+win32-msvc2008::DAE_SUPERLU_MT_SOLVER_LIB   = cdaeSuperLU_MT_LASolver.lib
+win32-msvc2008::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
+win32-msvc2008::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
+win32-msvc2008::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
+win32-msvc2008::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
 
-unix::DAE_CORE_LIB          = -lcdaeCore
-unix::DAE_DATAREPORTERS_LIB = -lcdaeDataReporting
-unix::DAE_SIMULATION_LIB    = -lcdaeActivity
-unix::DAE_SOLVER_LIB        = -lcdaeIDAS_DAESolver
-unix::DAE_BONMINSOLVER_LIB  = -lcdaeBONMIN_MINLPSolver
-unix::DAE_IPOPTSOLVER_LIB   = -lcdaeIPOPT_NLPSolver
-unix::DAE_NLOPTSOLVER_LIB   = -lcdaeNLOPT_NLPSolver
+unix::DAE_CORE_LIB                = -lcdaeCore
+unix::DAE_DATAREPORTING_LIB       = -lcdaeDataReporting
+unix::DAE_ACTIVITY_LIB            = -lcdaeActivity
+unix::DAE_IDAS_SOLVER_LIB         = -lcdaeIDAS_DAESolver
+unix::DAE_SUPERLU_SOLVER_LIB      = -lcdaeSuperLU_LASolver
+unix::DAE_SUPERLU_MT_SOLVER_LIB   = -lcdaeSuperLU_MT_LASolver
+unix::DAE_SUPERLU_CUDA_SOLVER_LIB = -lcdaeSuperLU_CUDA_LASolver
+unix::DAE_BONMIN_SOLVER_LIB       = -lcdaeBONMIN_MINLPSolver
+unix::DAE_IPOPT_SOLVER_LIB        = -lcdaeIPOPT_NLPSolver
+unix::DAE_NLOPT_SOLVER_LIB        = -lcdaeNLOPT_NLPSolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 

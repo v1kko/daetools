@@ -108,8 +108,7 @@ class simTutorial(daeSimulation):
 
 def CreateLASolver():
     lasolver = superlu.daeCreateSuperLUSolver()
-
-    options = lasolver.GetOptions()
+    options  = lasolver.GetOptions()
 
     if lasolver.Name == 'SuperLU':
         # SuperLU options:
