@@ -9,7 +9,6 @@
 #include "../Activity/simulation.h"
 #define daeIPOPT
 #include "../BONMIN_MINLPSolver/base_solvers.h"
-#define daeSuperLU
 #include "../LA_SuperLU/superlu_solvers.h"
 
 int main(int argc, char *argv[])
