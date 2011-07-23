@@ -52,22 +52,23 @@ if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
   ARCH=amd64
   ARCH_RPM=x86_64
-fi
-if [ ${HOST_ARCH} = "armv5tejl" ]; then
+elif [ ${HOST_ARCH} = "armv5tejl" ]; then
   LIB=lib
   ARCH=armel
   ARCH_RPM=armel
-fi
-if [ ${HOST_ARCH} = "i386" ]; then
+elif [ ${HOST_ARCH} = "i386" ]; then
   LIB=lib
   ARCH=i386
   ARCH_RPM=i386
-fi
-if [ ${HOST_ARCH} = "i686" ]; then
+elif [ ${HOST_ARCH} = "i686" ]; then
   LIB=lib
   ARCH=i386
   ARCH_RPM=i386
+else
+  echo "ERROR: undefined architecture"
+  exit
 fi
+USRLIB=/usr/${LIB}
 
 if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   PCKG_TYPE="deb"
@@ -76,26 +77,21 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   else
     SITE_PACK="dist-packages"
   fi
+elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
+  PCKG_TYPE="deb"
+  SITE_PACK="dist-packages"
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   PCKG_TYPE="rpm"
   SITE_PACK="site-packages"
 else
   echo "ERROR: undefined type of a package"
-  exit -1
+  exit
 fi
 
 TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
 RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
 BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
-
-if [ -d ${BUILD_DIR}/usr/lib ]; then
-  USRLIB=/usr/lib
-else
-  USRLIB=/usr/lib64
-fi
-
 USRBIN=${BUILD_DIR}/usr/bin
-DAE_TOOLS_DIR=${USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 
 echo " "
 echo " The package settings:"
@@ -109,7 +105,6 @@ echo "    lib prefix:        " ${LIB}
 echo "    python version:    " ${PYTHON_VERSION}
 echo "    site-packages dir: " ${SITE_PACK}
 echo "    /usr/lib dir:      " ${USRLIB}
-echo "    install dir:       " ${DAE_TOOLS_DIR}
 echo " " 
 read -p " Proceed [y/n]? " do_proceed
 case ${do_proceed} in
@@ -234,7 +229,7 @@ cp ../python-files/examples/*.init               ${PACKAGE_NAME}/examples
 cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 
 # Documentation
-cp ../Website/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
+cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
@@ -259,6 +254,12 @@ if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
 fi
 mkdir ${BUILD_DIR}
+mkdir ${BUILD_DIR}/usr
+mkdir ${BUILD_DIR}/usr/bin
+mkdir ${BUILD_DIR}${USRLIB}
+#if [ ! -d ${BUILD_DIR}${USRLIB} ]; then
+#  mkdir ${BUILD_DIR}${USRLIB}
+#fi
 
 if [ ${PCKG_TYPE} = "tgz" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
@@ -273,6 +274,13 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
 fi
 
+if [ -d ${BUILD_DIR}/usr/lib ]; then
+  PYTHON_USRLIB=/usr/lib
+else
+  PYTHON_USRLIB=/usr/lib64
+fi
+DAE_TOOLS_DIR=${PYTHON_USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
+
 # Delete all .pyc files
 find ${BUILD_DIR} -name \*.pyc | xargs rm
 
@@ -280,37 +288,27 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \*.py        | xargs chmod +x
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
-# Check if USRLIB exists; if not make it
-if [ ! -d ${BUILD_DIR}${USRLIB} ]; then
-  mkdir ${BUILD_DIR}${USRLIB}
-fi
-# Check if lib64 exists; if not make it
-if [ ! -d ${BUILD_DIR}/usr/${LIB} ]; then
-  mkdir ${BUILD_DIR}/usr/${LIB}
-fi
-mkdir ${BUILD_DIR}/usr/bin
-
 # Magma libraries
 if [ -e ${MAGMA}/lib/libmagma.so ]; then
-  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}${USRLIB}
 fi
 if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
-  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}${USRLIB}
 fi
 
 # SuperLU libraries
 if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
-  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}${USRLIB}
 fi
 
 # SuperLU_MT libraries
 if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
-  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}/usr/${LIB}
+  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}${USRLIB}
 fi
 
 # Change permissions and strip .so libraries
-chmod -x ${BUILD_DIR}/usr/${LIB}/*.so*
-find ${BUILD_DIR}/usr/${LIB} -name \*.so* | xargs strip
+chmod -x ${BUILD_DIR}${USRLIB}/*.so*
+find ${BUILD_DIR}${USRLIB} -name \*.so* | xargs strip
 
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
@@ -480,16 +478,30 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)"   > ${SPEC}
   echo "%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0) "         >> ${SPEC}
   echo "%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0) "     >> ${SPEC}
+  echo "%define dist redhat"        >> ${SPEC}
+  echo "%define disttag rh"         >> ${SPEC}
+  echo "%if %is_mandrake"           >> ${SPEC}
+  echo "%define dist mandrake"      >> ${SPEC}
+  echo "%define disttag mdk"        >> ${SPEC}
+  echo "%endif"                     >> ${SPEC}
+  echo "%if %is_suse"               >> ${SPEC}
+  echo "%define dist suse"          >> ${SPEC}
+  echo "%define disttag suse"       >> ${SPEC}
+  echo "%endif"                     >> ${SPEC}
+  echo "%if %is_fedora"             >> ${SPEC}
+  echo "%define dist fedora"        >> ${SPEC}
+  echo "%define disttag rhfc"       >> ${SPEC}
+  echo "%endif"                     >> ${SPEC}
 
   echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
   echo "Name: ${PACKAGE_NAME}"                                                      >> ${SPEC}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                         >> ${SPEC}
-  echo "Release: ${VER_BUILD}"                                                      >> ${SPEC}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}"                            >> ${SPEC}
+  echo "Release: 1.%{disttag}%{distver}"                                            >> ${SPEC}
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
   echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
-  echo "Requires: boost-devel, PyQt4, numpy, python-matplotlib "                    >> ${SPEC}
+  echo "Requires: boost-devel, PyQt4, numpy, scipy, python-matplotlib "             >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
 
