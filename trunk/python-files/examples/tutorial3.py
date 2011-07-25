@@ -139,7 +139,6 @@ class simTutorial(daeSimulation):
         self.m.Qt.SetValue(0)
 
     def SetUpVariables(self):
-        #self.InitialConditionMode = eSteadyState
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300)

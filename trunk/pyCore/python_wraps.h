@@ -752,12 +752,14 @@ public:
 	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
 	{
 		daeObject* pObject;
-		std::vector<daeObject*> ptrarrObjects;
+		daeExportable_t* pExportable;
+		std::vector<daeExportable_t*> ptrarrObjects;
 		boost::python::ssize_t n = boost::python::len(objects);
 		for(boost::python::ssize_t i = 0; i < n; i++) 
 		{
 			pObject = boost::python::extract<daeObject*>(objects[i]);
-			ptrarrObjects.push_back(pObject);
+			pExportable = dynamic_cast<daeExportable_t*>(pObject);
+			ptrarrObjects.push_back(pExportable);
 		}
 		
 		return daeModel::ExportObjects(ptrarrObjects, eLanguage);

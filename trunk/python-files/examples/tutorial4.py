@@ -27,7 +27,6 @@ A piece of copper (a plate) is at one side exposed to the source of heat and at 
 other to the surroundings. The process starts at the temperature of the metal of 283K.
 The metal is allowed to warm up for 200 seconds and then the heat source is
 removed and the metal cools down slowly again to the ambient temperature.
-
 """
 
 import sys

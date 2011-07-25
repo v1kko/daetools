@@ -318,7 +318,8 @@ public:
 	virtual real_t						GetLowerBound(void) const				= 0;
 	virtual real_t						GetUpperBound(void) const				= 0;
 
-	virtual void						SetPoints(std::vector<real_t>& darrPoints)= 0;
+	virtual void						GetPoints(std::vector<real_t>& darrPoints) const = 0;
+	virtual void						SetPoints(const std::vector<real_t>& darrPoints) = 0;
 };
 
 

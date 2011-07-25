@@ -339,8 +339,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter")
-		.def(init<string, daeeParameterType, daePort*, optional<string, list> >())
-		.def(init<string, daeeParameterType, daeModel*, optional<string, list> >())
+		.def(init<string, daeeParameterType, daePort*, optional<string, boost::python::list> >())
+		.def(init<string, daeeParameterType, daeModel*, optional<string, boost::python::list> >())
 
 		.add_property("Type",		&daeParameter::GetParameterType)
 		.add_property("Domains",	&daepython::daeParameterWrapper::GetDomains)
@@ -391,8 +391,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
  
 	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
-		.def(init<string, const daeVariableType&, daeModel*, optional<string, list> >())
-		.def(init<string, const daeVariableType&, daePort*, optional<string, list> >())
+		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >())
+		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >())
 		.add_property("Domains",		&daepython::daeVariable_Wrapper::GetDomains)
 		.add_property("VariableType",	make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()) )
 		.add_property("ReportingOn",	&daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
@@ -645,15 +645,15 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("dt",				&daeModel::dt)
 		.def("d",				&daeModel::d)
 
-		.def("IF",				&daepython::daeModelWrapper::IF, ( arg("EventTolerance") = 0.0 ) )
-		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( arg("EventTolerance") = 0.0 ) )
+		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("EventTolerance") = 0.0 ) )
+		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("EventTolerance") = 0.0 ) )
 		.def("ELSE",			&daepython::daeModelWrapper::ELSE)
 		.def("END_IF",			&daepython::daeModelWrapper::END_IF)
  
 		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>())
 		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
 		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
-		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( arg("EventTolerance") = 0.0 ) )
+		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("EventTolerance") = 0.0 ) )
 
 		.def("SaveModelReport",			&daeModel::SaveModelReport)
 		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)	

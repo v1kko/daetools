@@ -321,7 +321,12 @@ adouble daeDomain::pd_CFD(daePartialDerivativeVariable& pdv) const
 	return pardev;
 }
 
-void daeDomain::SetPoints(vector<real_t>& darrPoints)
+void daeDomain::GetPoints(std::vector<real_t>& darrPoints) const
+{
+	darrPoints = m_darrPoints;
+}
+
+void daeDomain::SetPoints(const vector<real_t>& darrPoints)
 {
 	if(m_eDomainType == eArray)
 	{	
@@ -336,7 +341,6 @@ void daeDomain::SetPoints(vector<real_t>& darrPoints)
 		throw e;
 	}
 
-	if(darrPoints[0] != 0 || darrPoints[darrPoints.size()-1] != 1)
 	m_dLowerBound = darrPoints[0];
 	m_dUpperBound = darrPoints[darrPoints.size()-1];
 	for(size_t i = 0; i < m_nNumberOfPoints; i++)

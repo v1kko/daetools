@@ -32,7 +32,10 @@ using namespace dae;
 using namespace dae::solver;
 #include "Core/base_logging.h"
 using namespace dae::logging;
-#include "Core/macros.h"
+//#include "Core/macros.h"
 #include "Core/class_factory.h"
+
+#include "BONMIN_MINLPSolver/base_solvers.h"
+#include "LA_SuperLU/superlu_solvers.h"
 
 #endif

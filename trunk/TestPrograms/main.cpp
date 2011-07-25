@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 		boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
 		boost::scoped_ptr<daeOptimization_t>	pOptimization(new daeOptimization());
 		boost::scoped_ptr<daeNLPSolver_t>	    pNLPSolver(daeCreateIPOPTSolver());
-		boost::scoped_ptr<daeIDALASolver_t>	    pLASolver(daeCreateSuperLUSolver());
+		daeIDALASolver_t* pLASolver = daeCreateSuperLUSolver();
  
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer); 
@@ -42,13 +42,13 @@ int main(int argc, char *argv[])
 		if(!pDataReporter->Connect(string(""), simName))
 			daeDeclareAndThrowException(exInvalidCall); 
     
-		pDAESolver->SetLASolver(pLASolver.get());
+		pDAESolver->SetLASolver(pLASolver);
         
 		pSimulation->SetReportingInterval(1);
         pSimulation->SetTimeHorizon(200);
 		pSimulation->GetModel()->SetReportingOn(true);
 		
-		bool bRunOptimization = true;
+		bool bRunOptimization = false;
 		
 		if(bRunOptimization)
 		{	

@@ -12,7 +12,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, distutils.sysconfig
+import os, sys, distutils.sysconfig, types
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -155,4 +155,7 @@ def daeStartPlotter(port = 0):
         return
     
 if __name__ == "__main__":
-    daeStartPlotter()
+    if (len(sys.argv) > 1):
+        daeStartPlotter(int(sys.argv[1]))
+    else:
+        daeStartPlotter()

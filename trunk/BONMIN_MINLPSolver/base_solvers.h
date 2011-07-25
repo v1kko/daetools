@@ -11,14 +11,8 @@ namespace dae
 {
 namespace nlpsolver
 {
-#ifdef daeIPOPT
-	daeNLPSolver_t* daeCreateIPOPTSolver(void);
-#endif
-
-#ifdef daeBONMIN
-	daeNLPSolver_t* daeCreateBONMINSolver(void);
-#endif
-
+daeNLPSolver_t* daeCreateIPOPTSolver(void);
+daeNLPSolver_t* daeCreateBONMINSolver(void);
 }
 }
 #endif

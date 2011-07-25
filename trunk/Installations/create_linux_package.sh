@@ -45,6 +45,12 @@ SUPERLU_MT=../superlu_mt
 MAGMA=../magma
 TRILINOS=../trilinos/build
 
+#DAE_TOOLS_MAJOR=`echo $(grep 'DAE_TOOLS_MAJOR = ' ../dae.pri)`
+#echo DAE_TOOLS_MAJOR = $DAE_TOOLS_MAJOR
+DAE_TOOLS_MAJOR=`echo $(expr match "DAE_TOOLS_MAJOR = 1" '\([0-9]\)')`
+#echo DAE_TOOLS_MAJOR = $DAE_TOOLS_MAJOR
+#exit
+
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 
@@ -70,7 +76,10 @@ else
 fi
 USRLIB=/usr/${LIB}
 
-if [ ${DISTRIBUTOR_ID} = "debian" ]; then
+echo $4
+if [ "$4" = "cdae" ]; then
+  PCKG_TYPE="tgz"
+elif [ ${DISTRIBUTOR_ID} = "debian" ]; then
   PCKG_TYPE="deb"
   if [ ${CODENAME} = "lenny" ]; then
     SITE_PACK="site-packages"
@@ -113,6 +122,61 @@ case ${do_proceed} in
       * ) break;;
 esac
 
+if [ ${PCKG_TYPE} = "tgz" ]; then
+  INSTALL_DIR=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
+  mkdir ${INSTALL_DIR}
+  mkdir ${INSTALL_DIR}/lib
+  mkdir ${INSTALL_DIR}/include
+  mkdir ${INSTALL_DIR}/include/Core
+  mkdir ${INSTALL_DIR}/include/Activity
+  mkdir ${INSTALL_DIR}/include/DataReporting
+  mkdir ${INSTALL_DIR}/include/IDAS_DAESolver
+  mkdir ${INSTALL_DIR}/include/BONMIN_MINLPSolver
+  mkdir ${INSTALL_DIR}/include/LA_SuperLU
+  mkdir ${INSTALL_DIR}/TestPrograms
+
+  cp ../compile_libraries_linux.sh            ${INSTALL_DIR}
+
+  cp ../release/libcdaeActivity.a             ${INSTALL_DIR}/lib
+  cp ../release/libcdaeBONMIN_MINLPSolver.a   ${INSTALL_DIR}/lib
+  cp ../release/libcdaeCore.a                 ${INSTALL_DIR}/lib
+  cp ../release/libcdaeDataReporting.a        ${INSTALL_DIR}/lib
+  cp ../release/libcdaeIDAS_DAESolver.a       ${INSTALL_DIR}/lib
+  cp ../release/libcdaeIPOPT_NLPSolver.a      ${INSTALL_DIR}/lib
+  cp ../release/libcdaeNLOPT_NLPSolver.a      ${INSTALL_DIR}/lib
+  cp ../release/libcdaeSuperLU_LASolver.a     ${INSTALL_DIR}/lib
+  cp ../release/libcdaeSuperLU_MT_LASolver.a  ${INSTALL_DIR}/lib
+
+  cp ../dae.h                                           ${INSTALL_DIR}/include
+  cp ../dae_develop.h                                   ${INSTALL_DIR}/include
+  cp ../config.h                                        ${INSTALL_DIR}/include
+  cp ../Core/definitions.h                              ${INSTALL_DIR}/include/Core
+  cp ../Core/xmlfile.h                                  ${INSTALL_DIR}/include/Core
+  cp ../Core/coreimpl.h                                 ${INSTALL_DIR}/include/Core
+  cp ../Core/helpers.h                                  ${INSTALL_DIR}/include/Core
+  cp ../Core/base_logging.h                             ${INSTALL_DIR}/include/Core
+  cp ../Core/class_factory.h                            ${INSTALL_DIR}/include/Core
+  cp ../Activity/base_activities.h                      ${INSTALL_DIR}/include/Activity
+  cp ../Activity/simulation.h                           ${INSTALL_DIR}/include/Activity
+  cp ../DataReporting/datareporters.h                   ${INSTALL_DIR}/include/DataReporting
+  cp ../DataReporting/base_data_reporters_receivers.h   ${INSTALL_DIR}/include/DataReporting
+  cp ../IDAS_DAESolver/base_solvers.h                   ${INSTALL_DIR}/include/IDAS_DAESolver
+  cp ../IDAS_DAESolver/ida_solver.h                     ${INSTALL_DIR}/include/IDAS_DAESolver
+  cp ../BONMIN_MINLPSolver/base_solvers.h               ${INSTALL_DIR}/include/BONMIN_MINLPSolver
+  cp ../LA_SuperLU/superlu_solvers.h                    ${INSTALL_DIR}/include/LA_SuperLU
+  
+  cp ../dae.pri                                         ${INSTALL_DIR}
+  cp ../TestPrograms/TestPrograms.pro                   ${INSTALL_DIR}/TestPrograms
+  cp ../TestPrograms/main.cpp                           ${INSTALL_DIR}/TestPrograms
+  cp ../TestPrograms/*tutorial*.h                       ${INSTALL_DIR}/TestPrograms
+  cp ../TestPrograms/whats_the_time.h                   ${INSTALL_DIR}/TestPrograms
+  cp ../TestPrograms/variable_types.h                   ${INSTALL_DIR}/TestPrograms
+
+  tar -czvf ${TGZ} ${INSTALL_DIR}
+  rm -r ${INSTALL_DIR}
+  exit
+fi
+
 if [ -d ${PACKAGE_NAME} ]; then
   rm -r ${PACKAGE_NAME}
 fi
@@ -129,6 +193,14 @@ mkdir ${PACKAGE_NAME}/daeSimulator
 mkdir ${PACKAGE_NAME}/daeSimulator/images
 mkdir ${PACKAGE_NAME}/solvers
 mkdir ${PACKAGE_NAME}/model_library
+
+if [ -d ${BUILD_DIR} ]; then
+  rm -r ${BUILD_DIR}
+fi
+mkdir ${BUILD_DIR}
+mkdir ${BUILD_DIR}/usr
+mkdir ${BUILD_DIR}/usr/bin
+mkdir ${BUILD_DIR}${USRLIB}
 
 # Python extension modules and LA solvers
 cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
@@ -250,20 +322,7 @@ echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library
 echo "      ) " >> setup.py
 echo " " >> setup.py
 
-if [ -d ${BUILD_DIR} ]; then
-  rm -r ${BUILD_DIR}
-fi
-mkdir ${BUILD_DIR}
-mkdir ${BUILD_DIR}/usr
-mkdir ${BUILD_DIR}/usr/bin
-mkdir ${BUILD_DIR}${USRLIB}
-#if [ ! -d ${BUILD_DIR}${USRLIB} ]; then
-#  mkdir ${BUILD_DIR}${USRLIB}
-#fi
-
-if [ ${PCKG_TYPE} = "tgz" ]; then
-  python setup.py install --prefix=/usr --root=${BUILD_DIR}
-elif [ ${PCKG_TYPE} = "deb" ]; then
+if [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
   if [ ${DISTRO} = "debian-lenny" ]; then
     python setup.py install --root=${BUILD_DIR}
@@ -383,14 +442,7 @@ echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
 #echo "Type=Link"                                      >> ${daeDocumentation_DESKTOP}
 #echo "StartupNotify=true"                             >> ${daeDocumentation_DESKTOP}
 
-if [ ${PCKG_TYPE} = "tgz" ]; then
-  cd ${BUILD_DIR}
-  tar -czvf ${TGZ} *
-  cd ..
-
-  cp ${BUILD_DIR}/${TGZ} ${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${BOOST}.tar.gz
-
-elif [ ${PCKG_TYPE} = "deb" ]; then
+if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
 
   CONTROL=${BUILD_DIR}/DEBIAN/control
@@ -495,8 +547,8 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
 
   echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
   echo "Name: ${PACKAGE_NAME}"                                                      >> ${SPEC}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}"                            >> ${SPEC}
-  echo "Release: 1.%{disttag}%{distver}"                                            >> ${SPEC}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                         >> ${SPEC}
+  echo "Release: ${VER_BUILD}"                                                      >> ${SPEC}
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}

@@ -39,7 +39,7 @@ compile () {
   echo 
   echo "*** EXECUTE: qmake-qt4 $1.pro -r -spec linux-${ARCH} ${CONFIG}"
   echo 
-  qmake-qt4 $1.pro -r -spec linux-${ARCH} ${CONFIG}
+  qmake-qt4 $1.pro -r CONFIG+=debug -spec linux-${ARCH} ${CONFIG}
   
   echo 
   echo "*** EXECUTE: make clean -w"

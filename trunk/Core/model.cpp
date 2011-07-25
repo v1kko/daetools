@@ -367,7 +367,7 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 }
 
 // Objects can be models and ports
-string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModelLanguage eLanguage) const
+string daeModel::ExportObjects(std::vector<daeExportable_t*>& ptrarrObjects, daeeModelLanguage eLanguage) const
 {
 	size_t i;
 	daeModelExportContext c;
@@ -450,7 +450,7 @@ string daeModel::ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModel
 		"DAE Tools software; if not, see <http://www.gnu.org/licenses/>.\n"
 		"*********************************************************************************/\n"
 		"\n"
-		"#include \"variable_types.h\";\n\n"
+		"#include \"variable_types.h\"\n\n"
 		"%1%\n"
 		"%2%\n"
 		"%3%\n";

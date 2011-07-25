@@ -28,6 +28,11 @@ daeIDALASolver_t* daeCreateSuperLUSolver(void)
 	return new daeSuperLUSolver;
 }
 
+daeIDALASolver_t* daeCreateSuperLU_MTSolver(void)
+{
+	return new daeSuperLUSolver;
+}
+
 daeSuperLUSolver::daeSuperLUSolver(void)
 {
 	m_pBlock	= NULL;

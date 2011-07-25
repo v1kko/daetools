@@ -7,9 +7,8 @@ namespace dae
 {
 namespace solver
 {
-
 daeIDALASolver_t* daeCreateSuperLUSolver(void);
-
+daeIDALASolver_t* daeCreateSuperLU_MTSolver(void);
 }
 }
 

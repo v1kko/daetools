@@ -316,7 +316,8 @@ public:
 	virtual real_t						GetLowerBound(void) const;
 	virtual real_t						GetUpperBound(void) const;
 
-	virtual void						SetPoints(std::vector<real_t>& darrPoints);
+	virtual void						GetPoints(std::vector<real_t>& darrPoints) const;
+	virtual void						SetPoints(const std::vector<real_t>& darrPoints);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -1895,7 +1896,7 @@ public:
 	
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
-	string ExportObjects(std::vector<daeObject*>& ptrarrObjects, daeeModelLanguage eLanguage) const;
+	string ExportObjects(std::vector<daeExportable_t*>& ptrarrObjects, daeeModelLanguage eLanguage) const;
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
 	void CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;

@@ -193,15 +193,15 @@ std::string getClassName(bool bStripNamespaces = false)
 
 // T must be a pointer
 template<class T>
-std::vector<T> makeVector(T a1 = NULL, T a2 = NULL, T a3 = NULL, T a4 = NULL, T a5 = NULL, T a6 = NULL, T a7 = NULL, T a8 = NULL, T a9 = NULL, T a10 = NULL)
+std::vector<T> makeVector(T a1, T a2, T a3, T a4, T a5, T a6, T a7, T a8)
 {
 	std::vector<T> std_array;
-	T array[10] = {a1, a2, a3, a4, a5, a6, a7, a8, a9, a10};
+	T array[8] = {a1, a2, a3, a4, a5, a6, a7, a8};
 	
-	if(a1 != NULL)
+	for(size_t i = 0; i < 8; i++)
 	{
-		for(T a = array[0]; a != NULL; a++)
-			std_array.push_back(a);
+		if(array[i])
+			std_array.push_back(array[i]);
 	}
 	return std_array;
 }

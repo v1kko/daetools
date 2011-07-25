@@ -271,7 +271,7 @@ def consoleRun():
     # export() auxiliary function exports the model into pyDAE and cDAE and saves the
     # exported models into the temporary folder (/tmp or c:\temp)
     export(simulation, [simulation.m])
-
+    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

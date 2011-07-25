@@ -9,21 +9,15 @@ namespace dae
 {
 namespace nlpsolver
 {
-#ifdef daeIPOPT
-	daeNLPSolver_t* daeCreateIPOPTSolver(void)
-	{
-		return new daeBONMINSolver;
-	}
+daeNLPSolver_t* daeCreateIPOPTSolver(void)
+{
+	return new daeBONMINSolver;
+}
 
-#endif
-
-#ifdef daeBONMIN
-	daeNLPSolver_t* daeCreateBONMINSolver(void)
-	{
-		return new daeBONMINSolver;
-	}
-
-#endif
+daeNLPSolver_t* daeCreateBONMINSolver(void)
+{
+	return new daeBONMINSolver;
+}
 	
 /******************************************************************
 	daeNLP

@@ -116,7 +116,7 @@ def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
+    sim.TimeHorizon       = 100
     simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
 
