@@ -156,7 +156,7 @@ public:
     }
 };
 
-void simulateWhatsTheTime(void)
+void runWhatsTheTime(void)
 { 
 /*
 5.Create Log, Solver, DataReporter and Simulation object

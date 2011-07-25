@@ -157,7 +157,7 @@ void Export(daeModel* model, std::vector<daeExportable_t*>& objects_to_export)
 	file_cdae.close();
 }
 
-void simulateTutorial6(void)
+void runTutorial6(void)
 { 
     boost::scoped_ptr<daeSimulation_t>      pSimulation(new simTutorial6);  
     boost::scoped_ptr<daeDataReporter_t>    pDataReporter(daeCreateTCPIPDataReporter());

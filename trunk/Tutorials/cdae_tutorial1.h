@@ -196,7 +196,7 @@ public:
 	}
 };
 
-void simulateTutorial1(void)
+void runTutorial1(void)
 { 
 	boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial1);  
 	boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());

@@ -1,5 +1,5 @@
-#ifndef TEST_PROGRAMS_STD_AFX_H
-#define TEST_PROGRAMS_STD_AFX_H
+#ifndef DAE_CDAE_TUTORIALS_H
+#define DAE_CDAE_TUTORIALS_H
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
