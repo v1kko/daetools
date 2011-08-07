@@ -53,7 +53,7 @@ Integer constants defined in the module:
      - eAllPointsInDomain
      - eRangeOfIndexes
      - eCustomRange
-     
+
     daeeOptimizationVariableType
      - eIntegerVariable
      - eBinaryVariable
@@ -73,7 +73,15 @@ class daeObject:
      - CanonicalName: string
      - Description: string
     """
-    pass
+    @property
+    def Name(self):
+        """
+        Name: string
+        """
+        def fget(self):
+            pass
+        def fset(self, value):
+            pass
 
 def daeVersion(includeBuild):
     """
@@ -1496,7 +1504,7 @@ class daeOptimizationVariable:
      - UpperBound: float
      - StartingPoint: float
     """
-    
+
 class daeObjectiveFunction:
     """
     PROPERTIES:

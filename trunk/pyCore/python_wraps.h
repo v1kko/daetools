@@ -24,16 +24,17 @@ namespace daepython
 {
 /*******************************************************
 	String functions
-*******************************************************/	
+*******************************************************/
 string daeVariableType_str(const daeVariableType& self) ;
 string daeDomain_str(const daeDomain& self);
-string daeParameter_str(const daeParameter& self); 
-string daeVariable_str(const daeVariable& self); 
-string daePort_str(const daePort& self); 
+string daeParameter_str(const daeParameter& self);
+string daeVariable_str(const daeVariable& self);
+string daePort_str(const daePort& self);
 string daeModel_str(const daeModel& self);
 string daeEquation_str(const daeEquation& self);
 string daeDEDI_str(const daeDEDI& self);
-	
+string adouble_repr(const adouble& self);
+
 /*******************************************************
 	Common functions
 *******************************************************/
@@ -51,7 +52,7 @@ bool        GetBoolean1(daeConfig& self, const std::string& strPropertyPath, con
 real_t      GetFloat1(daeConfig& self, const std::string& strPropertyPath, const real_t defValue);
 int         GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int defValue);
 std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue);
-		
+
 /*******************************************************
 	adouble
 *******************************************************/
@@ -127,7 +128,7 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
+		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
 			m_ptrDomains.push_back(pDomain);
@@ -139,7 +140,7 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
+		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
 			m_ptrDomains.push_back(pDomain);
@@ -150,12 +151,12 @@ public:
 	boost::python::list GetDomains(void)
 	{
 		boost::python::list l;
-		daeDomain* pDomain;
-	
+		daeDomain* obj;
+
 		for(size_t i = 0; i < m_ptrDomains.size(); i++)
 		{
-			pDomain = m_ptrDomains[i];
-			l.append(pDomain);
+			obj = m_ptrDomains[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -164,42 +165,42 @@ public:
 	{
 		return GetValue();
 	}
-	
+
 	real_t GetParameterValue1(real_t n1)
 	{
 		return GetValue(n1);
 	}
-	
+
 	real_t GetParameterValue2(real_t n1, real_t n2)
 	{
 		return GetValue(n1, n2);
 	}
-	
+
 	real_t GetParameterValue3(real_t n1, real_t n2, real_t n3)
 	{
 		return GetValue(n1, n2, n3);
 	}
-	
+
 	real_t GetParameterValue4(real_t n1, real_t n2, real_t n3, real_t n4)
 	{
 		return GetValue(n1, n2, n3, n4);
 	}
-	
+
 	real_t GetParameterValue5(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5)
 	{
 		return GetValue(n1, n2, n3, n4, n5);
 	}
-	
+
 	real_t GetParameterValue6(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6);
 	}
-	
+
 	real_t GetParameterValue7(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7);
 	}
-	
+
 	real_t GetParameterValue8(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7, real_t n8)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
@@ -263,7 +264,7 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
+		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
 			m_ptrDomains.push_back(pDomain);
@@ -275,7 +276,7 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
+		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
 			m_ptrDomains.push_back(pDomain);
@@ -286,16 +287,16 @@ public:
 	boost::python::list GetDomains(void)
 	{
 		boost::python::list l;
-		daeDomain* pDomain;
-	
+		daeDomain* obj;
+
 		for(size_t i = 0; i < m_ptrDomains.size(); i++)
 		{
-			pDomain = m_ptrDomains[i];
-			l.append(pDomain);
+			obj = m_ptrDomains[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	daeVariableType* GetVariableType(void)
 	{
 		return &this->m_VariableType;
@@ -305,42 +306,42 @@ public:
 	{
 		return GetValue();
 	}
-	
+
 	real_t GetVariableValue1(real_t n1)
 	{
 		return GetValue(n1);
 	}
-	
+
 	real_t GetVariableValue2(real_t n1, real_t n2)
 	{
 		return GetValue(n1, n2);
 	}
-	
+
 	real_t GetVariableValue3(real_t n1, real_t n2, real_t n3)
 	{
 		return GetValue(n1, n2, n3);
 	}
-	
+
 	real_t GetVariableValue4(real_t n1, real_t n2, real_t n3, real_t n4)
 	{
 		return GetValue(n1, n2, n3, n4);
 	}
-	
+
 	real_t GetVariableValue5(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5)
 	{
 		return GetValue(n1, n2, n3, n4, n5);
 	}
-	
+
 	real_t GetVariableValue6(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6);
 	}
-	
+
 	real_t GetVariableValue7(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7);
 	}
-	
+
 	real_t GetVariableValue8(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7, real_t n8)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
@@ -504,49 +505,50 @@ public:
 	boost::python::list GetDomains(void)
 	{
 		boost::python::list l;
-		daeDomain* pDomain;
-	
+		daeDomain* obj;
+
 		for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
 		{
-			pDomain = m_ptrarrDomains[i];
-			l.append(pDomain);
+			obj = m_ptrarrDomains[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetParameters(void)
 	{
 		boost::python::list l;
-		daeParameter* pParameter;
-	
+		daeParameter* obj;
+
 		for(size_t i = 0; i < m_ptrarrParameters.size(); i++)
 		{
-			pParameter = m_ptrarrParameters[i];
-			l.append(pParameter);
+			obj = m_ptrarrParameters[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetVariables(void)
 	{
 		boost::python::list l;
-		daeVariable* pVariable;
-	
+		daeVariable* obj;
+
 		for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
 		{
-			pVariable = m_ptrarrVariables[i];
-			l.append(pVariable);
+            //obj = dynamic_cast<daeVariable_Wrapper*>(m_ptrarrVariables[i]);
+			obj = m_ptrarrVariables[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
-	std::string GetObjectClassName(void) const 
+
+	std::string GetObjectClassName(void) const
 	{
 		boost::python::reference_existing_object::apply<const daePort*>::type converter;
 		PyObject* pyobj = converter( this );
 		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
 		boost::python::object o_class = obj.attr("__class__");
-		string name = boost::python::extract<string>(o_class.attr("__name__"));	
+		string name = boost::python::extract<string>(o_class.attr("__name__"));
 		return name;
 	}
 };
@@ -592,7 +594,7 @@ public:
 	{
 		daeModel::END_IF();
 	}
-	
+
 	daeSTN* STN(const string& strSTN)
 	{
 		return daeModel::STN(strSTN);
@@ -622,17 +624,17 @@ public:
 	{
 		return daeModel::CreateEquation(strName, "");
 	}
-	
+
 	void ConnectPorts(daePort& pPortFrom, daePort& pPortTo)
 	{
 		daeModel::ConnectPorts(&pPortFrom, &pPortTo);
 	}
-	
+
 	void DeclareData()
 	{
-		// Must be declared since I dont need it in python 
+		// Must be declared since I dont need it in python
 	}
-	
+
 	void DeclareEquations(void)
 	{
         if(boost::python::override f = this->get_override("DeclareEquations"))
@@ -649,37 +651,37 @@ public:
 	{
 		boost::python::list l;
 		daeDomain* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
 		{
 			obj = m_ptrarrDomains[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetParameters(void)
 	{
 		boost::python::list l;
 		daeParameter* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrParameters.size(); i++)
 		{
 			obj = m_ptrarrParameters[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetVariables(void)
 	{
 		boost::python::list l;
 		daeVariable* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
 		{
 			obj = m_ptrarrVariables[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -688,93 +690,93 @@ public:
 	{
 		boost::python::list l;
 		daePort* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
 		{
 			obj = m_ptrarrPorts[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetPortArrays(void)
 	{
 		boost::python::list l;
 		daePortArray* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrPortArrays.size(); i++)
 		{
 			obj = m_ptrarrPortArrays[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetChildModels(void)
 	{
 		boost::python::list l;
 		daeModel* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrModels.size(); i++)
 		{
 			obj = m_ptrarrModels[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetChildModelArrays(void)
 	{
 		boost::python::list l;
 		daeModelArray* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
 		{
 			obj = m_ptrarrModelArrays[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetSTNs(void)
 	{
 		boost::python::list l;
 		daeSTN* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
 		{
 			obj = m_ptrarrSTNs[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
 	{
 		daeObject* pObject;
 		daeExportable_t* pExportable;
 		std::vector<daeExportable_t*> ptrarrObjects;
 		boost::python::ssize_t n = boost::python::len(objects);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
+		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pObject = boost::python::extract<daeObject*>(objects[i]);
 			pExportable = dynamic_cast<daeExportable_t*>(pObject);
 			ptrarrObjects.push_back(pExportable);
 		}
-		
+
 		return daeModel::ExportObjects(ptrarrObjects, eLanguage);
 	}
-	
-	std::string GetObjectClassName(void) const 
+
+	std::string GetObjectClassName(void) const
 	{
 		boost::python::reference_existing_object::apply<const daeModel*>::type converter;
 		PyObject* pyobj = converter( this );
 		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
 		boost::python::object o_class = obj.attr("__class__");
-		string name = boost::python::extract<string>(o_class.attr("__name__"));	
+		string name = boost::python::extract<string>(o_class.attr("__name__"));
 		return name;
 	}
-	
+
 };
 
 /*******************************************************
@@ -793,24 +795,24 @@ public:
 	{
 		boost::python::list l;
 		daeEquation* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrEquations.size(); i++)
 		{
 			obj = m_ptrarrEquations[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
-	
+
 	boost::python::list GetStateTransitions(void)
 	{
 		boost::python::list l;
 		daeStateTransition* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrStateTransitions.size(); i++)
 		{
 			obj = m_ptrarrStateTransitions[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -819,11 +821,11 @@ public:
 	{
 		boost::python::list l;
 		daeSTN* obj;
-	
+
 		for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
 		{
 			obj = m_ptrarrSTNs[i];
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -847,7 +849,7 @@ boost::python::list GetStatesSTN(daeSTN& stn);
 //	{
 //		boost::python::list l;
 //		daeState* obj;
-//	
+//
 //		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
 //		{
 //			obj = m_ptrarrStates[i];
@@ -885,7 +887,7 @@ public:
 	{
 		return m_pStateFrom;
 	}
-	
+
 	daeState* GetStateTo(void)
 	{
 		return m_pStateTo;
@@ -933,7 +935,7 @@ public:
 		else
 			this->daeBaseLog::Message(strMessage, nSeverity);
 	}
-	
+
 	void def_Message(const string& strMessage, size_t nSeverity)
 	{
         this->daeBaseLog::Message(strMessage, nSeverity);
@@ -955,7 +957,7 @@ public:
 		else
 			this->daeFileLog::Message(strMessage, nSeverity);
 	}
-	
+
 	void def_Message(const string& strMessage, size_t nSeverity)
 	{
         this->daeFileLog::Message(strMessage, nSeverity);
@@ -975,7 +977,7 @@ public:
 		else
 			this->daeStdOutLog::Message(strMessage, nSeverity);
 	}
-	
+
 	void def_Message(const string& strMessage, size_t nSeverity)
 	{
         this->daeStdOutLog::Message(strMessage, nSeverity);
@@ -997,12 +999,12 @@ public:
 		else
 			this->daeTCPIPLog::Message(strMessage, nSeverity);
 	}
-	
+
 	void def_Message(const string& strMessage, size_t nSeverity)
 	{
         this->daeTCPIPLog::Message(strMessage, nSeverity);
 	}
-};	
+};
 
 class thread_locker
 {
@@ -1012,7 +1014,7 @@ public:
 	//	if(thread_support::enabled())
 			m_gstate = PyGILState_Ensure();
 	}
-	
+
 	~thread_locker()
 	{
 	//	if(boost::thread_support::enabled())
@@ -1041,9 +1043,9 @@ public:
 			daeDeclareException(exNotImplemented);
 			e << "daeTCPIPLogServer::MessageReceived() function must be implemented in the derived class";
 			throw e;
-		}	
+		}
 	}
-};	
+};
 
 }
 

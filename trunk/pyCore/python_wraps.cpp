@@ -5,7 +5,7 @@
 using namespace std;
 using namespace boost;
 using namespace boost::python;
-  
+
 namespace daepython
 {
 /*******************************************************
@@ -16,7 +16,7 @@ daeDomainIndex CreateDomainIndex(object& o)
 	extract<size_t>          size(o);
 	extract<daeDEDI*>        DEDI(o);
 	extract<daeDomainIndex>  domainIndex(o);
-	
+
 	if(size.check())
 	{
 		size_t n = size();
@@ -33,7 +33,7 @@ daeDomainIndex CreateDomainIndex(object& o)
 	}
 	else
 	{
-		daeDeclareException(exInvalidCall); 
+		daeDeclareException(exInvalidCall);
 		e << "Invalid argument" ;
 		throw e;
 		return daeDomainIndex();
@@ -45,7 +45,7 @@ daeArrayRange CreateArrayRange(object& o)
 	extract<size_t>        get_size_t(o);
 	extract<daeDEDI*>      get_DEDI(o);
 	extract<daeIndexRange> get_IndexRange(o);
-	
+
 // We have only the first number (start) so it must be integer or daeDEDI
 	if(get_DEDI.check())
 	{
@@ -64,7 +64,7 @@ daeArrayRange CreateArrayRange(object& o)
 	}
 	else
 	{
-		daeDeclareException(exInvalidCall); 
+		daeDeclareException(exInvalidCall);
 		e << "Invalid argument" ;
 		throw e;
 		return daeArrayRange();
@@ -79,48 +79,48 @@ boost::python::object daeGetConfig(void)
 
 bool GetBoolean(daeConfig& self, const std::string& strPropertyPath)
 {
-	return self.Get<bool>(strPropertyPath);	
+	return self.Get<bool>(strPropertyPath);
 }
 
 real_t GetFloat(daeConfig& self, const std::string& strPropertyPath)
 {
-	return self.Get<real_t>(strPropertyPath);	
+	return self.Get<real_t>(strPropertyPath);
 }
 
 int GetInteger(daeConfig& self, const std::string& strPropertyPath)
 {
-	return self.Get<int>(strPropertyPath);	
+	return self.Get<int>(strPropertyPath);
 }
 
 std::string GetString(daeConfig& self, const std::string& strPropertyPath)
 {
-	return self.Get<std::string>(strPropertyPath);	
+	return self.Get<std::string>(strPropertyPath);
 }
 
 bool GetBoolean1(daeConfig& self, const std::string& strPropertyPath, const bool defValue)
 {
-	return self.Get<bool>(strPropertyPath, defValue);	
+	return self.Get<bool>(strPropertyPath, defValue);
 }
 
 real_t GetFloat1(daeConfig& self, const std::string& strPropertyPath, const real_t defValue)
 {
-	return self.Get<real_t>(strPropertyPath, defValue);	
+	return self.Get<real_t>(strPropertyPath, defValue);
 }
 
 int GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int defValue)
 {
-	return self.Get<int>(strPropertyPath, defValue);	
+	return self.Get<int>(strPropertyPath, defValue);
 }
 
 std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue)
 {
-	return self.Get<std::string>(strPropertyPath, defValue);	
+	return self.Get<std::string>(strPropertyPath, defValue);
 }
 
 /*******************************************************
 	__str__ funkcije
 *******************************************************/
-string daeVariableType_str(const daeVariableType& self) 
+string daeVariableType_str(const daeVariableType& self)
 {
 	string str;
 	str += self.GetName() + string(", ");
@@ -131,7 +131,7 @@ string daeVariableType_str(const daeVariableType& self)
 	return str;
 }
 
-string daeDomain_str(const daeDomain& self) 
+string daeDomain_str(const daeDomain& self)
 {
 //	cout << "called daeDomain_str" << endl;
 	string str;
@@ -139,35 +139,35 @@ string daeDomain_str(const daeDomain& self)
 	return str;
 }
 
-string daeParameter_str(const daeParameter& self) 
+string daeParameter_str(const daeParameter& self)
 {
 	string str;
 	str += self.GetCanonicalName();
 	return str;
 }
 
-string daeVariable_str(const daeVariable& self) 
+string daeVariable_str(const daeVariable& self)
 {
 	string str;
 	str += self.GetCanonicalName();
 	return str;
 }
 
-string daePort_str(const daePort& self) 
+string daePort_str(const daePort& self)
 {
 	string str;
 	str += self.GetCanonicalName();
 	return str;
 }
 
-string daeModel_str(const daeModel& self) 
+string daeModel_str(const daeModel& self)
 {
 	string str;
 	str += self.GetCanonicalName();
 	return str;
 }
 
-string daeEquation_str(const daeEquation& self) 
+string daeEquation_str(const daeEquation& self)
 {
 	string str;
 	str += self.GetCanonicalName();
@@ -179,6 +179,11 @@ string daeDEDI_str(const daeDEDI& self)
 	string str;
 	str += self.GetCanonicalName();
 	return str;
+}
+
+string adouble_repr(const adouble& self)
+{
+    return self.node->SaveAsLatex(NULL);
 }
 
 /*******************************************************
@@ -340,7 +345,7 @@ python::numeric::array GetNumPyArrayDomain(daeDomain& domain)
 
 	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = domain.GetNumberOfPoints();
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	for(size_t k = 0; k < (size_t)dimensions; k++)
@@ -358,14 +363,14 @@ boost::python::list GetDomainPoints(daeDomain& domain)
 
 	return l;
 }
-	
+
 void SetDomainPoints(daeDomain& domain, boost::python::list l)
 {
 	real_t point;
 	std::vector<real_t> darrPoints;
-	
+
 	boost::python::ssize_t n = boost::python::len(l);
-	for(boost::python::ssize_t i = 0; i < n; i++) 
+	for(boost::python::ssize_t i = 0; i < n; i++)
 	{
 		point = extract<real_t>(l[i]);
 		darrPoints.push_back(point);
@@ -396,9 +401,9 @@ daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list Cus
 {
 	size_t index;
 	std::vector<size_t> narrCustomPoints;
-	
+
 	boost::python::ssize_t n = boost::python::len(CustomPoints);
-	for(boost::python::ssize_t i = 0; i < n; i++) 
+	for(boost::python::ssize_t i = 0; i < n; i++)
 	{
 		index = extract<size_t>(CustomPoints[i]);
 		narrCustomPoints.push_back(index);
@@ -416,12 +421,12 @@ daeIndexRange FunctionCallDomain2(daeDomain& domain, boost::python::list l)
 	size_t index;
 	std::vector<size_t> narrDomainIndexes;
 	boost::python::ssize_t n = boost::python::len(l);
-	for(boost::python::ssize_t i = 0; i < n; i++) 
+	for(boost::python::ssize_t i = 0; i < n; i++)
 	{
 		index = extract<size_t>(l[i]);
 		narrDomainIndexes.push_back(index);
 	}
-	
+
 	return domain(narrDomainIndexes);
 }
 
@@ -451,7 +456,7 @@ python::numeric::array GetNumPyArrayParameter(daeParameter& param)
 		dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
 		nTotalSize *= dimensions[i];
 	}
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	for(size_t k = 0; k < nTotalSize; k++)
@@ -612,7 +617,7 @@ python::numeric::array GetNumPyArrayVariable(daeVariable& var)
 		dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
 		nTotalSize *= dimensions[i];
 	}
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	for(size_t k = 0; k < nTotalSize; k++)
@@ -1241,7 +1246,7 @@ daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python:
 	size_t index;
 	std::vector<size_t> narrDomainIndexes;
 	boost::python::ssize_t n = boost::python::len(l);
-	for(boost::python::ssize_t i = 0; i < n; i++) 
+	for(boost::python::ssize_t i = 0; i < n; i++)
 	{
 		index = extract<size_t>(l[i]);
 		narrDomainIndexes.push_back(index);
@@ -1258,7 +1263,7 @@ boost::python::list GetStatesSTN(daeSTN& stn)
 	std::vector<daeState_t*> ptrarrStates;
 	boost::python::list l;
 	daeState* obj;
-	
+
 	stn.GetStates(ptrarrStates);
 
 	for(size_t i = 0; i < ptrarrStates.size(); i++)
@@ -1279,7 +1284,7 @@ boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction
 
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
@@ -1295,7 +1300,7 @@ boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimization
 
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
@@ -1311,7 +1316,7 @@ boost::python::numeric::array GetGradientsMeasuredVariable(daeMeasuredVariable& 
 
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
-	
+
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
