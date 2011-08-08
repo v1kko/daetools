@@ -65,7 +65,7 @@ class IdentifierNode(Node):
             return dictNamesValues[self.Name]
         else: # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             return 0.0
-            
+
         raise RuntimeError('Identifier {0} not found in the Name-Value dictionary'.format(self.Name))
 
 class FunctionNode(Node):
@@ -355,16 +355,22 @@ class Number:
                                 )
                      )
 
-reserved = {'exp' : 'exp',
-            'sin' : 'sin'
+functions = {'exp'  : 'exp',
+             'sqrt' : 'sqrt',
+             'log'  : 'log',
+             'ln'   : 'ln',
+             'sin'  : 'sin',
+             'cos'  : 'cos',
+             'tan'  : 'tan'
             }
+
 tokens = [
     'NAME', 'NUMBER', 'FLOAT',
     'PLUS','MINUS','EXP', 'TIMES','DIVIDE','EQUALS',
     'LPAREN','RPAREN',
     'NOT', 'AND', 'OR',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
-    ] + list(reserved.values())
+    ] + list(functions.values())
 
 t_PLUS    = r'\+'
 t_MINUS   = r'-'
@@ -382,15 +388,14 @@ t_GE = r'>='
 t_LT = r'<'
 t_LE = r'<='
 
-#t_FUNCTIONS = r'sin|cos|tan|exp'
 t_EQUALS  = r'='
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 
-#t_NAME    = r'[a-zA-Z_][a-zA-Z0-9_]*'
+#t_NAME     = r'[a-zA-Z_][a-zA-Z_0-9]*'
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value,'NAME') # Check for reserved words
+    t.type = functions.get(t.value,'NAME')
     return t
 
 t_NUMBER = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
@@ -406,105 +411,175 @@ def t_error(t):
     print "Illegal character '%s'" % t.value[0]
     t.lexer.skip(1)
 
-# Parsing rules
-
-precedence = (
-    ('left','NAME'),
-    ('left','PLUS','MINUS'),
-    ('left','TIMES','DIVIDE'),
-    ('left', 'EXP'),
-    ('right','UMINUS')
-    )
-
-#def p_exp(p):
-#    """expression : EXP LPAREN expression RPAREN"""
-#    p[0] = Number(FunctionNode(p[1], p[3]))
-
-def p_statement_assign(p):
-    """statement : expression EQUALS expression"""
-    p[0] = AssignmentNode(p[1], p[3])
-
-def p_statement_expr(p):
-    """
-    statement : expression
-              | expression_logical
-              | expression_rel
-    """
+# expression:
+def p_expression_1(p):
+    'expression : assignment_expression'
     p[0] = p[1]
 
-def p_expression_binop(p):
+# assigment_expression:
+def p_assignment_expression_1(p):
+    'assignment_expression : conditional_expression'
+    p[0] = p[1]
+
+def p_assignment_expression_2(p):
+    'assignment_expression : shift_expression EQUALS assignment_expression'
+    p[0] = AssignmentNode(p[1], p[3])
+
+# conditional-expression
+def p_conditional_expression_1(p):
+    'conditional_expression : or_expression'
+    p[0] = p[1]
+
+# OR-expression
+def p_or_expression_1(p):
+    'or_expression : and_expression'
+    p[0] = p[1]
+
+def p_or_expression_2(p):
+    'or_expression : or_expression OR and_expression'
+    p[0] = (p[1] | p[3])
+
+# AND-expression
+def p_and_expression_1(p):
+    'and_expression : equality_expression'
+    p[0] = p[1]
+
+def p_and_expression_2(p):
+    'and_expression : and_expression AND equality_expression'
+    p[0] = p[1] & p[3]
+
+# equality-expression:
+def p_equality_expression_1(p):
+    'equality_expression : relational_expression'
+    p[0] = p[1]
+
+def p_equality_expression_2(p):
+    'equality_expression : equality_expression EQ relational_expression'
+    p[0] = (p[1] == p[3])
+
+def p_equality_expression_3(p):
+    'equality_expression : equality_expression NE relational_expression'
+    p[0] = (p[1] != p[3])
+
+# relational-expression:
+def p_relational_expression_1(p):
+    'relational_expression : shift_expression'
+    p[0] = p[1]
+
+def p_relational_expression_2(p):
+    'relational_expression : relational_expression LT shift_expression'
+    p[0] = p[1] < p[3]
+
+def p_relational_expression_3(p):
+    'relational_expression : relational_expression GT shift_expression'
+    p[0] = p[1] > p[3]
+
+def p_relational_expression_4(p):
+    'relational_expression : relational_expression LE shift_expression'
+    p[0] = p[1] <= p[3]
+
+def p_relational_expression_5(p):
+    'relational_expression : relational_expression GE shift_expression'
+    p[0] = p[1] >= p[3]
+
+# shift-expression
+def p_shift_expression_1(p):
+    'shift_expression : additive_expression'
+    p[0] = p[1]
+
+# additive-expression
+def p_additive_expression_1(p):
+    'additive_expression : multiplicative_expression'
+    p[0] = p[1]
+
+def p_additive_expression_2(p):
+    'additive_expression : additive_expression PLUS multiplicative_expression'
+    p[0] = p[1] + p[3]
+
+def p_additive_expression_3(p):
+    'additive_expression : additive_expression MINUS multiplicative_expression'
+    p[0] = p[1] - p[3]
+
+# multiplicative-expression
+def p_multiplicative_expression_1(p):
+    'multiplicative_expression : cast_expression'
+    p[0] = p[1]
+
+def p_multiplicative_expression_2(p):
+    'multiplicative_expression : multiplicative_expression TIMES cast_expression'
+    p[0] = p[1] * p[3]
+
+def p_multiplicative_expression_3(p):
+    'multiplicative_expression : multiplicative_expression DIVIDE cast_expression'
+    p[0] = p[1] / p[3]
+
+def p_multiplicative_expression_4(p):
+    'multiplicative_expression : multiplicative_expression EXP cast_expression'
+    p[0] = p[1] ** p[3]
+
+# cast-expression
+def p_cast_expression_1(p):
+    'cast_expression : unary_expression'
+    p[0] = p[1]
+
+# unary-expression:
+def p_unary_expression_1(p):
+    'unary_expression : postfix_expression'
+    p[0] = p[1]
+
+def p_unary_expression_4(p):
+    'unary_expression : unary_operator'
+    p[0] = p[1]
+
+def p_unary_operator(p):
+    '''
+    unary_operator : PLUS
+                   | MINUS
+                   | NOT
+    '''
+    p[0] = p[1]
+
+# postfix-expression:
+def p_postfix_expression_1(p):
+    """postfix_expression : primary_expression"""
+    p[0] = p[1]
+
+def p_postfix_expression_2(p):
     """
-    expression : expression PLUS expression
-               | expression MINUS expression
-               | expression TIMES expression
-               | expression DIVIDE expression
-               | expression EXP expression
+    postfix_expression : sin  LPAREN expression RPAREN
+                       | cos  LPAREN expression RPAREN
+                       | tan  LPAREN expression RPAREN
+                       | exp  LPAREN expression RPAREN
+                       | sqrt LPAREN expression RPAREN
+                       | log  LPAREN expression RPAREN
+                       | ln   LPAREN expression RPAREN
     """
-    if p[2]   == '+' : p[0] = p[1] + p[3]
-    elif p[2] == '-' : p[0] = p[1] - p[3]
-    elif p[2] == '*' : p[0] = p[1] * p[3]
-    elif p[2] == '/' : p[0] = p[1] / p[3]
-    elif p[2] == '^' : p[0] = p[1] ** p[3]
+    p[0] = Number(FunctionNode(p[1], p[3]))
 
-def p_expression_logical(p):
-    """
-    expression_logical  : expression LT expression
-                        | expression LE expression
-                        | expression GT expression
-                        | expression GE expression
-                        | expression EQ expression
-                        | expression NE expression
-    """
-    if   p[2] == '<'  : p[0] = p[1] <  p[3]
-    elif p[2] == '<=' : p[0] = p[1] <= p[3]
-    elif p[2] == '>'  : p[0] = p[1] >  p[3]
-    elif p[2] == '>=' : p[0] = p[1] >= p[3]
-    elif p[2] == '==' : p[0] = p[1] == p[3]
-    elif p[2] == '!=' : p[0] = p[1] != p[3]
+def p_primary_expression(p):
+    '''primary_expression :  identifier
+                          |  constant
+                          |  LPAREN expression RPAREN'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 4:
+        p[0] = p[2]
 
-def p_expression_rel(p):
-    """
-    expression_rel : expression_logical AND expression_logical
-                   | expression_logical OR  expression_logical
-    """
-    if p[2]   == '&' : p[0] = p[1] & p[3]
-    elif p[2] == '|' : p[0] = p[1] | p[3]
-
-def p_expression_uminus(p):
-    """expression : MINUS expression %prec UMINUS"""
-    p[0] = - p[2]
-
-def p_expression_not(p):
-    """expression_rel : NOT expression_logical"""
-    p[0] = (not p[2])
-
-def p_expression_group_1(p):
-    """expression : LPAREN expression RPAREN"""
-    p[0] = p[2]
-
-def p_expression_group_2(p):
-    """expression_rel : LPAREN expression_rel RPAREN"""
-    p[0] = p[2]
-
-def p_expression_group_3(p):
-    """expression_logical : LPAREN expression_logical RPAREN"""
-    p[0] = p[2]
-
-def p_expression_number(p):
-    """expression : NUMBER"""
+def p_constant_1(p):
+    """constant : NUMBER"""
     p[0] = Number(ConstantNode(int(p[1])))
 
-def p_expression_float(p):
-    """expression : FLOAT"""
+def p_constant_2(p):
+    """constant : FLOAT"""
     p[0] = Number(ConstantNode(float(p[1])))
 
 def p_expression_name(p):
-    """expression : NAME"""
+    """identifier : NAME"""
     p[0] = Number(IdentifierNode(p[1]))
 
 def p_error(p):
     print "Syntax error at '%s'" % p.value
-    raise Exception("")
+    raise Exception("Syntax error at '%s'" % p.value)
 
 class daeExpressionParser:
     def __init__(self):
@@ -564,8 +639,8 @@ if __name__ == "__main__":
     parser  = daeExpressionParser()
 
     dictNameValue = getSimpleParserDictionary()
-    
-    expression = 'y + x2 / x4 + 4.0 - x1'
+
+    expression = '(exp(y + x2 / x4) + 4.0) - x1'
     parse_res = parser.parse(expression)
     eval_res  = parser.evaluate(dictNameValue)
     print '-------------------------------------------'
@@ -574,18 +649,9 @@ if __name__ == "__main__":
     print '    NodeTree:', repr(parse_res)
     print '    String:', str(parse_res)
     print '    Evaluate:', str(eval_res)
-    print '\n\n'
+    print '\n'
 
-    #expression = '(exp(y + x2 / x4) + 4.0) - x1'
-    #parse_res = parser.parse(expression)
-    #print '-------------------------------------------'
-    #print 'Expression:' + expression
-    #print '-------------------------------------------'
-    #print '    NodeTree:', repr(parse_res)
-    #print '    String:', str(parse_res)
-    #print '\n\n'
-
-    expression = 'y = (x1 + x3)/x4'
+    expression = 'y = sin(x1 + x3)/x4'
     res = parser.parse(expression)
     parse_res = parser.parse(expression)
     print '-------------------------------------------'
@@ -593,7 +659,7 @@ if __name__ == "__main__":
     print '-------------------------------------------'
     print '    NodeTree:', repr(parse_res)
     print '    String:', str(parse_res)
-    print '\n\n'
+    print '\n'
 
     expression = '(y + 4.0 >= x3 - 3.2e-03) & (y == 3)'
     parse_res = parser.parse(expression)
@@ -602,7 +668,7 @@ if __name__ == "__main__":
     print '-------------------------------------------'
     print '    NodeTree:', repr(parse_res)
     print '    String:', str(parse_res)
-    print '\n\n'
+    print '\n'
 
     expression = 'dV/dt = (v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
     parse_res = parser.parse(expression)
