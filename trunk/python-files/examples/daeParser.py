@@ -352,14 +352,16 @@ class Number:
                                 )
                      )
 
-
-tokens = (
+reserved = {'exp' : 'exp',
+            'sin' : 'sin'
+            }
+tokens = [
     'NAME', 'NUMBER', 'FLOAT',
     'PLUS','MINUS','EXP', 'TIMES','DIVIDE','EQUALS',
     'LPAREN','RPAREN',
     'NOT', 'AND', 'OR',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
-    )
+    ] + list(reserved.values())
 
 t_PLUS    = r'\+'
 t_MINUS   = r'-'
@@ -381,7 +383,12 @@ t_LE = r'<='
 t_EQUALS  = r'='
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
-t_NAME    = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+#t_NAME    = r'[a-zA-Z_][a-zA-Z0-9_]*'
+def t_NAME(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value,'NAME') # Check for reserved words
+    return t
 
 t_NUMBER = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
 t_FLOAT = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
@@ -406,11 +413,8 @@ precedence = (
     ('right','UMINUS')
     )
 
-#    ('left', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE'),
-#    ('left', 'NOT', 'AND', 'OR')
-
-#def p_function_expression(p):
-#    """expression : NAME '(' expression ')' """
+#def p_exp(p):
+#    """expression : EXP LPAREN expression RPAREN"""
 #    p[0] = Number(FunctionNode(p[1], p[3]))
 
 def p_statement_assign(p):
@@ -506,7 +510,7 @@ class daeParser:
         self.parseResult = None
 
     def parse(self, expression):
-        self.parseResult = self.parser.parse(expression, debug = 1)
+        self.parseResult = self.parser.parse(expression, debug = 0)
         return self.parseResult
 
     def evaluate(self, dictNamesValues):
@@ -526,27 +530,82 @@ class daeParser:
         result = node.evaluate(dictNamesValues)
         return result
 
+def getSimpleParserDictionary():
+    """
+    Dictionary should contain the keys of the following type:
+     - identifier-name: value (like 'V' : 1.25)
+     - function-of-one-argument : function-object ('exp': math.exp)
+       these function keys HAS to be implemented: sin, cos, tan, exp, ln, log, sqrt
+    """
+    import math
+    dictNameValue = {}
+
+    dictNameValue['y']  = 10.0
+    dictNameValue['x1'] = 1.0
+    dictNameValue['x2'] = 2.0
+    dictNameValue['x3'] = 3.0
+    dictNameValue['x4'] = 4.0
+
+    dictNameValue['sin']  = math.sin
+    dictNameValue['cos']  = math.cos
+    dictNameValue['tan']  = math.tan
+    dictNameValue['log']  = math.log10
+    dictNameValue['ln']   = math.log
+    dictNameValue['sqrt'] = math.sqrt
+    dictNameValue['exp']  = math.exp
+
+    return dictNameValue
+
 # Some tests...
 if __name__ == "__main__":
     parser  = daeParser()
 
-    #expression = '(exp(y + x2 / x4) + 4.0) - x1'
-    #res = parser.parse(expression)
-    #print 'Tree for ' + expression
-    #print repr(res)
-    #print 'String representation for ' + expression
-    #print str(res)
+    dictNameValue = getSimpleParserDictionary()
+    
+    expression = 'y + x2 / x4 + 4.0 - x1'
+    parse_res = parser.parse(expression)
+    eval_res  = parser.evaluate(dictNameValue)
+    print '-------------------------------------------'
+    print 'Expression:' + expression
+    print '-------------------------------------------'
+    print '    NodeTree:', repr(parse_res)
+    print '    String:', str(parse_res)
+    print '    Evaluate:', str(eval_res)
+    print '\n\n'
 
-    expression = '( (y + 4.0) >= x3 - 3.2e-03) & (y == 3)'
+    #expression = '(exp(y + x2 / x4) + 4.0) - x1'
+    #parse_res = parser.parse(expression)
+    #print '-------------------------------------------'
+    #print 'Expression:' + expression
+    #print '-------------------------------------------'
+    #print '    NodeTree:', repr(parse_res)
+    #print '    String:', str(parse_res)
+    #print '\n\n'
+
+    expression = 'y = (x1 + x3)/x4'
     res = parser.parse(expression)
-    print 'Tree for ' + expression
-    print repr(res)
-    print 'String representation for ' + expression
-    print str(res)
+    parse_res = parser.parse(expression)
+    print '-------------------------------------------'
+    print 'Expression:' + expression
+    print '-------------------------------------------'
+    print '    NodeTree:', repr(parse_res)
+    print '    String:', str(parse_res)
+    print '\n\n'
+
+    expression = '(y + 4.0 >= x3 - 3.2e-03) & (y == 3)'
+    parse_res = parser.parse(expression)
+    print '-------------------------------------------'
+    print 'Expression:' + expression
+    print '-------------------------------------------'
+    print '    NodeTree:', repr(parse_res)
+    print '    String:', str(parse_res)
+    print '\n\n'
 
     expression = 'dV/dt = (v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
-    res = parser.parse(expression)
-    print 'Tree for ' + expression
-    print repr(res)
-    print 'String representation for ' + expression
-    print str(res)
+    parse_res = parser.parse(expression)
+    print '-------------------------------------------'
+    print 'Expression:' + expression
+    print '-------------------------------------------'
+    print '    NodeTree:', repr(parse_res)
+    print '    String:', str(parse_res)
+    print '\n\n'
