@@ -92,6 +92,8 @@ copy WebView_ui.py               %ROOT%\pyDAE
 copy WebViewDialog.py            %ROOT%\pyDAE
 copy daeVariableTypes.py         %ROOT%\pyDAE
 copy daeDataReporters.py         %ROOT%\pyDAE
+copy daeParser.py                %ROOT%\pyDAE
+copy daeGetParserDictionary.py   %ROOT%\pyDAE
 copy pyDAE__init__.py            %ROOT%\pyDAE\__init__.py
 copy solvers__init__.py          %ROOT%\solvers\__init__.py
 copy aztecoo_options.py          %ROOT%\solvers

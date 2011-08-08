@@ -270,6 +270,8 @@ cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daeVariableTypes.py           ${PACKAGE_NAME}/pyDAE
 cp ../python-files/daeDataReporters.py           ${PACKAGE_NAME}/pyDAE
+cp ../python-files/daeParser.py                  ${PACKAGE_NAME}/pyDAE
+cp ../python-files/daeGetParserDictionary.py     ${PACKAGE_NAME}/pyDAE
 cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
 cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
 cp ../python-files/aztecoo_options.py            ${PACKAGE_NAME}/solvers
