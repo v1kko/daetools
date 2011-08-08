@@ -63,6 +63,9 @@ class IdentifierNode(Node):
     def evaluate(self, dictNamesValues):
         if self.Name in dictNamesValues:
             return dictNamesValues[self.Name]
+        else: # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            return 0.0
+            
         raise RuntimeError('Identifier {0} not found in the Name-Value dictionary'.format(self.Name))
 
 class FunctionNode(Node):
@@ -503,7 +506,7 @@ def p_error(p):
     print "Syntax error at '%s'" % p.value
     raise Exception("")
 
-class daeParser:
+class daeExpressionParser:
     def __init__(self):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc()
@@ -558,7 +561,7 @@ def getSimpleParserDictionary():
 
 # Some tests...
 if __name__ == "__main__":
-    parser  = daeParser()
+    parser  = daeExpressionParser()
 
     dictNameValue = getSimpleParserDictionary()
     

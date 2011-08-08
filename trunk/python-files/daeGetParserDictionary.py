@@ -17,7 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys
 from daetools.pyDAE import *
 
-def daeGetParserDictionary(model):
+def getParserDictionary(model):
     """
     Dictionary should contain the following type of items:
      - string : adouble (for parameters and variables)
@@ -25,12 +25,15 @@ def daeGetParserDictionary(model):
     """
     dictNameValue = {}
 
+    # adouble values for parameters
     for p in model.Parameters:
         dictNameValue[p.Name] = p()
 
+    # adouble values for variables
     for v in model.Variables:
         dictNameValue[v.Name] = v()
 
+    # DAE Tools mathematical functions:
     dictNameValue['sin']  = Sin
     dictNameValue['cos']  = Cos
     dictNameValue['tan']  = Tan
