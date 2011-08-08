@@ -18,21 +18,21 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   sudo apt-get install libboost-all-dev python-qt4 python-numpy python-scipy python-matplotlib mayavi2 \
                        liblapack3gf libblas3gf libsuitesparse-dev libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
-                       wget subversion
+                       wget subversion fakeroot
 
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   sudo apt-get update
   sudo apt-get install libboost-all-dev python-qt4 python-numpy python-scipy python-matplotlib mayavi2 \
                        liblapack3gf libblas3gf libsuitesparse-dev libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
-                       wget subversion
+                       wget subversion fakeroot
 
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   sudo yum check-update
   sudo yum install boost-devel PyQt4 numpy scipy python-matplotlib \
                    blas lapack suitesparse-devel qt-creator qt-devel \
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
-                   wget subversion
+                   wget subversion fakeroot
 
 else
   echo "ERROR: unsupported GNU/Linux distribution; please edit the script to add support for: ${DISTRIBUTOR_ID}/${CODENAME}"
