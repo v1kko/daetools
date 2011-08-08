@@ -411,8 +411,9 @@ def t_error(t):
     print "Illegal character '%s'" % t.value[0]
     t.lexer.skip(1)
 
+# Parser rules:
 # expression:
-def p_expression_1(p):
+def p_expression(p):
     'expression : assignment_expression'
     p[0] = p[1]
 
@@ -502,35 +503,31 @@ def p_additive_expression_3(p):
 
 # multiplicative-expression
 def p_multiplicative_expression_1(p):
-    'multiplicative_expression : cast_expression'
+    'multiplicative_expression : unary_expression'
     p[0] = p[1]
 
 def p_multiplicative_expression_2(p):
-    'multiplicative_expression : multiplicative_expression TIMES cast_expression'
+    'multiplicative_expression : multiplicative_expression TIMES unary_expression'
     p[0] = p[1] * p[3]
 
 def p_multiplicative_expression_3(p):
-    'multiplicative_expression : multiplicative_expression DIVIDE cast_expression'
+    'multiplicative_expression : multiplicative_expression DIVIDE unary_expression'
     p[0] = p[1] / p[3]
 
 def p_multiplicative_expression_4(p):
-    'multiplicative_expression : multiplicative_expression EXP cast_expression'
+    'multiplicative_expression : multiplicative_expression EXP unary_expression'
     p[0] = p[1] ** p[3]
-
-# cast-expression
-def p_cast_expression_1(p):
-    'cast_expression : unary_expression'
-    p[0] = p[1]
 
 # unary-expression:
 def p_unary_expression_1(p):
     'unary_expression : postfix_expression'
     p[0] = p[1]
 
-def p_unary_expression_4(p):
+def p_unary_expression_2(p):
     'unary_expression : unary_operator'
     p[0] = p[1]
 
+# unary-operator:
 def p_unary_operator(p):
     '''
     unary_operator : PLUS
@@ -556,6 +553,7 @@ def p_postfix_expression_2(p):
     """
     p[0] = Number(FunctionNode(p[1], p[3]))
 
+# primary-expression
 def p_primary_expression(p):
     '''primary_expression :  identifier
                           |  constant
@@ -573,7 +571,7 @@ def p_constant_2(p):
     """constant : FLOAT"""
     p[0] = Number(ConstantNode(float(p[1])))
 
-def p_expression_name(p):
+def p_identifier(p):
     """identifier : NAME"""
     p[0] = Number(IdentifierNode(p[1]))
 
@@ -581,6 +579,7 @@ def p_error(p):
     print "Syntax error at '%s'" % p.value
     raise Exception("Syntax error at '%s'" % p.value)
 
+# Parser class
 class daeExpressionParser:
     def __init__(self):
         self.lexer  = lex.lex()
@@ -611,13 +610,15 @@ class daeExpressionParser:
 def getSimpleParserDictionary():
     """
     Dictionary should contain the keys of the following type:
-     - identifier-name: value (like 'V' : 1.25)
-     - function-of-one-argument : function-object ('exp': math.exp)
+     - identifier-name: value (for instance 'V' : 1.25)
+     - function-name : callable-object (for instance 'exp': math.exp)
        these function keys HAS to be implemented: sin, cos, tan, exp, ln, log, sqrt
+       since they are supported by the parser
     """
     import math
     dictNameValue = {}
 
+    # Some dummy values
     dictNameValue['y']  = 10.0
     dictNameValue['x1'] = 1.0
     dictNameValue['x2'] = 2.0
@@ -644,37 +645,33 @@ if __name__ == "__main__":
     parse_res = parser.parse(expression)
     eval_res  = parser.evaluate(dictNameValue)
     print '-------------------------------------------'
-    print 'Expression:' + expression
-    print '-------------------------------------------'
-    print '    NodeTree:', repr(parse_res)
-    print '    String:', str(parse_res)
-    print '    Evaluate:', str(eval_res)
-    print '\n'
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print 'Evaluate result:', str(eval_res)
+    print '-------------------------------------------\n'
 
     expression = 'y = sin(x1 + x3)/x4'
     res = parser.parse(expression)
     parse_res = parser.parse(expression)
     print '-------------------------------------------'
-    print 'Expression:' + expression
-    print '-------------------------------------------'
-    print '    NodeTree:', repr(parse_res)
-    print '    String:', str(parse_res)
-    print '\n'
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print '-------------------------------------------\n'
 
     expression = '(y + 4.0 >= x3 - 3.2e-03) & (y == 3)'
     parse_res = parser.parse(expression)
     print '-------------------------------------------'
-    print 'Expression:' + expression
-    print '-------------------------------------------'
-    print '    NodeTree:', repr(parse_res)
-    print '    String:', str(parse_res)
-    print '\n'
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print '-------------------------------------------\n'
 
     expression = 'dV/dt = (v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
     parse_res = parser.parse(expression)
     print '-------------------------------------------'
-    print 'Expression:' + expression
-    print '-------------------------------------------'
-    print '    NodeTree:', repr(parse_res)
-    print '    String:', str(parse_res)
-    print '\n\n'
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print '-------------------------------------------\n'
