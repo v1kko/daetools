@@ -264,11 +264,18 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__str__",						&daepython::daeVariableType_str)
 		;
 
-	class_<daeObject, boost::noncopyable>("daeObject", no_init)
-		.add_property("Name",			&daeObject::GetName,			&daeObject::SetName)
-		.add_property("CanonicalName",	&daeObject::GetCanonicalName,	&daeObject::SetCanonicalName)
-		.add_property("Description",	&daeObject::GetDescription,		&daeObject::SetDescription)
-		;
+    class_<daeObject, boost::noncopyable>("daeObject", no_init)
+        .add_property("Name",           &daeObject::GetName,            &daeObject::SetName)
+        .add_property("CanonicalName",  &daeObject::GetCanonicalName,   &daeObject::SetCanonicalName)
+        .add_property("Description",    &daeObject::GetDescription,     &daeObject::SetDescription)
+
+        .def("GetNameRelativeToParentModel",            &daeObject::GetNameRelativeToParentModel)
+        .def("GetStrippedName",                         &daeObject::GetStrippedName)
+        .def("GetStrippedNameRelativeToParentModel",    &daeObject::GetStrippedNameRelativeToParentModel)
+        ;
+	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1);
+	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2);
+	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName);
 
 	class_<daeDomainIndex>("daeDomainIndex")
 		.def(init<size_t>())

@@ -334,6 +334,18 @@ const adouble_array adarr_atan(const adouble_array& a)
 	return atan(a);
 }
 
+/*******************************************************
+	daeObject
+*******************************************************/
+string daeGetRelativeName_1(const daeObject* parent, const daeObject* child)
+{
+	return daeGetRelativeName(parent, child);
+}
+
+string daeGetRelativeName_2(const string& strParent, const string& strChild)
+{
+	return daeGetRelativeName(strParent, strChild);
+}
 
 /*******************************************************
 	daeDomain

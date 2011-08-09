@@ -69,7 +69,7 @@ class daeChooseVariable(QtGui.QDialog):
     def initTree(self, processes):
         for process in processes:
             self.addProcess(process)
-        
+
     def addProcess(self, process):
         rootItem = QtGui.QTreeWidgetItem(self.ui.treeWidget)
         rootItem.setText(0, process.Name)
@@ -79,9 +79,18 @@ class daeChooseVariable(QtGui.QDialog):
             currentItem = rootItem
             names = var.Name.split(".")
 
-            for n in names:
-                name = n.replace("&", "");
-                name = name.replace(";", "");
+            var_path = names[:-1]
+
+            var_name = names[-1]
+            var_name = var_name.replace("&", "")
+            var_name = var_name.replace(";", "")
+
+            # First find the parent QTreeWidgetItem
+            for item in var_path:
+                name = item.replace("&", "")
+                name = name.replace(";", "")
+                # All names in the path has to be enclosed with brackets [] to distinguish between variables and ports/models
+                name = '[' + name + ']'
 
                 found = False
                 for c in range(0, currentItem.childCount()):
@@ -95,10 +104,13 @@ class daeChooseVariable(QtGui.QDialog):
                 if found == False:
                     currentItem = QtGui.QTreeWidgetItem(currentItem)
                     currentItem.setText(0, name)
-                    
+
+            # Now we have the parrent in the currentItem, so add the new item to it with the variable data
+            varItem = QtGui.QTreeWidgetItem(currentItem)
             varData = QtCore.QVariant(var)
-            currentItem.setData(0, QtCore.Qt.UserRole, varData)
-    
+            varItem.setText(0, var_name)
+            varItem.setData(0, QtCore.Qt.UserRole, varData)
+  
     #@QtCore.pyqtSlot(int)
     def slotCurrentIndexChanged(self, index):
         self.domainIndexes = []
@@ -275,6 +287,7 @@ class daeChooseVariable(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotSelectionChanged(self):
         self.variable = None
+        self.hideAndClearAll()
 
         items = self.ui.treeWidget.selectedItems()
         if len(items) != 1:
@@ -293,8 +306,6 @@ class daeChooseVariable(QtGui.QDialog):
         values  = var.Values
         
         self.variable = var
-        
-        self.hideAndClearAll()
         
         if len(domains) == 0:
             self.enableControls(0)

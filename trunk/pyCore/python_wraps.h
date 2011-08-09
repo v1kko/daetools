@@ -99,6 +99,12 @@ const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
 
 /*******************************************************
+	daeObject
+*******************************************************/
+string daeGetRelativeName_1(const daeObject* parent, const daeObject* child);
+string daeGetRelativeName_2(const string& strParent, const string& strChild);
+
+/*******************************************************
 	daeDomain
 *******************************************************/
 boost::python::numeric::array GetNumPyArrayDomain(daeDomain& domain);

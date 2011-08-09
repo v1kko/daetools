@@ -63,8 +63,6 @@ class IdentifierNode(Node):
     def evaluate(self, dictNamesValues):
         if self.Name in dictNamesValues:
             return dictNamesValues[self.Name]
-        else: # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            return 0.0
 
         raise RuntimeError('Identifier {0} not found in the Name-Value dictionary'.format(self.Name))
 
