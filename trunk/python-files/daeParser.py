@@ -586,7 +586,7 @@ def p_error(p):
 class daeExpressionParser:
     def __init__(self, dictNamesValues = None):
         self.lexer  = lex.lex()
-        self.parser = yacc.yacc()
+        self.parser = yacc.yacc() #(write_tables = 0)
         self.parseResult = None
         self.dictNamesValues = dictNamesValues
 
