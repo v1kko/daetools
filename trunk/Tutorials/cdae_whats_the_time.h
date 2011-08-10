@@ -60,7 +60,7 @@ public:
         keeps only their references. 
         Domains, parameters, variables, ports, etc has to be defined in the constructor
         First, the base class constructor has to be called.
-        In this example we declare only one variable: time.
+        In this example we declare only one variable: tau.
         daeVariable constructor accepts 3 arguments:
          - Name: string
          - VariableType: daeVariableType
@@ -71,7 +71,7 @@ public:
         Internally they will be used without '&' and ';' characters: alpha, beta, gamma, ...;
         but, in the equations exported in the MathML or Latex format they will be shown as native Greek letters.
         Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.
-        In this example we use Greek character 'tau' to name the variable 'time'.
+        In this example we use Greek character 'τ' to name the variable 'tau'.
 */
     modWhatsTheTime(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
@@ -93,9 +93,9 @@ public:
             - function dt() which calculates a time derivative of the variable
             - function d() and d2() which calculate a partial derivative of the variable of the 1st and the 2nd order, respectively
         In this example we simply write that the variable time derivative is equal to 1:
-                                d(time) / dt = 1
+                                d(tau) / dt = 1
         which calculates the time as the current time elapsed in the simulation (which is a common way to obtain the current time within the model).
-        Note that the variables should be accessed through the model object, therefore we use self.time
+        Note that the variables should be accessed through the model object, therefore we use self.tau
 */
         daeEquation* eq;
 
@@ -149,7 +149,7 @@ public:
     /*
     4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.
         Every simulation class must implement SetUpVariables method, even if it is empty.
-        In this example the only thing needed to be done is to set the initial condition for the variable time to 0.
+        In this example the only thing needed to be done is to set the initial condition for the variable tau to 0.
         That can be done by using SetInitialCondition function:
     */
         m.tau.SetInitialCondition(0);

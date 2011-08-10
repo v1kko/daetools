@@ -43,6 +43,7 @@ void daeBlock::CalculateConditions(real_t				dTime,
 	map<size_t, daeExpressionInfo>::iterator iter;
 
 	SetTime(dTime);
+	m_pDataProxy->SetCurrentTime(dTime);
 	CopyValuesFromSolver(arrValues);
 	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
 
@@ -75,6 +76,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
 	SetTime(dTime);
+	m_pDataProxy->SetCurrentTime(dTime);
 	SetResidualArray(&arrResiduals);
 	CopyValuesFromSolver(arrValues);
 	CopyTimeDerivativesFromSolver(arrTimeDerivatives);	
@@ -112,6 +114,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
 	SetTime(dTime);
+	m_pDataProxy->SetCurrentTime(dTime);
 	SetResidualArray(&arrResiduals);
 	SetJacobianMatrix(&matJacobian); 
 	SetInverseTimeStep(dInverseTimeStep);
@@ -153,6 +156,7 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
 	SetTime(dTime);
+	m_pDataProxy->SetCurrentTime(dTime);
 	CopyValuesFromSolver(arrValues);
 	CopyTimeDerivativesFromSolver(arrTimeDerivatives);
 	
@@ -490,7 +494,7 @@ void daeBlock::Initialize(void)
 	RebuildExpressionMap();
 }
 
-daeeDiscontinuityType daeBlock::CheckDiscontinuities()
+daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;

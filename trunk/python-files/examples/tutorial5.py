@@ -45,15 +45,11 @@ class modTutorial(daeModel):
         self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
 
         self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
-        self.time = daeVariable("&tau;", no_t,          self, "Time elapsed in the process, s")
         self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
-
-        eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.time.dt() - 1.0
 
         # Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
         # Again, states MUST contain the SAME NUMBER OF EQUATIONS.
@@ -75,6 +71,7 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin() - 1500
 
         self.SWITCH_TO("Cooling",   self.T()    > 340)
+        # Here the daeModel.time() function is used to get the current time (time elapsed) in the simulation
         self.SWITCH_TO("HeaterOff", self.time() > 350)
 
         self.STATE("Cooling")
@@ -115,7 +112,6 @@ class simTutorial(daeSimulation):
         self.m.stnRegulator.ActiveState = "Heating"
 
         self.m.T.SetInitialCondition(283)
-        self.m.time.SetInitialCondition(0)
 
 # Use daeSimulator class
 def guiRun(app):

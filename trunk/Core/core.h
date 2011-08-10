@@ -796,7 +796,8 @@ public:
 
 	virtual void	SetReportingOn(bool bOn)								= 0;
 
-	virtual void	SaveModelReport(const string& strFileName) const		= 0;
+	virtual void	SaveModelReport(const string& strFileName, 
+									bool bRecursively = false) const		= 0;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
 	virtual bool	IsModelDynamic() const									= 0;
 

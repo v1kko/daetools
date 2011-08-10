@@ -528,11 +528,16 @@ def p_unary_expression_2(p):
 # unary-operator:
 def p_unary_operator(p):
     '''
-    unary_operator : PLUS
-                   | MINUS
-                   | NOT
+    unary_operator : PLUS  postfix_expression
+                   | MINUS postfix_expression
+                   | NOT   postfix_expression
     '''
-    p[0] = p[1]
+    if p[1] == '+':
+        p[0] = p[2]
+    elif p[1] == '-':
+        p[0] = - p[2]
+    elif p[1] == '!':
+        p[0] = not p[2]
 
 # postfix-expression:
 def p_postfix_expression_1(p):
@@ -579,18 +584,25 @@ def p_error(p):
 
 # Parser class
 class daeExpressionParser:
-    def __init__(self):
+    def __init__(self, dictNamesValues = None):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc()
         self.parseResult = None
+        self.dictNamesValues = dictNamesValues
+
+    def parse_and_evaluate(self, expression):
+        self.parse(expression)
+        return self.evaluate()
 
     def parse(self, expression):
         self.parseResult = self.parser.parse(expression, debug = 0)
         return self.parseResult
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self):
         if self.parseResult is None:
             raise RuntimeError('expression not parsed yet')
+        if self.dictNamesValues is None:
+            raise RuntimeError('dictNamesValues not set')
 
         node = None
         if isinstance(self.parseResult, Number):
@@ -602,8 +614,16 @@ class daeExpressionParser:
         else:
             raise RuntimeError('Invalid parse result type')
 
-        result = node.evaluate(dictNamesValues)
+        result = node.evaluate(self.dictNamesValues)
         return result
+
+    @property
+    def dictNamesValues(self):
+        return self.dictNamesValues
+
+    @property
+    def parseResult(self):
+        return self.parseResult
 
 def getSimpleParserDictionary():
     """
@@ -635,13 +655,12 @@ def getSimpleParserDictionary():
 
 # Some tests...
 if __name__ == "__main__":
-    parser  = daeExpressionParser()
+    dictNamesValues = getSimpleParserDictionary()
+    parser          = daeExpressionParser(dictNamesValues)
 
-    dictNameValue = getSimpleParserDictionary()
-
-    expression = '(exp(y + x2 / x4) + 4.0) - x1'
+    expression = '(-exp(y + x2 / x4) + 4.0) - x1'
     parse_res = parser.parse(expression)
-    eval_res  = parser.evaluate(dictNameValue)
+    eval_res  = parser.evaluate()
     print '-------------------------------------------'
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)

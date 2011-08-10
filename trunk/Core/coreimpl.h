@@ -592,6 +592,7 @@ public:
 		m_pmatSValues				= NULL;
 		m_pmatSTimeDerivatives		= NULL; 
 		m_pmatSResiduals			= NULL;
+		m_dCurrentTime				= 0;
 	}
 
 	
@@ -1020,6 +1021,16 @@ public:
 		return m_eLanguage;
 	}
 	
+	real_t GetCurrentTime(void) const
+	{
+		return m_dCurrentTime;
+	}
+	
+	void SetCurrentTime(real_t time)
+	{
+		m_dCurrentTime = time;
+	}
+	
 //	void SetGlobalCondition(daeCondition condition)
 //	{
 //		daeExecutionContext EC;
@@ -1090,6 +1101,7 @@ protected:
 	int*							m_pnVariablesTypes;
 	int*							m_pnVariablesTypesGathered;
 	bool							m_bGatherInfo;
+	real_t							m_dCurrentTime;
 	//daeExecutionContext*			m_pExecutionContexts;
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
@@ -1864,7 +1876,7 @@ public:
 	virtual void	InitializeStage4(void);
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 
-	virtual void	SaveModelReport(const string& strFileName) const;
+	virtual void	SaveModelReport(const string& strFileName, bool bRecursively = false) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
 
 	virtual daeDomain_t*		FindDomain(string& strCanonicalName);
@@ -1922,6 +1934,7 @@ public:
 	const adouble max(const adouble_array& a) const;
 	const adouble average(const adouble_array& a) const;
 	const adouble integral(const adouble_array& a) const;
+	const adouble time(void) const;
 
 // Internal functions
 	const adouble __sum__(const adouble_array& a) const;

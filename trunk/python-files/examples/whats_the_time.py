@@ -62,7 +62,7 @@ class modTutorial(daeModel):
         #     and not:
         #                    variable = daeVariable(...)
         #
-        #     In this example we declare only one variable: time.
+        #     In this example we declare only one variable: tau.
         #     daeVariable constructor accepts 3 arguments:
         #      - Name: string
         #      - VariableType: daeVariableType
@@ -73,9 +73,9 @@ class modTutorial(daeModel):
         #     Internally they will be used without '&' and ';' characters: alpha, beta, gamma, ...;
         #     but, in the equations exported in the MathML or Latex format they will be shown as native Greek letters.
         #     Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.
-        #     In this example we use Greek character 'tau' to name the variable 'time'.
+        #     In this example we use Greek character 'τ' to name the variable 'tau'.
         daeModel.__init__(self, Name, Parent, Description)
-        self.time = daeVariable("&tau;", typeNone, self, "Time elapsed in the process, s")
+        self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process, s")
 
     def DeclareEquations(self):
         # 3.2 Declare equations and state transition networks
@@ -89,11 +89,11 @@ class modTutorial(daeModel):
         #      - function dt() which calculates a time derivative of the variable
         #      - function d() and d2() which calculate a partial derivative of the variable of the 1st and the 2nd order, respectively
         #     In this example we simply write that the variable time derivative is equal to 1:
-        #                          d(time) / dt = 1
+        #                          d(tau) / dt = 1
         #     which calculates the time as the current time elapsed in the simulation (which is a common way to obtain the current time within the model).
-        #     Note that the variables should be accessed through the model object, therefore we use self.time
+        #     Note that the variables should be accessed through the model object, therefore we use self.tau
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.time.dt() - 1.0
+        eq.Residual = self.tau.dt() - 1.0
 
 # 4. Define a simulation
 #    Simulations are derived from the base daeSimulation class
@@ -124,9 +124,9 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         # 4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.
         #     Every simulation class must implement SetUpVariables method, even if it is empty.
-        #     In this example the only thing needed to be done is to set the initial condition for the variable time to 0.
+        #     In this example the only thing needed to be done is to set the initial condition for the variable tau to 0.
         #     That can be done by using SetInitialCondition function:
-        self.m.time.SetInitialCondition(0)
+        self.m.tau.SetInitialCondition(0)
 
 # Use daeSimulator class
 def guiRun(app):

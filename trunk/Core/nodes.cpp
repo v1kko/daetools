@@ -452,6 +452,89 @@ bool adConstantNode::IsFunctionOfVariables(void) const
 }
 
 /*********************************************************************************************
+	adTimeNode
+**********************************************************************************************/
+adTimeNode::adTimeNode(void)
+{
+}
+
+adTimeNode::~adTimeNode()
+{
+}
+
+adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+	adouble tmp(pExecutionContext->m_pDataProxy->GetCurrentTime(), 0);
+	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+	{
+		tmp.setGatherInfo(true);
+		tmp.node = shared_ptr<adNode>( Clone() );
+	}
+	return tmp;
+}
+
+adNode* adTimeNode::Clone(void) const
+{
+	return new adTimeNode(*this);
+}
+
+void adTimeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += "time()";
+	else if(eLanguage == ePYDAE)
+		strContent += "self.time()";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+}
+
+//string adTimeNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//
+//}
+
+string adTimeNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+{
+	vector<string> domains;
+	return latexCreator::Variable(string("\\tau"), domains);
+}
+
+void adTimeNode::Open(io::xmlTag_t* /*pTag*/)
+{
+}
+
+void adTimeNode::Save(io::xmlTag_t* pTag) const
+{
+	string strName = "Value";
+	string strValue = "time";
+	pTag->Save(strName, strValue);
+}
+
+void adTimeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+}
+
+void adTimeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+	vector<string> domains;
+	xmlPresentationCreator::Variable(pTag, string("&tau;"), domains);
+}
+
+void adTimeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+}
+
+bool adTimeNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adTimeNode::IsFunctionOfVariables(void) const
+{
+	return false;
+}
+
+/*********************************************************************************************
 	adRuntimeParameterNode
 **********************************************************************************************/
 adRuntimeParameterNode::adRuntimeParameterNode(daeParameter* pParameter, 
