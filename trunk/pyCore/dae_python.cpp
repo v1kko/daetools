@@ -665,7 +665,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
 		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("EventTolerance") = 0.0 ) )
 
-		.def("SaveModelReport",			&daeModel::SaveModelReport, ( boost::python::arg("Recursively") = false ) )
+		.def("SaveModelReport",			&daeModel::SaveModelReport)
 		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)
 		.def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects)
 		.def("Export",					&daeModel::Export)

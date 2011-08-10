@@ -1876,7 +1876,7 @@ public:
 	virtual void	InitializeStage4(void);
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 
-	virtual void	SaveModelReport(const string& strFileName, bool bRecursively = false) const;
+	virtual void	SaveModelReport(const string& strFileName) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
 
 	virtual daeDomain_t*		FindDomain(string& strCanonicalName);
