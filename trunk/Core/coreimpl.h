@@ -195,7 +195,7 @@ public:
 
 	void SetCanonicalName(const string& strCanonicalName);
 	void SetName(const string& strName);
-	void SetDescription(const string& strName);
+	void SetDescription(const string& strDescription);
 	void SetModel(daeModel* pModel);
 
 	string GetNameRelativeToParentModel(void) const;
@@ -1692,6 +1692,7 @@ protected:
 	std::vector<daeDomain*>	m_ptrDomains;
 	friend class daePort;
 	friend class daeModel;
+	friend class daeAction;
 	friend class daePortConnection;
 	friend class daePartialDerivativeVariable;
 	friend class adSetupVariableNode;
@@ -1799,6 +1800,86 @@ protected:
 	size_t					_currentVariablesIndex;
 	friend class daeModel;
 	friend class daePortConnection;
+};
+
+/******************************************************************
+	daeEventPort
+*******************************************************************/
+class daeEventPort : virtual public daeObject,
+                     virtual public daeEventPort_t
+{
+public:
+	daeEventPort(const string& strName, daeePortType eType, daeModel* pModel, const string& strDescription);
+	virtual ~daeEventPort(void);
+	
+public:
+	virtual daeePortType	GetType(void) const;
+	virtual void			SetType(daeePortType eType);
+	virtual void			SendEvent(void* data);
+	//virtual void			Connect(daeEventPort_t* port);
+	//virtual void			Disconnect(daeEventPort_t* port);
+	//virtual void			GetConnectedPorts(std::vector<daeEventPort_t*>& ptrarrConnectedEventPorts);
+	//virtual void			GetAssociatedActions(std::vector<daeAction_t*>& ptrarrActions)	= 0;
+	
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+
+	void Update(daeEventPort_t* pSubject, void* data);
+	
+	void Initialize(void);
+	
+protected:
+	daeePortType m_ePortType;
+};
+
+/******************************************************************
+	daeAction
+*******************************************************************/
+class daeState;
+class daeAction : virtual public daeObject,
+                  virtual public daeAction_t
+{
+public:
+	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
+	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, void* data, const string& strDescription);
+	daeAction(const string& strname, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription);
+	virtual ~daeAction(void);
+
+public:
+	virtual daeeActionType	GetType(void) const;
+	virtual void			Execute(void* data);
+	virtual void Update(daeEventPort_t *pSubject, void* data);
+	
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	void Initialize(void);
+
+protected:
+	void SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
+
+protected:
+	daeeActionType m_eActionType;
+	
+// For eChangeState:
+	daeSTN*		m_pSTN;
+	string		m_strStateTo;
+	daeState*	m_pStateTo;
+	
+// For eSendEvent:
+	daeEventPort* m_pSendEventPort;
+	void*		  m_pData;
+
+// For eReAssignOrReInitializeVariable:
+	daeVariable*				m_pVariable;
+	int							m_nVariableType;
+	boost::shared_ptr<adNode>	m_pSetExpressionNode;
 };
 
 /******************************************************************
@@ -1952,6 +2033,8 @@ public:
 	void AddParameter(daeParameter* pParameter);
 	void AddModel(daeModel* pModel);
 	void AddPort(daePort* pPort);
+	void AddEventPort(daeEventPort* pPort);
+	void AddAction(daeAction* pAction);
 	void AddPortConnection(daePortConnection* pPortConnection);
 	void AddPortArray(daePortArray* pPortArray);
 	void AddModelArray(daeModelArray* pModelArray);
@@ -1967,6 +2050,7 @@ protected:
 	void AddParameter(daeParameter& rParameter, const string& strName, daeeParameterType eParameterType, string strDescription = "");
 	void AddModel(daeModel& rModel, const string& strName, string strDescription = "");
 	void AddPort(daePort& rPort, const string& strName, daeePortType ePortType, string strDescription = "");
+	void AddEventPort(daeEventPort& rPort, const string& strName, daeePortType ePortType, string strDescription);
 	void AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription = "");
 	void AddModelArray(daeModelArray& rModelArray, const string& strName, string strDescription = "");
 
@@ -2022,6 +2106,8 @@ public:
 	void RemoveParameter(daeParameter* pObject);
 	void RemoveVariable(daeVariable* pObject);
 	void RemovePort(daePort* pObject);
+	void RemoveEventPort(daeEventPort* pObject);
+	void RemoveAction(daeAction* pObject);
 	void RemovePortArray(daePortArray* pObject);
 	void RemoveModelArray(daeModelArray* pObject);
 
@@ -2080,6 +2166,8 @@ protected:
 	daePtrVector<daeParameter*>		m_ptrarrParameters;
 	daePtrVector<daeVariable*>		m_ptrarrVariables;
 	daePtrVector<daePort*>			m_ptrarrPorts;
+	daePtrVector<daeEventPort*>		m_ptrarrEventPorts;
+	daePtrVector<daeAction*>		m_ptrarrOnEventActions;
 	daePtrVector<daePortArray*>		m_ptrarrPortArrays;
 	daePtrVector<daeModelArray*>	m_ptrarrModelArrays;
 
@@ -2102,6 +2190,8 @@ protected:
 	friend class daeSTN;
 	friend class daeStateTransition;
 	friend class daePort;
+	friend class daeEventPort;
+	friend class daeAction;
 	friend class daeObject;
 	friend class daeDomain;
 	friend class daeVariable;
@@ -2528,8 +2618,11 @@ public:
 	virtual ~daeStateTransition(void);
 
 public:
-	virtual daeState_t* GetStateTo(void) const;
-	virtual daeState_t*	GetStateFrom(void) const;
+//	virtual daeState_t* GetStateTo(void) const;
+//	virtual daeState_t*	GetStateFrom(void) const;
+	
+	void GetActions(std::vector<daeAction_t*>& ptrarrActions) const;
+	void ExecuteActions(void);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -2542,23 +2635,24 @@ public:
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	void Initialize(void);
-	void CreateSTN(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
-	void CreateIF(const string& strCondition,  daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
+	void Create_SWITCH_TO(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
+	void Create_IF(const string& strCondition,  daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
 	string GetConditionAsString() const;
 	
 protected:
 	daeCondition*		GetCondition(void);
 	void				SetCondition(daeCondition& rCondition);
-	void				SetStateTo(daeState* pState);
-	void				SetStateFrom(daeState* pState);
+//	void				SetStateTo(daeState* pState);
+//	void				SetStateFrom(daeState* pState);
 
 protected:
-	string								m_strStateToName;
 	daeSTN*								m_pSTN;
-	daeState*							m_pStateFrom;
-	daeState*							m_pStateTo;
+	daePtrVector<daeAction*>			m_ptrarrActions;
 	daeCondition						m_Condition;
 	std::map<size_t, daeExpressionInfo>	m_mapExpressionInfos; 
+//	string								m_strStateToName;
+//	daeState*							m_pStateFrom;
+//	daeState*							m_pStateTo;
 
 // Internal variables, used only during Open
 	long	m_nStateFromID;
@@ -2642,6 +2736,7 @@ protected:
 	friend class daeModel;
 	friend class daeState;
 	friend class daeBlock;
+	friend class daeAction;
 };
 
 /******************************************************************

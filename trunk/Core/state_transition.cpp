@@ -11,8 +11,9 @@ namespace core
 daeStateTransition::daeStateTransition()
 {
 	m_pSTN			= NULL;
-	m_pStateFrom	= NULL;
-	m_pStateTo		= NULL;
+// 11.08.2011	
+//	m_pStateFrom	= NULL;
+//	m_pStateTo		= NULL;
 	m_pModel		= NULL;
 }
 
@@ -31,11 +32,12 @@ void daeStateTransition::Open(io::xmlTag_t* pTag)
 
 	daeFindStateByID del(m_pModel);
 
-	strName = "StateFromRef";
-	m_pStateFrom = pTag->OpenObjectRef(strName, &del);
-
-	strName = "StateToRef";
-	m_pStateTo = pTag->OpenObjectRef(strName, &del);
+// 11.08.2011	
+//	strName = "StateFromRef";
+//	m_pStateFrom = pTag->OpenObjectRef(strName, &del);
+//
+//	strName = "StateToRef";
+//	m_pStateTo = pTag->OpenObjectRef(strName, &del);
 
 	strName = "Condition";
 	pTag->OpenExistingObject<daeCondition, daeCondition>(strName, &m_Condition);
@@ -47,51 +49,57 @@ void daeStateTransition::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-	strName = "StateFromRef";
-	pTag->SaveObjectRef(strName, m_pStateFrom);
-
-	strName = "StateToRef";
-	pTag->SaveObjectRef(strName, m_pStateTo);
+// 11.08.2011	
+//	strName = "StateFromRef";
+//	pTag->SaveObjectRef(strName, m_pStateFrom);
+//
+//	strName = "StateToRef";
+//	pTag->SaveObjectRef(strName, m_pStateTo);
 
 	strName = "Condition";
 	pTag->SaveObject(strName, &m_Condition);
+
+	strName = "Actions";
+	pTag->SaveObjectArray(strName, m_ptrarrActions);
 }
 
 void daeStateTransition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strExport, strCondition;
-	boost::format fmtFile;
+	daeDeclareAndThrowException(exNotImplemented); 
 
-	if(c.m_bExportDefinition)
-	{
-	}
-	else
-	{
-		if(eLanguage == ePYDAE)
-		{
-			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.SWITCH_TO(\"%1%\", %2%)\n";
-			m_Condition.Export(strCondition, eLanguage, c);
-			
-			fmtFile.parse(strExport);
-			fmtFile % m_pStateTo->GetName()
-					% strCondition;
-		}
-		else if(eLanguage == eCDAE)
-		{
-			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "SWITCH_TO(\"%1%\", %2%);\n";
-			m_Condition.Export(strCondition, eLanguage, c);
-			
-			fmtFile.parse(strExport);
-			fmtFile % m_pStateTo->GetName()
-					% strCondition;
-		}
-		else
-		{
-			daeDeclareAndThrowException(exNotImplemented); 
-		}
-	}
-	
-	strContent += fmtFile.str();
+//	string strExport, strCondition;
+//	boost::format fmtFile;
+//
+//	if(c.m_bExportDefinition)
+//	{
+//	}
+//	else
+//	{
+//		if(eLanguage == ePYDAE)
+//		{
+//			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.SWITCH_TO(\"%1%\", %2%)\n";
+//			m_Condition.Export(strCondition, eLanguage, c);
+//			
+//			fmtFile.parse(strExport);
+//			fmtFile % m_pStateTo->GetName()
+//					% strCondition;
+//		}
+//		else if(eLanguage == eCDAE)
+//		{
+//			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "SWITCH_TO(\"%1%\", %2%);\n";
+//			m_Condition.Export(strCondition, eLanguage, c);
+//			
+//			fmtFile.parse(strExport);
+//			fmtFile % m_pStateTo->GetName()
+//					% strCondition;
+//		}
+//		else
+//		{
+//			daeDeclareAndThrowException(exNotImplemented); 
+//		}
+//	}
+//	
+//	strContent += fmtFile.str();
 }
 
 void daeStateTransition::OpenRuntime(io::xmlTag_t* pTag)
@@ -105,17 +113,17 @@ void daeStateTransition::SaveRuntime(io::xmlTag_t* pTag) const
 
 	daeObject::SaveRuntime(pTag);
 
-	strName = "StateFromRef";
-	pTag->SaveObjectRef(strName, m_pStateFrom);
-
-	strName = "StateToRef";
-	pTag->SaveObjectRef(strName, m_pStateTo);
+//	strName = "StateFromRef";
+//	pTag->SaveObjectRef(strName, m_pStateFrom);
+//
+//	strName = "StateToRef";
+//	pTag->SaveObjectRef(strName, m_pStateTo);
 
 	strName = "Condition";
 	pTag->SaveRuntimeObject(strName, &m_Condition);
 }
 
-void daeStateTransition::CreateSTN(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
+void daeStateTransition::Create_SWITCH_TO(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateFrom)
 	{	
@@ -134,22 +142,27 @@ void daeStateTransition::CreateSTN(const string& strCondition, daeState* pStateF
 
 	m_pSTN				= pStateFrom->GetSTN();
 	m_strShortName		= strName;
-	m_pStateFrom		= pStateFrom;
-	m_pStateTo			= NULL;
-	m_strStateToName	= strStateToName;
 	m_pModel			= pStateFrom->m_pModel;
+	
+	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, m_pModel, m_pSTN, strStateToName, string(""));
+	m_ptrarrActions.push_back(pAction);
+	
+// 11.08.2011	
+//	m_pStateFrom		= pStateFrom;
+//	m_pStateTo			= NULL;
+//	m_strStateToName	= strStateToName;
 	
 // This creates runtime node from setup nodes
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
 //	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
 	m_Condition			= rCondition;
 
-	m_Condition.m_pModel = m_pStateFrom->m_pModel;
+	m_Condition.m_pModel = m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
-	m_pStateFrom->AddStateTransition(this);
+	pStateFrom->AddStateTransition(this);
 }
 
-void daeStateTransition::CreateIF(const string& strCondition, daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
+void daeStateTransition::Create_IF(const string& strCondition, daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateTo)
 	{	
@@ -162,19 +175,32 @@ void daeStateTransition::CreateIF(const string& strCondition, daeState* pStateTo
 
 	m_pSTN				= pStateTo->GetSTN();
 	m_strShortName		= strName;
-	m_pStateFrom		= NULL;
-	m_pStateTo			= pStateTo;
-	m_strStateToName	= "";
 	m_pModel			= pStateTo->m_pModel;
 	
-// This creates runtime node from setup nodes	
-// Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-//	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
+	daeAction* pAction = new daeAction(string("actionChangeState_") + pStateTo->GetName(), m_pModel, m_pSTN, pStateTo->GetName(), string(""));
+	m_ptrarrActions.push_back(pAction);
+
+// 11.08.2011	
+//	m_pStateFrom		= NULL;
+//	m_pStateTo			= pStateTo;
+//	m_strStateToName	= "";
+	
 	m_Condition			= rCondition;
 
 	m_Condition.m_pModel = pStateTo->m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
 	pStateTo->AddStateTransition(this);
+}
+
+void daeStateTransition::ExecuteActions(void)
+{
+	daeAction* pAction;
+	
+	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
+	{
+		pAction = m_ptrarrActions[i];
+		pAction->Execute(NULL);
+	}
 }
 
 void daeStateTransition::Initialize(void)
@@ -190,6 +216,13 @@ void daeStateTransition::Initialize(void)
 // Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
 	m_Condition.m_pSetupConditionNode = m_Condition.m_pConditionNode;
 	m_Condition.m_pConditionNode      = m_Condition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo).m_pConditionNode;
+	
+	daeAction* pAction;
+	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
+	{
+		pAction = m_ptrarrActions[i];
+		pAction->Initialize();
+	}
 }
 
 daeCondition* daeStateTransition::GetCondition(void)
@@ -202,29 +235,37 @@ void daeStateTransition::SetCondition(daeCondition& rCondition)
 	m_Condition = rCondition;
 }
 
-daeState_t* daeStateTransition::GetStateTo(void) const
-{
-	return m_pStateTo;
-}
-
-void daeStateTransition::SetStateTo(daeState* pState)
-{
-	m_pStateTo = pState;
-}
-
-daeState_t* daeStateTransition::GetStateFrom(void) const
-{
-	return m_pStateFrom;
-}
-
-void daeStateTransition::SetStateFrom(daeState* pState)
-{
-	m_pStateFrom = pState;
-}
+// 11.08.2011	
+//daeState_t* daeStateTransition::GetStateTo(void) const
+//{
+//	return m_pStateTo;
+//}
+//
+//void daeStateTransition::SetStateTo(daeState* pState)
+//{
+//	m_pStateTo = pState;
+//}
+//
+//daeState_t* daeStateTransition::GetStateFrom(void) const
+//{
+//	return m_pStateFrom;
+//}
+//
+//void daeStateTransition::SetStateFrom(daeState* pState)
+//{
+//	m_pStateFrom = pState;
+//}
 
 string daeStateTransition::GetConditionAsString() const
 {
 	return m_Condition.SaveNodeAsPlainText();
+}
+
+void daeStateTransition::GetActions(vector<daeAction_t*>& ptrarrActions) const
+{
+	ptrarrActions.clear();
+	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
+		ptrarrActions.push_back(m_ptrarrActions[i]);
 }
 
 bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
@@ -245,6 +286,15 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 	
+	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
+	{
+		daeAction* pAction = m_ptrarrActions[i];
+		if(!pAction->CheckObject(strarrErrors))
+			return false;
+	}
+
+// 11.08.2011	
+/*	
 // Check state from	
 // If it is daeIF block it IS null (but StateTo mustn't be NULL)
 	if(!m_pStateFrom)
@@ -272,7 +322,8 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 		strarrErrors.push_back(strError);
 		return false;
 	}
-
+*/
+	
 // Check condition	
 	if(!m_Condition.m_pModel)
 	{

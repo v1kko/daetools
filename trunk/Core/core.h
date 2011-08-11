@@ -110,6 +110,14 @@ enum daeePortType
 	eOutletPort
 };
 
+enum daeeActionType
+{
+	eUnknownAction = 0,
+	eChangeState,
+	eSendEvent,
+	eReAssignOrReInitializeVariable
+};
+
 enum daeeFunctionType
 {
 	eFTUnknown = 0,
@@ -507,6 +515,59 @@ public:
 };
 
 /******************************************************************
+	daeEventPort_t
+*******************************************************************/
+/* It derives from daeSubject<daeEventPort_t> to allow daeActions to observe daeEventPort_t
+   It derives from daeObserver<daeEventPort_t> to allow inlet ports to observe outlet daeEventPort_t ports
+   How the events are propagated in the following scenario: 
+     Outlet event ports are attached to inlet event ports, and actions are attached to inlet event ports
+		   [daeAction] ------ > [inlet daeEventPort] --------> [daeEventport outlet]
+	   
+	   When outlet port's SendEvent() is called it calls it's Notify() function.   
+	   Notify() function calls Update() function in the inlet port which then calls Update() from the action.
+																	  
+													  <observer> -------< Notify(data) ------------ <subject>
+														  |                                      [EventPort: out]
+														  |
+														  | observer.Update(data) calls Notify(data)
+														  |
+														  v
+		<observer>-----------< Notify(data) ----------<subject>                         
+	   [daeAction]                                  [EventPort: in]                     
+			|
+			| Update(data) calls Execute(data)
+			v
+
+   The function SendEvent() is used by daeActions in state transitions to trigger the event (it calls the function Notify(data))
+*/
+class daeAction_t;
+class daeEventPort_t : virtual public daeObject_t,
+                       virtual public daeSubject<daeEventPort_t>,
+                       virtual public daeObserver<daeEventPort_t>
+{
+public:
+	virtual daeePortType	GetType(void) const													= 0;
+	virtual void			SetType(daeePortType eType)											= 0;
+	virtual void			SendEvent(void* data)												= 0;
+	
+	//virtual void			Connect(daeEventPort_t* port)										= 0;
+	//virtual void			Disconnect(daeEventPort_t* port)									= 0;
+	//virtual void			GetConnectedPorts(std::vector<daeEventPort_t*>& ptrarrEventPorts)	= 0;
+	//virtual void			GetAssociatedActions(std::vector<daeAction_t*>& ptrarrEventPorts)	= 0;
+};
+
+/******************************************************************
+	daeAction_t
+*******************************************************************/
+class daeAction_t : virtual public daeObject_t,
+                    virtual public daeObserver<daeEventPort_t>
+{
+public:
+	virtual daeeActionType	GetType(void) const		= 0;
+	virtual void			Execute(void* data)		= 0;
+};
+
+/******************************************************************
 	daePortConnection_t
 *******************************************************************/
 class daePortConnection_t : virtual public daeObject_t
@@ -535,8 +596,10 @@ public:
 class daeStateTransition_t : virtual public daeObject_t
 {
 public:
-	virtual daeState_t*		GetStateTo(void) const	 = 0;
-	virtual daeState_t*		GetStateFrom(void) const = 0;
+//	virtual daeState_t*		GetStateTo(void) const	 = 0;
+//	virtual daeState_t*		GetStateFrom(void) const = 0;
+	virtual void GetActions(std::vector<daeAction_t*>& ptrarrActions) const	= 0;
+	virtual void ExecuteActions(void)										= 0;
 };
 
 /******************************************************************
@@ -546,7 +609,7 @@ class daeSTN_t : virtual public daeObject_t
 {
 public:
 	virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates)	= 0;
-	virtual daeState_t*	GetActiveState(void)							= 0;
+	virtual daeState_t*	GetActiveState(void)								= 0;
 };
 
 /******************************************************************

@@ -688,8 +688,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeStateTransitionWrapper, bases<daeObject>, boost::noncopyable>("daeStateTransition")
-		.add_property("StateFrom",	make_function(&daepython::daeStateTransitionWrapper::GetStateFrom, return_internal_reference<>()))
-		.add_property("StateTo",	make_function(&daepython::daeStateTransitionWrapper::GetStateTo, return_internal_reference<>()))
+		//.add_property("StateFrom",	make_function(&daepython::daeStateTransitionWrapper::GetStateFrom, return_internal_reference<>()))
+		//.add_property("StateTo",	make_function(&daepython::daeStateTransitionWrapper::GetStateTo, return_internal_reference<>()))
 		.add_property("Condition",	&daepython::daeStateTransitionWrapper::GetCondition)
 		;
 

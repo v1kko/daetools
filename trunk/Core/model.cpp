@@ -182,10 +182,18 @@ void daeModel::Save(io::xmlTag_t* pTag) const
 // PORTS
 	strName = "Ports";
 	pTag->SaveObjectArray(strName, m_ptrarrPorts);
+	
+// EVENT PORTS
+	strName = "EventPorts";
+	pTag->SaveObjectArray(strName, m_ptrarrEventPorts);
 
 // EQUATIONS
 	strName = "Equations";
 	pTag->SaveObjectArray(strName, m_ptrarrEquations);
+	
+// ON EVENT ACTIONS
+	strName = "OnEventActions";
+	pTag->SaveObjectArray(strName, m_ptrarrOnEventActions);
 
 // STNs
 	strName = "STNs";
@@ -328,9 +336,17 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 	strName = "Ports";
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrPorts);
 
+// EVENT PORTS
+	strName = "EventPorts";
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrEventPorts);
+	
 // EQUATIONS
 	strName = "Equations";
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrEquations);
+	
+// ON EVENT ACTIONS
+	strName = "OnEventActions";
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrOnEventActions);
 
 // STNs
 	strName = "STNs";
@@ -552,6 +568,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrParameters,      strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrVariables,       strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,           strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrEventPorts,      strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrModels,          strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrModelArrays,     strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,      strConstructor, eLanguage, c);
@@ -559,6 +576,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrOnEventActions,		   strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strConstructor % (strDeclareEquations.empty() ? (c.CalculateIndent(c.m_nPythonIndentLevel) + "pass\n") : strDeclareEquations);
@@ -591,6 +609,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrParameters,  strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrVariables,   strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,       strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrEventPorts,  strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrModels,      strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrModelArrays, strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,  strCXXDeclaration, eLanguage, c);
@@ -603,6 +622,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrParameters,  strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrVariables,   strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,       strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrEventPorts,  strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrModels,      strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,  strConstructor, eLanguage, c);
@@ -613,6 +633,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrOnEventActions,         strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor % strDeclareEquations;
@@ -790,6 +811,46 @@ void daeModel::AddPort(daePort* pPort)
     m_ptrarrPorts.push_back(pPort);
 }
 
+void daeModel::AddEventPort(daeEventPort* pPort)
+{
+	std::string strName = pPort->GetName();
+	if(strName.empty())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "EventPor name cannot be empty";
+		throw e;
+	}
+	if(CheckName(m_ptrarrEventPorts, strName))
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "EventPor [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+		throw e;
+	}
+
+    SetModelAndCanonicalName(pPort);
+    m_ptrarrEventPorts.push_back(pPort);
+}
+
+void daeModel::AddAction(daeAction* pAction)
+{
+	std::string strName = pAction->GetName();
+	if(strName.empty())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Action name cannot be empty";
+		throw e;
+	}
+	if(CheckName(m_ptrarrOnEventActions, strName))
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "Action [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+		throw e;
+	}
+
+    SetModelAndCanonicalName(pAction);
+    m_ptrarrOnEventActions.push_back(pAction);
+}
+
 void daeModel::AddPortConnection(daePortConnection* pPortConnection)
 {
     SetModelAndCanonicalName(pPortConnection);
@@ -931,7 +992,7 @@ void daeModel::IF(const daeCondition& rCondition, real_t dEventTolerance)
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->CreateIF(string("Condition0"), _pState, rCondition, dEventTolerance);
+	_pST->Create_IF(string("Condition0"), _pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
@@ -960,7 +1021,7 @@ void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->CreateIF(string("Condition0"), _pState, rCondition, dEventTolerance);
+	_pST->Create_IF(string("Condition0"), _pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE(void)
@@ -1073,7 +1134,7 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 	}
 
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->CreateSTN(string("Condition"), pCurrentState, strState, rCondition, dEventTolerance);
+	_pST->Create_SWITCH_TO(string("Condition"), pCurrentState, strState, rCondition, dEventTolerance);
 }
 
 void daeModel::AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription)
@@ -1107,6 +1168,14 @@ void daeModel::AddPort(daePort& rPort, const string& strName, daeePortType ePort
 	AddPort(&rPort);
 }
 	
+void daeModel::AddEventPort(daeEventPort& rPort, const string& strName, daeePortType ePortType, string strDescription)
+{
+	rPort.SetName(strName);
+	rPort.SetDescription(strDescription);
+	rPort.SetType(ePortType);
+	AddEventPort(&rPort);
+}
+
 daeEquation* daeModel::CreateEquation(const string& strName, string strDescription)
 {
 	string strEqName;
@@ -1183,6 +1252,16 @@ void daeModel::RemoveVariable(daeVariable* pObject)
 void daeModel::RemovePort(daePort* pObject)
 {
 	m_ptrarrPorts.Remove(pObject);
+}
+
+void daeModel::RemoveEventPort(daeEventPort* pObject)
+{
+	m_ptrarrEventPorts.Remove(pObject);
+}
+
+void daeModel::RemoveAction(daeAction* pObject)
+{
+	m_ptrarrOnEventActions.Remove(pObject);
 }
 
 void daeModel::RemovePortArray(daePortArray* pObject)

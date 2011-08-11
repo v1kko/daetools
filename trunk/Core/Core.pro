@@ -17,6 +17,8 @@ SOURCES += xmlreadstream.cpp \
     state.cpp \
     stdafx.cpp \
     ports.cpp \
+	event_port.cpp \
+	action.cpp \
     partial.cpp \
     parameter.cpp \
     object.cpp \

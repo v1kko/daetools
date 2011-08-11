@@ -124,39 +124,39 @@ void daeSTN::SaveRuntime(io::xmlTag_t* pTag) const
 
 void daeSTN::ReconnectStateTransitionsAndStates()
 {
-	size_t i, k;
-	daeState* pState;
-	daeStateTransition *pST;
-
-	for(i = 0; i < m_ptrarrStates.size(); i++)
-	{
-		pState = m_ptrarrStates[i];
-		if(!pState)
-			daeDeclareAndThrowException(exInvalidPointer);
-
-		for(k = 0; k < pState->m_ptrarrStateTransitions.size(); k++)
-		{
-			pST = pState->m_ptrarrStateTransitions[k];
-			if(!pST)
-				daeDeclareAndThrowException(exInvalidPointer);
-
-			pST->m_pStateFrom = FindState(pST->m_nStateFromID);
-			if(!pST->m_pStateFrom)
-			{	
-				daeDeclareException(exInvalidCall); 
-				e << "Illegal start state in STN [" << m_strCanonicalName << "]";
-				throw e;
-			}
-
-			pST->m_pStateTo = FindState(pST->m_nStateToID);
-			if(!pST->m_pStateTo)
-			{	
-				daeDeclareException(exInvalidCall); 
-				e << "Illegal end state in STN [" << m_strCanonicalName << "]";
-				throw e;
-			}
-		}
-	}
+//	size_t i, k;
+//	daeState* pState;
+//	daeStateTransition *pST;
+//
+//	for(i = 0; i < m_ptrarrStates.size(); i++)
+//	{
+//		pState = m_ptrarrStates[i];
+//		if(!pState)
+//			daeDeclareAndThrowException(exInvalidPointer);
+//
+//		for(k = 0; k < pState->m_ptrarrStateTransitions.size(); k++)
+//		{
+//			pST = pState->m_ptrarrStateTransitions[k];
+//			if(!pST)
+//				daeDeclareAndThrowException(exInvalidPointer);
+//
+//			pST->m_pStateFrom = FindState(pST->m_nStateFromID);
+//			if(!pST->m_pStateFrom)
+//			{	
+//				daeDeclareException(exInvalidCall); 
+//				e << "Illegal start state in STN [" << m_strCanonicalName << "]";
+//				throw e;
+//			}
+//
+//			pST->m_pStateTo = FindState(pST->m_nStateToID);
+//			if(!pST->m_pStateTo)
+//			{	
+//				daeDeclareException(exInvalidCall); 
+//				e << "Illegal end state in STN [" << m_strCanonicalName << "]";
+//				throw e;
+//			}
+//		}
+//	}
 }
 
 daeState* daeSTN::FindState(long nID)
@@ -208,26 +208,27 @@ void daeSTN::Initialize()
 			pST = pState->m_ptrarrStateTransitions[k];
 			if(!pST)
 				daeDeclareAndThrowException(exInvalidPointer);
-			
-			if(!pST->m_pStateTo)
-			{
-				if(pST->m_strStateToName.empty())
-				{
-					daeDeclareException(exInvalidCall); 
-					e << "State transition StateTo name cannot be empty in state transition network [" << m_strCanonicalName << "]";
-					throw e;
-				}
 
-				pStateTo = FindState(pST->m_strStateToName);
-				if(!pStateTo)
-				{
-					daeDeclareException(exInvalidCall); 
-					e << "State [" << pST->m_strStateToName << "] does not exist in state transition network [" << m_strCanonicalName << "]";
-					throw e;
-				}
-				
-				pST->m_pStateTo = pStateTo;
-			}
+// 11.08.2011			
+//			if(!pST->m_pStateTo)
+//			{
+//				if(pST->m_strStateToName.empty())
+//				{
+//					daeDeclareException(exInvalidCall); 
+//					e << "State transition StateTo name cannot be empty in state transition network [" << m_strCanonicalName << "]";
+//					throw e;
+//				}
+//
+//				pStateTo = FindState(pST->m_strStateToName);
+//				if(!pStateTo)
+//				{
+//					daeDeclareException(exInvalidCall); 
+//					e << "State [" << pST->m_strStateToName << "] does not exist in state transition network [" << m_strCanonicalName << "]";
+//					throw e;
+//				}
+//				
+//				pST->m_pStateTo = pStateTo;
+//			}
 		}
 	}
 	
@@ -597,6 +598,9 @@ bool daeSTN::CheckDiscontinuities()
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
+	// Save the current active state to check if it has been changed by one of the actions
+	daeState* pFormerActiveState = m_pActiveState;
+	
 	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
 	{
 		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
@@ -606,7 +610,12 @@ bool daeSTN::CheckDiscontinuities()
 		if(pStateTransition->m_Condition.Evaluate(&EC))
 		{
 			LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
-			return CheckState(pStateTransition->m_pStateTo);
+			pStateTransition->ExecuteActions();
+			
+		// If the active state has changed return true; otherwise go and check the state transitions in the nested STNs
+			if(pFormerActiveState != m_pActiveState)
+				return true;
+			//return CheckState(pStateTransition->m_pStateTo);
 		}
 	}
 
@@ -625,6 +634,7 @@ bool daeSTN::CheckDiscontinuities()
 	return bResult;
 }
 
+// Not used anymore
 bool daeSTN::CheckState(daeState* pState)
 {
 	daeSTN* pSTN;

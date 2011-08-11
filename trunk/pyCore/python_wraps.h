@@ -889,15 +889,15 @@ public:
 	}
 
 public:
-	daeState* GetStateFrom(void)
-	{
-		return m_pStateFrom;
-	}
-
-	daeState* GetStateTo(void)
-	{
-		return m_pStateTo;
-	}
+//	daeState* GetStateFrom(void)
+//	{
+//		return m_pStateFrom;
+//	}
+//
+//	daeState* GetStateTo(void)
+//	{
+//		return m_pStateTo;
+//	}
 
 	daeCondition GetCondition(void)
 	{

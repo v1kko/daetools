@@ -70,7 +70,7 @@ void daeSerializable::Save(io::xmlTag_t* pTag) const
 	pTag->AddAttribute(strName, m_strLibraryName);
 
 	strName = "Version";
-	pTag->AddAttribute(strName, daeVersion());
+	pTag->AddAttribute(strName, daeVersion(true));
 }
 
 /******************************************************************
@@ -335,6 +335,19 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeIndexRang
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
+
+void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeActionType eValue)
+{
+	if(eValue == eChangeState)
+		pTag->AddTag(strEnumName, string("eChangeState"));
+	else if(eValue == eSendEvent)
+		pTag->AddTag(strEnumName, string("eSendEvent"));
+	else if(eValue == eReAssignOrReInitializeVariable)
+		pTag->AddTag(strEnumName, string("eReAssignOrReInitializeVariable"));
+	else
+		pTag->AddTag(strEnumName, strUnknown);
+}
+
 
 
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDomainType& eValue)
@@ -651,6 +664,22 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeIndexRangeType&
 	else
 		eValue = eIRTUnknown;
 }
+
+void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeActionType& eValue)
+{
+	string strValue;	
+	pTag->Open(strEnumName, strValue);
+
+	if(strValue == "eChangeState")
+		eValue = eChangeState;
+	else if(strValue == "eSendEvent")
+		eValue = eSendEvent;
+	else if(strValue == "eReAssignOrReInitializeVariable")
+		eValue = eReAssignOrReInitializeVariable;
+	else
+		eValue = eUnknownAction;
+}
+
 
 
 }

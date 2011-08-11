@@ -152,6 +152,7 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSpecialU
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeIntegralFunctions& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeRangeType& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeIndexRangeType& eValue);
+void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeActionType& eValue);
 
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeParameterType eValue);
@@ -172,6 +173,7 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSp
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeIntegralFunctions eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeRangeType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeIndexRangeType eValue);
+void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeActionType eValue);
 
 /*********************************************************************************************
 	daeEnumStringMap

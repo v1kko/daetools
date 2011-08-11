@@ -197,7 +197,7 @@ class daeObserver
 {
 public:
 	virtual ~daeObserver(void) {}
-	virtual void Update(SUBJECT *pSubject) = 0;
+	virtual void Update(SUBJECT *pSubject, void* data) = 0;
 };
 
 /*********************************************************************************************
@@ -228,14 +228,14 @@ public:
 		}
 	}
 
-	void Notify(void)
+	void Notify(void* data)
 	{
 		daeObserver<SUBJECT>* observer;
 		for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
 		{
 			observer = m_ptrarrObservers[i];
 			if(observer)
-				observer->Update((SUBJECT*)this);
+				observer->Update(dynamic_cast<SUBJECT*>(this), data);
 		}
 	}
 
