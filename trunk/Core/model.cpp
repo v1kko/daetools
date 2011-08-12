@@ -18,6 +18,7 @@ daeModel::daeModel()
 // When used programmatically they dont own pointers !!!!!
 	m_ptrarrDomains.SetOwnershipOnPointers(false);
 	m_ptrarrPorts.SetOwnershipOnPointers(false);
+	m_ptrarrEventPorts.SetOwnershipOnPointers(false);
 	m_ptrarrVariables.SetOwnershipOnPointers(false);
 	m_ptrarrParameters.SetOwnershipOnPointers(false);
 	m_ptrarrModels.SetOwnershipOnPointers(false);
@@ -56,6 +57,7 @@ daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 // When used programmatically they dont own pointers !!!!!
 	m_ptrarrDomains.SetOwnershipOnPointers(false);
 	m_ptrarrPorts.SetOwnershipOnPointers(false);
+	m_ptrarrEventPorts.SetOwnershipOnPointers(false);
 	m_ptrarrVariables.SetOwnershipOnPointers(false);
 	m_ptrarrParameters.SetOwnershipOnPointers(false);
 	m_ptrarrModels.SetOwnershipOnPointers(false);
@@ -89,6 +91,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrParameters.EmptyAndFreeMemory();
 	m_ptrarrVariables.EmptyAndFreeMemory();
 	m_ptrarrPorts.EmptyAndFreeMemory();
+	m_ptrarrEventPorts.EmptyAndFreeMemory();
 	m_ptrarrEquationExecutionInfos.EmptyAndFreeMemory();
 	m_ptrarrPortArrays.EmptyAndFreeMemory();
 	m_ptrarrModelArrays.EmptyAndFreeMemory();
@@ -101,6 +104,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrParameters.SetOwnershipOnPointers(true);
 	m_ptrarrVariables.SetOwnershipOnPointers(true);
 	m_ptrarrPorts.SetOwnershipOnPointers(true);
+	m_ptrarrEventPorts.SetOwnershipOnPointers(true);
 	m_ptrarrEquationExecutionInfos.SetOwnershipOnPointers(true);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(true);
 	m_ptrarrModelArrays.SetOwnershipOnPointers(true);
@@ -135,6 +139,10 @@ void daeModel::Open(io::xmlTag_t* pTag)
 // PORTS
 	strName = "Ports";
 	pTag->OpenObjectArray(strName, m_ptrarrPorts, &del);
+
+// PORTS
+	strName = "EventPorts";
+	pTag->OpenObjectArray(strName, m_ptrarrEventPorts, &del);
 
 // EQUATIONS
 	strName = "Equations";
@@ -992,7 +1000,7 @@ void daeModel::IF(const daeCondition& rCondition, real_t dEventTolerance)
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_IF(string("Condition0"), _pState, rCondition, dEventTolerance);
+	_pST->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
@@ -1021,7 +1029,7 @@ void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_IF(string("Condition0"), _pState, rCondition, dEventTolerance);
+	_pST->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE(void)
@@ -1134,7 +1142,144 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 	}
 
 	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_SWITCH_TO(string("Condition"), pCurrentState, strState, rCondition, dEventTolerance);
+	_pST->Create_SWITCH_TO(pCurrentState, strState, rCondition, dEventTolerance);
+}
+
+void daeModel::ON_CONDITION(const daeCondition& rCondition, 
+							const string& strStateTo, 
+							vector< pair<daeVariable*, adouble> >& arrSetVariables,
+							vector<daeEventPort*>& ptrarrTriggerEvents, 
+							real_t dEventTolerance)
+{
+	size_t i;
+	daeAction* pAction;
+	daeEventPort* pEventPort;
+	pair<daeVariable*, adouble> p;
+	daeVariable* pVariable;
+	adouble value;
+	vector<daeAction*> ptrarrActions;
+
+// Current STN must exist!!!
+// Otherwise throw an exception
+	if(!_currentSTN)
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "ON_CONDITION() can only be called after call to STN()";
+		throw e;
+	}
+	
+// Current state must exist!!!
+// Otherwise throw an exception
+	daeState* pCurrentState = GetStateFromStack();
+	if(!pCurrentState)
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "ON_CONDITION() can only be called after call to STATE()";
+		throw e;
+	}
+
+	daeStateTransition* _pST = new daeStateTransition;
+
+// ChangeState	
+	pAction = new daeAction(string("actionChangeState_") + strStateTo, this, _currentSTN, strStateTo, string(""));
+	ptrarrActions.push_back(pAction);
+
+// TriggerEvents
+	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
+	{
+		pEventPort = ptrarrTriggerEvents[i];
+		if(!pEventPort)
+			daeDeclareAndThrowException(exInvalidPointer);
+			
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
+
+		ptrarrActions.push_back(pAction);
+	}
+
+// SetVariables	
+	for(i = 0; i < arrSetVariables.size(); i++)
+	{
+		p = arrSetVariables[i];
+		pVariable = p.first;
+		value     = p.second;
+		if(!pVariable)
+			daeDeclareAndThrowException(exInvalidPointer);
+			
+		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
+
+		ptrarrActions.push_back(pAction);
+	}
+
+	_pST->Create_ON_CONDITION(pCurrentState, rCondition, ptrarrActions, dEventTolerance);
+}
+
+void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort, 
+						vector< pair<daeSTN*, string> >&		arrSwitchToStates, 
+						vector< pair<daeVariable*, adouble> >&	arrSetVariables,
+						vector<daeEventPort*>&					ptrarrTriggerEvents)
+{
+	size_t i;
+	daeAction* pAction;
+	daeSTN* pSTN;
+	string strStateTo;
+	daeEventPort* pEventPort;
+	pair<daeSTN*, string> p1;
+	pair<daeVariable*, adouble> p2;
+	daeVariable* pVariable;
+	adouble value;
+
+	if(!pTriggerEventPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(pTriggerEventPort->GetType() != eInletPort)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	daeOnEventActions(daeEventPort*, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
+	
+// ChangeState	
+	for(i = 0; i < arrSwitchToStates.size(); i++)
+	{
+		p1 = arrSwitchToStates[i];
+		pSTN       = p1.first;
+		strStateTo = p1.second;
+		if(!pSTN)
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(strStateTo.empty())
+			daeDeclareAndThrowException(exInvalidCall);
+			
+		pAction = new daeAction(string("actionChangeState_") + pSTN->GetName() + "_" + strStateTo, this, pSTN, strStateTo, string(""));
+		pTriggerEventPort->Attach(pAction);
+		
+		m_ptrarrOnEventActions.push_back(pAction);
+	}
+
+
+// TriggerEvents
+	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
+	{
+		pEventPort = ptrarrTriggerEvents[i];
+		if(!pEventPort)
+			daeDeclareAndThrowException(exInvalidPointer);
+			
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
+		pTriggerEventPort->Attach(pAction);
+
+		m_ptrarrOnEventActions.push_back(pAction);
+	}
+
+// SetVariables	
+	for(i = 0; i < arrSetVariables.size(); i++)
+	{
+		p2 = arrSetVariables[i];
+		pVariable = p2.first;
+		value     = p2.second;
+		if(!pVariable)
+			daeDeclareAndThrowException(exInvalidPointer);
+			
+		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
+		pTriggerEventPort->Attach(pAction);
+
+		m_ptrarrOnEventActions.push_back(pAction);
+	}
 }
 
 void daeModel::AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription)
@@ -1207,6 +1352,19 @@ void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 	pPortConnection->m_pPortFrom = pPortFrom;
 	pPortConnection->m_pPortTo   = pPortTo;
 	AddPortConnection(pPortConnection);
+}
+
+void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
+{
+// Here, portFrom is observer and portTo is subject
+// When the outlet port send an event its function Notify() is called which in turn calls the function Update() in the portFrom.
+// portFrom then calls its function Notify which calls Update() in all attached observers (daeAction).
+	if(pPortFrom->GetType() != eInletPort)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(pPortTo->GetType() != eOutletPort)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	pPortTo->Attach(pPortFrom);
 }
 
 boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
@@ -1843,6 +2001,7 @@ void daeModel::BuildUpSTNsAndEquations()
 		InitializeDEDIs();
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
+		InitializeOnEventActions();		
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -2061,9 +2220,41 @@ void daeModel::InitializeVariables()
 	m_nTotalNumberOfVariables = _currentVariablesIndex - m_nVariablesStartingIndex;
 }
 
+void daeModel::InitializeOnEventActions(void)
+{
+	size_t i;
+	daeOnEventActions* pOnEventActions;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	
+	// Initialize OnEventActions
+	for(i = 0; i < m_ptrarrOnEventActions.size(); i++)
+	{
+		pOnEventActions = m_ptrarrOnEventActions[i];
+		if(!pOnEventActions)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pOnEventActions->Initialize();
+	}
+
+// Next, initialize OnEventActions in each child-model
+	for(i = 0; i < m_ptrarrModels.size(); i++)
+	{
+		pModel = m_ptrarrModels[i];
+		pModel->InitializeOnEventActions();
+	}
+	
+// Finally, initialize OnEventActions in each modelarray
+	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	{
+		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray->InitializeOnEventActions();
+	}
+}
+
 void daeModel::InitializeSTNs(void)
 {
-	size_t i, k;
+	size_t i;
 	daeSTN* pSTN;
 	daeModel* pModel;
 	daeModelArray* pModelArray;

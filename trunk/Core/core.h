@@ -559,12 +559,21 @@ public:
 /******************************************************************
 	daeAction_t
 *******************************************************************/
-class daeAction_t : virtual public daeObject_t,
-                    virtual public daeObserver<daeEventPort_t>
+class daeAction_t : virtual public daeObject_t
 {
 public:
 	virtual daeeActionType	GetType(void) const		= 0;
 	virtual void			Execute(void* data)		= 0;
+};
+
+/******************************************************************
+	daeOnEventAction_t
+*******************************************************************/
+class daeOnEventActions_t : virtual public daeObject_t,
+                            virtual public daeObserver<daeEventPort_t>
+{
+public:
+	virtual void Execute(void* data) = 0;
 };
 
 /******************************************************************

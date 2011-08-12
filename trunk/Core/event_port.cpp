@@ -10,14 +10,18 @@ namespace core
 /*********************************************************************************************
 	daeEventPort
 **********************************************************************************************/
-daeEventPort::daeEventPort(const string& strName, daeePortType eType, daeModel* pModel, const string& strDescription)
+daeEventPort::daeEventPort(void)
+{
+}
+
+daeEventPort::daeEventPort(string strName, daeePortType eType, daeModel* pModel, const string& strDescription)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pModel->AddEventPort(*this, strName, eType, strDescription);
 }
 
-daeEventPort::~daeEventPort()
+daeEventPort::~daeEventPort(void)
 {
 }
 

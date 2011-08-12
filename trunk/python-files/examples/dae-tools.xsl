@@ -75,6 +75,10 @@
                 <xsl:apply-templates select="Model/Equations"/>
             </xsl:if>
             <xsl:apply-templates select="Model/STNs"/>
+            <xsl:if test="count(Model/OnEventActions/Object) > 0">
+                <h2><a name="OnEventActions"></a>OnEventActions</h2>
+                <xsl:apply-templates select="Model/OnEventActions"/>
+            </xsl:if>
 
         </div>
 
@@ -582,13 +586,13 @@
                     <xsl:for-each select="Actions/Object">
                        <li>
                            <xsl:if test="Type = 'eChangeState'">
-                               Switch to <xsl:copy-of select="StateTo/ObjectRefMathML"/>
+                               Switch to: <xsl:copy-of select="StateTo/ObjectRefMathML"/>
                            </xsl:if>
                            <xsl:if test="Type = 'eSendEvent'">
-                               Trigger the event on the port <xsl:copy-of select="SendEventPort/ObjectRefMathML"/>
+                               Trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/>
                            </xsl:if>
                            <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
-                               Set variable <xsl:value-of select="VariableName"/> to <xsl:copy-of select="MathML"/>
+                               Set: <xsl:copy-of select="MathML"/>
                            </xsl:if>
                        </li>
                     </xsl:for-each>
@@ -597,7 +601,24 @@
         </p>
       </xsl:for-each>
     </div>
+  </xsl:template>
 
+  <xsl:template match="OnEventActions">
+    <div>
+      <xsl:for-each select="Object">
+        <p>
+            <xsl:if test="Type = 'eChangeState'">
+                If  is triggered switch to: <xsl:copy-of select="StateTo/ObjectRefMathML"/>
+            </xsl:if>
+            <xsl:if test="Type = 'eSendEvent'">
+                If  is triggered trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/>
+            </xsl:if>
+            <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
+                If  is triggered set: <xsl:copy-of select="MathML"/>
+            </xsl:if>
+        </p>
+      </xsl:for-each>
+    </div>
   </xsl:template>
 
   <xsl:template match="Condition">

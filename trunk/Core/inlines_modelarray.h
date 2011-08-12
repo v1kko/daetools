@@ -88,6 +88,12 @@ protected:
 			it->InitializeSTNs();
 	}
 	
+	void InitializeOnEventActions(void)
+	{
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->InitializeOnEventActions();
+	}
+	
 	virtual void InitializeDEDIs(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

@@ -577,6 +577,12 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("Export",					&daePort::Export)
 		;
 
+    class_<daeEventPort, bases<daeObject>, boost::noncopyable>("daeEventPort")
+        .def(init<string, daeePortType, daeModel*, optional<string> >())
+
+        .add_property("Type", &daeEventPort::GetType)
+        ;
+
     class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)
         ;
 
@@ -643,6 +649,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation2, return_internal_reference<>())
 		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations)
 		.def("ConnectPorts",     &daepython::daeModelWrapper::ConnectPorts)
+		.def("ConnectEventPorts",&daeModel::ConnectEventPorts)
 		.def("SetReportingOn",	 &daeModel::SetReportingOn)
 
 		.def("sum",				&daeModel::sum)
@@ -655,16 +662,23 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("d",				&daeModel::d)
 		.def("time",			&daeModel::time)
 
-		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("EventTolerance") = 0.0 ) )
-		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("EventTolerance") = 0.0 ) )
+		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
+		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
 		.def("ELSE",			&daepython::daeModelWrapper::ELSE)
-		.def("END_IF",			&daepython::daeModelWrapper::END_IF)
+		.def("END_IF",			&daepython::daeModelWrapper::END_IF) 
 
 		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>())
 		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
 		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
-		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("EventTolerance") = 0.0 ) )
-
+		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
+        .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")          = string(),
+                                                                             boost::python::arg("triggerEvents")     = boost::python::list(),
+                                                                             boost::python::arg("setVariableValues") = boost::python::list(),
+                                                                             boost::python::arg("eventTolerance")    = 0.0) )
+        .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT, ( boost::python::arg("switchToStates")    = boost::python::list(),
+																		 boost::python::arg("triggerEvents")     = boost::python::list(),
+																		 boost::python::arg("setVariableValues") = boost::python::list() ) )
+		
 		.def("SaveModelReport",			&daeModel::SaveModelReport)
 		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)
 		.def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects)

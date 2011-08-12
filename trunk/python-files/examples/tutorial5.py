@@ -46,6 +46,11 @@ class modTutorial(daeModel):
 
         self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
         self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
+        self.dummy= daeVariable("dummy", no_t,          self, "dummy")
+
+        self.epIn   = daeEventPort("Inlet",  eInletPort, self, "Inlet event port")
+        self.epOut  = daeEventPort("Outlet", eOutletPort, self, "Outlet event port")
+        self.ConnectEventPorts(self.epIn, self.epOut)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
@@ -62,7 +67,7 @@ class modTutorial(daeModel):
         # This function defines the condition when the state 'State2' becomes the active one.
         # Repeat this procedure for all states in the state transition network.
         # Finally call the function END_STN() to finalize the state transition network.
-        # Again, there is an optional argument EventTolerance of the function SWITCH_TO, as explained in tutorial 4.
+        # Again, there is an optional argument eventTolerance of the function SWITCH_TO, as explained in tutorial 4.
         self.stnRegulator = self.STN("Regulator")
 
         self.STATE("Heating")
@@ -70,17 +75,29 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is on")
         eq.Residual = self.Qin() - 1500
 
-        self.SWITCH_TO("Cooling",   self.T()    > 340)
         # Here the daeModel.time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("HeaterOff", self.time() > 350)
+        #self.SWITCH_TO("Cooling",   self.T()    > 340)
+        #self.SWITCH_TO("HeaterOff", self.time() > 350)
+        self.ON_CONDITION(self.T()    > 340, switchTo          = 'Cooling',
+                                             triggerEvents     = [self.epOut],
+                                             setVariableValues = [] )
+        self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
+                                             triggerEvents     = [self.epOut],
+                                             setVariableValues = [] )
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T()    < 320)
-        self.SWITCH_TO("HeaterOff", self.time() > 350)
+        #self.SWITCH_TO("Heating",   self.T()    < 320)
+        #self.SWITCH_TO("HeaterOff", self.time() > 350)
+        self.ON_CONDITION(self.T()    < 320, switchTo          = 'Heating',
+                                             triggerEvents     = [self.epOut],
+                                             setVariableValues = [])
+        self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
+                                             triggerEvents     = [self.epOut],
+                                             setVariableValues = [])
 
         self.STATE("HeaterOff")
 
@@ -88,6 +105,11 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin()
 
         self.END_STN()
+
+        # The actions executed when the event on the inlet epIn event port is received
+        self.ON_EVENT(self.epIn, switchToStates    = [],
+                                 triggerEvents     = [],
+                                 setVariableValues = [ (self.dummy, self.dummy() + 10) ])
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -112,6 +134,8 @@ class simTutorial(daeSimulation):
         self.m.stnRegulator.ActiveState = "Heating"
 
         self.m.T.SetInitialCondition(283)
+        self.m.dummy.AssignValue(0.0)
+
 
 # Use daeSimulator class
 def guiRun(app):

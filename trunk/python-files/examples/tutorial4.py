@@ -66,14 +66,14 @@ class modTutorial(daeModel):
         # If there are more than two states, start a new state by calling the function ELSE_IF (condition2)
         # and write the equations that will be active if 'condition2' is satisfied. And so on...
         # Finally call the function END_IF() to finalize the state transition network.
-        # There is an optional argument EventTolerance of functions IF and ELSE_IF. It is used by the solver
+        # There is an optional argument eventTolerance of functions IF and ELSE_IF. It is used by the solver
         # to control the process of discovering the discontinuities.
-        # Details about the EventTolerance purpose will be given for the condition time < 200, given below.
+        # Details about the eventTolerance purpose will be given for the condition time < 200, given below.
         # Conditions like time < 200 will be internally transformed into the following equations:
-        #        time - 200 - EventTolerance = 0
+        #        time - 200 - eventTolerance = 0
         #        time - 200 = 0
-        #        time - 200 + EventTolerance = 0
-        # where EventTolerance is used to control how far will solver go after/before discovering a discontinuity.
+        #        time - 200 + eventTolerance = 0
+        # where eventTolerance is used to control how far will solver go after/before discovering a discontinuity.
         # The default value is 1E-7. Therefore, the above expressions will transform into:
         #        time - 199.9999999 = 0
         #        time - 200         = 0
@@ -94,7 +94,7 @@ class modTutorial(daeModel):
         # go to the state ELSE.
         # In this example, input power of the heater will be 1500 Watts if the time is less than 200.
         # Once we reach 200 seconds the heater is switched off (power is 0 W) and the sytem starts to cool down.
-        self.IF(self.time() < 200, EventTolerance = 1E-5)
+        self.IF(self.time() < 200, eventTolerance = 1E-5)
 
         eq = self.CreateEquation("Q_on", "The heater is on")
         eq.Residual = self.Qin() - 1500

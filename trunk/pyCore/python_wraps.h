@@ -621,6 +621,107 @@ public:
 		daeModel::SWITCH_TO(strState, rCondition, dEventTolerance);
 	}
 
+    void ON_CONDITION(const daeCondition& rCondition,
+                      const string& strStateTo = string(),
+                      boost::python::list triggerEvents = boost::python::list(),
+                      boost::python::list setVariableValues = boost::python::list(),
+                      real_t dEventTolerance = 0.0)
+    {
+        daeEventPort* pEventPort;
+        daeVariable* pVariable;
+        adouble a;
+        vector< pair<daeVariable*, adouble> > arrSetVariables;
+        vector<daeEventPort*> ptrarrTriggerEvents;
+        boost::python::ssize_t i, n;
+        boost::python::tuple t;
+
+        n = boost::python::len(setVariableValues);
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            pVariable = boost::python::extract<daeVariable*>(t[0]);
+            a = boost::python::extract<adouble>(t[1]);
+            pair<daeVariable*, adouble> p(pVariable, a);
+            
+			arrSetVariables.push_back(p);
+        }
+
+        n = boost::python::len(triggerEvents);
+        for(i = 0; i < n; i++)
+        {
+            pEventPort = boost::python::extract<daeEventPort*>(triggerEvents[i]);
+           
+			ptrarrTriggerEvents.push_back(pEventPort);
+        }
+
+        daeModel::ON_CONDITION(rCondition,
+                               strStateTo,
+                               arrSetVariables,
+                               ptrarrTriggerEvents,
+                               dEventTolerance);
+    }
+
+    void ON_EVENT(daeEventPort* pTriggerEventPort,
+                  boost::python::list switchToStates    = boost::python::list(),
+                  boost::python::list triggerEvents     = boost::python::list(),
+                  boost::python::list setVariableValues = boost::python::list())
+    {
+        daeEventPort* pEventPort;
+        daeSTN* pSTN;
+        string strStateTo;
+        daeVariable* pVariable;
+        adouble a;
+        vector< pair<daeSTN*, string> > arrSwitchToStates;
+        vector< pair<daeVariable*, adouble> > arrSetVariables;
+        vector<daeEventPort*> ptrarrTriggerEvents;
+        boost::python::ssize_t i, n;
+        boost::python::tuple t;
+
+        n = boost::python::len(switchToStates);
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            pSTN       = boost::python::extract<daeSTN*>(t[0]);
+            strStateTo = boost::python::extract<string>(t[1]);
+            pair<daeSTN*, string> p(pSTN, strStateTo);
+
+            arrSwitchToStates.push_back(p);
+        }
+
+        n = boost::python::len(setVariableValues);
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            pVariable = boost::python::extract<daeVariable*>(t[0]);
+            a = boost::python::extract<adouble>(t[1]);
+            pair<daeVariable*, adouble> p(pVariable, a);
+
+            arrSetVariables.push_back(p);
+        }
+
+        n = boost::python::len(triggerEvents);
+        for(i = 0; i < n; i++)
+        {
+            pEventPort = boost::python::extract<daeEventPort*>(triggerEvents[i]);
+
+            ptrarrTriggerEvents.push_back(pEventPort);
+        }
+
+        daeModel::ON_EVENT(pTriggerEventPort,
+                           arrSwitchToStates,
+                           arrSetVariables,
+                           ptrarrTriggerEvents);
+    }
+	
 	daeEquation* CreateEquation1(string strName, string strDescription)
 	{
 		return daeModel::CreateEquation(strName, strDescription);
@@ -629,11 +730,6 @@ public:
 	daeEquation* CreateEquation2(string strName)
 	{
 		return daeModel::CreateEquation(strName, "");
-	}
-
-	void ConnectPorts(daePort& pPortFrom, daePort& pPortTo)
-	{
-		daeModel::ConnectPorts(&pPortFrom, &pPortTo);
 	}
 
 	void DeclareData()

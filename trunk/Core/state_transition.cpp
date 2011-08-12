@@ -123,7 +123,7 @@ void daeStateTransition::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->SaveRuntimeObject(strName, &m_Condition);
 }
 
-void daeStateTransition::Create_SWITCH_TO(const string& strCondition, daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
+void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateFrom)
 	{	
@@ -162,7 +162,37 @@ void daeStateTransition::Create_SWITCH_TO(const string& strCondition, daeState* 
 	pStateFrom->AddStateTransition(this);
 }
 
-void daeStateTransition::Create_IF(const string& strCondition, daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
+void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, const daeCondition& rCondition, vector<daeAction*>& ptrarrActions, real_t dEventTolerance)
+{
+	if(!pStateFrom)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Illegal start state in StateTransition [" << m_strCanonicalName << "], start state [" << pStateFrom->m_strCanonicalName << "]";
+		throw e;
+	}
+	if(ptrarrActions.empty())
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Empty list of actions in StateTransition [" << m_strCanonicalName;
+		throw e;
+	}
+
+	string strName = "StateTransition_" + toString<size_t>(pStateFrom->m_ptrarrStateTransitions.size());
+
+	m_pSTN			= pStateFrom->GetSTN();
+	m_strShortName	= strName;
+	m_pModel		= pStateFrom->m_pModel;
+	m_ptrarrActions.EmptyAndFreeMemory();
+	for(size_t i = 0; i < ptrarrActions.size(); i++)
+		m_ptrarrActions.push_back(ptrarrActions[i]);
+	m_Condition		= rCondition;
+	m_Condition.m_pModel = m_pModel;
+	m_Condition.m_dEventTolerance = dEventTolerance;
+
+	pStateFrom->AddStateTransition(this);
+}
+	
+void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateTo)
 	{	
