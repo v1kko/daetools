@@ -517,14 +517,14 @@ public:
 /******************************************************************
 	daeEventPort_t
 *******************************************************************/
-/* It derives from daeSubject<daeEventPort_t> to allow daeActions to observe daeEventPort_t
+/* It derives from daeSubject<daeEventPort_t> to allow daeOnEventActions_t to observe daeEventPort_t
    It derives from daeObserver<daeEventPort_t> to allow inlet ports to observe outlet daeEventPort_t ports
    How the events are propagated in the following scenario: 
      Outlet event ports are attached to inlet event ports, and actions are attached to inlet event ports
-		   [daeAction] ------ > [inlet daeEventPort] --------> [daeEventport outlet]
+		 [daeOnEventActions] ------ > [inlet daeEventPort] --------> [outlet daeEventport]
 	   
 	   When outlet port's SendEvent() is called it calls it's Notify() function.   
-	   Notify() function calls Update() function in the inlet port which then calls Update() from the action.
+	   Notify() function calls Update() function in the inlet port which then calls Update() in OnEventActions.
 																	  
 													  <observer> -------< Notify(data) ------------ <subject>
 														  |                                      [EventPort: out]
@@ -533,12 +533,13 @@ public:
 														  |
 														  v
 		<observer>-----------< Notify(data) ----------<subject>                         
-	   [daeAction]                                  [EventPort: in]                     
+	 [OnEventActions]                              [EventPort: in]                     
 			|
 			| Update(data) calls Execute(data)
 			v
 
-   The function SendEvent() is used by daeActions in state transitions to trigger the event (it calls the function Notify(data))
+   The function daeEventPort_t::SendEvent() is used by daeActions to trigger the event 
+   (it calls the function Notify(data))
 */
 class daeAction_t;
 class daeEventPort_t : virtual public daeObject_t,
@@ -546,14 +547,9 @@ class daeEventPort_t : virtual public daeObject_t,
                        virtual public daeObserver<daeEventPort_t>
 {
 public:
-	virtual daeePortType	GetType(void) const													= 0;
-	virtual void			SetType(daeePortType eType)											= 0;
-	virtual void			SendEvent(void* data)												= 0;
-	
-	//virtual void			Connect(daeEventPort_t* port)										= 0;
-	//virtual void			Disconnect(daeEventPort_t* port)									= 0;
-	//virtual void			GetConnectedPorts(std::vector<daeEventPort_t*>& ptrarrEventPorts)	= 0;
-	//virtual void			GetAssociatedActions(std::vector<daeAction_t*>& ptrarrEventPorts)	= 0;
+	virtual daeePortType	GetType(void) const			= 0;
+	virtual void			SetType(daeePortType eType)	= 0;
+	virtual void			SendEvent(void* data)		= 0;
 };
 
 /******************************************************************

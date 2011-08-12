@@ -669,7 +669,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>())
 		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
-		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
+		.def("END_STN",			&daepython::daeModelWrapper::END_STN) 
 		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
         .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")          = string(),
                                                                              boost::python::arg("triggerEvents")     = boost::python::list(),

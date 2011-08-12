@@ -1809,6 +1809,7 @@ class daeEventPort : virtual public daeObject,
                      virtual public daeEventPort_t
 {
 public:
+	daeDeclareDynamicClass(daeEventPort)
 	daeEventPort(void);
 	daeEventPort(string strName, daeePortType eType, daeModel* pModel, const string& strDescription = string(""));
 	virtual ~daeEventPort(void);
@@ -1817,10 +1818,6 @@ public:
 	virtual daeePortType	GetType(void) const;
 	virtual void			SetType(daeePortType eType);
 	virtual void			SendEvent(void* data);
-	//virtual void			Connect(daeEventPort_t* port);
-	//virtual void			Disconnect(daeEventPort_t* port);
-	//virtual void			GetConnectedPorts(std::vector<daeEventPort_t*>& ptrarrConnectedEventPorts);
-	//virtual void			GetAssociatedActions(std::vector<daeAction_t*>& ptrarrActions)	= 0;
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1844,6 +1841,7 @@ class daeAction : virtual public daeObject,
                   virtual public daeAction_t
 {
 public:
+	daeDeclareDynamicClass(daeAction)
 	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, void* data, const string& strDescription);
 	daeAction(const string& strname, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription);
@@ -1852,7 +1850,6 @@ public:
 public:
 	virtual daeeActionType	GetType(void) const;
 	virtual void			Execute(void* data);
-	//virtual void Update(daeEventPort_t *pSubject, void* data);
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1891,8 +1888,9 @@ class daeOnEventActions : virtual public daeObject,
                           virtual public daeOnEventActions_t
 {
 public:
+	daeDeclareDynamicClass(daeOnEventActions)
 	daeOnEventActions(void);
-	daeOnEventActions(daeEventPort*, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
+	daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
 	virtual ~daeOnEventActions(void);
 
 public:
@@ -1908,6 +1906,7 @@ public:
 	void Initialize(void);
 
 protected:
+	daeEventPort*            m_pEventPort;
 	daePtrVector<daeAction*> m_ptrarrOnEventActions;
 };
 
@@ -2063,7 +2062,7 @@ public:
 	void AddModel(daeModel* pModel);
 	void AddPort(daePort* pPort);
 	void AddEventPort(daeEventPort* pPort);
-	void AddAction(daeAction* pAction);
+	void AddOnEventAction(daeOnEventActions* pOnEventAction);
 	void AddPortConnection(daePortConnection* pPortConnection);
 	void AddPortArray(daePortArray* pPortArray);
 	void AddModelArray(daeModelArray* pModelArray);
@@ -2083,6 +2082,7 @@ protected:
 	void AddModel(daeModel& rModel, const string& strName, string strDescription = "");
 	void AddPort(daePort& rPort, const string& strName, daeePortType ePortType, string strDescription = "");
 	void AddEventPort(daeEventPort& rPort, const string& strName, daeePortType ePortType, string strDescription);
+	void AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription = "");
 	void AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription = "");
 	void AddModelArray(daeModelArray& rModelArray, const string& strName, string strDescription = "");
 
@@ -2148,7 +2148,7 @@ public:
 	void RemoveVariable(daeVariable* pObject);
 	void RemovePort(daePort* pObject);
 	void RemoveEventPort(daeEventPort* pObject);
-	void RemoveAction(daeAction* pObject);
+	void RemoveOnEventAction(daeOnEventActions* pObject);
 	void RemovePortArray(daePortArray* pObject);
 	void RemoveModelArray(daeModelArray* pObject);
 
@@ -2234,6 +2234,7 @@ protected:
 	friend class daePort;
 	friend class daeEventPort;
 	friend class daeAction;
+	friend class daeOnEventActions;
 	friend class daeObject;
 	friend class daeDomain;
 	friend class daeVariable;

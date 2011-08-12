@@ -629,7 +629,6 @@ public:
     {
         daeEventPort* pEventPort;
         daeVariable* pVariable;
-        adouble a;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
         vector<daeEventPort*> ptrarrTriggerEvents;
         boost::python::ssize_t i, n;
@@ -642,10 +641,30 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pVariable = boost::python::extract<daeVariable*>(t[0]);
-            a = boost::python::extract<adouble>(t[1]);
-            pair<daeVariable*, adouble> p(pVariable, a);
+            pVariable               = boost::python::extract<daeVariable*>(t[0]);
+            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+			
+			boost::python::extract<real_t>  dValue(o);
+			boost::python::extract<adouble> aValue(o);
             
+            pair<daeVariable*, adouble> p;
+
+			p.first = pVariable;
+			if(aValue.check())
+			{
+				p.second = aValue();
+			}
+			else if(dValue.check())
+			{
+				p.second = adouble(dValue());
+			}
+			else
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Invalid setVariableValues argument in ON_CONDITION function";
+				throw e;
+			}
+
 			arrSetVariables.push_back(p);
         }
 
@@ -673,7 +692,6 @@ public:
         daeSTN* pSTN;
         string strStateTo;
         daeVariable* pVariable;
-        adouble a;
         vector< pair<daeSTN*, string> > arrSwitchToStates;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
         vector<daeEventPort*> ptrarrTriggerEvents;
@@ -701,9 +719,29 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pVariable = boost::python::extract<daeVariable*>(t[0]);
-            a = boost::python::extract<adouble>(t[1]);
-            pair<daeVariable*, adouble> p(pVariable, a);
+            pVariable               = boost::python::extract<daeVariable*>(t[0]);
+            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+			
+			boost::python::extract<real_t>  dValue(o);
+			boost::python::extract<adouble> aValue(o);
+            
+			pair<daeVariable*, adouble> p;
+
+			p.first = pVariable;
+			if(aValue.check())
+			{
+				p.second = aValue();
+			}
+			else if(dValue.check())
+			{
+				p.second = adouble(dValue());
+			}
+			else
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Invalid setVariableValues argument in ON_EVENT function";
+				throw e;
+			}
 
             arrSetVariables.push_back(p);
         }

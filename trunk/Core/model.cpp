@@ -839,24 +839,24 @@ void daeModel::AddEventPort(daeEventPort* pPort)
     m_ptrarrEventPorts.push_back(pPort);
 }
 
-void daeModel::AddAction(daeAction* pAction)
+void daeModel::AddOnEventAction(daeOnEventActions* pOnEventAction)
 {
-	std::string strName = pAction->GetName();
+	std::string strName = pOnEventAction->GetName();
 	if(strName.empty())
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Action name cannot be empty";
+		e << "OnEventAction name cannot be empty";
 		throw e;
 	}
 	if(CheckName(m_ptrarrOnEventActions, strName))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "Action [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+		e << "OnEventAction [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pAction);
-    m_ptrarrOnEventActions.push_back(pAction);
+    SetModelAndCanonicalName(pOnEventAction);
+    m_ptrarrOnEventActions.push_back(pOnEventAction);
 }
 
 void daeModel::AddPortConnection(daePortConnection* pPortConnection)
@@ -1225,16 +1225,15 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	daeEventPort* pEventPort;
 	pair<daeSTN*, string> p1;
 	pair<daeVariable*, adouble> p2;
-	daeVariable* pVariable;
 	adouble value;
+	daeVariable* pVariable;
+	std::vector<daeAction*> ptrarrOnEventActions;
 
 	if(!pTriggerEventPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(pTriggerEventPort->GetType() != eInletPort)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	daeOnEventActions(daeEventPort*, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
-	
 // ChangeState	
 	for(i = 0; i < arrSwitchToStates.size(); i++)
 	{
@@ -1247,11 +1246,8 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 			daeDeclareAndThrowException(exInvalidCall);
 			
 		pAction = new daeAction(string("actionChangeState_") + pSTN->GetName() + "_" + strStateTo, this, pSTN, strStateTo, string(""));
-		pTriggerEventPort->Attach(pAction);
-		
-		m_ptrarrOnEventActions.push_back(pAction);
+		ptrarrOnEventActions.push_back(pAction);
 	}
-
 
 // TriggerEvents
 	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
@@ -1261,9 +1257,7 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 			daeDeclareAndThrowException(exInvalidPointer);
 			
 		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
-		pTriggerEventPort->Attach(pAction);
-
-		m_ptrarrOnEventActions.push_back(pAction);
+		ptrarrOnEventActions.push_back(pAction);
 	}
 
 // SetVariables	
@@ -1276,10 +1270,11 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 			daeDeclareAndThrowException(exInvalidPointer);
 			
 		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
-		pTriggerEventPort->Attach(pAction);
-
-		m_ptrarrOnEventActions.push_back(pAction);
+		ptrarrOnEventActions.push_back(pAction);
 	}
+	
+	daeOnEventActions* pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, string(""));
+	pTriggerEventPort->Attach(pOnEventAction);
 }
 
 void daeModel::AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription)
@@ -1321,6 +1316,13 @@ void daeModel::AddEventPort(daeEventPort& rPort, const string& strName, daeePort
 	AddEventPort(&rPort);
 }
 
+void daeModel::AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription)
+{
+	rOnEventAction.SetName(strName);
+	rOnEventAction.SetDescription(strDescription);
+	AddOnEventAction(&rOnEventAction);
+}
+		
 daeEquation* daeModel::CreateEquation(const string& strName, string strDescription)
 {
 	string strEqName;
@@ -1417,7 +1419,7 @@ void daeModel::RemoveEventPort(daeEventPort* pObject)
 	m_ptrarrEventPorts.Remove(pObject);
 }
 
-void daeModel::RemoveAction(daeAction* pObject)
+void daeModel::RemoveOnEventAction(daeOnEventActions* pObject)
 {
 	m_ptrarrOnEventActions.Remove(pObject);
 }

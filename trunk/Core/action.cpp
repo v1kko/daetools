@@ -77,7 +77,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 	if(value.node)
 		m_pSetupSetExpressionNode = value.node;
 	else
-		m_pSetupSetExpressionNode = boost::shared_ptr<adNode>(new adConstantNode(0.0));
+		m_pSetupSetExpressionNode = boost::shared_ptr<adNode>(new adConstantNode(value.getValue()));
 }
 
 daeAction::~daeAction()
@@ -88,12 +88,6 @@ daeeActionType daeAction::GetType(void) const
 {
 	return m_eActionType;
 }
-
-//void daeAction::Update(daeEventPort_t* pSubject, void* data)
-//{
-//	std::cout << "Update received in the action: " << GetName() << std::endl;
-//	Execute(data);
-//}
 
 void daeAction::Initialize(void)
 {
@@ -340,102 +334,30 @@ void daeAction::Export(std::string& strContent, daeeModelLanguage eLanguage, dae
 }
 
 
-
-
-
-
-
-
-
 /*********************************************************************************************
 	daeOnEventActions
 **********************************************************************************************/
 daeOnEventActions::daeOnEventActions(void)
 {
+	m_pEventPort = NULL;
 }
 
 daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pModel->AddEventPort(*this, "OnEventAction)" + pEventPort->GetName(), ptrarrOnEventActions, strDescription);
-
-	size_t i;
-	daeAction* pAction;
-	daeSTN* pSTN;
-	string strStateTo;
-	daeEventPort* pEventPort;
-	pair<daeSTN*, string> p1;
-	pair<daeVariable*, adouble> p2;
-	daeVariable* pVariable;
-	adouble value;
-
-	if(!pTriggerEventPort)
+	if(!pEventPort)
 		daeDeclareAndThrowException(exInvalidPointer);
-	if(pTriggerEventPort->GetType() != eInletPort)
-		daeDeclareAndThrowException(exInvalidCall);
-
-	daeOnEventActions(daeEventPort*, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
 	
-// ChangeState	
-	for(i = 0; i < arrSwitchToStates.size(); i++)
-	{
-		p1 = arrSwitchToStates[i];
-		pSTN       = p1.first;
-		strStateTo = p1.second;
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(strStateTo.empty())
-			daeDeclareAndThrowException(exInvalidCall);
-			
-		pAction = new daeAction(string("actionChangeState_") + pSTN->GetName() + "_" + strStateTo, this, pSTN, strStateTo, string(""));
-		pTriggerEventPort->Attach(pAction);
-		
-		m_ptrarrOnEventActions.push_back(pAction);
-	}
+	pModel->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
 
-
-// TriggerEvents
-	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
-	{
-		pEventPort = ptrarrTriggerEvents[i];
-		if(!pEventPort)
-			daeDeclareAndThrowException(exInvalidPointer);
-			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
-		pTriggerEventPort->Attach(pAction);
-
-		m_ptrarrOnEventActions.push_back(pAction);
-	}
-
-// SetVariables	
-	for(i = 0; i < arrSetVariables.size(); i++)
-	{
-		p2 = arrSetVariables[i];
-		pVariable = p2.first;
-		value     = p2.second;
-		if(!pVariable)
-			daeDeclareAndThrowException(exInvalidPointer);
-			
-		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
-		pTriggerEventPort->Attach(pAction);
-
-		m_ptrarrOnEventActions.push_back(pAction);
-	}
+	m_pEventPort = pEventPort;
+	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
+		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
 }
 
 daeOnEventActions::~daeOnEventActions(void)
 {
-}
-
-// Called by the outlet event port that this port is attached to
-void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
-{
-	
-	std::cout << "Update received in inlet port: " << GetName() << std::endl;
-	
-// Observers in this case are actions
-	Notify(data);
 }
 
 void daeOnEventActions::Initialize(void)
@@ -449,12 +371,24 @@ void daeOnEventActions::Initialize(void)
 		if(!pAction)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		pAction->Initialize(data);
+		pAction->Initialize();
 	}
 }
 
 bool daeOnEventActions::CheckObject(std::vector<string>& strarrErrors) const
 {
+	if(!m_pEventPort)
+	{
+		strarrErrors.push_back(string("Invalid event port in OnEventActions: ") + GetName());
+		return false;
+	}
+	
+	if(m_ptrarrOnEventActions.empty())
+	{
+		strarrErrors.push_back(string("Actions array cannot be empty in OnEventActions: ") + GetName());
+		return false;
+	}
+
 	return true;
 }
 
@@ -466,9 +400,6 @@ void daeOnEventActions::Open(io::xmlTag_t* pTag)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	daeObject::Open(pTag);
-
-	strName = "Type";
-	OpenEnum(pTag, strName, m_ePortType);
 }
 
 void daeOnEventActions::Save(io::xmlTag_t* pTag) const
@@ -477,7 +408,10 @@ void daeOnEventActions::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-	strName = "OnEventActions";
+	strName = "EventPort";
+	pTag->SaveObjectRef(strName, m_pEventPort);
+
+	strName = "Actions";
 	pTag->SaveObjectArray(strName, m_ptrarrOnEventActions);
 }
 	
@@ -493,15 +427,11 @@ void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
 
 void daeOnEventActions::Execute(void* data)
 {
-	size_t i;
 	daeAction* pAction;
 	
-	for(i = 0; i < m_ptrarrOnEventActions.size(); i++)
+	for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
 	{
 		pAction = m_ptrarrOnEventActions[i];
-		if(!pAction)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pAction->Execute(data);
 	}
 }

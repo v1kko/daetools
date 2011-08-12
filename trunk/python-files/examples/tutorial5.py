@@ -44,12 +44,12 @@ class modTutorial(daeModel):
         self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
         self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
 
-        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
-        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
-        self.dummy= daeVariable("dummy", no_t,          self, "dummy")
+        self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
+        self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
+        self.dummy = daeVariable("dummy", no_t,          self, "dummy")
 
-        self.epIn   = daeEventPort("Inlet",  eInletPort, self, "Inlet event port")
-        self.epOut  = daeEventPort("Outlet", eOutletPort, self, "Outlet event port")
+        self.epIn  = daeEventPort("epIn",  eInletPort,  self, "Inlet event port")
+        self.epOut = daeEventPort("epOut", eOutletPort, self, "Outlet event port")
         self.ConnectEventPorts(self.epIn, self.epOut)
 
     def DeclareEquations(self):
@@ -82,8 +82,8 @@ class modTutorial(daeModel):
                                              triggerEvents     = [self.epOut],
                                              setVariableValues = [] )
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [self.epOut],
-                                             setVariableValues = [] )
+                                             triggerEvents     = [],
+                                             setVariableValues = [ (self.dummy, 0) ] )
 
         self.STATE("Cooling")
 
@@ -96,8 +96,8 @@ class modTutorial(daeModel):
                                              triggerEvents     = [self.epOut],
                                              setVariableValues = [])
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [self.epOut],
-                                             setVariableValues = [])
+                                             triggerEvents     = [],
+                                             setVariableValues = [ (self.dummy, 0) ] )
 
         self.STATE("HeaterOff")
 
@@ -109,7 +109,7 @@ class modTutorial(daeModel):
         # The actions executed when the event on the inlet epIn event port is received
         self.ON_EVENT(self.epIn, switchToStates    = [],
                                  triggerEvents     = [],
-                                 setVariableValues = [ (self.dummy, self.dummy() + 10) ])
+                                 setVariableValues = [ (self.dummy, self.dummy() + 1) ] )
 
 class simTutorial(daeSimulation):
     def __init__(self):
