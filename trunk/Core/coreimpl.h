@@ -2068,7 +2068,7 @@ public:
 	void AddModelArray(daeModelArray* pModelArray);
 
 	void ConnectPorts(daePort* pPortFrom, daePort* pPortTo);
-	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
+	void ConnectPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
 	
 // Overridables		
 public:

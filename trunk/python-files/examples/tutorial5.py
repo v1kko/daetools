@@ -50,7 +50,7 @@ class modTutorial(daeModel):
 
         self.epIn  = daeEventPort("epIn",  eInletPort,  self, "Inlet event port")
         self.epOut = daeEventPort("epOut", eOutletPort, self, "Outlet event port")
-        self.ConnectEventPorts(self.epIn, self.epOut)
+        self.ConnectPorts(self.epIn, self.epOut)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")

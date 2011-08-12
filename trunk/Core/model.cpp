@@ -1356,7 +1356,7 @@ void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 	AddPortConnection(pPortConnection);
 }
 
-void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
+void daeModel::ConnectPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
 {
 // Here, portFrom is observer and portTo is subject
 // When the outlet port send an event its function Notify() is called which in turn calls the function Update() in the portFrom.

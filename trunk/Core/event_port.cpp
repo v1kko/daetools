@@ -78,7 +78,7 @@ void daeEventPort::Open(io::xmlTag_t* pTag)
 
 	daeObject::Open(pTag);
 
-	strName = "Type";
+	strName = "PortType";
 	OpenEnum(pTag, strName, m_ePortType);
 }
 
@@ -88,7 +88,7 @@ void daeEventPort::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-	strName = "Type";
+	strName = "PortType";
 	SaveEnum(pTag, strName, m_ePortType);
 
 //	strName = "ActionsRefs";

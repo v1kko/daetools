@@ -760,6 +760,16 @@ public:
                            ptrarrTriggerEvents);
     }
 	
+	void ConnectPorts1(daePort* pPortFrom, daePort* pPortTo)
+	{
+		daeModel::ConnectPorts(pPortFrom, pPortTo);
+	}
+
+	void ConnectPorts2(daeEventPort* pPortFrom, daeEventPort* pPortTo)
+	{
+		daeModel::ConnectPorts(pPortFrom, pPortTo);
+	}
+
 	daeEquation* CreateEquation1(string strName, string strDescription)
 	{
 		return daeModel::CreateEquation(strName, strDescription);
@@ -839,6 +849,32 @@ public:
 		return l;
 	}
 
+	boost::python::list GetEventPorts(void)
+	{
+		boost::python::list l;
+		daeEventPort* obj;
+
+		for(size_t i = 0; i < m_ptrarrEventPorts.size(); i++)
+		{
+			obj = m_ptrarrEventPorts[i];
+			l.append(boost::ref(obj));
+		}
+		return l;
+	}
+	
+	boost::python::list GetOnEventActions(void)
+	{
+		boost::python::list l;
+		daeOnEventActions* obj;
+
+		for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
+		{
+			obj = m_ptrarrOnEventActions[i];
+			l.append(boost::ref(obj));
+		}
+		return l;
+	}
+	
 	boost::python::list GetPortArrays(void)
 	{
 		boost::python::list l;
