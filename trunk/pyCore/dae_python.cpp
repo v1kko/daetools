@@ -580,7 +580,10 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeEventPort, bases<daeObject>, boost::noncopyable>("daeEventPort")
         .def(init<string, daeePortType, daeModel*, optional<string> >())
 
-        .add_property("Type", &daeEventPort::GetType)
+        .add_property("Type",		&daeEventPort::GetType) 
+        .add_property("EventData",	&daeEventPort::GetEventData)
+		
+		.def("__call__", &daeEventPort::operator())
         ;
 
     class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)

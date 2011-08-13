@@ -627,10 +627,11 @@ public:
                       boost::python::list setVariableValues = boost::python::list(),
                       real_t dEventTolerance = 0.0)
     {
+		real_t data;
         daeEventPort* pEventPort;
         daeVariable* pVariable;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
-        vector<daeEventPort*> ptrarrTriggerEvents;
+        vector< pair<daeEventPort*, real_t> > arrTriggerEvents;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -671,15 +672,28 @@ public:
         n = boost::python::len(triggerEvents);
         for(i = 0; i < n; i++)
         {
-            pEventPort = boost::python::extract<daeEventPort*>(triggerEvents[i]);
-           
-			ptrarrTriggerEvents.push_back(pEventPort);
+            t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            pEventPort = boost::python::extract<daeEventPort*>(t[0]);
+			boost::python::extract<real_t> ex(t[1]);
+			if(!ex.check())
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Only float data can be sent to event ports in ON_CONDITION function";
+				throw e;
+			}
+            data = ex();
+
+            pair<daeEventPort*, real_t> p(pEventPort, data);
+            arrTriggerEvents.push_back(p);
         }
 
         daeModel::ON_CONDITION(rCondition,
                                strStateTo,
                                arrSetVariables,
-                               ptrarrTriggerEvents,
+                               arrTriggerEvents,
                                dEventTolerance);
     }
 
@@ -688,13 +702,14 @@ public:
                   boost::python::list triggerEvents     = boost::python::list(),
                   boost::python::list setVariableValues = boost::python::list())
     {
+		real_t data;
         daeEventPort* pEventPort;
-        daeSTN* pSTN;
+        string strSTN;
         string strStateTo;
         daeVariable* pVariable;
-        vector< pair<daeSTN*, string> > arrSwitchToStates;
+        vector< pair<string, string> > arrSwitchToStates;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
-        vector<daeEventPort*> ptrarrTriggerEvents;
+        vector< pair<daeEventPort*, real_t> > arrTriggerEvents;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -705,10 +720,10 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pSTN       = boost::python::extract<daeSTN*>(t[0]);
+            strSTN     = boost::python::extract<string>(t[0]);
             strStateTo = boost::python::extract<string>(t[1]);
-            pair<daeSTN*, string> p(pSTN, strStateTo);
-
+            
+			pair<string, string> p(strSTN, strStateTo);
             arrSwitchToStates.push_back(p);
         }
 
@@ -749,15 +764,28 @@ public:
         n = boost::python::len(triggerEvents);
         for(i = 0; i < n; i++)
         {
-            pEventPort = boost::python::extract<daeEventPort*>(triggerEvents[i]);
+            t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
 
-            ptrarrTriggerEvents.push_back(pEventPort);
+            pEventPort = boost::python::extract<daeEventPort*>(t[0]);
+			boost::python::extract<real_t> ex(t[1]);
+			if(!ex.check())
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Only float data can be sent to event ports in ON_EVENT function";
+				throw e;
+			}
+            data = ex();
+
+            pair<daeEventPort*, real_t> p(pEventPort, data);
+            arrTriggerEvents.push_back(p);
         }
 
         daeModel::ON_EVENT(pTriggerEventPort,
                            arrSwitchToStates,
                            arrSetVariables,
-                           ptrarrTriggerEvents);
+                           arrTriggerEvents);
     }
 	
 	void ConnectPorts1(daePort* pPortFrom, daePort* pPortTo)

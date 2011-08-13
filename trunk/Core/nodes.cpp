@@ -535,6 +535,98 @@ bool adTimeNode::IsFunctionOfVariables(void) const
 }
 
 /*********************************************************************************************
+	adEventPortDataNode
+**********************************************************************************************/
+adEventPortDataNode::adEventPortDataNode(daeEventPort* pEventPort)
+{
+	m_pEventPort = pEventPort;
+}
+
+adEventPortDataNode::~adEventPortDataNode()
+{
+}
+
+adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+	if(!m_pEventPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pExecutionContext)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pExecutionContext->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	adouble tmp(m_pEventPort->GetEventData(), 0);
+	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+	{
+		tmp.setGatherInfo(true);
+		tmp.node = shared_ptr<adNode>( Clone() );
+	}
+	return tmp;
+}
+
+adNode* adEventPortDataNode::Clone(void) const
+{
+	return new adEventPortDataNode(*this);
+}
+
+void adEventPortDataNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pEventPort) + "()";
+	else if(eLanguage == ePYDAE)
+		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pEventPort) + "()";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
+}
+
+//string adEventPortDataNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//
+//}
+
+string adEventPortDataNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+{
+	vector<string> domains;
+	string strName = daeGetRelativeName(c->m_pModel, m_pEventPort);
+	return latexCreator::Variable(strName, domains);
+}
+
+void adEventPortDataNode::Open(io::xmlTag_t* /*pTag*/)
+{
+}
+
+void adEventPortDataNode::Save(io::xmlTag_t* pTag) const
+{
+	string strName = "EventPort";
+	pTag->SaveObjectRef(strName, m_pEventPort);
+}
+
+void adEventPortDataNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+}
+
+void adEventPortDataNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+{
+	vector<string> domains;
+	string strName = daeGetRelativeName(c->m_pModel, m_pEventPort);
+	xmlPresentationCreator::Variable(pTag, strName, domains);
+}
+
+void adEventPortDataNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+}
+
+bool adEventPortDataNode::IsLinear(void) const
+{
+	return true;
+}
+
+bool adEventPortDataNode::IsFunctionOfVariables(void) const
+{
+	return false;
+}
+
+/*********************************************************************************************
 	adRuntimeParameterNode
 **********************************************************************************************/
 adRuntimeParameterNode::adRuntimeParameterNode(daeParameter* pParameter, 

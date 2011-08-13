@@ -10,6 +10,29 @@ namespace core
 /*********************************************************************************************
 	daeAction
 **********************************************************************************************/
+daeAction::daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription)
+{
+	m_pModel = pModel;
+	SetName(strName);
+	SetDescription(strDescription);
+	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
+	m_eActionType = eChangeState;
+
+// For eChangeState:
+	m_pSTN           = NULL;
+	m_strSTN         = strSTN;
+	m_pStateTo       = NULL;
+	m_strStateTo     = strStateTo;	
+	
+// For eSendEvent:
+	m_pSendEventPort = NULL;
+	m_dData          = 0.0;
+	
+// For eReAssignOrReInitializeVariable:
+	m_pVariable      = NULL;
+	m_nIndex         = (size_t)-1;
+}
+
 daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription)
 {
 	m_pModel = pModel;
@@ -25,14 +48,14 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, cons
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
-	m_pData          = NULL;
+	m_dData          = 0.0;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
 	m_nIndex         = (size_t)-1;
 }
 
-daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, void* data, const string& strDescription)
+daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, real_t data, const string& strDescription)
 {
 	m_pModel = pModel;
 	SetName(strName);
@@ -43,11 +66,12 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 // For eChangeState:
 	m_pSTN	         = NULL;
 	m_pStateTo       = NULL;
+	m_strSTN         = "";
 	m_strStateTo	 = "";
 	
 // For eSendEvent:
 	m_pSendEventPort = pPort;
-	m_pData          = data;
+	m_dData          = data;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
@@ -65,11 +89,12 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 // For eChangeState:
 	m_pSTN	     = NULL;
 	m_pStateTo   = NULL;
+	m_strSTN     = "";
 	m_strStateTo = "";
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
-	m_pData          = NULL;
+	m_dData          = 0.0;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable	= pVariable;
@@ -98,6 +123,17 @@ void daeAction::Initialize(void)
 
 	if(m_eActionType == eChangeState)
 	{
+		if(!m_pSTN)
+		{
+			daeObject_t* pObject = m_pModel->FindObjectFromRelativeName(m_strSTN);
+			if(!pObject)
+				daeDeclareAndThrowException(exInvalidPointer);
+	
+			m_pSTN = dynamic_cast<daeSTN*>(pObject);
+			if(!m_pSTN)
+				daeDeclareAndThrowException(exInvalidPointer);
+		}
+	
 		m_pStateTo = m_pSTN->FindState(m_strStateTo);
 		if(!m_pStateTo)
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -126,7 +162,7 @@ void daeAction::Initialize(void)
 	}
 }
 
-void daeAction::Execute(void* data)
+void daeAction::Execute(void)
 {
 	std::cout << "Execute called in the action: " << GetName() << std::endl;
 	
@@ -137,7 +173,7 @@ void daeAction::Execute(void* data)
 		if(!m_pStateTo)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		if(m_pSTN->m_pActiveState != m_pStateTo)
+		if(m_pSTN->GetActiveState() != m_pStateTo)
 			m_pSTN->SetActiveState(m_pStateTo);
 		else
 			m_pSTN->LogMessage(string("Current state unchanged"), 0);
@@ -147,7 +183,7 @@ void daeAction::Execute(void* data)
 		if(!m_pSendEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		m_pSendEventPort->SendEvent(m_pData);
+		m_pSendEventPort->SendEvent(m_dData);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -173,6 +209,10 @@ void daeAction::Execute(void* data)
 
 bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 {
+	bool bReturn = true;
+
+	bReturn = daeObject::CheckObject(strarrErrors);
+
 	if(m_eActionType == eChangeState)
 	{
 		if(!m_pSTN)
@@ -222,7 +262,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 	
-	return true;
+	return bReturn;
 }
 
 void daeAction::Open(io::xmlTag_t* pTag)
@@ -259,6 +299,9 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 	{
 		strName = "SendEventPort";
 		pTag->SaveObjectRef(strName, m_pSendEventPort);
+		
+		strName = "Data";
+		pTag->Save(strName, m_dData);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -377,6 +420,10 @@ void daeOnEventActions::Initialize(void)
 
 bool daeOnEventActions::CheckObject(std::vector<string>& strarrErrors) const
 {
+	bool bReturn = true;
+
+	bReturn = daeObject::CheckObject(strarrErrors);
+
 	if(!m_pEventPort)
 	{
 		strarrErrors.push_back(string("Invalid event port in OnEventActions: ") + GetName());
@@ -389,7 +436,7 @@ bool daeOnEventActions::CheckObject(std::vector<string>& strarrErrors) const
 		return false;
 	}
 
-	return true;
+	return bReturn;
 }
 
 void daeOnEventActions::Open(io::xmlTag_t* pTag)
@@ -421,18 +468,18 @@ void daeOnEventActions::Export(std::string& strContent, daeeModelLanguage eLangu
 
 void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
 {
-	std::cout << "Update received in the OnEventActions: " << GetName() << std::endl;
-	Execute(data);
+	std::cout << "Update received in the OnEventActions: " << GetName() << ", data = " << *((real_t*)data) << std::endl;
+	Execute();
 }
 
-void daeOnEventActions::Execute(void* data)
+void daeOnEventActions::Execute(void)
 {
 	daeAction* pAction;
 	
 	for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
 	{
 		pAction = m_ptrarrOnEventActions[i];
-		pAction->Execute(data);
+		pAction->Execute();
 	}
 }
 

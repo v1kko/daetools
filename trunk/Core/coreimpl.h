@@ -593,6 +593,7 @@ public:
 		m_pmatSTimeDerivatives		= NULL; 
 		m_pmatSResiduals			= NULL;
 		m_dCurrentTime				= 0;
+		m_bReinitializationFlag		= false;
 	}
 
 	
@@ -1031,6 +1032,16 @@ public:
 		m_dCurrentTime = time;
 	}
 	
+	bool GetReinitializationFlag(void) const
+	{
+		return m_bReinitializationFlag;
+	}
+	
+	void SetReinitializationFlag(bool bReinitializationFlag)
+	{
+		m_bReinitializationFlag = bReinitializationFlag;
+	}
+			
 //	void SetGlobalCondition(daeCondition condition)
 //	{
 //		daeExecutionContext EC;
@@ -1102,6 +1113,7 @@ protected:
 	int*							m_pnVariablesTypesGathered;
 	bool							m_bGatherInfo;
 	real_t							m_dCurrentTime;
+	bool							m_bReinitializationFlag;
 	//daeExecutionContext*			m_pExecutionContexts;
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
@@ -1753,6 +1765,10 @@ public:
 	
 	virtual void	SetReportingOn(bool bOn);
 
+	virtual daeObject_t* FindObject(string& strName);
+	virtual daeObject_t* FindObjectFromRelativeName(string& strRelativeName);
+	virtual daeObject_t* FindObjectFromRelativeName(std::vector<string>& strarrNames);
+
 public:	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1817,7 +1833,7 @@ public:
 public:
 	virtual daeePortType	GetType(void) const;
 	virtual void			SetType(daeePortType eType);
-	virtual void			SendEvent(void* data);
+	virtual void			SendEvent(real_t data);
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1829,7 +1845,11 @@ public:
 	
 	void Initialize(void);
 	
+	real_t GetEventData(void);
+	adouble operator()(void);
+	
 protected:
+	real_t       m_dEventData;
 	daeePortType m_ePortType;
 };
 
@@ -1843,13 +1863,14 @@ class daeAction : virtual public daeObject,
 public:
 	daeDeclareDynamicClass(daeAction)
 	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
-	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, void* data, const string& strDescription);
+	daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription);
+	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, real_t data, const string& strDescription);
 	daeAction(const string& strname, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription);
 	virtual ~daeAction(void);
 
 public:
 	virtual daeeActionType	GetType(void) const;
-	virtual void			Execute(void* data);
+	virtual void			Execute(void);
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1867,12 +1888,13 @@ protected:
 	
 // For eChangeState:
 	daeSTN*		m_pSTN;
+	string      m_strSTN;
 	string		m_strStateTo;
 	daeState*	m_pStateTo;
 	
 // For eSendEvent:
 	daeEventPort* m_pSendEventPort;
-	void*		  m_pData;
+	real_t		  m_dData;
 
 // For eReAssignOrReInitializeVariable:
 	daeVariable*				m_pVariable;
@@ -1894,7 +1916,7 @@ public:
 	virtual ~daeOnEventActions(void);
 
 public:
-	virtual void Execute(void* data);
+	virtual void Execute(void);
 	virtual void Update(daeEventPort_t *pSubject, void* data);
 	
 	void Open(io::xmlTag_t* pTag);
@@ -1993,8 +2015,14 @@ public:
 	virtual daeVariable_t*		FindVariable(string& strCanonicalName);
 	virtual daePort_t*			FindPort(string& strCanonicalName);
 	virtual daeModel_t*			FindModel(string& strCanonicalName);
+	virtual daeEventPort_t*		FindEventPort(string& strName);
+	virtual daeSTN_t*			FindSTN(string& strCanonicalName);
 	virtual daePortArray_t*		FindPortArray(string& strCanonicalName);
 	virtual daeModelArray_t*	FindModelArray(string& strCanonicalName);
+	
+	virtual daeObject_t*		FindObject(string& strName);
+	virtual daeObject_t*		FindObjectFromRelativeName(string& strRelativeName);
+	virtual daeObject_t*		FindObjectFromRelativeName(std::vector<string>& strarrNames);
 
 	virtual void	SetReportingOn(bool bOn);
 	
@@ -2102,16 +2130,16 @@ protected:
 	void      END_STN(void);
 	void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
 	
-	void ON_CONDITION(const daeCondition& rCondition, 
-					  const string& strStateTo, 
-					  std::vector< std::pair<daeVariable*, adouble> >& arrSetVariables,
-					  std::vector<daeEventPort*>& ptrarrTriggerEvents, 
-					  real_t dEventTolerance = 0);
+	void ON_CONDITION(const daeCondition&                               rCondition, 
+					  const string&                                     strStateTo, 
+					  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
+					  std::vector< std::pair<daeEventPort*, real_t> >&  arrTriggerEvents, 
+					  real_t                                            dEventTolerance = 0);
 	
-	void ON_EVENT(daeEventPort* pTriggerEventPort, 
-				  std::vector< std::pair<daeSTN*, string> >& arrSwitchToStates, 
-				  std::vector< std::pair<daeVariable*, adouble> >& arrSetVariables,
-				  std::vector<daeEventPort*>& ptrarrTriggerEvents);
+	void ON_EVENT(daeEventPort*                                     pTriggerEventPort, 
+				  std::vector< std::pair<string, string> >&         arrSwitchToStates, 
+				  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
+				  std::vector< std::pair<daeEventPort*, real_t> >&  arrTriggerEvents);
 	
 	template<typename Model>
 		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));
@@ -2732,7 +2760,7 @@ public:
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
-	virtual void		Initialize(void);
+	virtual void		FinalizeDeclaration(void);
 	virtual bool		CheckDiscontinuities(void);
 	virtual size_t		GetNumberOfEquations(void) const;
 	virtual daeState*	AddState(string strName);
@@ -2746,6 +2774,9 @@ public:
 
 	daeState*		GetParentState(void) const;
 	void			SetParentState(daeState* pParentState);
+	
+	daeState*		FindState(long nID);
+	daeState*		FindState(const string& strName);
 	
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
@@ -2767,9 +2798,6 @@ protected:
 
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 
-	daeState*		FindState(long nID);
-	daeState*		FindState(const string& strName);
-
 	void			ReconnectStateTransitionsAndStates(void);
 
 protected:
@@ -2782,7 +2810,6 @@ protected:
 	friend class daeModel;
 	friend class daeState;
 	friend class daeBlock;
-	friend class daeAction;
 };
 
 /******************************************************************
@@ -2796,7 +2823,7 @@ public:
 	virtual ~daeIF(void);
 
 public:	
-	virtual void		Initialize(void);
+	virtual void		FinalizeDeclaration(void);
 	virtual bool		CheckDiscontinuities(void);
 	virtual daeState*	AddState(string strName);
 

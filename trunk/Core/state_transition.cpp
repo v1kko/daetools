@@ -10,11 +10,8 @@ namespace core
 **************************************************/
 daeStateTransition::daeStateTransition()
 {
-	m_pSTN			= NULL;
-// 11.08.2011	
-//	m_pStateFrom	= NULL;
-//	m_pStateTo		= NULL;
-	m_pModel		= NULL;
+	m_pSTN		= NULL;
+	m_pModel	= NULL;
 }
 
 daeStateTransition::~daeStateTransition()
@@ -32,13 +29,6 @@ void daeStateTransition::Open(io::xmlTag_t* pTag)
 
 	daeFindStateByID del(m_pModel);
 
-// 11.08.2011	
-//	strName = "StateFromRef";
-//	m_pStateFrom = pTag->OpenObjectRef(strName, &del);
-//
-//	strName = "StateToRef";
-//	m_pStateTo = pTag->OpenObjectRef(strName, &del);
-
 	strName = "Condition";
 	pTag->OpenExistingObject<daeCondition, daeCondition>(strName, &m_Condition);
 }
@@ -48,13 +38,6 @@ void daeStateTransition::Save(io::xmlTag_t* pTag) const
 	string strName;
 
 	daeObject::Save(pTag);
-
-// 11.08.2011	
-//	strName = "StateFromRef";
-//	pTag->SaveObjectRef(strName, m_pStateFrom);
-//
-//	strName = "StateToRef";
-//	pTag->SaveObjectRef(strName, m_pStateTo);
 
 	strName = "Condition";
 	pTag->SaveObject(strName, &m_Condition);
@@ -109,18 +92,7 @@ void daeStateTransition::OpenRuntime(io::xmlTag_t* pTag)
 
 void daeStateTransition::SaveRuntime(io::xmlTag_t* pTag) const
 {
-	string strName;
-
 	daeObject::SaveRuntime(pTag);
-
-//	strName = "StateFromRef";
-//	pTag->SaveObjectRef(strName, m_pStateFrom);
-//
-//	strName = "StateToRef";
-//	pTag->SaveObjectRef(strName, m_pStateTo);
-
-	strName = "Condition";
-	pTag->SaveRuntimeObject(strName, &m_Condition);
 }
 
 void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
@@ -147,14 +119,6 @@ void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& st
 	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, m_pModel, m_pSTN, strStateToName, string(""));
 	m_ptrarrActions.push_back(pAction);
 	
-// 11.08.2011	
-//	m_pStateFrom		= pStateFrom;
-//	m_pStateTo			= NULL;
-//	m_strStateToName	= strStateToName;
-	
-// This creates runtime node from setup nodes
-// Global daeExecutionContext (m_pExecutionContextForGatherInfo) should be non-null during this stage
-//	m_Condition			= rCondition.m_pConditionNode->CreateRuntimeNode(m_pModel->m_pExecutionContextForGatherInfo);
 	m_Condition			= rCondition;
 
 	m_Condition.m_pModel = m_pModel;
@@ -207,14 +171,10 @@ void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCond
 	m_strShortName		= strName;
 	m_pModel			= pStateTo->m_pModel;
 	
-	daeAction* pAction = new daeAction(string("actionChangeState_") + pStateTo->GetName(), m_pModel, m_pSTN, pStateTo->GetName(), string(""));
-	m_ptrarrActions.push_back(pAction);
+// IF block cannot execute any action, so no need to specify them
+//	daeAction* pAction = new daeAction(string("actionChangeState_") + pStateTo->GetName(), m_pModel, m_pSTN, pStateTo->GetName(), string(""));
+//	m_ptrarrActions.push_back(pAction);
 
-// 11.08.2011	
-//	m_pStateFrom		= NULL;
-//	m_pStateTo			= pStateTo;
-//	m_strStateToName	= "";
-	
 	m_Condition			= rCondition;
 
 	m_Condition.m_pModel = pStateTo->m_pModel;
@@ -229,7 +189,7 @@ void daeStateTransition::ExecuteActions(void)
 	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
 	{
 		pAction = m_ptrarrActions[i];
-		pAction->Execute(NULL);
+		pAction->Execute();
 	}
 }
 

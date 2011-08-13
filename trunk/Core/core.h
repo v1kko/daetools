@@ -512,6 +512,10 @@ public:
 	virtual void			GetVariables(std::vector<daeVariable_t*>& ptrarrVariables)		= 0;
 	virtual void			GetParameters(std::vector<daeParameter_t*>& ptrarrParameters)	= 0;
 	virtual void			SetReportingOn(bool bOn)										= 0;
+	
+	virtual daeObject_t*	FindObject(std::string& strName)									= 0;
+	virtual daeObject_t*	FindObjectFromRelativeName(std::string& strRelativeName)			= 0;
+	virtual daeObject_t*	FindObjectFromRelativeName(std::vector<std::string>& strarrNames)	= 0;
 };
 
 /******************************************************************
@@ -549,7 +553,7 @@ class daeEventPort_t : virtual public daeObject_t,
 public:
 	virtual daeePortType	GetType(void) const			= 0;
 	virtual void			SetType(daeePortType eType)	= 0;
-	virtual void			SendEvent(void* data)		= 0;
+	virtual void			SendEvent(real_t data)		= 0;
 };
 
 /******************************************************************
@@ -558,8 +562,8 @@ public:
 class daeAction_t : virtual public daeObject_t
 {
 public:
-	virtual daeeActionType	GetType(void) const		= 0;
-	virtual void			Execute(void* data)		= 0;
+	virtual daeeActionType	GetType(void) const	= 0;
+	virtual void			Execute(void)  		= 0;
 };
 
 /******************************************************************
@@ -569,7 +573,7 @@ class daeOnEventActions_t : virtual public daeObject_t,
                             virtual public daeObserver<daeEventPort_t>
 {
 public:
-	virtual void Execute(void* data) = 0;
+	virtual void Execute(void) = 0;
 };
 
 /******************************************************************
@@ -873,8 +877,14 @@ public:
 	virtual daeVariable_t*		FindVariable(string& strCanonicalName)		= 0;
 	virtual daePort_t*			FindPort(string& strCanonicalName)			= 0;
 	virtual daeModel_t*			FindModel(string& strCanonicalName)			= 0;
+	virtual daeEventPort_t*		FindEventPort(string& strName)				= 0;
+	virtual daeSTN_t*			FindSTN(string& strCanonicalName)			= 0;
 	virtual daePortArray_t*		FindPortArray(string& strCanonicalName)		= 0;
 	virtual daeModelArray_t*	FindModelArray(string& strCanonicalName)	= 0;
+	
+	virtual daeObject_t*		FindObject(std::string& strName)									= 0;
+	virtual daeObject_t*		FindObjectFromRelativeName(std::string& strRelativeName)			= 0;
+	virtual daeObject_t*		FindObjectFromRelativeName(std::vector<std::string>& strarrNames)	= 0;
 };
 
 

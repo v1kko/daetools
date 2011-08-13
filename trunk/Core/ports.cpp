@@ -576,6 +576,76 @@ void daePort::SetVariablesStartingIndex(size_t nVariablesStartingIndex)
 	m_nVariablesStartingIndex = nVariablesStartingIndex;
 }
 
+daeObject_t* daePort::FindObjectFromRelativeName(string& strRelativeName)
+{
+// Parse string to get an array from the string 'object_1.object_2.[...].object_n'
+	vector<string> strarrNames = ParseString(strRelativeName, '.');
+	
+	if(strarrNames.size() == 0)
+	{
+		daeDeclareAndThrowException(exInvalidCall);
+	}
+	else if(strarrNames.size() == 1)
+	{
+		return FindObject(strarrNames[0]);
+	}
+	else
+	{
+		return FindObjectFromRelativeName(strarrNames);
+	}
+	return NULL;	
+}
+
+daeObject_t* daePort::FindObjectFromRelativeName(vector<string>& strarrNames)
+{
+	if(strarrNames.size() == 1)
+	{
+		return FindObject(strarrNames[0]);
+	}		
+	else
+	{
+	// Get the first item and erase it from the vector
+		vector<string>::iterator firstItem = strarrNames.begin();
+		string strName = strarrNames[0];
+		strarrNames.erase(firstItem);
+		
+	// Find the object with the name == strName
+		daeObject_t* pObject = FindObject(strName);
+		if(!pObject)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+	// Call FindObjectFromRelativeName with the shortened the vector
+		daePort_t*  pPort  = dynamic_cast<daePort_t*>(pObject);
+		daeModel_t* pModel = dynamic_cast<daeModel_t*>(pObject);
+		
+		if(pModel)
+			return pModel->FindObjectFromRelativeName(strarrNames);
+		else if(pPort)
+			return pPort->FindObjectFromRelativeName(strarrNames);
+		else
+			return NULL;
+	}
+}
+
+daeObject_t* daePort::FindObject(string& strName)
+{
+	daeObject_t* pObject;
+	
+	pObject = FindParameter(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindDomain(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindVariable(strName);
+	if(pObject)
+		return pObject;
+
+	return NULL;
+}
+
 daeDomain* daePort::FindDomain(unsigned long nID) const
 {
 	daeDomain* pDomain;

@@ -1080,8 +1080,8 @@ void daeModel::END_IF(void)
 		throw e;
 	}
 
-// Initialize the IF block
-	_pIF->Initialize();
+// Finalize the IF block
+	_pIF->FinalizeDeclaration();
 }
 
 daeSTN* daeModel::STN(const string& strSTN)
@@ -1116,7 +1116,7 @@ void daeModel::END_STN(void)
 		throw e;
 	}
 
-	_currentSTN->Initialize();
+	_currentSTN->FinalizeDeclaration();
 	_currentSTN = NULL;
 }
 
@@ -1148,13 +1148,15 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 void daeModel::ON_CONDITION(const daeCondition& rCondition, 
 							const string& strStateTo, 
 							vector< pair<daeVariable*, adouble> >& arrSetVariables,
-							vector<daeEventPort*>& ptrarrTriggerEvents, 
+							vector< pair<daeEventPort*, real_t> >& arrTriggerEvents, 
 							real_t dEventTolerance)
 {
+	real_t data;
 	size_t i;
 	daeAction* pAction;
 	daeEventPort* pEventPort;
 	pair<daeVariable*, adouble> p;
+	pair<daeEventPort*, real_t> p3;
 	daeVariable* pVariable;
 	adouble value;
 	vector<daeAction*> ptrarrActions;
@@ -1185,13 +1187,15 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 	ptrarrActions.push_back(pAction);
 
 // TriggerEvents
-	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
+	for(i = 0; i < arrTriggerEvents.size(); i++)
 	{
-		pEventPort = ptrarrTriggerEvents[i];
+		p3 = arrTriggerEvents[i];
+		pEventPort = p3.first;
+		data       = p3.second;
 		if(!pEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, data, string(""));
 
 		ptrarrActions.push_back(pAction);
 	}
@@ -1214,17 +1218,19 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 }
 
 void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort, 
-						vector< pair<daeSTN*, string> >&		arrSwitchToStates, 
+						vector< pair<string, string> >&		    arrSwitchToStates, 
 						vector< pair<daeVariable*, adouble> >&	arrSetVariables,
-						vector<daeEventPort*>&					ptrarrTriggerEvents)
+						vector< pair<daeEventPort*, real_t> >&	arrTriggerEvents)
 {
 	size_t i;
 	daeAction* pAction;
-	daeSTN* pSTN;
+	string strSTN;
 	string strStateTo;
 	daeEventPort* pEventPort;
-	pair<daeSTN*, string> p1;
+	real_t data;
+	pair<string, string> p1;
 	pair<daeVariable*, adouble> p2;
+	pair<daeEventPort*, real_t> p3;
 	adouble value;
 	daeVariable* pVariable;
 	std::vector<daeAction*> ptrarrOnEventActions;
@@ -1232,31 +1238,35 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	if(!pTriggerEventPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(pTriggerEventPort->GetType() != eInletPort)
-		daeDeclareAndThrowException(exInvalidCall);
-
+	{
+		daeDeclareException(exInvalidCall);
+		e << "ON_EVENT actions can only be set for inlet event ports, in model " << GetCanonicalName();
+		throw e;
+	}
+	
 // ChangeState	
 	for(i = 0; i < arrSwitchToStates.size(); i++)
 	{
 		p1 = arrSwitchToStates[i];
-		pSTN       = p1.first;
+		strSTN     = p1.first;
 		strStateTo = p1.second;
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer);
 		if(strStateTo.empty())
 			daeDeclareAndThrowException(exInvalidCall);
 			
-		pAction = new daeAction(string("actionChangeState_") + pSTN->GetName() + "_" + strStateTo, this, pSTN, strStateTo, string(""));
+		pAction = new daeAction(string("actionChangeState_") + strSTN + "_" + strStateTo, this, strSTN, strStateTo, string(""));
 		ptrarrOnEventActions.push_back(pAction);
 	}
 
 // TriggerEvents
-	for(i = 0; i < ptrarrTriggerEvents.size(); i++)
+	for(i = 0; i < arrTriggerEvents.size(); i++)
 	{
-		pEventPort = ptrarrTriggerEvents[i];
+		p3 = arrTriggerEvents[i];
+		pEventPort = p3.first;
+		data       = p3.second;
 		if(!pEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, NULL, string(""));
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, data, string(""));
 		ptrarrOnEventActions.push_back(pAction);
 	}
 
@@ -3707,6 +3717,92 @@ void daeModel::AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecu
 	m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 }
 
+daeObject_t* daeModel::FindObjectFromRelativeName(string& strRelativeName)
+{
+// Parse string to get an array from the string 'object_1.object_2.[...].object_n'
+	vector<string> strarrNames = ParseString(strRelativeName, '.');
+	
+	if(strarrNames.size() == 0)
+	{
+		daeDeclareAndThrowException(exInvalidCall);
+	}
+	else if(strarrNames.size() == 1)
+	{
+		return FindObject(strarrNames[0]);
+	}
+	else
+	{
+		return FindObjectFromRelativeName(strarrNames);
+	}
+	return NULL;	
+}
+
+daeObject_t* daeModel::FindObjectFromRelativeName(vector<string>& strarrNames)
+{
+	if(strarrNames.size() == 1)
+	{
+		return FindObject(strarrNames[0]);
+	}		
+	else
+	{
+	// Get the first item and erase it from the vector
+		vector<string>::iterator firstItem = strarrNames.begin();
+		string strName = strarrNames[0];
+		strarrNames.erase(firstItem);
+		
+	// Find the object with the name == strName
+		daeObject_t* pObject = FindObject(strName);
+		if(!pObject)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+	// Call FindObjectFromRelativeName with the shortened the vector
+		daePort_t*  pPort  = dynamic_cast<daePort_t*>(pObject);
+		daeModel_t* pModel = dynamic_cast<daeModel_t*>(pObject);
+		
+		if(pModel)
+			return pModel->FindObjectFromRelativeName(strarrNames);
+		else if(pPort)
+			return pPort->FindObjectFromRelativeName(strarrNames);
+		else
+			return NULL;
+	}
+}
+
+daeObject_t* daeModel::FindObject(string& strName)
+{
+	daeObject_t* pObject;
+	
+	pObject = FindModel(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindPort(strName);
+	if(pObject)
+		return pObject;
+
+	pObject = FindEventPort(strName);
+	if(pObject)
+		return pObject;
+
+	pObject = FindParameter(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindDomain(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindVariable(strName);
+	if(pObject)
+		return pObject;
+	
+	pObject = FindSTN(strName);
+	if(pObject)
+		return pObject;
+
+	return NULL;
+}
+
 daeDomain_t* daeModel::FindDomain(string& strName)
 {
 	daeDomain* pObject;
@@ -3755,12 +3851,36 @@ daePort_t* daeModel::FindPort(string& strName)
 	return NULL;
 }
 
+daeEventPort_t* daeModel::FindEventPort(string& strName)
+{
+	daeEventPort* pObject;
+	for(size_t i = 0; i < m_ptrarrEventPorts.size(); i++)
+	{
+		pObject = m_ptrarrEventPorts[i];
+		if(pObject->m_strShortName == strName)
+			return pObject;
+	}
+	return NULL;
+}
+
 daeModel_t* daeModel::FindModel(string& strName)
 {
 	daeModel* pObject;
 	for(size_t i = 0; i < m_ptrarrModels.size(); i++)
 	{
 		pObject = m_ptrarrModels[i];
+		if(pObject->m_strShortName == strName)
+			return pObject;
+	}
+	return NULL;
+}
+
+daeSTN_t* daeModel::FindSTN(string& strName)
+{
+	daeSTN* pObject;
+	for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pObject = m_ptrarrSTNs[i];
 		if(pObject->m_strShortName == strName)
 			return pObject;
 	}

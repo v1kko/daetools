@@ -189,7 +189,7 @@ void daeIF::AddExpressionsToBlock(daeBlock* pBlock)
 	}
 }
 
-void daeIF::Initialize()
+void daeIF::FinalizeDeclaration()
 {
 	daeState* pState;
 
