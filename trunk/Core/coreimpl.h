@@ -594,6 +594,7 @@ public:
 		m_pmatSResiduals			= NULL;
 		m_dCurrentTime				= 0;
 		m_bReinitializationFlag		= false;
+		m_bCopyDataFromBlock		= false;
 	}
 
 	
@@ -1041,7 +1042,17 @@ public:
 	{
 		m_bReinitializationFlag = bReinitializationFlag;
 	}
-			
+	
+	bool GetCopyDataFromBlock(void) const
+	{
+		return m_bCopyDataFromBlock;
+	}
+	
+	void SetCopyDataFromBlock(bool bCopyDataFromBlock)
+	{
+		m_bCopyDataFromBlock = bCopyDataFromBlock;
+	}
+	
 //	void SetGlobalCondition(daeCondition condition)
 //	{
 //		daeExecutionContext EC;
@@ -1114,6 +1125,7 @@ protected:
 	bool							m_bGatherInfo;
 	real_t							m_dCurrentTime;
 	bool							m_bReinitializationFlag;
+	bool							m_bCopyDataFromBlock;
 	//daeExecutionContext*			m_pExecutionContexts;
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
@@ -1913,6 +1925,7 @@ public:
 	daeDeclareDynamicClass(daeOnEventActions)
 	daeOnEventActions(void);
 	daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
+	daeOnEventActions(daeEventPort* pEventPort, daeState* pState, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
 	virtual ~daeOnEventActions(void);
 
 public:
@@ -1924,6 +1937,8 @@ public:
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	
+	daeEventPort* GetEventPort(void) const;
 	
 	void Initialize(void);
 
@@ -2096,7 +2111,7 @@ public:
 	void AddModelArray(daeModelArray* pModelArray);
 
 	void ConnectPorts(daePort* pPortFrom, daePort* pPortTo);
-	void ConnectPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
+	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
 	
 // Overridables		
 public:
@@ -2650,8 +2665,12 @@ public:
 	template<class Model>
 		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t));
 
+	void AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription);
+	
 	void CalcNonZeroElements(int& NNZ);
 	void FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
+	void ConnectOnEventActions(void);
+	void DisconnectOnEventActions(void);
 
 protected:
 	void	Create(const string& strName, daeSTN* pSTN);
@@ -2670,6 +2689,7 @@ protected:
 	daeSTN*									m_pSTN;
 	daePtrVector<daeEquation*>				m_ptrarrEquations;
 	daePtrVector<daeStateTransition*>		m_ptrarrStateTransitions;
+	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 	daePtrVector<daeSTN*>					m_ptrarrSTNs;
 	friend class daeIF;

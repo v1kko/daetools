@@ -589,6 +589,7 @@
                         <div style="padding-left:30px; padding-right:30px;">
                             <xsl:apply-templates select="Equations"/>
                             <xsl:apply-templates select="StateTransitions"/>
+                            <xsl:apply-templates select="OnEventActions"/>
                             <xsl:apply-templates select="STNs"/>
                         </div>
                     </li>
@@ -619,6 +620,7 @@
         <xsl:apply-templates select="Equations"/>
         <xsl:apply-templates select="StateTransitions"/>
         <xsl:apply-templates select="STNs"/>
+        <xsl:apply-templates select="OnEventActions"/>
       </xsl:for-each>
     </div>
   </xsl:template>

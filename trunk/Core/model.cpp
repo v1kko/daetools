@@ -1283,8 +1283,19 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 		ptrarrOnEventActions.push_back(pAction);
 	}
 	
-	daeOnEventActions* pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, string(""));
-	pTriggerEventPort->Attach(pOnEventAction);
+	daeState* pParentState = GetStateFromStack();
+
+	daeOnEventActions* pOnEventAction;
+	if(pParentState)	
+	{
+		pOnEventAction = new daeOnEventActions(pTriggerEventPort, pParentState, ptrarrOnEventActions, string(""));
+	}
+	else
+	{
+		pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, string(""));
+	// Attach ONLY those OnEventActions that belong to the model; others will be set during the active state changes
+		pTriggerEventPort->Attach(pOnEventAction);
+	}
 }
 
 void daeModel::AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription)
@@ -1366,7 +1377,7 @@ void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 	AddPortConnection(pPortConnection);
 }
 
-void daeModel::ConnectPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
+void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
 {
 // Here, portFrom is observer and portTo is subject
 // When the outlet port send an event its function Notify() is called which in turn calls the function Update() in the portFrom.

@@ -678,10 +678,18 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 			delete[] rootsfound;
 
 			eDiscontinuityType = m_pBlock->CheckDiscontinuities();
+			
 			if(eDiscontinuityType == eModelDiscontinuity)
-			{
+			{ 
 				RefreshRootFunctions();
 				Reinitialize(false);
+				if(eCriterion == eStopAtModelDiscontinuity)
+					return m_dCurrentTime;
+			}
+			else if(eDiscontinuityType == eModelDiscontinuityWithDataChange)
+			{ 
+				RefreshRootFunctions();
+				Reinitialize(true);
 				if(eCriterion == eStopAtModelDiscontinuity)
 					return m_dCurrentTime;
 			}

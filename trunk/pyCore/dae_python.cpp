@@ -580,7 +580,7 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeEventPort, bases<daeObject>, boost::noncopyable>("daeEventPort")
         .def(init<string, daeePortType, daeModel*, optional<string> >())
 
-        .add_property("Type",		&daeEventPort::GetType) 
+        .add_property("Type",		&daeEventPort::GetType)
         .add_property("EventData",	&daeEventPort::GetEventData)
 		
 		.def("__call__", &daeEventPort::operator())
@@ -653,8 +653,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation1, return_internal_reference<>())
 		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation2, return_internal_reference<>())
 		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations)
-		.def("ConnectPorts",     &daepython::daeModelWrapper::ConnectPorts1)
-		.def("ConnectPorts",     &daepython::daeModelWrapper::ConnectPorts2)
+		.def("ConnectPorts",     &daeModel::ConnectPorts)
+		.def("ConnectEventPorts",&daeModel::ConnectEventPorts)
 		.def("SetReportingOn",	 &daeModel::SetReportingOn)
 
 		.def("sum",				&daeModel::sum)
@@ -674,7 +674,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>())
 		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
-		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
+		.def("END_STN",			&daepython::daeModelWrapper::END_STN) 
 		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
         .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")          = string(),
                                                                              boost::python::arg("triggerEvents")     = boost::python::list(),

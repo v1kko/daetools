@@ -788,16 +788,6 @@ public:
                            arrTriggerEvents);
     }
 	
-	void ConnectPorts1(daePort* pPortFrom, daePort* pPortTo)
-	{
-		daeModel::ConnectPorts(pPortFrom, pPortTo);
-	}
-
-	void ConnectPorts2(daeEventPort* pPortFrom, daeEventPort* pPortTo)
-	{
-		daeModel::ConnectPorts(pPortFrom, pPortTo);
-	}
-
 	daeEquation* CreateEquation1(string strName, string strDescription)
 	{
 		return daeModel::CreateEquation(strName, strDescription);

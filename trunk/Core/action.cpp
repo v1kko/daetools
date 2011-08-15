@@ -174,9 +174,16 @@ void daeAction::Execute(void)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
 		if(m_pSTN->GetActiveState() != m_pStateTo)
+		{
 			m_pSTN->SetActiveState(m_pStateTo);
+			
+		// Just in case; it is also set in the SetActiveState() function
+			m_pModel->m_pDataProxy->SetReinitializationFlag(true);
+		}
 		else
+		{
 			m_pSTN->LogMessage(string("Current state unchanged"), 0);
+		}			
 	}
 	else if(m_eActionType == eSendEvent)
 	{
@@ -192,6 +199,7 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t value = m_pSetExpressionNode->Evaluate(&EC).getValue();
+		std::cout << "Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
 		
 		//std::cout << "Action: " << GetName() << ", nIndex = " << m_nIndex << ", Type = " << m_pModel->m_pDataProxy->GetVariableType(m_nIndex) << std::endl;
 		if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnFixed)
@@ -200,6 +208,12 @@ void daeAction::Execute(void)
 			m_pVariable->ReSetInitialCondition(value);
 		else
 			daeDeclareAndThrowException(exInvalidCall);
+		
+		std::cout << "Variable new value: " << m_pVariable->GetValue() << std::endl;
+		
+	// Set the reinitialization flag to true to mark the system ready for re-initialization
+		m_pModel->m_pDataProxy->SetReinitializationFlag(true);
+		m_pModel->m_pDataProxy->SetCopyDataFromBlock(true);
 	}
 	else
 	{
@@ -399,8 +413,27 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel,
 		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
 }
 
+daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeState* pState, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription)
+{
+	if(!pState)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pEventPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	pState->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
+
+	m_pEventPort = pEventPort;
+	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
+		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
+}
+
 daeOnEventActions::~daeOnEventActions(void)
 {
+}
+
+daeEventPort* daeOnEventActions::GetEventPort(void) const
+{
+	return m_pEventPort;
 }
 
 void daeOnEventActions::Initialize(void)

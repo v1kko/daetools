@@ -505,6 +505,7 @@ daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
 
 	eResult = eNoDiscontinuity;
 	m_pDataProxy->SetReinitializationFlag(false);
+	m_pDataProxy->SetCopyDataFromBlock(false);
 
 // First check the global stopping condition from the DataProxy (Simulation)
 	daeModel* model = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
@@ -537,12 +538,17 @@ daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
 	
 // If any of the actions changed the state it should also be indicated in the bReinitializationFlag
 // At some point I should switch to use of GetReinitializationFlag() only!
-	if(m_pDataProxy->GetReinitializationFlag())
-		eResult = eModelDiscontinuity;
-	
-	if(eResult == eModelDiscontinuity)
+	if(m_pDataProxy->GetReinitializationFlag() && m_pDataProxy->GetCopyDataFromBlock())
+	{
+		eResult = eModelDiscontinuityWithDataChange;
 		RebuildExpressionMap();
-
+	}
+	else if(m_pDataProxy->GetReinitializationFlag())
+	{
+		eResult = eModelDiscontinuity;
+		RebuildExpressionMap();
+	}
+	
 	return eResult;
 }
 

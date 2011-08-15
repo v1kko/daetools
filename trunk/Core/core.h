@@ -201,6 +201,7 @@ enum daeeDiscontinuityType
 	eDCTUnknown = 0,
 	eGlobalDiscontinuity,
 	eModelDiscontinuity,
+	eModelDiscontinuityWithDataChange,
 	eNoDiscontinuity	
 };
 

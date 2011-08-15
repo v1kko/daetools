@@ -158,13 +158,16 @@ def getObjectFromCanonicalName(rootModel, canonicalName, **kwargs):
     rootModel: daModel object
     canonicalName: a 'path' to the object ('model1.model2.object')
     """
-    listCanonicalName = canonicalName.split('.')
+    relativeName = daeGetRelativeName(rootModel.CanonicalName, canonicalName)
+    #print 'relativeName = {0} for root = {1} and canonicalName = {2}'.format(relativeName, rootModel.CanonicalName, canonicalName)
+    listCanonicalName = relativeName.split('.')
     objectName = listCanonicalName[-1]
     objectPath = listCanonicalName[:-1]
 
     root = rootModel
     if len(objectPath) > 0:
         for name in objectPath:
+            #print 'name: {0} in model {1}'.format(name, root.Name)
             root = findObjectInModel(root, name, look_for_models = True)
             if root == None:
                 raise RuntimeError('Could not locate object {0} in {1}'.format(name, ".".join(objectPath)))
@@ -229,12 +232,19 @@ class nineml_daetools_bridge(daeModel):
             else:
                 raise RuntimeError("")
             self.nineml_event_ports.append( daeEventPort(event_port.name, port_type, self, "") )
-        #self.ConnectEventPorts(self.epIn, self.epOut)
 
         # 6) Create sub-nodes
         self.ninemlSubComponents = []
         for name, subcomponent in ninemlComponent.subnodes.items():
             self.ninemlSubComponents.append( nineml_daetools_bridge(name, subcomponent, self) )
+
+        # 7) Connect event ports
+        if self.Name == 'iaf_1coba':
+            spikeoutput = getObjectFromCanonicalName(self, 'iaf_1coba.iaf.spikeoutput',      look_for_eventports = True)
+            spikeinput  = getObjectFromCanonicalName(self, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
+            #print 'spikeoutput =', spikeoutput
+            #print 'spikeinput =', spikeinput
+            self.ConnectEventPorts(spikeinput, spikeoutput)
             
     def DeclareEquations(self):
         # Create the epression parser and set its Identifier:Value dictionary
@@ -289,15 +299,59 @@ class nineml_daetools_bridge(daeModel):
                     else:
                         eq.Residual = variable.dt() - parser.parse_and_evaluate(rhs)
 
-                # 2c) Create state transitions
+                # 2c) Create on_condition actions (state transitions, etc)
                 for on_condition in regime.on_conditions:
-                    self.SWITCH_TO(on_condition.target_regime.name, parser.parse_and_evaluate(on_condition.trigger.rhs))
+                    condition         = parser.parse_and_evaluate(on_condition.trigger.rhs)
+                    switchTo          = on_condition.target_regime.name
+                    triggerEvents     = []
+                    setVariableValues = []
 
-                    #for state_assignment in t.state_assignments:
-                    #    state_assignment.lhs, state_assignment.rhs
-                    #for event_output in t.event_outputs:
-                    #    event_output
+                    for state_assignment in on_condition.state_assignments:
+                        variable   = getObjectFromCanonicalName(self, state_assignment.lhs, look_for_variables = True)
+                        if variable == None:
+                            raise RuntimeError('Cannot find variable {0}'.format(state_assignment.lhs))
+                        expression = parser.parse_and_evaluate(state_assignment.rhs)
+                        setVariableValues.append( (variable, expression) )
+
+                    for event_output in on_condition.event_outputs:
+                        event_port = getObjectFromCanonicalName(self, event_output.port_name, look_for_eventports = True)
+                        if event_port == None:
+                            raise RuntimeError('Cannot find event port {0}'.format(event_output.port_name))
+                        triggerEvents.append( (event_port, 0) )
+
+                    self.ON_CONDITION(condition, switchTo          = switchTo,
+                                                 triggerEvents     = triggerEvents,
+                                                 setVariableValues = setVariableValues )
+
+                    #self.SWITCH_TO(on_condition.target_regime.name, parser.parse_and_evaluate(on_condition.trigger.rhs))
                 
+                # 2d) Create on_event actions
+                for on_event in regime.on_events:
+                    print self.Name, on_event.src_port_name
+                    source_event_port = getObjectFromCanonicalName(self, on_event.src_port_name, look_for_eventports = True)
+                    if source_event_port == None:
+                        raise RuntimeError('Cannot find event port {0}'.format(on_event.src_port_name))
+                    switchToStates    = []
+                    triggerEvents     = []
+                    setVariableValues = []
+
+                    for state_assignment in on_event.state_assignments:
+                        variable   = getObjectFromCanonicalName(self, state_assignment.lhs, look_for_variables = True)
+                        if variable == None:
+                            raise RuntimeError('Cannot find variable {0}'.format(state_assignment.lhs))
+                        expression = parser.parse_and_evaluate(state_assignment.rhs)
+                        setVariableValues.append( (variable, expression) )
+
+                    for event_output in on_event.event_outputs:
+                        event_port = getObjectFromCanonicalName(self, event_output.port_name, look_for_eventports = True)
+                        if event_port == None:
+                            raise RuntimeError('Cannot find event port {0}'.format(event_output.port_name))
+                        triggerEvents.append( (event_port, 0) )
+
+                    self.ON_EVENT(source_event_port, switchToStates    = switchToStates,
+                                                     triggerEvents     = triggerEvents,
+                                                     setVariableValues = setVariableValues )
+                                                 
             self.END_STN()
 
         # 3) Create equations for outlet analog-ports: port.value() - variable() = 0

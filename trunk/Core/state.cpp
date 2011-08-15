@@ -46,6 +46,9 @@ void daeState::Open(io::xmlTag_t* pTag)
 	strName = "StateTransitions";
 	pTag->OpenObjectArray(strName, m_ptrarrStateTransitions, &del);
 
+	strName = "OnEventActions";
+	pTag->OpenObjectArray(strName, m_ptrarrOnEventActions, &del);
+
 	strName = "STN";
 	daeFindSTNByID stndel(m_pModel);
 	m_pSTN = pTag->OpenObjectRef<daeSTN>(strName, &stndel);
@@ -65,6 +68,9 @@ void daeState::Save(io::xmlTag_t* pTag) const
 
 	strName = "StateTransitions";
 	pTag->SaveObjectArray(strName, m_ptrarrStateTransitions);
+
+	strName = "OnEventActions";
+	pTag->SaveObjectArray(strName, m_ptrarrOnEventActions);
 
 	strName = "STN";
 	pTag->SaveObjectRef(strName, m_pSTN);
@@ -174,6 +180,17 @@ void daeState::InitializeStateTransitions(void)
 			daeDeclareAndThrowException(exInvalidPointer);
 		pSTN->InitializeStateTransitions();
 	}
+	
+// Initialize OnEventActions
+	daeOnEventActions* pOnEventActions;
+	for(i = 0; i < m_ptrarrOnEventActions.size(); i++)
+	{
+		pOnEventActions = m_ptrarrOnEventActions[i];
+		if(!pOnEventActions)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pOnEventActions->Initialize();
+	}
 }
 
 void daeState::InitializeDEDIs(void)
@@ -226,6 +243,53 @@ void daeState::AddEquation(daeEquation* pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pEquation);
 	m_ptrarrEquations.push_back(pEquation);
+}
+
+void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription)
+{
+	rOnEventAction.SetName(strName);
+	rOnEventAction.SetDescription(strDescription);
+    SetModelAndCanonicalName(&rOnEventAction);
+	
+	if(strName.empty())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "OnEventAction name cannot be empty";
+		throw e;
+	}
+	if(CheckName(m_ptrarrOnEventActions, strName))
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "OnEventAction [" << strName << "] already exists in the state [" << GetCanonicalName() << "]";
+		throw e;
+	}
+    m_ptrarrOnEventActions.push_back(&rOnEventAction);
+}
+
+void daeState::ConnectOnEventActions(void)
+{
+	daeEventPort* pEventPort;
+	daeOnEventActions* pOnEventActions;
+	
+	for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
+	{
+		pOnEventActions = m_ptrarrOnEventActions[i];
+		pEventPort = pOnEventActions->GetEventPort();
+		pEventPort->Attach(pOnEventActions);
+	}
+}
+
+void daeState::DisconnectOnEventActions(void)
+{
+	daeEventPort* pEventPort;
+	daeOnEventActions* pOnEventActions;
+	
+	for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
+	{
+		pOnEventActions = m_ptrarrOnEventActions[i];
+		pEventPort = pOnEventActions->GetEventPort();
+		pEventPort->Detach(pOnEventActions);
+	}
 }
 
 //daeEquation* daeState::AddEquation(const string& strEquationExpression)
@@ -398,7 +462,27 @@ bool daeState::CheckObject(vector<string>& strarrErrors) const
 				bCheck = false;
 		}
 	}
-
+	
+// Check OnEventActions	
+	if(m_ptrarrOnEventActions.size() > 0)
+	{
+		daeOnEventActions* pOnEventActions;
+		for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
+		{
+			pOnEventActions = m_ptrarrOnEventActions[i];
+			if(!pOnEventActions)
+			{
+				strError = "Invalid on event actions in state [" + GetCanonicalName() + "]";
+				strarrErrors.push_back(strError);
+				bCheck = false;
+				continue;
+			}
+	
+			if(!pOnEventActions->CheckObject(strarrErrors))
+				bCheck = false;
+		}
+	}
+	
 // Check nested STNs	
 	if(m_ptrarrSTNs.size() > 0)
 	{

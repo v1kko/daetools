@@ -35,7 +35,7 @@ class sim_hierachical_iaf_1coba(daeSimulation):
 
         tau       .SetValue(5.0)
         vrev      .SetValue(0)
-        q         .SetValue(1)
+        q         .SetValue(100)
         cm        .SetValue(1)
         gl        .SetValue(50)
         taurefrac .SetValue(8)
@@ -51,7 +51,7 @@ class sim_hierachical_iaf_1coba(daeSimulation):
         V      = findObjectInModel(iaf,  'V',      look_for_variables = True)
         tspike = findObjectInModel(iaf,  'tspike', look_for_variables = True)
 
-        g     .SetInitialCondition(0.001)
+        g     .SetInitialCondition(100)
         V     .SetInitialCondition(-60) # = parameter [iaf_vrest]
         tspike.SetInitialCondition(-1e99)
         
@@ -79,7 +79,7 @@ simulation.m.SetReportingOn(True)
 
 # Set the time horizon and the reporting interval
 simulation.ReportingInterval = 1
-simulation.TimeHorizon = 100
+simulation.TimeHorizon = 250
 
 # Connect data reporter
 simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

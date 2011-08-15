@@ -754,7 +754,17 @@ void daeSTN::SetActiveState(daeState* pState)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	
 	LogMessage(string("The state: ") + pState->m_strShortName + string(" is active now"), 0);
+	
 	m_pModel->m_pDataProxy->SetReinitializationFlag(true);
+	
+// Disconnect old OnEventActions
+	if(m_pActiveState)
+		m_pActiveState->DisconnectOnEventActions();
+
+// Connect new OnEventActions
+	pState->ConnectOnEventActions();
+	
+// Set the new active state
 	m_pActiveState = pState;
 }
 
