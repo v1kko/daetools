@@ -208,6 +208,7 @@ void daeIF::FinalizeDeclaration()
 	m_bInitialized = true;
 }
 
+/* Old CheckDiscontinuities() function
 bool daeIF::CheckDiscontinuities()
 {
 	bool bResult, bResultTemp;
@@ -244,6 +245,7 @@ bool daeIF::CheckDiscontinuities()
 				return CheckState(pState);
 		}
 	}
+	
 // If no conditions are satisfied, then I have to activate ELSE
 	if(!bResult)
 	{
@@ -256,49 +258,132 @@ bool daeIF::CheckDiscontinuities()
 	
 	return false;
 }
+*/
 
-bool daeIF::CheckState(daeState* pState)
+bool daeIF::CheckDiscontinuities(void)
 {
-	bool bResult;
+	size_t i;
 	daeSTN* pSTN;
+	daeState* pState;
 	daeStateTransition* pStateTransition;
-	
-	if(!pState)
-		daeDeclareAndThrowException(exInvalidPointer);
 
-// Only if the current state is not equal to the active state change the state (no reinitialization)
-// but continue searching for state change in the nested IF/STNs
-	bResult = false;
-	if(m_pActiveState != pState)
+	if(!m_pActiveState)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Active state does not exist in IF [" << m_strCanonicalName << "]";
+		throw e;
+	}
+
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+	for(i = 0; i < m_ptrarrStates.size(); i++)
 	{
-		if(pState->m_ptrarrStateTransitions.size() > 0)
+		pState = m_ptrarrStates[i];
+
+		if(i != m_ptrarrStates.size() - 1) // All states except the last (for ELSE does not have conditions)
 		{
 			pStateTransition = pState->m_ptrarrStateTransitions[0];
-			if(!pStateTransition)
-				daeDeclareAndThrowException(exInvalidPointer); 
-			LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+
+			if(pStateTransition->m_Condition.Evaluate(&EC))
+			{
+			// If this state is not the active one then there is state change - therefore return true
+			// If it is equal then there is no state change so break the for loop
+				if(m_pActiveState != pState) // There is a state change, thus return true; otherwise break
+					return true;
+				else
+					break;
+			}
 		}
-
-		bResult = true;
-		SetActiveState(pState);
+		else if(i == m_ptrarrStates.size() - 1) // ELSE state (with no conditions)
+		{
+		// If I reached this point then none of the above conditions was satisfied, so that ELSE should be the active state
+			if(m_pActiveState != pState) // There is a state change, thus return true
+				return true;
+		}
 	}
-	else
+	
+// If I reached this point then there was no discontinuity in this IF block so check for discontinuities in the nested STNs
+	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
 	{
-		//LogMessage(string("Current state unchanged"), 0);
+		pSTN = m_pActiveState->m_ptrarrSTNs[i];
+		if(pSTN->CheckDiscontinuities())
+			return true;
 	}
 
-// Check nested STNs no matter if the active state has or has not been changed
-	for(size_t i = 0; i < pState->m_ptrarrSTNs.size(); i++)
+	return false;
+}
+
+void daeIF::ExecuteOnConditionActions(void)
+{
+	size_t i;
+	daeState* pState;
+	daeSTN* pSTN;
+	daeStateTransition* pStateTransition;
+
+	if(!m_pActiveState)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Active state does not exist in IF [" << m_strCanonicalName << "]";
+		throw e;
+	}
+
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+	for(i = 0; i < m_ptrarrStates.size(); i++) // For all states in the STN
+	{
+		pState = m_ptrarrStates[i];
+
+		if(i != m_ptrarrStates.size() - 1) // All states except the last
+		{
+			pStateTransition = pState->m_ptrarrStateTransitions[0];
+
+			if(pStateTransition->m_Condition.Evaluate(&EC))
+			{
+				if(m_pActiveState != pState)
+				{
+					LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+					SetActiveState(pState);
+				}
+				break;
+			}
+		}
+		else if(i == m_ptrarrStates.size() - 1) // ELSE state (with no conditions)
+		{
+			if(m_pActiveState != pState)
+			{
+				SetActiveState(pState);
+			}
+			break;
+		}
+	}
+	
+	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer);
 
-		if(pSTN->CheckDiscontinuities())
-			bResult = true;
+		pSTN->ExecuteOnConditionActions();
 	}
+}
 
-	return bResult;
+void daeIF::CheckState(daeState* pState)
+{
+//	daeStateTransition* pStateTransition;
+//	
+//	if(!pState)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//
+//// Only if the current state is not equal to the active state change the state (no reinitialization)
+//// but continue searching for state change in the nested IF/STNs
+//	if(m_pActiveState != pState)
+//	{
+//		pStateTransition = pState->m_ptrarrStateTransitions[0];
+//		LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+//		SetActiveState(pState);
+//	}
 }
 
 daeState* daeIF::AddState(string strName)

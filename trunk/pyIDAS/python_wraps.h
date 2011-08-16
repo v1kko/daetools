@@ -58,7 +58,7 @@ public:
 	{
 	}
 
-	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
+	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeSimulation_t* pSimulation, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
 	{
 		size_t index;
 		std::vector<size_t> narrParametersIndexes;
@@ -69,7 +69,7 @@ public:
 			narrParametersIndexes.push_back(index);
 		}
 		
-		daeIDASolver::Initialize(pBlock, pLog, eMode, bCalculateSensitivities, narrParametersIndexes);
+		daeIDASolver::Initialize(pBlock, pLog, pSimulation, eMode, bCalculateSensitivities, narrParametersIndexes);
 	}
 
 	void SetLASolver1(daeeIDALASolverType eLASolverType)

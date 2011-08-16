@@ -28,7 +28,7 @@ public:
 	virtual void				Finalize(void);
 	virtual void				Reset(void);
 	virtual void				ReRun(void);
-	virtual void				ReportData(void);
+	virtual void				ReportData(real_t dCurrentTime);
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
 
@@ -55,9 +55,9 @@ public:
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);
 	virtual daeDAESolver_t*		GetDAESolver(void) const;
-	virtual real_t				Integrate(daeeStopCriterion eStopCriterion);
-	virtual real_t				IntegrateForTimeInterval(real_t time_interval);
-	virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion);
+	virtual real_t				Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
+	virtual real_t				IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities = true);
+	virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
 	virtual void				SetUpParametersAndDomains(void);
 	virtual void				SetUpVariables(void);
 	virtual void				SetUpOptimization(void);

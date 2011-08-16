@@ -163,7 +163,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 /**************************************************************
 	daeDataReceiver
 ***************************************************************/
-	class_<daeDataReceiverDomain>("daeDataReceiverDomain")
+	class_<daeDataReceiverDomain, boost::noncopyable>("daeDataReceiverDomain")
 		.def(init<string, daeeDomainType, size_t>())
 		
 		.def_readonly("Name",				&daeDataReceiverDomain::m_strName)
@@ -176,7 +176,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("__setitem__",					&daeDataReceiverDomain::SetPoint)
 		;
 
-	class_<daeDataReceiverVariableValue>("daeDataReceiverVariableValue")
+	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue")
 		.def(init<real_t, size_t>())
 		
 		.def_readonly("Time",				&daeDataReceiverVariableValue::m_dTime)
@@ -185,8 +185,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("__setitem__",					&daeDataReceiverVariableValue::SetValue)
 		;
 
-	class_<daeDataReceiverVariable>("daeDataReceiverVariable")
-		.def(init<string, size_t>())
+	class_<daeDataReceiverVariable, boost::noncopyable>("daeDataReceiverVariable")
+		.def(init<string, size_t>()) 
 
 		.def_readonly("Name",				&daeDataReceiverVariable::m_strName)
 		.def_readonly("NumberOfPoints",		&daeDataReceiverVariable::m_nNumberOfPoints)

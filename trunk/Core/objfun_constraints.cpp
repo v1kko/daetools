@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include <algorithm>
+#include <typeinfo>
 
 namespace dae 
 {
@@ -12,26 +13,38 @@ namespace core
 daeFunctionWithGradients::daeFunctionWithGradients(void)
 {
 	m_pModel                         = NULL;
+	m_pDAESolver					 = NULL;
 	m_nEquationIndexInBlock          = ULONG_MAX;
 	m_nVariableIndexInBlock          = ULONG_MAX;
 	m_pEquationExecutionInfo         = NULL;
-	m_pSimulation					 = NULL;
 	m_nNumberOfOptimizationVariables = 0;
 }
 
-daeFunctionWithGradients::daeFunctionWithGradients(daeSimulation_t* pSimulation, 
+daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
+												   daeDAESolver_t* pDAESolver, 
 												   real_t abstol, 
 												   const string& strVariableName, 
 												   const string& strEquationName,
 												   const string& strDescription)
 {
-	if(!pSimulation)
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDAESolver)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	m_pModel = dynamic_cast<daeModel*>(pSimulation->GetModel());
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
+//	daeModel_t* pModel = pSimulation->GetModel();
+//	if(!pModel)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	cout << " *pSimulation is: " << typeid(*pSimulation).name() << endl;
+//	cout << " *pModel is: " << typeid(*pModel).name() << endl;
+//	
+//	m_pModel = dynamic_cast<daeModel*>(pModel);
+//	if(!m_pModel)
+//		daeDeclareAndThrowException(exInvalidPointer);
 		
+	m_pModel     = pModel;
+	m_pDAESolver = pDAESolver;
+	
 	const daeVariableType varType("gradient_function_t", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
 
 	m_nEquationIndexInBlock = ULONG_MAX;
@@ -43,7 +56,6 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeSimulation_t* pSimulation,
 	m_pEquation = m_pModel->CreateEquation(strEquationName, strDescription);
 	m_pEquation->SetResidual( (*m_pVariable)() );
 
-	m_pSimulation                    = pSimulation;
 	m_pEquationExecutionInfo         = NULL;
 	m_nNumberOfOptimizationVariables = 0;
 	
@@ -151,14 +163,14 @@ daeMatrix<real_t>& daeFunctionWithGradients::GetSensitivitiesMatrix(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pSimulation)
+	if(!m_pDAESolver)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	daeDAESolver_t* pDAESolver = m_pSimulation->GetDAESolver();
-	if(!pDAESolver)
-		daeDeclareAndThrowException(exInvalidPointer);
+//	daeDAESolver_t* pDAESolver = m_pSimulation->GetDAESolver();
+//	if(!pDAESolver)
+//		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeMatrix<real_t>& matSens = pDAESolver->GetSensitivities();
+	daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 	if(m_nNumberOfOptimizationVariables != matSens.GetNrows())
 		daeDeclareAndThrowException(exInvalidCall);
 
@@ -274,11 +286,13 @@ daeObjectiveFunction::daeObjectiveFunction(void)
 {
 }
 
-daeObjectiveFunction::daeObjectiveFunction(daeSimulation_t* pSimulation, 
+daeObjectiveFunction::daeObjectiveFunction(daeModel* pModel,
+										   daeDAESolver_t* pDAESolver, 
 										   real_t abstol, 
 										   size_t nEquationIndex,
 										   const string& strDescription)
-	  :	daeFunctionWithGradients(pSimulation, 
+	  :	daeFunctionWithGradients(pModel, 
+								 pDAESolver, 
 								 abstol, 
 								 string("V_obj") + toString<size_t>(nEquationIndex + 1), 
 								 string("F_obj") + toString<size_t>(nEquationIndex + 1),
@@ -298,12 +312,14 @@ daeOptimizationConstraint::daeOptimizationConstraint(void)
 {
 }
 
-daeOptimizationConstraint::daeOptimizationConstraint(daeSimulation_t* pSimulation, 
+daeOptimizationConstraint::daeOptimizationConstraint(daeModel* pModel,
+													 daeDAESolver_t* pDAESolver, 
 													 bool bIsInequalityConstraint, 
 													 real_t abstol, 
 													 size_t nEquationIndex,
 													 const string& strDescription)
-	: daeFunctionWithGradients(pSimulation, 
+	: daeFunctionWithGradients(pModel, 
+							   pDAESolver, 
 							   abstol, 
 							   string("V_constraint") + toString<size_t>(nEquationIndex + 1), 
 							   string("F_constraint") + toString<size_t>(nEquationIndex + 1),
@@ -333,11 +349,13 @@ daeMeasuredVariable::daeMeasuredVariable(void)
 {
 }
 
-daeMeasuredVariable::daeMeasuredVariable(daeSimulation_t* pSimulation, 
+daeMeasuredVariable::daeMeasuredVariable(daeModel* pModel,
+										 daeDAESolver_t* pDAESolver, 
 										 real_t abstol, 
 										 size_t nEquationIndex,
 										 const string& strDescription)
-	: daeFunctionWithGradients(pSimulation, 
+	: daeFunctionWithGradients(pModel, 
+							   pDAESolver,
 							   abstol, 
 							   string("V_measured") + toString<size_t>(nEquationIndex + 1), 
 							   string("F_measured") + toString<size_t>(nEquationIndex + 1),

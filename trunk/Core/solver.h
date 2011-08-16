@@ -21,6 +21,16 @@ using namespace dae::logging;
 
 namespace dae
 {
+namespace activity
+{
+	class daeSimulation_t;
+}
+}
+using namespace dae::activity;
+
+
+namespace dae
+{
 namespace solver
 {
 /*********************************************************************************************
@@ -60,11 +70,14 @@ public:
 public:
 	virtual void						Initialize(daeBlock_t* pBlock, 
 												   daeLog_t* pLog, 
+												   daeSimulation_t* pSimulation,
 												   daeeInitialConditionMode eMode,
 												   bool bCalculateSensitivities,
 												   const std::vector<size_t>& narrParametersIndexes)= 0;
 	virtual void						SolveInitial(void)											= 0;
-	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion)			= 0;
+	virtual real_t						Solve(real_t dTime, 
+											  daeeStopCriterion eCriterion, 
+											  bool bReportDataAroundDiscontinuities = true)			= 0;
 	virtual size_t						GetNumberOfVariables(void) const                            = 0;
 	virtual void						SetRelativeTolerance(real_t relTol)							= 0;
 	virtual real_t						GetRelativeTolerance(void) const							= 0;

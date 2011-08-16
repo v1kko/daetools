@@ -545,7 +545,83 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 	m_pModel->PropagateGlobalExecutionContext(NULL);
 }
 
-bool daeSTN::CheckDiscontinuities()
+// This function ONLY checks if there is a discontinuity somewhere; if there is - it returns true; otherwise false
+// It will return true if any condition in any STN or nested STN has been satisfied 
+bool daeSTN::CheckDiscontinuities(void)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeStateTransition* pStateTransition;
+
+	if(!m_pActiveState)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		throw e;
+	}
+
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
+	{
+		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
+		if(pStateTransition->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
+			return true;
+	}
+
+// Now I have to check for discontinuities in the nested STNs of the current active state
+	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_pActiveState->m_ptrarrSTNs[i];
+		if(pSTN->CheckDiscontinuities()) // There is a discontinuity, therefore return true
+			return true;
+	}
+	
+	return false;
+}
+
+void daeSTN::ExecuteOnConditionActions(void)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeStateTransition* pStateTransition;
+
+	if(!m_pActiveState)
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		throw e;
+	}
+
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
+	{
+		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
+		if(pStateTransition->m_Condition.Evaluate(&EC))
+		{
+			LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+			
+			pStateTransition->ExecuteActions();
+			break;
+		}
+	}
+
+// Now I have to check state transitions in the nested STNs of the current active state
+// m_pActiveState might point now to the new state (if the state-change occured in actions above)
+	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_pActiveState->m_ptrarrSTNs[i];
+		pSTN->ExecuteOnConditionActions();
+	}
+}
+
+/* Old CheckDiscontinuities() function 
+bool daeSTN::CheckDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -602,6 +678,7 @@ bool daeSTN::CheckDiscontinuities()
 	}
 	return bResult;
 }
+*/
 
 // Not used anymore
 bool daeSTN::CheckState(daeState* pState)

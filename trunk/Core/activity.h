@@ -60,7 +60,7 @@ public:
 	virtual void				Finalize(void)													= 0;
 	virtual void				ReRun(void)													    = 0;
 	virtual void				Reset(void)														= 0;
-	virtual void				ReportData(void)												= 0;
+	virtual void				ReportData(real_t dCurrentTime)									= 0;
 	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const	= 0;
 
@@ -88,10 +88,13 @@ public:
 	virtual void				SolveInitial(void)										= 0;
 	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;
 	
-	virtual real_t				Integrate(daeeStopCriterion eStopCriterion)				= 0;
-	virtual real_t				IntegrateForTimeInterval(real_t time_interval)			= 0;
+	virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
+										  bool bReportDataAroundDiscontinuities = true)					= 0;
+	virtual real_t				IntegrateForTimeInterval(real_t time_interval,
+														 bool bReportDataAroundDiscontinuities = true)	= 0;
 	virtual real_t				IntegrateUntilTime(real_t time, 
-												   daeeStopCriterion eStopCriterion)	= 0;
+												   daeeStopCriterion eStopCriterion,
+												   bool bReportDataAroundDiscontinuities = true)		= 0;
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
 	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const = 0;

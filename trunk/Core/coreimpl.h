@@ -1195,7 +1195,8 @@ public:
 
 	virtual size_t	GetNumberOfRoots(void) const;
 
-	virtual daeeDiscontinuityType CheckDiscontinuities(void);
+	virtual bool	              CheckDiscontinuities(void);
+	virtual daeeDiscontinuityType ExecuteOnConditionActionsAndRebuildExpressionMap(void);
 	
 	virtual void	SetAllInitialConditions(real_t value);
 	
@@ -2782,6 +2783,7 @@ public:
 	
 	virtual void		FinalizeDeclaration(void);
 	virtual bool		CheckDiscontinuities(void);
+	virtual void		ExecuteOnConditionActions(void);
 	virtual size_t		GetNumberOfEquations(void) const;
 	virtual daeState*	AddState(string strName);
 
@@ -2845,6 +2847,7 @@ public:
 public:	
 	virtual void		FinalizeDeclaration(void);
 	virtual bool		CheckDiscontinuities(void);
+	virtual void		ExecuteOnConditionActions(void);
 	virtual daeState*	AddState(string strName);
 
 public:	
@@ -2861,7 +2864,7 @@ public:
 	
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
-	bool			CheckState(daeState* pState);
+	void			CheckState(daeState* pState);
 };
 
 /******************************************************************
@@ -3045,7 +3048,8 @@ class DAE_CORE_API daeFunctionWithGradients : virtual public daeFunctionWithGrad
 public:
 	daeDeclareDynamicClass(daeFunctionWithGradients)
 	daeFunctionWithGradients(void);
-	daeFunctionWithGradients(daeSimulation_t* pSimulation, 
+	daeFunctionWithGradients(daeModel* pModel,
+							 daeDAESolver_t* pDAESolver, 
 							 real_t abstol, 
 							 const string& strVariableName, 
 							 const string& strEquationName,
@@ -3080,7 +3084,7 @@ protected:
 	
 protected:
 	daeModel*						m_pModel;
-	daeSimulation_t*				m_pSimulation;
+	daeDAESolver_t*					m_pDAESolver;
 	boost::shared_ptr<daeVariable>	m_pVariable;
 	daeEquation*					m_pEquation;
 	daeEquationExecutionInfo*		m_pEquationExecutionInfo;
@@ -3099,7 +3103,8 @@ class DAE_CORE_API daeObjectiveFunction : virtual public daeFunctionWithGradient
 public:
 	daeDeclareDynamicClass(daeObjectiveFunction)
 	daeObjectiveFunction(void);
-	daeObjectiveFunction(daeSimulation_t* pSimulation, 
+	daeObjectiveFunction(daeModel* pModel,
+						 daeDAESolver_t* pDAESolver,
 						 real_t abstol, 
 						 size_t nEquationIndex, 
 						 const string& strDescription);
@@ -3115,7 +3120,8 @@ class DAE_CORE_API daeOptimizationConstraint : virtual public daeFunctionWithGra
 public:
 	daeDeclareDynamicClass(daeOptimizationConstraint)
 	daeOptimizationConstraint(void);
-	daeOptimizationConstraint(daeSimulation_t* pSimulation, 
+	daeOptimizationConstraint(daeModel* pModel,
+							  daeDAESolver_t* pDAESolver, 
 							  bool bIsInequalityConstraint, 
 							  real_t abstol, 
 							  size_t nEquationIndex, 
@@ -3139,7 +3145,8 @@ class DAE_CORE_API daeMeasuredVariable : virtual public daeFunctionWithGradients
 public:
 	daeDeclareDynamicClass(daeMeasuredVariable)
 	daeMeasuredVariable(void);
-	daeMeasuredVariable(daeSimulation_t* pSimulation, 
+	daeMeasuredVariable(daeModel* pModel,
+						daeDAESolver_t* pDAESolver, 
 						real_t abstol, 
 						size_t nEquationIndex, 
 						const string& strDescription);

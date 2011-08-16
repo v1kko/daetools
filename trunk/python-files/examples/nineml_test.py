@@ -35,10 +35,10 @@ class sim_hierachical_iaf_1coba(daeSimulation):
 
         tau       .SetValue(5.0)
         vrev      .SetValue(0)
-        q         .SetValue(100)
+        q         .SetValue(1)
         cm        .SetValue(1)
-        gl        .SetValue(50)
-        taurefrac .SetValue(8)
+        gl        .SetValue(1) # was 50
+        taurefrac .SetValue(2)
         vreset    .SetValue(-60)
         vrest     .SetValue(-60)
         vthresh   .SetValue(-40)
@@ -51,10 +51,28 @@ class sim_hierachical_iaf_1coba(daeSimulation):
         V      = findObjectInModel(iaf,  'V',      look_for_variables = True)
         tspike = findObjectInModel(iaf,  'tspike', look_for_variables = True)
 
-        g     .SetInitialCondition(100)
+        g     .SetInitialCondition(0)
         V     .SetInitialCondition(-60) # = parameter [iaf_vrest]
         tspike.SetInitialCondition(-1e99)
         
+    def Run(self):
+        spikeoutput = getObjectFromCanonicalName(self.m, 'iaf_1coba.iaf.spikeoutput', look_for_eventports = True)
+
+        self.Log.Message("Integrating for 1 second ... ", 0)
+        time = self.IntegrateForTimeInterval(1)
+        self.ReportData(self.CurrentTime)
+
+        spikeoutput.SendEvent(0.0)
+        self.Reinitialize()
+
+        daeSimulation.Run(self)
+        return
+        while self.CurrentTime < self.TimeHorizon:
+            t = self.NextReportingTime
+            self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
+            self.IntegrateUntilTime(t, eStopAtModelDiscontinuity)
+            self.ReportData(self.CurrentTime)
+            
 
 # Load the Component:
 coba1_base = TestableComponent('hierachical_iaf_1coba')
@@ -78,7 +96,7 @@ datareporter = daeTCPIPDataReporter()
 simulation.m.SetReportingOn(True)
 
 # Set the time horizon and the reporting interval
-simulation.ReportingInterval = 1
+simulation.ReportingInterval = 250
 simulation.TimeHorizon = 250
 
 # Connect data reporter

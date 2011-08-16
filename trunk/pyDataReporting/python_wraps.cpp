@@ -106,15 +106,15 @@ python::numeric::array GetTimeValuesDataReceiverVariable(daeDataReceiverVariable
 python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)
 {
 	python::list l;
-	daeDataReceiverDomain* pDomain;
+	daeDataReceiverDomain* obj;
 	size_t i, nDomains;
 
 	nDomains = var.m_ptrarrDomains.size();
 	
 	for(i = 0; i < nDomains; i++)
 	{
-		pDomain = var.m_ptrarrDomains[i];
-		l.append(pDomain);
+		obj = var.m_ptrarrDomains[i];
+		l.append(boost::ref(obj));
 	}
 	return l;
 }
@@ -125,12 +125,12 @@ python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)
 python::list GetDomainsDataReporterProcess(daeDataReporterProcess& process)
 {
 	python::list l;
-	daeDataReceiverDomain* pDomain;
+	daeDataReceiverDomain* obj;
 
 	for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
 	{
-		pDomain = process.m_ptrarrRegisteredDomains[i];
-		l.append(pDomain);
+		obj = process.m_ptrarrRegisteredDomains[i];
+		l.append(boost::ref(obj));
 	}
 	return l;
 }
@@ -138,13 +138,13 @@ python::list GetDomainsDataReporterProcess(daeDataReporterProcess& process)
 python::list GetVariablesDataReporterProcess(daeDataReporterProcess& process)
 {
 	python::list l;
-	daeDataReceiverVariable* pVariable;
+	daeDataReceiverVariable* obj;
 
 	map<string, daeDataReceiverVariable*>::const_iterator iter;
 	for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
 	{
-		pVariable = (*iter).second;
-		l.append(pVariable);
+		obj = (*iter).second;
+		l.append(boost::ref(obj));
 	}
 
 	return l;

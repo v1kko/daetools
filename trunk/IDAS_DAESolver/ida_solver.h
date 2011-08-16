@@ -2,6 +2,7 @@
 #define IDA_DAESOLVER_H
 
 #include "../Core/helpers.h"
+#include "../Core/activity.h"
 #include "solver_class_factory.h"
 #include "dae_array_matrix.h"
 #include "ida_la_solver_interface.h"
@@ -24,11 +25,12 @@ public:
 public:
 	virtual void						Initialize(daeBlock_t* pBlock, 
 												   daeLog_t* pLog, 
+												   daeSimulation_t* pSimulation,
 												   daeeInitialConditionMode eMode,
 												   bool bCalculateSensitivities,
 												   const std::vector<size_t>& narrParametersIndexes);
 	virtual void						SolveInitial(void);
-	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion);
+	virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities = true);
 	virtual void						SetRelativeTolerance(real_t relTol);
 	virtual size_t						GetNumberOfVariables(void) const;
 	virtual real_t						GetRelativeTolerance(void) const;
@@ -67,6 +69,7 @@ public:
 	void*								m_pIDA;
 	daeLog_t*							m_pLog;
 	daeBlock_t*							m_pBlock;
+	daeSimulation_t*					m_pSimulation;
 	daeeIDALASolverType					m_eLASolver;
 	daeIDALASolver_t*					m_pLASolver;
 	size_t								m_nNumberOfEquations;

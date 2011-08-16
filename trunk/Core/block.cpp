@@ -494,20 +494,16 @@ void daeBlock::Initialize(void)
 	RebuildExpressionMap();
 }
 
-daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
+bool daeBlock::CheckDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;
-	daeeDiscontinuityType eResult;
 
 	if(m_dCurrentTime > 0)
 		m_pDataProxy->LogMessage(string("Checking state transitions at time [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("]..."), 0);
 
-	eResult = eNoDiscontinuity;
-	m_pDataProxy->SetReinitializationFlag(false);
-	m_pDataProxy->SetCopyDataFromBlock(false);
-
 // First check the global stopping condition from the DataProxy (Simulation)
+/*
 	daeModel* model = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
 	if(!model)
 	   daeDeclareAndThrowException(exInvalidPointer);
@@ -524,20 +520,35 @@ daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
 			return eGlobalDiscontinuity;
 		}
 	}
-
+*/
+	
 // Then check conditions from STNs
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		if(pSTN->CheckDiscontinuities())
-			eResult = eModelDiscontinuity;
+			return true;
+	}
+	
+	return false;
+}
+
+daeeDiscontinuityType daeBlock::ExecuteOnConditionActionsAndRebuildExpressionMap(void)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeeDiscontinuityType eResult;
+
+	m_pDataProxy->SetReinitializationFlag(false);
+	m_pDataProxy->SetCopyDataFromBlock(false);
+
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		pSTN->ExecuteOnConditionActions();
 	}
 	
 // If any of the actions changed the state it should also be indicated in the bReinitializationFlag
-// At some point I should switch to use of GetReinitializationFlag() only!
 	if(m_pDataProxy->GetReinitializationFlag() && m_pDataProxy->GetCopyDataFromBlock())
 	{
 		eResult = eModelDiscontinuityWithDataChange;
@@ -547,6 +558,10 @@ daeeDiscontinuityType daeBlock::CheckDiscontinuities(void)
 	{
 		eResult = eModelDiscontinuity;
 		RebuildExpressionMap();
+	}
+	else
+	{
+		eResult = eNoDiscontinuity;
 	}
 	
 	return eResult;

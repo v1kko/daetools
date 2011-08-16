@@ -172,26 +172,33 @@ class daeChooseVariable(QtGui.QDialog):
             self.ui.buttonOk.setEnabled(False)        
 
     def getPlot2DData(self):
+        # Achtung, achtung!!
+        # It is important to get TimeValues first since the reporter
+        # might add more values to the data receiver (in the meantime)
+        # and the size of the xPoints and yPoints arrays will not match
+        times   = self.variable.TimeValues
         values  = self.variable.Values
         domains = self.variable.Domains
-        times   = self.variable.TimeValues
 
-        #QtGui.QMessageBox.about(None, "domains", str(domains))
-        
         xAxisLabel = ""
         
         # Remove html code marks ('&' and ';')
         yname = self.variable.Name
         yAxisLabel = yname.replace("&", "").replace(";", "");
         xPoints = []
-        
+
+        noTimePoints = len(times)
+
+        # x axis points
         # Only one domain is free
         for i in range(0, len(self.domainIndexes)):
             if self.domainIndexes[i] == 0:
                 if i == 0: # Time domain
                     xAxisLabel = "Time"
-                    for k in range(0, len(times)):
+
+                    for k in range(0, noTimePoints):
                         xPoints.append(times[k])        
+
                 else: # Some other domain
                     d = domains[i-1] # because Time is not in a domain list
                     names = d.Name.split(".")
@@ -199,26 +206,34 @@ class daeChooseVariable(QtGui.QDialog):
                     # Remove html code marks ('&' and ';')
                     xname = names[len(names)-1]
                     xAxisLabel = xname.replace("&", "").replace(";", "");
-                    
+
                     for k in range(0, d.NumberOfPoints):
                         xPoints.append(d[k]) 
                 break       
-            
+        
+        # y axis points
         t = []
         for i in self.domainIndexes:
-            if i == 0: 
-                t.append(slice(0, None))
+            if i == 0:
+                t.append(slice(0, noTimePoints))
             else:
                 t.append(i-1)
 
         yPoints = values[t].copy()
-        
+
+        #print 'Number of x points = {0}'.format(len(xPoints))
+        #print 'Number of y points = {0}'.format(len(yPoints))
+
         return self.domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints
 
     def getPlot3DData(self):
+        # Achtung, achtung!!
+        # It is important to get TimeValues first since the reporter
+        # might add more values to the data receiver (in the meantime)
+        # and the size of xPoints, yPoints and zPoints arrays will not match
+        times   = self.variable.TimeValues
         values  = self.variable.Values
         domains = self.variable.Domains
-        times   = self.variable.TimeValues
 
         xPoints = []
         yPoints = []
@@ -237,12 +252,15 @@ class daeChooseVariable(QtGui.QDialog):
         if len(freeDomainIndexes) != 2:
             return
         
+        noTimePoints = len(times)
+
         # x axis
         nd = freeDomainIndexes[0]
         if nd == 0: # Time domain
             xAxisLabel = "Time"
-            for k in range(0, len(times)):
+            for k in range(0, noTimePoints):
                 xPoints.append(times[k])        
+
         else: # Some other domain
             d = domains[nd-1] # because Time is not in a domain list
             names = d.Name.split(".")
@@ -258,8 +276,9 @@ class daeChooseVariable(QtGui.QDialog):
         nd = freeDomainIndexes[1]
         if nd == 0: # Time domain
             yAxisLabel = "Time"
-            for k in range(0, len(times)):
+            for k in range(0, noTimePoints):
                 yPoints.append(times[k])        
+
         else: # Some other domain
             d = domains[nd-1] # because Time is not in a domain list
             names = d.Name.split(".")
@@ -271,14 +290,16 @@ class daeChooseVariable(QtGui.QDialog):
             for k in range(0, d.NumberOfPoints):
                 yPoints.append(d[k]) 
 
+        # z axis
         t = []
         for i in self.domainIndexes:
-            if i == 0: 
-                t.append(slice(0, None))
+            if i == 0:
+                t.append(slice(0, noTimePoints))
             else:
                 t.append(i-1)
 
         zPoints = values[t].copy()
+
         #print values
         #print zPoints
         

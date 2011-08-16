@@ -82,8 +82,11 @@ def Calculate(p, minpack, calc_values):
                 while minpack.simulation.CurrentTime < minpack.simulation.TimeHorizon:
                     t = minpack.simulation.NextReportingTime
                     # print 'Integrating from {0} to {1}...'.format(minpack.simulation.CurrentTime, t)
-                    minpack.simulation.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
-                    minpack.simulation.ReportData()
+
+                    # Do not stop at discontinuity and do not report data around discontinuities!!!
+                    minpack.simulation.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity, false)
+                    minpack.simulation.ReportData(minpack.simulation.CurrentTime)
+
                     for o in range(0, minpack.Nmeasured_variables):
                         values[o, e, ct]    = minpack.y_measured_variables[o].Value - minpack.experimental_data[e][2][o][ct]
                         derivs[:, o, e, ct] = minpack.y_measured_variables[o].Gradients

@@ -711,7 +711,8 @@ public:
 	virtual void	CopyValuesToSolver(daeArray<real_t>& arrValues) = 0;
 	virtual void	CopyTimeDerivativesToSolver(daeArray<real_t>& arrTimeDerivatives) = 0;
 	
-	virtual daeeDiscontinuityType CheckDiscontinuities(void) = 0;
+	virtual bool	              CheckDiscontinuities(void) = 0;
+	virtual daeeDiscontinuityType ExecuteOnConditionActionsAndRebuildExpressionMap(void) = 0;
 	
 	virtual void	SetAllInitialConditions(real_t value) = 0;
 

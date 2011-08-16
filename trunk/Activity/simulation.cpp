@@ -406,7 +406,7 @@ void daeSimulation::SetupSolver(void)
 		}
 	}
 	
-	m_pDAESolver->Initialize(pBlock, m_pLog, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
+	m_pDAESolver->Initialize(pBlock, m_pLog, this, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
 }
 
 void daeSimulation::SolveInitial(void)
@@ -438,7 +438,7 @@ void daeSimulation::SolveInitial(void)
 	m_pDAESolver->SolveInitial();
 
 // Report data at TIME=0
-	ReportData();
+	ReportData(m_dCurrentTime);
 
 // Set the SolveInitial flag to true
 	m_bIsSolveInitial = true;
@@ -516,7 +516,7 @@ void daeSimulation::Run(void)
 			m_pLog->Message(string("Activity paused by the user"), 0);
 			return;
 		}
-
+/*
 	// Integrate until the first discontinuity or until the end of the integration period
 	// Report current time period in low precision
 		m_pLog->Message(string("Integrating from [") + toString<real_t>(m_dCurrentTime) + 
@@ -524,19 +524,20 @@ void daeSimulation::Run(void)
 						string("] ..."), 0);
 		m_dCurrentTime = IntegrateUntilTime(t, eStopAtModelDiscontinuity);
 		ReportData();
+*/
 
 	// If discontinuity is found, loop until the end of the integration period
+	// The data will be reported around discontinuities!
 		while(t > m_dCurrentTime)
 		{
-		// Report current time period in high precision
-			m_pLog->Message(string("Integrating from [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + 
-							string("] to [")             + toStringFormatted<real_t>(t, -1, 15)              +  
+			m_pLog->Message(string("Integrating from [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15, false, true) + 
+							string("] to [")             + toStringFormatted<real_t>(t, -1, 15, false, true)              +  
 							string("] ..."), 0);
-			m_dCurrentTime = IntegrateUntilTime(t, eStopAtModelDiscontinuity);
-			ReportData();
+			m_dCurrentTime = IntegrateUntilTime(t, eStopAtModelDiscontinuity, true);
 		}
 		
 		m_dCurrentTime = t;
+		ReportData(m_dCurrentTime);
 	}
 
 // Print the end of the simulation info if not in the optimization mode		
@@ -595,17 +596,17 @@ daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strD
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(this, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }
 
-daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDescription)
+daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDescription) 
 {
 	daeConfig& cfg = daeConfig::GetConfig();
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(this, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
 	m_arrConstraints.push_back(pConstraint);
 	return pConstraint.get();
 }
@@ -623,7 +624,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(daeVariable& variable)
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
 	size_t nIndex  = m_arrMeasuredVariables.size();
 
-	boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(this, dAbsTolerance, nIndex, "Measured variable"));
+	boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
 	measvar->SetResidual(variable());
 	m_arrMeasuredVariables.push_back(measvar);
 
@@ -654,7 +655,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(adouble a)
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
 	size_t nIndex  = m_arrMeasuredVariables.size();
 
-	boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(this, dAbsTolerance, nIndex, "Measured variable"));
+	boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
 	measvar->SetResidual(a);
 	m_arrMeasuredVariables.push_back(measvar);
 
@@ -823,7 +824,7 @@ boost::shared_ptr<daeObjectiveFunction> daeSimulation::AddObjectiveFunction(void
 	real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
 	size_t nObjFunIndex  = m_arrObjectiveFunctions.size();
 
-	boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(this, dAbsTolerance, nObjFunIndex, "Objective function"));
+	boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(m_pModel, m_pDAESolver, dAbsTolerance, nObjFunIndex, "Objective function"));
 	m_arrObjectiveFunctions.push_back(objfun);
 	
 	return objfun;
@@ -1020,7 +1021,7 @@ real_t daeSimulation::GetReportingInterval(void) const
 }
 
 // Integrates until the stopping criterion is reached or the time horizon of simulation
-real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion)
+real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -1029,12 +1030,12 @@ real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion)
 	if(m_dCurrentTime >= m_dTimeHorizon)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	m_dCurrentTime = m_pDAESolver->Solve(m_dTimeHorizon, eStopCriterion);
+	m_dCurrentTime = m_pDAESolver->Solve(m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
 	return m_dCurrentTime;
 }
 
 // Integrates for the given time interval
-real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval)
+real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -1043,12 +1044,12 @@ real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval)
 	if((m_dCurrentTime + time_interval) > m_dTimeHorizon)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity);
+	m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 	return m_dCurrentTime;
 }
 
 // Integrates until the stopping criterion or time is reached
-real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion)
+real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -1057,7 +1058,7 @@ real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCri
 	if(time > m_dTimeHorizon)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	m_dCurrentTime = m_pDAESolver->Solve(time, eStopCriterion);
+	m_dCurrentTime = m_pDAESolver->Solve(time, eStopCriterion, bReportDataAroundDiscontinuities);
 	return m_dCurrentTime;
 }
 
@@ -1247,19 +1248,19 @@ void daeSimulation::RegisterDomain(daeDomain_t* pDomain)
 	}
 }
 
-void daeSimulation::ReportData(void)
+void daeSimulation::ReportData(real_t dCurrentTime)
 {
 	if(!m_pDataReporter)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	if(!m_pDataReporter->StartNewResultSet(m_dCurrentTime))
+	if(!m_pDataReporter->StartNewResultSet(dCurrentTime))
 	{
 		daeDeclareException(exDataReportingError);
-		e << "Simulation dastardly failed to start new result set at TIME: [" << m_dCurrentTime << "]";
+		e << "Simulation dastardly failed to start new result set at TIME: [" << dCurrentTime << "]";
 		throw e;
 	}
 
-	ReportModel(m_pModel, m_dCurrentTime);
+	ReportModel(m_pModel, dCurrentTime);
 }
 
 void daeSimulation::ReportModel(daeModel_t* pModel, real_t time)

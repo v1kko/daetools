@@ -981,12 +981,12 @@ public:
 	boost::python::list GetDataReceivers(void)
 	{
 		boost::python::list l;
-		daeTCPIPDataReceiver* pDataReceiver;
+		daeTCPIPDataReceiver* obj;
 	
 		for(size_t i = 0; i < m_ptrarrDataReceivers.size(); i++)
 		{
-			pDataReceiver = m_ptrarrDataReceivers[i];
-			l.append(pDataReceiver);
+			obj = m_ptrarrDataReceivers[i];
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -1006,13 +1006,13 @@ public:
 		boost::python::list l;
 		boost::python::object o;
 		daeTCPIPDataReceiver* pDataReceiver;
-		daeDataReporterProcess* pDataReporterProcess;
+		daeDataReporterProcess* obj;
 	
 		for(size_t i = 0; i < m_ptrarrDataReceivers.size(); i++)
 		{
 			pDataReceiver = m_ptrarrDataReceivers[i];
-			pDataReporterProcess = pDataReceiver->GetProcess();
-			l.append(boost::python::object(pDataReporterProcess));
+			obj = pDataReceiver->GetProcess();
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}

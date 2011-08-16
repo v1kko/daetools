@@ -164,7 +164,7 @@ void daeAction::Initialize(void)
 
 void daeAction::Execute(void)
 {
-	std::cout << "Execute called in the action: " << GetName() << std::endl;
+	std::cout << "    Execute called in the action: " << GetName() << std::endl;
 	
 	if(m_eActionType == eChangeState)
 	{
@@ -199,7 +199,7 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t value = m_pSetExpressionNode->Evaluate(&EC).getValue();
-		std::cout << "Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
+		std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
 		
 		//std::cout << "Action: " << GetName() << ", nIndex = " << m_nIndex << ", Type = " << m_pModel->m_pDataProxy->GetVariableType(m_nIndex) << std::endl;
 		if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnFixed)
@@ -209,7 +209,7 @@ void daeAction::Execute(void)
 		else
 			daeDeclareAndThrowException(exInvalidCall);
 		
-		std::cout << "Variable new value: " << m_pVariable->GetValue() << std::endl;
+		std::cout << "    Variable new value: " << m_pVariable->GetValue() << std::endl;
 		
 	// Set the reinitialization flag to true to mark the system ready for re-initialization
 		m_pModel->m_pDataProxy->SetReinitializationFlag(true);
@@ -501,7 +501,7 @@ void daeOnEventActions::Export(std::string& strContent, daeeModelLanguage eLangu
 
 void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
 {
-	std::cout << "Update received in the OnEventActions: " << GetName() << ", data = " << *((real_t*)data) << std::endl;
+	std::cout << "    Update received in the OnEventActions: " << GetName() << ", data = " << *((real_t*)data) << std::endl;
 	Execute();
 }
 

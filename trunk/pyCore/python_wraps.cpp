@@ -1243,11 +1243,6 @@ void ReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, s
 /*******************************************************
 	daeEquation
 *******************************************************/
-//daeEquation* __init__daeEquation(const string& strName, daeModel& model)
-//{
-//	daeEquation* pEquation = model.AddEquation(strName);
-//	return pEquation;
-//}
 daeDEDI* DistributeOnDomain1(daeEquation& eq, daeDomain& rDomain, daeeDomainBounds eDomainBounds)
 {
 	return eq.DistributeOnDomain(rDomain, eDomainBounds);
@@ -1281,7 +1276,7 @@ boost::python::list GetStatesSTN(daeSTN& stn)
 	for(size_t i = 0; i < ptrarrStates.size(); i++)
 	{
 		obj = dynamic_cast<daeState*>(ptrarrStates[i]);
-		l.append(obj);
+		l.append(boost::ref(obj));
 	}
 	return l;
 }

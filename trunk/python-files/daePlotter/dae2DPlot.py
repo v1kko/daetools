@@ -218,6 +218,8 @@ class dae2DPlot(QtGui.QDialog):
             for k in range(0, len(x)):
                 newItem = QtGui.QTableWidgetItem(str(y[k]))
                 table.setItem(k, i, newItem)
+            for k in range(0, len(x)):
+                verHeader.append(str(x[k]))
             
         table.setHorizontalHeaderLabels(horHeader)
         table.setVerticalHeaderLabels(verHeader)

@@ -1030,29 +1030,6 @@ public:
 *******************************************************/
 boost::python::list GetStatesSTN(daeSTN& stn);
 
-//class daeSTNWrapper : public daeSTN,
-//                      public boost::python::wrapper<daeSTN>
-//{
-//public:
-//	daeSTNWrapper(void)
-//	{
-//	}
-//
-//public:
-//	boost::python::list GetStates(void)
-//	{
-//		boost::python::list l;
-//		daeState* obj;
-//
-//		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
-//		{
-//			obj = m_ptrarrStates[i];
-//			l.append(obj);
-//		}
-//		return l;
-//	}
-//};
-
 /*******************************************************
 	daeIF
 *******************************************************/

@@ -122,13 +122,13 @@ class simTutorial(daeSimulation):
     def Run(self):
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100)
-        self.ReportData()
+        self.ReportData(self.CurrentTime)
 
         self.m.Qb.ReAssignValue(2E6)
         self.Reinitialize()
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
-        self.ReportData()
+        self.ReportData(self.CurrentTime)
 
         self.m.Qb.ReAssignValue(1.5E6)
         #self.m.Qt.SetValue(2E6)
@@ -136,11 +136,11 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints-1):
                 self.m.T.ReSetInitialCondition(x, y, 300)
         self.Reinitialize()
-        self.ReportData()
+        self.ReportData(self.CurrentTime)
 
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)
-        self.ReportData()
+        self.ReportData(self.CurrentTime)
         self.Log.Message("OP: Finished", 0)
 
 # Use daeSimulator class

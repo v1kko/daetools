@@ -152,6 +152,7 @@ real_t daeIDASolver::GetRelativeTolerance(void) const
 
 void daeIDASolver::Initialize(daeBlock_t* pBlock, 
 							  daeLog_t* pLog, 
+							  daeSimulation_t* pSimulation,
 							  daeeInitialConditionMode eMode, 
 							  bool bCalculateSensitivities,
 							  const std::vector<size_t>& narrParametersIndexes)
@@ -160,9 +161,12 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pSimulation)
+		daeDeclareAndThrowException(exInvalidPointer);
 
 	m_pLog					= pLog;
 	m_pBlock				= pBlock;
+	m_pSimulation			= pSimulation;
 	m_eInitialConditionMode = eMode;
 	
 	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
@@ -622,7 +626,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	}
 }
 
-real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
+real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
 {
  	int retval, retvalr;
 	int* rootsfound;
@@ -663,7 +667,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 			  << "; time horizon [" << m_dTargetTime << "]; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
-
+		
 		if(retval == IDA_ROOT_RETURN) 
 		{
 			nNoRoots = m_pBlock->GetNumberOfRoots();
@@ -677,26 +681,45 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion)
 			}
 			delete[] rootsfound;
 
-			eDiscontinuityType = m_pBlock->CheckDiscontinuities();
-			
-			if(eDiscontinuityType == eModelDiscontinuity)
-			{ 
-				RefreshRootFunctions();
-				Reinitialize(false);
-				if(eCriterion == eStopAtModelDiscontinuity)
-					return m_dCurrentTime;
-			}
-			else if(eDiscontinuityType == eModelDiscontinuityWithDataChange)
-			{ 
-				RefreshRootFunctions();
-				Reinitialize(true);
-				if(eCriterion == eStopAtModelDiscontinuity)
-					return m_dCurrentTime;
-			}
-			else if(eDiscontinuityType == eGlobalDiscontinuity)
+			if(m_pBlock->CheckDiscontinuities())
 			{
-				if(eCriterion == eStopAtGlobalDiscontinuity)
-					return m_dCurrentTime;
+			// Data will be reported only if there is a discontinuity; otherwise
+				if(bReportDataAroundDiscontinuities)
+					m_pSimulation->ReportData(m_dCurrentTime);					
+				
+				eDiscontinuityType = m_pBlock->ExecuteOnConditionActionsAndRebuildExpressionMap();
+				
+				if(eDiscontinuityType == eModelDiscontinuity)
+				{ 
+					RefreshRootFunctions();
+					Reinitialize(false);
+					
+				// The data will be reported again ONLY if there was a discontinuity
+					if(bReportDataAroundDiscontinuities)
+						m_pSimulation->ReportData(m_dCurrentTime);					
+					
+					if(eCriterion == eStopAtModelDiscontinuity)
+						return m_dCurrentTime;
+				}
+				else if(eDiscontinuityType == eModelDiscontinuityWithDataChange)
+				{ 
+					RefreshRootFunctions();
+					Reinitialize(true);
+					
+				// The data will be reported again ONLY if there was a discontinuity
+					if(bReportDataAroundDiscontinuities)
+						m_pSimulation->ReportData(m_dCurrentTime);					
+					
+					if(eCriterion == eStopAtModelDiscontinuity)
+						return m_dCurrentTime;
+				}
+				else if(eDiscontinuityType == eGlobalDiscontinuity)
+				{
+					daeDeclareAndThrowException(exNotImplemented);
+				}
+			}
+			else
+			{
 			}
 		}
 

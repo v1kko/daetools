@@ -152,6 +152,11 @@ public:
 	{
 	}
 
+	daeModel_t* GetModel(void) const
+	{
+		return dynamic_cast<daeModel*>(this->m_pModel);
+	}
+
 	boost::python::object GetModel_(void) const
 	{
 		return model;
@@ -314,7 +319,7 @@ public:
 		for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			obj = m_arrOptimizationVariables[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -327,7 +332,7 @@ public:
 		for(size_t i = 0; i < m_arrConstraints.size(); i++)
 		{
 			obj = m_arrConstraints[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -340,7 +345,7 @@ public:
 		for(size_t i = 0; i < m_arrObjectiveFunctions.size(); i++)
 		{
 			obj = m_arrObjectiveFunctions[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -353,7 +358,7 @@ public:
 		for(size_t i = 0; i < m_arrInputVariables.size(); i++)
 		{
 			obj = m_arrInputVariables[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -366,7 +371,7 @@ public:
 		for(size_t i = 0; i < m_arrMeasuredVariables.size(); i++)
 		{
 			obj = m_arrMeasuredVariables[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
@@ -379,7 +384,7 @@ public:
 		for(size_t i = 0; i < m_arrOptimizationVariables.size(); i++)
 		{
 			obj = m_arrOptimizationVariables[i].get();
-			l.append(obj);
+			l.append(boost::ref(obj));
 		}
 		return l;
 	}
