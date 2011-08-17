@@ -592,7 +592,7 @@ def p_error(p):
     raise Exception("Syntax error at '%s'" % p.value)
 
 # Parser class
-class daeExpressionParser:
+class ExpressionParser:
     def __init__(self, dictIdentifiers = None, dictFunctions = None):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc() #(write_tables = 0)
@@ -684,7 +684,7 @@ if __name__ == "__main__":
     print 'Functions:\n', dictFunctions
     print '\n'
 
-    parser = daeExpressionParser(dictIdentifiers, dictFunctions)
+    parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
     expression   = '(-m1.m2.y + 2) / m1.x'
     expected_res = (-m1_m2_y + 2) / m1_x

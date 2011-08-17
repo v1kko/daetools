@@ -43,7 +43,7 @@ def addIdentifiers(model, parent, dictIdentifiers):
         
     return dictIdentifiers
 
-def getParserDictionary(model):
+def getParserDictionaries(model):
     """
     Dictionary should contain the following type of items:
      - string : adouble (for parameters and variables)

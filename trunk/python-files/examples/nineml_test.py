@@ -7,8 +7,6 @@ from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys
 from time import localtime, strftime
-from daetools.pyDAE.daeParser import daeExpressionParser
-from daetools.pyDAE.daeGetParserDictionary import getParserDictionary
 from daetools.pyDAE import *
 
 from nineml_daetools_bridge import *
@@ -83,8 +81,8 @@ coba1 = coba1_base()
 #nineml.al.writers.DotWriter.write(coba1, 'TestOut_Coba1.dot')
 #nineml.al.writers.DotWriter.build('TestOut_Coba1.dot')
 
-print 'Component hierachical_iaf_1coba:'
-printComponent(coba1, 'hierachical_iaf_1coba')
+#print 'Component hierachical_iaf_1coba:'
+#printComponent(coba1, 'hierachical_iaf_1coba')
 
 # Create Log, Solver, DataReporter and Simulation object
 log          = daePythonStdOutLog()

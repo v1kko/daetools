@@ -16,8 +16,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 import sys, tempfile
-from daetools.pyDAE.daeParser import daeExpressionParser
-from daetools.pyDAE.daeGetParserDictionary import getParserDictionary
+from daetools.pyDAE.parser import ExpressionParser
+from daetools.pyDAE.parserDictionaries import getParserDictionaries
 from daetools.pyDAE import *
 from daetools.pyDAE.daeDataReporters import *
 from time import localtime, strftime
@@ -36,11 +36,15 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation.")
 
-        dictNameValue = getParserDictionary(self)
+        dictIdentifiers, dictFunctions = getParserDictionaries(self)
+        print 'Identifiers:\n', dictIdentifiers
+        print '\n'
+        print 'Functions:\n', dictFunctions
+        print '\n'
 
-        parser  = daeExpressionParser()
+        parser  = ExpressionParser(dictIdentifiers, dictFunctions)
         parser.parse('y - x1 + x2 * x3 / (2 * x4 - 12)')
-        residual = parser.evaluate(dictNameValue)
+        residual = parser.evaluate()
         print 'parse_result =', str(parser.parseResult)
         eq.Residual = residual
 

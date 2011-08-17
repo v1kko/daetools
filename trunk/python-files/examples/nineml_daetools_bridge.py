@@ -5,48 +5,52 @@ import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
-
 import os, sys
 from time import localtime, strftime
-from daetools.pyDAE.daeParser import daeExpressionParser
-from daetools.pyDAE.daeGetParserDictionary import getParserDictionary
+from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 
-def getParserDictionary(model):
-    """
-    Dictionary should contain the following type of items:
-     - string : adouble (for parameters and variables)
-     - string : callable-object (these has to be implemented: sin, cos, tan, exp, ln, log, sqrt)
-    """
-    dictNameValue = {}
+def addIdentifiers(model, parent, dictIdentifiers):
+    for o in model.Parameters:
+        relName = daeGetRelativeName(parent, o)
+        #print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        dictIdentifiers[relName] = o()
 
-    # adouble values for parameters
-    for p in model.Parameters:
-        dictNameValue[p.Name] = p()
+    for o in model.Variables:
+        relName = daeGetRelativeName(parent, o)
+        #print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        dictIdentifiers[relName] = o()
 
-    # adouble values for variables
-    for v in model.Variables:
-        dictNameValue[v.Name] = v()
-
-    # adouble values for ports variable ('value')
     for port in model.Ports:
         if port.Type == eInletPort:
-            for v in port.Variables:
-                dictNameValue[port.Name] = v()
+            if len(port.Variables) != 1:
+                raise RuntimeError('Invalid number of variables in the port ' + port.CanonicalName)
+            relName = daeGetRelativeName(parent, port)
+            #print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+            dictIdentifiers[relName] = port.Variables[0]()
 
-    # DAE Tools mathematical functions:
-    dictNameValue['t']    = model.time()
+    for m in model.Models:
+        dictIdentifiers = addIdentifiers(m, model, dictIdentifiers)
 
-    # DAE Tools mathematical functions:
-    dictNameValue['sin']  = Sin
-    dictNameValue['cos']  = Cos
-    dictNameValue['tan']  = Tan
-    dictNameValue['log']  = Log10
-    dictNameValue['ln']   = Log
-    dictNameValue['sqrt'] = Sqrt
-    dictNameValue['exp']  = Exp
+    return dictIdentifiers
 
-    return dictNameValue
+def getNineMLDictionaries(model):
+    dictIdentifiers = {}
+    dictFunctions   = {}
+
+    dictIdentifiers['t'] = model.time()
+
+    dictFunctions['sin']  = Sin
+    dictFunctions['cos']  = Cos
+    dictFunctions['tan']  = Tan
+    dictFunctions['log']  = Log10
+    dictFunctions['ln']   = Log
+    dictFunctions['sqrt'] = Sqrt
+    dictFunctions['exp']  = Exp
+
+    dictIdentifiers = addIdentifiers(model, model, dictIdentifiers)
+
+    return dictIdentifiers, dictFunctions
 
 def printComponent(c, name, indent_string = '  ', level = 0):
     indent = level*indent_string
@@ -248,11 +252,13 @@ class nineml_daetools_bridge(daeModel):
             
     def DeclareEquations(self):
         # Create the epression parser and set its Identifier:Value dictionary
-        parser = daeExpressionParser()
-        parser.dictNamesValues = getParserDictionary(self)
-        #for key, value in parser.dictNamesValues.items():
-        #    print key + ' : ' + repr(value)
-
+        dictIdentifiers, dictFunctions = getNineMLDictionaries(self)
+        parser = ExpressionParser(dictIdentifiers, dictFunctions)
+        print "Identifiers dictionary for the model: " + self.CanonicalName
+        for key, value in dictIdentifiers.items():
+            print key + ' : ' + repr(value)
+        print '\n'
+        
         # 1) Create aliases (algebraic equations)
         aliases = list(self.ninemlComponent.aliases)
         if len(aliases) > 0:
@@ -368,8 +374,7 @@ class nineml_daetools_bridge(daeModel):
             #print 'try to connect {0} to {1}'.format(port_connection[0].getstr('.'), port_connection[1].getstr('.'))
             portFrom = getObjectFromNamespaceAddress(self, port_connection[0])
             portTo   = getObjectFromNamespaceAddress(self, port_connection[1])
-
-            print '  {0} -> {1}\n'.format(portFrom.CanonicalName, portTo.CanonicalName)
+            #print '  {0} -> {1}\n'.format(portFrom.CanonicalName, portTo.CanonicalName)
             self.ConnectPorts(portFrom, portTo)
 
     def findVariable(self, name):
@@ -377,36 +382,3 @@ class nineml_daetools_bridge(daeModel):
             if var.Name == name:
                 return var
         return None
-
-    #def parseExpression(self, expression, **kwargs):
-    #    """
-    #    Parses the expression, evaluates it using 'dictNameValue' and returns the result (adouble object)
-    #    """
-    #    print_result = kwargs.get('print_result', False)
-    #
-    #    result = parser.parse(expression)
-    #    if print_result:
-    #        print 'Expression: {0}\nParse result: {1}'.format(expression, str(result))
-    #    return parser.evaluate()
-
-    """
-    def setParameters(self):
-        for param in self.nineml_parameters:
-            param.SetValue(0.0)
-        for model in self.ninemlSubComponents:
-            model.setParameters()
-
-    def assignVariables(self):
-        #for var in self.nineml_state_variables:
-        #    var.AssignValue(0.0)
-        #for var in self.nineml_aliases:
-        #    var.AssignValue(0.0)
-        for model in self.ninemlSubComponents:
-            model.assignVariables()
-
-    def setInitialConditions(self):
-        for var in self.nineml_state_variables:
-            var.SetInitialCondition(0.0)
-        for model in self.ninemlSubComponents:
-            model.setInitialConditions()
-    """
