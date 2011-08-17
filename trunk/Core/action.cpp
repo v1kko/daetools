@@ -70,9 +70,9 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 // For eSendEvent:
 	m_pSendEventPort = pPort;
 	if(data.node)
-		m_pSetupDataNode = data.node;
+		m_pSetupNode = data.node;
 	else
-		m_pSetupDataNode = boost::shared_ptr<adNode>(new adConstantNode(data.getValue()));
+		m_pSetupNode = boost::shared_ptr<adNode>(new adConstantNode(data.getValue()));
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
@@ -100,9 +100,9 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 	m_pVariable	= pVariable;
 	m_nIndex    = (size_t)-1;
 	if(value.node)
-		m_pSetupSetExpressionNode = value.node;
+		m_pSetupNode = value.node;
 	else
-		m_pSetupSetExpressionNode = boost::shared_ptr<adNode>(new adConstantNode(value.getValue()));
+		m_pSetupNode = boost::shared_ptr<adNode>(new adConstantNode(value.getValue()));
 }
 
 daeAction::~daeAction()
@@ -147,22 +147,22 @@ void daeAction::Initialize(void)
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
-		m_pDataNode = m_pSetupDataNode->Evaluate(&EC).node;
+		m_pNode = m_pSetupNode->Evaluate(&EC).node;
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
 		if(!m_pVariable)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-	// Here I do not have variable types yet (SetUpVariables has not been called yet) so I cannot check the variable type
-	// therefore, we just get the variable index and will decide later which function to call (ReAssign or reInitialize)
+	// Here we do not have variable types yet (SetUpVariables has not been called yet) so we cannot check the variable type.
+	// Therefore, we just get the variable index and will decide later which function to call (ReAssign or ReInitialize)
 		m_nIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(NULL, 0);
 		
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
-		m_pSetExpressionNode = m_pSetupSetExpressionNode->Evaluate(&EC).node;
+		m_pNode = m_pSetupNode->Evaluate(&EC).node;
 	}
 	else
 	{
@@ -202,7 +202,7 @@ void daeAction::Execute(void)
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
-		real_t data = m_pDataNode->Evaluate(&EC).getValue();
+		real_t data = m_pNode->Evaluate(&EC).getValue();
 		std::cout << "    Event data : " << data << std::endl;
 
 		m_pSendEventPort->SendEvent(data);
@@ -213,7 +213,7 @@ void daeAction::Execute(void)
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
-		real_t value = m_pSetExpressionNode->Evaluate(&EC).getValue();
+		real_t value = m_pNode->Evaluate(&EC).getValue();
 		std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
 		
 		//std::cout << "Action: " << GetName() << ", nIndex = " << m_nIndex << ", Type = " << m_pModel->m_pDataProxy->GetVariableType(m_nIndex) << std::endl;
@@ -260,7 +260,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			strarrErrors.push_back(string("Invalid Event Port in action: ") + GetName());
 			return false;
 		}
-		if(!m_pSetupDataNode)
+		if(!m_pSetupNode)
 		{
 			strarrErrors.push_back(string("Invalid event data expression in action: ") + GetName());
 			return false;
@@ -278,7 +278,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			strarrErrors.push_back(string("Invalid variable in action: ") + GetName());
 			return false;
 		}
-		if(!m_pSetupSetExpressionNode)
+		if(!m_pSetupNode)
 		{
 			strarrErrors.push_back(string("Invalid set value expression in action: ") + GetName());
 			return false;
@@ -333,10 +333,10 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 		pTag->SaveObjectRef(strName, m_pSendEventPort);
 		
 		strName = "Expression";
-		adNode::SaveNode(pTag, strName, m_pSetupDataNode.get());
+		adNode::SaveNode(pTag, strName, m_pSetupNode.get());
 
 		strName = "MathML";
-		SaveNodeAsMathML(m_pSetupDataNode.get(), pTag, strName);
+		SaveNodeAsMathML(m_pSetupNode.get(), pTag, strName);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -344,10 +344,10 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 		pTag->SaveObjectRef(strName, m_pVariable);
 
 		strName = "Expression";
-		adNode::SaveNode(pTag, strName, m_pSetupSetExpressionNode.get());
+		adNode::SaveNode(pTag, strName, m_pSetupNode.get());
 
 		strName = "MathML";
-		SaveNodeAsMathML(m_pSetupSetExpressionNode.get(), pTag, strName);
+		SaveNodeAsMathML(m_pSetupNode.get(), pTag, strName);
 	}
 	else
 	{

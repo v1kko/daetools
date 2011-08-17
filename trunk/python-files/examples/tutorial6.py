@@ -78,11 +78,13 @@ class modTutorial(daeModel):
         self.mpin  = modPortIn("Port_In", self)
         self.mpout = modPortOut("Port_Out", self)
 
-    def DeclareEquations(self):
         # Ports can be connected by using the function ConnectPorts from daeModel class. Apparently,
         # ports dont have to be of the same type but must contain the same number of parameters and variables.
         self.ConnectPorts(self.mpout.Pout, self.mpin.Pin)
 
+    def DeclareEquations(self):
+        pass
+    
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)

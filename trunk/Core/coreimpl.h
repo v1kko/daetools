@@ -1907,14 +1907,14 @@ protected:
 	
 // For eSendEvent:
 	daeEventPort*				m_pSendEventPort;
-	boost::shared_ptr<adNode>	m_pSetupDataNode;
-	boost::shared_ptr<adNode>	m_pDataNode;
 
 // For eReAssignOrReInitializeVariable:
 	daeVariable*				m_pVariable;
 	size_t						m_nIndex;
-	boost::shared_ptr<adNode>	m_pSetupSetExpressionNode;
-	boost::shared_ptr<adNode>	m_pSetExpressionNode;
+
+// Common for eSendEvent and eReAssignOrReInitializeVariable:
+	boost::shared_ptr<adNode>	m_pSetupNode;
+	boost::shared_ptr<adNode>	m_pNode;
 };
 
 /******************************************************************
