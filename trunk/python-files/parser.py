@@ -14,13 +14,13 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-import os, sys
+import os, sys, math
 import ply.lex as lex
 import ply.yacc as yacc
 from daetools.pyDAE import *
 
 class Node:
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         pass
 
 class ConstantNode(Node):
@@ -33,22 +33,24 @@ class ConstantNode(Node):
     def __str__(self):
         return str(self.Value)
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         return self.Value
 
 class AssignmentNode(Node):
-    def __init__(self, lnode, rnode):
-        self.lNode = lnode
-        self.rNode = rnode
+    def __init__(self, identifier, expression):
+        self.identifier = identifier
+        self.expression = expression
 
     def __repr__(self):
-        return 'AssignmentNode({0}, =, {1})'.format(repr(self.lNode), repr(self.rNode))
+        return 'AssignmentNode({0}, =, {1})'.format(repr(self.identifier), repr(self.expression))
 
     def __str__(self):
-        return '{0} = {1}'.format(str(self.lNode), str(self.rNode))
+        return '{0} = {1}'.format(str(self.identifier), str(self.expression))
 
-    def evaluate(self, dictNamesValues):
-        return self.rNode.evaluate(dictNamesValues)
+    def evaluate(self, dictIdentifiers, dictFunctions):
+        value = self.expression.Node.evaluate(dictIdentifiers, dictFunctions)
+        dictIdentifiers[self.identifier.Node.Name] = value
+        return value
 
 class IdentifierNode(Node):
     def __init__(self, name):
@@ -60,11 +62,11 @@ class IdentifierNode(Node):
     def __str__(self):
         return self.Name
 
-    def evaluate(self, dictNamesValues):
-        if self.Name in dictNamesValues:
-            return dictNamesValues[self.Name]
+    def evaluate(self, dictIdentifiers, dictFunctions):
+        if self.Name in dictIdentifiers:
+            return dictIdentifiers[self.Name]
 
-        raise RuntimeError('Identifier {0} not found in the Name-Value dictionary'.format(self.Name))
+        raise RuntimeError('Identifier {0} not found in the identifiers dictionary'.format(self.Name))
 
 class FunctionNode(Node):
     functions = ['exp', 'sin', 'cos', 'tan', 'log', 'ln', 'sqrt']
@@ -82,12 +84,13 @@ class FunctionNode(Node):
     def __str__(self):
         return '{0}({1})'.format(self.Function, str(self.Node))
 
-    def evaluate(self, dictNamesValues):
-        if self.Function in dictNamesValues:
-            fun = dictNamesValues[self.Function]
-            return fun(self.Node.evaluate(dictNamesValues))
+    def evaluate(self, dictIdentifiers, dictFunctions):
+        if self.Function in dictFunctions:
+            fun = dictFunctions[self.Function]
+            argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
+            return fun(argument0)
         else:
-            raise RuntimeError('The function {0} not found in the Name-Value dictionary'.format(self.Function))
+            raise RuntimeError('The function {0} not found in the functions dictionary'.format(self.Function))
 
 class UnaryNode(Node):
     opMinus = '-'
@@ -103,11 +106,11 @@ class UnaryNode(Node):
     def __str__(self):
         return '({0}{1})'.format(self.Operator, str(self.Node))
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == UnaryNode.opMinus:
-            return (-self.Node.evaluate(dictNamesValues))
+            return (-self.Node.evaluate(dictIdentifiers, dictFunctions))
         elif self.Operator == UnaryNode.opPlus:
-            return self.Node.evaluate(dictNamesValues)
+            return self.Node.evaluate(dictIdentifiers, dictFunctions)
         else:
             raise RuntimeError("Not supported unary operator: {0}".format(self.Operator))
 
@@ -129,22 +132,22 @@ class BinaryNode(Node):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == BinaryNode.opPlus:
-            return self.lNode.evaluate(dictNamesValues) + self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) + self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == BinaryNode.opMinus:
-            return self.lNode.evaluate(dictNamesValues) - self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) - self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == BinaryNode.opMulti:
-            return self.lNode.evaluate(dictNamesValues) * self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) * self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == BinaryNode.opDivide:
-            return self.lNode.evaluate(dictNamesValues) / self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) / self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == BinaryNode.opPower:
-            return self.lNode.evaluate(dictNamesValues) ** self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) ** self.rNode.evaluate(dictIdentifiers, dictFunctions)
         else:
             raise RuntimeError("Not supported binary operator: {0}".format(self.Operator))
 
 class ConditionNode:
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         pass
 
 class ConditionUnaryNode(ConditionNode):
@@ -160,9 +163,9 @@ class ConditionUnaryNode(ConditionNode):
     def __str__(self):
         return '({0} {1})'.format(self.Operator, str(self.Node))
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionUnaryNode.opNot:
-            return not self.Node.evaluate(dictNamesValues)
+            return not self.Node.evaluate(dictIdentifiers, dictFunctions)
         else:
             raise RuntimeError("Not supported logical unary operator: {0}".format(self.Operator))
 
@@ -185,19 +188,19 @@ class ConditionBinaryNode(ConditionNode):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionBinaryNode.opEQ:
-            return self.lNode.evaluate(dictNamesValues) == self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) == self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionBinaryNode.opNE:
-            return self.lNode.evaluate(dictNamesValues) != self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) != self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionBinaryNode.opLT:
-            return self.lNode.evaluate(dictNamesValues) < self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) < self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionBinaryNode.opLE:
-            return self.lNode.evaluate(dictNamesValues) <= self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) <= self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionBinaryNode.opGT:
-            return self.lNode.evaluate(dictNamesValues) > self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) > self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionBinaryNode.opGE:
-            return self.lNode.evaluate(dictNamesValues) >= self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) >= self.rNode.evaluate(dictIdentifiers, dictFunctions)
         else:
             raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 
@@ -216,11 +219,11 @@ class ConditionExpressionNode(ConditionNode):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
-    def evaluate(self, dictNamesValues):
+    def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionExpressionNode.opAnd:
-            return self.lNode.evaluate(dictNamesValues) & self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) & self.rNode.evaluate(dictIdentifiers, dictFunctions)
         elif self.Operator == ConditionExpressionNode.opOr:
-            return self.lNode.evaluate(dictNamesValues) | self.rNode.evaluate(dictNamesValues)
+            return self.lNode.evaluate(dictIdentifiers, dictFunctions) | self.rNode.evaluate(dictIdentifiers, dictFunctions)
         else:
             raise RuntimeError("Not supported logical operator: {0}".format(self.Operator))
 
@@ -365,7 +368,7 @@ functions = {'exp'  : 'exp',
 tokens = [
     'NAME', 'NUMBER', 'FLOAT',
     'PLUS','MINUS','EXP', 'TIMES','DIVIDE','EQUALS',
-    'LPAREN','RPAREN',
+    'LPAREN','RPAREN','PERIOD',
     'NOT', 'AND', 'OR',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
     ] + list(functions.values())
@@ -389,6 +392,7 @@ t_LE = r'<='
 t_EQUALS  = r'='
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
+t_PERIOD  = r'\.'
 
 #t_NAME     = r'[a-zA-Z_][a-zA-Z_0-9]*'
 def t_NAME(t):
@@ -421,8 +425,9 @@ def p_assignment_expression_1(p):
     p[0] = p[1]
 
 def p_assignment_expression_2(p):
-    'assignment_expression : shift_expression EQUALS assignment_expression'
+    'assignment_expression : identifier EQUALS assignment_expression'
     p[0] = AssignmentNode(p[1], p[3])
+    #'assignment_expression : shift_expression EQUALS assignment_expression'
 
 # conditional-expression
 def p_conditional_expression_1(p):
@@ -556,6 +561,10 @@ def p_postfix_expression_2(p):
     """
     p[0] = Number(FunctionNode(p[1], p[3]))
 
+def p_postfix_expression_3(p):
+    '''postfix_expression : postfix_expression PERIOD NAME'''
+    p[0] = Number(IdentifierNode(p[1].Node.Name + '.' + p[3]))
+
 # primary-expression
 def p_primary_expression(p):
     '''primary_expression :  identifier
@@ -584,11 +593,12 @@ def p_error(p):
 
 # Parser class
 class daeExpressionParser:
-    def __init__(self, dictNamesValues = None):
+    def __init__(self, dictIdentifiers = None, dictFunctions = None):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc() #(write_tables = 0)
         self.parseResult = None
-        self.dictNamesValues = dictNamesValues
+        self.dictIdentifiers = dictIdentifiers
+        self.dictFunctions   = dictFunctions
 
     def parse_and_evaluate(self, expression):
         self.parse(expression)
@@ -601,8 +611,10 @@ class daeExpressionParser:
     def evaluate(self):
         if self.parseResult is None:
             raise RuntimeError('expression not parsed yet')
-        if self.dictNamesValues is None:
-            raise RuntimeError('dictNamesValues not set')
+        if self.dictIdentifiers is None:
+            raise RuntimeError('dictIdentifiers not set')
+        if self.dictFunctions is None:
+            raise RuntimeError('dictFunctions not set')
 
         node = None
         if isinstance(self.parseResult, Number):
@@ -614,81 +626,107 @@ class daeExpressionParser:
         else:
             raise RuntimeError('Invalid parse result type')
 
-        result = node.evaluate(self.dictNamesValues)
+        result = node.evaluate(self.dictIdentifiers, self.dictFunctions)
         return result
 
     @property
-    def dictNamesValues(self):
-        return self.dictNamesValues
+    def dictIdentifiers(self):
+        return self.dictIdentifiers
+
+    @property
+    def dictFunctions(self):
+        return self.dictFunctions
 
     @property
     def parseResult(self):
         return self.parseResult
 
-def getSimpleParserDictionary():
-    """
-    Dictionary should contain the keys of the following type:
-     - identifier-name: value (for instance 'V' : 1.25)
-     - function-name : callable-object (for instance 'exp': math.exp)
-       these function keys HAS to be implemented: sin, cos, tan, exp, ln, log, sqrt
-       since they are supported by the parser
-    """
-    import math
-    dictNameValue = {}
-
-    # Some dummy values
-    dictNameValue['y']  = 10.0
-    dictNameValue['x1'] = 1.0
-    dictNameValue['x2'] = 2.0
-    dictNameValue['x3'] = 3.0
-    dictNameValue['x4'] = 4.0
-
-    dictNameValue['sin']  = math.sin
-    dictNameValue['cos']  = math.cos
-    dictNameValue['tan']  = math.tan
-    dictNameValue['log']  = math.log10
-    dictNameValue['ln']   = math.log
-    dictNameValue['sqrt'] = math.sqrt
-    dictNameValue['exp']  = math.exp
-
-    return dictNameValue
-
-# Some tests...
 if __name__ == "__main__":
-    dictNamesValues = getSimpleParserDictionary()
-    parser          = daeExpressionParser(dictNamesValues)
+    """
+    Dictionary dictIdentifiers should contain the keys of the following type:
+      identifier-name: value (for instance 'V' : 1.25, or 'name.V' : 0.1, etc)
+    Dictionary dictFunctions should contain the keys of the following type:
+      function-name : callable-object (for instance 'exp': math.exp)
+      functions: sin, cos, tan, exp, ln, log, sqrt MUST be implemented
+    """
+    dictIdentifiers = {}
+    dictFunctions   = {}
 
-    expression = '(-exp(y + x2 / x4) + 4.0) - x1'
-    parse_res = parser.parse(expression)
-    eval_res  = parser.evaluate()
-    print '-------------------------------------------'
+    # Some dummy identifiers/values
+    y       = 10.0
+    x1      =  1.0
+    x2      =  2.0
+    x3      =  3.0
+    x4      =  4.0
+    m1_x    =  2.11
+    m1_m2_y = 10.12
+    R       =  0.0
+
+    dictIdentifiers['y']       = y
+    dictIdentifiers['x1']      = x1
+    dictIdentifiers['x2']      = x2
+    dictIdentifiers['x3']      = x3
+    dictIdentifiers['x4']      = x4
+    dictIdentifiers['m1.x']    = m1_x
+    dictIdentifiers['m1.m2.y'] = m1_m2_y
+    dictIdentifiers['R']       = R
+
+    dictFunctions['sin']  = math.sin
+    dictFunctions['cos']  = math.cos
+    dictFunctions['tan']  = math.tan
+    dictFunctions['log']  = math.log10
+    dictFunctions['ln']   = math.log
+    dictFunctions['sqrt'] = math.sqrt
+    dictFunctions['exp']  = math.exp
+
+    print 'Identifiers:\n', dictIdentifiers
+    print '\n'
+    print 'Functions:\n', dictFunctions
+    print '\n'
+
+    parser = daeExpressionParser(dictIdentifiers, dictFunctions)
+
+    expression   = '(-m1.m2.y + 2) / m1.x'
+    expected_res = (-m1_m2_y + 2) / m1_x
+    parse_res    = parser.parse(expression)
+    eval_res     = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
-    print 'Evaluate result:', str(eval_res)
-    print '-------------------------------------------\n'
+    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
+    print '\n'
 
-    expression = 'y = sin(x1 + x3)/x4'
-    res = parser.parse(expression)
-    parse_res = parser.parse(expression)
-    print '-------------------------------------------'
+    expression   = '(-exp(y + x2 / x4) + 4.0) - x1'
+    expected_res = (-math.exp(y + x2 / x4) + 4.0) - x1
+    parse_res    = parser.parse(expression)
+    eval_res     = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
-    print '-------------------------------------------\n'
+    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
+    print '\n'
+
+    expression   = 'R = sin(x1 + x3)/x4'
+    Rcalc        = math.sin(x1 + x3)/x4
+    parse_res    = parser.parse(expression)
+    eval_res     = parser.evaluate()
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print 'Evaluate result: R = {0} (expected {1})'.format(str(eval_res), Rcalc)
+    print 'Updated dictIdentifiers[R] = {0}'.format(dictIdentifiers['R'])
+    print '\n'
 
     expression = '(y + 4.0 >= x3 - 3.2e-03) & (y == 3)'
     parse_res = parser.parse(expression)
-    print '-------------------------------------------'
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
-    print '-------------------------------------------\n'
+    print '\n'
 
-    expression = 'dV/dt = (v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
+    expression = '(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
     parse_res = parser.parse(expression)
-    print '-------------------------------------------'
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
-    print '-------------------------------------------\n'
+    print '\n'

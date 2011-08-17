@@ -1195,8 +1195,8 @@ public:
 
 	virtual size_t	GetNumberOfRoots(void) const;
 
-	virtual bool	              CheckDiscontinuities(void);
-	virtual daeeDiscontinuityType ExecuteOnConditionActionsAndRebuildExpressionMap(void);
+	virtual bool	              CheckForDiscontinuities(void);
+	virtual daeeDiscontinuityType ExecuteOnConditionActions(void);
 	
 	virtual void	SetAllInitialConditions(real_t value);
 	
@@ -1877,7 +1877,7 @@ public:
 	daeDeclareDynamicClass(daeAction)
 	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription);
-	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, real_t data, const string& strDescription);
+	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, adouble data, const string& strDescription);
 	daeAction(const string& strname, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription);
 	virtual ~daeAction(void);
 
@@ -1894,7 +1894,7 @@ public:
 	void Initialize(void);
 
 protected:
-	void SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
+	void SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string& strObjectName) const;
 
 protected:
 	daeeActionType m_eActionType;
@@ -1906,8 +1906,9 @@ protected:
 	daeState*	m_pStateTo;
 	
 // For eSendEvent:
-	daeEventPort* m_pSendEventPort;
-	real_t		  m_dData;
+	daeEventPort*				m_pSendEventPort;
+	boost::shared_ptr<adNode>	m_pSetupDataNode;
+	boost::shared_ptr<adNode>	m_pDataNode;
 
 // For eReAssignOrReInitializeVariable:
 	daeVariable*				m_pVariable;
@@ -2149,13 +2150,13 @@ protected:
 	void ON_CONDITION(const daeCondition&                               rCondition, 
 					  const string&                                     strStateTo, 
 					  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
-					  std::vector< std::pair<daeEventPort*, real_t> >&  arrTriggerEvents, 
+					  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents, 
 					  real_t                                            dEventTolerance = 0);
 	
 	void ON_EVENT(daeEventPort*                                     pTriggerEventPort, 
 				  std::vector< std::pair<string, string> >&         arrSwitchToStates, 
 				  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
-				  std::vector< std::pair<daeEventPort*, real_t> >&  arrTriggerEvents);
+				  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents);
 	
 	template<typename Model>
 		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));

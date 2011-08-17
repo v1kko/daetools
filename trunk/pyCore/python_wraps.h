@@ -627,11 +627,10 @@ public:
                       boost::python::list setVariableValues = boost::python::list(),
                       real_t dEventTolerance = 0.0)
     {
-		real_t data;
         daeEventPort* pEventPort;
         daeVariable* pVariable;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
-        vector< pair<daeEventPort*, real_t> > arrTriggerEvents;
+        vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -676,17 +675,30 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pEventPort = boost::python::extract<daeEventPort*>(t[0]);
-			boost::python::extract<real_t> ex(t[1]);
-			if(!ex.check())
+            pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
+            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+			
+			boost::python::extract<real_t>  dValue(o);
+			boost::python::extract<adouble> aValue(o);
+
+            pair<daeEventPort*, adouble> p;
+			
+			p.first = pEventPort;
+			if(aValue.check())
+			{
+				p.second = aValue();
+			}
+			else if(dValue.check())
+			{
+				p.second = adouble(dValue());
+			}
+			else
 			{
 				daeDeclareException(exInvalidCall);
-				e << "Only float data can be sent to event ports in ON_CONDITION function";
+				e << "Invalid trigger events argument in ON_CONDITION function";
 				throw e;
 			}
-            data = ex();
 
-            pair<daeEventPort*, real_t> p(pEventPort, data);
             arrTriggerEvents.push_back(p);
         }
 
@@ -702,14 +714,13 @@ public:
                   boost::python::list triggerEvents     = boost::python::list(),
                   boost::python::list setVariableValues = boost::python::list())
     {
-		real_t data;
         daeEventPort* pEventPort;
         string strSTN;
         string strStateTo;
         daeVariable* pVariable;
         vector< pair<string, string> > arrSwitchToStates;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
-        vector< pair<daeEventPort*, real_t> > arrTriggerEvents;
+        vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -768,17 +779,30 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pEventPort = boost::python::extract<daeEventPort*>(t[0]);
-			boost::python::extract<real_t> ex(t[1]);
-			if(!ex.check())
+            pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
+            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+			
+			boost::python::extract<real_t>  dValue(o);
+			boost::python::extract<adouble> aValue(o);
+
+            pair<daeEventPort*, adouble> p;
+			
+			p.first = pEventPort;
+			if(aValue.check())
+			{
+				p.second = aValue();
+			}
+			else if(dValue.check())
+			{
+				p.second = adouble(dValue());
+			}
+			else
 			{
 				daeDeclareException(exInvalidCall);
-				e << "Only float data can be sent to event ports in ON_EVENT function";
+				e << "Invalid triggerEvents argument in ON_EVENT function";
 				throw e;
 			}
-            data = ex();
 
-            pair<daeEventPort*, real_t> p(pEventPort, data);
             arrTriggerEvents.push_back(p);
         }
 
@@ -1054,16 +1078,6 @@ public:
 	}
 
 public:
-//	daeState* GetStateFrom(void)
-//	{
-//		return m_pStateFrom;
-//	}
-//
-//	daeState* GetStateTo(void)
-//	{
-//		return m_pStateTo;
-//	}
-
 	daeCondition GetCondition(void)
 	{
 		return m_Condition;

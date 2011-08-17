@@ -1148,15 +1148,14 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 void daeModel::ON_CONDITION(const daeCondition& rCondition, 
 							const string& strStateTo, 
 							vector< pair<daeVariable*, adouble> >& arrSetVariables,
-							vector< pair<daeEventPort*, real_t> >& arrTriggerEvents, 
+							vector< pair<daeEventPort*, adouble> >& arrTriggerEvents, 
 							real_t dEventTolerance)
 {
-	real_t data;
 	size_t i;
 	daeAction* pAction;
 	daeEventPort* pEventPort;
 	pair<daeVariable*, adouble> p;
-	pair<daeEventPort*, real_t> p3;
+	pair<daeEventPort*, adouble> p3;
 	daeVariable* pVariable;
 	adouble value;
 	vector<daeAction*> ptrarrActions;
@@ -1191,11 +1190,11 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 	{
 		p3 = arrTriggerEvents[i];
 		pEventPort = p3.first;
-		data       = p3.second;
+		value      = p3.second;
 		if(!pEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, data, string(""));
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, value, string(""));
 
 		ptrarrActions.push_back(pAction);
 	}
@@ -1220,17 +1219,16 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort, 
 						vector< pair<string, string> >&		    arrSwitchToStates, 
 						vector< pair<daeVariable*, adouble> >&	arrSetVariables,
-						vector< pair<daeEventPort*, real_t> >&	arrTriggerEvents)
+						vector< pair<daeEventPort*, adouble> >&	arrTriggerEvents)
 {
 	size_t i;
 	daeAction* pAction;
 	string strSTN;
 	string strStateTo;
 	daeEventPort* pEventPort;
-	real_t data;
 	pair<string, string> p1;
 	pair<daeVariable*, adouble> p2;
-	pair<daeEventPort*, real_t> p3;
+	pair<daeEventPort*, adouble> p3;
 	adouble value;
 	daeVariable* pVariable;
 	std::vector<daeAction*> ptrarrOnEventActions;
@@ -1262,11 +1260,11 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	{
 		p3 = arrTriggerEvents[i];
 		pEventPort = p3.first;
-		data       = p3.second;
+		value      = p3.second;
 		if(!pEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, data, string(""));
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, value, string(""));
 		ptrarrOnEventActions.push_back(pAction);
 	}
 

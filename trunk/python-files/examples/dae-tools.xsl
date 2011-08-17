@@ -634,7 +634,7 @@
                             Switch to: <xsl:copy-of select="StateTo/ObjectRefMathML"/>
                         </xsl:if>
                         <xsl:if test="Type = 'eSendEvent'">
-                            Trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/> with the data: <xsl:value-of select="Data"/>
+                            Trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/> with the data: <xsl:copy-of select="MathML"/>
                         </xsl:if>
                         <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
                             Set: <xsl:copy-of select="MathML"/>

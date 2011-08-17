@@ -494,7 +494,7 @@ void daeBlock::Initialize(void)
 	RebuildExpressionMap();
 }
 
-bool daeBlock::CheckDiscontinuities(void)
+bool daeBlock::CheckForDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -533,7 +533,7 @@ bool daeBlock::CheckDiscontinuities(void)
 	return false;
 }
 
-daeeDiscontinuityType daeBlock::ExecuteOnConditionActionsAndRebuildExpressionMap(void)
+daeeDiscontinuityType daeBlock::ExecuteOnConditionActions(void)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -548,7 +548,7 @@ daeeDiscontinuityType daeBlock::ExecuteOnConditionActionsAndRebuildExpressionMap
 		pSTN->ExecuteOnConditionActions();
 	}
 	
-// If any of the actions changed the state it should also be indicated in the bReinitializationFlag
+// If any of the actions changed the state it has to be indicated in those flag
 	if(m_pDataProxy->GetReinitializationFlag() && m_pDataProxy->GetCopyDataFromBlock())
 	{
 		eResult = eModelDiscontinuityWithDataChange;

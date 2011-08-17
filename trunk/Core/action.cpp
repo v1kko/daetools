@@ -26,7 +26,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, const string& strS
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
-	m_dData          = 0.0;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
@@ -48,14 +47,13 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, cons
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
-	m_dData          = 0.0;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
 	m_nIndex         = (size_t)-1;
 }
 
-daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, real_t data, const string& strDescription)
+daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, adouble data, const string& strDescription)
 {
 	m_pModel = pModel;
 	SetName(strName);
@@ -71,7 +69,10 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 	
 // For eSendEvent:
 	m_pSendEventPort = pPort;
-	m_dData          = data;
+	if(data.node)
+		m_pSetupDataNode = data.node;
+	else
+		m_pSetupDataNode = boost::shared_ptr<adNode>(new adConstantNode(data.getValue()));
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable      = NULL;
@@ -94,7 +95,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
-	m_dData          = 0.0;
 	
 // For eReAssignOrReInitializeVariable:
 	m_pVariable	= pVariable;
@@ -140,6 +140,14 @@ void daeAction::Initialize(void)
 	}
 	else if(m_eActionType == eSendEvent)
 	{
+		if(!m_pSendEventPort)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		daeExecutionContext EC;
+		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_eEquationCalculationMode	= eCalculate;
+		
+		m_pDataNode = m_pSetupDataNode->Evaluate(&EC).node;
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -190,7 +198,14 @@ void daeAction::Execute(void)
 		if(!m_pSendEventPort)
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		m_pSendEventPort->SendEvent(m_dData);
+		daeExecutionContext EC;
+		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_eEquationCalculationMode	= eCalculate;
+		
+		real_t data = m_pDataNode->Evaluate(&EC).getValue();
+		std::cout << "    Event data : " << data << std::endl;
+
+		m_pSendEventPort->SendEvent(data);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -208,8 +223,6 @@ void daeAction::Execute(void)
 			m_pVariable->ReSetInitialCondition(value);
 		else
 			daeDeclareAndThrowException(exInvalidCall);
-		
-		std::cout << "    Variable new value: " << m_pVariable->GetValue() << std::endl;
 		
 	// Set the reinitialization flag to true to mark the system ready for re-initialization
 		m_pModel->m_pDataProxy->SetReinitializationFlag(true);
@@ -245,6 +258,11 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		if(!m_pSendEventPort)
 		{
 			strarrErrors.push_back(string("Invalid Event Port in action: ") + GetName());
+			return false;
+		}
+		if(!m_pSetupDataNode)
+		{
+			strarrErrors.push_back(string("Invalid event data expression in action: ") + GetName());
 			return false;
 		}
 		if(m_pSendEventPort->GetType() != eOutletPort)
@@ -314,8 +332,11 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 		strName = "SendEventPort";
 		pTag->SaveObjectRef(strName, m_pSendEventPort);
 		
-		strName = "Data";
-		pTag->Save(strName, m_dData);
+		strName = "Expression";
+		adNode::SaveNode(pTag, strName, m_pSetupDataNode.get());
+
+		strName = "MathML";
+		SaveNodeAsMathML(m_pSetupDataNode.get(), pTag, strName);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -326,7 +347,7 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 		adNode::SaveNode(pTag, strName, m_pSetupSetExpressionNode.get());
 
 		strName = "MathML";
-		SaveNodeAsMathML(pTag, strName);
+		SaveNodeAsMathML(m_pSetupSetExpressionNode.get(), pTag, strName);
 	}
 	else
 	{
@@ -334,11 +355,10 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 	}
 }
 	
-void daeAction::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
+void daeAction::SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;
 	daeSaveAsMathMLContext c(m_pModel);
-	adNode* node = m_pSetupSetExpressionNode.get();
 
 	io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
 	if(!pChildTag)
@@ -353,21 +373,33 @@ void daeAction::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName
 	strValue = "http://www.w3.org/1998/Math/MathML";
 	pMathMLTag->AddAttribute(strName, strValue);
 
-	strName = "mrow";
-	io::xmlTag_t* mrow = pMathMLTag->AddTag(strName);
-	if(!mrow)
-		daeDeclareAndThrowException(exXMLIOError);
-
-	strName  = "mi";
-	strValue = daeGetRelativeName(m_pModel, m_pVariable);
-	pChildTag = mrow->AddTag(strName, strValue);
-	pChildTag->AddAttribute(string("mathvariant"), string("italic"));
-
-	strName  = "mo";
-	strValue = "=";
-	mrow->AddTag(strName, strValue);
-
-	node->SaveAsPresentationMathML(mrow, &c);
+	if(m_eActionType == eReAssignOrReInitializeVariable)
+	{
+		strName = "mrow";
+		io::xmlTag_t* mrow = pMathMLTag->AddTag(strName);
+		if(!mrow)
+			daeDeclareAndThrowException(exXMLIOError);
+	
+		strName  = "mi";
+		strValue = daeGetRelativeName(m_pModel, m_pVariable);
+		pChildTag = mrow->AddTag(strName, strValue);
+		pChildTag->AddAttribute(string("mathvariant"), string("italic"));
+	
+		strName  = "mo";
+		strValue = "=";
+		mrow->AddTag(strName, strValue);
+	
+		node->SaveAsPresentationMathML(mrow, &c);
+	}
+	else if(m_eActionType == eSendEvent)
+	{
+		strName = "mrow";
+		io::xmlTag_t* mrow = pMathMLTag->AddTag(strName);
+		if(!mrow)
+			daeDeclareAndThrowException(exXMLIOError);
+	
+		node->SaveAsPresentationMathML(mrow, &c);
+	}
 }
 
 void daeAction::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const

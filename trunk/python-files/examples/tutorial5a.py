@@ -65,7 +65,7 @@ class modTutorial(daeModel):
                                              triggerEvents     = [],
                                              setVariableValues = [ (self.dummy, 1) ] )
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [ (self.epOut, 5.0) ],
+                                             triggerEvents     = [ (self.epOut, self.T() + 5.0) ],
                                              setVariableValues = [] )
 
         self.STATE("Cooling")
@@ -77,7 +77,7 @@ class modTutorial(daeModel):
                                              triggerEvents     = [],
                                              setVariableValues = [ (self.dummy, 0) ])
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [ (self.epOut, 6.0) ],
+                                             triggerEvents     = [ (self.epOut, self.T() + 6.0) ],
                                              setVariableValues = [] )
 
         self.STATE("HeaterOff")

@@ -681,13 +681,13 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 			}
 			delete[] rootsfound;
 
-			if(m_pBlock->CheckDiscontinuities())
+			if(m_pBlock->CheckForDiscontinuities())
 			{
-			// Data will be reported only if there is a discontinuity; otherwise
+			// Data will be reported only if there is a discontinuity
 				if(bReportDataAroundDiscontinuities)
 					m_pSimulation->ReportData(m_dCurrentTime);					
 				
-				eDiscontinuityType = m_pBlock->ExecuteOnConditionActionsAndRebuildExpressionMap();
+				eDiscontinuityType = m_pBlock->ExecuteOnConditionActions();
 				
 				if(eDiscontinuityType == eModelDiscontinuity)
 				{ 
@@ -928,8 +928,11 @@ int residuals(realtype	time,
 	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	pSolver->m_arrResiduals.InitArray(N, pdResiduals);
 
+	// We do not need to call CheckForDiscontinuities since we are not interested in 
+	// whether there are discontinuitues or not, just to execute the actions which
+	// may lead to state/variable changes and/or to event triggers
 	if(time == 0)
-		pBlock->CheckDiscontinuities();
+		pBlock->ExecuteOnConditionActions();
 
 	pBlock->CalculateResiduals(time, 
 		                       pSolver->m_arrValues, 
