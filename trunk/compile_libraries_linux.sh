@@ -15,15 +15,33 @@ vIDAS=1.0.0
 vTRILINOS=10.6.2
 
 # Get the archives DAE Tools website
-wget ${DAETOOLS_HTTP}/Bonmin-${vBONMIN}.zip
-wget ${DAETOOLS_HTTP}/superlu_${vSUPERLU}.tar.gz
-wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
-wget ${DAETOOLS_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
-wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
-wget ${DAETOOLS_HTTP}/nlopt-${vNLOPT}.tar.gz
-wget ${DAETOOLS_HTTP}/idas-${vIDAS}.tar.gz
-wget ${DAETOOLS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
-wget ${DAETOOLS_HTTP}/do-configure-trilinos.sh
+if [ ! -e Bonmin-${vBONMIN}.zip ]; then
+    wget ${DAETOOLS_HTTP}/Bonmin-${vBONMIN}.zip
+fi
+if [ ! -e  ]; then
+    wget ${DAETOOLS_HTTP}/superlu_${vSUPERLU}.tar.gz
+fi
+if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
+fi
+if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
+fi
+if [ ! -e superlu_mt_makefiles.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
+fi
+if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/nlopt-${vNLOPT}.tar.gz
+fi
+if [ ! -e idas-${vIDAS}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/idas-${vIDAS}.tar.gz
+fi
+if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
+fi
+if [ ! -e do-configure-trilinos.sh ]; then
+    wget ${DAETOOLS_HTTP}/do-configure-trilinos.sh
+fi
 
 # Unpack and compile libraries
 unzip Bonmin-${vBONMIN}.zip

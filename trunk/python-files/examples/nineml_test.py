@@ -33,10 +33,10 @@ class sim_hierachical_iaf_1coba(daeSimulation):
 
         tau       .SetValue(5.0)
         vrev      .SetValue(0)
-        q         .SetValue(1)
+        q         .SetValue(50) # was 1
         cm        .SetValue(1)
-        gl        .SetValue(1) # was 50
-        taurefrac .SetValue(2)
+        gl        .SetValue(50)
+        taurefrac .SetValue(2) # was 8
         vreset    .SetValue(-60)
         vrest     .SetValue(-60)
         vthresh   .SetValue(-40)
@@ -57,7 +57,7 @@ class sim_hierachical_iaf_1coba(daeSimulation):
         spikeoutput = getObjectFromCanonicalName(self.m, 'iaf_1coba.iaf.spikeoutput', look_for_eventports = True)
 
         self.Log.Message("Integrating for 1 second ... ", 0)
-        time = self.IntegrateForTimeInterval(1)
+        time = self.IntegrateForTimeInterval(0.1)
         self.ReportData(self.CurrentTime)
 
         spikeoutput.SendEvent(0.0)
@@ -94,7 +94,7 @@ datareporter = daeTCPIPDataReporter()
 simulation.m.SetReportingOn(True)
 
 # Set the time horizon and the reporting interval
-simulation.ReportingInterval = 250
+simulation.ReportingInterval = 0.05
 simulation.TimeHorizon = 250
 
 # Connect data reporter
