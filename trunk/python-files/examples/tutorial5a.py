@@ -20,6 +20,8 @@ In this example we use the same problem as in the tutorial 5.
 Here we introduce:
  - The event ports
  - Advanced actions executed during state transitions
+ - Actions executed when an event is triggered
+ - User defined action
 """
 
 import sys
@@ -28,6 +30,14 @@ from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
 
+# User defined action executed in OnEvent handler
+class simpleUserAction(daeAction):
+    def __init__(self):
+        daeAction.__init__(self)
+
+    def Execute(self):
+        print 'simpleUserAction executed'
+        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -42,6 +52,9 @@ class modTutorial(daeModel):
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
         self.dummy = daeVariable("dummy", no_t,          self, "dummy")
 
+        # Here we create two event ports (inlet and outlet) and connect them
+        # (it makes no sense in reality, but this is example just to show the possibilities).
+        # Event ports can be connected/disconnected at any time.
         self.epIn  = daeEventPort("epIn",  eInletPort,  self, "Inlet event port")
         self.epOut = daeEventPort("epOut", eOutletPort, self, "Outlet event port")
         self.ConnectEventPorts(self.epIn, self.epOut)
@@ -58,15 +71,21 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin() - 1500
 
         # ON_CONDITION function
-        # switchTo is the name of the new state
-        # triggerEvents is a list of python tuples (outlet-event-port, float data)
-        # setVariableValues is a list of python tuples ()
-        self.ON_CONDITION(self.T()    > 340, switchTo          = 'Cooling',
-                                             triggerEvents     = [],
-                                             setVariableValues = [ (self.dummy, 1) ] )
-        self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [ (self.epOut, self.T() + 5.0) ],
-                                             setVariableValues = [] )
+        # Arguments:
+        # - Condition that triggers the actions
+        # - switchTo is the name of the next active state
+        # - triggerEvents is a list of python tuples (outlet-event-port, expression)
+        # - setVariableValues is a list of python tuples (variable, expression)
+        # - userDefinedActions is a list of daeAction derived classes
+        self.ON_CONDITION(self.T()    > 340, switchTo           = 'Cooling',
+                                             triggerEvents      = [],
+                                             setVariableValues  = [ (self.dummy, 1) ],
+                                             userDefinedActions = [] )
+
+        self.ON_CONDITION(self.time() > 350, switchTo           = 'HeaterOff',
+                                             triggerEvents      = [ (self.epOut, self.T() + 5.0) ],
+                                             setVariableValues  = [],
+                                             userDefinedActions = [] )
 
         self.STATE("Cooling")
 
@@ -75,10 +94,13 @@ class modTutorial(daeModel):
 
         self.ON_CONDITION(self.T()    < 320, switchTo          = 'Heating',
                                              triggerEvents     = [],
-                                             setVariableValues = [ (self.dummy, 0) ])
+                                             setVariableValues = [ (self.dummy, 0) ],
+                                             userDefinedActions = [] )
+
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
                                              triggerEvents     = [ (self.epOut, self.T() + 6.0) ],
-                                             setVariableValues = [] )
+                                             setVariableValues = [],
+                                             userDefinedActions = [] )
 
         self.STATE("HeaterOff")
 
@@ -87,16 +109,31 @@ class modTutorial(daeModel):
 
         self.END_STN()
 
-        # The actions executed when the event on the inlet epIn event port is received
-        self.ON_EVENT(self.epIn, switchToStates    = [ ('Regulator', 'HeaterOff')],
-                                 triggerEvents     = [],
-                                 setVariableValues = [ (self.dummy, self.epIn()) ] )
+        # Users are responsible for creating/deleting of user actions and have to ensure
+        # that they still exist until the end of simulation.
+        self.action = simpleUserAction()
+
+        # ON_EVENT function
+        # The actions executed when the event on the inlet epIn event port is received.
+        # OnEvent handlers can be also specified as a part of the state definition
+        # and then they are active only when that particular state is active.
+        # Arguments:
+        # - Inlet event port
+        # - switchToStates is a list of python tuples (STN-name, State-name)
+        # - triggerEvents is a list of python tuples (outlet-event-port, expression)
+        # - setVariableValues is a list of python tuples (variable, expression)
+        # - userDefinedActions is a list of daeAction derived classes
+        self.ON_EVENT(self.epIn, switchToStates     = [ ('Regulator', 'HeaterOff')],
+                                 triggerEvents      = [],
+                                 setVariableValues  = [ (self.dummy, self.epIn()) ],
+                                 userDefinedActions = [self.action])
 
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial5a")
         self.m.Description = ""
+
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385)
         self.m.m.SetValue(1)

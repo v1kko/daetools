@@ -1149,6 +1149,7 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 							const string& strStateTo, 
 							vector< pair<daeVariable*, adouble> >& arrSetVariables,
 							vector< pair<daeEventPort*, adouble> >& arrTriggerEvents, 
+							vector<daeAction*>& ptrarrUserDefinedActions, 
 							real_t dEventTolerance)
 {
 	size_t i;
@@ -1213,13 +1214,14 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 		ptrarrActions.push_back(pAction);
 	}
 
-	_pST->Create_ON_CONDITION(pCurrentState, rCondition, ptrarrActions, dEventTolerance);
+	_pST->Create_ON_CONDITION(pCurrentState, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
 }
 
 void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort, 
 						vector< pair<string, string> >&		    arrSwitchToStates, 
 						vector< pair<daeVariable*, adouble> >&	arrSetVariables,
-						vector< pair<daeEventPort*, adouble> >&	arrTriggerEvents)
+						vector< pair<daeEventPort*, adouble> >&	arrTriggerEvents,
+						vector<daeAction*>&						ptrarrUserDefinedActions)
 {
 	size_t i;
 	daeAction* pAction;
@@ -1286,11 +1288,11 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	daeOnEventActions* pOnEventAction;
 	if(pParentState)	
 	{
-		pOnEventAction = new daeOnEventActions(pTriggerEventPort, pParentState, ptrarrOnEventActions, string(""));
+		pOnEventAction = new daeOnEventActions(pTriggerEventPort, pParentState, ptrarrOnEventActions, ptrarrUserDefinedActions, string(""));
 	}
 	else
 	{
-		pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, string(""));
+		pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, ptrarrUserDefinedActions, string(""));
 	// Attach ONLY those OnEventActions that belong to the model; others will be set during the active state changes
 		pTriggerEventPort->Attach(pOnEventAction);
 	}
@@ -3313,6 +3315,32 @@ void daeModel::InitializeStage5(bool bDoBlockDecomposition, vector<daeBlock_t*>&
 {
 // Do block decomposition (if requested)
 	DoBlockDecomposition(bDoBlockDecomposition, ptrarrBlocks);	
+
+//	std::cout << "sizeof(daeDomain) = "							<< sizeof(daeDomain) << std::endl;
+//	std::cout << "sizeof(daeParameter) = "						<< sizeof(daeParameter) << std::endl;
+//	std::cout << "sizeof(daeVariable) = "						<< sizeof(daeVariable) << std::endl;
+//	std::cout << "sizeof(daeEquation) = "						<< sizeof(daeEquation) << std::endl;
+//	std::cout << "sizeof(daePort) = "							<< sizeof(daePort) << std::endl;
+//	std::cout << "sizeof(daeEventPort) = "						<< sizeof(daeEventPort) << std::endl;
+//	std::cout << "sizeof(daeModel) = "							<< sizeof(daeModel) << std::endl;
+//	std::cout << "sizeof(daeSTN) = "							<< sizeof(daeSTN) << std::endl;
+//	std::cout << "sizeof(daePortConnection) = "					<< sizeof(daePortConnection) << std::endl;
+//
+//	std::cout << "sizeof(daeModel) = "							<< sizeof(*this) << std::endl;
+//	std::cout << "m_ptrarrDomains.capacity() = "				<< m_ptrarrDomains.capacity() << std::endl;
+//	std::cout << "m_ptrarrEquationExecutionInfos.capacity() = " << m_ptrarrEquationExecutionInfos.capacity() << std::endl;
+//	std::cout << "m_ptrarrEquations.capacity() = "				<< m_ptrarrEquations.capacity() << std::endl;
+//	std::cout << "m_ptrarrEventPorts.capacity() = "				<< m_ptrarrEventPorts.capacity() << std::endl;
+//	std::cout << "m_ptrarrModelArrays.capacity() = "			<< m_ptrarrModelArrays.capacity() << std::endl;
+//	std::cout << "m_ptrarrModels.capacity() = "					<< m_ptrarrModels.capacity() << std::endl;
+//	std::cout << "m_ptrarrOnEventActions.capacity() = "			<< m_ptrarrOnEventActions.capacity() << std::endl;
+//	std::cout << "m_ptrarrParameters.capacity() = "				<< m_ptrarrParameters.capacity() << std::endl;
+//	std::cout << "m_ptrarrPortArrays.capacity() = "				<< m_ptrarrPortArrays.capacity() << std::endl;
+//	std::cout << "m_ptrarrPortConnections.capacity() = "		<< m_ptrarrPortConnections.capacity() << std::endl;
+//	std::cout << "m_ptrarrPorts.capacity() = "					<< m_ptrarrPorts.capacity() << std::endl;
+//	std::cout << "m_ptrarrStackStates.capacity() = "			<< m_ptrarrStackStates.capacity() << std::endl;
+//	std::cout << "m_ptrarrSTNs.capacity() = "					<< m_ptrarrSTNs.capacity() << std::endl;
+//	std::cout << "m_ptrarrVariables.capacity() = "				<< m_ptrarrVariables.capacity() << std::endl;
 }
 
 void daeModel::StoreInitializationValues(const std::string& strFileName) const

@@ -126,7 +126,11 @@ void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& st
 	pStateFrom->AddStateTransition(this);
 }
 
-void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, const daeCondition& rCondition, vector<daeAction*>& ptrarrActions, real_t dEventTolerance)
+void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, 
+											 const daeCondition& rCondition, 
+											 vector<daeAction*>& ptrarrActions, 
+											 vector<daeAction*>& ptrarrUserDefinedActions,
+											 real_t dEventTolerance)
 {
 	if(!pStateFrom)
 	{	
@@ -147,8 +151,11 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, const daeCond
 	m_strShortName	= strName;
 	m_pModel		= pStateFrom->m_pModel;
 	m_ptrarrActions.EmptyAndFreeMemory();
+	m_ptrarrUserDefinedActions.clear();
 	for(size_t i = 0; i < ptrarrActions.size(); i++)
 		m_ptrarrActions.push_back(ptrarrActions[i]);
+	for(size_t i = 0; i < ptrarrUserDefinedActions.size(); i++)
+		m_ptrarrUserDefinedActions.push_back(ptrarrUserDefinedActions[i]);
 	m_Condition		= rCondition;
 	m_Condition.m_pModel = m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
@@ -156,6 +163,7 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, const daeCond
 	pStateFrom->AddStateTransition(this);
 }
 	
+// IF block cannot execute any action, so no need to specify them
 void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateTo)
@@ -171,10 +179,6 @@ void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCond
 	m_strShortName		= strName;
 	m_pModel			= pStateTo->m_pModel;
 	
-// IF block cannot execute any action, so no need to specify them
-//	daeAction* pAction = new daeAction(string("actionChangeState_") + pStateTo->GetName(), m_pModel, m_pSTN, pStateTo->GetName(), string(""));
-//	m_ptrarrActions.push_back(pAction);
-
 	m_Condition			= rCondition;
 
 	m_Condition.m_pModel = pStateTo->m_pModel;
@@ -189,6 +193,11 @@ void daeStateTransition::ExecuteActions(void)
 	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
 	{
 		pAction = m_ptrarrActions[i];
+		pAction->Execute();
+	}
+	for(size_t i = 0; i < m_ptrarrUserDefinedActions.size(); i++)
+	{
+		pAction = m_ptrarrUserDefinedActions[i];
 		pAction->Execute();
 	}
 }

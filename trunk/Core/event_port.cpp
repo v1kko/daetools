@@ -63,6 +63,15 @@ void daeEventPort::Update(daeEventPort_t* pSubject, void* data)
 	Notify(data);
 }
 
+void daeEventPort::ReceiveEvent(real_t data)
+{
+	if(m_ePortType != eInletPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// Observers in this case are OnEventActions
+	Notify(&data);
+}
+
 void daeEventPort::Initialize(void)
 {	
 }

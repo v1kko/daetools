@@ -583,8 +583,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Type",		&daeEventPort::GetType)
         .add_property("EventData",	&daeEventPort::GetEventData)
 		
-		.def("__call__",	&daeEventPort::operator())
-		.def("SendEvent",	&daeEventPort::SendEvent)  
+		.def("__call__",		&daeEventPort::operator())
+		.def("SendEvent",		&daeEventPort::SendEvent)  
+		.def("ReceiveEvent",	&daeEventPort::ReceiveEvent)  
+        ;
+
+	class_<daepython::daeActionWrapper, bases<daeObject>, boost::noncopyable>("daeAction")
+		.def("Execute",		pure_virtual(&daepython::daeActionWrapper::Execute)) 
         ;
  
     class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)
@@ -677,13 +682,15 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
 		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
 		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
-        .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")          = string(),
-                                                                             boost::python::arg("triggerEvents")     = boost::python::list(),
-                                                                             boost::python::arg("setVariableValues") = boost::python::list(),
-                                                                             boost::python::arg("eventTolerance")    = 0.0) )
-        .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT, ( boost::python::arg("switchToStates")    = boost::python::list(),
-																		 boost::python::arg("triggerEvents")     = boost::python::list(),
-																		 boost::python::arg("setVariableValues") = boost::python::list() ) )
+        .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")           = string(),
+                                                                             boost::python::arg("triggerEvents")      = boost::python::list(),
+                                                                             boost::python::arg("setVariableValues")  = boost::python::list(),
+                                                                             boost::python::arg("userDefinedActions") = boost::python::list(),
+                                                                             boost::python::arg("eventTolerance")     = 0.0) )
+        .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT, ( boost::python::arg("switchToStates")     = boost::python::list(),
+																		 boost::python::arg("triggerEvents")      = boost::python::list(),
+																		 boost::python::arg("setVariableValues")  = boost::python::list(),
+																		 boost::python::arg("userDefinedActions") = boost::python::list()) )
 		
 		.def("SaveModelReport",			&daeModel::SaveModelReport)
 		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)

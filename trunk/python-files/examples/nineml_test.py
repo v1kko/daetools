@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
@@ -8,7 +7,6 @@ from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys
 from time import localtime, strftime
 from daetools.pyDAE import *
-
 from nineml_daetools_bridge import *
 
 class sim_hierachical_iaf_1coba(daeSimulation):
@@ -33,10 +31,10 @@ class sim_hierachical_iaf_1coba(daeSimulation):
 
         tau       .SetValue(5.0)
         vrev      .SetValue(0)
-        q         .SetValue(50) # was 1
+        q         .SetValue(15) # was 1
         cm        .SetValue(1)
         gl        .SetValue(50)
-        taurefrac .SetValue(2) # was 8
+        taurefrac .SetValue(8) # was 8
         vreset    .SetValue(-60)
         vrest     .SetValue(-60)
         vthresh   .SetValue(-40)
@@ -54,22 +52,29 @@ class sim_hierachical_iaf_1coba(daeSimulation):
         tspike.SetInitialCondition(-1e99)
         
     def Run(self):
-        spikeoutput = getObjectFromCanonicalName(self.m, 'iaf_1coba.iaf.spikeoutput', look_for_eventports = True)
+        spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
 
-        self.Log.Message("Integrating for 1 second ... ", 0)
-        time = self.IntegrateForTimeInterval(0.1)
-        self.ReportData(self.CurrentTime)
-
-        spikeoutput.SendEvent(0.0)
-        self.Reinitialize()
-
-        daeSimulation.Run(self)
-        return
+        # A simple Mickey Mouse simulation to test the functionality of the NineML-DAETools bridge.
+        # We have only one neuron (IAF) and a synapse (COBA) connected to it.
+        # Here we trigger an input event on the synapse each 2 seconds.
+        # At the beginning the Isyn will not be high enough to depolarize the membrane to produce the action potential.
+        # However after the repeated events on the synapse it will start emit action potential events.
+        # Note: here ReceiveEvent is used just for simulating the input events; it is not used in real applications.
+        dt = 2.0
         while self.CurrentTime < self.TimeHorizon:
-            t = self.NextReportingTime
-            self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
-            self.IntegrateUntilTime(t, eStopAtModelDiscontinuity)
+            spikeinput.ReceiveEvent(0.0)
+            self.Reinitialize()
             self.ReportData(self.CurrentTime)
+
+            targetTime = self.CurrentTime + dt
+            if targetTime > self.TimeHorizon:
+                targetTime = self.TimeHorizon
+
+            while self.CurrentTime < targetTime:
+                t = self.NextReportingTime
+                self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
+                self.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
+                self.ReportData(self.CurrentTime)
             
 
 # Load the Component:
@@ -94,8 +99,8 @@ datareporter = daeTCPIPDataReporter()
 simulation.m.SetReportingOn(True)
 
 # Set the time horizon and the reporting interval
-simulation.ReportingInterval = 0.05
-simulation.TimeHorizon = 250
+simulation.ReportingInterval = 0.5
+simulation.TimeHorizon = 100
 
 # Connect data reporter
 simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -105,14 +110,12 @@ if(datareporter.Connect("", simName) == False):
 # Initialize the simulation
 simulation.Initialize(daesolver, datareporter, log)
 
-# Save the model report and the runtime model report
+# Save the model reports for all models
 simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-iaf  = findObjectInModel(simulation.m, 'iaf',       look_for_models = True)
-coba = findObjectInModel(simulation.m, 'cobaExcit', look_for_models = True)
+iaf  = findObjectInModel(simulation.m, 'iaf', look_for_models = True)
 iaf.SaveModelReport(iaf.Name + ".xml")
+coba = findObjectInModel(simulation.m, 'cobaExcit', look_for_models = True)
 coba.SaveModelReport(coba.Name + ".xml")
-
-simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
 # Solve at time=0 (initialization)
 simulation.SolveInitial()
@@ -120,41 +123,3 @@ simulation.SolveInitial()
 # Run
 simulation.Run()
 simulation.Finalize()
-
-
-
-
-"""
-# Simulate the Neuron:
-records = [
-    RecordValue(what='iaf_V', tag='V', label='V'),
-    RecordValue(what='regime', tag='Regime', label='Regime'),
-        ]
-
-parameters = nineml.al.flattening.ComponentFlattener.flatten_namespace_dict({
-'cobaExcit_tau':5.0,
-'cobaExcit_vrev':0,
-'iaf_cm':1,
-'iaf_gl':50,
-'iaf_taurefrac':8,
-'iaf_vreset':-60,
-'iaf_vrest':-60,
-'iaf_vthresh':-40
- })
-
-initial_values = {
-        'iaf_V': parameters['iaf_vrest'],
-        'tspike': -1e99,
-        'regime': 1002,
-            }
-
-res = std_pynn_simulation( test_component = coba1,
-                    parameters = parameters,
-                    initial_values = initial_values,
-                    synapse_components = [('cobaExcit','q')],
-                    synapse_weights=15.0,
-                    records = records,
-                    sim_time=250,
-                    syn_input_rate=100
-                   )
-"""

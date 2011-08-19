@@ -35,7 +35,7 @@ BOOST_PYTHON_MODULE(pyActivity)
 /**************************************************************
     daeSimulation_t
 ***************************************************************/
-    class_<daepython::daeSimulationWrapper, boost::noncopyable>("daeSimulation_t", no_init)
+    class_<daeSimulation_t, boost::noncopyable>("daeSimulation_t", no_init)
         .def("GetModel",                    pure_virtual(&daeSimulation_t::GetModel), return_internal_reference<>())
         .def("SetModel",                    pure_virtual(&daeSimulation_t::SetModel))
         .def("SetUpParametersAndDomains",   pure_virtual(&daeSimulation_t::SetUpParametersAndDomains))
@@ -95,7 +95,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("ModelParameters",				&daepython::daeDefaultSimulationWrapper::GetModelParameters)
 
         .def("GetModel",                    &daeSimulation::GetModel, return_internal_reference<>())
-        .def("SetModel",                    &daeSimulation::SetModel)
+        .def("SetModel",                    &daeSimulation::SetModel) 
  
         .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains)
         .def("SetUpVariables",              &daeSimulation::SetUpVariables,            &daepython::daeDefaultSimulationWrapper::def_SetUpVariables)

@@ -10,6 +10,23 @@ namespace core
 /*********************************************************************************************
 	daeAction
 **********************************************************************************************/
+daeAction::daeAction(void)
+{
+	m_pModel		= NULL;
+	m_eActionType	= eUnknownAction;
+
+// For eChangeState:
+	m_pSTN           = NULL;
+	m_pStateTo       = NULL;
+	
+// For eSendEvent:
+	m_pSendEventPort = NULL;
+	
+// For eReAssignOrReInitializeVariable:
+	m_pVariable      = NULL;
+	m_nIndex         = (size_t)-1;
+}
+
 daeAction::daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription)
 {
 	m_pModel = pModel;
@@ -64,8 +81,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 // For eChangeState:
 	m_pSTN	         = NULL;
 	m_pStateTo       = NULL;
-	m_strSTN         = "";
-	m_strStateTo	 = "";
 	
 // For eSendEvent:
 	m_pSendEventPort = pPort;
@@ -90,8 +105,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 // For eChangeState:
 	m_pSTN	     = NULL;
 	m_pStateTo   = NULL;
-	m_strSTN     = "";
-	m_strStateTo = "";
 	
 // For eSendEvent:
 	m_pSendEventPort = NULL;
@@ -164,6 +177,9 @@ void daeAction::Initialize(void)
 		
 		m_pNode = m_pSetupNode->Evaluate(&EC).node;
 	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
+	}
 	else
 	{
 		daeDeclareAndThrowException(exNotImplemented);
@@ -228,6 +244,9 @@ void daeAction::Execute(void)
 		m_pModel->m_pDataProxy->SetReinitializationFlag(true);
 		m_pModel->m_pDataProxy->SetCopyDataFromBlock(true);
 	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
+	}
 	else
 	{
 		daeDeclareAndThrowException(exNotImplemented);
@@ -289,6 +308,9 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			return false;
 		}
 	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
+	}
 	else
 	{
 		daeDeclareAndThrowException(exNotImplemented);
@@ -348,6 +370,9 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 
 		strName = "MathML";
 		SaveNodeAsMathML(m_pSetupNode.get(), pTag, strName);
+	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
 	}
 	else
 	{
@@ -416,6 +441,10 @@ void daeAction::Export(std::string& strContent, daeeModelLanguage eLanguage, dae
 	{
 		daeDeclareAndThrowException(exNotImplemented);
 	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
 	else
 	{
 		daeDeclareAndThrowException(exNotImplemented);
@@ -431,7 +460,11 @@ daeOnEventActions::daeOnEventActions(void)
 	m_pEventPort = NULL;
 }
 
-daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription)
+daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, 
+									 daeModel* pModel, 
+									 vector<daeAction*>& ptrarrOnEventActions, 
+									 vector<daeAction*>& ptrarrUserDefinedOnEventActions, 
+									 const string& strDescription)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -441,11 +474,19 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel,
 	pModel->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
 
 	m_pEventPort = pEventPort;
+	
 	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
 		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
+	
+	for(size_t i = 0; i < ptrarrUserDefinedOnEventActions.size(); i++)
+		m_ptrarrUserDefinedOnEventActions.push_back(ptrarrUserDefinedOnEventActions[i]);
 }
 
-daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeState* pState, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription)
+daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, 
+									 daeState* pState, 
+									 vector<daeAction*>& ptrarrOnEventActions, 
+									 vector<daeAction*>& ptrarrUserDefinedOnEventActions, 
+									 const string& strDescription)
 {
 	if(!pState)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -455,8 +496,12 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, daeState* pState,
 	pState->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
 
 	m_pEventPort = pEventPort;
+	
 	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
 		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
+	
+	for(size_t i = 0; i < ptrarrUserDefinedOnEventActions.size(); i++)
+		m_ptrarrUserDefinedOnEventActions.push_back(ptrarrUserDefinedOnEventActions[i]);
 }
 
 daeOnEventActions::~daeOnEventActions(void)
@@ -544,6 +589,18 @@ void daeOnEventActions::Execute(void)
 	for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
 	{
 		pAction = m_ptrarrOnEventActions[i];
+		if(!pAction)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		pAction->Execute();
+	}
+	
+	for(size_t i = 0; i < m_ptrarrUserDefinedOnEventActions.size(); i++)
+	{
+		pAction = m_ptrarrUserDefinedOnEventActions[i];
+		if(!pAction)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
 		pAction->Execute();
 	}
 }

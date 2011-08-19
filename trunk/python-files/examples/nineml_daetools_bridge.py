@@ -272,15 +272,15 @@ class nineml_daetools_bridge(daeModel):
             self.connectPorts(portFrom, portTo)
 
         # 8) Connect event ports
-        if self.Name == 'iaf_1coba':
-            spikeoutput = getObjectFromCanonicalName(self, 'iaf_1coba.iaf.spikeoutput',      look_for_eventports = True)
-            spikeinput  = getObjectFromCanonicalName(self, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
-            #print 'spikeoutput =', spikeoutput
-            #print 'spikeinput =', spikeinput
-            self.ConnectEventPorts(spikeinput, spikeoutput)
+        #if self.Name == 'iaf_1coba':
+        #    spikeoutput = getObjectFromCanonicalName(self, 'iaf_1coba.iaf.spikeoutput',      look_for_eventports = True)
+        #    spikeinput  = getObjectFromCanonicalName(self, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
+        #    #print 'spikeoutput =', spikeoutput
+        #    #print 'spikeinput =', spikeinput
+        #    self.ConnectEventPorts(spikeinput, spikeoutput)
             
     def DeclareEquations(self):
-        # Create the epression parser and set its Identifier:Value dictionary
+        # Create the epression parser and set its Identifiers/Functions dictionaries
         dictIdentifiers, dictFunctions = getNineMLDictionaries(self)
         parser = ExpressionParser(dictIdentifiers, dictFunctions)
         """
@@ -305,16 +305,17 @@ class nineml_daetools_bridge(daeModel):
         regimes         = list(self.ninemlComponent.regimes)
         state_variables = list(self.ninemlComponent.state_variables)
         if len(regimes) > 0:
-            # Create STN for model
+            # 2a) Create STN for model
             self.STN('regimes')
 
             for regime in regimes:
-                # 2a) Create State for each regime
+                # 2b) Create State for each regime
                 self.STATE(regime.name)
 
+                # 2c) Create equations for all state variables/time derivatives
                 # Sometime a time_derivative equation is not given and in that case the derivative is equal to zero
-                # I have to discover which variables do not have a corresponding ODE
-                # I do that by creating a map {'state_var' : 'RHS'} which initially has
+                # We have to discover which variables do not have a corresponding ODE and
+                # we do that by creating a map {'state_var' : 'RHS'} which initially has
                 # set rhs to '0'. RHS will be set later while iterating through ODEs
                 map_statevars_timederivs = {}
                 for state_var in state_variables:
@@ -325,7 +326,6 @@ class nineml_daetools_bridge(daeModel):
                     map_statevars_timederivs[time_deriv.dependent_variable] = time_deriv.rhs
                 #print map_statevars_timederivs
 
-                # 2b) Create equations for all state variables/time derivatives
                 for var_name, rhs in map_statevars_timederivs.items():
                     variable = self.findVariable(var_name)
                     if variable == None:
@@ -340,7 +340,7 @@ class nineml_daetools_bridge(daeModel):
                     else:
                         eq.Residual = variable.dt() - parser.parse_and_evaluate(rhs)
 
-                # 2c) Create on_condition actions (state transitions, etc)
+                # 2d) Create on_condition actions
                 for on_condition in regime.on_conditions:
                     condition         = parser.parse_and_evaluate(on_condition.trigger.rhs)
                     switchTo          = on_condition.target_regime.name
@@ -364,9 +364,7 @@ class nineml_daetools_bridge(daeModel):
                                                  triggerEvents     = triggerEvents,
                                                  setVariableValues = setVariableValues )
 
-                    #self.SWITCH_TO(on_condition.target_regime.name, parser.parse_and_evaluate(on_condition.trigger.rhs))
-                
-                # 2d) Create on_event actions
+                # 2e) Create on_event actions
                 for on_event in regime.on_events:
                     print self.Name, on_event.src_port_name
                     source_event_port = getObjectFromCanonicalName(self, on_event.src_port_name, look_for_eventports = True)

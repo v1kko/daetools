@@ -115,7 +115,8 @@ enum daeeActionType
 	eUnknownAction = 0,
 	eChangeState,
 	eSendEvent,
-	eReAssignOrReInitializeVariable
+	eReAssignOrReInitializeVariable,
+	eUserDefinedAction
 };
 
 enum daeeFunctionType

@@ -1861,6 +1861,8 @@ public:
 	real_t GetEventData(void);
 	adouble operator()(void);
 	
+	void ReceiveEvent(real_t data);
+	
 protected:
 	real_t       m_dEventData;
 	daeePortType m_ePortType;
@@ -1875,6 +1877,7 @@ class daeAction : virtual public daeObject,
 {
 public:
 	daeDeclareDynamicClass(daeAction)
+	daeAction(void);
 	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, adouble data, const string& strDescription);
@@ -1926,8 +1929,16 @@ class daeOnEventActions : virtual public daeObject,
 public:
 	daeDeclareDynamicClass(daeOnEventActions)
 	daeOnEventActions(void);
-	daeOnEventActions(daeEventPort* pEventPort, daeModel* pModel, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
-	daeOnEventActions(daeEventPort* pEventPort, daeState* pState, std::vector<daeAction*>& ptrarrOnEventActions, const string& strDescription);
+	daeOnEventActions(daeEventPort* pEventPort, 
+					  daeModel* pModel, 
+					  std::vector<daeAction*>& ptrarrOnEventActions, 
+					  std::vector<daeAction*>& ptrarrUserDefinedOnEventActions, 
+					  const string& strDescription);
+	daeOnEventActions(daeEventPort* pEventPort, 
+					  daeState* pState, 
+					  std::vector<daeAction*>& ptrarrOnEventActions, 
+					  std::vector<daeAction*>& ptrarrUserDefinedOnEventActions, 
+					  const string& strDescription);
 	virtual ~daeOnEventActions(void);
 
 public:
@@ -1947,6 +1958,7 @@ public:
 protected:
 	daeEventPort*            m_pEventPort;
 	daePtrVector<daeAction*> m_ptrarrOnEventActions;
+	daePtrVector<daeAction*> m_ptrarrUserDefinedOnEventActions;
 };
 
 /******************************************************************
@@ -2151,12 +2163,14 @@ protected:
 					  const string&                                     strStateTo, 
 					  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
 					  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents, 
+					  std::vector<daeAction*>&							ptrarrUserDefinedOnEventActions, 
 					  real_t                                            dEventTolerance = 0);
 	
 	void ON_EVENT(daeEventPort*                                     pTriggerEventPort, 
 				  std::vector< std::pair<string, string> >&         arrSwitchToStates, 
 				  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
-				  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents);
+				  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents,
+			      std::vector<daeAction*>&							ptrarrUserDefinedOnEventActions);
 	
 	template<typename Model>
 		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));
@@ -2731,24 +2745,24 @@ public:
 	void Initialize(void);
 	void Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
 	void Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
-	void Create_ON_CONDITION(daeState* pStateFrom, const daeCondition& rCondition, std::vector<daeAction*>& ptrarrActions, real_t dEventTolerance);
+	void Create_ON_CONDITION(daeState* pStateFrom, 
+							 const daeCondition& rCondition, 
+							 std::vector<daeAction*>& ptrarrActions, 
+							 std::vector<daeAction*>& ptrarrUserDefinedActions,
+							 real_t dEventTolerance);
 
 	string GetConditionAsString() const;
 	
 protected:
 	daeCondition*		GetCondition(void);
 	void				SetCondition(daeCondition& rCondition);
-//	void				SetStateTo(daeState* pState);
-//	void				SetStateFrom(daeState* pState);
 
 protected:
 	daeSTN*								m_pSTN;
 	daePtrVector<daeAction*>			m_ptrarrActions;
+	std::vector<daeAction*>				m_ptrarrUserDefinedActions;
 	daeCondition						m_Condition;
 	std::map<size_t, daeExpressionInfo>	m_mapExpressionInfos; 
-//	string								m_strStateToName;
-//	daeState*							m_pStateFrom;
-//	daeState*							m_pStateTo;
 
 // Internal variables, used only during Open
 	long	m_nStateFromID;

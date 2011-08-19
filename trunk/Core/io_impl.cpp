@@ -344,6 +344,8 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeActionTy
 		pTag->AddTag(strEnumName, string("eSendEvent"));
 	else if(eValue == eReAssignOrReInitializeVariable)
 		pTag->AddTag(strEnumName, string("eReAssignOrReInitializeVariable"));
+	else if(eValue == eUserDefinedAction)
+		pTag->AddTag(strEnumName, string("eUserDefinedAction"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -676,6 +678,8 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeActionType& eV
 		eValue = eSendEvent;
 	else if(strValue == "eReAssignOrReInitializeVariable")
 		eValue = eReAssignOrReInitializeVariable;
+	else if(strValue == "eUserDefinedAction")
+		eValue = eUserDefinedAction;
 	else
 		eValue = eUnknownAction;
 }

@@ -490,6 +490,24 @@ void SetInitialGuess6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t 
 void SetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+/*******************************************************
+	daeActionWrapper
+*******************************************************/
+class daeActionWrapper : public daeAction,
+                         public boost::python::wrapper<daeAction>
+{
+public:
+	daeActionWrapper(void)
+	{
+		m_eActionType = eUserDefinedAction;
+	}
+
+	void Execute(void)
+	{
+        this->get_override("Execute")();
+	}
+};
+
 
 /*******************************************************
 	daePort
@@ -625,12 +643,15 @@ public:
                       const string& strStateTo = string(),
                       boost::python::list triggerEvents = boost::python::list(),
                       boost::python::list setVariableValues = boost::python::list(),
+					  boost::python::list userDefinedActions = boost::python::list(),
                       real_t dEventTolerance = 0.0)
     {
+		daeAction* pAction;
         daeEventPort* pEventPort;
         daeVariable* pVariable;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
         vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
+		vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -702,18 +723,31 @@ public:
             arrTriggerEvents.push_back(p);
         }
 
+        n = boost::python::len(userDefinedActions);
+        for(i = 0; i < n; i++)
+        {
+            pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
+			if(!pAction)
+				daeDeclareAndThrowException(exInvalidPointer);
+			
+            ptrarrUserDefinedActions.push_back(pAction);
+		}
+
         daeModel::ON_CONDITION(rCondition,
                                strStateTo,
                                arrSetVariables,
                                arrTriggerEvents,
+							   ptrarrUserDefinedActions,
                                dEventTolerance);
     }
 
     void ON_EVENT(daeEventPort* pTriggerEventPort,
-                  boost::python::list switchToStates    = boost::python::list(),
-                  boost::python::list triggerEvents     = boost::python::list(),
-                  boost::python::list setVariableValues = boost::python::list())
+                  boost::python::list switchToStates     = boost::python::list(),
+                  boost::python::list triggerEvents      = boost::python::list(),
+                  boost::python::list setVariableValues  = boost::python::list(),
+				  boost::python::list userDefinedActions = boost::python::list())
     {
+		daeAction* pAction;
         daeEventPort* pEventPort;
         string strSTN;
         string strStateTo;
@@ -721,6 +755,7 @@ public:
         vector< pair<string, string> > arrSwitchToStates;
         vector< pair<daeVariable*, adouble> > arrSetVariables;
         vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
+		vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -806,10 +841,21 @@ public:
             arrTriggerEvents.push_back(p);
         }
 
+        n = boost::python::len(userDefinedActions);
+        for(i = 0; i < n; i++)
+        {
+            pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
+			if(!pAction)
+				daeDeclareAndThrowException(exInvalidPointer);
+			
+            ptrarrUserDefinedActions.push_back(pAction);
+		} 
+
         daeModel::ON_EVENT(pTriggerEventPort,
                            arrSwitchToStates,
                            arrSetVariables,
-                           arrTriggerEvents);
+                           arrTriggerEvents,
+						   ptrarrUserDefinedActions);
     }
 	
 	daeEquation* CreateEquation1(string strName, string strDescription)
