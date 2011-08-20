@@ -31,10 +31,10 @@ class sim_hierachical_iaf_1coba(daeSimulation):
 
         tau       .SetValue(5.0)
         vrev      .SetValue(0)
-        q         .SetValue(15) # was 1
+        q         .SetValue(3) # was 1
         cm        .SetValue(1)
         gl        .SetValue(50)
-        taurefrac .SetValue(8) # was 8
+        taurefrac .SetValue(0.008) # was 8
         vreset    .SetValue(-60)
         vrest     .SetValue(-60)
         vthresh   .SetValue(-40)
@@ -54,13 +54,13 @@ class sim_hierachical_iaf_1coba(daeSimulation):
     def Run(self):
         spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
 
-        # A simple Mickey Mouse simulation to test the functionality of the NineML-DAETools bridge.
+        # Mickey Mouse simulation to test the functionality of the NineML-DAE Tools bridge.
         # We have only one neuron (IAF) and a synapse (COBA) connected to it.
-        # Here we trigger an input event on the synapse each 2 seconds.
+        # Here we trigger an input event on the synapse each 'dt' seconds.
         # At the beginning the Isyn will not be high enough to depolarize the membrane to produce the action potential.
         # However after the repeated events on the synapse it will start emit action potential events.
         # Note: here ReceiveEvent is used just for simulating the input events; it is not used in real applications.
-        dt = 2.0
+        dt = 0.1
         while self.CurrentTime < self.TimeHorizon:
             spikeinput.ReceiveEvent(0.0)
             self.Reinitialize()
@@ -99,8 +99,8 @@ datareporter = daeTCPIPDataReporter()
 simulation.m.SetReportingOn(True)
 
 # Set the time horizon and the reporting interval
-simulation.ReportingInterval = 0.5
-simulation.TimeHorizon = 100
+simulation.ReportingInterval = 0.001
+simulation.TimeHorizon = 1
 
 # Connect data reporter
 simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
