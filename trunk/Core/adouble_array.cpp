@@ -835,10 +835,9 @@ const adouble_array sqrt(const adouble_array& a)
 	}
 	
 	size_t n = a.GetSize();
-	//tmp.Resize(n);
+	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
-		tmp.m_arrValues.push_back(sqrt(a[i]));
-	//	tmp[i] = sqrt(a[i]);
+		tmp[i] = sqrt(a[i]);
 	return tmp;
 }
 

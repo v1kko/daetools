@@ -1225,9 +1225,7 @@ void daeVariable::SetVariableType(const daeVariableType& VariableType)
 
 void daeVariable::DistributeOnDomain(daeDomain& rDomain)
 {
-	if(!(&rDomain))
-		daeDeclareAndThrowException(exInvalidPointer);
-	m_ptrDomains.push_back(&rDomain);
+	dae_optimized_push_back(m_ptrDomains, &rDomain);
 }
 
 void daeVariable::GetDomains(vector<daeDomain_t*>& ptrarrDomains)

@@ -134,10 +134,11 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
+		m_ptrDomains.resize(n);
 		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains.push_back(pDomain);
+			m_ptrDomains[i] = pDomain;
 		}
 	}
 
@@ -146,10 +147,11 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
+		m_ptrDomains.resize(n);
 		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains.push_back(pDomain);
+			m_ptrDomains[i] = pDomain;
 		}
 	}
 
@@ -270,10 +272,11 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
+		m_ptrDomains.resize(n);
 		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains.push_back(pDomain);
+			m_ptrDomains[i] = pDomain;
 		}
 	}
 
@@ -282,10 +285,11 @@ public:
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
+		m_ptrDomains.resize(n);
 		for(boost::python::ssize_t i = 0; i < n; i++)
 		{
 			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains.push_back(pDomain);
+			m_ptrDomains[i] = pDomain;
 		}
 	}
 

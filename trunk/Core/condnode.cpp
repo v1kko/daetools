@@ -439,61 +439,62 @@ void condExpressionNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & pt
 	adouble right = m_pRight->Evaluate(pExecutionContext);
 	adouble ad    = left - right;
 
-// This have to be added always
-	ptrarrExpressions.push_back(ad.node);
+// This have to be added always!
+	dae_optimized_push_back(ptrarrExpressions, ad.node);
 
-// Depending on the type I have to add certain additional expressions
-	adouble ad1, ad2;
-
+// Depending on the type I have to add some additional expressions
 	if(dEventTolerance == 0)
 		dEventTolerance = 1E-7;
 
-	ad1 = ad + dEventTolerance;
-	ad2 = ad - dEventTolerance;
-	ptrarrExpressions.push_back(ad1.node);
-	ptrarrExpressions.push_back(ad2.node);
-	
 /*
+                       Explanation:
+  
+left-right = f(t)
+    ^          
+    |         /
+    |        /
+    |       X (2): ad2 = ad - Et   (l - r = +Et, thus: l - r - Et = 0)
+ ---|------X--(0)-----------------------------------------------------------> Time
+    |     X   (1): ad1 = ad + Et   (l - r = -Et, thus: l - r + Et = 0)
+    |    /
+    |   /
+    |  
+  
+  
+*/
+	adouble ad1 = ad + dEventTolerance;
+	adouble ad2 = ad - dEventTolerance;
 	switch(m_eConditionType)
 	{
 	case eNotEQ: // !=
-		ad1 = ad + dEventTolerance;
-		ad2 = ad - dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
-		ptrarrExpressions.push_back(ad2.node);
+		dae_optimized_push_back(ptrarrExpressions, ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eEQ: // ==
-		ad1 = ad + dEventTolerance;
-		ad2 = ad - dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
-		ptrarrExpressions.push_back(ad2.node);
+		dae_optimized_push_back(ptrarrExpressions, ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eGT: // >
-		ad1 = ad - dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eGTEQ: // >=
-		ad1 = ad + dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad1.node);
 		break;
 
 	case eLT: // <
-		ad1 = ad + dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad1.node);
 		break;
 
 	case eLTEQ: // <=
-		ad1 = ad - dEventTolerance;
-		ptrarrExpressions.push_back(ad1.node);
+		dae_optimized_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	default:
 		daeDeclareAndThrowException(exNotImplemented); 
 	}
-*/	
 }
 
 void condExpressionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)

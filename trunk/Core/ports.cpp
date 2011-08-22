@@ -337,7 +337,8 @@ void daePort::AddDomain(daeDomain* pDomain)
 	}
 
     SetModelAndCanonicalName(pDomain);
-    m_ptrarrDomains.push_back(pDomain);
+    //m_ptrarrDomains.push_back(pDomain);
+	dae_optimized_push_back(m_ptrarrDomains, pDomain);
 }
 
 void daePort::AddVariable(daeVariable* pVariable)
@@ -357,7 +358,8 @@ void daePort::AddVariable(daeVariable* pVariable)
 	}
 
     SetModelAndCanonicalName(pVariable);
-    m_ptrarrVariables.push_back(pVariable);
+    //m_ptrarrVariables.push_back(pVariable);
+	dae_optimized_push_back(m_ptrarrVariables, pVariable);
 }
 
 void daePort::AddParameter(daeParameter* pParameter)
@@ -377,7 +379,8 @@ void daePort::AddParameter(daeParameter* pParameter)
 	}
 
     SetModelAndCanonicalName(pParameter);
-    m_ptrarrParameters.push_back(pParameter);
+    //m_ptrarrParameters.push_back(pParameter);
+	dae_optimized_push_back(m_ptrarrParameters, pParameter);
 }
 
 void daePort::AddDomain(daeDomain& rDomain, const string& strName, string strDescription)
@@ -543,22 +546,19 @@ daeePortType daePort::GetType(void) const
 void daePort::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 {
 	ptrarrDomains.clear();
-	for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
-		ptrarrDomains.push_back(m_ptrarrDomains[i]);
+	dae_optimized_set_vector(m_ptrarrDomains, ptrarrDomains);
 }
 	 
 void daePort::GetVariables(vector<daeVariable_t*>& ptrarrVariables)
 {
 	ptrarrVariables.clear();
-	for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
-		ptrarrVariables.push_back(m_ptrarrVariables[i]);
+	dae_optimized_set_vector(m_ptrarrVariables, ptrarrVariables);
 }
 	
 void daePort::GetParameters(vector<daeParameter_t*>& ptrarrParameters)
 {
 	ptrarrParameters.clear();
-	for(size_t i = 0; i < m_ptrarrParameters.size(); i++)
-		ptrarrParameters.push_back(m_ptrarrParameters[i]);
+	dae_optimized_set_vector(m_ptrarrParameters, ptrarrParameters);
 }
 
 void daePort::SetType(daeePortType eType)
@@ -725,6 +725,10 @@ bool daePort::CheckObject(vector<string>& strarrErrors) const
 	daeVariable* pVariable;
 
 	bool bCheck = true;
+	
+	dae_capacity_check(m_ptrarrDomains);
+	dae_capacity_check(m_ptrarrParameters);
+	dae_capacity_check(m_ptrarrVariables);
 
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))
@@ -957,7 +961,8 @@ void daePortConnection::CreateEquations(void)
 		pEquation = new daePortEqualityEquation();
 		pEquation->Initialize(pVarFrom, pVarTo);
 		SetModelAndCanonicalName(pEquation);
-		m_ptrarrEquations.push_back(pEquation);
+		//m_ptrarrEquations.push_back(pEquation);
+		dae_optimized_push_back(m_ptrarrEquations, pEquation);
 
 		strName  = pVarFrom->GetName();
 		strName += "_";
@@ -997,8 +1002,7 @@ void daePortConnection::CreateEquations(void)
 
 void daePortConnection::GetEquations(vector<daeEquation*>& ptrarrEquations) const
 {
-	for(size_t i = 0; i < m_ptrarrEquations.size(); i++)
-		ptrarrEquations.push_back(m_ptrarrEquations[i]);
+	dae_optimized_set_vector(m_ptrarrEquations, ptrarrEquations);
 }
 
 void daePortConnection::SetModelAndCanonicalName(daeObject* pObject)
@@ -1019,7 +1023,7 @@ bool daePortConnection::CheckObject(vector<string>& strarrErrors) const
 	size_t j, k, nNoDomains, iNoVarsFrom, iNoVarsTo;
 
 	bool bCheck = true;
-
+	
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))
 		bCheck = false;

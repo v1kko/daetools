@@ -475,11 +475,8 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 
 	m_pEventPort = pEventPort;
 	
-	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
-		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
-	
-	for(size_t i = 0; i < ptrarrUserDefinedOnEventActions.size(); i++)
-		m_ptrarrUserDefinedOnEventActions.push_back(ptrarrUserDefinedOnEventActions[i]);
+	dae_optimized_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
+	dae_optimized_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
 }
 
 daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, 
@@ -497,11 +494,8 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 
 	m_pEventPort = pEventPort;
 	
-	for(size_t i = 0; i < ptrarrOnEventActions.size(); i++)
-		m_ptrarrOnEventActions.push_back(ptrarrOnEventActions[i]);
-	
-	for(size_t i = 0; i < ptrarrUserDefinedOnEventActions.size(); i++)
-		m_ptrarrUserDefinedOnEventActions.push_back(ptrarrUserDefinedOnEventActions[i]);
+	dae_optimized_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
+	dae_optimized_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
 }
 
 daeOnEventActions::~daeOnEventActions(void)
@@ -531,6 +525,9 @@ void daeOnEventActions::Initialize(void)
 bool daeOnEventActions::CheckObject(std::vector<string>& strarrErrors) const
 {
 	bool bReturn = true;
+
+	dae_capacity_check(m_ptrarrOnEventActions);
+	dae_capacity_check(m_ptrarrUserDefinedOnEventActions);
 
 	bReturn = daeObject::CheckObject(strarrErrors);
 

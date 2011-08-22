@@ -369,7 +369,7 @@ void daeEquationExecutionInfo::GetVariableIndexes(std::vector<size_t>& narrVaria
 {
 	std::map<size_t, size_t>::const_iterator iter;
 	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
-		narrVariableIndexes.push_back(iter->first);
+		dae_optimized_push_back(narrVariableIndexes, iter->first);
 }
 
 size_t daeEquationExecutionInfo::GetEquationIndexInBlock(void) const
@@ -1677,8 +1677,10 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const vector<size_t
 daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n)
 {
 	vector<size_t> narrDomainIndexes;
+	
+	narrDomainIndexes.resize(n);
 	for(size_t i = 0; i < n; i++)
-		narrDomainIndexes.push_back(pnarrDomainIndexes[i]);
+		narrDomainIndexes[i] = pnarrDomainIndexes[i];
 
 	return DistributeOnDomain(rDomain, narrDomainIndexes);	
 }
@@ -1686,15 +1688,13 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarr
 void daeEquation::GetDomainDefinitions(vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo)
 {
 	arrDistributedEquationDomainInfo.clear();
-	for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
-		arrDistributedEquationDomainInfo.push_back(m_ptrarrDistributedEquationDomainInfos[i]);
+	dae_optimized_set_vector(m_ptrarrDistributedEquationDomainInfos, arrDistributedEquationDomainInfo);
 }
 
 void daeEquation::GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const
 {
 	ptrarrEquationExecutionInfos.clear();
-	for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
-		ptrarrEquationExecutionInfos.push_back(m_ptrarrEquationExecutionInfos[i]);
+	dae_optimized_set_vector(m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfos);
 }
 
 void daeEquation::SetModelAndCanonicalName(daeObject* pObject)
@@ -1734,6 +1734,9 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 	string strError;
 
 	bool bCheck = true;
+	
+	dae_capacity_check(m_ptrarrDistributedEquationDomainInfos);
+	dae_capacity_check(m_ptrarrEquationExecutionInfos);
 
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))
@@ -1905,6 +1908,9 @@ bool daePortEqualityEquation::CheckObject(vector<string>& strarrErrors) const
 	string strError;
 
 	bool bCheck = true;
+	
+	dae_capacity_check(m_ptrarrDistributedEquationDomainInfos);
+	dae_capacity_check(m_ptrarrEquationExecutionInfos);
 
 	if(!daeEquation::CheckObject(strarrErrors))
 		bCheck = false;

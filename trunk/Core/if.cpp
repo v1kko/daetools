@@ -393,7 +393,9 @@ daeState* daeIF::AddState(string strName)
 
 // Instantiate a new state and add it to STN
 	daeState* pState = new daeState();
-	m_ptrarrStates.push_back(pState);
+
+	dae_optimized_push_back(m_ptrarrStates, pState);
+	
 	string strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
 	pState->Create(strStateName, this);
 	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;

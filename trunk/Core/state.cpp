@@ -242,7 +242,8 @@ void daeState::AddEquation(daeEquation* pEquation)
 	if(!pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pEquation);
-	m_ptrarrEquations.push_back(pEquation);
+	//m_ptrarrEquations.push_back(pEquation);
+	dae_optimized_push_back(m_ptrarrEquations, pEquation);
 }
 
 void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription)
@@ -263,7 +264,8 @@ void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string&
 		e << "OnEventAction [" << strName << "] already exists in the state [" << GetCanonicalName() << "]";
 		throw e;
 	}
-    m_ptrarrOnEventActions.push_back(&rOnEventAction);
+    //m_ptrarrOnEventActions.push_back(&rOnEventAction);
+	dae_optimized_push_back(m_ptrarrOnEventActions, &rOnEventAction);
 }
 
 void daeState::ConnectOnEventActions(void)
@@ -322,7 +324,7 @@ void daeState::AddNestedSTN(daeSTN* pSTN)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pSTN);
 	pSTN->SetParentState(this);
-	m_ptrarrSTNs.push_back(pSTN);
+	dae_optimized_push_back(m_ptrarrSTNs, pSTN);
 }
 
 void daeState::AddStateTransition(daeStateTransition* pStateTransition)
@@ -330,28 +332,25 @@ void daeState::AddStateTransition(daeStateTransition* pStateTransition)
 	if(!pStateTransition)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pStateTransition);
-	m_ptrarrStateTransitions.push_back(pStateTransition);
+	dae_optimized_push_back(m_ptrarrStateTransitions, pStateTransition);
 }
 	
 void daeState::GetStateTransitions(vector<daeStateTransition_t*>& ptrarrStateTransitions)
 {
 	ptrarrStateTransitions.clear();
-	for(size_t i = 0; i < m_ptrarrStateTransitions.size(); i++)
-		ptrarrStateTransitions.push_back(m_ptrarrStateTransitions[i]);
+	dae_optimized_set_vector(m_ptrarrStateTransitions, ptrarrStateTransitions);
 }
 	
 void daeState::GetEquations(vector<daeEquation_t*>& ptrarrEquations)
 {
 	ptrarrEquations.clear();
-	for(size_t i = 0; i < m_ptrarrEquations.size(); i++)
-		ptrarrEquations.push_back(m_ptrarrEquations[i]);
+	dae_optimized_set_vector(m_ptrarrEquations, ptrarrEquations);
 }
 	
 void daeState::GetNestedSTNs(vector<daeSTN_t*>& ptrarrSTNs)
 {
 	ptrarrSTNs.clear();
-	for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
-		ptrarrSTNs.push_back(m_ptrarrSTNs[i]);
+	dae_optimized_set_vector(m_ptrarrSTNs, ptrarrSTNs);
 }
 
 void daeState::CalcNonZeroElements(int& NNZ)
@@ -403,6 +402,12 @@ bool daeState::CheckObject(vector<string>& strarrErrors) const
 
 	bool bCheck = true;
 
+	dae_capacity_check(m_ptrarrEquations);
+	dae_capacity_check(m_ptrarrStateTransitions);
+	dae_capacity_check(m_ptrarrSTNs);
+	dae_capacity_check(m_ptrarrOnEventActions);
+	dae_capacity_check(m_ptrarrEquationExecutionInfos);
+	
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))
 		bCheck = false;

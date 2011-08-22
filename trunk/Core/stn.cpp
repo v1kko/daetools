@@ -295,19 +295,11 @@ void daeSTN::CollectEquationExecutionInfos(vector<daeEquationExecutionInfo*>& pt
 {
 	size_t i, k;
 	daeSTN* pSTN;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
 
 	if(!m_pActiveState)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
-	for(k = 0; k < m_pActiveState->m_ptrarrEquationExecutionInfos.size(); k++)
-	{
-		pEquationExecutionInfo = m_pActiveState->m_ptrarrEquationExecutionInfos[k];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
-		ptrarrEquationExecutionInfo.push_back(pEquationExecutionInfo);
-	}
+	dae_optimized_add_vector(m_pActiveState->m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfo);
 
 // Nested STNs
 	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
@@ -787,7 +779,10 @@ daeState* daeSTN::AddState(string strName)
 // Instantiate a new state and add it to STN
 // Ignore the name
 	daeState* pState = new daeState();
-	m_ptrarrStates.push_back(pState);
+	
+	//m_ptrarrStates.push_back(pState);
+	dae_optimized_push_back(m_ptrarrStates, pState);
+	
 	pState->Create(strName, this);
 	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
 
@@ -988,6 +983,8 @@ bool daeSTN::CheckObject(vector<string>& strarrErrors) const
 	size_t nNoEquationsInEachState = 0;
 
 	bool bCheck = true;
+	
+	dae_capacity_check(m_ptrarrStates);
 
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))

@@ -2234,7 +2234,7 @@ protected:
 	void		SetVariablesStartingIndex(size_t nVariablesStartingIndex);
 
 	void		AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
-	void		GetEquationExecutionInfo(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
+	void		GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
 	void		CreateEquationExecutionInfo(daeEquation* pEquation, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
 
 	bool		FindObject(string& strCanonicalName, daeObjectType& ObjectType);

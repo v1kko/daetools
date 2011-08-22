@@ -695,6 +695,7 @@ void daeBlock::AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecu
 {
 	if(!pEquationExecutionInfo)
 		daeDeclareAndThrowException(exInvalidPointer);
+	
 	m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 }
 
@@ -839,45 +840,6 @@ void daeBlock::SetResidualArray(daeArray<real_t>* pResidual)
 	m_parrResidual = pResidual;
 }
 
-//void daeBlock::SetSValuesMatrix(daeMatrix<real_t>* pSValues)
-//{
-//	if(!pSValues)
-//		daeDeclareAndThrowException(exInvalidPointer);
-
-//	m_pmatSValues = pSValues;
-//}
-
-//void daeBlock::SetSTimeDerivativesMatrix(daeMatrix<real_t>* pSTimeDerivatives)
-//{
-//	if(!pSTimeDerivatives)
-//		daeDeclareAndThrowException(exInvalidPointer);
-
-//	m_pmatSTimeDerivatives = pSTimeDerivatives; 
-//}
-
-//void daeBlock::SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals)
-//{
-//	if(!pSResiduals)
-//		daeDeclareAndThrowException(exInvalidPointer);
-
-//	m_pmatSResiduals = pSResiduals;
-//}
-
-//daeMatrix<real_t>* daeBlock::GetSValuesMatrix(void) const
-//{
-//	return m_pmatSValues;
-//}
-
-//daeMatrix<real_t>* daeBlock::GetSTimeDerivativesMatrix(void) const
-//{
-//	return m_pmatSTimeDerivatives;
-//}
-
-//daeMatrix<real_t>* daeBlock::GetSResidualsMatrix(void) const
-//{
-//	return m_pmatSResiduals;
-//}
-
 real_t daeBlock::GetTime() const
 {
 	return m_dCurrentTime;
@@ -910,6 +872,9 @@ void daeBlock::SetInitializeMode(bool bMode)
 
 bool daeBlock::CheckObject(vector<string>& strarrErrors) const
 {
+	dae_capacity_check(m_ptrarrEquationExecutionInfos);
+	dae_capacity_check(m_ptrarrSTNs);
+
 	return true;
 }
 

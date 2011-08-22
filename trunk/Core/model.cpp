@@ -736,7 +736,7 @@ void daeModel::AddDomain(daeDomain* pDomain)
 	}
 
     SetModelAndCanonicalName(pDomain);
-    m_ptrarrDomains.push_back(pDomain);
+	dae_optimized_push_back(m_ptrarrDomains, pDomain);
 }
 
 void daeModel::AddVariable(daeVariable* pVariable)
@@ -756,7 +756,7 @@ void daeModel::AddVariable(daeVariable* pVariable)
 	}
 
     SetModelAndCanonicalName(pVariable);
-    m_ptrarrVariables.push_back(pVariable);
+	dae_optimized_push_back(m_ptrarrVariables, pVariable);
 }
 
 void daeModel::AddParameter(daeParameter* pParameter)
@@ -776,7 +776,7 @@ void daeModel::AddParameter(daeParameter* pParameter)
 	}
 	
     SetModelAndCanonicalName(pParameter);
-    m_ptrarrParameters.push_back(pParameter);
+	dae_optimized_push_back(m_ptrarrParameters, pParameter);
 }
 
 void daeModel::AddModel(daeModel* pModel)
@@ -796,7 +796,7 @@ void daeModel::AddModel(daeModel* pModel)
 	}
 
     SetModelAndCanonicalName(pModel);
-    m_ptrarrModels.push_back(pModel);
+	dae_optimized_push_back(m_ptrarrModels, pModel);
 }
 
 void daeModel::AddPort(daePort* pPort)
@@ -816,7 +816,7 @@ void daeModel::AddPort(daePort* pPort)
 	}
 
     SetModelAndCanonicalName(pPort);
-    m_ptrarrPorts.push_back(pPort);
+	dae_optimized_push_back(m_ptrarrPorts, pPort);
 }
 
 void daeModel::AddEventPort(daeEventPort* pPort)
@@ -836,7 +836,7 @@ void daeModel::AddEventPort(daeEventPort* pPort)
 	}
 
     SetModelAndCanonicalName(pPort);
-    m_ptrarrEventPorts.push_back(pPort);
+	dae_optimized_push_back(m_ptrarrEventPorts, pPort);
 }
 
 void daeModel::AddOnEventAction(daeOnEventActions* pOnEventAction)
@@ -856,13 +856,13 @@ void daeModel::AddOnEventAction(daeOnEventActions* pOnEventAction)
 	}
 
     SetModelAndCanonicalName(pOnEventAction);
-    m_ptrarrOnEventActions.push_back(pOnEventAction);
+	dae_optimized_push_back(m_ptrarrOnEventActions, pOnEventAction);
 }
 
 void daeModel::AddPortConnection(daePortConnection* pPortConnection)
 {
     SetModelAndCanonicalName(pPortConnection);
-    m_ptrarrPortConnections.push_back(pPortConnection);
+	dae_optimized_push_back(m_ptrarrPortConnections, pPortConnection);
 }
 
 void daeModel::AddPortArray(daePortArray* pPortArray)
@@ -882,7 +882,7 @@ void daeModel::AddPortArray(daePortArray* pPortArray)
 	}
 
     SetModelAndCanonicalName(pPortArray);
-    m_ptrarrPortArrays.push_back(pPortArray);
+	dae_optimized_push_back(m_ptrarrPortArrays, pPortArray);
 }
 
 void daeModel::AddModelArray(daeModelArray* pModelArray)
@@ -902,13 +902,13 @@ void daeModel::AddModelArray(daeModelArray* pModelArray)
 	}
 
     SetModelAndCanonicalName(pModelArray);
-    m_ptrarrModelArrays.push_back(pModelArray);
+	dae_optimized_push_back(m_ptrarrModelArrays, pModelArray);
 }
 
 void daeModel::AddEquation(daeEquation* pEquation)
 {
     SetModelAndCanonicalName(pEquation);
-    m_ptrarrEquations.push_back(pEquation);
+	dae_optimized_push_back(m_ptrarrEquations, pEquation);
 }
 
 void daeModel::AddDomain(daeDomain& rDomain, const string& strName, string strDescription)
@@ -958,7 +958,7 @@ daeSTN* daeModel::AddSTN(const string& strName)
 	if(!pParentState)
 	{
 		pSTN->m_pParentState = NULL;
-		m_ptrarrSTNs.push_back(pSTN);
+		dae_optimized_push_back(m_ptrarrSTNs, pSTN);
 	}
 	else
 	{
@@ -980,7 +980,7 @@ daeIF* daeModel::AddIF(const string& strCondition)
 	{
 		strName = "IF_" + toString<size_t>(m_ptrarrSTNs.size());
 		pIF->m_pParentState = NULL;
-		m_ptrarrSTNs.push_back(pIF);
+		dae_optimized_push_back(m_ptrarrSTNs, pIF);
 	}
 	else
 	{
@@ -1593,7 +1593,22 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 	ptrarrEqnExecutionInfosCreated.clear();
 
 	nNoDomains = pEquation->m_ptrarrDistributedEquationDomainInfos.size();
-
+	
+/***************************************************************************************************/
+// Try to predict requirements and reserve the memory for all EquationExecutionInfos (could save a lot of memory)
+// AddEquationExecutionInfo() does not use dae_optimized_push_back() !!!
+	size_t NoEqns = pEquation->GetNumberOfEquations();
+	if(bAddToTheModel)
+	{
+		m_ptrarrEquationExecutionInfos.reserve( m_ptrarrEquationExecutionInfos.size() + NoEqns );
+	}
+	else
+	{
+		ptrarrEqnExecutionInfosCreated.reserve(NoEqns);
+		pEquation->m_ptrarrEquationExecutionInfos.reserve(NoEqns);
+	}
+/***************************************************************************************************/
+	
 	if(nNoDomains > 0)
 	{
 		// Here I have to create one EquationExecutionInfo for each point in each domain
@@ -2381,7 +2396,7 @@ void daeModel::CollectAllSTNs(vector<daeSTN*>& ptrarrSTNs) const
 	ptrarrSTNs.insert(ptrarrSTNs.end(), m_ptrarrSTNs.begin(), m_ptrarrSTNs.end());
 
 /////////////////////////////////////////////////////////////////////////////////////
-// BUG!!!
+// BUG!!!???
 // What about STNs nested within states???
 // States should take care of them, I guess
 /////////////////////////////////////////////////////////////////////////////////////
@@ -2418,12 +2433,6 @@ void daeModel::CollectEquationExecutionInfosFromSTNs(vector<daeEquationExecution
 		pSTN->CollectEquationExecutionInfos(ptrarrEquationExecutionInfo);
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////
-// BUG!!!
-// What about STNs nested within states???
-// States should take care of them, I guess
-/////////////////////////////////////////////////////////////////////////////////////
-
 // Then, fill it with execution info in each child-model
 	for(i = 0; i < m_ptrarrModels.size(); i++)
 	{
@@ -2444,17 +2453,9 @@ void daeModel::CollectEquationExecutionInfosFromModels(vector<daeEquationExecuti
 	size_t i;
 	daeModel* pModel;
 	daeModelArray* pModelArray;
-	daeEquationExecutionInfo* pEquationExecutionInfo;
 
 // Fill array ptrarrEquationExecutionInfo with all execution info in the model
-	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
-	{
-		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer);
-
-		ptrarrEquationExecutionInfo.push_back(pEquationExecutionInfo);
-	}
+	dae_optimized_add_vector(m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfo);
 	
 // Then, fill it with execution info in each child-model
 	for(i = 0; i < m_ptrarrModels.size(); i++)
@@ -2508,6 +2509,10 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 
 	ptrarrAllEquationExecutionInfosInModel.insert(ptrarrAllEquationExecutionInfosInModel.begin(), ptrarrEEIfromSTNs.begin(),   ptrarrEEIfromSTNs.end());
 	ptrarrAllEquationExecutionInfosInModel.insert(ptrarrAllEquationExecutionInfosInModel.end(),   ptrarrEEIfromModels.begin(), ptrarrEEIfromModels.end());
+	
+	dae_capacity_check(ptrarrAllEquationExecutionInfosInModel);
+	dae_capacity_check(ptrarrEEIfromSTNs);
+	dae_capacity_check(ptrarrEEIfromModels);
 
 //	size_t nVar = m_pDataProxy->GetTotalNumberOfVariables();
 //	size_t nEq  = ptrarrAllEquationExecutionInfosInModel.size();
@@ -2561,6 +2566,7 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 		pBlock = new daeBlock;
 		pBlock->SetName(string("Block N-1"));
 		pBlock->SetDataProxy(m_pDataProxy.get());
+		pBlock->m_ptrarrEquationExecutionInfos.reserve(ptrarrEEIfromModels.size());
 		ptrarrBlocks.push_back(pBlock);
 
 		for(i = 0; i < nNoEquations; i++)
@@ -3315,32 +3321,6 @@ void daeModel::InitializeStage5(bool bDoBlockDecomposition, vector<daeBlock_t*>&
 {
 // Do block decomposition (if requested)
 	DoBlockDecomposition(bDoBlockDecomposition, ptrarrBlocks);	
-
-//	std::cout << "sizeof(daeDomain) = "							<< sizeof(daeDomain) << std::endl;
-//	std::cout << "sizeof(daeParameter) = "						<< sizeof(daeParameter) << std::endl;
-//	std::cout << "sizeof(daeVariable) = "						<< sizeof(daeVariable) << std::endl;
-//	std::cout << "sizeof(daeEquation) = "						<< sizeof(daeEquation) << std::endl;
-//	std::cout << "sizeof(daePort) = "							<< sizeof(daePort) << std::endl;
-//	std::cout << "sizeof(daeEventPort) = "						<< sizeof(daeEventPort) << std::endl;
-//	std::cout << "sizeof(daeModel) = "							<< sizeof(daeModel) << std::endl;
-//	std::cout << "sizeof(daeSTN) = "							<< sizeof(daeSTN) << std::endl;
-//	std::cout << "sizeof(daePortConnection) = "					<< sizeof(daePortConnection) << std::endl;
-//
-//	std::cout << "sizeof(daeModel) = "							<< sizeof(*this) << std::endl;
-//	std::cout << "m_ptrarrDomains.capacity() = "				<< m_ptrarrDomains.capacity() << std::endl;
-//	std::cout << "m_ptrarrEquationExecutionInfos.capacity() = " << m_ptrarrEquationExecutionInfos.capacity() << std::endl;
-//	std::cout << "m_ptrarrEquations.capacity() = "				<< m_ptrarrEquations.capacity() << std::endl;
-//	std::cout << "m_ptrarrEventPorts.capacity() = "				<< m_ptrarrEventPorts.capacity() << std::endl;
-//	std::cout << "m_ptrarrModelArrays.capacity() = "			<< m_ptrarrModelArrays.capacity() << std::endl;
-//	std::cout << "m_ptrarrModels.capacity() = "					<< m_ptrarrModels.capacity() << std::endl;
-//	std::cout << "m_ptrarrOnEventActions.capacity() = "			<< m_ptrarrOnEventActions.capacity() << std::endl;
-//	std::cout << "m_ptrarrParameters.capacity() = "				<< m_ptrarrParameters.capacity() << std::endl;
-//	std::cout << "m_ptrarrPortArrays.capacity() = "				<< m_ptrarrPortArrays.capacity() << std::endl;
-//	std::cout << "m_ptrarrPortConnections.capacity() = "		<< m_ptrarrPortConnections.capacity() << std::endl;
-//	std::cout << "m_ptrarrPorts.capacity() = "					<< m_ptrarrPorts.capacity() << std::endl;
-//	std::cout << "m_ptrarrStackStates.capacity() = "			<< m_ptrarrStackStates.capacity() << std::endl;
-//	std::cout << "m_ptrarrSTNs.capacity() = "					<< m_ptrarrSTNs.capacity() << std::endl;
-//	std::cout << "m_ptrarrVariables.capacity() = "				<< m_ptrarrVariables.capacity() << std::endl;
 }
 
 void daeModel::StoreInitializationValues(const std::string& strFileName) const
@@ -3438,6 +3418,31 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 
 	bool bCheck = true;
 
+//	std::cout << "sizeof(daeDomain) = "							<< sizeof(daeDomain) << std::endl;
+//	std::cout << "sizeof(daeParameter) = "						<< sizeof(daeParameter) << std::endl;
+//	std::cout << "sizeof(daeVariable) = "						<< sizeof(daeVariable) << std::endl;
+//	std::cout << "sizeof(daeEquation) = "						<< sizeof(daeEquation) << std::endl;
+//	std::cout << "sizeof(daePort) = "							<< sizeof(daePort) << std::endl;
+//	std::cout << "sizeof(daeEventPort) = "						<< sizeof(daeEventPort) << std::endl;
+//	std::cout << "sizeof(daeModel) = "							<< sizeof(daeModel) << std::endl;
+//	std::cout << "sizeof(daeSTN) = "							<< sizeof(daeSTN) << std::endl;
+//	std::cout << "sizeof(daePortConnection) = "					<< sizeof(daePortConnection) << std::endl;
+//	std::cout << "sizeof(*this) = "								<< sizeof(*this) << std::endl;
+
+	dae_capacity_check(m_ptrarrDomains);
+	dae_capacity_check(m_ptrarrParameters);
+	dae_capacity_check(m_ptrarrVariables);
+	dae_capacity_check(m_ptrarrEquations);
+	dae_capacity_check(m_ptrarrSTNs);
+	dae_capacity_check(m_ptrarrPorts);
+	dae_capacity_check(m_ptrarrEventPorts);
+	dae_capacity_check(m_ptrarrModels);
+	dae_capacity_check(m_ptrarrOnEventActions);
+	dae_capacity_check(m_ptrarrEquationExecutionInfos);
+	dae_capacity_check(m_ptrarrModelArrays);
+	dae_capacity_check(m_ptrarrPortArrays);
+	dae_capacity_check(m_ptrarrPortConnections);
+	
 // Check all domains
 	for(i = 0; i < m_ptrarrDomains.size(); i++)
 	{
@@ -3739,7 +3744,7 @@ void daeModel::GetModelArrays(vector<daeModelArray_t*>& ptrarrModelArrays)
 		ptrarrModelArrays.push_back(m_ptrarrModelArrays[i]);
 }
 
-void daeModel::GetEquationExecutionInfo(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
+void daeModel::GetEquationExecutionInfos(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
 {
 	ptrarrEquationExecutionInfos.clear();
 	for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)

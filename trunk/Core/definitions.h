@@ -170,6 +170,42 @@ protected:
 };
 
 /*********************************************************************************************
+	        Memory-concerned vector operations
+**********************************************************************************************
+Since the logarithmic resize of a std::vector while items are added with push_back, many times 
+we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for 
+the item to add it calls reserve(2*SIZE) so we may end up with a lot of memory wasted).
+Therefore, we may use generally slower but more memory conservative functions that do not 
+reserve memory for items that do not exist.
+**********************************************************************************************/
+template<class Storage, class Item>
+void dae_optimized_push_back(std::vector<Storage>& ptrarrVector, Item item)
+{
+    ptrarrVector.reserve(ptrarrVector.size() + 1);
+    ptrarrVector.push_back(item);
+}
+
+template<class itemSource, class itemDestination>
+void dae_optimized_add_vector(const std::vector<itemSource>& ptrarrSource, std::vector<itemDestination>& ptrarrDestination)
+{
+    ptrarrDestination.reserve(ptrarrDestination.size() + ptrarrSource.size());
+	for(size_t i = 0; i < ptrarrSource.size(); i++)
+		ptrarrDestination.push_back(ptrarrSource[i]);
+}
+
+template<class itemSource, class itemDestination>
+void dae_optimized_set_vector(const std::vector<itemSource>& ptrarrSource, std::vector<itemDestination>& ptrarrDestination)
+{
+    ptrarrDestination.resize(ptrarrSource.size());
+	for(size_t i = 0; i < ptrarrSource.size(); i++)
+		ptrarrDestination[i] = ptrarrSource[i];
+}
+
+#define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
+    std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
+
+
+/*********************************************************************************************
 	daeCreateObjectDelegate
 **********************************************************************************************/
 template <typename OBJECT>
@@ -211,7 +247,7 @@ public:
 
 	void Attach(daeObserver<SUBJECT>* pObserver)
 	{
-		m_ptrarrObservers.push_back(pObserver);
+		dae_optimized_push_back(m_ptrarrObservers, pObserver);
 	}
 
 	void Detach(daeObserver<SUBJECT>* pObserver)

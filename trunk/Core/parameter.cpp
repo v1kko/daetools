@@ -272,7 +272,8 @@ void daeParameter::Fill_adouble_array(vector<adouble>& arrValues, const daeArray
 {
 	if(currentN == N) // create and add adouble to the vector
 	{
-		arrValues.push_back(Create_adouble(indexes, N));
+		//arrValues.push_back(Create_adouble(indexes, N));
+		dae_optimized_push_back(arrValues, Create_adouble(indexes, N));
 	}
 	else // continue iterating
 	{
@@ -416,9 +417,7 @@ void daeParameter::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 
 void daeParameter::DistributeOnDomain(daeDomain& rDomain)
 {
-	if(!(&rDomain))
-		daeDeclareAndThrowException(exInvalidPointer);
-	m_ptrDomains.push_back(&rDomain);
+	dae_optimized_push_back(m_ptrDomains, &rDomain);
 }
 
 real_t* daeParameter::GetValuePointer(void)

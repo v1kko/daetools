@@ -102,7 +102,7 @@ void daeVariable::Fill_adouble_array(vector<adouble>& arrValues, const daeArrayR
 {
 	if(currentN == N) // create and add adouble to the vector
 	{
-		arrValues.push_back(Create_adouble(indexes, N));
+		dae_optimized_push_back(arrValues, Create_adouble(indexes, N));
 	}
 	else // continue iterating
 	{
@@ -145,7 +145,7 @@ void daeVariable::Fill_dt_array(vector<adouble>& arrValues, const daeArrayRange*
 {
 	if(currentN == N) // create and add adouble to the vector
 	{
-		arrValues.push_back(Calculate_dt(indexes, N));
+		dae_optimized_push_back(arrValues, Calculate_dt(indexes, N));
 	}
 	else // continue iterating
 	{
@@ -188,7 +188,7 @@ void daeVariable::Fill_partial_array(vector<adouble>& arrValues, size_t nOrder, 
 {
 	if(currentN == N) // create and add adouble to the vector
 	{
-		arrValues.push_back(partial(nOrder, rDomain, indexes, N));
+		dae_optimized_push_back(arrValues, partial(nOrder, rDomain, indexes, N));
 	}
 	else // continue iterating
 	{

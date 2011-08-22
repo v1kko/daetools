@@ -117,7 +117,8 @@ void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& st
 	m_pModel			= pStateFrom->m_pModel;
 	
 	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, m_pModel, m_pSTN, strStateToName, string(""));
-	m_ptrarrActions.push_back(pAction);
+	//m_ptrarrActions.push_back(pAction);
+	dae_optimized_push_back(m_ptrarrActions, pAction);
 	
 	m_Condition			= rCondition;
 
@@ -150,12 +151,13 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom,
 	m_pSTN			= pStateFrom->GetSTN();
 	m_strShortName	= strName;
 	m_pModel		= pStateFrom->m_pModel;
+	
 	m_ptrarrActions.EmptyAndFreeMemory();
 	m_ptrarrUserDefinedActions.clear();
-	for(size_t i = 0; i < ptrarrActions.size(); i++)
-		m_ptrarrActions.push_back(ptrarrActions[i]);
-	for(size_t i = 0; i < ptrarrUserDefinedActions.size(); i++)
-		m_ptrarrUserDefinedActions.push_back(ptrarrUserDefinedActions[i]);
+
+	dae_optimized_set_vector(ptrarrActions, m_ptrarrActions);
+	dae_optimized_set_vector(ptrarrUserDefinedActions, m_ptrarrUserDefinedActions);
+	
 	m_Condition		= rCondition;
 	m_Condition.m_pModel = m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
@@ -234,27 +236,6 @@ void daeStateTransition::SetCondition(daeCondition& rCondition)
 	m_Condition = rCondition;
 }
 
-// 11.08.2011	
-//daeState_t* daeStateTransition::GetStateTo(void) const
-//{
-//	return m_pStateTo;
-//}
-//
-//void daeStateTransition::SetStateTo(daeState* pState)
-//{
-//	m_pStateTo = pState;
-//}
-//
-//daeState_t* daeStateTransition::GetStateFrom(void) const
-//{
-//	return m_pStateFrom;
-//}
-//
-//void daeStateTransition::SetStateFrom(daeState* pState)
-//{
-//	m_pStateFrom = pState;
-//}
-
 string daeStateTransition::GetConditionAsString() const
 {
 	return m_Condition.SaveNodeAsPlainText();
@@ -272,6 +253,8 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 	string strError;
 
 	bool bCheck = true;
+	
+	dae_capacity_check(m_ptrarrActions);
 
 // Check base class	
 	if(!daeObject::CheckObject(strarrErrors))
@@ -292,37 +275,6 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 			return false;
 	}
 
-// 11.08.2011	
-/*	
-// Check state from	
-// If it is daeIF block it IS null (but StateTo mustn't be NULL)
-	if(!m_pStateFrom)
-	{
-		if(!m_pStateTo)
-		{
-			strError = "Invalid start state in state transition [" + GetCanonicalName() + "]";
-			strarrErrors.push_back(strError);
-			bCheck = false;
-		}
-	}
-
-// Check state to	
-	if(!m_pStateTo)
-	{
-		strError = "Invalid end state in state transition [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-	
-// Check if start and end states are the same to	
-	if(m_pStateFrom == m_pStateTo)
-	{
-		strError = "Start end end states are the same in state transition [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		return false;
-	}
-*/
-	
 // Check condition	
 	if(!m_Condition.m_pModel)
 	{
