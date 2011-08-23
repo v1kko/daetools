@@ -18,6 +18,37 @@ daeState::~daeState()
 {
 }
 
+void daeState::Clone(const daeState& rObject)
+{
+	for(size_t i = 0; i < rObject.m_ptrarrStateTransitions.size(); i++)
+	{
+		daeStateTransition* pStateTransition = new daeStateTransition();
+		pStateTransition->SetName(rObject.m_ptrarrStateTransitions[i]->m_strShortName);
+		AddStateTransition(pStateTransition);		
+		pStateTransition->Clone(*rObject.m_ptrarrStateTransitions[i]);
+	}
+
+	for(size_t i = 0; i < rObject.m_ptrarrEquations.size(); i++)
+	{
+		daeEquation* pEquation = m_pModel->CreateEquation(rObject.m_ptrarrEquations[i]->m_strShortName,
+														  rObject.m_ptrarrEquations[i]->m_strDescription);
+		pEquation->Clone(*rObject.m_ptrarrEquations[i]);
+	}
+
+	for(size_t i = 0; i < rObject.m_ptrarrSTNs.size(); i++)
+	{
+		daeSTN* pSTN = m_pModel->AddSTN(rObject.m_ptrarrSTNs[i]->m_strShortName);
+		pSTN->Clone(*rObject.m_ptrarrSTNs[i]);
+	}
+
+	for(size_t i = 0; i < rObject.m_ptrarrOnEventActions.size(); i++)
+	{
+		daeOnEventActions* pOnEventActions = new daeOnEventActions();
+		dae_push_back(m_ptrarrOnEventActions, pOnEventActions);
+		pOnEventActions->Clone(*rObject.m_ptrarrOnEventActions[i]);
+	}
+}
+
 void daeState::Open(io::xmlTag_t* pTag)
 {
 	string strName;
@@ -242,8 +273,7 @@ void daeState::AddEquation(daeEquation* pEquation)
 	if(!pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pEquation);
-	//m_ptrarrEquations.push_back(pEquation);
-	dae_optimized_push_back(m_ptrarrEquations, pEquation);
+	dae_push_back(m_ptrarrEquations, pEquation);
 }
 
 void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription)
@@ -264,8 +294,7 @@ void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string&
 		e << "OnEventAction [" << strName << "] already exists in the state [" << GetCanonicalName() << "]";
 		throw e;
 	}
-    //m_ptrarrOnEventActions.push_back(&rOnEventAction);
-	dae_optimized_push_back(m_ptrarrOnEventActions, &rOnEventAction);
+	dae_push_back(m_ptrarrOnEventActions, &rOnEventAction);
 }
 
 void daeState::ConnectOnEventActions(void)
@@ -324,7 +353,7 @@ void daeState::AddNestedSTN(daeSTN* pSTN)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pSTN);
 	pSTN->SetParentState(this);
-	dae_optimized_push_back(m_ptrarrSTNs, pSTN);
+	dae_push_back(m_ptrarrSTNs, pSTN);
 }
 
 void daeState::AddStateTransition(daeStateTransition* pStateTransition)
@@ -332,25 +361,22 @@ void daeState::AddStateTransition(daeStateTransition* pStateTransition)
 	if(!pStateTransition)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pStateTransition);
-	dae_optimized_push_back(m_ptrarrStateTransitions, pStateTransition);
+	dae_push_back(m_ptrarrStateTransitions, pStateTransition);
 }
 	
 void daeState::GetStateTransitions(vector<daeStateTransition_t*>& ptrarrStateTransitions)
 {
-	ptrarrStateTransitions.clear();
-	dae_optimized_set_vector(m_ptrarrStateTransitions, ptrarrStateTransitions);
+	dae_set_vector(m_ptrarrStateTransitions, ptrarrStateTransitions);
 }
 	
 void daeState::GetEquations(vector<daeEquation_t*>& ptrarrEquations)
 {
-	ptrarrEquations.clear();
-	dae_optimized_set_vector(m_ptrarrEquations, ptrarrEquations);
+	dae_set_vector(m_ptrarrEquations, ptrarrEquations);
 }
 	
 void daeState::GetNestedSTNs(vector<daeSTN_t*>& ptrarrSTNs)
 {
-	ptrarrSTNs.clear();
-	dae_optimized_set_vector(m_ptrarrSTNs, ptrarrSTNs);
+	dae_set_vector(m_ptrarrSTNs, ptrarrSTNs);
 }
 
 void daeState::CalcNonZeroElements(int& NNZ)

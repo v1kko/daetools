@@ -138,7 +138,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daeCondition>("daeCondition")
 		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
-		.def(!self)
+		//.def(!self)
 		.def(self | self)
 		.def(self & self)
 	;
@@ -589,7 +589,7 @@ BOOST_PYTHON_MODULE(pyCore)
         ;
 
 	class_<daepython::daeActionWrapper, bases<daeObject>, boost::noncopyable>("daeAction")
-		.def("Execute",		pure_virtual(&daepython::daeActionWrapper::Execute)) 
+		.def("Execute",		pure_virtual(&daepython::daeActionWrapper::Execute))
         ;
  
     class_<daeOptimizationVariable_t, boost::noncopyable>("daeOptimizationVariable_t", no_init)

@@ -185,7 +185,16 @@ void runTutorial2(void)
     pSimulation->GetModel()->SetReportingOn(true);
     
     pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
-    pSimulation->SolveInitial();
+	
+	double start = dae::GetTimeInSeconds();
+	daeModel* pOriginal = dynamic_cast<daeModel*>(pSimulation->GetModel());
+	daeModel* pModel = new daeModel(pOriginal->GetName(), NULL, pOriginal->GetDescription());
+	pModel->Clone(*pOriginal);
+	double end = dae::GetTimeInSeconds();
+	std::cout << "Clone time = " << end - start << std::endl;
+    pModel->SaveModelReport(pModel->GetName() + "-clone.xml");
+    
+	pSimulation->SolveInitial();
     
     pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");
     pSimulation->GetModel()->SaveRuntimeModelReport(pSimulation->GetModel()->GetName() + "-rt.xml");

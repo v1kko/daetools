@@ -170,35 +170,39 @@ protected:
 };
 
 /*********************************************************************************************
-	        Memory-concerned vector operations
+	        Memory/speed aware vector operations
 **********************************************************************************************
-Since the logarithmic resize of a std::vector while items are added with push_back, many times 
-we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for 
-the item to add it calls reserve(2*SIZE) so we may end up with a lot of memory wasted).
-Therefore, we may use generally slower but more memory conservative functions that do not 
-reserve memory for items that do not exist.
+a) dae_push_back 
+   Since the logarithmic resize of a std::vector while items are added with push_back, many times 
+   we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for 
+   the item to add it calls reserve(2*size) so we may end up with a lot of memory wasted).
+   Therefore, we may use generally slower but more memory conservative function that does not 
+   reserve memory for items that do not exist (yet).
+b) dae_add_vector, dae_set_vector 
+   They should be the fastest way to add items to the existing vector and to make two vectors 
+   equal (currently they use the built-in std::XXX functions, but if a faster way should be 
+   discovered it might be added here). 
 **********************************************************************************************/
 template<class Storage, class Item>
-void dae_optimized_push_back(std::vector<Storage>& ptrarrVector, Item item)
+void dae_push_back(std::vector<Storage>& arrVector, Item item)
 {
-    ptrarrVector.reserve(ptrarrVector.size() + 1);
-    ptrarrVector.push_back(item);
+    arrVector.reserve(arrVector.size()+1);
+    arrVector.push_back(item);
 }
 
 template<class itemSource, class itemDestination>
-void dae_optimized_add_vector(const std::vector<itemSource>& ptrarrSource, std::vector<itemDestination>& ptrarrDestination)
+void dae_add_vector(const std::vector<itemSource>& arrSource, std::vector<itemDestination>& arrDestination)
 {
-    ptrarrDestination.reserve(ptrarrDestination.size() + ptrarrSource.size());
-	for(size_t i = 0; i < ptrarrSource.size(); i++)
-		ptrarrDestination.push_back(ptrarrSource[i]);
+	arrDestination.insert(arrDestination.end(), arrSource.begin(), arrSource.end());
 }
 
 template<class itemSource, class itemDestination>
-void dae_optimized_set_vector(const std::vector<itemSource>& ptrarrSource, std::vector<itemDestination>& ptrarrDestination)
+void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDestination>& arrDestination)
 {
-    ptrarrDestination.resize(ptrarrSource.size());
-	for(size_t i = 0; i < ptrarrSource.size(); i++)
-		ptrarrDestination[i] = ptrarrSource[i];
+// resize(n) allocates enough memory to store n elements (if it does not already exist)
+// std::copy(where, start, end) is an optimized function for bulk insertions
+	arrDestination.resize(arrSource.size());
+	std::copy(arrSource.begin(), arrSource.end(), arrDestination.begin());
 }
 
 #define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
@@ -247,7 +251,7 @@ public:
 
 	void Attach(daeObserver<SUBJECT>* pObserver)
 	{
-		dae_optimized_push_back(m_ptrarrObservers, pObserver);
+		dae_push_back(m_ptrarrObservers, pObserver);
 	}
 
 	void Detach(daeObserver<SUBJECT>* pObserver)

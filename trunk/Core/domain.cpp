@@ -52,6 +52,18 @@ daeDomain::~daeDomain()
 {
 }
 
+void daeDomain::Clone(const daeDomain& rObject)
+{
+	m_dLowerBound			= rObject.m_dLowerBound;
+	m_dUpperBound			= rObject.m_dUpperBound;
+	m_nNumberOfIntervals	= rObject.m_nNumberOfIntervals;
+	m_nNumberOfPoints		= rObject.m_nNumberOfPoints;
+	m_eDomainType			= rObject.m_eDomainType;
+	m_nDiscretizationOrder  = rObject.m_nDiscretizationOrder;
+	m_eDiscretizationMethod	= rObject.m_eDiscretizationMethod;
+	m_darrPoints			= rObject.m_darrPoints;
+}
+
 void daeDomain::Open(io::xmlTag_t* pTag)
 {
 	string strName;
@@ -588,6 +600,43 @@ bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 
 	return bCheck;
 }
+
+/******************************************************************
+	Find functions
+*******************************************************************/
+void FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeDomain*>& ptrarrDestination, daeModel* pParentModel)
+{
+	string strRelativeName;
+	daeDomain* pDomain;
+
+	ptrarrDestination.resize(ptrarrSource.size());
+	for(size_t i = 0; i < ptrarrSource.size(); i++)
+	{
+		strRelativeName = ptrarrSource[i]->GetNameRelativeToParentModel();
+		pDomain = dynamic_cast<daeDomain*>(pParentModel->FindObjectFromRelativeName(strRelativeName));
+		if(!pDomain)
+			daeDeclareAndThrowException(exInvalidPointer);
+		ptrarrDestination[i] = pDomain;
+	}
+}
+
+daeDomain* FindDomain(const daeDomain* pSource, daeModel* pParentModel)
+{
+	string strRelativeName = pSource->GetNameRelativeToParentModel();
+	return dynamic_cast<daeDomain*>(pParentModel->FindObjectFromRelativeName(strRelativeName));
+}
+
+daeEventPort* FindEventPort(const daeEventPort* pSource, daeModel* pParentModel)
+{
+	string strRelativeName = pSource->GetNameRelativeToParentModel();
+	return dynamic_cast<daeEventPort*>(pParentModel->FindObjectFromRelativeName(strRelativeName));
+}
+
+//daeEquation* FindEquation(const daeEquation* pSource, daeModel* pParentModel)
+//{
+//	string strRelativeName = pSource->GetNameRelativeToParentModel();
+//	return dynamic_cast<daeEquation*>(pParentModel->FindObjectFromRelativeName(strRelativeName));
+//}
 
 }
 }

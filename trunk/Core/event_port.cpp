@@ -28,6 +28,12 @@ daeEventPort::~daeEventPort(void)
 {
 }
 
+void daeEventPort::Clone(const daeEventPort& rObject)
+{
+	m_ePortType  = rObject.m_ePortType;
+	m_dEventData = rObject.m_dEventData;
+}
+
 daeePortType daeEventPort::GetType(void) const
 {
 	return m_ePortType;

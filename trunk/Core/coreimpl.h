@@ -186,6 +186,8 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 	
+	void Clone(const daeObject& rObject);
+	
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
@@ -220,6 +222,7 @@ protected:
 	friend class daePortArray;
 	friend class daeModelArray;
 	friend class daeDistributedEquationDomainInfo;
+	friend class daeOnEventActions;
 };
 
 string daeGetRelativeName(const daeObject* parent, const daeObject* child);
@@ -324,6 +327,8 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
+
+	void Clone(const daeDomain& rObject);
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
@@ -477,6 +482,8 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
+
+	void Clone(const daeDistributedEquationDomainInfo& rObject);
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	daeEquation*	GetEquation(void) const;
@@ -1343,6 +1350,8 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	void Clone(const daeParameter& rObject);
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
@@ -1539,6 +1548,8 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	void Clone(const daeVariable& rObject);
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
@@ -1699,8 +1710,6 @@ protected:
 	adouble_array CreateSetupTimeDerivativeArray(const daeArrayRange* ranges, const size_t N) const;
 	adouble_array CreateSetupPartialDerivativeArray(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const;
 	
-//	real_t	GetValueAt(size_t nIndex) const;
-//	real_t	GetADValueAt(size_t nIndex) const;
 	void	SetVariableType(const daeVariableType& VariableType);
 	real_t 	GetInitialCondition(const size_t* indexes, const size_t N);
 	void	Fill_adouble_array(std::vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
@@ -1792,6 +1801,8 @@ public:
 	void DetectVariableTypesForExport(std::vector<const daeVariableType*>& ptrarrVariableTypes) const;
 	void CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
+	void Clone(const daePort& rObject);
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void SetType(daeePortType eType);
@@ -1852,6 +1863,9 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
+	void Clone(const daeEventPort& rObject);
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
 	void Update(daeEventPort_t* pSubject, void* data);
@@ -1892,6 +1906,7 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void Clone(const daeAction& rObject);
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void Initialize(void);
@@ -1949,6 +1964,7 @@ public:
 	void Save(io::xmlTag_t* pTag) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void Clone(const daeOnEventActions& rObject);
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	daeEventPort* GetEventPort(void) const;
@@ -1958,7 +1974,7 @@ public:
 protected:
 	daeEventPort*            m_pEventPort;
 	daePtrVector<daeAction*> m_ptrarrOnEventActions;
-	daePtrVector<daeAction*> m_ptrarrUserDefinedOnEventActions;
+	std::vector<daeAction*>  m_ptrarrUserDefinedOnEventActions;
 };
 
 /******************************************************************
@@ -1983,7 +1999,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-	
+	void Clone(const daePortConnection& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void   GetEquations(std::vector<daeEquation*>& ptrarrEquations) const;
@@ -2072,6 +2088,7 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 	
+	void Clone(const daeModel& rObject);
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 
 	string ExportObjects(std::vector<daeExportable_t*>& ptrarrObjects, daeeModelLanguage eLanguage) const;
@@ -2288,6 +2305,7 @@ protected:
 	daeExecutionContext		m_globalConditionContext;
 
 	friend class daeIF;
+	friend class daeState;
 	friend class daeSTN;
 	friend class daeStateTransition;
 	friend class daePort;
@@ -2652,7 +2670,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-
+	void Clone(const daeState& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	void AddEquation(daeEquation* pEquation);
@@ -2726,9 +2744,6 @@ public:
 	virtual ~daeStateTransition(void);
 
 public:
-//	virtual daeState_t* GetStateTo(void) const;
-//	virtual daeState_t*	GetStateFrom(void) const;
-	
 	void GetActions(std::vector<daeAction_t*>& ptrarrActions) const;
 	void ExecuteActions(void);
 
@@ -2739,7 +2754,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-	
+	void Clone(const daeStateTransition& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	void Initialize(void);
@@ -2793,7 +2808,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-	
+	virtual void Clone(const daeSTN& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	virtual void		FinalizeDeclaration(void);
@@ -2872,7 +2887,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-	
+	virtual void Clone(const daeIF& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	daeState* CreateElse(void);
@@ -2913,7 +2928,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-
+	void Clone(const daeEquation& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void InitializeDEDIs(void);
@@ -2973,7 +2988,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
-
+	void Clone(const daePortEqualityEquation& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void Initialize(daeVariable* pLeft, daeVariable* pRight);
@@ -3167,6 +3182,13 @@ public:
 						const string& strDescription);
 	virtual ~daeMeasuredVariable(void);
 };
+
+/******************************************************************
+	Find functions
+*******************************************************************/
+daeDomain*		FindDomain(const daeDomain* pSource, daeModel* pParentModel);
+daeEventPort*	FindEventPort(const daeEventPort* pSource, daeModel* pParentModel);
+void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeDomain*>& ptrarrDestination, daeModel* pParentModel);
 
 /*********************************************************************************************
 	daeExternalFunctionArgument

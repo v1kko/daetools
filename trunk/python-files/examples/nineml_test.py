@@ -5,15 +5,18 @@ from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponen
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys
-from time import localtime, strftime
+from time import localtime, strftime, time
 from daetools.pyDAE import *
 from nineml_daetools_bridge import *
 
 class sim_hierachical_iaf_1coba(daeSimulation):
     def __init__(self, ninemlComponent):
         daeSimulation.__init__(self)
+        start_time = time()
         self.m = nineml_daetools_bridge(ninemlComponent.name, ninemlComponent)
         self.m.Description = ""
+        elapsed_time = time() - start_time
+        print 'Elapsed time =', elapsed_time
 
     def SetUpParametersAndDomains(self):
         iaf  = findObjectInModel(self.m, 'iaf',       look_for_models = True)

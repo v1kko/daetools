@@ -45,6 +45,13 @@ daeParameter::~daeParameter(void)
 {
 }
 
+void daeParameter::Clone(const daeParameter& rObject)
+{
+	m_eParameterType = rObject.m_eParameterType;
+	m_darrValues	 = rObject.m_darrValues;
+	FindDomains(rObject.m_ptrDomains, m_ptrDomains, m_pModel);
+}
+
 void daeParameter::Open(io::xmlTag_t* pTag)
 {
 	string strName;
@@ -273,7 +280,7 @@ void daeParameter::Fill_adouble_array(vector<adouble>& arrValues, const daeArray
 	if(currentN == N) // create and add adouble to the vector
 	{
 		//arrValues.push_back(Create_adouble(indexes, N));
-		dae_optimized_push_back(arrValues, Create_adouble(indexes, N));
+		dae_push_back(arrValues, Create_adouble(indexes, N));
 	}
 	else // continue iterating
 	{
@@ -417,7 +424,7 @@ void daeParameter::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 
 void daeParameter::DistributeOnDomain(daeDomain& rDomain)
 {
-	dae_optimized_push_back(m_ptrDomains, &rDomain);
+	dae_push_back(m_ptrDomains, &rDomain);
 }
 
 real_t* daeParameter::GetValuePointer(void)

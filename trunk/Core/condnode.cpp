@@ -440,7 +440,7 @@ void condExpressionNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & pt
 	adouble ad    = left - right;
 
 // This have to be added always!
-	dae_optimized_push_back(ptrarrExpressions, ad.node);
+	dae_push_back(ptrarrExpressions, ad.node);
 
 // Depending on the type I have to add some additional expressions
 	if(dEventTolerance == 0)
@@ -467,29 +467,29 @@ left-right = f(t)
 	switch(m_eConditionType)
 	{
 	case eNotEQ: // !=
-		dae_optimized_push_back(ptrarrExpressions, ad1.node);
-		dae_optimized_push_back(ptrarrExpressions, ad2.node);
+		dae_push_back(ptrarrExpressions, ad1.node);
+		dae_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eEQ: // ==
-		dae_optimized_push_back(ptrarrExpressions, ad1.node);
-		dae_optimized_push_back(ptrarrExpressions, ad2.node);
+		dae_push_back(ptrarrExpressions, ad1.node);
+		dae_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eGT: // >
-		dae_optimized_push_back(ptrarrExpressions, ad2.node);
+		dae_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	case eGTEQ: // >=
-		dae_optimized_push_back(ptrarrExpressions, ad1.node);
+		dae_push_back(ptrarrExpressions, ad1.node);
 		break;
 
 	case eLT: // <
-		dae_optimized_push_back(ptrarrExpressions, ad1.node);
+		dae_push_back(ptrarrExpressions, ad1.node);
 		break;
 
 	case eLTEQ: // <=
-		dae_optimized_push_back(ptrarrExpressions, ad2.node);
+		dae_push_back(ptrarrExpressions, ad2.node);
 		break;
 
 	default:

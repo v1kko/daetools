@@ -55,39 +55,13 @@ daeVariable::~daeVariable()
 {
 }
 
-/*
-real_t daeVariable::GetValueAt(size_t nIndex) const
+void daeVariable::Clone(const daeVariable& rObject)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	return *m_pModel->m_pDataProxy->GetValue(nIndex);
+	m_bReportingOn  = rObject.m_bReportingOn;
+	m_nOverallIndex = ULONG_MAX;
+	m_VariableType  = rObject.m_VariableType;
+	FindDomains(rObject.m_ptrDomains, m_ptrDomains, m_pModel);
 }
-
-// This function shouldn't be called during eCalculate, eCalculateIFSTN and eGatherInfo
-real_t daeVariable::GetADValueAt(size_t nIndex) const
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	daeExecutionContext* pExecutionContext = m_pModel->m_pDataProxy->GetExecutionContext(nIndex);
-	if(!pExecutionContext)
-	{	
-		daeDeclareException(exInvalidPointer); 
-		e << "Invalid ExecutionContext" << m_strCanonicalName;
-		throw e;
-	}
-
-	if(pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == nIndex)
-		return 1.0;
-	else
-		return 0.0;
-}
-*/
 
 void daeVariable::Open(io::xmlTag_t* pTag)
 {
@@ -1225,7 +1199,7 @@ void daeVariable::SetVariableType(const daeVariableType& VariableType)
 
 void daeVariable::DistributeOnDomain(daeDomain& rDomain)
 {
-	dae_optimized_push_back(m_ptrDomains, &rDomain);
+	dae_push_back(m_ptrDomains, &rDomain);
 }
 
 void daeVariable::GetDomains(vector<daeDomain_t*>& ptrarrDomains)

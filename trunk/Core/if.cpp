@@ -18,6 +18,15 @@ daeIF::~daeIF(void)
 {
 }
 
+void daeIF::Clone(const daeIF& rObject)
+{
+	for(size_t i = 0; i < rObject.m_ptrarrStates.size(); i++)
+	{
+		daeState* pState = AddState(rObject.m_ptrarrStates[i]->m_strShortName);
+		pState->Clone(*rObject.m_ptrarrStates[i]);
+	}
+}
+
 void daeIF::Open(io::xmlTag_t* pTag)
 {
 	daeSTN::Open(pTag);
@@ -394,7 +403,7 @@ daeState* daeIF::AddState(string strName)
 // Instantiate a new state and add it to STN
 	daeState* pState = new daeState();
 
-	dae_optimized_push_back(m_ptrarrStates, pState);
+	dae_push_back(m_ptrarrStates, pState);
 	
 	string strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
 	pState->Create(strStateName, this);

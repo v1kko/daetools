@@ -14,10 +14,20 @@ daeSTN::daeSTN()
 	m_pParentState	= NULL;
 	m_pActiveState	= NULL;
 	m_eSTNType		= eSTN;
+	m_bInitialized  = false;
 }
 
 daeSTN::~daeSTN()
 {
+}
+
+void daeSTN::Clone(const daeSTN& rObject)
+{
+	for(size_t i = 0; i < rObject.m_ptrarrStates.size(); i++)
+	{
+		daeState* pState = AddState(rObject.m_ptrarrStates[i]->m_strShortName);
+		pState->Clone(*rObject.m_ptrarrStates[i]);
+	}
 }
 
 void daeSTN::Open(io::xmlTag_t* pTag)
@@ -299,7 +309,7 @@ void daeSTN::CollectEquationExecutionInfos(vector<daeEquationExecutionInfo*>& pt
 	if(!m_pActiveState)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
-	dae_optimized_add_vector(m_pActiveState->m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfo);
+	dae_add_vector(m_pActiveState->m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfo);
 
 // Nested STNs
 	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
@@ -780,8 +790,7 @@ daeState* daeSTN::AddState(string strName)
 // Ignore the name
 	daeState* pState = new daeState();
 	
-	//m_ptrarrStates.push_back(pState);
-	dae_optimized_push_back(m_ptrarrStates, pState);
+	dae_push_back(m_ptrarrStates, pState);
 	
 	pState->Create(strName, this);
 	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;

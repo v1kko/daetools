@@ -63,6 +63,10 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
+        import inspect
+        a = self.Qin() < self.Qin()
+        print inspect.getmembers(a, predicate=inspect.ismethod)
+        
         self.stnRegulator = self.STN("Regulator")
 
         self.STATE("Heating")

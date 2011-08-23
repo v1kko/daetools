@@ -122,6 +122,10 @@ daeAction::~daeAction()
 {
 }
 
+void daeAction::Clone(const daeAction& rObject)
+{
+}
+
 daeeActionType daeAction::GetType(void) const
 {
 	return m_eActionType;
@@ -475,8 +479,8 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 
 	m_pEventPort = pEventPort;
 	
-	dae_optimized_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
-	dae_optimized_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
+	dae_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
+	dae_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
 }
 
 daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, 
@@ -494,12 +498,28 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 
 	m_pEventPort = pEventPort;
 	
-	dae_optimized_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
-	dae_optimized_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
+	dae_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
+	dae_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
 }
 
 daeOnEventActions::~daeOnEventActions(void)
 {
+}
+
+void daeOnEventActions::Clone(const daeOnEventActions& rObject)
+{
+	m_pEventPort = FindEventPort(m_pEventPort, m_pModel);
+	if(!m_pEventPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	for(size_t i = 0; i < rObject.m_ptrarrOnEventActions.size(); i++)
+	{
+		daeAction* pAction = new daeAction();
+		pAction->SetName(rObject.m_ptrarrOnEventActions[i]->m_strShortName);
+		pAction->Clone(*rObject.m_ptrarrOnEventActions[i]);
+	}
+	
+	dae_set_vector(rObject.m_ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
 }
 
 daeEventPort* daeOnEventActions::GetEventPort(void) const

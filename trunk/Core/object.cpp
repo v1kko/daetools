@@ -20,6 +20,14 @@ daeObject::~daeObject(void)
 {
 }
 
+void daeObject::Clone(const daeObject& rObject)
+{
+	m_pModel           = NULL;
+	m_strCanonicalName = rObject.m_strCanonicalName;
+	m_strShortName     = rObject.m_strShortName;
+	m_strDescription   = rObject.m_strDescription;
+}
+
 void daeObject::Open(io::xmlTag_t* pTag)
 {
 	string strName, strValue;

@@ -18,6 +18,10 @@ daeStateTransition::~daeStateTransition()
 {
 }
 
+void daeStateTransition::Clone(const daeStateTransition& rObject)
+{
+}
+
 void daeStateTransition::Open(io::xmlTag_t* pTag)
 {
 	string strName;
@@ -117,8 +121,7 @@ void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& st
 	m_pModel			= pStateFrom->m_pModel;
 	
 	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, m_pModel, m_pSTN, strStateToName, string(""));
-	//m_ptrarrActions.push_back(pAction);
-	dae_optimized_push_back(m_ptrarrActions, pAction);
+	dae_push_back(m_ptrarrActions, pAction);
 	
 	m_Condition			= rCondition;
 
@@ -155,8 +158,8 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom,
 	m_ptrarrActions.EmptyAndFreeMemory();
 	m_ptrarrUserDefinedActions.clear();
 
-	dae_optimized_set_vector(ptrarrActions, m_ptrarrActions);
-	dae_optimized_set_vector(ptrarrUserDefinedActions, m_ptrarrUserDefinedActions);
+	dae_set_vector(ptrarrActions, m_ptrarrActions);
+	dae_set_vector(ptrarrUserDefinedActions, m_ptrarrUserDefinedActions);
 	
 	m_Condition		= rCondition;
 	m_Condition.m_pModel = m_pModel;
