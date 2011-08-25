@@ -1,0 +1,80 @@
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{wallpaper}
+
+\def\name{###MODEL_NAME###}
+
+\def\footerlink{http://www.incf.org}
+
+\hypersetup{
+  colorlinks = true,
+  urlcolor = blue,
+  pdfauthor = {INCF},
+  pdfkeywords = {neuroinformatics},
+  pdftitle = {\name: NineML Model Report},
+  pdfsubject = {NineML Model Report},
+  pdfpagemode = UseNone
+}
+
+\geometry{
+  body={6.5in, 8.5in},
+  left=1.0in,
+  top=1.25in
+}
+
+\pagestyle{myheadings}
+\markright{\name}
+\thispagestyle{empty}
+
+\usepackage{sectsty}
+\sectionfont{\rmfamily\mdseries\Large}
+\subsectionfont{\rmfamily\mdseries\itshape\large}
+
+\setlength\parindent{0em}
+
+\renewenvironment{itemize}{
+  \begin{list}{}{
+    \setlength{\leftmargin}{1.5em}
+  }
+}{
+  \end{list}
+}
+
+\begin{document}
+
+\URCornerWallPaper{0.25}{logo.png}
+
+\centerline{\huge \bf \name}
+
+\vspace{0.25in}
+
+\begin{minipage}{0.45\linewidth}
+  \href{http://www.incf.org}{INCF Secretariat} \\
+  Karolinska Institutet \\
+  Nobels väg 15 A \\
+  SE-171 77 Stockholm \\
+  Sweden
+\end{minipage}
+\begin{minipage}{0.45\linewidth}
+  \begin{tabular}{ll}
+    Phone: & +46 8 524 87 093 \\
+    Fax: & +46 8 524 87 094 \\
+    Email: & \href{mailto:info@incf.org}{\tt info@incf.org} \\
+    Homepage: & \href{http://www.incf.org}{\tt http://www.incf.org} \\
+  \end{tabular}
+\end{minipage}
+
+###CONTENTS###
+
+\bigskip
+
+\begin{center}
+  \begin{footnotesize}
+    \href{\footerlink}{\texttt{\footerlink}}
+  \end{footnotesize}
+\end{center}
+
+\end{document}

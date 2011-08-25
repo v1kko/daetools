@@ -12,11 +12,8 @@ from nineml_daetools_bridge import *
 class sim_hierachical_iaf_1coba(daeSimulation):
     def __init__(self, ninemlComponent):
         daeSimulation.__init__(self)
-        start_time = time()
         self.m = nineml_daetools_bridge(ninemlComponent.name, ninemlComponent)
         self.m.Description = ""
-        elapsed_time = time() - start_time
-        print 'Elapsed time =', elapsed_time
 
     def SetUpParametersAndDomains(self):
         iaf  = findObjectInModel(self.m, 'iaf',       look_for_models = True)
@@ -95,7 +92,12 @@ coba1 = coba1_base()
 # Create Log, Solver, DataReporter and Simulation object
 log          = daePythonStdOutLog()
 daesolver    = daeIDAS()
+
+start_time = time()
 simulation   = sim_hierachical_iaf_1coba(coba1)
+elapsed_time = time() - start_time
+print 'Time to create component =', elapsed_time
+
 datareporter = daeTCPIPDataReporter()
 
 # Enable reporting of all variables
@@ -111,7 +113,10 @@ if(datareporter.Connect("", simName) == False):
     sys.exit()
 
 # Initialize the simulation
+start_time = time()
 simulation.Initialize(daesolver, datareporter, log)
+elapsed_time = time() - start_time
+print 'Time to initialize the simulation =', elapsed_time
 
 # Save the model reports for all models
 simulation.m.SaveModelReport(simulation.m.Name + ".xml")

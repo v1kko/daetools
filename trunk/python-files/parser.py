@@ -33,6 +33,9 @@ class ConstantNode(Node):
     def __str__(self):
         return str(self.Value)
 
+    def toLatex(self):
+        return str(self.Value)
+
     def evaluate(self, dictIdentifiers, dictFunctions):
         return self.Value
 
@@ -46,6 +49,9 @@ class AssignmentNode(Node):
 
     def __str__(self):
         return '{0} = {1}'.format(str(self.identifier), str(self.expression))
+
+    def toLatex(self):
+        return '{0} = {1}'.format(self.identifier.toLatex(), self.expression.toLatex())
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         value = self.expression.Node.evaluate(dictIdentifiers, dictFunctions)
@@ -61,6 +67,9 @@ class IdentifierNode(Node):
 
     def __str__(self):
         return self.Name
+
+    def toLatex(self):
+        return '{' + self.Name + '}'
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Name in dictIdentifiers:
@@ -84,6 +93,9 @@ class FunctionNode(Node):
     def __str__(self):
         return '{0}({1})'.format(self.Function, str(self.Node))
 
+    def toLatex(self):
+        return '{0} \\left( {1} \\right)'.format(self.Function, self.Node.toLatex())
+
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
@@ -105,6 +117,9 @@ class UnaryNode(Node):
 
     def __str__(self):
         return '({0}{1})'.format(self.Operator, str(self.Node))
+
+    def toLatex(self):
+        return '{0} \\left( {1} \\right)'.format(self.Operator, self.Node.toLatex())
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == UnaryNode.opMinus:
@@ -132,6 +147,14 @@ class BinaryNode(Node):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
+    def toLatex(self):
+        if self.Operator == '/':
+            return '\\frac{0}{1}'.format('{'+self.lNode.toLatex()+'}', '{'+self.rNode.toLatex()+'}')
+        elif self.Operator == '*':
+            return '{0} {1} {2}'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+        else:
+            return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+            
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == BinaryNode.opPlus:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) + self.rNode.evaluate(dictIdentifiers, dictFunctions)
@@ -190,6 +213,9 @@ class ConditionBinaryNode(ConditionNode):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
+    def toLatex(self):
+        return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionBinaryNode.opEQ:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) == self.rNode.evaluate(dictIdentifiers, dictFunctions)
@@ -221,6 +247,9 @@ class ConditionExpressionNode(ConditionNode):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
+    def toLatex(self):
+        return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionExpressionNode.opAnd:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) & self.rNode.evaluate(dictIdentifiers, dictFunctions)
@@ -239,6 +268,9 @@ class Condition:
 
     def __str__(self):
         return str(self.CondNode)
+
+    def toLatex(self):
+        return self.CondNode.toLatex()
 
     #def not_(self):
     #    return Condition(ConditionUnaryNode(ConditionUnaryNode.opNot,
@@ -281,6 +313,9 @@ class Number:
 
     def __str__(self):
         return str(self.Node)
+
+    def toLatex(self):
+        return self.Node.toLatex()
 
     def __neg__(self):
         return Number(UnaryNode(UnaryNode.opMinus, self.Node))
@@ -607,9 +642,18 @@ class ExpressionParser:
         self.parse(expression)
         return self.evaluate()
 
+    def parse_to_latex(self, expression):
+        self.parse(expression)
+        return self.toLatex()
+
     def parse(self, expression):
         self.parseResult = self.parser.parse(expression, debug = 0)
         return self.parseResult
+
+    def toLatex(self):
+        if self.parseResult is None:
+            raise RuntimeError('expression not parsed yet')
+        return self.parseResult.toLatex()
 
     def evaluate(self):
         if self.parseResult is None:
@@ -692,44 +736,54 @@ if __name__ == "__main__":
     expression   = '(-m1.m2.y + 2) / m1.x'
     expected_res = (-m1_m2_y + 2) / m1_x
     parse_res    = parser.parse(expression)
+    latex_res    = parser.toLatex()
     eval_res     = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
     print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
     print '\n'
 
     expression   = '(-exp(y + x2 / x4) + 4.0) - x1'
     expected_res = (-math.exp(y + x2 / x4) + 4.0) - x1
     parse_res    = parser.parse(expression)
+    latex_res    = parser.toLatex()
     eval_res     = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
     print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
     print '\n'
 
     expression   = 'R = sin(x1 + x3)/x4'
     Rcalc        = math.sin(x1 + x3)/x4
     parse_res    = parser.parse(expression)
+    latex_res    = parser.toLatex()
     eval_res     = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
     print 'Evaluate result: R = {0} (expected {1})'.format(str(eval_res), Rcalc)
     print 'Updated dictIdentifiers[R] = {0}'.format(dictIdentifiers['R'])
     print '\n'
 
     expression = '(y + 4.0 >= x3 - 3.2e-03) and (y == 3)'
     parse_res = parser.parse(expression)
+    latex_res = parser.toLatex()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
     print '\n'
 
     expression = '(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
     parse_res = parser.parse(expression)
+    latex_res = parser.toLatex()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
     print '\n'
