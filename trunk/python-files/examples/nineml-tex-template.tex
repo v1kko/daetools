@@ -1,13 +1,28 @@
 \documentclass[a4paper]{article}
+\special{papersize=210mm,297mm}
 
+\usepackage{graphicx}
+\usepackage{verbatim} 
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{wallpaper}
+\usepackage{fancyhdr}
+\setlength{\headheight}{20mm}
 
 \def\name{###MODEL_NAME###}
+\title{###MODEL_NAME###}
+\author{INCF}
 
-\def\footerlink{http://www.incf.org}
+\pagestyle{fancy}
+\lhead{\includegraphics[height=8mm,keepaspectratio=true]{./logo.png}}
+\chead{}
+\rhead{\bfseries \name}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
 
 \hypersetup{
   colorlinks = true,
@@ -19,62 +34,94 @@
   pdfpagemode = UseNone
 }
 
-\geometry{
-  body={6.5in, 8.5in},
-  left=1.0in,
-  top=1.25in
+\pdfinfo{
+  /Title    (NineML Model Report)
+  /Author   (INCF)
+  /Creator  (INCF)
+  /Producer (INCF)
+  /Subject  (NineML Model Report)
+  /Keywords (neuroinformatics)
 }
 
-\pagestyle{myheadings}
-\markright{\name}
-\thispagestyle{empty}
+\geometry{
+  left=25mm,
+  right=25mm,
+  top=30mm,
+  bottom=20mm
+}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.2mm}}
 
 \usepackage{sectsty}
+\chapterfont{\rmfamily\mdseries\Large}
 \sectionfont{\rmfamily\mdseries\Large}
 \subsectionfont{\rmfamily\mdseries\itshape\large}
 
-\setlength\parindent{0em}
-
-\renewenvironment{itemize}{
-  \begin{list}{}{
-    \setlength{\leftmargin}{1.5em}
-  }
-}{
-  \end{list}
-}
-
 \begin{document}
 
-\URCornerWallPaper{0.25}{logo.png}
+\begin{titlepage}
+\begin{center}
 
-\centerline{\huge \bf \name}
+\vspace*{5cm}
 
-\vspace{0.25in}
+\includegraphics{./logo.png} \\[1cm]    
 
-\begin{minipage}{0.45\linewidth}
-  \href{http://www.incf.org}{INCF Secretariat} \\
-  Karolinska Institutet \\
-  Nobels väg 15 A \\
-  SE-171 77 Stockholm \\
-  Sweden
-\end{minipage}
-\begin{minipage}{0.45\linewidth}
-  \begin{tabular}{ll}
-    Phone: & +46 8 524 87 093 \\
-    Fax: & +46 8 524 87 094 \\
-    Email: & \href{mailto:info@incf.org}{\tt info@incf.org} \\
-    Homepage: & \href{http://www.incf.org}{\tt http://www.incf.org} \\
-  \end{tabular}
-\end{minipage}
+\textsc{\Large NineML Model report}\\[0.5cm]
 
-###CONTENTS###
+\HRule \\[0.4cm]
+{ \huge \bfseries \name}\\[0.4cm]
 
-\bigskip
+\HRule \\[1.5cm]
+
+\vfill
+
+{\large \today}
+
+\end{center}
+\end{titlepage}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Model Specification}
+
+###MODEL_SPECIFICATION###
+\newpage
+
+\section{Tests}
+
+###TESTS###
+\newpage
+
+\appendix
+
+###APPENDIXES###
+
+\section{XML Source code}
+
+\section{Python Source code}
+
+\section{Tests Source code}
+
+\vfill
 
 \begin{center}
-  \begin{footnotesize}
-    \href{\footerlink}{\texttt{\footerlink}}
-  \end{footnotesize}
+  \begin{minipage}{0.45\linewidth}
+    \href{http://www.incf.org}{INCF Secretariat} \\
+    Karolinska Institutet \\
+    Nobels väg 15 A \\
+    SE-171 77 Stockholm \\
+    Sweden
+  \end{minipage}
+  \begin{minipage}{0.45\linewidth}
+    \begin{tabular}{ll}
+      Phone: & +46 8 524 87 093 \\
+      Fax: & +46 8 524 87 094 \\
+      Email: & \href{mailto:info@incf.org}{\tt info@incf.org} \\
+      Homepage: & \href{http://www.incf.org}{\tt http://www.incf.org} \\
+    \end{tabular}
+  \end{minipage}
 \end{center}
 
 \end{document}

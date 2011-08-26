@@ -69,7 +69,7 @@ class IdentifierNode(Node):
         return self.Name
 
     def toLatex(self):
-        return '{' + self.Name + '}'
+        return self.Name
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Name in dictIdentifiers:
@@ -94,12 +94,18 @@ class FunctionNode(Node):
         return '{0}({1})'.format(self.Function, str(self.Node))
 
     def toLatex(self):
-        return '{0} \\left( {1} \\right)'.format(self.Function, self.Node.toLatex())
-
+        if self.Function == 'sqrt':
+            return '\\sqrt{{{0}}}'.format(self.Node.toLatex())
+        elif self.Function == 'exp':
+            return 'e ^ {{{0}}}'.format(self.Node.toLatex())
+        else:
+            return '{0} \\left( {1} \\right)'.format(self.Function, self.Node.toLatex())
+            
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
             argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
+            print fun, argument0
             return fun(argument0)
         else:
             raise RuntimeError('The function {0} not found in the functions dictionary'.format(self.Function))
@@ -119,8 +125,38 @@ class UnaryNode(Node):
         return '({0}{1})'.format(self.Operator, str(self.Node))
 
     def toLatex(self):
-        return '{0} \\left( {1} \\right)'.format(self.Operator, self.Node.toLatex())
+        return '{0}{1}'.format(self.Operator, self.encloseNode())
 
+    def enclose(self, doEnclose):
+        if doEnclose:
+            return '\\left( ' + self.Node.toLatex() + ' \\right)'
+        else:
+            return self.Node.toLatex()
+            
+    def encloseNode(self):
+        if isinstance(self.Node, ConstantNode):
+            return self.enclose(False)
+
+        elif isinstance(self.Node, IdentifierNode):
+            return self.enclose(False)
+
+        elif isinstance(self.Node, FunctionNode):
+            return self.enclose(False)
+
+        elif isinstance(self.Node, UnaryNode):
+            return self.enclose(True)
+
+        elif isinstance(self.Node, BinaryNode):
+            if (self.Node.Operator == '+') or (self.Node.Operator == '-'):
+                return self.enclose(True)
+            elif (self.Node.Operator == '*') or (self.Node.Operator == '/') or (self.Node.Operator == '^'):
+                return self.enclose(False)
+            else:
+                return self.enclose(True)
+
+        else:
+            return self.enclose(True)
+            
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == UnaryNode.opMinus:
             return (-self.Node.evaluate(dictIdentifiers, dictFunctions))
@@ -147,25 +183,122 @@ class BinaryNode(Node):
     def __str__(self):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
-    def toLatex(self):
-        if self.Operator == '/':
-            return '\\frac{0}{1}'.format('{'+self.lNode.toLatex()+'}', '{'+self.rNode.toLatex()+'}')
-        elif self.Operator == '*':
-            return '{0} {1} {2}'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+    def encloseLeft(self, doEnclose):
+        if doEnclose:
+            return '\\left( ' + self.lNode.toLatex() + ' \\right)'
         else:
-            return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+            return self.lNode.toLatex()
+
+    def encloseRight(self, doEnclose):
+        if doEnclose:
+            return '\\left( ' + self.rNode.toLatex() + ' \\right)'
+        else:
+            return self.rNode.toLatex()
+
+    def toLatex(self):
+        if (self.Operator == '+'):
+            # Default behaviour is to not enclose any
+            left  = self.encloseLeft(False)
+            right = self.encloseRight(False)
+
+            # Right exceptions:
+            if isinstance(self.rNode, UnaryNode):
+                right = self.encloseRight(True)
+
+            return '{0} + {1}'.format(left, right)
+
+        elif (self.Operator == '-'):
+            # Default behaviour is to enclose right
+            left  = self.encloseLeft(False)
+            right = self.encloseRight(True)
+
+            # Right exceptions:
+            if isinstance(self.rNode, ConstantNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, IdentifierNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, FunctionNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, BinaryNode):
+                if (self.rNode.Operator == '*') or (self.rNode.Operator == '/') or (self.rNode.Operator == '^'):
+                    right = self.encloseRight(False)
+
+            return '{0} - {1}'.format(left, right)
+
+        elif (self.Operator == '*'):
+            # Default behaviour is to enclose both
+            left  = self.encloseLeft(True)
+            right = self.encloseRight(True)
+
+            # Left exceptions:
+            if isinstance(self.lNode, ConstantNode):
+                left = self.encloseLeft(False)
+            elif isinstance(self.lNode, IdentifierNode):
+                left = self.encloseLeft(False)
+            elif isinstance(self.lNode, FunctionNode):
+                left = self.encloseLeft(False)
+            elif isinstance(self.lNode, UnaryNode):
+                left = self.encloseLeft(False)
+            elif isinstance(self.lNode, BinaryNode):
+                if (self.lNode.Operator == '*') or (self.lNode.Operator == '/') or (self.lNode.Operator == '^'):
+                    left = self.encloseLeft(False)
+
+            # Right exceptions:
+            if isinstance(self.rNode, ConstantNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, IdentifierNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, FunctionNode):
+                right = self.encloseRight(False)
+            elif isinstance(self.rNode, BinaryNode):
+                if (self.rNode.Operator == '*') or (self.rNode.Operator == '/') or (self.rNode.Operator == '^'):
+                    right = self.encloseRight(False)
+
+            return '{0} \\cdot {1}'.format(left, right)
+
+        elif (self.Operator == '/'):
+            # Default behaviour is to not enclose any
+            left  = self.encloseLeft(False)
+            right = self.encloseRight(False)
+
+            return '\\frac{{{0}}}{{{1}}}'.format(left, right)
+
+        elif (self.Operator == '^'):
+            # Default behaviour is to enclose left
+            left  = self.encloseLeft(True)
+            right = self.encloseRight(False)
+
+            # Left exceptions:
+            if isinstance(self.lNode, ConstantNode):
+                left = self.encloseLeft(False)
+            elif isinstance(self.lNode, IdentifierNode):
+                left = self.encloseLeft(False)
+
+            return '{{{0}}} ^ {{{1}}}'.format(left, right)
+
+        else:
+            # Default behaviour is to enclose both
+            left  = self.encloseLeft(True)
+            right = self.encloseRight(True)
+
+            return '{0} {1} {2}'.format(left, self.Operator, right)
             
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == BinaryNode.opPlus:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) + self.rNode.evaluate(dictIdentifiers, dictFunctions)
+
         elif self.Operator == BinaryNode.opMinus:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) - self.rNode.evaluate(dictIdentifiers, dictFunctions)
+
         elif self.Operator == BinaryNode.opMulti:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) * self.rNode.evaluate(dictIdentifiers, dictFunctions)
+
         elif self.Operator == BinaryNode.opDivide:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) / self.rNode.evaluate(dictIdentifiers, dictFunctions)
+
         elif self.Operator == BinaryNode.opPower:
             return self.lNode.evaluate(dictIdentifiers, dictFunctions) ** self.rNode.evaluate(dictIdentifiers, dictFunctions)
+
         else:
             raise RuntimeError("Not supported binary operator: {0}".format(self.Operator))
 
@@ -408,16 +541,23 @@ functions = {'exp'  : 'exp',
 
 tokens = [
     'NAME', 'NUMBER', 'FLOAT',
-    'PLUS','MINUS','EXP', 'TIMES','DIVIDE','EQUALS',
+    'PLUS','MINUS','TIMES','DIVIDE','EXP','EQUALS',
     'LPAREN','RPAREN','PERIOD',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
     ] + list(functions.values()) + list(logical_operator.values())
 
+precedence = [
+                ('left', 'PLUS', 'MINUS'),
+                ('left', 'TIMES', 'DIVIDE'),
+                ('left', 'EXP')
+             ]
+
+
 t_PLUS    = r'\+'
 t_MINUS   = r'-'
-t_EXP     = r'\*\*'
 t_TIMES   = r'\*'
 t_DIVIDE  = r'/'
+t_EXP     = r'\*\*'
 
 t_EQ = r'=='
 t_NE = r'!='
@@ -547,19 +687,24 @@ def p_additive_expression_3(p):
 
 # multiplicative-expression
 def p_multiplicative_expression_1(p):
-    'multiplicative_expression : unary_expression'
+    'multiplicative_expression : power_expression'
     p[0] = p[1]
 
 def p_multiplicative_expression_2(p):
-    'multiplicative_expression : multiplicative_expression TIMES unary_expression'
-    p[0] = p[1] * p[3]
-
-def p_multiplicative_expression_3(p):
-    'multiplicative_expression : multiplicative_expression DIVIDE unary_expression'
+    'multiplicative_expression : multiplicative_expression DIVIDE power_expression'
     p[0] = p[1] / p[3]
 
-def p_multiplicative_expression_4(p):
-    'multiplicative_expression : multiplicative_expression EXP unary_expression'
+def p_multiplicative_expression_3(p):
+    'multiplicative_expression : multiplicative_expression TIMES power_expression'
+    p[0] = p[1] * p[3]
+
+
+def p_power_expression_1(p):
+    'power_expression : unary_expression'
+    p[0] = p[1]
+
+def p_power_expression_2(p):
+    'power_expression : power_expression EXP unary_expression'
     p[0] = p[1] ** p[3]
 
 # unary-expression:
@@ -688,6 +833,33 @@ class ExpressionParser:
     def parseResult(self):
         return self.parseResult
 
+def parse(expression, expected_res):
+    parse_res    = parser.parse(expression)
+    latex_res    = parser.toLatex()
+    eval_res     = parser.evaluate()
+    print 'Expression:\n' + expression
+    #print 'NodeTree:\n', repr(parse_res)
+    print 'Parse result:\n', str(parse_res)
+    print 'Latex:\n', latex_res
+    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
+    print '\n'
+
+def testLatex(parser):
+    operators = ['+', '-', '*', '/', '**']
+    l = 'x_1'
+    r = 'x_2'
+    counter = 0
+    for lop in operators:
+        for rop in operators:
+            for op in operators:
+                expression   = l + lop + r + op + l + rop + r
+                parse_res    = parser.parse(expression)
+                latex_res    = parser.toLatex()
+                print '\\begin{verbatim}' + str(counter) + '. ' + expression + '\\end{verbatim}\n'
+                print '\\begin{verbatim}Parse result: ' + str(parse_res) + '\\end{verbatim}\n'
+                print '$' + latex_res + '$\n\n'
+                counter += 1
+
 if __name__ == "__main__":
     """
     Dictionary dictIdentifiers should contain the keys of the following type:
@@ -733,8 +905,11 @@ if __name__ == "__main__":
 
     parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
-    expression   = '(-m1.m2.y + 2) / m1.x'
-    expected_res = (-m1_m2_y + 2) / m1_x
+    #testLatex(parser)
+    #exit(0)
+    
+    expression   = '-sqrt(m1.m2.y + 2) / m1.x'
+    expected_res = -math.sqrt(m1_m2_y + 2) / m1_x
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
     eval_res     = parser.evaluate()
@@ -745,6 +920,8 @@ if __name__ == "__main__":
     print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
     print '\n'
 
+    exit(0)
+    
     expression   = '(-exp(y + x2 / x4) + 4.0) - x1'
     expected_res = (-math.exp(y + x2 / x4) + 4.0) - x1
     parse_res    = parser.parse(expression)

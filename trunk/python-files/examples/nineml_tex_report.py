@@ -10,6 +10,17 @@ from time import localtime, strftime, time
 from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 
+class texCommand:
+    def __init__(self, startCommand, endCommand):
+        self.startCommand = startCommand
+        self.endCommand   = endCommand
+
+    def __call__(self, content):
+        return self.startCommand + content + self.endCommand
+
+tex_itemize  = texCommand('\\begin{itemize}\n', '\\end{itemize}\n')
+tex_verbatim = texCommand(' \\begin{verbatim}', '\\end{verbatim} ')
+
 class nineml_tex_report:
     def __init__(self, ninemlComponent, texTemplate, texOutputFile):
         self.ninemlComponent = ninemlComponent
@@ -24,7 +35,7 @@ class nineml_tex_report:
 
         self.begin_itemize = '\\begin{itemize}\n'
         self.item          = '\\item '
-        self.end_itemize   = '\\end{itemize}\n'
+        self.end_itemize   = '\\end{itemize}\n\n'
 
         self.content = []
         # 1) Create parameters
@@ -32,7 +43,7 @@ class nineml_tex_report:
             self.content.append('\\subsection*{Parameters}\n\n')
             self.content.append(self.begin_itemize)
             for param in self.ninemlComponent.parameters:
-                tex = self.item + param.name + '\n'
+                tex = self.item + tex_verbatim(param.name) + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
@@ -42,7 +53,7 @@ class nineml_tex_report:
             self.content.append('\\subsection*{State-Variables}\n\n')
             self.content.append(self.begin_itemize)
             for var in self.ninemlComponent.state_variables:
-                tex = self.item + var.name + '\n'
+                tex = self.item + tex_verbatim(var.name) + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
@@ -51,7 +62,7 @@ class nineml_tex_report:
         if self.ninemlComponent.aliases_map:
             self.content.append('\\subsection*{Aliases}\n\n')
             for alias in self.ninemlComponent.aliases:
-                tex = '${0} = {1}$\n'.format(alias.lhs, self.parser.parse_to_latex(alias.rhs))
+                tex = '${0} = {1}$\n\n'.format(alias.lhs, self.parser.parse_to_latex(alias.rhs))
                 self.content.append(tex)
             self.content.append('\n')
 
@@ -60,7 +71,7 @@ class nineml_tex_report:
             self.content.append('\\subsection*{Analog Ports}\n\n')
             self.content.append(self.begin_itemize)
             for analog_port in self.ninemlComponent.analog_ports:
-                tex = self.item + analog_port.name + ' (' + analog_port.mode + ')' + '\n'
+                tex = self.item + tex_verbatim(analog_port.name + ' (' + analog_port.mode + ')') + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
@@ -70,7 +81,7 @@ class nineml_tex_report:
             self.content.append('\\subsection*{Event ports}\n\n')
             self.content.append(self.begin_itemize)
             for event_port in self.ninemlComponent.event_ports:
-                tex = self.item + event_port.name + ' (' + event_port.mode + ')' + '\n'
+                tex = self.item + tex_verbatim(event_port.name + ' (' + event_port.mode + ')') + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
@@ -102,7 +113,7 @@ class nineml_tex_report:
                 for time_deriv in regime.time_derivatives:
                     if counter != 0:
                         tex += ' \\\\ '
-                    tex += '\\frac{{{0}}}{{dt}} = {1}'.format(time_deriv.lhs, self.parser.parse_to_latex(time_deriv.rhs))
+                    tex += '\\frac{{d{0}}}{{dt}} = {1}'.format(time_deriv.dependent_variable, self.parser.parse_to_latex(time_deriv.rhs))
                     counter += 1
                 
                 # 8b) Create on_condition actions
@@ -138,13 +149,34 @@ class nineml_tex_report:
             self.content.append('\n')
 
         self.template = self.template.replace('###MODEL_NAME###', self.ninemlComponent.name)
-        self.template = self.template.replace('###CONTENTS###', ''.join(self.content))
+        self.template = self.template.replace('###MODEL_SPECIFICATION###', ''.join(self.content))
+        self.template = self.template.replace('###TESTS###', '')
+        self.template = self.template.replace('###APPENDIXES###', '')
         self.of.write(self.template)
         self.of.close()
 
         if subprocess.call(['pdflatex', self.texOutputFile], shell=False) != 0:
             raise RuntimeError('Call to pdflatex failed!')
-        subprocess.call(['evince', self.texOutputFile.replace('tex', 'pdf')], shell=False)
+        subprocess.call(['evince', self.texOutputFile.replace('.tex', '.pdf')], shell=False)
+
+"""
+\begin{table}[placement=h]
+    \caption{A normal caption}
+    \begin{center}
+      \begin{tabular}{ | l | l |}
+    \hline
+    Time, ms & Vm, mV \\ \hline
+    0 & -50.0 \\
+    1 & -51.0 \\
+    2 & -52.0 \\
+    3 & -53.0 \\
+    4 & -54.0 \\
+    5 & -55.0 \\
+    \hline
+      \end{tabular}
+    \end{center}
+\end{table}
+"""
 
 coba_iaf_base = TestableComponent('hierachical_iaf_1coba')
 coba_iaf = coba_iaf_base()
