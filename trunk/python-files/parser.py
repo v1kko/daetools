@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 
 """********************************************************************************
-                             daeParser.py
-                 DAE Tools: pyDAE module, www.daetools.com
+                             parser.py
                  Copyright (C) Dragan Nikolic, 2011
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
+Parser is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with this 
+software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 import os, sys, math, operator
 import ply.lex as lex
 import ply.yacc as yacc
-from daetools.pyDAE import *
+#from daetools.pyDAE import *
 
 class Node:
     def evaluate(self, dictIdentifiers, dictFunctions):
@@ -105,7 +104,6 @@ class FunctionNode(Node):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
             argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
-            print fun, argument0
             return fun(argument0)
         else:
             raise RuntimeError('The function {0} not found in the functions dictionary'.format(self.Function))
@@ -347,7 +345,20 @@ class ConditionBinaryNode(ConditionNode):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
     def toLatex(self):
-        return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+        if self.Operator == ConditionBinaryNode.opEQ:
+            return '\\left( {0} == {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionBinaryNode.opNE:
+            return '\\left( {0} \\neq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionBinaryNode.opLT:
+            return '\\left( {0} < {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionBinaryNode.opLE:
+            return '\\left( {0} \\leq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionBinaryNode.opGT:
+            return '\\left( {0} > {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionBinaryNode.opGE:
+            return '\\left( {0} \\geq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        else:
+            raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionBinaryNode.opEQ:
@@ -381,7 +392,12 @@ class ConditionExpressionNode(ConditionNode):
         return '({0} {1} {2})'.format(str(self.lNode), self.Operator, str(self.rNode))
 
     def toLatex(self):
-        return '\\left( {0} {1} {2} \\right)'.format(self.lNode.toLatex(), self.Operator, self.rNode.toLatex())
+        if self.Operator == ConditionExpressionNode.opAnd:
+            return '\\left( {0} \\land {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        elif self.Operator == ConditionExpressionNode.opOr:
+            return '\\left( {0} \\lor {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+        else:
+            raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Operator == ConditionExpressionNode.opAnd:
@@ -498,7 +514,7 @@ class Number:
                                 )
                      )
 
-    def __neq__(self, val):
+    def __ne__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opNE,
                                              val.Node
@@ -631,7 +647,7 @@ def p_and_expression_1(p):
 
 def p_and_expression_2(p):
     'and_expression : and_expression and equality_expression'
-    p[0] = p[1] & p[3]
+    p[0] = (p[1] & p[3])
 
 # equality-expression:
 def p_equality_expression_1(p):
@@ -920,8 +936,6 @@ if __name__ == "__main__":
     print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
     print '\n'
 
-    exit(0)
-    
     expression   = '(-exp(y + x2 / x4) + 4.0) - x1'
     expected_res = (-math.exp(y + x2 / x4) + 4.0) - x1
     parse_res    = parser.parse(expression)
@@ -947,13 +961,16 @@ if __name__ == "__main__":
     print 'Updated dictIdentifiers[R] = {0}'.format(dictIdentifiers['R'])
     print '\n'
 
-    expression = '(y + 4.0 >= x3 - 3.2e-03) and (y == 3)'
+    expression = '(y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5)'
+    expected_res = (y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5)
     parse_res = parser.parse(expression)
     latex_res = parser.toLatex()
+    eval_res  = parser.evaluate()
     print 'Expression:\n' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result:\n', str(parse_res)
     print 'Latex:\n', latex_res
+    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
     print '\n'
 
     expression = '(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>410</height>
+    <width>680</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>6</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -148,104 +148,23 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QTreeWidget" name="treeAnalogPorts">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>350</width>
-           <height>300</height>
-          </size>
-         </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="tabKeyNavigation">
-          <bool>true</bool>
          </property>
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
-         <property name="columnCount">
-          <number>2</number>
-         </property>
-         <attribute name="headerVisible">
-          <bool>false</bool>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
          </attribute>
          <attribute name="headerDefaultSectionSize">
-          <number>200</number>
+          <number>300</number>
          </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>200</number>
-         </attribute>
-         <attribute name="headerVisible">
-          <bool>false</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>Name</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Value</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_5">
-      <attribute name="title">
-       <string>Event Ports</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QTreeWidget" name="treeEventPorts">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>350</width>
-           <height>300</height>
-          </size>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAsNeeded</enum>
-         </property>
-         <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="tabKeyNavigation">
-          <bool>true</bool>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="columnCount">
-          <number>2</number>
-         </property>
-         <attribute name="headerVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>200</number>
-         </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>200</number>
-         </attribute>
-         <attribute name="headerVisible">
-          <bool>false</bool>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
          </attribute>
          <column>
           <property name="text">
@@ -263,8 +182,121 @@
      </widget>
      <widget class="QWidget" name="tab_6">
       <attribute name="title">
+       <string>Event Ports</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QTreeWidget" name="treeEventPorts">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Value</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Regimes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QTreeWidget" name="treeRegimes">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Value</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_7">
+      <attribute name="title">
        <string>Results</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QTreeWidget" name="treeResultsVariables">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="columnCount">
+          <number>1</number>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <attribute name="headerDefaultSectionSize">
+          <number>300</number>
+         </attribute>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

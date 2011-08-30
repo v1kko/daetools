@@ -184,8 +184,8 @@ coba_iaf = coba_iaf_base()
 destexhe_ampa_base = TestableComponent('destexhe_ampa')
 destexhe_ampa = destexhe_ampa_base()
 
-#coba = nineml_tex_report(coba_iaf.subnodes['cobaExcit'], 'nineml-tex-template.tex', 'cobaExcit.tex')
+coba = nineml_tex_report(coba_iaf.subnodes['cobaExcit'], 'nineml-tex-template.tex', 'cobaExcit.tex')
 iaf  = nineml_tex_report(coba_iaf.subnodes['iaf'],       'nineml-tex-template.tex', 'iaf.tex')
-#ampa  = nineml_tex_report(destexhe_ampa, 'nineml-tex-template.tex', 'destexhe_ampa.tex')
+ampa  = nineml_tex_report(destexhe_ampa, 'nineml-tex-template.tex', 'destexhe_ampa.tex')
 
 
