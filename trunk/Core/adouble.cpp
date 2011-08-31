@@ -703,6 +703,73 @@ const adouble atan(const adouble &a)
     return tmp;
 }
 
+const adouble sinh(const adouble& a) 
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+
+//    if (a.getValue() < 0.0) 
+//	{
+//        adouble temp = exp(a);
+//        return  0.5*(temp - 1.0/temp);
+//    }
+//	else 
+//	{
+//        adouble temp = exp(-a);
+//        return 0.5*(1.0/temp - temp);
+//    }
+}
+
+const adouble cosh(const adouble& a) 
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+
+//    adouble temp = (a.getValue() < 0.0) ? exp(a) : exp(-a);
+//    return 0.5*(temp + 1.0/temp);
+}
+
+const adouble tanh(const adouble& a)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+
+//    if (a.getValue() < 0.0) 
+//	{
+//        adouble temp = exp(2.0*a);
+//        return (temp - 1.0)/(temp + 1.0);
+//    }
+//	else
+//	{
+//        adouble temp = exp((-2.0)*a);
+//        return (1.0 - temp)/(temp + 1.0);
+//    }
+}
+
+const adouble asinh(const adouble &a)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+}
+
+const adouble acosh(const adouble &a)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+}
+
+const adouble atanh(const adouble &a)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+}
+
+const adouble atan2(const adouble &a, const adouble &b)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+}
+
 // ceil is non-differentiable: should I remove it?
 const adouble ceil(const adouble &a) 
 {

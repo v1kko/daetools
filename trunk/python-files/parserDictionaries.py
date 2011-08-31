@@ -55,13 +55,30 @@ def getParserDictionaries(model):
     dictIdentifiers['time'] = model.time()
 
     # DAE Tools mathematical functions:
-    dictFunctions['sin']  = Sin
-    dictFunctions['cos']  = Cos
-    dictFunctions['tan']  = Tan
-    dictFunctions['log']  = Log10
-    dictFunctions['ln']   = Log
-    dictFunctions['sqrt'] = Sqrt
-    dictFunctions['exp']  = Exp
+    dictFunctions['sin']   = Sin
+    dictFunctions['cos']   = Cos
+    dictFunctions['tan']   = Tan
+    dictFunctions['asin']  = ASin
+    dictFunctions['acos']  = ACos
+    dictFunctions['atan']  = ATan
+
+    #dictFunctions['sinh']   = Sinh
+    #dictFunctions['cosh']   = Cosh
+    #dictFunctions['tanh']   = Tanh
+    #dictFunctions['asinh']  = ASinh
+    #dictFunctions['acosh']  = ACosh
+    #dictFunctions['atanh']  = ATanh
+
+    dictFunctions['log']   = Log
+    dictFunctions['sqrt']  = Sqrt
+    dictFunctions['exp']   = Exp
+    dictFunctions['log']   = Log
+    dictFunctions['log10'] = Log10
+    dictFunctions['floor'] = Floor
+    dictFunctions['ceil']  = Ceil
+    dictFunctions['abs']   = Abs
+    dictFunctions['min']   = Min
+    dictFunctions['max']   = Max
 
     dictIdentifiers = addIdentifiers(model, model, dictIdentifiers)
     

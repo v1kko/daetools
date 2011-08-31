@@ -4,7 +4,7 @@
                              parser.py
                  Copyright (C) Dragan Nikolic, 2011
 ***********************************************************************************
-Parser is free software; you can redistribute it and/or modify it under the
+ExpressionParser is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. It is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -13,10 +13,10 @@ You should have received a copy of the GNU General Public License along with thi
 software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-import os, sys, math, operator
+import os, sys, operator
 import ply.lex as lex
 import ply.yacc as yacc
-#from daetools.pyDAE import *
+from math import *
 
 class Node:
     def evaluate(self, dictIdentifiers, dictFunctions):
@@ -27,7 +27,7 @@ class ConstantNode(Node):
         self.Value = value
 
     def __repr__(self):
-        return str(self.Value)
+        return 'ConstantNode({0})'.format(self.Value)
 
     def __str__(self):
         return str(self.Value)
@@ -76,18 +76,19 @@ class IdentifierNode(Node):
 
         raise RuntimeError('Identifier {0} not found in the identifiers dictionary'.format(self.Name))
 
-class FunctionNode(Node):
-    functions = ['exp', 'sin', 'cos', 'tan', 'log', 'ln', 'sqrt']
+class StandardFunctionNode(Node):
+    functions = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+                 'sqrt', 'exp', 'log', 'log10', 'ceil', 'floor']
 
     def __init__(self, function, expression):
-        if not (function in FunctionNode.functions):
+        if not (function in StandardFunctionNode.functions):
             raise RuntimeError('The function {0} is not supported'.format(function))
 
         self.Function = function
         self.Node     = expression.Node
 
     def __repr__(self):
-        return 'FunctionNode({0}, {1})'.format(self.Function, repr(self.Node))
+        return 'StandardFunctionNode({0}, {1})'.format(self.Function, repr(self.Node))
 
     def __str__(self):
         return '{0}({1})'.format(self.Function, str(self.Node))
@@ -103,8 +104,59 @@ class FunctionNode(Node):
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
+            if not callable(fun):
+                raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
             argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
             return fun(argument0)
+        else:
+            raise RuntimeError('The function {0} not found in the functions dictionary'.format(self.Function))
+
+class NonstandardFunctionNode(Node):
+    def __init__(self, function, argument_list = []):
+        self.Function          = function
+        self.ArgumentsNodeList = []
+        for arg in argument_list:
+            self.ArgumentsNodeList.append(arg.Node)
+
+    def __repr__(self):
+        argument_list = ''
+        for i in range(0, len(self.ArgumentsNodeList)):
+            node = self.ArgumentsNodeList[i]
+            if i == 0:
+                argument_list += repr(node)
+            else:
+                argument_list += ', ' + repr(node)
+        return 'NonstandardFunctionNode({0}, {1})'.format(self.Function, argument_list)
+
+    def __str__(self):
+        argument_list = ''
+        for i in range(0, len(self.ArgumentsNodeList)):
+            node = self.ArgumentsNodeList[i]
+            if i == 0:
+                argument_list += str(node)
+            else:
+                argument_list += ', ' + str(node)
+        return '{0}({1})'.format(self.Function, argument_list)
+
+    def toLatex(self):
+        argument_list = ''
+        for i in range(0, len(self.ArgumentsNodeList)):
+            node = self.ArgumentsNodeList[i]
+            if i == 0:
+                argument_list += node.toLatex()
+            else:
+                argument_list += ', ' + node.toLatex()
+        return '{0} \\left( {1} \\right)'.format(self.Function, argument_list)
+
+    def evaluate(self, dictIdentifiers, dictFunctions):
+        if self.Function in dictFunctions:
+            fun = dictFunctions[self.Function]
+            if not callable(fun):
+                raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
+            argument_list = ()
+            for node in self.ArgumentsNodeList:
+                argument_list = argument_list + (node.evaluate(dictIdentifiers, dictFunctions), )
+            return fun(*argument_list)
         else:
             raise RuntimeError('The function {0} not found in the functions dictionary'.format(self.Function))
 
@@ -138,7 +190,7 @@ class UnaryNode(Node):
         elif isinstance(self.Node, IdentifierNode):
             return self.enclose(False)
 
-        elif isinstance(self.Node, FunctionNode):
+        elif isinstance(self.Node, StandardFunctionNode):
             return self.enclose(False)
 
         elif isinstance(self.Node, UnaryNode):
@@ -215,7 +267,7 @@ class BinaryNode(Node):
                 right = self.encloseRight(False)
             elif isinstance(self.rNode, IdentifierNode):
                 right = self.encloseRight(False)
-            elif isinstance(self.rNode, FunctionNode):
+            elif isinstance(self.rNode, StandardFunctionNode):
                 right = self.encloseRight(False)
             elif isinstance(self.rNode, BinaryNode):
                 if (self.rNode.Operator == '*') or (self.rNode.Operator == '/') or (self.rNode.Operator == '^'):
@@ -233,7 +285,7 @@ class BinaryNode(Node):
                 left = self.encloseLeft(False)
             elif isinstance(self.lNode, IdentifierNode):
                 left = self.encloseLeft(False)
-            elif isinstance(self.lNode, FunctionNode):
+            elif isinstance(self.lNode, StandardFunctionNode):
                 left = self.encloseLeft(False)
             elif isinstance(self.lNode, UnaryNode):
                 left = self.encloseLeft(False)
@@ -246,7 +298,7 @@ class BinaryNode(Node):
                 right = self.encloseRight(False)
             elif isinstance(self.rNode, IdentifierNode):
                 right = self.encloseRight(False)
-            elif isinstance(self.rNode, FunctionNode):
+            elif isinstance(self.rNode, StandardFunctionNode):
                 right = self.encloseRight(False)
             elif isinstance(self.rNode, BinaryNode):
                 if (self.rNode.Operator == '*') or (self.rNode.Operator == '/') or (self.rNode.Operator == '^'):
@@ -377,8 +429,8 @@ class ConditionBinaryNode(ConditionNode):
             raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 
 class ConditionExpressionNode(ConditionNode):
-    opAnd = 'and'
-    opOr  = 'or'
+    opAnd = '&&'
+    opOr  = '||'
 
     def __init__(self, lnode, operator, rnode):
         self.lNode    = lnode
@@ -542,25 +594,37 @@ class Number:
                                 )
                      )
 
-logical_operator = {'and':'and',
-                    'or' :'or'
-                   }
+#logical_operator = {'and': 'and',
+#                    'or' : 'or'
+#                   }
 
 functions = {'exp'  : 'exp',
              'sqrt' : 'sqrt',
              'log'  : 'log',
-             'ln'   : 'ln',
+             'log10': 'log10',
              'sin'  : 'sin',
              'cos'  : 'cos',
-             'tan'  : 'tan'
+             'tan'  : 'tan',
+             'asin' : 'asin',
+             'acos' : 'acos',
+             'atan' : 'atan',
+             'sinh' : 'sinh',
+             'cosh' : 'cosh',
+             'tanh' : 'tanh',
+             'asinh': 'asinh',
+             'acosh': 'acosh',
+             'atanh': 'atanh',
+             'ceil' : 'ceil',
+             'floor': 'floor'
             }
 
 tokens = [
     'NAME', 'NUMBER', 'FLOAT',
     'PLUS','MINUS','TIMES','DIVIDE','EXP','EQUALS',
-    'LPAREN','RPAREN','PERIOD',
+    'LPAREN','RPAREN','PERIOD', 'COMMA',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
-    ] + list(functions.values()) + list(logical_operator.values())
+    'AND', 'OR'
+    ] + list(functions.values()) #+ list(logical_operator.values())
 
 precedence = [
                 ('left', 'PLUS', 'MINUS'),
@@ -581,18 +645,23 @@ t_GT = r'>'
 t_GE = r'>='
 t_LT = r'<'
 t_LE = r'<='
+t_AND = r'&&'
+t_OR  = r'\|\|'
 
+t_COMMA   = r','
 t_EQUALS  = r'='
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 t_PERIOD  = r'\.'
 
+#t_PI = r'pi'
+
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
-    if t.value in logical_operator:
-        t.type = logical_operator[t.value]
-    elif t.value in functions:
+    if t.value in functions:
         t.type = functions[t.value]
+    #elif t.value in logical_operator:
+    #    t.type = logical_operator[t.value]
     else:
         t.type = 'NAME'
     return t
@@ -612,9 +681,13 @@ def t_error(t):
 
 # Parser rules:
 # expression:
-def p_expression(p):
+def p_expression_1(p):
     'expression : assignment_expression'
     p[0] = p[1]
+
+def p_expression_2(t):
+    'expression : expression COMMA assignment_expression'
+    p[0] = p[1] + p[3]
 
 # assigment_expression:
 def p_assignment_expression_1(p):
@@ -637,7 +710,7 @@ def p_or_expression_1(p):
     p[0] = p[1]
 
 def p_or_expression_2(p):
-    'or_expression : or_expression or and_expression'
+    'or_expression : or_expression OR and_expression'
     p[0] = (p[1] | p[3])
 
 # AND-expression
@@ -646,7 +719,7 @@ def p_and_expression_1(p):
     p[0] = p[1]
 
 def p_and_expression_2(p):
-    'and_expression : and_expression and equality_expression'
+    'and_expression : and_expression AND equality_expression'
     p[0] = (p[1] & p[3])
 
 # equality-expression:
@@ -750,19 +823,35 @@ def p_postfix_expression_1(p):
 
 def p_postfix_expression_2(p):
     """
-    postfix_expression : sin  LPAREN expression RPAREN
-                       | cos  LPAREN expression RPAREN
-                       | tan  LPAREN expression RPAREN
-                       | exp  LPAREN expression RPAREN
-                       | sqrt LPAREN expression RPAREN
-                       | log  LPAREN expression RPAREN
-                       | ln   LPAREN expression RPAREN
+    postfix_expression : sin   LPAREN expression RPAREN
+                       | cos   LPAREN expression RPAREN
+                       | tan   LPAREN expression RPAREN
+                       | asin  LPAREN expression RPAREN
+                       | acos  LPAREN expression RPAREN
+                       | atan  LPAREN expression RPAREN
+                       | sinh  LPAREN expression RPAREN
+                       | cosh  LPAREN expression RPAREN
+                       | tanh  LPAREN expression RPAREN
+                       | asinh LPAREN expression RPAREN
+                       | acosh LPAREN expression RPAREN
+                       | atanh LPAREN expression RPAREN
+                       | exp   LPAREN expression RPAREN
+                       | sqrt  LPAREN expression RPAREN
+                       | log   LPAREN expression RPAREN
+                       | log10 LPAREN expression RPAREN
+                       | ceil  LPAREN expression RPAREN
+                       | floor LPAREN expression RPAREN
     """
-    p[0] = Number(FunctionNode(p[1], p[3]))
+    p[0] = Number(StandardFunctionNode(p[1], p[3]))
 
 def p_postfix_expression_3(p):
     '''postfix_expression : postfix_expression PERIOD NAME'''
     p[0] = Number(IdentifierNode(p[1].Node.Name + '.' + p[3]))
+
+def p_postfix_expression_4(p):
+    '''postfix_expression : postfix_expression LPAREN argument_expression_list RPAREN'''
+    print str(p[1]) + '(' + str(p[3]) + ')'
+    p[0] = Number(NonstandardFunctionNode(str(p[1]), p[3]))
 
 # primary-expression
 def p_primary_expression(p):
@@ -773,6 +862,20 @@ def p_primary_expression(p):
         p[0] = p[1]
     elif len(p) == 4:
         p[0] = p[2]
+
+# argument-expression-list:
+def p_argument_expression_list(p):
+    '''argument_expression_list :  assignment_expression
+                                |  argument_expression_list COMMA assignment_expression'''
+    arguments = []
+    if len(p) == 2:
+        arguments.append(p[1])
+    elif len(p) == 4:
+        for arg in list(p[1]):
+            arguments.append(arg)
+        arguments.append(p[3])
+
+    p[0] = arguments
 
 def p_constant_1(p):
     """constant : NUMBER"""
@@ -849,17 +952,24 @@ class ExpressionParser:
     def parseResult(self):
         return self.parseResult
 
-def parse(expression, expected_res):
+def testExpression(expression, expected_res, do_evaluation = True):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
-    eval_res     = parser.evaluate()
-    print 'Expression:\n' + expression
+    print 'Expression: ' + expression
     #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
+    print 'Parse result: ', str(parse_res)
+    print 'Latex: ', latex_res
+    eval_res = 0
+    if do_evaluation:
+        eval_res = parser.evaluate()
+        if fabs(eval_res - expected_res) > 0:
+            raise RuntimeError('Expression evaluation failed: {0} (evaluated {1}; expected {2})'.format(expression, eval_res, expected_res))
+        else:
+            print 'Evaluate result: OK (={0})'.format(eval_res)
     print '\n'
 
+    return parse_res, latex_res, eval_res
+    
 def testLatex(parser):
     operators = ['+', '-', '*', '/', '**']
     l = 'x_1'
@@ -876,18 +986,36 @@ def testLatex(parser):
                 print '$' + latex_res + '$\n\n'
                 counter += 1
 
+def Sum(a1, a2, a3):
+    return a1 + a2 + a3
+
+def step(t0, amplitude):
+    return amplitude
+
+def impulse(t0, amplitude):
+    return amplitude
+
+def linear(t0, t1, start, end):
+    return end
+
 if __name__ == "__main__":
     """
-    Dictionary dictIdentifiers should contain the keys of the following type:
-      identifier-name: value (for instance 'V' : 1.25, or 'name.V' : 0.1, etc)
-    Dictionary dictFunctions should contain the keys of the following type:
+    The parser supports the following math. functions: 'sqrt', 'exp', 'log', 'log10', 'ceil', 'floor',
+                                                       'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+                                                       'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
+    Objects that can be used with this parser should support the following math operators: +, -, *, /, **
+    and abovementioned math. functions.
+    User-defined functions with arbitrary number of arguments that operate on such objects can be defined by the user.
+    Dictionary dictIdentifiers should contain pairs of the following type:
+      identifier-name: value (for instance 'var' : number,
+                              or 'name.var' : object-that-defines-math-operators-and-functions)
+    Dictionary dictFunctions should contain pairs of the following type:
       function-name : callable-object (for instance 'exp': math.exp)
-      functions: sin, cos, tan, exp, ln, log, sqrt MUST be implemented
     """
     dictIdentifiers = {}
     dictFunctions   = {}
 
-    # Some dummy identifiers/values
+    # Some dummy identifiers:values
     y       = 10.0
     x1      =  1.0
     x2      =  2.0
@@ -897,6 +1025,9 @@ if __name__ == "__main__":
     m1_m2_y = 10.12
     R       =  0.0
 
+    # identifiers
+    dictIdentifiers['pi']      = pi
+    dictIdentifiers['e']       = e
     dictIdentifiers['y']       = y
     dictIdentifiers['x1']      = x1
     dictIdentifiers['x2']      = x2
@@ -906,13 +1037,31 @@ if __name__ == "__main__":
     dictIdentifiers['m1.m2.y'] = m1_m2_y
     dictIdentifiers['R']       = R
 
-    dictFunctions['sin']  = math.sin
-    dictFunctions['cos']  = math.cos
-    dictFunctions['tan']  = math.tan
-    dictFunctions['log']  = math.log10
-    dictFunctions['ln']   = math.log
-    dictFunctions['sqrt'] = math.sqrt
-    dictFunctions['exp']  = math.exp
+    # Standard functions
+    dictFunctions['log10']  = log10
+    dictFunctions['log']    = log
+    dictFunctions['sqrt']   = sqrt
+    dictFunctions['exp']    = exp
+    dictFunctions['ceil']   = ceil
+    dictFunctions['floor']  = floor
+    dictFunctions['sin']    = sin
+    dictFunctions['cos']    = cos
+    dictFunctions['tan']    = tan
+    dictFunctions['asin']   = asin
+    dictFunctions['acos']   = acos
+    dictFunctions['atan']   = atan
+    dictFunctions['sinh']   = sinh
+    dictFunctions['cosh']   = cosh
+    dictFunctions['tanh']   = tanh
+    dictFunctions['asinh']  = asinh
+    dictFunctions['acosh']  = acosh
+    dictFunctions['atanh']  = atanh
+
+    # Nonstandard functions (custom functions)
+    dictFunctions['Sum']      = Sum
+    dictFunctions['step']     = step
+    dictFunctions['impulse']  = impulse
+    dictFunctions['linear']   = linear
 
     print 'Identifiers:\n', dictIdentifiers
     print '\n'
@@ -922,62 +1071,44 @@ if __name__ == "__main__":
     parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
     #testLatex(parser)
-    #exit(0)
-    
-    expression   = '-sqrt(m1.m2.y + 2) / m1.x'
-    expected_res = -math.sqrt(m1_m2_y + 2) / m1_x
-    parse_res    = parser.parse(expression)
-    latex_res    = parser.toLatex()
-    eval_res     = parser.evaluate()
-    print 'Expression:\n' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
-    print '\n'
 
-    expression   = '(-exp(y + x2 / x4) + 4.0) - x1'
-    expected_res = (-math.exp(y + x2 / x4) + 4.0) - x1
-    parse_res    = parser.parse(expression)
-    latex_res    = parser.toLatex()
-    eval_res     = parser.evaluate()
-    print 'Expression:\n' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
-    print '\n'
 
-    expression   = 'R = sin(x1 + x3)/x4'
-    Rcalc        = math.sin(x1 + x3)/x4
-    parse_res    = parser.parse(expression)
-    latex_res    = parser.toLatex()
-    eval_res     = parser.evaluate()
-    print 'Expression:\n' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print 'Evaluate result: R = {0} (expected {1})'.format(str(eval_res), Rcalc)
-    print 'Updated dictIdentifiers[R] = {0}'.format(dictIdentifiers['R'])
-    print '\n'
+    testExpression('step(1.2, 1.2)', 1.2)
+    testExpression('impulse(1.2, 1.2)', 1.2)
+    testExpression('linear(0.0, 1.0, 5, 10)', 10)
+    exit(0)
 
-    expression = '(y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5)'
-    expected_res = (y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5)
-    parse_res = parser.parse(expression)
-    latex_res = parser.toLatex()
-    eval_res  = parser.evaluate()
-    print 'Expression:\n' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print 'Evaluate result: {0} (expected {1})'.format(str(eval_res), expected_res)
-    print '\n'
+    testExpression('log10(pi)', log10(pi))
+    testExpression('log(pi)',   log(pi))
+    testExpression('sqrt(pi)',  sqrt(pi))
+    testExpression('exp(pi)',   exp(pi))
+    testExpression('ceil(pi)',  ceil(pi))
+    testExpression('floor(pi)', floor(pi))
 
-    expression = '(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm'
-    parse_res = parser.parse(expression)
-    latex_res = parser.toLatex()
-    print 'Expression:\n' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result:\n', str(parse_res)
-    print 'Latex:\n', latex_res
-    print '\n'
+    testExpression('sin(pi)', sin(pi))
+    testExpression('cos(pi)', cos(pi))
+    testExpression('tan(pi)', tan(pi))
+    testExpression('asin(1)', asin(1))
+    testExpression('acos(1)', acos(1))
+    testExpression('atan(1)', atan(1))
+
+    testExpression('sinh(pi)', sinh(pi))
+    testExpression('cosh(pi)', cosh(pi))
+    testExpression('tanh(pi)', tanh(pi))
+    testExpression('asinh(pi)', asinh(pi))
+    testExpression('acosh(pi)', acosh(pi))
+    testExpression('atanh(0.1)', atanh(0.1))
+
+    testExpression('x1 + x2', x1 + x2)
+    testExpression('x1 - x2', x1 - x2)
+    testExpression('x1 * x2', x1 * x2)
+    testExpression('x1 / x2', x1 / x2)
+    testExpression('x1 ** x2', x1 ** x2)
+
+    testExpression('Sum(pi, 1.5, sqrt(4))', Sum(pi, 1.5, sqrt(4)))
+    testExpression('-sqrt(m1.m2.y + 2) / m1.x', -sqrt(m1_m2_y + 2) / m1_x)
+    testExpression('(-exp(y + x2 / x4) + 4.0) - x1', (-exp(y + x2 / x4) + 4.0) - x1)
+    parse_res, latex_res, eval_res = testExpression('R = sin(x1 + x3)/x4', sin(x1 + x3)/x4)
+    print 'Updated dictIdentifiers[R] = {0}\n'.format(dictIdentifiers['R'])
+    testExpression('(y + 4.0 >= x3 - 3.2e-03) || (y != 3) && (x1 <= 5)', (y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5))
+    testExpression('(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm', 0, False)

@@ -197,6 +197,15 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("ASin",  &daepython::ad_asin);
 	def("ACos",  &daepython::ad_acos);
 	def("ATan",  &daepython::ad_atan);
+
+	def("Sinh",  &daepython::ad_sinh);
+	def("Cosh",  &daepython::ad_cosh);
+	def("Tanh",  &daepython::ad_tanh);
+	def("ASinh", &daepython::ad_asinh);
+	def("ACosh", &daepython::ad_acosh);
+	def("ATanh", &daepython::ad_atanh);
+	def("ATan2", &daepython::ad_atan2);
+
 	def("Log10", &daepython::ad_log10);
 	def("Abs",   &daepython::ad_abs);
 	def("Ceil",  &daepython::ad_ceil);

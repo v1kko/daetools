@@ -5,7 +5,7 @@ import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
-import os, sys
+import os, sys, math, random
 from time import localtime, strftime, time
 from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
@@ -37,19 +37,53 @@ def addIdentifiers(model, parent, dictIdentifiers):
 
     return dictIdentifiers
 
+def random_uniform():
+    raise RuntimeError('Not implemented function: random.uniform')
+
+def random_normal():
+    raise RuntimeError('Not implemented function: random.normal')
+
+def random_binomial(N, P):
+    raise RuntimeError('Not implemented function: random.binomial')
+
+def random_poisson(L):
+    raise RuntimeError('Not implemented function: random.poisson')
+
+def random_exponential(L):
+    raise RuntimeError('Not implemented function: random.exponential')
+
 def getNineMLDictionaries(model):
     dictIdentifiers = {}
     dictFunctions   = {}
 
-    dictIdentifiers['t'] = model.time()
+    dictIdentifiers['t']  = model.time()
+    dictIdentifiers['pi'] = math.pi
+    dictIdentifiers['e']  = math.e
 
-    dictFunctions['sin']  = Sin
-    dictFunctions['cos']  = Cos
-    dictFunctions['tan']  = Tan
-    dictFunctions['log']  = Log10
-    dictFunctions['ln']   = Log
-    dictFunctions['sqrt'] = Sqrt
-    dictFunctions['exp']  = Exp
+    dictFunctions['sin']   = Sin
+    dictFunctions['cos']   = Cos
+    dictFunctions['tan']   = Tan
+    dictFunctions['asin']  = ASin
+    dictFunctions['acos']  = ACos
+    dictFunctions['atan']  = ATan
+    dictFunctions['sinh']  = Sinh
+    dictFunctions['cosh']  = Cosh
+    dictFunctions['tanh']  = Tanh
+    dictFunctions['asinh'] = ASinh
+    dictFunctions['acosh'] = ACosh
+    dictFunctions['atanh'] = ATanh
+    dictFunctions['log10'] = Log10
+    dictFunctions['log']   = Log
+    dictFunctions['sqrt']  = Sqrt
+    dictFunctions['exp']   = Exp
+    dictFunctions['floor'] = Floor
+    dictFunctions['ceil']  = Ceil
+
+    dictFunctions['random.uniform']     = random_uniform
+    dictFunctions['random.normal']      = random_normal
+    dictFunctions['random.binomial']    = random_binomial
+    dictFunctions['random.poisson']     = random_poisson
+    dictFunctions['random.exponential'] = random_exponential
 
     dictIdentifiers = addIdentifiers(model, model, dictIdentifiers)
 

@@ -66,6 +66,14 @@ const adouble ad_asin(const adouble &a);
 const adouble ad_acos(const adouble &a);
 const adouble ad_atan(const adouble &a);
 
+const adouble ad_sinh(const adouble &a);
+const adouble ad_cosh(const adouble &a);
+const adouble ad_tanh(const adouble &a);
+const adouble ad_asinh(const adouble &a);
+const adouble ad_acosh(const adouble &a);
+const adouble ad_atanh(const adouble &a);
+const adouble ad_atan2(const adouble &a, const adouble &b);
+
 const adouble ad_pow1(const adouble &a, real_t v);
 const adouble ad_pow2(const adouble &a, const adouble &b);
 const adouble ad_pow3(real_t v, const adouble &a);

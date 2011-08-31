@@ -147,6 +147,14 @@ public:
     friend DAE_CORE_API const adouble asin(const adouble &a);
     friend DAE_CORE_API const adouble acos(const adouble &a);
     friend DAE_CORE_API const adouble atan(const adouble &a);
+    
+	friend DAE_CORE_API const adouble sinh(const adouble &a);
+    friend DAE_CORE_API const adouble cosh(const adouble &a);
+    friend DAE_CORE_API const adouble tanh(const adouble &a);
+	friend DAE_CORE_API const adouble asinh(const adouble &a);
+    friend DAE_CORE_API const adouble acosh(const adouble &a);
+    friend DAE_CORE_API const adouble atanh(const adouble &a);
+    friend DAE_CORE_API const adouble atan2(const adouble &a, const adouble &b);
 
     friend DAE_CORE_API const adouble pow(const adouble &a, real_t v);
     friend DAE_CORE_API const adouble pow(const adouble &a, const adouble &b);

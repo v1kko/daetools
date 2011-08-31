@@ -225,6 +225,36 @@ const adouble ad_atan(const adouble &a)
 {
 	return atan(a);
 }
+
+const adouble ad_sinh(const adouble &a)
+{
+	return sinh(a);
+}
+const adouble ad_cosh(const adouble &a)
+{
+	return cosh(a);
+}
+const adouble ad_tanh(const adouble &a)
+{
+	return tanh(a);
+}
+const adouble ad_asinh(const adouble &a)
+{
+	return asinh(a);
+}
+const adouble ad_acosh(const adouble &a)
+{
+	return acosh(a);
+}
+const adouble ad_atanh(const adouble &a)
+{
+	return atanh(a);
+}
+const adouble ad_atan2(const adouble &a, const adouble &b)
+{
+	return atan2(a, b);
+}
+
 const adouble ad_pow1(const adouble &a, real_t v)
 {
 	return pow(a,v);
