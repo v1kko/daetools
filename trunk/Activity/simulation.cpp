@@ -1199,13 +1199,16 @@ void daeSimulation::RegisterPort(daePort_t* pPort)
 
 void daeSimulation::RegisterVariable(daeVariable_t* pVariable)
 {
-	size_t i;
+	size_t i; 
 	daeDomain_t* pDomain;
 	vector<daeDomain_t*> arrDomains;
 
 	if(!pVariable)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+	if(!pVariable->GetReportingOn())
+		return;
+	
 	daeDataReporterVariable var;
 	var.m_strName = pVariable->GetCanonicalName();
 	var.m_nNumberOfPoints = pVariable->GetNumberOfPoints();

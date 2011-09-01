@@ -10,12 +10,21 @@ from daetools.pyDAE import *
 from nineml_daetools_bridge import *
 
 class sim_hierachical_iaf_1coba(daeSimulation):
-    def __init__(self, ninemlComponent):
+    def __init__(self, ninemlComponent, parameters, initial_conditions, active_regimes, results_variables):
         daeSimulation.__init__(self)
         self.m = nineml_daetools_bridge(ninemlComponent.name, ninemlComponent)
         self.m.Description = ""
 
+        self._parameters         = parameters
+        self._initial_conditions = initial_conditions
+        self._active_regimes     = active_regimes
+        self._results_variables  = results_variables
+
     def SetUpParametersAndDomains(self):
+        for paramName in self._parameters:
+            parameter = getObjectFromCanonicalName(self.m, paramName, look_for_parameters = True)
+            print 'parameter = ' + repr(parameter)
+            
         iaf  = findObjectInModel(self.m, 'iaf',       look_for_models = True)
         coba = findObjectInModel(self.m, 'cobaExcit', look_for_models = True)
 
@@ -40,6 +49,10 @@ class sim_hierachical_iaf_1coba(daeSimulation):
         vthresh   .SetValue(-40)
         
     def SetUpVariables(self):
+        for varName in self._initial_conditions:
+            variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
+            print 'variable = ' + repr(variable)
+
         iaf  = findObjectInModel(self.m, 'iaf',       look_for_models = True)
         coba = findObjectInModel(self.m, 'cobaExcit', look_for_models = True)
 
@@ -75,7 +88,31 @@ class sim_hierachical_iaf_1coba(daeSimulation):
                 self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
                 self.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
                 self.ReportData(self.CurrentTime)
-            
+          
+parameters = {
+    'cobaExcit.q' : 3.0,
+    'cobaExcit.tau' : 5.0,
+    'cobaExcit.vrev' : 0.0,
+    'iaf.cm' : 1,
+    'iaf.gl' : 50,
+    'iaf.taurefrac' : 0.008,
+    'iaf.vreset' : -60,
+    'iaf.vrest' : -60,
+    'iaf.vthresh' : -40
+}
+initial_conditions = {
+    'cobaExcit.g' : 0.0,
+    'iaf.V' : -60,
+    'iaf.tspike' : -1E99
+}
+active_regimes = [
+    'cobaExcit.cobadefaultregime',
+    'iaf.subthresholdregime'
+]
+results_variables = [
+    'cobaExcit.g',
+    'iaf.tspike'
+]
 
 # Load the Component:
 coba1_base = TestableComponent('hierachical_iaf_1coba')
@@ -94,7 +131,7 @@ log          = daePythonStdOutLog()
 daesolver    = daeIDAS()
 
 start_time = time()
-simulation   = sim_hierachical_iaf_1coba(coba1)
+simulation   = sim_hierachical_iaf_1coba(coba1, parameters, initial_conditions, active_regimes, results_variables)
 elapsed_time = time() - start_time
 print 'Time to create component =', elapsed_time
 

@@ -158,17 +158,18 @@ def findObjectInModel(model, name, **kwargs):
     look_for_ports       = kwargs.get('look_for_ports',       False)
     look_for_reduceports = kwargs.get('look_for_reduceports', False)
     look_for_eventports  = kwargs.get('look_for_eventports',  False)
+    look_for_stns        = kwargs.get('look_for_stns',        False)
     look_for_models      = kwargs.get('look_for_models',      False)
 
     objects = []
     look_for_all = True
 
     # If any of those is set then set look_for_all to False
-    if look_for_domains or look_for_parameters or look_for_variables or look_for_ports or look_for_reduceports or look_for_eventports or look_for_models:
+    if look_for_domains or look_for_parameters or look_for_variables or look_for_ports or look_for_reduceports or look_for_eventports or look_for_models or look_for_stns:
         look_for_all = False
 
     if look_for_all:
-        objects = model.Domains + model.Parameters + model.Variables + model.Ports + model.Models
+        objects = model.Domains + model.Parameters + model.Variables + model.Ports + model.EventPorts + model.STNs + model.Models
     else:
         if look_for_domains:
             objects = objects + model.Domains
@@ -184,12 +185,14 @@ def findObjectInModel(model, name, **kwargs):
             objects = objects + model.EventPorts
         if look_for_models:
             objects = objects + model.Models
+        if look_for_stns:
+            objects = objects + model.STNs
 
     mapObjects = {}
     for o in objects:
         mapObjects[o.Name] = o
     
-    if name in mapObjects.keys():
+    if name in mapObjects:
         return mapObjects[name]
     return None
 
@@ -203,7 +206,7 @@ def getObjectFromCanonicalName(rootModel, canonicalName, **kwargs):
     canonicalName: a 'path' to the object ('model1.model2.object')
     """
     relativeName = daeGetRelativeName(rootModel.CanonicalName, canonicalName)
-    #print 'relativeName = {0} for root = {1} and canonicalName = {2}'.format(relativeName, rootModel.CanonicalName, canonicalName)
+    #print '  relativeName = {0} for root = {1} and canonicalName = {2}'.format(relativeName, rootModel.CanonicalName, canonicalName)
     listCanonicalName = relativeName.split('.')
     objectName = listCanonicalName[-1]
     objectPath = listCanonicalName[:-1]
@@ -211,13 +214,12 @@ def getObjectFromCanonicalName(rootModel, canonicalName, **kwargs):
     root = rootModel
     if len(objectPath) > 0:
         for name in objectPath:
-            #print 'name: {0} in model {1}'.format(name, root.Name)
             root = findObjectInModel(root, name, look_for_models = True)
             if root == None:
                 raise RuntimeError('Could not locate object {0} in {1}'.format(name, ".".join(objectPath)))
 
     # Now we have the model where port should be located (root)
-    # Search for the 'name' in ALL objects (domains, params, vars, ports, models) in the 'root' model
+    # Search for the 'name' in the 'root' model (in the types of objects given in **kwargs)
     return findObjectInModel(root, objectName, **kwargs)
     
 class ninemlAnalogPort(daePort):
@@ -247,8 +249,10 @@ class ninemlReduceAnalogPort(object):
         for p in self.Ports:
             varSum = varSum + p.value()
         eq.Residual = self.portVariable() - varSum
-    
+
 class nineml_daetools_bridge(daeModel):
+    ninemlSTNRegimesName = 'NineML_Regimes_STN'
+
     def __init__(self, Name, ninemlComponent, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
@@ -343,7 +347,7 @@ class nineml_daetools_bridge(daeModel):
         state_variables = list(self.ninemlComponent.state_variables)
         if len(regimes) > 0:
             # 2a) Create STN for model
-            self.STN('regimes')
+            self.STN(nineml_daetools_bridge.ninemlSTNRegimesName)
 
             for regime in regimes:
                 # 2b) Create State for each regime

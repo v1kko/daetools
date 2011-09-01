@@ -249,10 +249,10 @@ def addItemsToRegimesTree(treeWidget, dictItems, rootName):
     treeWidget.resizeColumnToContents(0)
     treeWidget.resizeColumnToContents(1)
 
-class nineml_tester(QtGui.QDialog):
+class nineml_tester_gui(QtGui.QDialog):
     def __init__(self, ninemlComponent, parametersValues = {}, initialConditionsValues = {}, activeRegimes = [], resultsVariables = []):
         QtGui.QDialog.__init__(self)
-        self.ui = Ui_ninemlSimulator()
+        self.ui = Ui_ninemlTester()
         self.ui.setupUi(self)
 
         self.ninemlComponent   = ninemlComponent
