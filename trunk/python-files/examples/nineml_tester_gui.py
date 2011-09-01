@@ -5,13 +5,13 @@ import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
-import os, sys, subprocess
+import os, sys, math
 from time import localtime, strftime, time
 from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
-from nineml_simulator_ui import Ui_ninemlSimulator
+from nineml_tester_ui import Ui_ninemlTester
 
 
 def printDictionary(dictionary):
@@ -79,31 +79,37 @@ def collectRegimes(root, component, regimes, activeRegimes = []):
 
     return regimes
 
-def collectAnalogPorts(root, component, analog_ports):
+def collectAnalogPorts(root, component, analog_ports, expressions):
     rootName = root
     if rootName != '':
         rootName += '.'
     for obj in component.analog_ports:
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
             objName = rootName + obj.name
-            analog_ports[objName] = ''
+            if objName in expressions:
+                analog_ports[objName] = expressions[objName]
+            else:
+                analog_ports[objName] = '15 * pi'
 
     for name, subcomponent in component.subnodes.items():
-        analog_ports = collectAnalogPorts(rootName + name, subcomponent, analog_ports)
+        analog_ports = collectAnalogPorts(rootName + name, subcomponent, analog_ports, expressions)
 
     return analog_ports
 
-def collectEventPorts(root, component, event_ports):
+def collectEventPorts(root, component, event_ports, expressions):
     rootName = root
     if rootName != '':
         rootName += '.'
     for obj in component.event_ports:
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
             objName = rootName + obj.name
-            event_ports[objName] = ''
+            if objName in expressions:
+                event_ports[objName] = expressions[objName]
+            else:
+                event_ports[objName] = ''
 
     for name, subcomponent in component.subnodes.items():
-        event_ports = collectEventPorts(rootName + name, subcomponent, event_ports)
+        event_ports = collectEventPorts(rootName + name, subcomponent, event_ports, expressions)
 
     return event_ports
 
@@ -250,23 +256,29 @@ def addItemsToRegimesTree(treeWidget, dictItems, rootName):
     treeWidget.resizeColumnToContents(1)
 
 class nineml_tester_gui(QtGui.QDialog):
-    def __init__(self, ninemlComponent, parametersValues = {}, initialConditionsValues = {}, activeRegimes = [], resultsVariables = []):
+    def __init__(self, ninemlComponent, **kwargs):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_ninemlTester()
         self.ui.setupUi(self)
 
+        _parameters               = kwargs.get('parameters',               {})
+        _initial_conditions       = kwargs.get('initial_conditions',       {})
+        _active_states            = kwargs.get('active_states',            [])
+        _variables_to_report      = kwargs.get('variables_to_report',      [])
+        _analog_ports_expressions = kwargs.get('analog_ports_expressions', {})
+        _event_ports_expressions  = kwargs.get('event_ports_expressions',  {})
+
         self.ninemlComponent   = ninemlComponent
-        self.parser            = ExpressionParser()
         # Dictionaries 'key' : floating-point-value
-        self.parameters        = {}
-        self.state_variables   = {}
+        self.parameters         = {}
+        self.initial_conditions = {}
         # Dictionaries: 'key' : 'expression'
-        self.analog_ports      = {}
-        self.event_ports       = {}
-        # Dictionary 'key' : [ [list-of-available-regimes], 'current-active-regime']
-        self.active_regimes    = {}
+        self.analog_ports_expressions = {}
+        self.event_ports_expressions  = {}
+        # Dictionary 'key' : [ [list-of-available-states], 'current-active-state']
+        self.active_states = {}
         # Dictionaries 'key' : boolean-value
-        self.results_variables = {}
+        self.variables_to_report = {}
 
         self.connect(self.ui.treeParameters,        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotParameterItemChanged)
         self.connect(self.ui.treeInitialConditions, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotInitialConditionItemChanged)
@@ -275,21 +287,21 @@ class nineml_tester_gui(QtGui.QDialog):
         self.connect(self.ui.treeEventPorts,        QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotEventPortsItemDoubleClicked)
         self.connect(self.ui.treeResultsVariables,  QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotResultsVariablesItemChanged)
 
-        collectParameters      ('', self.ninemlComponent, self.parameters,      parametersValues)
-        collectStateVariables  ('', self.ninemlComponent, self.state_variables, initialConditionsValues)
-        collectRegimes         ('', self.ninemlComponent, self.active_regimes,  activeRegimes)
-        collectAnalogPorts     ('', self.ninemlComponent, self.analog_ports)
-        collectEventPorts      ('', self.ninemlComponent, self.event_ports)
-        collectResultsVariables('', self.ninemlComponent, self.results_variables, resultsVariables)
+        collectParameters      ('', self.ninemlComponent, self.parameters,               _parameters)
+        collectStateVariables  ('', self.ninemlComponent, self.initial_conditions,       _initial_conditions)
+        collectRegimes         ('', self.ninemlComponent, self.active_states,            _active_states)
+        collectAnalogPorts     ('', self.ninemlComponent, self.analog_ports_expressions, _analog_ports_expressions)
+        collectEventPorts      ('', self.ninemlComponent, self.event_ports_expressions,  _event_ports_expressions)
+        collectResultsVariables('', self.ninemlComponent, self.variables_to_report,      _variables_to_report)
 
         #self.printResults()
 
-        addItemsToTree                (self.ui.treeParameters,        self.parameters,        self.ninemlComponent.name)
-        addItemsToTree                (self.ui.treeInitialConditions, self.state_variables,   self.ninemlComponent.name)
-        addItemsToTree                (self.ui.treeAnalogPorts,       self.analog_ports,      self.ninemlComponent.name, False)
-        addItemsToTree                (self.ui.treeEventPorts,        self.event_ports,       self.ninemlComponent.name, False)
-        addItemsToRegimesTree         (self.ui.treeRegimes,           self.active_regimes,    self.ninemlComponent.name)
-        addItemsToResultsVariablesTree(self.ui.treeResultsVariables,  self.results_variables, self.ninemlComponent.name)
+        addItemsToTree                (self.ui.treeParameters,        self.parameters,               self.ninemlComponent.name)
+        addItemsToTree                (self.ui.treeInitialConditions, self.initial_conditions,       self.ninemlComponent.name)
+        addItemsToTree                (self.ui.treeAnalogPorts,       self.analog_ports_expressions, self.ninemlComponent.name, False)
+        addItemsToTree                (self.ui.treeEventPorts,        self.event_ports_expressions,  self.ninemlComponent.name, False)
+        addItemsToRegimesTree         (self.ui.treeRegimes,           self.active_states,            self.ninemlComponent.name)
+        addItemsToResultsVariablesTree(self.ui.treeResultsVariables,  self.variables_to_report,      self.ninemlComponent.name)
 
     @property
     def parametersValues(self):
@@ -297,38 +309,38 @@ class nineml_tester_gui(QtGui.QDialog):
 
     @property
     def initialConditions(self):
-        return self.state_variables
+        return self.initial_conditions
 
     @property
     def analogPortsExpressions(self):
-        return self.analog_ports
+        return self.analog_ports_expressions
 
     @property
     def eventPortsExpressions(self):
-        return self.event_ports
+        return self.event_ports_expressions
 
     @property
-    def initialActiveRegimes(self):
+    def initialActiveStates(self):
         results = []
-        for key, value in self.active_regimes.items():
+        for key, value in self.active_states.items():
             results.append(key + '.' + value[1])
         return results
 
     @property
-    def reportingVariables(self):
+    def variablesToReport(self):
         results = []
-        for key, value in self.results_variables.items():
+        for key, value in self.variables_to_report.items():
             if value:
                 results.append(key)
         return results
 
     def printResults(self):
         printDictionary(self.parameters)
-        printDictionary(self.state_variables)
-        printDictionary(self.active_regimes)
-        printDictionary(self.analog_ports)
-        printDictionary(self.event_ports)
-        printDictionary(self.results_variables)
+        printDictionary(self.initial_conditions)
+        printDictionary(self.active_states)
+        printDictionary(self.analog_ports_expressions)
+        printDictionary(self.event_ports_expressions)
+        printDictionary(self.variables_to_report)
 
     def slotParameterItemChanged(self, item, column):
         if column == 1:
@@ -338,7 +350,7 @@ class nineml_tester_gui(QtGui.QDialog):
 
             value, isOK = varValue.toDouble()
             if not isOK:
-                QtGui.QMessageBox.warning(None, "NineML Simulator", "Invalid value entered for the item: " + item.text(0))
+                QtGui.QMessageBox.warning(None, "NineML", "Invalid value entered for the item: " + item.text(0))
                 item.setText(1, str(self.parameters[key]))
                 return
 
@@ -353,31 +365,12 @@ class nineml_tester_gui(QtGui.QDialog):
 
             value, isOK = varValue.toDouble()
             if not isOK:
-                QtGui.QMessageBox.warning(None, "NineML Simulator", "Invalid value entered for the item: " + item.text(0))
-                item.setText(1, str(self.state_variables[key]))
+                QtGui.QMessageBox.warning(None, "NineML", "Invalid value entered for the item: " + item.text(0))
+                item.setText(1, str(self.initial_conditions[key]))
                 return
 
-            if self.state_variables[key] != value:
-                self.state_variables[key] = value
-
-    def slotResultsVariableItemChanged(self, item, column):
-        if column == 1:
-            data = item.data(column, QtCore.Qt.UserRole)
-            key  = str(data.toString())
-            varValue = QtCore.QVariant(item.text(1))
-
-            value, isOK = varValue.toDouble()
-            if not isOK:
-                QtGui.QMessageBox.warning(None, "NineML Simulator", "Invalid value entered for the item: " + item.text(0))
-                item.setText(1, str(self.parameters[key]))
-                return
-
-            if self.parameters[key] != value:
-                self.parameters[key] = value
-            if True:
-                item.setCheckState(0,QtCore.Qt.Checked)
-            else:
-                item.setCheckState(0,QtCore.Qt.Unchecked)
+            if self.initial_conditions[key] != value:
+                self.initial_conditions[key] = value
 
     def slotEventPortsItemDoubleClicked(self, item, column):
         if column == 1:
@@ -387,7 +380,7 @@ class nineml_tester_gui(QtGui.QDialog):
             new_expression, ok = QtGui.QInputDialog.getText(self, "Event Port Input", "Set the input event expression:", QtGui.QLineEdit.Normal, old_expression)
             if ok:
                 item.setText(1, new_expression)
-                self.event_ports[key] = str(new_expression)
+                self.event_ports_expressions[key] = str(new_expression)
 
     def slotAnalogPortsItemDoubleClicked(self, item, column):
         if column == 1:
@@ -397,25 +390,25 @@ class nineml_tester_gui(QtGui.QDialog):
             new_expression, ok = QtGui.QInputDialog.getText(self, "Analog Port Input", "Set the analog port input expression:", QtGui.QLineEdit.Normal, old_expression)
             if ok:
                 item.setText(1, str(new_expression))
-                self.analog_ports[key] = str(new_expression)
+                self.analog_ports_expressions[key] = str(new_expression)
 
     def slotRegimesItemDoubleClicked(self, item, column):
         if column == 1:
             data = item.data(column, QtCore.Qt.UserRole)
             key, available_regimes = data.toPyObject()
-            active_regime, ok = QtGui.QInputDialog.getItem(self, "Available regimes", "Select the new active regime:", available_regimes, 0, False)
+            active_state, ok = QtGui.QInputDialog.getItem(self, "Available regimes", "Select the new active regime:", available_regimes, 0, False)
             if ok:
-                item.setText(1, active_regime)
-                self.active_regimes[key][1] = str(active_regime)
+                item.setText(1, active_state)
+                self.active_states[key][1] = str(active_state)
 
     def slotResultsVariablesItemChanged(self, item, column):
         if column == 0:
             data = item.data(0, QtCore.Qt.UserRole)
             key  = str(data.toString())
             if item.checkState(0) == Qt.Checked:
-                self.results_variables[key] = True
+                self.variables_to_report[key] = True
             else:
-                self.results_variables[key] = False
+                self.variables_to_report[key] = False
 
 if __name__ == "__main__":
     coba_iaf_base = TestableComponent('hierachical_iaf_1coba')
@@ -442,16 +435,27 @@ if __name__ == "__main__":
         'iaf.V' : -60,
         'iaf.tspike' : -1E99
     }
-    active_regimes = [
+    analog_ports_expressions = {
+        'cobaExcit.V' : '1.2 * e',
+        'iaf.ISyn' : '5 * pi'
+    }
+    event_ports_expressions = {
+    }
+    active_states = [
         'cobaExcit.cobadefaultregime',
         'iaf.subthresholdregime'
     ]
-    reporting_variables = [
+    variables_to_report = [
         'cobaExcit.g',
         'iaf.tspike'
     ]
 
-    s = nineml_tester(coba_iaf, parameters, initial_conditions, active_regimes, reporting_variables)
+    s = nineml_tester_gui(coba_iaf, parameters               = parameters,
+                                    initial_conditions       = initial_conditions,
+                                    active_states            = active_states,
+                                    analog_ports_expressions = analog_ports_expressions,
+                                    event_ports_expressions  = event_ports_expressions,
+                                    variables_to_report      = variables_to_report)
     s.exec_()
     #s.printResults()
 
@@ -467,9 +471,21 @@ if __name__ == "__main__":
     print 'eventPortsExpressions:'
     print s.eventPortsExpressions
 
-    print 'initialActiveRegimes:'
-    print s.initialActiveRegimes
+    print 'initialActiveStates:'
+    print s.initialActiveStates
 
-    print 'reportingVariables:'
-    print s.reportingVariables
+    print 'variablesToReport:'
+    print s.variablesToReport
+
+    dictIdentifiers = {}
+    dictFunctions   = {}
+
+    dictIdentifiers['pi'] = math.pi
+    dictIdentifiers['e']  = math.e
+
+    parser = ExpressionParser(dictIdentifiers, dictFunctions)
+
+    for portName, expr in s.analogPortsExpressions.items():
+        if expr:
+            print 'port: {0} = {1}'.format(portName, parser.parse(expr))
 
