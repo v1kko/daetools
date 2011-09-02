@@ -319,11 +319,8 @@ class nineml_daetools_bridge(daeModel):
             
     def DeclareEquations(self):
         # Create the epression parser and set its Identifiers/Functions dictionaries
-        start_time = time()
         dictIdentifiers, dictFunctions = getNineMLDictionaries(self)
         parser = ExpressionParser(dictIdentifiers, dictFunctions)
-        elapsed_time = time() - start_time
-        print self.Name + ' parser create time =', elapsed_time
         """
         print "Identifiers dictionary for the model: " + self.CanonicalName
         for key, value in dictIdentifiers.items():

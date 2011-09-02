@@ -38,6 +38,9 @@ class nineml_daetools_simulation(daeSimulation):
         daeSimulation.__init__(self)
         self.m = model
 
+        dictIdentifiers, dictFunctions = getNineMLDictionaries(self.m)
+        self.parser = ExpressionParser(dictIdentifiers, dictFunctions)
+
         self._parameters               = kwargs.get('parameters',               {})
         self._initial_conditions       = kwargs.get('initial_conditions',       {})
         self._active_states            = kwargs.get('active_states',            [])
@@ -61,6 +64,14 @@ class nineml_daetools_simulation(daeSimulation):
             print '  --> Set the variable: {0} to: {1}'.format(varName, value)
             variable.SetInitialCondition(value)
 
+        for portName, expression in self._analog_ports_expressions.items():
+            if expression == None or expression == '':
+                raise RuntimeError('An expression for the value of the analog port {0} cannot be empty'.format(portName))
+            port = getObjectFromCanonicalName(self.m, portName, look_for_ports = True, look_for_reduceports = True)
+            if port == None:
+                raise RuntimeError('Could not locate port {0}'.format(portName))
+            print 'port: {0} = {1}'.format(portName, self.parser.parse(expression))
+
         for activeStateName in self._active_states:
             listNames = activeStateName.split('.')
             if len(listNames) > 1:
@@ -72,7 +83,7 @@ class nineml_daetools_simulation(daeSimulation):
             stn = getObjectFromCanonicalName(self.m, modelName + '.' + nineml_daetools_bridge.ninemlSTNRegimesName, look_for_stns = True)
             if stn == None:
                 raise RuntimeError('Could not locate STN {0}'.format(nineml_daetools_bridge.ninemlSTNRegimesName))
-            
+
             print '  --> Set the active state in the model: {0} to: {1}'.format(modelName, stateName)
             stn.ActiveState = stateName
 
@@ -136,8 +147,9 @@ if __name__ == "__main__":
     ]
 
     # Load the Component:
-    coba1_base  = TestableComponent('hierachical_iaf_1coba')
-    nineml_comp = coba1_base()
+    nineml_comp  = TestableComponent('hierachical_iaf_1coba')()
+    if not nineml_comp:
+        raise RuntimeError('Cannot load NineML component')
 
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()

@@ -263,7 +263,7 @@
      </widget>
      <widget class="QWidget" name="tab_7">
       <attribute name="title">
-       <string>Results</string>
+       <string>Report Variables</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>

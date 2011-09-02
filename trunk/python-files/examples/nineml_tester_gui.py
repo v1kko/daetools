@@ -6,13 +6,9 @@ from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponen
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys, math
-from time import localtime, strftime, time
-from daetools.pyDAE.parser import ExpressionParser
-from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 from nineml_tester_ui import Ui_ninemlTester
-
 
 def printDictionary(dictionary):
     sortedDictionary = sorted(dictionary.iteritems())
@@ -57,7 +53,15 @@ def collectStateVariables(root, component, stateVariables, initialValues = {}):
 
     return stateVariables
 
+# Regimes are different from other elements, for they appear in the following form:
+#  - Component | regime
+#     - Component | regime
+#     - Component | regime
+#        - Component | regime
+# that is all components should have the value (regime), even if it is empty
 def collectRegimes(root, component, regimes, activeRegimes = []):
+    if root == '':
+        root = component.name
     rootName = root
     if rootName != '':
         rootName += '.'
@@ -68,31 +72,52 @@ def collectRegimes(root, component, regimes, activeRegimes = []):
         objName = rootName + obj.name
         if objName in activeRegimes:
             active_regime = obj.name
+            break
 
     if len(available_regimes) > 0:
         if active_regime == None:
             active_regime = available_regimes[0]
-        regimes[root] = [available_regimes, active_regime]
 
+        regimes[root] = [available_regimes, active_regime]
+        
     for name, subcomponent in component.subnodes.items():
         regimes = collectRegimes(rootName + name, subcomponent, regimes, activeRegimes)
 
     return regimes
 
-def collectAnalogPorts(root, component, analog_ports, expressions):
-    rootName = root
+# This function collects canonical names of all ports that are connected
+def getConnectedAnalogPorts(root_model_name, component, connected_ports):
+    rootName = root_model_name
+    if rootName != '':
+        rootName += '.'
+
+    for port_connection in component.portconnections:
+        connected_ports.append(rootName + '.'.join(port_connection[0].loctuple))
+        connected_ports.append(rootName + '.'.join(port_connection[1].loctuple))
+
+    for name, subcomponent in component.subnodes.items():
+        connected_ports = getConnectedAnalogPorts(rootName + name, subcomponent, connected_ports)
+
+    return connected_ports
+    
+def collectAnalogPorts(root_model_name, component, analog_ports, connected_ports, expressions):
+    rootName = root_model_name
     if rootName != '':
         rootName += '.'
     for obj in component.analog_ports:
+        # Add only if it is inlet or reduce port
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
             objName = rootName + obj.name
-            if objName in expressions:
-                analog_ports[objName] = expressions[objName]
-            else:
-                analog_ports[objName] = '15 * pi'
+            # Add only if it is not in the list of connected ports
+            if not objName in connected_ports:
+                # If the initial expression is given set it; otherwise set the empty string
+                if objName in expressions:
+                    analog_ports[objName] = expressions[objName]
+                else:
+                    analog_ports[objName] = ''
 
     for name, subcomponent in component.subnodes.items():
-        analog_ports = collectAnalogPorts(rootName + name, subcomponent, analog_ports, expressions)
+        analog_ports = collectAnalogPorts(rootName + name, subcomponent, analog_ports, connected_ports, expressions)
 
     return analog_ports
 
@@ -146,7 +171,11 @@ def collectResultsVariables(root, component, results_variables, checkedVariables
     return results_variables
 
 def addItemsToTree(treeWidget, dictItems, rootName, editableItems = True):
+    if len(dictItems) == 0:
+        return
+        
     rootItem = QtGui.QTreeWidgetItem(treeWidget, [rootName, ''])
+    rootItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     for key, value in dictItems.items():
         names = key.split(".")
@@ -234,22 +263,29 @@ def addItemsToRegimesTree(treeWidget, dictItems, rootName):
         for item in item_path:
             found = False
             if currentItem:
-                for c in range(0, currentItem.childCount()):
-                    child = currentItem.child(c)
-                    cname = child.text(0)
-                    if item == cname:
-                        found = True
-                        currentItem = currentItem.child(c)
-                        break
+                cname = currentItem.text(0)
+                # First check whether it is equal to the current item
+                # If it is not, check its children
+                if item == cname:
+                    found = True
+                    currentItem = currentItem
+                else:
+                    for c in range(0, currentItem.childCount()):
+                        child = currentItem.child(c)
+                        cname = child.text(0)
+                        if item == cname:
+                            found = True
+                            currentItem = currentItem.child(c)
+                            break
 
             if found == False:
                 currentItem = QtGui.QTreeWidgetItem(currentItem, [item, ''])
 
-        # Now we have the parrent in the currentItem, so add the new item to it with the variable data
-        varItem = QtGui.QTreeWidgetItem(currentItem, [item_name, value[1]])
-        varData = QtCore.QVariant((key, value[0]))
-        varItem.setData(1, QtCore.Qt.UserRole, varData)
-        varItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            # Now we have the parrent in the currentItem, so add the new item to it with the variable data
+            varItem = QtGui.QTreeWidgetItem(currentItem, [item_name, value[1]])
+            varData = QtCore.QVariant((key, value[0]))
+            varItem.setData(1, QtCore.Qt.UserRole, varData)
+            varItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     treeWidget.expandAll()
     treeWidget.resizeColumnToContents(0)
@@ -280,6 +316,8 @@ class nineml_tester_gui(QtGui.QDialog):
         # Dictionaries 'key' : boolean-value
         self.variables_to_report = {}
 
+        self.connect(self.ui.buttonOk,              QtCore.SIGNAL('clicked()'),                                self.slotOK)
+        self.connect(self.ui.buttonCancel,          QtCore.SIGNAL('clicked()'),                                self.slotCancel)
         self.connect(self.ui.treeParameters,        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotParameterItemChanged)
         self.connect(self.ui.treeInitialConditions, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotInitialConditionItemChanged)
         self.connect(self.ui.treeRegimes,           QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotRegimesItemDoubleClicked)
@@ -290,11 +328,11 @@ class nineml_tester_gui(QtGui.QDialog):
         collectParameters      ('', self.ninemlComponent, self.parameters,               _parameters)
         collectStateVariables  ('', self.ninemlComponent, self.initial_conditions,       _initial_conditions)
         collectRegimes         ('', self.ninemlComponent, self.active_states,            _active_states)
-        collectAnalogPorts     ('', self.ninemlComponent, self.analog_ports_expressions, _analog_ports_expressions)
         collectEventPorts      ('', self.ninemlComponent, self.event_ports_expressions,  _event_ports_expressions)
         collectResultsVariables('', self.ninemlComponent, self.variables_to_report,      _variables_to_report)
-
-        #self.printResults()
+        connected_ports = []
+        connected_ports = getConnectedAnalogPorts('', self.ninemlComponent, connected_ports)
+        collectAnalogPorts('', self.ninemlComponent, self.analog_ports_expressions, connected_ports, _analog_ports_expressions)
 
         addItemsToTree                (self.ui.treeParameters,        self.parameters,               self.ninemlComponent.name)
         addItemsToTree                (self.ui.treeInitialConditions, self.initial_conditions,       self.ninemlComponent.name)
@@ -334,12 +372,24 @@ class nineml_tester_gui(QtGui.QDialog):
                 results.append(key)
         return results
 
+    def slotOK(self):
+        self.done(QtGui.QDialog.Accepted)
+    
+    def slotCancel(self):
+        self.done(QtGui.QDialog.Rejected)
+
     def printResults(self):
+        print 'parameters:'
         printDictionary(self.parameters)
+        print 'initial_conditions:'
         printDictionary(self.initial_conditions)
+        print 'active_states:'
         printDictionary(self.active_states)
+        print 'analog_ports_expressions:'
         printDictionary(self.analog_ports_expressions)
+        print 'event_ports_expressions:'
         printDictionary(self.event_ports_expressions)
+        print 'variables_to_report:'
         printDictionary(self.variables_to_report)
 
     def slotParameterItemChanged(self, item, column):
@@ -409,83 +459,4 @@ class nineml_tester_gui(QtGui.QDialog):
                 self.variables_to_report[key] = True
             else:
                 self.variables_to_report[key] = False
-
-if __name__ == "__main__":
-    coba_iaf_base = TestableComponent('hierachical_iaf_1coba')
-    coba_iaf = coba_iaf_base()
-
-    destexhe_ampa_base = TestableComponent('destexhe_ampa')
-    destexhe_ampa = destexhe_ampa_base()
-
-    app = QtGui.QApplication(sys.argv)
-
-    parameters = {
-        'cobaExcit.q' : 3.0,
-        'cobaExcit.tau' : 5.0,
-        'cobaExcit.vrev' : 0.0,
-        'iaf.cm' : 1,
-        'iaf.gl' : 50,
-        'iaf.taurefrac' : 0.008,
-        'iaf.vreset' : -60,
-        'iaf.vrest' : -60,
-        'iaf.vthresh' : -40
-    }
-    initial_conditions = {
-        'cobaExcit.g' : 0.0,
-        'iaf.V' : -60,
-        'iaf.tspike' : -1E99
-    }
-    analog_ports_expressions = {
-        'cobaExcit.V' : '1.2 * e',
-        'iaf.ISyn' : '5 * pi'
-    }
-    event_ports_expressions = {
-    }
-    active_states = [
-        'cobaExcit.cobadefaultregime',
-        'iaf.subthresholdregime'
-    ]
-    variables_to_report = [
-        'cobaExcit.g',
-        'iaf.tspike'
-    ]
-
-    s = nineml_tester_gui(coba_iaf, parameters               = parameters,
-                                    initial_conditions       = initial_conditions,
-                                    active_states            = active_states,
-                                    analog_ports_expressions = analog_ports_expressions,
-                                    event_ports_expressions  = event_ports_expressions,
-                                    variables_to_report      = variables_to_report)
-    s.exec_()
-    #s.printResults()
-
-    print 'parametersValues:'
-    print s.parametersValues
-
-    print 'initialConditions:'
-    print s.initialConditions
-
-    print 'analogPortsExpressions:'
-    print s.analogPortsExpressions
-
-    print 'eventPortsExpressions:'
-    print s.eventPortsExpressions
-
-    print 'initialActiveStates:'
-    print s.initialActiveStates
-
-    print 'variablesToReport:'
-    print s.variablesToReport
-
-    dictIdentifiers = {}
-    dictFunctions   = {}
-
-    dictIdentifiers['pi'] = math.pi
-    dictIdentifiers['e']  = math.e
-
-    parser = ExpressionParser(dictIdentifiers, dictFunctions)
-
-    for portName, expr in s.analogPortsExpressions.items():
-        if expr:
-            print 'port: {0} = {1}'.format(portName, parser.parse(expr))
 
