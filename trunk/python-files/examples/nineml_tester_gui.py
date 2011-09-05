@@ -58,7 +58,8 @@ def collectStateVariables(root, component, stateVariables, initialValues = {}):
 #     - Component | regime
 #     - Component | regime
 #        - Component | regime
-# that is all components should have the value (regime), even if it is empty
+# that is components dont have other children except their subnodes,
+# and the regime is linked to the item holding the component name
 def collectRegimes(root, component, regimes, activeRegimes = []):
     if root == '':
         root = component.name
@@ -72,7 +73,6 @@ def collectRegimes(root, component, regimes, activeRegimes = []):
         objName = rootName + obj.name
         if objName in activeRegimes:
             active_regime = obj.name
-            break
 
     if len(available_regimes) > 0:
         if active_regime == None:
@@ -254,38 +254,36 @@ def addItemsToRegimesTree(treeWidget, dictItems, rootName):
 
     for key, value in dictItems.items():
         names = key.split(".")
-        item_path = names[:-1]
-        item_name = names[-1]
+        item_path = names # Achtung, achtung! Not: [:-1]
 
         currentItem = rootItem
 
         # First find the parent QTreeWidgetItem
         for item in item_path:
             found = False
-            if currentItem:
-                cname = currentItem.text(0)
-                # First check whether it is equal to the current item
-                # If it is not, check its children
-                if item == cname:
-                    found = True
-                    currentItem = currentItem
-                else:
-                    for c in range(0, currentItem.childCount()):
-                        child = currentItem.child(c)
-                        cname = child.text(0)
-                        if item == cname:
-                            found = True
-                            currentItem = currentItem.child(c)
-                            break
+            cname = currentItem.text(0)
+            # First check whether it is equal to the current item
+            # If it is not, check its children
+            # This is useful if the root component has got regimes
+            if item == cname:
+                found = True
+                currentItem = currentItem
+            else:
+                for c in range(0, currentItem.childCount()):
+                    child = currentItem.child(c)
+                    cname = child.text(0)
+                    if item == cname:
+                        found = True
+                        currentItem = currentItem.child(c)
+                        break
 
             if found == False:
                 currentItem = QtGui.QTreeWidgetItem(currentItem, [item, ''])
 
-            # Now we have the parrent in the currentItem, so add the new item to it with the variable data
-            varItem = QtGui.QTreeWidgetItem(currentItem, [item_name, value[1]])
-            varData = QtCore.QVariant((key, value[0]))
-            varItem.setData(1, QtCore.Qt.UserRole, varData)
-            varItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        currentItem.setText(1, value[1])
+        varData = QtCore.QVariant((key, value[0]))
+        currentItem.setData(1, QtCore.Qt.UserRole, varData)
+        currentItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
 
     treeWidget.expandAll()
     treeWidget.resizeColumnToContents(0)
@@ -358,7 +356,7 @@ class nineml_tester_gui(QtGui.QDialog):
         return self.event_ports_expressions
 
     @property
-    def initialActiveStates(self):
+    def activeStates(self):
         results = []
         for key, value in self.active_states.items():
             results.append(key + '.' + value[1])

@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os, sys, math
+from time import localtime, strftime, time
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
-from nineml.abstraction_layer.testing_utils import std_pynn_simulation
-import os, sys, math
-from time import localtime, strftime, time
 from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
@@ -15,30 +14,68 @@ from nineml_tester_gui import *
 from nineml_daetools_bridge import *
 from nineml_daetools_simulation import *
 
+
+def test_Izhikevich():
+    nineml_component = TestableComponent('izhikevich')()
+    if not nineml_component:
+        raise RuntimeError('Cannot load NineML component')
+
+    parameters = {
+                    "a": 0.02,
+                    "b": 0.2,
+                    "c": -50.0,
+                    "d": 2.0,
+                    "theta": 0.03
+                 }
+    initial_conditions = {
+                            "U": 0.0,
+                            "V": -0.07
+                         }
+    analog_ports_expressions = {
+                                  "Isyn": "0.1"
+                               }
+    event_ports_expressions = {}
+    active_states = []
+    variables_to_report = []
+
+    app = QtGui.QApplication(sys.argv)
+    s = nineml_tester_gui(nineml_component, parameters               = parameters,
+                                            initial_conditions       = initial_conditions,
+                                            active_states            = active_states,
+                                            analog_ports_expressions = analog_ports_expressions,
+                                            event_ports_expressions  = event_ports_expressions,
+                                            variables_to_report      = variables_to_report)
+    res = s.exec_()
+    if res == QtGui.QDialog.Accepted:
+        s.printResults()
+        return s
+    else:
+        return None
+
 def test_Hodgkin_Huxley():
     nineml_component = TestableComponent('hh')()
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
     parameters = {
+        'C' : 1,
+        'ek' : -63,
         'el' : 0.1,
-        'C' : 0,
-        'ek' : 0,
-        'ena' : 0,
-        'gkbar' : 0,
-        'gnabar' : 0,
-        'theta' : 0,
-        'gl' : 0,
-        'celsius' : 0
+        'ena' : -190,
+        'gkbar' : 36,
+        'gnabar' : 120,
+        'theta' : -60,
+        'gl' : 0.3,
+        'celsius' : 1
     }
     initial_conditions = {
-        'n' : 0,
-        'm' : 0,
-        'h' : 0,
-        'V' : 0
+        'n' : 0.31768,
+        'm' : 0.052932,
+        'h' : 0.59612,
+        'V' : -75
     }
     analog_ports_expressions = {
-        'Isyn' : '5 * pi'
+        'Isyn' : '0.01'
     }
     event_ports_expressions = {
     }
@@ -166,27 +203,32 @@ def test_hierachical_iaf_nmda():
         return None
 
 try:
-    # test_hierachical_iaf_nmda()
-    # test_hierachical_iaf_1coba()
-    # test_Hodgkin_Huxley()
-    input_data = test_Hodgkin_Huxley() 
+    # test_hierachical_iaf_nmda
+    # test_hierachical_iaf_1coba
+    # test_Hodgkin_Huxley
+    # test_Izhikevich
+    input_data = test_Izhikevich() 
     if input_data == None:
         exit(0)
 
     print 'Input data from the GUI:'
-    print input_data.printResults()
-    
-    #dictIdentifiers = {}
-    #dictFunctions   = {}
+    input_data.printResults()
 
-    #dictIdentifiers['pi'] = math.pi
-    #dictIdentifiers['e']  = math.e
+    simulation_data = daeSimulationInputData()
 
-    #parser = ExpressionParser(dictIdentifiers, dictFunctions)
+    simulation_data.parameters                 = input_data.parameters
+    simulation_data.initialConditions          = input_data.initialConditions
+    simulation_data.inletPortExpressions       = input_data.analogPortsExpressions
+    simulation_data.inletEventPortExpressions  = input_data.eventPortsExpressions
+    simulation_data.activeStates               = input_data.activeStates
+    simulation_data.variablesToReport          = input_data.variablesToReport
 
-    #for portName, expr in input_data.analogPortsExpressions.items():
-    #    if expr:
-    #        print 'port: {0} = {1}'.format(portName, parser.parse(expr))
+    print 'JSON data:'
+    jsonContent = simulation_data.dumpJSON()
+    print jsonContent
+    simulation_data.importJSON(jsonContent)
+    jsonContent1 = simulation_data.dumpJSON()
+    print str(jsonContent1)
 
     # Create Log, DAESolver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -195,7 +237,7 @@ try:
     model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
     simulation   = nineml_daetools_simulation(model, parameters               = input_data.parametersValues,
                                                      initial_conditions       = input_data.initialConditions,
-                                                     active_states            = input_data.initialActiveStates,
+                                                     active_states            = input_data.activeStates,
                                                      analog_ports_expressions = input_data.analogPortsExpressions,
                                                      event_ports_expressions  = input_data.eventPortsExpressions,
                                                      variables_to_report      = input_data.variablesToReport)

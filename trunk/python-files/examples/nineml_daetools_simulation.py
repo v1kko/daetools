@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+import json
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
-from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys
 from time import localtime, strftime, time
 from daetools.pyDAE import *
@@ -32,6 +32,43 @@ class daeSimulationInputData:
         #self.laSolver     = pySuperLU.daeCreateSuperLUSolver()
         #self.log          = daePythonStdOutLog()
         #self.dataReporter = daeTCPIPDataReporter()
+
+    def dumpJSON(self, sort = True, indent = 2):
+        result = {}
+        result['parameters']                = self.parameters
+        result['initialConditions']         = self.initialConditions
+        result['inletPortExpressions']      = self.inletPortExpressions
+        result['inletEventPortExpressions'] = self.inletEventPortExpressions
+        result['activeStates']              = self.activeStates
+        result['variablesToReport']         = self.variablesToReport
+
+        return json.dumps(result, sort_keys = sort, indent = indent)
+
+    def importJSON(self, jsonContent):
+        dictInput = json.loads(jsonContent)
+        self.parameters                 = dictInput['parameters']
+        self.initialConditions          = dictInput['initialConditions']
+        self.inletPortExpressions       = dictInput['inletPortExpressions']
+        self.inletEventPortExpressions  = dictInput['inletEventPortExpressions']
+        self.activeStates               = dictInput['activeStates']
+        self.variablesToReport          = dictInput['variablesToReport']
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        print 'parameters:'
+        printDictionary(self.parameters)
+        print 'initial_conditions:'
+        printDictionary(self.initial_conditions)
+        print 'active_states:'
+        printDictionary(self.active_states)
+        print 'analog_ports_expressions:'
+        printDictionary(self.analog_ports_expressions)
+        print 'event_ports_expressions:'
+        printDictionary(self.event_ports_expressions)
+        print 'variables_to_report:'
+        printDictionary(self.variables_to_report)
 
 class nineml_daetools_simulation(daeSimulation):
     def __init__(self, model, **kwargs):
