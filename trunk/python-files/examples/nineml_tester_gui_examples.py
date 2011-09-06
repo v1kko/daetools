@@ -39,12 +39,12 @@ def test_Izhikevich():
     variables_to_report = []
 
     app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_gui(nineml_component, parameters               = parameters,
-                                            initial_conditions       = initial_conditions,
-                                            active_states            = active_states,
-                                            analog_ports_expressions = analog_ports_expressions,
-                                            event_ports_expressions  = event_ports_expressions,
-                                            variables_to_report      = variables_to_report)
+    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
+                                              initial_conditions       = initial_conditions,
+                                              active_states            = active_states,
+                                              analog_ports_expressions = analog_ports_expressions,
+                                              event_ports_expressions  = event_ports_expressions,
+                                              variables_to_report      = variables_to_report)
     res = s.exec_()
     if res == QtGui.QDialog.Accepted:
         s.printResults()
@@ -85,12 +85,12 @@ def test_Hodgkin_Huxley():
     ]
 
     app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_gui(nineml_component, parameters               = parameters,
-                                            initial_conditions       = initial_conditions,
-                                            active_states            = active_states,
-                                            analog_ports_expressions = analog_ports_expressions,
-                                            event_ports_expressions  = event_ports_expressions,
-                                            variables_to_report      = variables_to_report)
+    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
+                                              initial_conditions       = initial_conditions,
+                                              active_states            = active_states,
+                                              analog_ports_expressions = analog_ports_expressions,
+                                              event_ports_expressions  = event_ports_expressions,
+                                              variables_to_report      = variables_to_report)
     res = s.exec_()
     if res == QtGui.QDialog.Accepted:
         s.printResults()
@@ -135,12 +135,12 @@ def test_hierachical_iaf_1coba():
     ]
 
     app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_gui(nineml_component, parameters               = parameters,
-                                            initial_conditions       = initial_conditions,
-                                            active_states            = active_states,
-                                            analog_ports_expressions = analog_ports_expressions,
-                                            event_ports_expressions  = event_ports_expressions,
-                                            variables_to_report      = variables_to_report)
+    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
+                                              initial_conditions       = initial_conditions,
+                                              active_states            = active_states,
+                                              analog_ports_expressions = analog_ports_expressions,
+                                              event_ports_expressions  = event_ports_expressions,
+                                              variables_to_report      = variables_to_report)
     res = s.exec_()
     if res == QtGui.QDialog.Accepted:
         s.printResults()
@@ -189,12 +189,12 @@ def test_hierachical_iaf_nmda():
                           ]
 
     app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_gui(nineml_component, parameters               = parameters,
-                                            initial_conditions       = initial_conditions,
-                                            active_states            = active_states,
-                                            analog_ports_expressions = analog_ports_expressions,
-                                            event_ports_expressions  = event_ports_expressions,
-                                            variables_to_report      = variables_to_report)
+    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
+                                              initial_conditions       = initial_conditions,
+                                              active_states            = active_states,
+                                              analog_ports_expressions = analog_ports_expressions,
+                                              event_ports_expressions  = event_ports_expressions,
+                                              variables_to_report      = variables_to_report)
     res = s.exec_()
     if res == QtGui.QDialog.Accepted:
         s.printResults()

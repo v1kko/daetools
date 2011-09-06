@@ -289,12 +289,8 @@ def addItemsToRegimesTree(treeWidget, dictItems, rootName):
     treeWidget.resizeColumnToContents(0)
     treeWidget.resizeColumnToContents(1)
 
-class nineml_tester_gui(QtGui.QDialog):
+class nineml_tester:
     def __init__(self, ninemlComponent, **kwargs):
-        QtGui.QDialog.__init__(self)
-        self.ui = Ui_ninemlTester()
-        self.ui.setupUi(self)
-
         _parameters               = kwargs.get('parameters',               {})
         _initial_conditions       = kwargs.get('initial_conditions',       {})
         _active_states            = kwargs.get('active_states',            [])
@@ -314,15 +310,6 @@ class nineml_tester_gui(QtGui.QDialog):
         # Dictionaries 'key' : boolean-value
         self.variables_to_report = {}
 
-        self.connect(self.ui.buttonOk,              QtCore.SIGNAL('clicked()'),                                self.slotOK)
-        self.connect(self.ui.buttonCancel,          QtCore.SIGNAL('clicked()'),                                self.slotCancel)
-        self.connect(self.ui.treeParameters,        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotParameterItemChanged)
-        self.connect(self.ui.treeInitialConditions, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotInitialConditionItemChanged)
-        self.connect(self.ui.treeRegimes,           QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotRegimesItemDoubleClicked)
-        self.connect(self.ui.treeAnalogPorts,       QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotAnalogPortsItemDoubleClicked)
-        self.connect(self.ui.treeEventPorts,        QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotEventPortsItemDoubleClicked)
-        self.connect(self.ui.treeResultsVariables,  QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotResultsVariablesItemChanged)
-
         collectParameters      ('', self.ninemlComponent, self.parameters,               _parameters)
         collectStateVariables  ('', self.ninemlComponent, self.initial_conditions,       _initial_conditions)
         collectRegimes         ('', self.ninemlComponent, self.active_states,            _active_states)
@@ -331,13 +318,6 @@ class nineml_tester_gui(QtGui.QDialog):
         connected_ports = []
         connected_ports = getConnectedAnalogPorts('', self.ninemlComponent, connected_ports)
         collectAnalogPorts('', self.ninemlComponent, self.analog_ports_expressions, connected_ports, _analog_ports_expressions)
-
-        addItemsToTree                (self.ui.treeParameters,        self.parameters,               self.ninemlComponent.name)
-        addItemsToTree                (self.ui.treeInitialConditions, self.initial_conditions,       self.ninemlComponent.name)
-        addItemsToTree                (self.ui.treeAnalogPorts,       self.analog_ports_expressions, self.ninemlComponent.name, False)
-        addItemsToTree                (self.ui.treeEventPorts,        self.event_ports_expressions,  self.ninemlComponent.name, False)
-        addItemsToRegimesTree         (self.ui.treeRegimes,           self.active_states,            self.ninemlComponent.name)
-        addItemsToResultsVariablesTree(self.ui.treeResultsVariables,  self.variables_to_report,      self.ninemlComponent.name)
 
     @property
     def parametersValues(self):
@@ -370,12 +350,6 @@ class nineml_tester_gui(QtGui.QDialog):
                 results.append(key)
         return results
 
-    def slotOK(self):
-        self.done(QtGui.QDialog.Accepted)
-    
-    def slotCancel(self):
-        self.done(QtGui.QDialog.Rejected)
-
     def printResults(self):
         print 'parameters:'
         printDictionary(self.parameters)
@@ -389,6 +363,103 @@ class nineml_tester_gui(QtGui.QDialog):
         printDictionary(self.event_ports_expressions)
         print 'variables_to_report:'
         printDictionary(self.variables_to_report)
+
+class nineml_tester_htmlGUI(nineml_tester):
+    def __init__(self, ninemlComponent, **kwargs):
+        nineml_tester.__init__(self, ninemlComponent, **kwargs)
+
+    def generateHTMLForm(self):
+        form_template = """
+        <form method="post">
+            <h1>NineMl component: {0}</h1>
+            {1}
+            <br/>
+            <input type="submit" value="Submit" />
+        </form>
+        """
+
+        if len(self.parameters) > 0:
+            content = '<form method="post"><h2>Parameters</h2>\n'
+            content += '<ul>'
+            for name, value in self.parameters.items():
+                content += '<li><span>{0}</span> <input type="text" name="{0}" value="{1}"/> </li>'.format(name, value)
+            content += '</ul>'
+            content += '\n'
+
+        if len(self.initial_conditions) > 0:
+            content += '<h2>Initial Conditions</h2>\n'
+            content += '<ul>'
+            for name, value in self.initial_conditions.items():
+                content += '<li><span>{0}</span> <input type="text" name="{0}" value="{1}"/> </li>'.format(name, value)
+            content += '</ul>'
+            content += '\n'
+
+        if len(self.active_states) > 0:
+            content += '<h2>Active Regimes</h2>\n'
+            content += '<ul>'
+            for name, value in self.active_states.items():
+                content += '<li><span>{0}</span> <select name="{0}">'.format(name)
+                for available_regime in value[0]:
+                    content += '<option value="{0}">{0}</option>'.format(available_regime)
+                content += '</select> </li>'
+            content += '</ul>'
+            content += '\n'
+
+        if len(self.analog_ports_expressions) > 0:
+            content += '<h2>Analog Ports Expressions</h2>\n'
+            content += '<ul>'
+            for name, value in self.analog_ports_expressions.items():
+                content += '<li><span>{0}</span> <input type="text" name="{0}" value="{1}"/> </li>'.format(name, value)
+            content += '</ul>'
+            content += '\n'
+
+        if len(self.event_ports_expressions) > 0:
+            content += '<h2>Event Ports Expressions</h2>\n'
+            content += '<ul>'
+            for name, value in self.event_ports_expressions.items():
+                content += '<li><span>{0}</span> <input type="text" name="{0}" value="{1}"/> </li>'.format(name, value)
+            content += '</ul>'
+            content += '\n'
+
+        if len(self.variables_to_report) > 0:
+            content += '<h2>Variables To Report</h2>\n'
+            content += '<ul>'
+            for name, value in self.variables_to_report.items():
+                content += '<li><span>{0}</span> <input type="text" name="{0}" value="{1}"/> </li>'.format(name, value)
+            content += '</ul>'
+            content += '\n'
+
+        return form_template.format(self.ninemlComponent.name, content)
+        
+class nineml_tester_qtGUI(nineml_tester, QtGui.QDialog):
+    def __init__(self, ninemlComponent, **kwargs):
+        nineml_tester.__init__(self, ninemlComponent, **kwargs)
+        QtGui.QDialog.__init__(self)
+
+        self.ui = Ui_ninemlTester()
+        self.ui.setupUi(self)
+        
+        self.connect(self.ui.buttonOk,              QtCore.SIGNAL('clicked()'),                                self.slotOK)
+        self.connect(self.ui.buttonCancel,          QtCore.SIGNAL('clicked()'),                                self.slotCancel)
+        self.connect(self.ui.treeParameters,        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotParameterItemChanged)
+        self.connect(self.ui.treeInitialConditions, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotInitialConditionItemChanged)
+        self.connect(self.ui.treeRegimes,           QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotRegimesItemDoubleClicked)
+        self.connect(self.ui.treeAnalogPorts,       QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotAnalogPortsItemDoubleClicked)
+        self.connect(self.ui.treeEventPorts,        QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.slotEventPortsItemDoubleClicked)
+        self.connect(self.ui.treeResultsVariables,  QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),       self.slotResultsVariablesItemChanged)
+
+        addItemsToTree                (self.ui.treeParameters,        self.parameters,               self.ninemlComponent.name)
+        addItemsToTree                (self.ui.treeInitialConditions, self.initial_conditions,       self.ninemlComponent.name)
+        addItemsToTree                (self.ui.treeAnalogPorts,       self.analog_ports_expressions, self.ninemlComponent.name, False)
+        addItemsToTree                (self.ui.treeEventPorts,        self.event_ports_expressions,  self.ninemlComponent.name, False)
+        addItemsToRegimesTree         (self.ui.treeRegimes,           self.active_states,            self.ninemlComponent.name)
+        addItemsToResultsVariablesTree(self.ui.treeResultsVariables,  self.variables_to_report,      self.ninemlComponent.name)
+
+    def slotOK(self):
+        self.done(QtGui.QDialog.Accepted)
+    
+    def slotCancel(self):
+        self.done(QtGui.QDialog.Rejected)
 
     def slotParameterItemChanged(self, item, column):
         if column == 1:
