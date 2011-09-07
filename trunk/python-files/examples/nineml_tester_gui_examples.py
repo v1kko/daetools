@@ -202,68 +202,72 @@ def test_hierachical_iaf_nmda():
     else:
         return None
 
-try:
-    # test_hierachical_iaf_nmda
-    # test_hierachical_iaf_1coba
-    # test_Hodgkin_Huxley
-    # test_Izhikevich
-    input_data = test_Izhikevich() 
-    if input_data == None:
+if __name__ == "__main__":
+    try:
+        # test_hierachical_iaf_nmda
+        # test_hierachical_iaf_1coba
+        # test_Hodgkin_Huxley
+        # test_Izhikevich
+        input_data = test_hierachical_iaf_1coba()
+        if input_data == None:
+            exit(0)
+
+        print 'Input data from the GUI:'
+        #input_data.printResults()
+        #input_data.printTrees()
+        input_data.printTreeDictionaries()
         exit(0)
 
-    print 'Input data from the GUI:'
-    input_data.printResults()
+        simulation_data = daeSimulationInputData()
 
-    simulation_data = daeSimulationInputData()
+        simulation_data.parameters                 = input_data.parameters
+        simulation_data.initialConditions          = input_data.initialConditions
+        simulation_data.inletPortExpressions       = input_data.analogPortsExpressions
+        simulation_data.inletEventPortExpressions  = input_data.eventPortsExpressions
+        simulation_data.activeStates               = input_data.activeStates
+        simulation_data.variablesToReport          = input_data.variablesToReport
 
-    simulation_data.parameters                 = input_data.parameters
-    simulation_data.initialConditions          = input_data.initialConditions
-    simulation_data.inletPortExpressions       = input_data.analogPortsExpressions
-    simulation_data.inletEventPortExpressions  = input_data.eventPortsExpressions
-    simulation_data.activeStates               = input_data.activeStates
-    simulation_data.variablesToReport          = input_data.variablesToReport
+        print 'JSON data:'
+        jsonContent = simulation_data.dumpJSON()
+        print jsonContent
+        simulation_data.importJSON(jsonContent)
+        jsonContent1 = simulation_data.dumpJSON()
+        print str(jsonContent1)
 
-    print 'JSON data:'
-    jsonContent = simulation_data.dumpJSON()
-    print jsonContent
-    simulation_data.importJSON(jsonContent)
-    jsonContent1 = simulation_data.dumpJSON()
-    print str(jsonContent1)
+        # Create Log, DAESolver, DataReporter and Simulation object
+        log          = daePythonStdOutLog()
+        daesolver    = daeIDAS()
+        datareporter = daeTCPIPDataReporter()
+        model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
+        simulation   = nineml_daetools_simulation(model, parameters               = input_data.parametersValues,
+                                                        initial_conditions       = input_data.initialConditions,
+                                                        active_states            = input_data.activeStates,
+                                                        analog_ports_expressions = input_data.analogPortsExpressions,
+                                                        event_ports_expressions  = input_data.eventPortsExpressions,
+                                                        variables_to_report      = input_data.variablesToReport)
 
-    # Create Log, DAESolver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
-    simulation   = nineml_daetools_simulation(model, parameters               = input_data.parametersValues,
-                                                     initial_conditions       = input_data.initialConditions,
-                                                     active_states            = input_data.activeStates,
-                                                     analog_ports_expressions = input_data.analogPortsExpressions,
-                                                     event_ports_expressions  = input_data.eventPortsExpressions,
-                                                     variables_to_report      = input_data.variablesToReport)
+        # Set the time horizon and the reporting interval
+        simulation.ReportingInterval = 0.1
+        simulation.TimeHorizon = 10
 
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.1
-    simulation.TimeHorizon = 10
+        # Connect data reporter
+        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        if(datareporter.Connect("", simName) == False):
+            sys.exit()
 
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
+        # Initialize the simulation
+        simulation.Initialize(daesolver, datareporter, log)
 
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
+        # Save the model reports for all models
+        simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+        simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    # Save the model reports for all models
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+        # Solve at time=0 (initialization)
+        simulation.SolveInitial()
 
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
+        # Run
+        simulation.Run()
+        simulation.Finalize()
 
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-
-except Exception, e:
-    print e
+    except Exception, e:
+        print e

@@ -1,7 +1,10 @@
 from pprint import pformat
-from cgi import parse_qs, escape
 import os, sys, math
 from time import localtime, strftime, time
+import urlparse
+import cgitb
+
+cgitb.enable()
 
 def application(environ, start_response):
     output = []
@@ -10,8 +13,8 @@ def application(environ, start_response):
     #output.append(pformat(environ))
     #output.append('</pre>')
 
-    if environ['REQUEST_METHOD'] == 'GET':
-        try:
+    try:
+        if environ['REQUEST_METHOD'] == 'GET':
             sys.path.append("/home/ciroki/Data/daetools/trunk/python-files/examples")
             import nineml
             from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
@@ -67,18 +70,25 @@ def application(environ, start_response):
             output.append('</body>')
             output.append('</html>')
 
-        except Exception, e:
-            output.append('Exception: ' + str(e))
-        
-    elif environ['REQUEST_METHOD'] == 'POST':
-        # show form data as received by POST:
-        output.append('<h1>FORM DATA</h1>')
-        content_length = int(environ['CONTENT_LENGTH'])
-        if content_length > 0:
-            query_string = parse_qs(pformat(environ['wsgi.input'].read(content_length)))
-            output.append('<p>' + str(query_string) + '</p>')
-        else:
-            output.append('<p>No data</p>')
+        elif environ['REQUEST_METHOD'] == 'POST':
+            # show form data as received by POST:
+            output.append('<h1>FORM DATA</h1>')
+            content_length = int(environ['CONTENT_LENGTH'])
+            if content_length > 0:
+                dictFormData = urlparse.parse_qs(pformat(environ['wsgi.input'].read(content_length)))
+                for key, values in dictFormData.items():
+                    output.append('<p>{0}: {1}</p>'.format(key, values))
+                    #if isinstance(values, list):
+                    #    if len(values) > 0:
+                    #        output.append('<p>{0}: {1}</p>'.format(key, values[0]))
+                    #else:
+                    #    output.append('<p>{0}: {1}</p>'.format(key, values))
+                        
+            else:
+                output.append('<p>No data</p>')
+
+    except Exception, e:
+        output.append('Exception: ' + str(e))
 
     # send results
     output_len = sum(len(line) for line in output)
