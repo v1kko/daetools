@@ -14,16 +14,16 @@ class daeSimulationInputData:
         self.parser = ExpressionParser()
 
         # Dictionaries 'canonical/relative name' : floating-point-value
-        self.parameters        = {}
-        self.initialConditions = {}
+        self.parameters         = {}
+        self.initial_conditions = {}
 
         # Dictionaries: 'canonical/relative name' : 'expression'
-        self.inletPortExpressions      = {}
-        self.inletEventPortExpressions = {}
+        self.analog_port_expressions = {}
+        self.event_port_expressions  = {}
 
         # List of canonical/relative names
-        self.activeStates       = []
-        self.variablesToReport  = []
+        self.active_regimes       = {}
+        self.variables_to_report = {}
 
         #self.timeHorizon       = 0.0
         #self.reportingInterval = 0.0
@@ -34,24 +34,48 @@ class daeSimulationInputData:
         #self.dataReporter = daeTCPIPDataReporter()
 
     def dumpJSON(self, sort = True, indent = 2):
-        result = {}
-        result['parameters']                = self.parameters
-        result['initialConditions']         = self.initialConditions
-        result['inletPortExpressions']      = self.inletPortExpressions
-        result['inletEventPortExpressions'] = self.inletEventPortExpressions
-        result['activeStates']              = self.activeStates
-        result['variablesToReport']         = self.variablesToReport
+        data = {}
+        data['parameters']                = self.parameters
+        data['initial_conditions']        = self.initial_conditions
+        data['analog_port_expressions']   = self.analog_port_expressions
+        data['event_port_expressions']    = self.event_port_expressions
+        data['active_regimes']             = self.active_regimes
+        data['variables_to_report']       = self.variables_to_report
 
-        return json.dumps(result, sort_keys = sort, indent = indent)
+        return json.dumps(data, sort_keys = sort, indent = indent)
 
-    def importJSON(self, jsonContent):
-        dictInput = json.loads(jsonContent)
-        self.parameters                 = dictInput['parameters']
-        self.initialConditions          = dictInput['initialConditions']
-        self.inletPortExpressions       = dictInput['inletPortExpressions']
-        self.inletEventPortExpressions  = dictInput['inletEventPortExpressions']
-        self.activeStates               = dictInput['activeStates']
-        self.variablesToReport          = dictInput['variablesToReport']
+    def loadJSON(self, jsonContent):
+        data = json.loads(jsonContent)
+
+        if data.has_key('parameters'):
+            temp = data['parameters']
+            if isinstance(temp, dict):
+                self.parameters = temp
+
+        if data.has_key('initial_conditions'):
+            temp = data['initial_conditions']
+            if isinstance(temp, dict):
+                self.initial_conditions = temp
+
+        if data.has_key('analog_ports_expressions'):
+            temp = data['analog_ports_expressions']
+            if isinstance(temp, dict):
+                self.analog_ports_expressions = temp
+
+        if data.has_key('event_ports_expressions'):
+            temp = data['event_ports_expressions']
+            if isinstance(temp, dict):
+                self.event_ports_expressions = temp
+
+        if data.has_key('active_regimes'):
+            temp = data['active_regimes']
+            if isinstance(temp, list):
+                self.active_regimes = temp
+
+        if data.has_key('variables_to_report'):
+            temp = data['variables_to_report']
+            if isinstance(temp, list):
+                self.variables_to_report = temp
 
     def __repr__(self):
         return self.__str__()
@@ -61,8 +85,8 @@ class daeSimulationInputData:
         printDictionary(self.parameters)
         print 'initial_conditions:'
         printDictionary(self.initial_conditions)
-        print 'active_states:'
-        printDictionary(self.active_states)
+        print 'active_regimes:'
+        printDictionary(self.active_regimes)
         print 'analog_ports_expressions:'
         printDictionary(self.analog_ports_expressions)
         print 'event_ports_expressions:'
@@ -80,8 +104,8 @@ class nineml_daetools_simulation(daeSimulation):
 
         self._parameters               = kwargs.get('parameters',               {})
         self._initial_conditions       = kwargs.get('initial_conditions',       {})
-        self._active_states            = kwargs.get('active_states',            [])
-        self._variables_to_report      = kwargs.get('variables_to_report',      [])
+        self._active_regimes           = kwargs.get('active_regimes',           {})
+        self._variables_to_report      = kwargs.get('variables_to_report',      {})
         self._analog_ports_expressions = kwargs.get('analog_ports_expressions', {})
         self._event_ports_expressions  = kwargs.get('event_ports_expressions',  {})
 
@@ -109,13 +133,13 @@ class nineml_daetools_simulation(daeSimulation):
                 raise RuntimeError('Could not locate port {0}'.format(portName))
             print 'port: {0} = {1}'.format(portName, self.parser.parse(expression))
 
-        for activeStateName in self._active_states:
-            listNames = activeStateName.split('.')
-            if len(listNames) > 1:
-                stateName = listNames[-1]
-                modelName = '.'.join(listNames[:-1])
-            else:
-                raise RuntimeError('Invalid initial active state name {0}'.format(activeStateName))
+        for modelName, stateName in self._active_regimes.items():
+            #listNames = activeStateName.split('.')
+            #if len(listNames) > 1:
+            #    stateName = listNames[-1]
+            #    modelName = '.'.join(listNames[:-1])
+            #else:
+            #    raise RuntimeError('Invalid initial active state name {0}'.format(activeStateName))
 
             stn = getObjectFromCanonicalName(self.m, modelName + '.' + nineml_daetools_bridge.ninemlSTNRegimesName, look_for_stns = True)
             if stn == None:
@@ -125,12 +149,13 @@ class nineml_daetools_simulation(daeSimulation):
             stn.ActiveState = stateName
 
         self.m.SetReportingOn(False)
-        for varName in self._variables_to_report:
-            variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
-            if variable == None:
-                raise RuntimeError('Could not locate variable {0}'.format(paramName))
-            print '  --> Report the variable: {0}'.format(varName)
-            variable.ReportingOn = True
+        for varName, value in self._variables_to_report.items():
+            if value:
+                variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
+                if variable == None:
+                    raise RuntimeError('Could not locate variable {0}'.format(paramName))
+                print '  --> Report the variable: {0}'.format(varName)
+                variable.ReportingOn = True
         
     def Run1(self):
         spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
@@ -168,7 +193,7 @@ if __name__ == "__main__":
         'iaf.V' : -60,
         'iaf.tspike' : -1E99
     }
-    active_states = [
+    active_regimes = [
         'cobaExcit.cobadefaultregime',
         'iaf.subthresholdregime'
     ]
@@ -195,7 +220,7 @@ if __name__ == "__main__":
     model = nineml_daetools_bridge(nineml_comp.name, nineml_comp, None, '')
     simulation = nineml_daetools_simulation(model, parameters               = parameters,
                                                    initial_conditions       = initial_conditions,
-                                                   active_states            = active_states,
+                                                   active_regimes           = active_regimes,
                                                    analog_ports_expressions = analog_ports_expressions,
                                                    event_ports_expressions  = event_ports_expressions,
                                                    variables_to_report      = variables_to_report)

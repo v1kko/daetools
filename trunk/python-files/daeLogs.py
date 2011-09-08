@@ -20,4 +20,11 @@ class daePythonStdOutLog(daeStdOutLog):
     def Message(self, message, severity):
         print self.IndentString + message
 
+class daeStringListLog(daeStdOutLog):
+    def __init__(self):
+        daeStdOutLog.__init__(self)
+        self.messages = []
+
+    def Message(self, message, severity):
+        self.messages.append(self.IndentString + message)
 

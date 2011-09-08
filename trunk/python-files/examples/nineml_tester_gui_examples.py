@@ -35,13 +35,13 @@ def test_Izhikevich():
                                   "Isyn": "0.1"
                                }
     event_ports_expressions = {}
-    active_states = []
-    variables_to_report = []
+    active_regimes = {}
+    variables_to_report = {}
 
     app = QtGui.QApplication(sys.argv)
     s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
                                               initial_conditions       = initial_conditions,
-                                              active_states            = active_states,
+                                              active_regimes           = active_regimes,
                                               analog_ports_expressions = analog_ports_expressions,
                                               event_ports_expressions  = event_ports_expressions,
                                               variables_to_report      = variables_to_report)
@@ -77,17 +77,14 @@ def test_Hodgkin_Huxley():
     analog_ports_expressions = {
         'Isyn' : '0.01'
     }
-    event_ports_expressions = {
-    }
-    active_states = [
-    ]
-    variables_to_report = [
-    ]
+    event_ports_expressions = {}
+    active_regimes = {}
+    variables_to_report = {}
 
     app = QtGui.QApplication(sys.argv)
     s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
                                               initial_conditions       = initial_conditions,
-                                              active_states            = active_states,
+                                              active_regimes           = active_regimes,
                                               analog_ports_expressions = analog_ports_expressions,
                                               event_ports_expressions  = event_ports_expressions,
                                               variables_to_report      = variables_to_report)
@@ -125,19 +122,19 @@ def test_hierachical_iaf_1coba():
     }
     event_ports_expressions = {
     }
-    active_states = [
-        'cobaExcit.cobadefaultregime',
-        'iaf.subthresholdregime'
-    ]
-    variables_to_report = [
-        'cobaExcit.g',
-        'iaf.tspike'
-    ]
+    active_regimes = {
+        'cobaExcit' : 'cobadefaultregime',
+        'iaf' : 'subthresholdregime'
+    }
+    variables_to_report = {
+        'cobaExcit.g' : True,
+        'iaf.tspike' : True
+    }
 
     app = QtGui.QApplication(sys.argv)
     s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
                                               initial_conditions       = initial_conditions,
-                                              active_states            = active_states,
+                                              active_regimes           = active_regimes,
                                               analog_ports_expressions = analog_ports_expressions,
                                               event_ports_expressions  = event_ports_expressions,
                                               variables_to_report      = variables_to_report)
@@ -181,17 +178,17 @@ def test_hierachical_iaf_nmda():
                          }
     analog_ports_expressions = {}
     event_ports_expressions = {}
-    active_states = []
-    variables_to_report = [
-                            'iaf.V',
-                            'nmda.g',
-                            'cobaExcit.g'
-                          ]
+    active_regimes = {}
+    variables_to_report = {
+                            'iaf.V' : True,
+                            'nmda.g' : True,
+                            'cobaExcit.g' : True
+                          }
 
     app = QtGui.QApplication(sys.argv)
     s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
                                               initial_conditions       = initial_conditions,
-                                              active_states            = active_states,
+                                              active_regimes           = active_regimes,
                                               analog_ports_expressions = analog_ports_expressions,
                                               event_ports_expressions  = event_ports_expressions,
                                               variables_to_report      = variables_to_report)
@@ -216,35 +213,35 @@ if __name__ == "__main__":
         #input_data.printResults()
         #input_data.printTrees()
         input_data.printTreeDictionaries()
-        exit(0)
 
         simulation_data = daeSimulationInputData()
-
-        simulation_data.parameters                 = input_data.parameters
-        simulation_data.initialConditions          = input_data.initialConditions
-        simulation_data.inletPortExpressions       = input_data.analogPortsExpressions
-        simulation_data.inletEventPortExpressions  = input_data.eventPortsExpressions
-        simulation_data.activeStates               = input_data.activeStates
-        simulation_data.variablesToReport          = input_data.variablesToReport
+        simulation_data.parameters               = input_data.parameters
+        simulation_data.initial_conditions       = input_data.initial_conditions
+        simulation_data.analog_ports_expressions = input_data.analog_ports_expressions
+        simulation_data.event_ports_expressions  = input_data.event_ports_expressions
+        simulation_data.active_regimes           = input_data.active_regimes
+        simulation_data.variables_to_report      = input_data.variables_to_report
 
         print 'JSON data:'
         jsonContent = simulation_data.dumpJSON()
         print jsonContent
-        simulation_data.importJSON(jsonContent)
+        simulation_data.loadJSON(jsonContent)
         jsonContent1 = simulation_data.dumpJSON()
         print str(jsonContent1)
+
+        #exit(0)
 
         # Create Log, DAESolver, DataReporter and Simulation object
         log          = daePythonStdOutLog()
         daesolver    = daeIDAS()
         datareporter = daeTCPIPDataReporter()
         model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
-        simulation   = nineml_daetools_simulation(model, parameters               = input_data.parametersValues,
-                                                        initial_conditions       = input_data.initialConditions,
-                                                        active_states            = input_data.activeStates,
-                                                        analog_ports_expressions = input_data.analogPortsExpressions,
-                                                        event_ports_expressions  = input_data.eventPortsExpressions,
-                                                        variables_to_report      = input_data.variablesToReport)
+        simulation   = nineml_daetools_simulation(model, parameters               = input_data.parameters,
+                                                         initial_conditions       = input_data.initial_conditions,
+                                                         active_regimes           = input_data.active_regimes,
+                                                         analog_ports_expressions = input_data.analog_ports_expressions,
+                                                         event_ports_expressions  = input_data.event_ports_expressions,
+                                                         variables_to_report      = input_data.variables_to_report)
 
         # Set the time horizon and the reporting interval
         simulation.ReportingInterval = 0.1

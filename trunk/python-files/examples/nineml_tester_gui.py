@@ -5,7 +5,7 @@ import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
-import os, sys, math
+import os, sys, math, collections
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 from nineml_tester_ui import Ui_ninemlTester
@@ -69,34 +69,6 @@ class treeItem:
 
         return dictItems
 
-    def getHTMLFormList(self):
-        content = '<ul>'
-
-        if self.itemType == treeItem.typeFloat:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(self.name, self.canonicalName, self.value)
-        elif self.itemType == treeItem.typeInteger:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(self.name, self.canonicalName, self.value)
-        elif self.itemType == treeItem.typeString:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(self.name, self.canonicalName, self.value)
-        elif self.itemType == treeItem.typeBoolean:
-            if self.value:
-                content += '<li><span>{0}</span><input type="checkbox" name="{1}" checked/></li>'.format(self.name, self.canonicalName)
-            else:
-                content += '<li><span>{0}</span><input type="checkbox" name="{1}"/></li>'.format(self.name, self.canonicalName)
-        elif self.itemType == treeItem.typeList:
-            content += '<li><span>{0}</span> <select name="{1}">'.format(self.name, self.canonicalName)
-            for available_regime in self.data:
-                content += '<option value="{0}">{0}</option>'.format(available_regime)
-            content += '</select></li>'
-        else:
-            content += '<li><span>{0}</span></li>'.format(self.name)
-
-        for child in self.children:
-            content += child.getHTMLFormList()
-
-        content += '</ul>'
-        return content
-        
     def __str__(self):
         indent = self.level * '    '
         res = '{0}- {1}: {2}\n'.format(indent, self.name, self.value)
@@ -167,14 +139,15 @@ def collectStateVariables(nodeItem, component, dictStateVariables, initialValues
         subnodeItem = treeItem(nodeItem, name, None, None, treeItem.typeNoValue)
         collectStateVariables(subnodeItem, subcomponent, dictStateVariables, initialValues)
 
-def collectRegimes(nodeItem, component, dictRegimes, activeRegimes = []):
+def collectRegimes(nodeItem, component, dictRegimes, activeRegimes = {}):
     available_regimes = []
     active_regime     = None
 
     for obj in component.regimes:
         available_regimes.append(obj.name)
         objName = nodeItem.canonicalName + '.' + obj.name
-        if isValueInList(objName, activeRegimes, True) == True:
+        value   = getValueFromDictionary(nodeItem.canonicalName, activeRegimes, None, True)
+        if value == obj.name:
             active_regime = obj.name
 
     if len(available_regimes) > 0:
@@ -216,32 +189,23 @@ def collectEventPorts(nodeItem, component, dictEventPortsExpressions, expression
         subnodeItem = treeItem(nodeItem, name, None, None, treeItem.typeNoValue)
         collectEventPorts(subnodeItem, subcomponent, dictEventPortsExpressions, expressions)
 
-def collectVariablesToReport(nodeItem, component, dictVariablesToReport, variables_to_report = []):
+def collectVariablesToReport(nodeItem, component, dictVariablesToReport, variables_to_report = {}):
     for obj in component.aliases:
         objName = nodeItem.canonicalName + '.' + obj.lhs
-        if isValueInList(objName, variables_to_report, True) == True:
-            checked = True
-        else:
-            checked = False
+        checked = getValueFromDictionary(objName, variables_to_report, False, True)
         dictVariablesToReport[objName] = checked
         item = treeItem(nodeItem, obj.lhs, checked, None, treeItem.typeBoolean)
 
     for obj in component.state_variables:
         objName = nodeItem.canonicalName + '.' + obj.name
-        if isValueInList(objName, variables_to_report, True) == True:
-            checked = True
-        else:
-            checked = False
+        checked = getValueFromDictionary(objName, variables_to_report, False, True)
         dictVariablesToReport[objName] = checked
         item = treeItem(nodeItem, obj.name, checked, None, treeItem.typeBoolean)
 
     for obj in component.analog_ports:
         objName = nodeItem.canonicalName + '.' + obj.name
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
-            if isValueInList(objName, variables_to_report, True) == True:
-                checked = True
-            else:
-                checked = False
+            checked = getValueFromDictionary(objName, variables_to_report, False, True)
             dictVariablesToReport[objName] = checked
             item = treeItem(nodeItem, obj.name, checked, None, treeItem.typeBoolean)
 
@@ -285,11 +249,24 @@ class nineml_tester:
     def __init__(self, ninemlComponent, **kwargs):
         _parameters               = kwargs.get('parameters',               {})
         _initial_conditions       = kwargs.get('initial_conditions',       {})
-        _active_states            = kwargs.get('active_states',            [])
-        _variables_to_report      = kwargs.get('variables_to_report',      [])
+        _active_regimes           = kwargs.get('active_regimes',           {})
         _analog_ports_expressions = kwargs.get('analog_ports_expressions', {})
         _event_ports_expressions  = kwargs.get('event_ports_expressions',  {})
+        _variables_to_report      = kwargs.get('variables_to_report',      {})
 
+        if not isinstance(_parameters, dict):
+            raise RuntimeError('parameters argument must be a dictionary')
+        if not isinstance(_initial_conditions, dict):
+            raise RuntimeError('initial_conditions argument must be a dictionary')
+        if not isinstance(_active_regimes, dict):
+            raise RuntimeError('active_regimes argument must be a dictionary')
+        if not isinstance(_analog_ports_expressions, dict):
+            raise RuntimeError('analog_ports_expressions argument must be a dictionary')
+        if not isinstance(_event_ports_expressions, dict):
+            raise RuntimeError('event_ports_expressions argument must be a dictionary')
+        if not isinstance(_variables_to_report, dict):
+            raise RuntimeError('variables_to_report argument must be a dictionary')
+        
         self.ninemlComponent   = ninemlComponent
         # Dictionaries 'key' : floating-point-value
         self.parameters         = {}
@@ -297,8 +274,8 @@ class nineml_tester:
         # Dictionaries: 'key' : 'expression'
         self.analog_ports_expressions = {}
         self.event_ports_expressions  = {}
-        # Dictionary 'key' : [ [list-of-available-states], 'current-active-state']
-        self.active_states = {}
+        # Dictionary 'key' : 'current-active-state'
+        self.active_regimes = {}
         # Dictionaries 'key' : boolean-value
         self.variables_to_report = {}
 
@@ -309,7 +286,7 @@ class nineml_tester:
         collectStateVariables(self.treeInitialConditions, self.ninemlComponent, self.initial_conditions, _initial_conditions)
 
         self.treeActiveStates = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
-        collectRegimes(self.treeActiveStates, self.ninemlComponent, self.active_states, _active_states)
+        collectRegimes(self.treeActiveStates, self.ninemlComponent, self.active_regimes, _active_regimes)
 
         self.treeEventPorts = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
         collectEventPorts(self.treeEventPorts, self.ninemlComponent, self.event_ports_expressions, _event_ports_expressions)
@@ -321,46 +298,14 @@ class nineml_tester:
         connected_ports = getConnectedAnalogPorts(self.ninemlComponent.name, self.ninemlComponent, connected_ports)
         self.treeAnalogPorts = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
         collectAnalogPorts(self.treeAnalogPorts, self.ninemlComponent, self.analog_ports_expressions, connected_ports, _analog_ports_expressions)
-    """
-    @property
-    def parametersValues(self):
-        return self.parameters
-
-    @property
-    def initialConditions(self):
-        return self.initial_conditions
-
-    @property
-    def analogPortsExpressions(self):
-        return self.analog_ports_expressions
-
-    @property
-    def eventPortsExpressions(self):
-        return self.event_ports_expressions
-
-    @property
-    def activeStates(self):
-        results = []
-        for key, value in self.active_states.items():
-            results.append(key + '.' + value[1])
-        return results
-
-    @property
-    def variablesToReport(self):
-        results = []
-        for key, value in self.variables_to_report.items():
-            if value:
-                results.append(key)
-        return results
-    """
     
     def printResults(self):
         print 'parameters:'
         printDictionary(self.parameters)
         print 'initial_conditions:'
         printDictionary(self.initial_conditions)
-        print 'active_states:'
-        printDictionary(self.active_states)
+        print 'active_regimes:'
+        printDictionary(self.active_regimes)
         print 'analog_ports_expressions:'
         printDictionary(self.analog_ports_expressions)
         print 'event_ports_expressions:'
@@ -373,7 +318,7 @@ class nineml_tester:
         print str(self.treeParameters)
         print 'tree initial_conditions:'
         print str(self.treeInitialConditions)
-        print 'tree active_states:'
+        print 'tree active_regimes:'
         print str(self.treeActiveStates)
         print 'tree event_ports_expressions:'
         print str(self.treeEventPorts)
@@ -387,7 +332,7 @@ class nineml_tester:
         printDictionary(self.treeParameters.getDictionary())
         print 'tree initial_conditions dictionary:'
         printDictionary(self.treeInitialConditions.getDictionary())
-        print 'tree active_states dictionary:'
+        print 'tree active_regimes dictionary:'
         printDictionary(self.treeActiveStates.getDictionary())
         print 'tree event_ports_expressions dictionary:'
         printDictionary(self.treeEventPorts.getDictionary())
@@ -397,47 +342,94 @@ class nineml_tester:
         printDictionary(self.treeVariablesToReport.getDictionary())
         
 class nineml_tester_htmlGUI(nineml_tester):
+    categoryParameters              = '___PARAMETERS___'
+    categoryInitialConditions       = '___INITIAL_CONDITIONS___'
+    categoryActiveStates            = '___ACTIVE_STATES___'
+    categoryAnalogPortsExpressions  = '___INLET_ANALOG_PORTS_EXPRESSIONS___'
+    categoryEventPortsExpressions   = '___EVENT_PORTS_EXPRESSIONS___'
+    categoryVariablesToReport       = '___VARIABLES_TO_REPORT___'
+
     def __init__(self, ninemlComponent, **kwargs):
         nineml_tester.__init__(self, ninemlComponent, **kwargs)
 
     def generateHTMLForm(self):
         form_template = """
-        <form method="post">
-            <h1>NineMl component: {0}</h1>
-            {1}
-            <br/>
-            <input type="submit" value="Submit" />
-        </form>
+        <h1>NineMl component: {0}</h1>
+        {1}
+        <br/>
+        <input type="submit" value="Submit" />
         """
-
         content = ''
         if len(self.parameters) > 0:
             content += '<h2>Parameters</h2>\n'
-            content += self.treeParameters.getHTMLFormList()
+            content += self.generateHTMLFormTree(self.treeParameters, nineml_tester_htmlGUI.categoryParameters)
             content += '\n'
 
         if len(self.initial_conditions) > 0:
             content += '<h2>Initial Conditions</h2>\n'
-            content += self.treeInitialConditions.getHTMLFormList() + '\n'
+            content += self.generateHTMLFormTree(self.treeInitialConditions, nineml_tester_htmlGUI.categoryInitialConditions) + '\n'
 
-        if len(self.active_states) > 0:
+        if len(self.active_regimes) > 0:
             content += '<h2>Active Regimes</h2>\n'
-            content += self.treeActiveStates.getHTMLFormList()
+            content += self.generateHTMLFormTree(self.treeActiveStates, nineml_tester_htmlGUI.categoryActiveStates)
 
         if len(self.analog_ports_expressions) > 0:
             content += '<h2>Analog Ports Expressions</h2>\n'
-            content += self.treeAnalogPorts.getHTMLFormList() + '\n'
+            content += self.generateHTMLFormTree(self.treeAnalogPorts, nineml_tester_htmlGUI.categoryAnalogPortsExpressions) + '\n'
 
         if len(self.event_ports_expressions) > 0:
             content += '<h2>Event Ports Expressions</h2>\n'
-            content += self.treeEventPorts.getHTMLFormList() + '\n'
+            content += self.generateHTMLFormTree(self.treeEventPorts, nineml_tester_htmlGUI.categoryEventPortsExpressions) + '\n'
 
         if len(self.variables_to_report) > 0:
             content += '<h2>Variables To Report</h2>\n'
-            content += self.treeVariablesToReport.getHTMLFormList() + '\n'
+            content += self.generateHTMLFormTree(self.treeVariablesToReport, nineml_tester_htmlGUI.categoryVariablesToReport) + '\n'
 
         return form_template.format(self.ninemlComponent.name, content)
-        
+
+    def generateHTMLFormTree(self, item, category = ''):
+        if category == '':
+            inputName = item.canonicalName
+        else:
+            inputName = category + '.' + item.canonicalName
+
+        content = '<ul>'
+        if item.itemType == treeItem.typeFloat:
+            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+
+        elif item.itemType == treeItem.typeInteger:
+            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+
+        elif item.itemType == treeItem.typeString:
+            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+
+        elif item.itemType == treeItem.typeBoolean:
+            if item.value:
+                content += '<li><span>{0}</span><input type="checkbox" name="{1}" checked/></li>'.format(item.name, inputName)
+            else:
+                content += '<li><span>{0}</span><input type="checkbox" name="{1}"/></li>'.format(item.name, inputName)
+
+        elif item.itemType == treeItem.typeList:
+            if isinstance(item.data, collections.Iterable) and len(item.data) > 0:
+                content += '<li><span>{0}</span> <select name="{1}">'.format(item.name, inputName)
+                for available_regime in item.data:
+                    if available_regime == item.value:
+                        content += '<option value="{0}" selected>{0}</option>'.format(available_regime)
+                    else:
+                        content += '<option value="{0}">{0}</option>'.format(available_regime)
+                content += '</select></li>'
+            else:
+                content += '<li><span>{0}</span></li>'.format(item.name)
+
+        else:
+            content += '<li><span>{0}</span></li>'.format(item.name)
+
+        for child in item.children:
+            content += self.generateHTMLFormTree(child, category)
+
+        content += '</ul>'
+        return content
+
 class nineml_tester_qtGUI(nineml_tester, QtGui.QDialog):
     def __init__(self, ninemlComponent, **kwargs):
         nineml_tester.__init__(self, ninemlComponent, **kwargs)
@@ -479,7 +471,7 @@ class nineml_tester_qtGUI(nineml_tester, QtGui.QDialog):
         self.ui.treeRegimes.resizeColumnToContents(1)
         self.ui.treeResultsVariables.expandAll()
         self.ui.treeResultsVariables.resizeColumnToContents(0)
-        self.ui.treeResultsVariables.resizeColumnToContents(1)
+        #self.ui.treeResultsVariables.resizeColumnToContents(1)
 
     def slotOK(self):
         self.done(QtGui.QDialog.Accepted)
