@@ -8,6 +8,9 @@ import os, sys
 from time import localtime, strftime, time
 from daetools.pyDAE import *
 from nineml_daetools_bridge import *
+from nineml_tex_report import *
+import matplotlib
+import matplotlib.pyplot as plt
 
 class daeSimulationInputData:
     def __init__(self):
@@ -94,6 +97,40 @@ class daeSimulationInputData:
         print 'variables_to_report:'
         printDictionary(self.variables_to_report)
 
+class ninemlTesterDataReporter(daeDataReporterLocal):
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+        self.plotFilenames = []
+
+    def createPlots(self):
+        fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
+        fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
+        fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
+
+        for var in self.Process.Variables:
+            fileName   = '/tmp/' + var.Name + '.png'
+            xAxisLabel = 't'
+            yAxisLabel = var.Name
+            xPoints    = var.TimeValues
+            yPoints    = var.Values.reshape(len(var.Values))
+
+            plt.plot(xPoints, yPoints)
+            plt.title(var.Name)
+            plt.xlabel(xAxisLabel)
+            plt.ylabel(yAxisLabel)
+            plt.savefig(fileName)
+            self.plotFilenames.append(fileName)
+
+    def Connect(self, ConnectionString, ProcessName):
+        return True
+
+    def Disconnect(self):
+        return True
+
+    def IsConnected(self):
+        return True
+
 class nineml_daetools_simulation(daeSimulation):
     def __init__(self, model, **kwargs):
         daeSimulation.__init__(self)
@@ -157,7 +194,7 @@ class nineml_daetools_simulation(daeSimulation):
                 print '  --> Report the variable: {0}'.format(varName)
                 variable.ReportingOn = True
         
-    def Run1(self):
+    def Run(self):
         spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
 
         dt = 0.1
@@ -193,20 +230,16 @@ if __name__ == "__main__":
         'iaf.V' : -60,
         'iaf.tspike' : -1E99
     }
-    active_regimes = [
-        'cobaExcit.cobadefaultregime',
-        'iaf.subthresholdregime'
-    ]
-    analog_ports_expressions = {
-        'cobaExcit.V' : '1.2 * e',
-        'iaf.ISyn' : '5 * pi'
+    analog_ports_expressions = {}
+    event_ports_expressions = {}
+    active_regimes = {
+        'cobaExcit' : 'cobadefaultregime',
+        'iaf' : 'subthresholdregime'
     }
-    event_ports_expressions = {
+    variables_to_report = {
+        'cobaExcit.I' : True,
+        'iaf.V' : True
     }
-    variables_to_report = [
-        'cobaExcit.g',
-        'iaf.tspike'
-    ]
 
     # Load the Component:
     nineml_comp  = TestableComponent('hierachical_iaf_1coba')()
@@ -224,11 +257,11 @@ if __name__ == "__main__":
                                                    analog_ports_expressions = analog_ports_expressions,
                                                    event_ports_expressions  = event_ports_expressions,
                                                    variables_to_report      = variables_to_report)
-    datareporter = daeTCPIPDataReporter()
+    datareporter = ninemlTesterDataReporter()
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.001
-    simulation.TimeHorizon = 1
+    simulation.ReportingInterval = 0.01
+    simulation.TimeHorizon = 5
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -251,3 +284,5 @@ if __name__ == "__main__":
     # Run
     simulation.Run()
     simulation.Finalize()
+
+    datareporter.createPlots()

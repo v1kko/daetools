@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'nineml_tester.ui'
 #
-# Created: Thu Sep  1 13:06:43 2011
+# Created: Fri Sep  9 13:14:15 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_ninemlTester(object):
     def setupUi(self, ninemlTester):
         ninemlTester.setObjectName("ninemlTester")
-        ninemlTester.resize(680, 420)
+        ninemlTester.resize(720, 420)
         self.verticalLayout_5 = QtGui.QVBoxLayout(ninemlTester)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.tabWidget = QtGui.QTabWidget(ninemlTester)
@@ -25,25 +25,20 @@ class Ui_ninemlTester(object):
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.tab_1)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.formLayout = QtGui.QFormLayout()
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout.setObjectName("formLayout")
-        self.nineMLComponentLabel = QtGui.QLabel(self.tab_1)
-        self.nineMLComponentLabel.setObjectName("nineMLComponentLabel")
-        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.nineMLComponentLabel)
-        self.nineMLComponentLineEdit = QtGui.QLineEdit(self.tab_1)
-        self.nineMLComponentLineEdit.setObjectName("nineMLComponentLineEdit")
-        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.nineMLComponentLineEdit)
         self.timeHorizonLabel = QtGui.QLabel(self.tab_1)
         self.timeHorizonLabel.setObjectName("timeHorizonLabel")
-        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.timeHorizonLabel)
+        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.timeHorizonLabel)
         self.timeHorizonSLineEdit = QtGui.QLineEdit(self.tab_1)
         self.timeHorizonSLineEdit.setObjectName("timeHorizonSLineEdit")
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.timeHorizonSLineEdit)
+        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.timeHorizonSLineEdit)
         self.reportingIntervalLabel = QtGui.QLabel(self.tab_1)
         self.reportingIntervalLabel.setObjectName("reportingIntervalLabel")
-        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.reportingIntervalLabel)
+        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.reportingIntervalLabel)
         self.reportingIntervalSLineEdit = QtGui.QLineEdit(self.tab_1)
         self.reportingIntervalSLineEdit.setObjectName("reportingIntervalSLineEdit")
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.reportingIntervalSLineEdit)
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.reportingIntervalSLineEdit)
         self.verticalLayout_6.addLayout(self.formLayout)
         self.tabWidget.addTab(self.tab_1, "")
         self.tab_2 = QtGui.QWidget()
@@ -81,6 +76,7 @@ class Ui_ninemlTester(object):
         self.verticalLayout_2.addWidget(self.treeAnalogPorts)
         self.tabWidget.addTab(self.tab_4, "")
         self.tab_6 = QtGui.QWidget()
+        self.tab_6.setEnabled(True)
         self.tab_6.setObjectName("tab_6")
         self.verticalLayout = QtGui.QVBoxLayout(self.tab_6)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -132,15 +128,14 @@ class Ui_ninemlTester(object):
         self.verticalLayout_5.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(ninemlTester)
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(ninemlTester)
 
     def retranslateUi(self, ninemlTester):
         ninemlTester.setWindowTitle(QtGui.QApplication.translate("ninemlTester", "NineML Component Tester", None, QtGui.QApplication.UnicodeUTF8))
-        self.nineMLComponentLabel.setText(QtGui.QApplication.translate("ninemlTester", "NineML component", None, QtGui.QApplication.UnicodeUTF8))
         self.timeHorizonLabel.setText(QtGui.QApplication.translate("ninemlTester", "Time horizon, s", None, QtGui.QApplication.UnicodeUTF8))
         self.reportingIntervalLabel.setText(QtGui.QApplication.translate("ninemlTester", "Reporting interval, s", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), QtGui.QApplication.translate("ninemlTester", "Basic", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), QtGui.QApplication.translate("ninemlTester", "General", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(0, QtGui.QApplication.translate("ninemlTester", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(1, QtGui.QApplication.translate("ninemlTester", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("ninemlTester", "Parameters", None, QtGui.QApplication.UnicodeUTF8))
@@ -157,7 +152,7 @@ class Ui_ninemlTester(object):
         self.treeRegimes.headerItem().setText(1, QtGui.QApplication.translate("ninemlTester", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtGui.QApplication.translate("ninemlTester", "Regimes", None, QtGui.QApplication.UnicodeUTF8))
         self.treeResultsVariables.headerItem().setText(0, QtGui.QApplication.translate("ninemlTester", "Name", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), QtGui.QApplication.translate("ninemlTester", "Results", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), QtGui.QApplication.translate("ninemlTester", "Report Variables", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setText(QtGui.QApplication.translate("ninemlTester", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonOk.setText(QtGui.QApplication.translate("ninemlTester", "Ok", None, QtGui.QApplication.UnicodeUTF8))
 

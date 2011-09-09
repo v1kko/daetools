@@ -512,7 +512,7 @@ class nineml_tester_qtGUI(nineml_tester, QtGui.QDialog):
             elif tree_item.itemType == treeItem.typeList:
                 tree_item.value  = str(item.text(1))
 
-        # Only for boolean data (whith a check-box)
+        # Only for boolean data (with a check-box)
         elif column == 0:
             data = item.data(1, QtCore.Qt.UserRole)
             if not data:

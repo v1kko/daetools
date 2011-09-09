@@ -7,17 +7,17 @@
 \usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{wallpaper}
+\usepackage{underscore}
 \usepackage{fancyhdr}
 \setlength{\headheight}{20mm}
 
-\def\name{###MODEL_NAME###}
-\title{###MODEL_NAME###}
+\title{MODEL-NAME}
 \author{INCF}
 
 \pagestyle{fancy}
 \lhead{\includegraphics[height=8mm,keepaspectratio=true]{./logo.png}}
 \chead{}
-\rhead{\bfseries \name}
+\rhead{\bfseries MODEL-NAME}
 \lfoot{}
 \cfoot{\thepage}
 \rfoot{}
@@ -29,7 +29,7 @@
   urlcolor = blue,
   pdfauthor = {INCF},
   pdfkeywords = {neuroinformatics},
-  pdftitle = {\name: NineML Model Report},
+  pdftitle = {MODEL-NAME: NineML Model Report},
   pdfsubject = {NineML Model Report},
   pdfpagemode = UseNone
 }
@@ -69,7 +69,7 @@
 \textsc{\Large NineML Model report}\\[0.5cm]
 
 \HRule \\[0.4cm]
-{ \huge \bfseries \name}\\[0.4cm]
+{ \huge \bfseries MODEL-NAME}\\[0.4cm]
 
 \HRule \\[1.5cm]
 
@@ -84,19 +84,17 @@
 \tableofcontents
 \newpage
 
-\section{Model Specification}
-
-###MODEL_SPECIFICATION###
+MODEL-SPECIFICATION
 \newpage
 
 \section{Tests}
 
-###TESTS###
+TESTS
 \newpage
 
 \appendix
 
-###APPENDIXES###
+APPENDIXES
 
 \section{XML Source code}
 

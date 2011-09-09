@@ -116,19 +116,15 @@ def test_hierachical_iaf_1coba():
         'iaf.V' : -60,
         'iaf.tspike' : -1E99
     }
-    analog_ports_expressions = {
-        'cobaExcit.V' : '1.2 * e',
-        'iaf.ISyn' : '5 * pi'
-    }
-    event_ports_expressions = {
-    }
+    analog_ports_expressions = {}
+    event_ports_expressions = {}
     active_regimes = {
         'cobaExcit' : 'cobadefaultregime',
         'iaf' : 'subthresholdregime'
     }
     variables_to_report = {
-        'cobaExcit.g' : True,
-        'iaf.tspike' : True
+        'cobaExcit.I' : True,
+        'iaf.V' : True
     }
 
     app = QtGui.QApplication(sys.argv)
@@ -234,7 +230,7 @@ if __name__ == "__main__":
         # Create Log, DAESolver, DataReporter and Simulation object
         log          = daePythonStdOutLog()
         daesolver    = daeIDAS()
-        datareporter = daeTCPIPDataReporter()
+        datareporter = ninemlTesterDataReporter()
         model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
         simulation   = nineml_daetools_simulation(model, parameters               = input_data.parameters,
                                                          initial_conditions       = input_data.initial_conditions,

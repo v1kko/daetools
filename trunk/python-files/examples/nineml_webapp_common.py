@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, traceback
 
 def getSelectComponentPage():
     html = """
@@ -10,7 +10,7 @@ def getSelectComponentPage():
         </p>
         <p>
             Initial values:<br/>
-            <textarea name="InitialValues" rows="30" cols="100"></textarea>
+            <textarea name="InitialValues" rows="30" cols="50"></textarea>
         </p>
         <input type="submit" value="Submit" />
     </form>
@@ -42,10 +42,17 @@ def createSetupDataPage(content):
     """
     return html.format(content)
 
-def createErrorPage(content):
+def createErrorPage(error, trace_back, additional_data = ''):
     html =  """
     <html><body>
-    {0}
+    <pre>Error occurred:\n  {0}</pre>
+    <pre>{1}</pre>
+    <pre>{2}</pre>
     </body></html>
     """
-    return html.format(content)
+    errorDescription = ''
+    messages = traceback.format_tb(trace_back)
+    for msg in messages:
+        errorDescription += msg
+        
+    return html.format(error, errorDescription, additional_data)

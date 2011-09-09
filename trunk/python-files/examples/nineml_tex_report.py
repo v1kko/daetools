@@ -38,75 +38,128 @@ class nineml_tex_report:
         self.end_itemize   = '\\end{itemize}\n\n'
 
         self.content = []
+
+        # Collect all unique components from sub-nodes:
+        unique_components = {}
+        self.detectUniqueComponents(self.ninemlComponent, unique_components)
+        
+        # Now add all detected components to the report
+        for name, component in unique_components.items():
+            self.addComponentToReport(component, name)
+
+        comp_name = self.ninemlComponent.name.replace('_', '\\_')
+        self.template = self.template.replace('MODEL-NAME', comp_name)
+        self.template = self.template.replace('MODEL-SPECIFICATION', ''.join(self.content))
+        self.template = self.template.replace('TESTS', '')
+        self.template = self.template.replace('APPENDIXES', '')
+        self.of.write(self.template)
+        self.of.close()
+
+        if subprocess.call(['pdflatex', self.texOutputFile], shell=False) != 0:
+            raise RuntimeError('Call to pdflatex failed!')
+        subprocess.call(['evince', self.texOutputFile.replace('.tex', '.pdf')], shell=False)
+
+    def detectUniqueComponents(self, component, unique_components):
+        if not component.name in unique_components:
+            unique_components[component.name] = component
+
+        for name, subcomponent in component.subnodes.items():
+            self.detectUniqueComponents(subcomponent, unique_components)
+    
+    def addComponentToReport(self, component, name):
+        comp_name = name.replace('_', '\\_')
+        self.content.append('\\section{{NineML Component: {0}}}\n\n'.format(comp_name))
+
         # 1) Create parameters
-        if self.ninemlComponent.parameters:
+        parameters = list(component.parameters)
+        if len(parameters) > 0:
             self.content.append('\\subsection*{Parameters}\n\n')
             self.content.append(self.begin_itemize)
-            for param in self.ninemlComponent.parameters:
-                tex = self.item + tex_verbatim(param.name) + '\n'
+            for param in parameters:
+                _name = param.name.replace('_', '\\_')
+                tex = self.item + _name + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 2) Create state-variables (diff. variables)
-        if self.ninemlComponent.state_variables:
+        state_variables = list(component.state_variables)
+        if len(state_variables) > 0:
             self.content.append('\\subsection*{State-Variables}\n\n')
             self.content.append(self.begin_itemize)
-            for var in self.ninemlComponent.state_variables:
-                tex = self.item + tex_verbatim(var.name) + '\n'
+            for var in state_variables:
+                _name = var.name.replace('_', '\\_')
+                tex = self.item + _name + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 3) Create alias variables (algebraic)
-        if self.ninemlComponent.aliases_map:
+        aliases = list(component.aliases)
+        if len(aliases) > 0:
             self.content.append('\\subsection*{Aliases}\n\n')
-            for alias in self.ninemlComponent.aliases:
-                tex = '${0} = {1}$\n\n'.format(alias.lhs, self.parser.parse_to_latex(alias.rhs))
+            self.content.append(self.begin_itemize)
+            for alias in aliases:
+                tex = self.item + '${0} = {1}$\n\n'.format(alias.lhs, self.parser.parse_to_latex(alias.rhs))
                 self.content.append(tex)
+            self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 4) Create analog-ports and reduce-ports
-        if self.ninemlComponent.analog_ports:
+        analog_ports = list(component.analog_ports)
+        if len(analog_ports) > 0:
             self.content.append('\\subsection*{Analog Ports}\n\n')
             self.content.append(self.begin_itemize)
-            for analog_port in self.ninemlComponent.analog_ports:
-                tex = self.item + tex_verbatim(analog_port.name + ' (' + analog_port.mode + ')') + '\n'
+            for analog_port in analog_ports:
+                _name = analog_port.name.replace('_', '\\_')
+                tex = self.item + _name + ' (' + analog_port.mode + ')' + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 5) Create event-ports
-        if self.ninemlComponent.event_ports:
+        event_ports = list(component.event_ports)
+        if len(event_ports) > 0:
             self.content.append('\\subsection*{Event ports}\n\n')
             self.content.append(self.begin_itemize)
-            for event_port in self.ninemlComponent.event_ports:
-                tex = self.item + tex_verbatim(event_port.name + ' (' + event_port.mode + ')') + '\n'
+            for event_port in event_ports:
+                _name = event_port.name.replace('_', '\\_')
+                tex = self.item + _name + ' (' + event_port.mode + ')' + '\n'
                 self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 6) Create sub-nodes
-        #self.ninemlSubComponents = []
-        #for name, subcomponent in self.ninemlComponent.subnodes.items():
-        #    self.ninemlSubComponents.append( nineml_daetools_bridge(name, subcomponent, self) )
+        if len(component.subnodes.items()) > 0:
+            self.content.append('\\subsection*{Sub-nodes}\n\n')
+            self.content.append(self.begin_itemize)
+            for name, subcomponent in component.subnodes.items():
+                _name = name.replace('_', '\\_')
+                tex = self.item + _name + '\n'
+                self.content.append(tex)
+            self.content.append(self.end_itemize)
+            self.content.append('\n')
 
         # 7) Create port connections
-        if self.ninemlComponent.portconnections:
+        portconnections = list(component.portconnections)
+        if len(portconnections) > 0:
             self.content.append('\\subsection*{Port Connections}\n\n')
             self.content.append(self.begin_itemize)
-            for port_connection in self.ninemlComponent.portconnections:
-                portFrom = port_connection[0]
-                portTo   = port_connection[1]
-                tex = self.item + ''
-                #self.content.append(tex)
+            for port_connection in portconnections:
+                portFrom = '.'.join(port_connection[0].loctuple)
+                portTo   = '.'.join(port_connection[1].loctuple)
+                _fromname = portFrom.replace('_', '\\_')
+                _toname   = portTo.replace('_', '\\_')
+                tex = self.item + _fromname + ' = ' + _toname + '\n'
+                self.content.append(tex)
             self.content.append(self.end_itemize)
             self.content.append('\n')
 
         # 8) Create regimes
-        if self.ninemlComponent.regimes:
+        regimes = list(component.regimes)
+        if len(regimes) > 0:
             self.content.append('\\subsection*{Regimes}\n\n')
-            for regime in self.ninemlComponent.regimes:
+            for regime in regimes:
                 counter = 0
                 tex = ''
                 # 8a) Create time derivatives
@@ -115,7 +168,7 @@ class nineml_tex_report:
                         tex += ' \\\\ '
                     tex += '\\frac{{d{0}}}{{dt}} = {1}'.format(time_deriv.dependent_variable, self.parser.parse_to_latex(time_deriv.rhs))
                     counter += 1
-                
+
                 # 8b) Create on_condition actions
                 for on_condition in regime.on_conditions:
                     tex += ' \\\\ \\mbox{If } ' + self.parser.parse_to_latex(on_condition.trigger.rhs) + '\mbox{:}'
@@ -128,7 +181,7 @@ class nineml_tex_report:
 
                     for event_output in on_condition.event_outputs:
                         tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{emit }} {0}'.format(event_output.port_name)
-                        
+
                 # 8c) Create on_event actions
                 for on_event in regime.on_events:
                     tex += ' \\\\ \\mbox{On } ' + on_event.src_port_name + '\mbox{:}'
@@ -145,20 +198,9 @@ class nineml_tex_report:
                 tex = '${0} = \\begin{{cases}} {1} \\end{{cases}}$\n'.format(regime.name, tex)
                 tex += '\\newline \n'
                 self.content.append(tex)
-                
+
             self.content.append('\n')
-
-        self.template = self.template.replace('###MODEL_NAME###', self.ninemlComponent.name)
-        self.template = self.template.replace('###MODEL_SPECIFICATION###', ''.join(self.content))
-        self.template = self.template.replace('###TESTS###', '')
-        self.template = self.template.replace('###APPENDIXES###', '')
-        self.of.write(self.template)
-        self.of.close()
-
-        if subprocess.call(['pdflatex', self.texOutputFile], shell=False) != 0:
-            raise RuntimeError('Call to pdflatex failed!')
-        subprocess.call(['evince', self.texOutputFile.replace('.tex', '.pdf')], shell=False)
-
+        
 """
 \begin{table}[placement=h]
     \caption{A normal caption}
@@ -179,14 +221,8 @@ class nineml_tex_report:
 """
 
 if __name__ == "__main__":
-    coba_iaf_base = TestableComponent('hierachical_iaf_1coba')
-    coba_iaf = coba_iaf_base()
+    testable = TestableComponent('hierachical_iaf_1coba')
+    component = testable()
 
-    destexhe_ampa_base = TestableComponent('destexhe_ampa')
-    destexhe_ampa = destexhe_ampa_base()
-
-    coba = nineml_tex_report(coba_iaf.subnodes['cobaExcit'], 'nineml-tex-template.tex', 'cobaExcit.tex')
-    iaf  = nineml_tex_report(coba_iaf.subnodes['iaf'],       'nineml-tex-template.tex', 'iaf.tex')
-    ampa  = nineml_tex_report(destexhe_ampa, 'nineml-tex-template.tex', 'destexhe_ampa.tex')
-
+    report = nineml_tex_report(component, 'nineml-tex-template.tex', 'coba_iaf.tex')
 
