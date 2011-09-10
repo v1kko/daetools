@@ -20,7 +20,7 @@ def application(environ, start_response):
         if not ___import_exception___:
             html = getSelectComponentPage()
         else:
-            html = createErrorPage(___import_exception___, ___import_exception_traceback___)
+            html = 'Error occurred:\n{0}\n{1}'.format(___import_exception___, ___import_exception_traceback___)
             
     except Exception, e:
         content = 'Application environment:\n' + pformat(environ) + '\n\n'

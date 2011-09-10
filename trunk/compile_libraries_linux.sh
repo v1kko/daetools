@@ -18,10 +18,10 @@ vTRILINOS=10.6.2
 if [ ! -e Bonmin-${vBONMIN}.zip ]; then
     wget ${DAETOOLS_HTTP}/Bonmin-${vBONMIN}.zip
 fi
-if [ ! -e  ]; then
+if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/superlu_${vSUPERLU}.tar.gz
 fi
-if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
+if [ ! -e {DAETOOLS_HTTP}/superlu_makefiles.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
 fi
 if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then

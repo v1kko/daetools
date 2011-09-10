@@ -8,6 +8,7 @@ cgitb.enable()
 ___import_exception___ = None
 ___import_exception_traceback___ = None
 try:
+    os.environ['HOME'] = "/tmp"
     sys.path.append("/home/ciroki/Data/daetools/trunk/python-files/examples")
 
     import nineml
@@ -32,17 +33,16 @@ def application(environ, start_response):
         content = ''
         log = None
         success = False
+        parameters = {}
+        initial_conditions = {}
+        analog_ports_expressions = {}
+        event_ports_expressions = {}
+        active_regimes = {}
+        variables_to_report = {}
 
         if not ___import_exception___:
             if environ['REQUEST_METHOD'] == 'POST':
                 content_length = int(environ['CONTENT_LENGTH'])
-
-                parameters = {}
-                initial_conditions = {}
-                analog_ports_expressions = {}
-                event_ports_expressions = {}
-                active_regimes = {}
-                variables_to_report = {}
 
                 if content_length > 0:
                     raw_arguments = pformat(environ['wsgi.input'].read(content_length))
@@ -80,7 +80,7 @@ def application(environ, start_response):
                             raise RuntimeError('Cannot process argument: ' + key)
 
                 else:
-                    html = createPage('<p>No arguments available</p>')
+                    html = '<p>No arguments available</p>'# createResultPage('<p>No arguments available</p>')
 
                 nineml_component = TestableComponent('hierachical_iaf_1coba')()
                 if not nineml_component:
@@ -137,10 +137,10 @@ def application(environ, start_response):
                 html = createResultPage(content)
 
         else:
-            html = createErrorPage(___import_exception___, ___import_exception_traceback___)
+            html = 'Error occurred:\n{0}\n{1}'.format(___import_exception___, ___import_exception_traceback___)
             
     except Exception, e:
-        content = 'Application environment:\n' + pformat(environ) + '\n\n'
+        content += 'Application environment:\n' + pformat(environ) + '\n\n'
         content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
         content += 'Simulation input:\n'
         content += '  parameters:  {0}\n'.format(parameters)
@@ -158,7 +158,7 @@ def application(environ, start_response):
 
     if success:
         boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-        pdf = open("/home/ciroki/www/dummy-report.pdf", "rb").read()
+        pdf = open("/home/ciroki/Data/daetools/trunk/python-files/examples/coba_iaf.pdf", "rb").read()
         part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
         part2 = '--{0}\r\nContent-Disposition: attachment; filename=Dummy-model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
         output = part1 + part2
