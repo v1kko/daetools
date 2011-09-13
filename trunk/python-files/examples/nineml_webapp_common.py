@@ -3,7 +3,7 @@ import os, sys, traceback
 def getSelectComponentPage():
     html = """
     <html><body>
-    <form action="nineml-webapp-setup-data" method="post">
+    <form action="nineml-webapp" method="post">
         <p>
             NineML testable component name:<br/>
             <input type="text" name="TestableComponent" value="hierachical_iaf_1coba"/>
@@ -12,6 +12,8 @@ def getSelectComponentPage():
             Initial values:<br/>
             <textarea name="InitialValues" rows="30" cols="50"></textarea>
         </p>
+        <input type="hidden" name="__NINEML_WEBAPP_ACTION__" value="setupData"/>
+        <br/>
         <input type="submit" value="Submit" />
     </form>
     </body></html>
@@ -20,8 +22,12 @@ def getSelectComponentPage():
 
 def getSetupDataForm():
     html = """
-    <form action="nineml-webapp-run-simulation" method="post">
+    <form action="nineml-webapp" method="post">
     {0}
+    <input type="hidden" name="__NINEML_WEBAPP_ID__" value="{1}"/>
+    <input type="hidden" name="__NINEML_WEBAPP_ACTION__" value="runSimulation"/>
+    <br/>
+    <input type="submit" value="Submit" />
     </form>
     """
     return html

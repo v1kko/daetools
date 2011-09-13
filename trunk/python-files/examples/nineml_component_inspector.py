@@ -246,7 +246,7 @@ def collectVariablesToReport(nodeItem, component, dictVariablesToReport, variabl
         subnodeItem = treeItem(nodeItem, name, None, None, treeItem.typeNoValue)
         collectVariablesToReport(subnodeItem, subcomponent, dictVariablesToReport, variables_to_report)
 
-def addItem(parent, item):
+def addItem(treeWidget, parent, item):
     widgetItem = QtGui.QTreeWidgetItem(parent, [item.name, ''])
 
     # Item's data is always the tree item object
@@ -259,7 +259,7 @@ def addItem(parent, item):
     if item.itemType == treeItem.typeFloat or item.itemType == treeItem.typeInteger or item.itemType == treeItem.typeString:
         widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsEditable)
         widgetItem.setText(1, str(item.value))
-            
+
     elif item.itemType == treeItem.typeBoolean:
         widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsUserCheckable)
         if item.value:
@@ -273,10 +273,10 @@ def addItem(parent, item):
 
     return widgetItem
     
-def addItemsToTree(parent, tree_item):
-    new_parent = addItem(parent, tree_item)
+def addItemsToTree(treeWidget, parent, tree_item):
+    new_parent = addItem(treeWidget, parent, tree_item)
     for child in tree_item.children:
-        addItemsToTree(new_parent, child)
+        addItemsToTree(treeWidget, new_parent, child)
 
 class nineml_component_qtGUI(QtGui.QDialog):
     def __init__(self, inspector):
@@ -284,13 +284,17 @@ class nineml_component_qtGUI(QtGui.QDialog):
         self.ui = Ui_ninemlTester()
         self.ui.setupUi(self)
 
+        validator = QtGui.QDoubleValidator(self)
+        self.ui.timeHorizonSLineEdit.setValidator(validator)
+        self.ui.reportingIntervalSLineEdit.setValidator(validator)
+
         self.inspector = inspector
-        addItemsToTree(self.ui.treeParameters,        self.inspector.treeParameters)
-        addItemsToTree(self.ui.treeInitialConditions, self.inspector.treeInitialConditions)
-        addItemsToTree(self.ui.treeAnalogPorts,       self.inspector.treeAnalogPorts)
-        addItemsToTree(self.ui.treeEventPorts,        self.inspector.treeEventPorts)
-        addItemsToTree(self.ui.treeRegimes,           self.inspector.treeActiveStates)
-        addItemsToTree(self.ui.treeResultsVariables,  self.inspector.treeVariablesToReport)
+        addItemsToTree(self.ui.treeParameters,          self.ui.treeParameters,        self.inspector.treeParameters)
+        addItemsToTree(self.ui.treeInitialConditions,   self.ui.treeInitialConditions, self.inspector.treeInitialConditions)
+        addItemsToTree(self.ui.treeAnalogPorts,         self.ui.treeAnalogPorts,       self.inspector.treeAnalogPorts)
+        addItemsToTree(self.ui.treeEventPorts,          self.ui.treeEventPorts,        self.inspector.treeEventPorts)
+        addItemsToTree(self.ui.treeRegimes,             self.ui.treeRegimes,           self.inspector.treeActiveStates)
+        addItemsToTree(self.ui.treeResultsVariables,    self.ui.treeResultsVariables,  self.inspector.treeVariablesToReport)
 
         self.connect(self.ui.buttonOk,              QtCore.SIGNAL('clicked()'),                                self.slotOK)
         self.connect(self.ui.buttonCancel,          QtCore.SIGNAL('clicked()'),                                self.slotCancel)
@@ -423,6 +427,9 @@ class nineml_component_inspector:
         # NineML component
         self.ninemlComponent = None
 
+        self.timeHorizon       = 0.0
+        self.reportingInterval = 0.0
+        
         # Dictionaries 'key' : floating-point-value
         self.parameters                 = {}
         self.initial_conditions         = {}
@@ -471,6 +478,11 @@ class nineml_component_inspector:
         if not isinstance(_variables_to_report, dict):
             raise RuntimeError('variables_to_report argument must be a dictionary')
 
+        if kwargs.has_key('timeHorizon'):
+            self.timeHorizon = float(kwargs.get('timeHorizon'))
+        if kwargs.has_key('reportingInterval'):
+            self.reportingInterval = float(kwargs.get('reportingInterval'))
+
         self.treeParameters = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
         collectParameters(self.treeParameters, self.ninemlComponent, self.parameters, _parameters)
 
@@ -491,7 +503,20 @@ class nineml_component_inspector:
         self.treeAnalogPorts = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
         collectAnalogPorts(self.treeAnalogPorts, self.ninemlComponent, self.analog_ports_expressions, connected_ports, _analog_ports_expressions)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        res = []
+        res.append('tree parameters:')
+        res.append(str(self.treeParameters))
+        res.append('tree initial_conditions:')
+        res.append(str(self.treeInitialConditions))
+        return '\n'.join(res)
+
     def printCollectedData(self):
+        print 'timeHorizon: ' + str(self.timeHorizon)
+        print 'reportingInterval: ' + str(self.reportingInterval)
         print 'parameters:'
         printDictionary(self.parameters)
         print 'initial_conditions:'
@@ -506,6 +531,8 @@ class nineml_component_inspector:
         printDictionary(self.variables_to_report)
     
     def printTrees(self):
+        print 'timeHorizon: ' + str(self.timeHorizon)
+        print 'reportingInterval: ' + str(self.reportingInterval)
         print 'tree parameters:'
         print str(self.treeParameters)
         print 'tree initial_conditions:'
@@ -554,6 +581,10 @@ class nineml_component_inspector:
         if not isinstance(_variables_to_report, dict):
             raise RuntimeError('variables_to_report argument must be a dictionary')
 
+        if kwargs.has_key('timeHorizon'):
+            self.timeHorizon = float(kwargs.get('timeHorizon'))
+        if kwargs.has_key('reportingInterval'):
+            self.reportingInterval = float(kwargs.get('reportingInterval'))
         updateDictionary(self.parameters,               _parameters)
         updateDictionary(self.initial_conditions,       _initial_conditions)
         updateDictionary(self.active_regimes,           _active_regimes)
@@ -590,10 +621,13 @@ class nineml_component_inspector:
         form_template = """
         <h1>NineMl component: {0}</h1>
         {1}
-        <br/>
-        <input type="submit" value="Submit" />
         """
         content = ''
+
+        content += '<span>Time horizon</span><input type="text" name="timeHorizon" value="{0}"/>'.format(self.timeHorizon)
+        content += '<br/>'
+        content += '<span>Reporting interval</span><input type="text" name="reportingInterval" value="{0}"/>'.format(self.reportingInterval)
+
         if len(self.parameters) > 0:
             content += '<h2>Parameters</h2>\n'
             content += self._generateHTMLFormTree(self.treeParameters, nineml_component_inspector.categoryParameters)
@@ -732,21 +766,29 @@ class nineml_component_inspector:
 
         app = QtGui.QApplication(sys.argv)
         gui = nineml_component_qtGUI(self)
+        gui.ui.timeHorizonSLineEdit.setText(str(self.timeHorizon))
+        gui.ui.reportingIntervalSLineEdit.setText(str(self.reportingInterval))
+
         isOK = gui.exec_()
         if isOK == QtGui.QDialog.Accepted:
-            self.updateData(parameters               = self.treeParameters.getDictionary(),
+            self.updateData(timeHorizon              = float(str(gui.ui.timeHorizonSLineEdit.text())),
+                            reportingInterval        = float(str(gui.ui.reportingIntervalSLineEdit.text())),
+                            parameters               = self.treeParameters.getDictionary(),
                             initial_conditions       = self.treeInitialConditions.getDictionary(),
                             active_regimes           = self.treeActiveStates.getDictionary(),
                             analog_ports_expressions = self.treeAnalogPorts.getDictionary(),
                             event_ports_expressions  = self.treeEventPorts.getDictionary(),
                             variables_to_report      = self.treeVariablesToReport.getDictionary())
-
-            return (self.parameters,
-                    self.initial_conditions,
-                    self.active_regimes,
-                    self.analog_ports_expressions,
-                    self.event_ports_expressions,
-                    self.variables_to_report)
+            results = {}
+            results['timeHorizon']              = self.timeHorizon
+            results['reportingInterval']        = self.reportingInterval
+            results['parameters']               = self.parameters
+            results['initial_conditions']       = self.initial_conditions
+            results['active_regimes']           = self.active_regimes
+            results['analog_ports_expressions'] = self.analog_ports_expressions
+            results['event_ports_expressions']  = self.event_ports_expressions
+            results['variables_to_report']      = self.variables_to_report
+            return results
         else:
             return None
 
@@ -914,7 +956,9 @@ if __name__ == "__main__":
     nineml_component = TestableComponent('hierachical_iaf_1coba')()
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
-    
+
+    timeHorizon = 10
+    reportingInterval = 0.01
     parameters = {
         'cobaExcit.q' : 3.0,
         'cobaExcit.tau' : 5.0,
@@ -943,14 +987,16 @@ if __name__ == "__main__":
     }
 
     inspector = nineml_component_inspector()
-    inspector.inspect(nineml_component, parameters               = parameters,
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
                                         initial_conditions       = initial_conditions,
                                         active_regimes           = active_regimes,
                                         analog_ports_expressions = analog_ports_expressions,
                                         event_ports_expressions  = event_ports_expressions,
                                         variables_to_report      = variables_to_report)
-    results = inspector.showQtGUI()
-    inspector.printTreeDictionaries()
+    isOK = inspector.showQtGUI()
+    inspector.printCollectedData()
 
     variables_to_report = {}
     variables_to_report['iaf_1coba.iaf.tspike'] = True
@@ -961,21 +1007,27 @@ if __name__ == "__main__":
     
     #print inspector.getComponentXMLSourceCode()
     
-    #form = inspector.generateHTMLForm()
-    #print form
+    #print inspector.generateHTMLForm()
 
-    #html = inspector.generateHTMLReport()
-    #print html
+    #print inspector.generateHTMLReport()
 
-    #latex = inspector.generateLatexReport()
-    #print latex
+    #print inspector.generateLatexReport()
 
     """
     simulation_data = daeSimulationInputData()
-    simulation_data.parameters               = results[0]
-    simulation_data.initial_conditions       = results[1]
-    simulation_data.active_regimes           = results[2]
-    simulation_data.analog_ports_expressions = results[3]
-    simulation_data.event_ports_expressions  = results[4]
-    simulation_data.variables_to_report      = results[5]
     """
+    import pickle
+
+    ins = pickle.dumps(inspector)
+
+    inspector = pickle.loads(ins)
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    isOK = inspector.showQtGUI()
+    inspector.printCollectedData()

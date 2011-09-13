@@ -19,17 +19,16 @@ class daeSimulationInputData:
         # Dictionaries 'canonical/relative name' : floating-point-value
         self.parameters         = {}
         self.initial_conditions = {}
-
         # Dictionaries: 'canonical/relative name' : 'expression'
         self.analog_port_expressions = {}
         self.event_port_expressions  = {}
-
-        # List of canonical/relative names
-        self.active_regimes       = {}
+        # Dictionary: 'canonical/relative name' : string
+        self.active_regimes      = {}
+        # Dictionary: 'canonical/relative name' : boolean
         self.variables_to_report = {}
 
-        #self.timeHorizon       = 0.0
-        #self.reportingInterval = 0.0
+        self.timeHorizon       = 0.0
+        self.reportingInterval = 0.0
 
         #self.daeSolver    = daeIDAS()
         #self.laSolver     = pySuperLU.daeCreateSuperLUSolver()
@@ -38,17 +37,26 @@ class daeSimulationInputData:
 
     def dumpJSON(self, sort = True, indent = 2):
         data = {}
+        data['timeHorizon']               = self.timeHorizon
+        data['reportingInterval']         = self.reportingInterval
         data['parameters']                = self.parameters
         data['initial_conditions']        = self.initial_conditions
         data['analog_port_expressions']   = self.analog_port_expressions
         data['event_port_expressions']    = self.event_port_expressions
-        data['active_regimes']             = self.active_regimes
+        data['active_regimes']            = self.active_regimes
         data['variables_to_report']       = self.variables_to_report
 
         return json.dumps(data, sort_keys = sort, indent = indent)
 
     def loadJSON(self, jsonContent):
         data = json.loads(jsonContent)
+        print data
+
+        if data.has_key('timeHorizon'):
+            self.timeHorizon = float(data['timeHorizon'])
+
+        if data.has_key('reportingInterval'):
+            self.reportingInterval = float(data['reportingInterval'])
 
         if data.has_key('parameters'):
             temp = data['parameters']
@@ -84,6 +92,8 @@ class daeSimulationInputData:
         return self.__str__()
 
     def __str__(self):
+        print 'timeHorizon:', timeHorizon
+        print 'reportingInterval:', reportingInterval
         print 'parameters:'
         printDictionary(self.parameters)
         print 'initial_conditions:'
@@ -139,6 +149,8 @@ class nineml_daetools_simulation(daeSimulation):
         dictIdentifiers, dictFunctions = getNineMLDictionaries(self.m)
         self.parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
+        # These dictionaries may contain unicode strings (if the input originated from the web form)
+        # Therefore, str(...) should be used whenever a string is expected
         self._parameters               = kwargs.get('parameters',               {})
         self._initial_conditions       = kwargs.get('initial_conditions',       {})
         self._active_regimes           = kwargs.get('active_regimes',           {})
@@ -148,50 +160,50 @@ class nineml_daetools_simulation(daeSimulation):
 
     def SetUpParametersAndDomains(self):
         for paramName, value in self._parameters.items():
+            paramName = str(paramName)
             parameter = getObjectFromCanonicalName(self.m, paramName, look_for_parameters = True)
             if parameter == None:
                 raise RuntimeError('Could not locate parameter {0}'.format(paramName))
-            print '  --> Set the parameter: {0} to: {1}'.format(paramName, value)
+            self.Log.Message('  --> Set the parameter: {0} to: {1}'.format(paramName, value), 0)
+            print self.Log
             parameter.SetValue(value)
             
     def SetUpVariables(self):
         for varName, value in self._initial_conditions.items():
+            varName = str(varName)
             variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
             if variable == None:
-                raise RuntimeError('Could not locate variable {0}'.format(paramName))
-            print '  --> Set the variable: {0} to: {1}'.format(varName, value)
+                raise RuntimeError('Could not locate variable {0}'.format(varName))
+            self.Log.Message('  --> Set the variable: {0} to: {1}'.format(varName, value), 0)
             variable.SetInitialCondition(value)
 
         for portName, expression in self._analog_ports_expressions.items():
+            portName = str(portName)
             if expression == None or expression == '':
                 raise RuntimeError('An expression for the value of the analog port {0} cannot be empty'.format(portName))
             port = getObjectFromCanonicalName(self.m, portName, look_for_ports = True, look_for_reduceports = True)
             if port == None:
                 raise RuntimeError('Could not locate port {0}'.format(portName))
-            print 'port: {0} = {1}'.format(portName, self.parser.parse(expression))
+            self.Log.Message('port: {0} = {1}'.format(portName, self.parser.parse(expression)), 0)
 
         for modelName, stateName in self._active_regimes.items():
-            #listNames = activeStateName.split('.')
-            #if len(listNames) > 1:
-            #    stateName = listNames[-1]
-            #    modelName = '.'.join(listNames[:-1])
-            #else:
-            #    raise RuntimeError('Invalid initial active state name {0}'.format(activeStateName))
-
+            modelName = str(modelName)
+            stateName = str(stateName)
             stn = getObjectFromCanonicalName(self.m, modelName + '.' + nineml_daetools_bridge.ninemlSTNRegimesName, look_for_stns = True)
             if stn == None:
                 raise RuntimeError('Could not locate STN {0}'.format(nineml_daetools_bridge.ninemlSTNRegimesName))
 
-            print '  --> Set the active state in the model: {0} to: {1}'.format(modelName, stateName)
+            self.Log.Message('  --> Set the active state in the model: {0} to: {1}'.format(modelName, stateName), 0)
             stn.ActiveState = stateName
 
         self.m.SetReportingOn(False)
         for varName, value in self._variables_to_report.items():
+            varName = str(varName)
             if value:
                 variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
                 if variable == None:
-                    raise RuntimeError('Could not locate variable {0}'.format(paramName))
-                print '  --> Report the variable: {0}'.format(varName)
+                    raise RuntimeError('Could not locate variable {0}'.format(varName))
+                self.Log.Message('  --> Report the variable: {0}'.format(varName), 0)
                 variable.ReportingOn = True
         
     def Run(self):

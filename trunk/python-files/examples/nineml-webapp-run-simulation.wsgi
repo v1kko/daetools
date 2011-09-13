@@ -49,6 +49,18 @@ def application(environ, start_response):
                     raw_arguments = raw_arguments.strip(' \'')
                     dictFormData  = urlparse.parse_qs(raw_arguments)
 
+                    if not environ.has_key('nineml_process_data'):
+                        raise RuntimeError('nineml_process_data')
+                    
+                    if not dictFormData.has_key('__NINEML_WEBAPP_ID__'):
+                        raise RuntimeError('Invalid application ID specified')
+                    applicationID = dictFormData['__NINEML_WEBAPP_ID__']
+                    if not nineml_process_data.has_key(applicationID):
+                        raise RuntimeError('Invalid application ID specified; cannot find the application: ' + applicationID)
+                    inspector = nineml_process_data[applicationID]
+                    if not inspector:
+                        raise RuntimeError('Invalid inspectro object')
+
                     for key, values in dictFormData.items():
                         names = key.split('.')
                         if len(names) > 0:
@@ -82,12 +94,13 @@ def application(environ, start_response):
                 else:
                     html = '<p>No arguments available</p>'# createResultPage('<p>No arguments available</p>')
 
-                nineml_component = TestableComponent('hierachical_iaf_1coba')()
+                nineml_component = inspector.nineml_component
                 if not nineml_component:
                     raise RuntimeError('Cannot load NineML component')
 
                 simulation_data = daeSimulationInputData()
-
+                simulation_data.timeHorizon              = 10  #timeHorizon
+                simulation_data.reportingInterval        = 0.1 #reportingInterval
                 simulation_data.parameters               = parameters
                 simulation_data.initial_conditions       = initial_conditions
                 simulation_data.analog_ports_expressions = analog_ports_expressions
@@ -108,8 +121,8 @@ def application(environ, start_response):
                                                                  variables_to_report      = simulation_data.variables_to_report)
 
                 # Set the time horizon and the reporting interval
-                simulation.ReportingInterval = 0.1
-                simulation.TimeHorizon = 10
+                simulation.ReportingInterval = simulation_data.reportingInterval
+                simulation.TimeHorizon       = simulation_data.timeHorizon
 
                 # Connect data reporter
                 simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

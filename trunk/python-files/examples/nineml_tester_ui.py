@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'nineml_tester.ui'
 #
-# Created: Fri Sep  9 13:14:15 2011
+# Created: Tue Sep 13 15:54:21 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,6 +31,7 @@ class Ui_ninemlTester(object):
         self.timeHorizonLabel.setObjectName("timeHorizonLabel")
         self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.timeHorizonLabel)
         self.timeHorizonSLineEdit = QtGui.QLineEdit(self.tab_1)
+        self.timeHorizonSLineEdit.setInputMask("")
         self.timeHorizonSLineEdit.setObjectName("timeHorizonSLineEdit")
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.timeHorizonSLineEdit)
         self.reportingIntervalLabel = QtGui.QLabel(self.tab_1)
@@ -134,7 +135,9 @@ class Ui_ninemlTester(object):
     def retranslateUi(self, ninemlTester):
         ninemlTester.setWindowTitle(QtGui.QApplication.translate("ninemlTester", "NineML Component Tester", None, QtGui.QApplication.UnicodeUTF8))
         self.timeHorizonLabel.setText(QtGui.QApplication.translate("ninemlTester", "Time horizon, s", None, QtGui.QApplication.UnicodeUTF8))
+        self.timeHorizonSLineEdit.setText(QtGui.QApplication.translate("ninemlTester", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.reportingIntervalLabel.setText(QtGui.QApplication.translate("ninemlTester", "Reporting interval, s", None, QtGui.QApplication.UnicodeUTF8))
+        self.reportingIntervalSLineEdit.setText(QtGui.QApplication.translate("ninemlTester", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), QtGui.QApplication.translate("ninemlTester", "General", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(0, QtGui.QApplication.translate("ninemlTester", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(1, QtGui.QApplication.translate("ninemlTester", "Value", None, QtGui.QApplication.UnicodeUTF8))

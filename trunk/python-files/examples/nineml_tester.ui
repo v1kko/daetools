@@ -46,7 +46,14 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="timeHorizonSLineEdit"/>
+          <widget class="QLineEdit" name="timeHorizonSLineEdit">
+           <property name="inputMask">
+            <string/>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="reportingIntervalLabel">
@@ -56,7 +63,11 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="reportingIntervalSLineEdit"/>
+          <widget class="QLineEdit" name="reportingIntervalSLineEdit">
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

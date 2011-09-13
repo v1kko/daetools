@@ -10,7 +10,7 @@ from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
-from nineml_tester_gui import *
+from nineml_component_inspector import nineml_component_inspector
 from nineml_daetools_bridge import *
 from nineml_daetools_simulation import *
 
@@ -20,6 +20,8 @@ def test_Izhikevich():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
+    timeHorizon = 10
+    reportingInterval = 0.01
     parameters = {
                     "a": 0.02,
                     "b": 0.2,
@@ -38,25 +40,25 @@ def test_Izhikevich():
     active_regimes = {}
     variables_to_report = {}
 
-    app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
-                                              initial_conditions       = initial_conditions,
-                                              active_regimes           = active_regimes,
-                                              analog_ports_expressions = analog_ports_expressions,
-                                              event_ports_expressions  = event_ports_expressions,
-                                              variables_to_report      = variables_to_report)
-    res = s.exec_()
-    if res == QtGui.QDialog.Accepted:
-        s.printResults()
-        return s
-    else:
-        return None
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
 
 def test_Hodgkin_Huxley():
     nineml_component = TestableComponent('hh')()
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
+    timeHorizon = 10
+    reportingInterval = 0.01
     parameters = {
         'C' : 1,
         'ek' : -63,
@@ -81,25 +83,25 @@ def test_Hodgkin_Huxley():
     active_regimes = {}
     variables_to_report = {}
 
-    app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
-                                              initial_conditions       = initial_conditions,
-                                              active_regimes           = active_regimes,
-                                              analog_ports_expressions = analog_ports_expressions,
-                                              event_ports_expressions  = event_ports_expressions,
-                                              variables_to_report      = variables_to_report)
-    res = s.exec_()
-    if res == QtGui.QDialog.Accepted:
-        s.printResults()
-        return s
-    else:
-        return None
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
 
 def test_hierachical_iaf_1coba():
     nineml_component = TestableComponent('hierachical_iaf_1coba')()
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
+    timeHorizon = 10
+    reportingInterval = 0.01
     parameters = {
         'cobaExcit.q' : 3.0,
         'cobaExcit.tau' : 5.0,
@@ -127,25 +129,25 @@ def test_hierachical_iaf_1coba():
         'iaf.V' : True
     }
 
-    app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
-                                              initial_conditions       = initial_conditions,
-                                              active_regimes           = active_regimes,
-                                              analog_ports_expressions = analog_ports_expressions,
-                                              event_ports_expressions  = event_ports_expressions,
-                                              variables_to_report      = variables_to_report)
-    res = s.exec_()
-    if res == QtGui.QDialog.Accepted:
-        s.printResults()
-        return s
-    else:
-        return None
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
 
 def test_hierachical_iaf_nmda():
     nineml_component = TestableComponent('hierachical_iaf_nmda')()
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
+    timeHorizon = 10
+    reportingInterval = 0.01
     parameters = {
                     'cobaExcit.q' : 3.0,
                     'cobaExcit.tau' : 5.0,
@@ -181,86 +183,83 @@ def test_hierachical_iaf_nmda():
                             'cobaExcit.g' : True
                           }
 
-    app = QtGui.QApplication(sys.argv)
-    s = nineml_tester_qtGUI(nineml_component, parameters               = parameters,
-                                              initial_conditions       = initial_conditions,
-                                              active_regimes           = active_regimes,
-                                              analog_ports_expressions = analog_ports_expressions,
-                                              event_ports_expressions  = event_ports_expressions,
-                                              variables_to_report      = variables_to_report)
-    res = s.exec_()
-    if res == QtGui.QDialog.Accepted:
-        s.printResults()
-        return s
-    else:
-        return None
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
 
 if __name__ == "__main__":
-    try:
-        # test_hierachical_iaf_nmda
-        # test_hierachical_iaf_1coba
-        # test_Hodgkin_Huxley
-        # test_Izhikevich
-        input_data = test_hierachical_iaf_1coba()
-        if input_data == None:
-            exit(0)
+    # test_hierachical_iaf_nmda
+    # test_hierachical_iaf_1coba
+    # test_Hodgkin_Huxley
+    # test_Izhikevich
+    results, inspector = test_hierachical_iaf_1coba()
+    if not results:
+        exit(0)
 
-        print 'Input data from the GUI:'
-        #input_data.printResults()
-        #input_data.printTrees()
-        input_data.printTreeDictionaries()
+    print 'Input data from the GUI:'
+    inspector.printCollectedData()
 
-        simulation_data = daeSimulationInputData()
-        simulation_data.parameters               = input_data.parameters
-        simulation_data.initial_conditions       = input_data.initial_conditions
-        simulation_data.analog_ports_expressions = input_data.analog_ports_expressions
-        simulation_data.event_ports_expressions  = input_data.event_ports_expressions
-        simulation_data.active_regimes           = input_data.active_regimes
-        simulation_data.variables_to_report      = input_data.variables_to_report
+    simulation_data = daeSimulationInputData()
+    simulation_data.timeHorizon              = results['timeHorizon']
+    simulation_data.reportingInterval        = results['reportingInterval']
+    simulation_data.parameters               = results['parameters']
+    simulation_data.initial_conditions       = results['initial_conditions']
+    simulation_data.active_regimes           = results['active_regimes']
+    simulation_data.analog_ports_expressions = results['analog_ports_expressions']
+    simulation_data.event_ports_expressions  = results['event_ports_expressions']
+    simulation_data.variables_to_report      = results['variables_to_report']
 
-        print 'JSON data:'
-        jsonContent = simulation_data.dumpJSON()
-        print jsonContent
-        simulation_data.loadJSON(jsonContent)
-        jsonContent1 = simulation_data.dumpJSON()
-        print str(jsonContent1)
+    #print 'JSON data:'
+    #jsonContent = simulation_data.dumpJSON()
+    #print 'jsonContent:', jsonContent
+    #simulation_data.loadJSON(jsonContent)
+    #jsonContent1 = simulation_data.dumpJSON()
+    #print jsonContent1
 
-        #exit(0)
+    #exit(0)
 
-        # Create Log, DAESolver, DataReporter and Simulation object
-        log          = daePythonStdOutLog()
-        daesolver    = daeIDAS()
-        datareporter = ninemlTesterDataReporter()
-        model        = nineml_daetools_bridge(input_data.ninemlComponent.name, input_data.ninemlComponent)
-        simulation   = nineml_daetools_simulation(model, parameters               = input_data.parameters,
-                                                         initial_conditions       = input_data.initial_conditions,
-                                                         active_regimes           = input_data.active_regimes,
-                                                         analog_ports_expressions = input_data.analog_ports_expressions,
-                                                         event_ports_expressions  = input_data.event_ports_expressions,
-                                                         variables_to_report      = input_data.variables_to_report)
+    # Create Log, DAESolver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = ninemlTesterDataReporter()
+    model        = nineml_daetools_bridge(inspector.ninemlComponent.name, inspector.ninemlComponent)
+    simulation   = nineml_daetools_simulation(model, timeHorizon              = simulation_data.timeHorizon,
+                                                     reportingInterval        = simulation_data.reportingInterval,
+                                                     parameters               = simulation_data.parameters,
+                                                     initial_conditions       = simulation_data.initial_conditions,
+                                                     active_regimes           = simulation_data.active_regimes,
+                                                     analog_ports_expressions = simulation_data.analog_ports_expressions,
+                                                     event_ports_expressions  = simulation_data.event_ports_expressions,
+                                                     variables_to_report      = simulation_data.variables_to_report)
 
-        # Set the time horizon and the reporting interval
-        simulation.ReportingInterval = 0.1
-        simulation.TimeHorizon = 10
+    # Set the time horizon and the reporting interval
+    simulation.ReportingInterval = simulation_data.reportingInterval
+    simulation.TimeHorizon       = simulation_data.timeHorizon
 
-        # Connect data reporter
-        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-        if(datareporter.Connect("", simName) == False):
-            sys.exit()
+    # Connect data reporter
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
 
-        # Initialize the simulation
-        simulation.Initialize(daesolver, datareporter, log)
+    # Initialize the simulation
+    simulation.Initialize(daesolver, datareporter, log)
 
-        # Save the model reports for all models
-        simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-        simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    # Save the model reports for all models
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-        # Solve at time=0 (initialization)
-        simulation.SolveInitial()
+    # Solve at time=0 (initialization)
+    simulation.SolveInitial()
 
-        # Run
-        simulation.Run()
-        simulation.Finalize()
+    # Run
+    simulation.Run()
+    simulation.Finalize()
 
-    except Exception, e:
-        print e

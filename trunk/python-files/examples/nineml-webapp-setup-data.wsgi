@@ -14,7 +14,7 @@ try:
     from nineml.abstraction_layer import readers
     from nineml.abstraction_layer.testing_utils import TestableComponent
     from nineml.abstraction_layer import ComponentClass
-    from nineml_tester_gui import nineml_tester_htmlGUI
+    from nineml_component_inspector import nineml_component_inspector
     from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage
 
 except Exception, e:
@@ -25,6 +25,8 @@ except Exception, e:
 """
 Sample json input data:
 {
+    "timeHorizon" : 10.0,
+    "reportingInterval" : 0.01,
     "parameters" : {
         "cobaExcit.q" : 3.0,
         "cobaExcit.tau" : 5.0,
@@ -83,7 +85,7 @@ def application(environ, start_response):
                 nineml_component = TestableComponent(compName)()
                 if not nineml_component:
                     raise RuntimeError('The specified component: {0} could not be loaded'.format(compName))
-
+                
                 if dictFormData.has_key('InitialValues'):
                     data = json.loads(dictFormData['InitialValues'][0])
                     if not isinstance(data, dict):
@@ -131,15 +133,23 @@ def application(environ, start_response):
                         else:
                             raise RuntimeError('variables_to_report argument must be a dictionary')
 
-                s = nineml_tester_htmlGUI(nineml_component, parameters               = parameters,
-                                                            initial_conditions       = initial_conditions,
-                                                            active_regimes           = active_regimes,
-                                                            analog_ports_expressions = analog_ports_expressions,
-                                                            event_ports_expressions  = event_ports_expressions,
-                                                            variables_to_report      = variables_to_report)
-                formTemplate = getSetupDataForm()
-                content     += formTemplate.format(s.generateHTMLForm())
-                html         = createSetupDataPage(content)
+                inspector = nineml_component_inspector()
+                inspector.inspect(nineml_component, parameters               = parameters,
+                                                    initial_conditions       = initial_conditions,
+                                                    active_regimes           = active_regimes,
+                                                    analog_ports_expressions = analog_ports_expressions,
+                                                    event_ports_expressions  = event_ports_expressions,
+                                                    variables_to_report      = variables_to_report)
+
+                applicationID = compName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+                if not environ.has_key('nineml_process_data'):
+                    environ['nineml_process_data'] = {}
+                environ['nineml_process_data'][applicationID] = inspector
+
+                raise RuntimeError('nineml_process_data')
+                formTemplate  = getSetupDataForm()
+                content      += formTemplate.format(inspector.generateHTMLForm(), applicationID)
+                html          = createSetupDataPage(content)
 
         else:
             html = 'Error occurred:\n{0}\n{1}'.format(___import_exception___, ___import_exception_traceback___)
