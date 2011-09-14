@@ -8,8 +8,9 @@ cgitb.enable()
 ___import_exception___ = None
 ___import_exception_traceback___ = None
 try:
+    baseFolder = '/home/ciroki/Data/daetools/trunk/python-files/examples'
     os.environ['HOME'] = "/tmp"
-    sys.path.append("/home/ciroki/Data/daetools/trunk/python-files/examples")
+    sys.path.append(baseFolder)
 
     import nineml
     from nineml.abstraction_layer import readers
@@ -19,6 +20,7 @@ try:
     from daetools.pyDAE import pyCore, pyActivity, pyDataReporting, pyIDAS, daeLogs
     from nineml_component_inspector import nineml_component_inspector
     from nineml_daetools_bridge import nineml_daetools_bridge
+    from nineml_tex_report import createLatexReport
     from nineml_daetools_simulation import daeSimulationInputData, nineml_daetools_simulation, ninemlTesterDataReporter
     from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getSelectComponentPage, createResultPage
 
@@ -124,7 +126,7 @@ class nineml_webapp:
                                                 event_ports_expressions  = event_ports_expressions,
                                                 variables_to_report      = variables_to_report)
 
-            applicationID = compName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+            applicationID = compName + strftime("[%d.%m.%Y-%H:%M:%S]", localtime())
             nineml_webapp.nineml_process_data[applicationID] = inspector
 
             formTemplate  = getSetupDataForm()
@@ -153,6 +155,7 @@ class nineml_webapp:
     def run_simulation(self, dictFormData, environ, start_response):
         try:
             html = ''
+            pdf_report = ''
             raw_arguments = ''
             content = ''
             log = None
@@ -258,13 +261,22 @@ class nineml_webapp:
 
             # Run
             simulation.Run()
-
-            log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
-            content += log_output
             simulation.Finalize()
 
-            html = createResultPage(content)
-            success = True
+            datareporter.createPlots()
+            log.Message(str(datareporter.plots), 0)
+
+            log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
+            content += log_output + '\n' + pdf_report
+
+            texOutputFile = '/tmp/{0}.tex'.format(applicationID)
+            pdf_report = createLatexReport(inspector, baseFolder + '/nineml-tex-template.tex', texOutputFile)
+            if pdf_report:
+                html = createResultPage(content)
+                success = True
+            else:
+                html = str(texOutputFile)
+                success = False
 
         except Exception, e:
             content += 'Application environment:\n' + pformat(environ) + '\n\n'
@@ -285,9 +297,9 @@ class nineml_webapp:
 
         if success:
             boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-            pdf = open("/home/ciroki/Data/daetools/trunk/python-files/examples/coba_iaf.pdf", "rb").read()
+            pdf = open(pdf_report, "rb").read()
             part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
-            part2 = '--{0}\r\nContent-Disposition: attachment; filename=Dummy-model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
+            part2 = '--{0}\r\nContent-Disposition: attachment; filename=model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
             output = part1 + part2
             output_len = len(output)
             start_response('200 OK', [('Content-type', 'multipart/mixed; boundary={0}'.format(boundary)),

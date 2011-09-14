@@ -37,10 +37,18 @@ def createLatexReport(inspector, texTemplate, texOutputFile):
     of.write(template)
     of.close()
 
-    if subprocess.call(['pdflatex', texOutputFile], shell=False) != 0:
-        raise RuntimeError('Call to pdflatex failed!')
-    subprocess.call(['evince', texOutputFile.replace('.tex', '.pdf')], shell=False)
-    return texOutputFile
+    res = os.system('pdflatex \"{0}\"'.format(texOutputFile))
+    print 'pdflatex \"{0}\"'.format(texOutputFile)
+    os.wait()
+    if res == 0:
+        return texOutputFile.replace('.tex', '.pdf')
+    else:
+        return res
+
+    #if subprocess.call(['pdflatex', texOutputFile], shell=False) == 0:
+    #    return texOutputFile.replace('.tex', '.pdf')
+    #else:
+    #    return None
 
 """
 \begin{table}[placement=h]
@@ -66,4 +74,5 @@ if __name__ == "__main__":
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_component)
     report = createLatexReport(inspector, 'nineml-tex-template.tex', 'coba_iaf.tex')
+    subprocess.call(['evince', report], shell=False)
 

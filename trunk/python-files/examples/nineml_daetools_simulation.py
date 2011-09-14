@@ -9,7 +9,9 @@ from time import localtime, strftime, time
 from daetools.pyDAE import *
 from nineml_daetools_bridge import *
 from nineml_tex_report import *
-import matplotlib
+
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 class daeSimulationInputData:
@@ -114,9 +116,9 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
         self.plots = []
 
     def createPlots(self):
-        fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
-        fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
-        fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
+        fp8  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
+        fp9  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
+        fp11 = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
 
         for i, var in enumerate(self.Process.Variables):
             fileName   = '/tmp/' + var.Name + '.png'
@@ -125,13 +127,21 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
             xPoints    = var.TimeValues
             yPoints    = var.Values.reshape(len(var.Values))
 
-            plt.figure(i+1)
-            plt.subplot(111)
-            plt.plot(xPoints, yPoints)
-            plt.title(var.Name)
-            plt.xlabel(xAxisLabel)
-            plt.ylabel(yAxisLabel)
-            plt.savefig(fileName)
+            #plt.figure(i+1)
+            #plt.subplot(111)
+            #plt.plot(xPoints, yPoints)
+            #plt.title(var.Name)
+            #plt.xlabel(xAxisLabel)
+            #plt.ylabel(yAxisLabel)
+            #plt.savefig(fileName)
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(xPoints, yPoints)
+            ax.set_xlabel(xAxisLabel)
+            ax.set_ylabel(yAxisLabel)
+            fig.savefig(fileName)
+
             self.plots.append((var.Name, xPoints, yPoints, fileName))
 
     def Connect(self, ConnectionString, ProcessName):
