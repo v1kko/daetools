@@ -747,14 +747,15 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("IndentString",	&daeLog_t::GetIndentString)
 
 		.def("Message",			pure_virtual(&daeLog_t::Message))
+		.def("JoinMessages",	pure_virtual(&daeLog_t::JoinMessages))
 		.def("IncreaseIndent",	pure_virtual(&daeLog_t::IncreaseIndent))
 		.def("DecreaseIndent",	pure_virtual(&daeLog_t::DecreaseIndent))
 		;
 
-	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog")
-		.def("Message",			&daeLog_t::Message, &daepython::daeBaseLogWrapper::def_Message)
-		.def("IncreaseIndent",	&daeBaseLog::IncreaseIndent)
-		.def("DecreaseIndent",	&daeBaseLog::DecreaseIndent)
+	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog") 
+		.def("Message",				&daeLog_t::Message, &daepython::daeBaseLogWrapper::def_Message)
+		.def("IncreaseIndent",		&daeBaseLog::IncreaseIndent)
+		.def("DecreaseIndent",		&daeBaseLog::DecreaseIndent)
 		;
 
 	class_<daepython::daeFileLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeFileLog", init<string>())

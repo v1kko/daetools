@@ -111,26 +111,28 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
-        self.plotFilenames = []
+        self.plots = []
 
     def createPlots(self):
         fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
         fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
         fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
 
-        for var in self.Process.Variables:
+        for i, var in enumerate(self.Process.Variables):
             fileName   = '/tmp/' + var.Name + '.png'
             xAxisLabel = 't'
             yAxisLabel = var.Name
             xPoints    = var.TimeValues
             yPoints    = var.Values.reshape(len(var.Values))
 
+            plt.figure(i+1)
+            plt.subplot(111)
             plt.plot(xPoints, yPoints)
             plt.title(var.Name)
             plt.xlabel(xAxisLabel)
             plt.ylabel(yAxisLabel)
             plt.savefig(fileName)
-            self.plotFilenames.append(fileName)
+            self.plots.append((var.Name, xPoints, yPoints, fileName))
 
     def Connect(self, ConnectionString, ProcessName):
         return True
@@ -158,6 +160,9 @@ class nineml_daetools_simulation(daeSimulation):
         self._analog_ports_expressions = kwargs.get('analog_ports_expressions', {})
         self._event_ports_expressions  = kwargs.get('event_ports_expressions',  {})
 
+        self.TimeHorizon               = float(kwargs.get('timeHorizon', 0.0))
+        self.ReportingInterval         = float(kwargs.get('reportingInterval', 0.0))
+
     def SetUpParametersAndDomains(self):
         for paramName, value in self._parameters.items():
             paramName = str(paramName)
@@ -165,7 +170,6 @@ class nineml_daetools_simulation(daeSimulation):
             if parameter == None:
                 raise RuntimeError('Could not locate parameter {0}'.format(paramName))
             self.Log.Message('  --> Set the parameter: {0} to: {1}'.format(paramName, value), 0)
-            print self.Log
             parameter.SetValue(value)
             
     def SetUpVariables(self):
@@ -233,13 +237,13 @@ if __name__ == "__main__":
         'iaf.cm' : 1,
         'iaf.gl' : 50,
         'iaf.taurefrac' : 0.008,
-        'iaf.vreset' : -60,
-        'iaf.vrest' : -60,
-        'iaf.vthresh' : -40
+        'iaf.vreset' : -0.060,
+        'iaf.vrest' : -0.060,
+        'iaf.vthresh' : -0.040
     }
     initial_conditions = {
         'cobaExcit.g' : 0.0,
-        'iaf.V' : -60,
+        'iaf.V' : -0.060,
         'iaf.tspike' : -1E99
     }
     analog_ports_expressions = {}
@@ -252,6 +256,8 @@ if __name__ == "__main__":
         'cobaExcit.I' : True,
         'iaf.V' : True
     }
+    timeHorizon       = 1
+    reportingInterval = 0.001
 
     # Load the Component:
     nineml_comp  = TestableComponent('hierachical_iaf_1coba')()
@@ -259,11 +265,13 @@ if __name__ == "__main__":
         raise RuntimeError('Cannot load NineML component')
 
     # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
+    log          = daeBaseLog()
     daesolver    = daeIDAS()
 
     model = nineml_daetools_bridge(nineml_comp.name, nineml_comp, None, '')
-    simulation = nineml_daetools_simulation(model, parameters               = parameters,
+    simulation = nineml_daetools_simulation(model, timeHorizon              = timeHorizon,
+                                                   reportingInterval        = reportingInterval,
+                                                   parameters               = parameters,
                                                    initial_conditions       = initial_conditions,
                                                    active_regimes           = active_regimes,
                                                    analog_ports_expressions = analog_ports_expressions,
@@ -272,8 +280,8 @@ if __name__ == "__main__":
     datareporter = ninemlTesterDataReporter()
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.01
-    simulation.TimeHorizon = 5
+    simulation.ReportingInterval = reportingInterval
+    simulation.TimeHorizon       = timeHorizon
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -297,4 +305,17 @@ if __name__ == "__main__":
     simulation.Run()
     simulation.Finalize()
 
+    
+    from PyQt4 import QtCore, QtGui
+    from daetools.pyDAE.WebViewDialog import WebView
+
     datareporter.createPlots()
+    print datareporter.plots
+
+    app = QtGui.QApplication(sys.argv)
+    for plot in datareporter.plots:
+        url = QtCore.QUrl(plot[3])
+        wv = WebView(url)
+        wv.resize(400, 400)
+        wv.setWindowTitle(plot[3])
+        wv.exec_()

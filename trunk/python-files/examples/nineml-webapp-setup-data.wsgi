@@ -34,13 +34,13 @@ Sample json input data:
         "iaf.cm" : 1,
         "iaf.gl" : 50,
         "iaf.taurefrac" : 0.008,
-        "iaf.vreset" : -60,
-        "iaf.vrest" : -60,
-        "iaf.vthresh" : -40
+        "iaf.vreset" : -0.060,
+        "iaf.vrest" : -0.060,
+        "iaf.vthresh" : -0.040
     },
     "initial_conditions" : {
         "cobaExcit.g" : 0.0,
-        "iaf.V" : -60,
+        "iaf.V" : -0.060,
         "iaf.tspike" : -1E99
     },
     "analog_ports_expressions" : {},

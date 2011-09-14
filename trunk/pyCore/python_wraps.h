@@ -1159,7 +1159,7 @@ class daeLogWrapper : public daeLog_t,
 public:
 	void Message(const string& strMessage, size_t nSeverity)
 	{
-		this->get_override("Message")();
+		this->get_override("Message")(strMessage, nSeverity);
 	}
 };
 

@@ -95,6 +95,14 @@ public:
 		}
 	}
 	
+	virtual string JoinMessages(const std::string& join = std::string("\n")) const
+	{
+		string strAllMessages;
+		for(size_t i = 0; i < m_strarrMessages.size(); i++)
+			strAllMessages += m_strarrMessages[i] + join;
+		return strAllMessages;
+	}
+	
 	void UpdateIndent(void)
 	{
 		m_strIndent.clear();

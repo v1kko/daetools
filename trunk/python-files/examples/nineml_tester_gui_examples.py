@@ -20,8 +20,8 @@ def test_Izhikevich():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
-    timeHorizon = 10
-    reportingInterval = 0.01
+    timeHorizon = 1
+    reportingInterval = 0.001
     parameters = {
                     "a": 0.02,
                     "b": 0.2,
@@ -57,8 +57,8 @@ def test_Hodgkin_Huxley():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
-    timeHorizon = 10
-    reportingInterval = 0.01
+    timeHorizon = 1
+    reportingInterval = 0.001
     parameters = {
         'C' : 1,
         'ek' : -63,
@@ -100,8 +100,8 @@ def test_hierachical_iaf_1coba():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
-    timeHorizon = 10
-    reportingInterval = 0.01
+    timeHorizon = 1
+    reportingInterval = 0.001
     parameters = {
         'cobaExcit.q' : 3.0,
         'cobaExcit.tau' : 5.0,
@@ -109,13 +109,13 @@ def test_hierachical_iaf_1coba():
         'iaf.cm' : 1,
         'iaf.gl' : 50,
         'iaf.taurefrac' : 0.008,
-        'iaf.vreset' : -60,
-        'iaf.vrest' : -60,
-        'iaf.vthresh' : -40
+        'iaf.vreset' : -0.060,
+        'iaf.vrest' : -0.060,
+        'iaf.vthresh' : -0.040
     }
     initial_conditions = {
         'cobaExcit.g' : 0.0,
-        'iaf.V' : -60,
+        'iaf.V' : -0.060,
         'iaf.tspike' : -1E99
     }
     analog_ports_expressions = {}
@@ -146,8 +146,8 @@ def test_hierachical_iaf_nmda():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
-    timeHorizon = 10
-    reportingInterval = 0.01
+    timeHorizon = 1
+    reportingInterval = 0.001
     parameters = {
                     'cobaExcit.q' : 3.0,
                     'cobaExcit.tau' : 5.0,

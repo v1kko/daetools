@@ -224,7 +224,7 @@ class nineml_webapp:
             simulation_data.variables_to_report      = variables_to_report
 
             # Create Log, DAESolver, DataReporter and Simulation object
-            log          = daeLogs.daeStringListLog()
+            log          = daeLogs.daeBaseLog()
             daesolver    = pyIDAS.daeIDAS()
             datareporter = ninemlTesterDataReporter()
             model        = nineml_daetools_bridge(nineml_component.name, nineml_component)
@@ -244,7 +244,7 @@ class nineml_webapp:
             # Connect data reporter
             simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
             if(datareporter.Connect("", simName) == False):
-                raise RuntimeError('Cannot connect a TCP/IP datareporter; did you forget to strat daePlotter?')
+                raise RuntimeError('Cannot connect a TCP/IP datareporter; did you forget to start daePlotter?')
 
             # Initialize the simulation
             simulation.Initialize(daesolver, datareporter, log)
@@ -258,13 +258,13 @@ class nineml_webapp:
 
             # Run
             simulation.Run()
+
+            log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
+            content += log_output
             simulation.Finalize()
 
-            success = True
-            log_output = '<pre>{0}</pre>'.format('\n'.join(log.messages))
-            content += log_output
-
             html = createResultPage(content)
+            success = True
 
         except Exception, e:
             content += 'Application environment:\n' + pformat(environ) + '\n\n'
@@ -277,7 +277,7 @@ class nineml_webapp:
             content += '  event_ports_expressions:  {0}\n'.format(event_ports_expressions)
             content += '  variables_to_report:  {0}\n'.format(variables_to_report)
             if log:
-                log_output = 'Log output:\n{0}'.format('\n'.join(log.messages))
+                log_output = 'Log output:\n{0}'.format(log.JoinMessages('\n'))
                 content += '\n' + log_output
 
             exc_type, exc_value, exc_traceback = sys.exc_info()
