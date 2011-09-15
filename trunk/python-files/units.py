@@ -187,23 +187,15 @@ class unit:
     def __str__(self):
         return '{0} [{1}]'.format(self.value, self.unitsAsString())
 
-tokens = [
-    'kg', 'm', 's', 'cd', 'A', 'K', 'mol',
+tokens = [ 'NAME',
     'NUMBER', 'FLOAT',
-    'TIMES', 'EXP',
+    'TIMES', 'DIVIDE', 'EXP',
     'LPAREN','RPAREN'
     ]
 
 t_TIMES   = r'\*'
+t_DIVIDE  = r'/'
 t_EXP     = r'\^'
-
-t_kg = r'kg'
-t_m = r'm'
-t_s = r's'
-t_cd = r'cd'
-t_A = r'A'
-t_K = r'K'
-t_mol = r'mol'
 
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
@@ -212,6 +204,27 @@ t_NUMBER = r'(\+|-)?\d+'
 t_FLOAT  = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
 
 t_ignore = " \t"
+
+dictUnits = {}
+kg  = unit(value = 1.0, M = 1, name = 'kg')
+m   = unit(value = 1.0, L = 1, name = 'm')
+s   = unit(value = 1.0, T = 1, name = 's')
+cd  = unit(value = 1.0, C = 1, name = 'cd')
+A   = unit(value = 1.0, A = 1, name = 'A')
+K   = unit(value = 1.0, K = 1, name = 'K')
+mol = unit(value = 1.0, N = 1, name = 'mol')
+g = 0.001 * kg
+
+dictUnits['kg'] = kg
+dictUnits['m']  = m
+dictUnits['s']  = s
+dictUnits['cd']  = cd
+dictUnits['A']  = A
+dictUnits['K']  = K
+dictUnits['mol']  = mol
+dictUnits['g']  = g
+
+t_NAME = r'[a-zA-Z_][a-zA-Z_0-9]*'
 
 def t_newline(t):
     r'\n+'
@@ -223,11 +236,15 @@ def t_error(t):
 
 # Parser rules:
 # expression:
-def p_multiplicative_expression_1(p):
+def p_expression_1(p):
     'expression : unit'
     p[0] = p[1]
 
-def p_multiplicative_expression_3(p):
+def p_expression_2(p):
+    'expression : expression DIVIDE unit'
+    p[0] = p[1] / p[3]
+
+def p_expression_3(p):
     'expression : expression TIMES unit'
     p[0] = p[1] * p[3]
 
@@ -261,66 +278,27 @@ def p_constant_4(p):
     p[0] = float(p[2])
 
 def p_base_unit_1(p):
-    """base_unit : kg """
-    p[0] = unit(value = 1.0, M = 1, name = 'kg')
-
-def p_base_unit_2(p):
-    """base_unit : m """
-    p[0] = unit(value = 1.0, L = 1, name = 'm')
-
-def p_base_unit_3(p):
-    """base_unit : s """
-    p[0] = unit(value = 1.0, T = 1, name = 's')
-
-def p_base_unit_4(p):
-    """base_unit : cd """
-    p[0] = unit(value = 1.0, C = 1, name = 'cd')
-
-def p_base_unit_5(p):
-    """base_unit : A """
-    p[0] = unit(value = 1.0, A = 1, name = 'A')
-
-def p_base_unit_6(p):
-    """base_unit : K """
-    p[0] = unit(value = 1.0, K = 1, name = 'K')
-
-def p_base_unit_7(p):
-    """base_unit : mol """
-    p[0] = unit(value = 1.0, N = 1, name = 'mol')
+    """base_unit : NAME  """
+    if not dictUnits.has_key(p[1]):
+        raise RuntimeError('Unit: {0} not found in the dictionary'.format(p[1]))
+    
+    p[0] = dictUnits[p[1]]
 
 def p_error(p):
     raise Exception("Syntax error at '%s'" % p.value)
 
 # Parser class
 class UnitParser:
-    def __init__(self, dictIdentifiers = None, dictFunctions = None):
+    def __init__(self):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc() #(write_tables = 0)
         self.parseResult = None
-        self.dictIdentifiers = dictIdentifiers
-        self.dictFunctions   = dictFunctions
 
     def parse(self, expression):
         self.parseResult = self.parser.parse(expression, debug = 0)
         return self.parseResult
 
-kg  = unit(value = 1.0, M = 1, name = 'kg')
-m   = unit(value = 1.0, L = 1, name = 'm')
-s   = unit(value = 1.0, T = 1, name = 's')
-cd  = unit(value = 1.0, C = 1, name = 'cd')
-A   = unit(value = 1.0, A = 1, name = 'A')
-K   = unit(value = 1.0, K = 1, name = 'K')
-mol = unit(value = 1.0, N = 1, name = 'mol')
 
-N  = unit(value = 1.0, L = 1, M = 1, T = -2)
-g  = 0.001 * kg
-
-units = {}
-units['kg'] = kg
-units['m']  = m
-units['s']  = s
-units['N']  = N
-units['g']  = g
 """
 print repr(kg)
 print N
@@ -333,5 +311,6 @@ print kg == 1.02*kg
 """
 
 parser = UnitParser()
-res = parser.parse('kg*m^-1*s^(+2)')
-print res
+res = parser.parse('g*kg*m^(-1)/s^(+2)')
+print res.unitsAsLatex()
+

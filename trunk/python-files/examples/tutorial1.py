@@ -185,7 +185,7 @@ class simTutorial(daeSimulation):
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
                              "their boundary and initial conditions."
-
+        
     def SetUpParametersAndDomains(self):
         # In this example we use the center-finite difference method (CFDM) of 2nd order to discretize the domains x and y.
         # The function CreateDistributed can be used to create a distributed domain. It accepts 5 arguments:
@@ -250,8 +250,8 @@ def consoleRun():
     simulation.ReportingInterval = 10
     simulation.TimeHorizon = 1000
 
-    simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
-    print simulation.ReportingTimes
+    #simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
+    #print simulation.ReportingTimes
     
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
