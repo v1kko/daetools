@@ -940,18 +940,6 @@ class ExpressionParser:
         result = node.evaluate(self.dictIdentifiers, self.dictFunctions)
         return result
 
-    @property
-    def dictIdentifiers(self):
-        return self.dictIdentifiers
-
-    @property
-    def dictFunctions(self):
-        return self.dictFunctions
-
-    @property
-    def parseResult(self):
-        return self.parseResult
-
 def testExpression(expression, expected_res, do_evaluation = True):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()

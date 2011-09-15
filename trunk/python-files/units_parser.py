@@ -327,40 +327,42 @@ def testExpression(expression, do_evaluation = True):
 
     return parse_res, latex_res, eval_res
 
-"""
-print repr(kg)
-print N
-print N.unitsAsLatex()
-print g * N * kg
-print repr(g * N)
+if __name__ == "__main__":
+    """
+    print repr(kg)
+    print N
+    print N.unitsAsLatex()
+    print g * N * kg
+    print repr(g * N)
 
-print 0.1*kg ** 2
-print kg == 1.02*kg
-"""
+    print 0.1*kg ** 2
+    print kg == 1.02*kg
+    """
 
-dictUnits = {}
-kg  = unit(value = 1.0, M = 1, name = 'kg')
-m   = unit(value = 1.0, L = 1, name = 'm')
-s   = unit(value = 1.0, T = 1, name = 's')
-cd  = unit(value = 1.0, C = 1, name = 'cd')
-A   = unit(value = 1.0, A = 1, name = 'A')
-K   = unit(value = 1.0, K = 1, name = 'K')
-mol = unit(value = 1.0, N = 1, name = 'mol')
-g = 0.001 * kg
-V = (kg * m**2) / (A * s**(-3))
-mV = 0.001 * V
+    dictUnits = {}
+    kg  = unit(value = 1.0, M = 1, name = 'kg')
+    m   = unit(value = 1.0, L = 1, name = 'm')
+    s   = unit(value = 1.0, T = 1, name = 's')
+    cd  = unit(value = 1.0, C = 1, name = 'cd')
+    A   = unit(value = 1.0, A = 1, name = 'A')
+    K   = unit(value = 1.0, K = 1, name = 'K')
+    mol = unit(value = 1.0, N = 1, name = 'mol')
+    g = 0.001 * kg
+    V = (kg * m**2) / (A * s**(-3))
+    mV = 0.001 * V
 
-dictUnits['kg']  = kg
-dictUnits['m']   = m
-dictUnits['s']   = s
-dictUnits['cd']  = cd
-dictUnits['A']   = A
-dictUnits['K']   = K
-dictUnits['mol'] = mol
-dictUnits['g']   = g
-dictUnits['V']   = V
-dictUnits['mV']  = mV
+    dictUnits['kg']  = kg
+    dictUnits['m']   = m
+    dictUnits['s']   = s
+    dictUnits['cd']  = cd
+    dictUnits['A']   = A
+    dictUnits['K']   = K
+    dictUnits['mol'] = mol
+    dictUnits['g']   = g
+    dictUnits['V']   = V
+    dictUnits['mV']  = mV
 
-parser = UnitParser(dictUnits)
-testExpression('kg*V/mV^2')
+    parser = UnitParser(dictUnits)
+    testExpression('kg*V/mV^2')
 
+    testExpression('V')
