@@ -13,7 +13,7 @@ from PyQt4.QtCore import Qt
 from nineml_component_inspector import nineml_component_inspector
 from nineml_daetools_bridge import *
 from nineml_daetools_simulation import *
-
+from daetools.pyDAE.WebViewDialog import WebView
 
 def test_Izhikevich():
     nineml_component = TestableComponent('izhikevich')()
@@ -217,8 +217,8 @@ if __name__ == "__main__":
     simulation_data.event_ports_expressions  = results['event_ports_expressions']
     simulation_data.variables_to_report      = results['variables_to_report']
 
-    #print 'JSON data:'
-    #jsonContent = simulation_data.dumpJSON()
+    print 'JSON data:'
+    jsonContent = simulation_data.dumpJSON()
     #print 'jsonContent:', jsonContent
     #simulation_data.loadJSON(jsonContent)
     #jsonContent1 = simulation_data.dumpJSON()
@@ -253,8 +253,8 @@ if __name__ == "__main__":
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model reports for all models
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
@@ -263,3 +263,11 @@ if __name__ == "__main__":
     simulation.Run()
     simulation.Finalize()
 
+    datareporter.createPlots('/tmp')
+    app = QtGui.QApplication(sys.argv)
+    for plot in datareporter.plots:
+        url = QtCore.QUrl(plot[3])
+        wv = WebView(url)
+        wv.resize(400, 400)
+        wv.setWindowTitle(plot[3])
+        wv.exec_()

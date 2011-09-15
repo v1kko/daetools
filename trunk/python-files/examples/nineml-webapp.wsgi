@@ -1,5 +1,5 @@
 from pprint import pformat
-import os, sys, math, json, traceback
+import os, sys, math, json, traceback, os.path
 from time import localtime, strftime, time
 import urlparse
 import cgitb
@@ -9,6 +9,7 @@ ___import_exception___ = None
 ___import_exception_traceback___ = None
 try:
     baseFolder = '/home/ciroki/Data/daetools/trunk/python-files/examples'
+    tmpFolder  = '/tmp/nineml-webapp'
     os.environ['HOME'] = "/tmp"
     sys.path.append(baseFolder)
 
@@ -20,7 +21,7 @@ try:
     from daetools.pyDAE import pyCore, pyActivity, pyDataReporting, pyIDAS, daeLogs
     from nineml_component_inspector import nineml_component_inspector
     from nineml_daetools_bridge import nineml_daetools_bridge
-    from nineml_tex_report import createLatexReport
+    from nineml_tex_report import createLatexReport, createPDF
     from nineml_daetools_simulation import daeSimulationInputData, nineml_daetools_simulation, ninemlTesterDataReporter
     from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getSelectComponentPage, createResultPage
 
@@ -155,7 +156,8 @@ class nineml_webapp:
     def run_simulation(self, dictFormData, environ, start_response):
         try:
             html = ''
-            pdf_report = ''
+            texReport = ''
+            pdfReport = ''
             raw_arguments = ''
             content = ''
             log = None
@@ -180,7 +182,7 @@ class nineml_webapp:
             if not inspector:
                 raise RuntimeError('Invalid inspector object')
 
-            # Remove inspector from the map since I finished with it
+            # Remove inspector from the map since we got a reference to it and do not need it in the map anymore
             del nineml_webapp.nineml_process_data[applicationID]
             
             if dictFormData.has_key('timeHorizon'):
@@ -263,20 +265,24 @@ class nineml_webapp:
             simulation.Run()
             simulation.Finalize()
 
-            datareporter.createPlots()
+            datareporter.createPlots(tmpFolder)
             log.Message(str(datareporter.plots), 0)
 
             log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
-            content += log_output + '\n' + pdf_report
+            content += log_output
 
-            texOutputFile = '/tmp/{0}.tex'.format(applicationID)
-            pdf_report = createLatexReport(inspector, baseFolder + '/nineml-tex-template.tex', texOutputFile)
-            if pdf_report:
-                html = createResultPage(content)
+            texReport = '{0}/{1}.tex'.format(tmpFolder, applicationID)
+            pdfReport = '{0}/{1}.pdf'.format(tmpFolder, applicationID)
+
+            createLatexReport(inspector, baseFolder + '/nineml-tex-template.tex', texReport, tmpFolder)
+            #os.chmod(texReport, 0666)
+
+            result = createPDF(texReport, tmpFolder)
+            if result == 0 and os.path.isfile(pdfReport):
                 success = True
             else:
-                html = str(texOutputFile)
                 success = False
+            html = createResultPage(content)
 
         except Exception, e:
             content += 'Application environment:\n' + pformat(environ) + '\n\n'
@@ -297,7 +303,7 @@ class nineml_webapp:
 
         if success:
             boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-            pdf = open(pdf_report, "rb").read()
+            pdf = open(pdfReport, "rb").read()
             part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
             part2 = '--{0}\r\nContent-Disposition: attachment; filename=model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
             output = part1 + part2

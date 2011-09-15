@@ -22,7 +22,7 @@ class texCommand:
 tex_itemize  = texCommand('\\begin{itemize}\n', '\\end{itemize}\n')
 tex_verbatim = texCommand(' \\begin{verbatim}', '\\end{verbatim} ')
 
-def createLatexReport(inspector, texTemplate, texOutputFile):
+def createLatexReport(inspector, texTemplate, texOutputFile, find_files_dir = '.'):
     tf = open(texTemplate, 'r')
     template = ''.join(tf.readlines())
     tf.close()
@@ -30,25 +30,22 @@ def createLatexReport(inspector, texTemplate, texOutputFile):
     content = inspector.generateLatexReport()
 
     comp_name = inspector.ninemlComponent.name.replace('_', '\\_')
+    template  = template.replace('LOGO_PATH', find_files_dir)
     template  = template.replace('MODEL-NAME', comp_name)
     template  = template.replace('MODEL-SPECIFICATION', ''.join(content))
     template  = template.replace('TESTS', '')
     template  = template.replace('APPENDIXES', '')
+    
     of.write(template)
     of.close()
 
-    res = os.system('pdflatex \"{0}\"'.format(texOutputFile))
-    print 'pdflatex \"{0}\"'.format(texOutputFile)
-    os.wait()
-    if res == 0:
-        return texOutputFile.replace('.tex', '.pdf')
+def createPDF(texFile, outdir = None):
+    if outdir:
+        res = os.system('/usr/bin/pdflatex -output-directory {0} {1}'.format(outdir, texFile))
     else:
-        return res
-
-    #if subprocess.call(['pdflatex', texOutputFile], shell=False) == 0:
-    #    return texOutputFile.replace('.tex', '.pdf')
-    #else:
-    #    return None
+        res = os.system('/usr/bin/pdflatex {0}'.format(texFile))
+        
+    return res
 
 """
 \begin{table}[placement=h]
@@ -73,6 +70,7 @@ if __name__ == "__main__":
     nineml_component = TestableComponent('hierachical_iaf_1coba')()
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_component)
-    report = createLatexReport(inspector, 'nineml-tex-template.tex', 'coba_iaf.tex')
-    subprocess.call(['evince', report], shell=False)
+    createLatexReport(inspector, 'nineml-tex-template.tex', 'coba_iaf.tex')
+    res = createPDF('coba_iaf.tex')
+    subprocess.call(['evince', 'coba_iaf.pdf'], shell=False)
 

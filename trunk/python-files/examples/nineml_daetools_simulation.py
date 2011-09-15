@@ -115,13 +115,13 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
         self.ProcessName = ""
         self.plots = []
 
-    def createPlots(self):
+    def createPlots(self, tmp_folder = '/tmp'):
         fp8  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
         fp9  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
         fp11 = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
 
         for i, var in enumerate(self.Process.Variables):
-            fileName   = '/tmp/' + var.Name + '.png'
+            fileName   = tmp_folder + '/' + var.Name + '.png'
             xAxisLabel = 't'
             yAxisLabel = var.Name
             xPoints    = var.TimeValues
@@ -319,7 +319,7 @@ if __name__ == "__main__":
     from PyQt4 import QtCore, QtGui
     from daetools.pyDAE.WebViewDialog import WebView
 
-    datareporter.createPlots()
+    datareporter.createPlots('/tmp')
     print datareporter.plots
 
     app = QtGui.QApplication(sys.argv)
