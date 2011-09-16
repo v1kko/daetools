@@ -9,7 +9,8 @@ import os, sys, math, collections
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 from nineml_tester_ui import Ui_ninemlTester
-from daetools.pyDAE.parser import ExpressionParser
+from daetools.pyDAE.expression_parser import ExpressionParser
+from daetools.pyDAE.units_parser import UnitParser
 from StringIO import StringIO
 
 def printDictionary(dictionary):
@@ -411,6 +412,65 @@ class nineml_component_qtGUI(QtGui.QDialog):
                 item.setText(1, active_state)
                 tree_item.value = str(active_state)
 
+def latex_table(header_flags, header_items, rows_items, caption = ''):
+    table_template = """
+\\begin{{table}}[placement=!h]
+{3}
+\\begin{{center}}
+\\begin{{tabular}}{{ {0} }}
+\\hline
+{1}
+\\hline
+{2}
+\\end{{tabular}}
+\\end{{center}}
+\\end{{table}}
+    """
+    #flags  = ' | ' + ' | '.join(header_flags) + ' | '
+    flags  = ' '.join(header_flags)
+    header = ' & '.join(header_items) + ' \\\\'
+    rows = ''
+    for item in rows_items:
+        rows += ' & '.join(item) + ' \\\\ \n'
+    if caption:
+        title = '\\caption{{{0}}} \n'.format(caption)
+    else:
+        title = ''
+    return table_template.format(flags, header, rows, title)
+
+def latex_regime_table(header_flags, regime, odes, _on_conditions, _on_events, caption = ''):
+    table_template = """
+\\begin{{table}}[placement=!h]
+{3}
+\\begin{{center}}
+\\begin{{tabular}}{{ {0} }}
+\\hline
+\\multicolumn{{2}}{{c}}{{ {1} }} \\\\
+\\hline
+{2}
+\\end{{tabular}}
+\\end{{center}}
+\\end{{table}}
+    """
+    flags  = ' '.join(header_flags)
+    rows = '\\multirow{{{0}}}{{*}}{{ODEs}} & '.format(len(odes))
+    for item in odes:
+        rows += item + ' \\\\ \n'
+
+    rows += '\\multirow{{{0}}}{{*}}{{On condition}} & '.format(len(_on_conditions))
+    for item in _on_conditions:
+        rows += item + ' \\\\ \n'
+
+    rows += '\\multirow{{{0}}}{{*}}{{On event}} & '.format(len(_on_events))
+    for item in _on_events:
+        rows += item + ' \\\\ \n'
+
+    if caption:
+        title = '\\caption{{{0}}} \n'.format(caption)
+    else:
+        title = ''
+    return table_template.format(flags, regime, rows, title)
+
 class nineml_component_inspector:
     categoryParameters              = '___PARAMETERS___'
     categoryInitialConditions       = '___INITIAL_CONDITIONS___'
@@ -422,6 +482,8 @@ class nineml_component_inspector:
     begin_itemize = '\\begin{itemize}\n'
     item          = '\\item '
     end_itemize   = '\\end{itemize}\n\n'
+
+    
 
     def __init__(self):
         # NineML component
@@ -824,61 +886,87 @@ class nineml_component_inspector:
         parameters = list(component.parameters)
         if len(parameters) > 0:
             content.append('\\subsection*{Parameters}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
+            header_flags = ['l', 'c', 'l']
+            header_items = ['Name', 'Units', 'Description']
+            rows_items = []
             for param in parameters:
                 _name = param.name.replace('_', '\\_')
-                tex = nineml_component_inspector.item + _name + '\n'
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+                rows_items.append([_name, ' - ', ' '])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
 
         # 2) Create state-variables (diff. variables)
         state_variables = list(component.state_variables)
         if len(state_variables) > 0:
             content.append('\\subsection*{State-Variables}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
+            header_flags = ['l', 'c', 'l']
+            header_items = ['Name', 'Units', 'Description']
+            rows_items = []
             for var in state_variables:
                 _name = var.name.replace('_', '\\_')
-                tex = nineml_component_inspector.item + _name + '\n'
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+                rows_items.append([_name, ' - ', ' '])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
 
         # 3) Create alias variables (algebraic)
         aliases = list(component.aliases)
         if len(aliases) > 0:
             content.append('\\subsection*{Aliases}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
+            header_flags = ['l', 'l', 'c', 'l']
+            header_items = ['Name', 'Expression', 'Units', 'Description']
+            rows_items = []
             for alias in aliases:
-                tex = nineml_component_inspector.item + '${0} = {1}$\n\n'.format(alias.lhs, parser.parse_to_latex(alias.rhs))
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+                _name = '${0}$'.format(alias.lhs)
+                _rhs  = '${0}$'.format(parser.parse_to_latex(alias.rhs))
+                rows_items.append([_name, _rhs, ' - ', ' '])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
 
         # 4) Create analog-ports and reduce-ports
         analog_ports = list(component.analog_ports)
         if len(analog_ports) > 0:
             content.append('\\subsection*{Analog Ports}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
-            for analog_port in analog_ports:
-                _name = analog_port.name.replace('_', '\\_')
-                tex = nineml_component_inspector.item + _name + ' (' + analog_port.mode + ')' + '\n'
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+            header_flags = ['l', 'l', 'c', 'l']
+            header_items = ['Name', 'Type', 'Units', 'Description']
+            rows_items = []
+            for port in analog_ports:
+                _name = port.name.replace('_', '\\_')
+                _type = port.mode
+                rows_items.append([_name, _type, ' - ', ' '])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
 
         # 5) Create event-ports
         event_ports = list(component.event_ports)
         if len(event_ports) > 0:
             content.append('\\subsection*{Event ports}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
-            for event_port in event_ports:
-                _name = event_port.name.replace('_', '\\_')
-                tex = nineml_component_inspector.item + _name + ' (' + event_port.mode + ')' + '\n'
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+            header_flags = ['l', 'l', 'c', 'l']
+            header_items = ['Name', 'Type', 'Units', 'Description']
+            rows_items = []
+            for port in event_ports:
+                _name = port.name.replace('_', '\\_')
+                _type = port.mode
+                rows_items.append([_name, _type, ' - ', ' '])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
-
+        '''
+        content.append("""\\begin{center}
+            \\begin{tabular}{ | l | l | l | p{5cm} |}
+            \\hline
+            Day & Min Temp & Max Temp & Summary \\\\ \\hline
+            Monday & 11C & 22C & A clear day with lots of sunshine.
+            However, the strong breeze will bring down the temperatures. \\\\ \\hline
+            Tuesday & 9C & 19C & Cloudy with rain, \\newline across many northern regions. \\newline Clear spells
+            across most of Scotland and Northern Ireland,
+            but rain reaching the far northwest. \\\\ \\hline
+            Wednesday & 10C & 21C & Rain will still linger for the morning.
+            Conditions will improve by early afternoon and continue
+            throughout the evening. \\\\
+            \\hline
+            \\end{tabular}
+            \\end{center}""")
+        '''
+        
         # 6) Create sub-nodes
         if len(component.subnodes.items()) > 0:
             content.append('\\subsection*{Sub-nodes}\n\n')
@@ -894,19 +982,64 @@ class nineml_component_inspector:
         portconnections = list(component.portconnections)
         if len(portconnections) > 0:
             content.append('\\subsection*{Port Connections}\n\n')
-            content.append(nineml_component_inspector.begin_itemize)
+            header_flags = ['l', 'l']
+            header_items = ['From', 'To']
+            rows_items = []
             for port_connection in portconnections:
                 portFrom = '.'.join(port_connection[0].loctuple)
                 portTo   = '.'.join(port_connection[1].loctuple)
                 _fromname = portFrom.replace('_', '\\_')
                 _toname   = portTo.replace('_', '\\_')
-                tex = nineml_component_inspector.item + _fromname + ' = ' + _toname + '\n'
-                content.append(tex)
-            content.append(nineml_component_inspector.end_itemize)
+                rows_items.append([_fromname, _toname])
+            content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
 
         # 8) Create regimes
         regimes = list(component.regimes)
+        """
+        if len(regimes) > 0:
+            content.append('\\subsection*{Regimes}\n\n')
+            for regime in regimes:
+                header_flags = ['l', 'l', 'l']
+                header_items = ['ODEs', 'Transitions']
+                rows_items = []
+
+                _name = regime.name.replace('_', '\\_')
+                _odes = []
+                _on_events = []
+                _on_conditions = []
+
+                for time_deriv in regime.time_derivatives:
+                    _odes.append('$\\frac{{d{0}}}{{dt}} = {1}$'.format(time_deriv.dependent_variable, parser.parse_to_latex(time_deriv.rhs)))
+
+                for on_condition in regime.on_conditions:
+                    _on_conditions.append('\\mbox{If } $' + parser.parse_to_latex(on_condition.trigger.rhs) + '$\mbox{:}')
+
+                    if on_condition.target_regime.name != '':
+                        _on_conditions.append('\\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(on_condition.target_regime.name))
+
+                    for state_assignment in on_condition.state_assignments:
+                        _on_conditions.append('\\hspace*{{0.2in}} \\mbox{{set }} {0} = {1}'.format(state_assignment.lhs, parser.parse_to_latex(state_assignment.rhs)))
+
+                    for event_output in on_condition.event_outputs:
+                        _on_conditions.append('\\hspace*{{0.2in}} \\mbox{{emit }} {0}'.format(event_output.port_name))
+
+                # 8c) Create on_event actions
+                for on_event in regime.on_events:
+                    _on_events.append('\\mbox{On } $' + on_event.src_port_name + '$\mbox{:}')
+
+                    if on_event.target_regime.name != '':
+                        _on_events.append('\\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(on_event.target_regime.name))
+
+                    for state_assignment in on_event.state_assignments:
+                        _on_events.append('\\hspace*{{0.2in}} \\mbox{{set }} {0} = {1}'.format(state_assignment.lhs, parser.parse_to_latex(state_assignment.rhs)))
+
+                    for event_output in on_event.event_outputs:
+                        _on_events.append('\\hspace*{{0.2in}} \\mbox{{emit }} {0}'.format(event_output.port_name))
+
+                content.append(latex_regime_table(header_flags, _name, _odes, _on_conditions, _on_events))
+                content.append('\n')
+        """
         if len(regimes) > 0:
             content.append('\\subsection*{Regimes}\n\n')
             for regime in regimes:
@@ -949,6 +1082,7 @@ class nineml_component_inspector:
                 tex += '\\newline \n'
                 content.append(tex)
 
+            content.append('\\newpage')
             content.append('\n')
 
 if __name__ == "__main__":

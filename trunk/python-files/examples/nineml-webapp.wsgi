@@ -1,5 +1,5 @@
 from pprint import pformat
-import os, sys, math, json, traceback, os.path
+import os, sys, math, json, traceback, os.path, tempfile, shutil
 from time import localtime, strftime, time
 import urlparse
 import cgitb
@@ -9,9 +9,9 @@ ___import_exception___ = None
 ___import_exception_traceback___ = None
 try:
     baseFolder = '/home/ciroki/Data/daetools/trunk/python-files/examples'
-    tmpFolder  = '/tmp/nineml-webapp'
-    os.environ['HOME'] = "/tmp"
     sys.path.append(baseFolder)
+    os.environ['HOME'] = tempfile.gettempdir()
+    print os.environ['HOME']
 
     import nineml
     from nineml.abstraction_layer import readers
@@ -155,9 +155,11 @@ class nineml_webapp:
 
     def run_simulation(self, dictFormData, environ, start_response):
         try:
+            pdf = None
             html = ''
             texReport = ''
             pdfReport = ''
+            tmpFolder = ''
             raw_arguments = ''
             content = ''
             log = None
@@ -265,6 +267,10 @@ class nineml_webapp:
             simulation.Run()
             simulation.Finalize()
 
+            # Create tmpFolder
+            tmpFolder = tempfile.mkdtemp(suffix='-nineml-webapp', prefix='tmp-')
+            shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
+
             datareporter.createPlots(tmpFolder)
             log.Message(str(datareporter.plots), 0)
 
@@ -279,10 +285,15 @@ class nineml_webapp:
 
             result = createPDF(texReport, tmpFolder)
             if result == 0 and os.path.isfile(pdfReport):
+                pdf = open(pdfReport, "rb").read()
                 success = True
             else:
                 success = False
+
             html = createResultPage(content)
+
+            # Clean up
+            shutil.rmtree(tmpFolder)
 
         except Exception, e:
             content += 'Application environment:\n' + pformat(environ) + '\n\n'
@@ -303,7 +314,6 @@ class nineml_webapp:
 
         if success:
             boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-            pdf = open(pdfReport, "rb").read()
             part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
             part2 = '--{0}\r\nContent-Disposition: attachment; filename=model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
             output = part1 + part2

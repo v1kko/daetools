@@ -1,195 +1,10 @@
 import os, sys, operator
 import ply.lex as lex
 import ply.yacc as yacc
-from math import *
-from copy import copy, deepcopy
-from parser import Number, BinaryNode, IdentifierNode, ConstantNode
+import parser_objects
+from parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, unit
 
-class DimensionsError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-def format(name, U):
-    if U == 1:
-        return '{0}'.format(name, U)
-    elif U != 0:
-        return '({0}^{1})'.format(name, U)
-    else:
-        return None
-        
-def format_and_append(name, U, l):
-    res = format(name, U)
-    if res:
-        l.append(res)
-
-def latex(name, U):
-    if U == 1:
-        return '{{{0}}}'.format(name)
-    elif U != 0:
-        return '{{{{{0}}}^{{{1}}}}}'.format(name, U)
-    else:
-        return None
-
-def latex_and_append(name, U, l):
-    res = latex(name, U)
-    if res:
-        l.append(res)
-
-class unit:
-    def __init__(self, **kwargs):
-        self.L = kwargs.get('L', 0) # length, m
-        self.M = kwargs.get('M', 0) # mass, kg
-        self.T = kwargs.get('T', 0) # time, s
-        self.C = kwargs.get('C', 0) # candela, cd
-        self.A = kwargs.get('A', 0) # ampere, A
-        self.K = kwargs.get('K', 0) # kelvin, K
-        self.N = kwargs.get('N', 0) # mole, mol
-        self.name      = kwargs.get('name',      None)
-        #self.latexName = kwargs.get('latexName', self.name)
-        self.value     = kwargs.get('value',     0.0)
-
-    def __eq__(self, other):
-        return self.areDimensionsEqual(other)
-        
-    def __ne__(self, other):
-        return not self.areDimensionsEqual(other)
-
-    def isEqualTo(self, other):
-        if (self.value == other.value) and self.areDimensionsEqual(other):
-           return True
-        else:
-            return False
-
-    def areDimensionsEqual(self, other):
-        if ((self.M == other.M) and \
-            (self.L == other.L) and \
-            (self.L == other.T) and \
-            (self.L == other.C) and \
-            (self.L == other.A) and \
-            (self.L == other.K) and \
-            (self.T == other.N)):
-           return True
-        else:
-            return False
-            
-    def __neg__(self):
-        tmp       = deepcopy(self)
-        tmp.value = -self.value
-        return tmp
-
-    def __pos__(self):
-        return deepcopy(self)
-
-    def __add__(self, other):
-        if not self.areDimensionsEqual(other):
-            raise DimensionsError('Units not consistent')
-
-        tmp       = deepcopy(self)
-        tmp.value = self.value + other.value
-        return tmp
-
-    def __sub__(self, other):
-        if not self.areDimensionsEqual(other):
-            raise DimensionsError('Units not consistent')
-
-        tmp       = deepcopy(self)
-        tmp.value = self.value - other.value
-        return tmp
-
-    def __mul__(self, other):
-        if not isinstance(other, unit):
-            val   = float(other)
-            other = unit(value = val)
-
-        tmp   = unit()
-        tmp.L = self.L + other.L
-        tmp.M = self.M + other.M
-        tmp.T = self.T + other.T
-        tmp.C = self.C + other.C
-        tmp.A = self.A + other.A
-        tmp.K = self.K + other.K
-        tmp.N = self.N + other.N
-        tmp.value = self.value * other.value
-        return tmp
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
-    def __div__(self, other):
-        if not isinstance(other, unit):
-            val   = float(other)
-            other = unit(value = val)
-
-        tmp   = unit()
-        tmp.L = self.L - other.L
-        tmp.M = self.M - other.M
-        tmp.T = self.T - other.T
-        tmp.C = self.C - other.C
-        tmp.A = self.A - other.A
-        tmp.K = self.K - other.K
-        tmp.N = self.N - other.N
-        tmp.value = self.value / other.value
-        return tmp
-
-    def __rdiv__(self, other):
-        if not isinstance(other, unit):
-            val = float(other)
-            other = unit(value = val)
-
-        return other.__div__(self)
-
-    def __pow__(self, power):
-        tmp   = deepcopy(self)
-        tmp.L = self.L * float(power)
-        tmp.M = self.M * float(power)
-        tmp.T = self.T * float(power)
-        tmp.C = self.C * float(power)
-        tmp.A = self.A * float(power)
-        tmp.K = self.K * float(power)
-        tmp.N = self.N * float(power)
-        tmp.value = self.value ** float(power)
-        return tmp
-
-    def unitsAsString(self):
-        if self.name:
-            return '{0} [{1}]'.format(self.value, self.name)
-        else:
-            units = []
-            format_and_append('kg',  self.M, units)
-            format_and_append('m',   self.L, units)
-            format_and_append('s',   self.T, units)
-            format_and_append('cd',  self.C, units)
-            format_and_append('A',   self.A, units)
-            format_and_append('K',   self.K, units)
-            format_and_append('mol', self.N, units)
-            return '*'.join(units)
-
-    def unitsAsLatex(self):
-        if self.name:
-            return self.name
-        else:
-            units = []
-            latex_and_append('kg',  self.M, units)
-            latex_and_append('m',   self.L, units)
-            latex_and_append('s',   self.T, units)
-            latex_and_append('cd',  self.C, units)
-            latex_and_append('A',   self.A, units)
-            latex_and_append('K',   self.K, units)
-            latex_and_append('mol', self.N, units)
-            return ' \cdot '.join(units)
-
-    def __repr__(self):
-        template = 'unit(name = {0}, value = {1}, M = {2}, L = {3}, T = {4}, C = {5}, A = {6}, K = {7}, N = {8})'
-        return template.format(self.name, self.value, self.M, self.L, self.T, self.C, self.A, self.K, self.N)
-
-    def __str__(self):
-        return '{0} [{1}]'.format(self.value, self.unitsAsString())
-
-
-tokens = [ 'NAME',
+tokens = [ 'UNIT_NAME',
     'NUMBER', 'FLOAT',
     'TIMES', 'DIVIDE', 'EXP',
     'LPAREN','RPAREN'
@@ -207,7 +22,7 @@ t_FLOAT  = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
 
 t_ignore = " \t"
 
-t_NAME = r'[a-zA-Z_][a-zA-Z_0-9]*'
+t_UNIT_NAME = r'[a-zA-Z_][a-zA-Z_0-9]*'
 
 def t_newline(t):
     r'\n+'
@@ -261,7 +76,7 @@ def p_constant_4(p):
     p[0] = Number(ConstantNode(float(p[2])))
     
 def p_base_unit_1(p):
-    """base_unit : NAME  """
+    """base_unit : UNIT_NAME  """
     p[0] = Number(IdentifierNode(p[1]))
     
 def p_error(p):
@@ -328,18 +143,7 @@ def testExpression(expression, do_evaluation = True):
     return parse_res, latex_res, eval_res
 
 if __name__ == "__main__":
-    """
-    print repr(kg)
-    print N
-    print N.unitsAsLatex()
-    print g * N * kg
-    print repr(g * N)
-
-    print 0.1*kg ** 2
-    print kg == 1.02*kg
-    """
-
-    dictUnits = {}
+    # Basic SI units
     kg  = unit(value = 1.0, M = 1, name = 'kg')
     m   = unit(value = 1.0, L = 1, name = 'm')
     s   = unit(value = 1.0, T = 1, name = 's')
@@ -347,9 +151,14 @@ if __name__ == "__main__":
     A   = unit(value = 1.0, A = 1, name = 'A')
     K   = unit(value = 1.0, K = 1, name = 'K')
     mol = unit(value = 1.0, N = 1, name = 'mol')
+
+    # Some derived units
     g = 0.001 * kg
     V = (kg * m**2) / (A * s**(-3))
     mV = 0.001 * V
+
+    dictUnits     = {}
+    dictFunctions = {}
 
     dictUnits['kg']  = kg
     dictUnits['m']   = m
@@ -362,7 +171,39 @@ if __name__ == "__main__":
     dictUnits['V']   = V
     dictUnits['mV']  = mV
 
-    parser = UnitParser(dictUnits)
-    testExpression('kg*V/mV^2')
+    # if we want to evaluate and check units of an expression, we have to provide
+    # basic math. functions as well and some other identifiers (e, t, pi ...) 
+    """
+    dictUnits['t']  = model.time()
+    dictUnits['pi'] = math.pi
+    dictUnits['e']  = math.e
 
-    testExpression('V')
+    dictFunctions['sin']   = parser_objects.sin
+    dictFunctions['cos']   = parser_objects.cos
+    dictFunctions['tan']   = parser_objects.tan
+    dictFunctions['asin']  = parser_objects.asin
+    dictFunctions['acos']  = parser_objects.acos
+    dictFunctions['atan']  = parser_objects.atan
+    dictFunctions['sinh']  = parser_objects.sinh
+    dictFunctions['cosh']  = parser_objects.cosh
+    dictFunctions['tanh']  = parser_objects.tanh
+    dictFunctions['asinh'] = parser_objects.asinh
+    dictFunctions['acosh'] = parser_objects.cosh
+    dictFunctions['atanh'] = parser_objects.atanh
+    dictFunctions['log10'] = parser_objects.log10
+    dictFunctions['log']   = parser_objects.log
+    dictFunctions['sqrt']  = parser_objects.sqrt
+    dictFunctions['exp']   = parser_objects.exp
+    dictFunctions['floor'] = parser_objects.floor
+    dictFunctions['ceil']  = parser_objects.ceil
+    dictFunctions['pow']   = parser_objects.pow
+    """
+
+    parser = UnitParser(dictUnits, dictFunctions)
+
+    print repr(g * K)
+    print 0.1*kg ** 2
+    print kg == 1.02*kg
+
+    testExpression('kg*V/mV^2')
+    testExpression('kg*V/A^2')

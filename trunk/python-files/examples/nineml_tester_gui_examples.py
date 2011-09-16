@@ -6,7 +6,6 @@ from time import localtime, strftime, time
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
-from daetools.pyDAE.parser import ExpressionParser
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt

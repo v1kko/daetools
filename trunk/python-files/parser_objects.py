@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """********************************************************************************
-                             parser.py
+                          parser_objects.py
                  Copyright (C) Dragan Nikolic, 2011
 ***********************************************************************************
 ExpressionParser is free software; you can redistribute it and/or modify it under the
@@ -13,10 +13,8 @@ You should have received a copy of the GNU General Public License along with thi
 software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-import os, sys, operator
-import ply.lex as lex
-import ply.yacc as yacc
-from math import *
+import os, sys, operator, math
+from copy import copy, deepcopy
 
 class Node:
     def evaluate(self, dictIdentifiers, dictFunctions):
@@ -594,509 +592,281 @@ class Number:
                                 )
                      )
 
-#logical_operator = {'and': 'and',
-#                    'or' : 'or'
-#                   }
+class DimensionsError(Exception):
+    def __init__(self, value):
+        self.value = value
 
-functions = {'exp'  : 'exp',
-             'sqrt' : 'sqrt',
-             'log'  : 'log',
-             'log10': 'log10',
-             'sin'  : 'sin',
-             'cos'  : 'cos',
-             'tan'  : 'tan',
-             'asin' : 'asin',
-             'acos' : 'acos',
-             'atan' : 'atan',
-             'sinh' : 'sinh',
-             'cosh' : 'cosh',
-             'tanh' : 'tanh',
-             'asinh': 'asinh',
-             'acosh': 'acosh',
-             'atanh': 'atanh',
-             'ceil' : 'ceil',
-             'floor': 'floor'
-            }
+    def __str__(self):
+        return repr(self.value)
 
-tokens = [
-    'NAME', 'NUMBER', 'FLOAT',
-    'PLUS','MINUS','TIMES','DIVIDE','EXP','EQUALS',
-    'LPAREN','RPAREN','PERIOD', 'COMMA',
-    'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
-    'AND', 'OR'
-    ] + list(functions.values()) #+ list(logical_operator.values())
-
-precedence = [
-                ('left', 'PLUS', 'MINUS'),
-                ('left', 'TIMES', 'DIVIDE'),
-                ('left', 'EXP')
-             ]
-
-
-t_PLUS    = r'\+'
-t_MINUS   = r'-'
-t_TIMES   = r'\*'
-t_DIVIDE  = r'/'
-t_EXP     = r'\*\*'
-
-t_EQ = r'=='
-t_NE = r'!='
-t_GT = r'>'
-t_GE = r'>='
-t_LT = r'<'
-t_LE = r'<='
-t_AND = r'&&'
-t_OR  = r'\|\|'
-
-t_COMMA   = r','
-t_EQUALS  = r'='
-t_LPAREN  = r'\('
-t_RPAREN  = r'\)'
-t_PERIOD  = r'\.'
-
-#t_PI = r'pi'
-
-def t_NAME(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    if t.value in functions:
-        t.type = functions[t.value]
-    #elif t.value in logical_operator:
-    #    t.type = logical_operator[t.value]
+def format(name, U):
+    if U == 1:
+        return '{0}'.format(name, U)
+    elif U != 0:
+        return '({0}^{1})'.format(name, U)
     else:
-        t.type = 'NAME'
-    return t
+        return None
 
-t_NUMBER = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
-t_FLOAT = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
+def format_and_append(name, U, l):
+    res = format(name, U)
+    if res:
+        l.append(res)
 
-t_ignore = " \t"
+def latex(name, U):
+    if U == 1:
+        return '{{{0}}}'.format(name)
+    elif U != 0:
+        return '{{{{{0}}}^{{{1}}}}}'.format(name, U)
+    else:
+        return None
 
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
+def latex_and_append(name, U, l):
+    res = latex(name, U)
+    if res:
+        l.append(res)
 
-def t_error(t):
-    print "Illegal character '%s'" % t.value[0]
-    t.lexer.skip(1)
+class unit:
+    def __init__(self, **kwargs):
+        self.L = kwargs.get('L', 0) # length, m
+        self.M = kwargs.get('M', 0) # mass, kg
+        self.T = kwargs.get('T', 0) # time, s
+        self.C = kwargs.get('C', 0) # candela, cd
+        self.A = kwargs.get('A', 0) # ampere, A
+        self.K = kwargs.get('K', 0) # kelvin, K
+        self.N = kwargs.get('N', 0) # mole, mol
+        self.name      = kwargs.get('name',      None)
+        #self.latexName = kwargs.get('latexName', self.name)
+        self.value     = kwargs.get('value',     0.0)
 
-# Parser rules:
-# expression:
-def p_expression_1(p):
-    'expression : assignment_expression'
-    p[0] = p[1]
+    def __eq__(self, other):
+        return self.areDimensionsEqual(other)
 
-def p_expression_2(t):
-    'expression : expression COMMA assignment_expression'
-    p[0] = p[1] + p[3]
+    def __ne__(self, other):
+        return not self.areDimensionsEqual(other)
 
-# assigment_expression:
-def p_assignment_expression_1(p):
-    'assignment_expression : conditional_expression'
-    p[0] = p[1]
-
-def p_assignment_expression_2(p):
-    'assignment_expression : identifier EQUALS assignment_expression'
-    p[0] = AssignmentNode(p[1], p[3])
-    #'assignment_expression : shift_expression EQUALS assignment_expression'
-
-# conditional-expression
-def p_conditional_expression_1(p):
-    'conditional_expression : or_expression'
-    p[0] = p[1]
-
-# OR-expression
-def p_or_expression_1(p):
-    'or_expression : and_expression'
-    p[0] = p[1]
-
-def p_or_expression_2(p):
-    'or_expression : or_expression OR and_expression'
-    p[0] = (p[1] | p[3])
-
-# AND-expression
-def p_and_expression_1(p):
-    'and_expression : equality_expression'
-    p[0] = p[1]
-
-def p_and_expression_2(p):
-    'and_expression : and_expression AND equality_expression'
-    p[0] = (p[1] & p[3])
-
-# equality-expression:
-def p_equality_expression_1(p):
-    'equality_expression : relational_expression'
-    p[0] = p[1]
-
-def p_equality_expression_2(p):
-    'equality_expression : equality_expression EQ relational_expression'
-    p[0] = (p[1] == p[3])
-
-def p_equality_expression_3(p):
-    'equality_expression : equality_expression NE relational_expression'
-    p[0] = (p[1] != p[3])
-
-# relational-expression:
-def p_relational_expression_1(p):
-    'relational_expression : shift_expression'
-    p[0] = p[1]
-
-def p_relational_expression_2(p):
-    'relational_expression : relational_expression LT shift_expression'
-    p[0] = p[1] < p[3]
-
-def p_relational_expression_3(p):
-    'relational_expression : relational_expression GT shift_expression'
-    p[0] = p[1] > p[3]
-
-def p_relational_expression_4(p):
-    'relational_expression : relational_expression LE shift_expression'
-    p[0] = p[1] <= p[3]
-
-def p_relational_expression_5(p):
-    'relational_expression : relational_expression GE shift_expression'
-    p[0] = p[1] >= p[3]
-
-# shift-expression
-def p_shift_expression_1(p):
-    'shift_expression : additive_expression'
-    p[0] = p[1]
-
-# additive-expression
-def p_additive_expression_1(p):
-    'additive_expression : multiplicative_expression'
-    p[0] = p[1]
-
-def p_additive_expression_2(p):
-    'additive_expression : additive_expression PLUS multiplicative_expression'
-    p[0] = p[1] + p[3]
-
-def p_additive_expression_3(p):
-    'additive_expression : additive_expression MINUS multiplicative_expression'
-    p[0] = p[1] - p[3]
-
-# multiplicative-expression
-def p_multiplicative_expression_1(p):
-    'multiplicative_expression : power_expression'
-    p[0] = p[1]
-
-def p_multiplicative_expression_2(p):
-    'multiplicative_expression : multiplicative_expression DIVIDE power_expression'
-    p[0] = p[1] / p[3]
-
-def p_multiplicative_expression_3(p):
-    'multiplicative_expression : multiplicative_expression TIMES power_expression'
-    p[0] = p[1] * p[3]
-
-
-def p_power_expression_1(p):
-    'power_expression : unary_expression'
-    p[0] = p[1]
-
-def p_power_expression_2(p):
-    'power_expression : power_expression EXP unary_expression'
-    p[0] = p[1] ** p[3]
-
-# unary-expression:
-def p_unary_expression_1(p):
-    'unary_expression : postfix_expression'
-    p[0] = p[1]
-
-def p_unary_expression_2(p):
-    'unary_expression : unary_operator'
-    p[0] = p[1]
-
-# unary-operator:
-def p_unary_operator(p):
-    '''
-    unary_operator : PLUS  postfix_expression
-                   | MINUS postfix_expression
-    '''
-    if p[1] == '+':
-        p[0] = p[2]
-    elif p[1] == '-':
-        p[0] = - p[2]
-
-# postfix-expression:
-def p_postfix_expression_1(p):
-    """postfix_expression : primary_expression"""
-    p[0] = p[1]
-
-def p_postfix_expression_2(p):
-    """
-    postfix_expression : sin   LPAREN expression RPAREN
-                       | cos   LPAREN expression RPAREN
-                       | tan   LPAREN expression RPAREN
-                       | asin  LPAREN expression RPAREN
-                       | acos  LPAREN expression RPAREN
-                       | atan  LPAREN expression RPAREN
-                       | sinh  LPAREN expression RPAREN
-                       | cosh  LPAREN expression RPAREN
-                       | tanh  LPAREN expression RPAREN
-                       | asinh LPAREN expression RPAREN
-                       | acosh LPAREN expression RPAREN
-                       | atanh LPAREN expression RPAREN
-                       | exp   LPAREN expression RPAREN
-                       | sqrt  LPAREN expression RPAREN
-                       | log   LPAREN expression RPAREN
-                       | log10 LPAREN expression RPAREN
-                       | ceil  LPAREN expression RPAREN
-                       | floor LPAREN expression RPAREN
-    """
-    p[0] = Number(StandardFunctionNode(p[1], p[3]))
-
-def p_postfix_expression_3(p):
-    '''postfix_expression : postfix_expression PERIOD NAME'''
-    p[0] = Number(IdentifierNode(p[1].Node.Name + '.' + p[3]))
-
-def p_postfix_expression_4(p):
-    '''postfix_expression : postfix_expression LPAREN argument_expression_list RPAREN'''
-    print str(p[1]) + '(' + str(p[3]) + ')'
-    p[0] = Number(NonstandardFunctionNode(str(p[1]), p[3]))
-
-# primary-expression
-def p_primary_expression(p):
-    '''primary_expression :  identifier
-                          |  constant
-                          |  LPAREN expression RPAREN'''
-    if len(p) == 2:
-        p[0] = p[1]
-    elif len(p) == 4:
-        p[0] = p[2]
-
-# argument-expression-list:
-def p_argument_expression_list(p):
-    '''argument_expression_list :  assignment_expression
-                                |  argument_expression_list COMMA assignment_expression'''
-    arguments = []
-    if len(p) == 2:
-        arguments.append(p[1])
-    elif len(p) == 4:
-        for arg in list(p[1]):
-            arguments.append(arg)
-        arguments.append(p[3])
-
-    p[0] = arguments
-
-def p_constant_1(p):
-    """constant : NUMBER"""
-    p[0] = Number(ConstantNode(int(p[1])))
-
-def p_constant_2(p):
-    """constant : FLOAT"""
-    p[0] = Number(ConstantNode(float(p[1])))
-
-def p_identifier(p):
-    """identifier : NAME"""
-    p[0] = Number(IdentifierNode(p[1]))
-
-def p_error(p):
-    print "Syntax error at '%s'" % p.value
-    raise Exception("Syntax error at '%s'" % p.value)
-
-# Parser class
-class ExpressionParser:
-    def __init__(self, dictIdentifiers = None, dictFunctions = None):
-        self.lexer  = lex.lex()
-        self.parser = yacc.yacc() #(write_tables = 0)
-        self.parseResult = None
-        self.dictIdentifiers = dictIdentifiers
-        self.dictFunctions   = dictFunctions
-
-    def parse_and_evaluate(self, expression):
-        self.parse(expression)
-        return self.evaluate()
-
-    def parse_to_latex(self, expression):
-        self.parse(expression)
-        return self.toLatex()
-
-    def parse(self, expression):
-        self.parseResult = self.parser.parse(expression, debug = 0)
-        return self.parseResult
-
-    def toLatex(self):
-        if self.parseResult is None:
-            raise RuntimeError('expression not parsed yet')
-        return self.parseResult.toLatex()
-
-    def evaluate(self):
-        if self.parseResult is None:
-            raise RuntimeError('expression not parsed yet')
-        if self.dictIdentifiers is None:
-            raise RuntimeError('dictIdentifiers not set')
-        if self.dictFunctions is None:
-            raise RuntimeError('dictFunctions not set')
-
-        node = None
-        if isinstance(self.parseResult, Number):
-            node = self.parseResult.Node
-        elif isinstance(self.parseResult, Condition):
-            node = self.parseResult.CondNode
-        elif isinstance(self.parseResult, AssignmentNode):
-            node = self.parseResult
+    def isEqualTo(self, other):
+        if (self.value == other.value) and self.areDimensionsEqual(other):
+           return True
         else:
-            raise RuntimeError('Invalid parse result type')
+            return False
 
-        result = node.evaluate(self.dictIdentifiers, self.dictFunctions)
-        return result
-
-def testExpression(expression, expected_res, do_evaluation = True):
-    parse_res    = parser.parse(expression)
-    latex_res    = parser.toLatex()
-    print 'Expression: ' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result: ', str(parse_res)
-    print 'Latex: ', latex_res
-    eval_res = 0
-    if do_evaluation:
-        eval_res = parser.evaluate()
-        if fabs(eval_res - expected_res) > 0:
-            raise RuntimeError('Expression evaluation failed: {0} (evaluated {1}; expected {2})'.format(expression, eval_res, expected_res))
+    def areDimensionsEqual(self, other):
+        if ((self.M == other.M) and \
+            (self.L == other.L) and \
+            (self.L == other.T) and \
+            (self.L == other.C) and \
+            (self.L == other.A) and \
+            (self.L == other.K) and \
+            (self.T == other.N)):
+           return True
         else:
-            print 'Evaluate result: OK (={0})'.format(eval_res)
-    print '\n'
+            return False
 
-    return parse_res, latex_res, eval_res
-    
-def testLatex(parser):
-    operators = ['+', '-', '*', '/', '**']
-    l = 'x_1'
-    r = 'x_2'
-    counter = 0
-    for lop in operators:
-        for rop in operators:
-            for op in operators:
-                expression   = l + lop + r + op + l + rop + r
-                parse_res    = parser.parse(expression)
-                latex_res    = parser.toLatex()
-                print '\\begin{verbatim}' + str(counter) + '. ' + expression + '\\end{verbatim}\n'
-                print '\\begin{verbatim}Parse result: ' + str(parse_res) + '\\end{verbatim}\n'
-                print '$' + latex_res + '$\n\n'
-                counter += 1
+    def __neg__(self):
+        tmp       = deepcopy(self)
+        tmp.value = -self.value
+        return tmp
 
-def Sum(a1, a2, a3):
-    return a1 + a2 + a3
+    def __pos__(self):
+        return deepcopy(self)
 
-def step(t0, amplitude):
-    return amplitude
+    def __add__(self, other):
+        if not self.areDimensionsEqual(other):
+            raise DimensionsError('Units not consistent')
 
-def impulse(t0, amplitude):
-    return amplitude
+        tmp       = deepcopy(self)
+        tmp.value = self.value + other.value
+        return tmp
 
-def linear(t0, t1, start, end):
-    return end
+    def __sub__(self, other):
+        if not self.areDimensionsEqual(other):
+            raise DimensionsError('Units not consistent')
 
-if __name__ == "__main__":
-    """
-    The parser supports the following math. functions: 'sqrt', 'exp', 'log', 'log10', 'ceil', 'floor',
-                                                       'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-                                                       'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
-    Objects that can be used with this parser should support the following math operators: +, -, *, /, **
-    and abovementioned math. functions.
-    User-defined functions with arbitrary number of arguments that operate on such objects can be defined by the user.
-    Dictionary dictIdentifiers should contain pairs of the following type:
-      identifier-name: value (for instance 'var' : number,
-                              or 'name.var' : object-that-defines-math-operators-and-functions)
-    Dictionary dictFunctions should contain pairs of the following type:
-      function-name : callable-object (for instance 'exp': math.exp)
-    """
-    dictIdentifiers = {}
-    dictFunctions   = {}
+        tmp       = deepcopy(self)
+        tmp.value = self.value - other.value
+        return tmp
 
-    # Some dummy identifiers:values
-    y       = 10.0
-    x1      =  1.0
-    x2      =  2.0
-    x3      =  3.0
-    x4      =  4.0
-    m1_x    =  2.11
-    m1_m2_y = 10.12
-    R       =  0.0
+    def __mul__(self, other):
+        if not isinstance(other, unit):
+            val   = float(other)
+            other = unit(value = val)
 
-    # identifiers
-    dictIdentifiers['pi']      = pi
-    dictIdentifiers['e']       = e
-    dictIdentifiers['y']       = y
-    dictIdentifiers['x1']      = x1
-    dictIdentifiers['x2']      = x2
-    dictIdentifiers['x3']      = x3
-    dictIdentifiers['x4']      = x4
-    dictIdentifiers['m1.x']    = m1_x
-    dictIdentifiers['m1.m2.y'] = m1_m2_y
-    dictIdentifiers['R']       = R
+        tmp   = unit()
+        tmp.L = self.L + other.L
+        tmp.M = self.M + other.M
+        tmp.T = self.T + other.T
+        tmp.C = self.C + other.C
+        tmp.A = self.A + other.A
+        tmp.K = self.K + other.K
+        tmp.N = self.N + other.N
+        tmp.value = self.value * other.value
+        return tmp
 
-    # Standard functions
-    dictFunctions['log10']  = log10
-    dictFunctions['log']    = log
-    dictFunctions['sqrt']   = sqrt
-    dictFunctions['exp']    = exp
-    dictFunctions['ceil']   = ceil
-    dictFunctions['floor']  = floor
-    dictFunctions['sin']    = sin
-    dictFunctions['cos']    = cos
-    dictFunctions['tan']    = tan
-    dictFunctions['asin']   = asin
-    dictFunctions['acos']   = acos
-    dictFunctions['atan']   = atan
-    dictFunctions['sinh']   = sinh
-    dictFunctions['cosh']   = cosh
-    dictFunctions['tanh']   = tanh
-    dictFunctions['asinh']  = asinh
-    dictFunctions['acosh']  = acosh
-    dictFunctions['atanh']  = atanh
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
-    # Nonstandard functions (custom functions)
-    dictFunctions['Sum']      = Sum
-    dictFunctions['step']     = step
-    dictFunctions['impulse']  = impulse
-    dictFunctions['linear']   = linear
+    def __div__(self, other):
+        if not isinstance(other, unit):
+            val   = float(other)
+            other = unit(value = val)
 
-    print 'Identifiers:\n', dictIdentifiers
-    print '\n'
-    print 'Functions:\n', dictFunctions
-    print '\n'
+        tmp   = unit()
+        tmp.L = self.L - other.L
+        tmp.M = self.M - other.M
+        tmp.T = self.T - other.T
+        tmp.C = self.C - other.C
+        tmp.A = self.A - other.A
+        tmp.K = self.K - other.K
+        tmp.N = self.N - other.N
+        tmp.value = self.value / other.value
+        return tmp
 
-    parser = ExpressionParser(dictIdentifiers, dictFunctions)
+    def __rdiv__(self, other):
+        if not isinstance(other, unit):
+            val = float(other)
+            other = unit(value = val)
 
-    #testLatex(parser)
+        return other.__div__(self)
 
+    def __pow__(self, power):
+        tmp   = deepcopy(self)
+        tmp.L = self.L * float(power)
+        tmp.M = self.M * float(power)
+        tmp.T = self.T * float(power)
+        tmp.C = self.C * float(power)
+        tmp.A = self.A * float(power)
+        tmp.K = self.K * float(power)
+        tmp.N = self.N * float(power)
+        tmp.value = self.value ** float(power)
+        return tmp
 
-    testExpression('step(1.2, 1.2)', 1.2)
-    testExpression('impulse(1.2, 1.2)', 1.2)
-    testExpression('linear(0.0, 1.0, 5, 10)', 10)
-    exit(0)
+    def unitsAsString(self):
+        if self.name:
+            return '{0} [{1}]'.format(self.value, self.name)
+        else:
+            units = []
+            format_and_append('kg',  self.M, units)
+            format_and_append('m',   self.L, units)
+            format_and_append('s',   self.T, units)
+            format_and_append('cd',  self.C, units)
+            format_and_append('A',   self.A, units)
+            format_and_append('K',   self.K, units)
+            format_and_append('mol', self.N, units)
+            return '*'.join(units)
 
-    testExpression('log10(pi)', log10(pi))
-    testExpression('log(pi)',   log(pi))
-    testExpression('sqrt(pi)',  sqrt(pi))
-    testExpression('exp(pi)',   exp(pi))
-    testExpression('ceil(pi)',  ceil(pi))
-    testExpression('floor(pi)', floor(pi))
+    def unitsAsLatex(self):
+        if self.name:
+            return self.name
+        else:
+            units = []
+            latex_and_append('kg',  self.M, units)
+            latex_and_append('m',   self.L, units)
+            latex_and_append('s',   self.T, units)
+            latex_and_append('cd',  self.C, units)
+            latex_and_append('A',   self.A, units)
+            latex_and_append('K',   self.K, units)
+            latex_and_append('mol', self.N, units)
+            return ' \cdot '.join(units)
 
-    testExpression('sin(pi)', sin(pi))
-    testExpression('cos(pi)', cos(pi))
-    testExpression('tan(pi)', tan(pi))
-    testExpression('asin(1)', asin(1))
-    testExpression('acos(1)', acos(1))
-    testExpression('atan(1)', atan(1))
+    def __repr__(self):
+        template = 'unit(name = {0}, value = {1}, M = {2}, L = {3}, T = {4}, C = {5}, A = {6}, K = {7}, N = {8})'
+        return template.format(self.name, self.value, self.M, self.L, self.T, self.C, self.A, self.K, self.N)
 
-    testExpression('sinh(pi)', sinh(pi))
-    testExpression('cosh(pi)', cosh(pi))
-    testExpression('tanh(pi)', tanh(pi))
-    testExpression('asinh(pi)', asinh(pi))
-    testExpression('acosh(pi)', acosh(pi))
-    testExpression('atanh(0.1)', atanh(0.1))
+    def __str__(self):
+        return '{0} [{1}]'.format(self.value, self.unitsAsString())
 
-    testExpression('x1 + x2', x1 + x2)
-    testExpression('x1 - x2', x1 - x2)
-    testExpression('x1 * x2', x1 * x2)
-    testExpression('x1 / x2', x1 / x2)
-    testExpression('x1 ** x2', x1 ** x2)
+def exp(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.exp(unit.value)
+    return tmp
 
-    testExpression('Sum(pi, 1.5, sqrt(4))', Sum(pi, 1.5, sqrt(4)))
-    testExpression('-sqrt(m1.m2.y + 2) / m1.x', -sqrt(m1_m2_y + 2) / m1_x)
-    testExpression('(-exp(y + x2 / x4) + 4.0) - x1', (-exp(y + x2 / x4) + 4.0) - x1)
-    parse_res, latex_res, eval_res = testExpression('R = sin(x1 + x3)/x4', sin(x1 + x3)/x4)
-    print 'Updated dictIdentifiers[R] = {0}\n'.format(dictIdentifiers['R'])
-    testExpression('(y + 4.0 >= x3 - 3.2e-03) || (y != 3) && (x1 <= 5)', (y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5))
-    testExpression('(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm', 0, False)
+def pow(unit, n):
+    return unit ** n
+
+def log(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.log(unit.value)
+    return tmp
+
+def log10(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.log10(unit.value)
+    return tmp
+
+def sqrt(unit):
+    return unit ** 0.5
+
+def sin(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.sin(unit.value)
+    return tmp
+
+def cos(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.cos(unit.value)
+    return tmp
+
+def tan(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.tan(unit.value)
+    return tmp
+
+def asin(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.asin(unit.value)
+    return tmp
+
+def acos(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.acos(unit.value)
+    return tmp
+
+def atan(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.atan(unit.value)
+    return tmp
+
+def sinh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.sinh(unit.value)
+    return tmp
+
+def cosh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.cosh(unit.value)
+    return tmp
+
+def tanh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.tanh(unit.value)
+    return tmp
+
+def asinh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.asinh(unit.value)
+    return tmp
+
+def acosh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.acosh(unit.value)
+    return tmp
+
+def atanh(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.atanh(unit.value)
+    return tmp
+
+def abs(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.abs(unit.value)
+    return tmp
+
+def ceil(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.ceil(unit.value)
+    return tmp
+
+def floor(unit):
+    tmp       = deepcopy(unit)
+    tmp.value = math.floor(unit.value)
+    return tmp

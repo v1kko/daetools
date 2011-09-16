@@ -7,7 +7,8 @@ from nineml.abstraction_layer import ComponentClass
 from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys, math, random
 from time import localtime, strftime, time
-from daetools.pyDAE.parser import ExpressionParser
+from daetools.pyDAE.expression_parser import ExpressionParser
+from daetools.pyDAE.units_parser import UnitParser
 from daetools.pyDAE import *
 
 def addIdentifiers(model, parent, dictIdentifiers):
@@ -60,6 +61,7 @@ def getNineMLDictionaries(model):
     dictIdentifiers['pi'] = math.pi
     dictIdentifiers['e']  = math.e
 
+    # Standard math. functions (single argument)
     dictFunctions['sin']   = Sin
     dictFunctions['cos']   = Cos
     dictFunctions['tan']   = Tan
@@ -79,6 +81,10 @@ def getNineMLDictionaries(model):
     dictFunctions['floor'] = Floor
     dictFunctions['ceil']  = Ceil
 
+    # Non-standard functions (multiple arguments)
+    dictFunctions['pow']   = Pow
+
+    # NineMl distributions, non-standard functions
     dictFunctions['random.uniform']     = random_uniform
     dictFunctions['random.normal']      = random_normal
     dictFunctions['random.binomial']    = random_binomial
