@@ -320,6 +320,22 @@ def p_error(p):
 
 # Parser class
 class ExpressionParser:
+    """
+    The parser supports the following:
+        a) math. functions: 'sqrt', 'exp', 'log', 'log10', 'ceil', 'floor',
+                            'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+                            'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
+        b) math. operators: +, -, *, /, **, unary +, unary -
+        c) comparison operators: <, <=, >, >=, !=, ==
+        d) logical operators: && (and), || (or)
+                                                       
+    Objects that can be used to evaluate the expression after parsing should support the above math. functions and operators.
+    User-defined functions with arbitrary number of arguments that operate on such objects can be defined by the user.
+    Dictionary 'dictIdentifiers' should contain pairs of the following type:
+        identifier-name:value (ie. 'var':number,  or 'name1.name2.var':object-that-defines-math-operators-and-functions)
+    Dictionary 'dictFunctions' should contain pairs of the following type:
+        function-name:callable-object (ie. 'exp':math.exp, 'Foo':user-defined-function-with-arbitrary-number-of-arguments)
+    """
     def __init__(self, dictIdentifiers = None, dictFunctions = None):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc() #(write_tables = 0)
@@ -379,7 +395,7 @@ def testExpression(expression, expected_res, do_evaluation = True):
             raise RuntimeError('Expression evaluation failed: {0} (evaluated {1}; expected {2})'.format(expression, eval_res, expected_res))
         else:
             print 'Evaluate result: OK (={0})'.format(eval_res)
-    print '\n'
+    print ' '
 
     return parse_res, latex_res, eval_res
     
@@ -412,19 +428,6 @@ def linear(t0, t1, start, end):
     return end
 
 if __name__ == "__main__":
-    """
-    The parser supports the following math. functions: 'sqrt', 'exp', 'log', 'log10', 'ceil', 'floor',
-                                                       'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-                                                       'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
-    Objects that can be used with this parser should support the following math operators: +, -, *, /, **
-    and abovementioned math. functions.
-    User-defined functions with arbitrary number of arguments that operate on such objects can be defined by the user.
-    Dictionary dictIdentifiers should contain pairs of the following type:
-      identifier-name: value (for instance 'var' : number,
-                              or 'name.var' : object-that-defines-math-operators-and-functions)
-    Dictionary dictFunctions should contain pairs of the following type:
-      function-name : callable-object (for instance 'exp': math.exp)
-    """
     dictIdentifiers = {}
     dictFunctions   = {}
 
@@ -476,15 +479,12 @@ if __name__ == "__main__":
     dictFunctions['impulse']  = impulse
     dictFunctions['linear']   = linear
 
-    print 'Identifiers:\n', dictIdentifiers
-    print '\n'
-    print 'Functions:\n', dictFunctions
-    print '\n'
+    print 'Identifiers:\n', dictIdentifiers, '\n'
+    print 'Functions:\n', dictFunctions, '\n'
 
     parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
     #testLatex(parser)
-
 
     testExpression('step(1.2, 1.2)', 1.2)
     testExpression('impulse(1.2, 1.2)', 1.2)

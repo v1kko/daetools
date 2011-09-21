@@ -1,14 +1,36 @@
-import os, sys, operator
+import os, sys, operator, math
 import ply.lex as lex
 import ply.yacc as yacc
 import parser_objects
 from parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, unit
+from expression_parser import ExpressionParser
 
-tokens = [ 'UNIT_NAME',
-    'NUMBER', 'FLOAT',
-    'TIMES', 'DIVIDE', 'EXP',
-    'LPAREN','RPAREN'
-    ]
+"""
+Loading ALL units into the current module could be done by:
+    current_module = sys.modules[__name__]
+    supportedUnits = unit.getAllSupportedUnits()
+    for key, u in supportedUnits.items():
+        setattr(current_module, key, u)
+    #print globals()
+ACHTUNG, ACHTUNG: it pollutes the namespace with tens of unit variables.
+Therefore, it is better to use 'unit' static members:
+    unit.kg
+    unt.m
+    unit.V
+    unit.J
+    ...
+They are created automatically when the module with the 'unit' class is loaded into the namespace.
+If that didn't work, they can be explicitly loaded by calling the class method: unit.init_base_units()
+That can be done right after importing the module:
+    from parser_objects import unit
+    unit.init_base_units()
+"""
+
+tokens = [ 'BASE_UNIT',
+           'NUMBER', 'FLOAT',
+           'TIMES', 'DIVIDE', 'EXP',
+           'LPAREN','RPAREN'
+         ]
 
 t_TIMES   = r'\*'
 t_DIVIDE  = r'/'
@@ -20,33 +42,27 @@ t_RPAREN  = r'\)'
 t_NUMBER = r'(\+|-)?\d+'
 t_FLOAT  = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
 
-t_ignore = " \t"
+t_ignore = " \t\n"
 
-t_UNIT_NAME = r'[a-zA-Z_][a-zA-Z_0-9]*'
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
+t_BASE_UNIT = r'[a-zA-Z_][a-zA-Z_0-9]*'
 
 def t_error(t):
     print "Illegal character '%s'" % t.value[0]
     t.lexer.skip(1)
 
 # Parser rules:
-# expression:
 def p_expression_1(p):
-    'expression : unit'
+    """unit_expression : unit"""
     p[0] = p[1]
 
 def p_expression_2(p):
-    'expression : expression DIVIDE unit'
+    """unit_expression : unit_expression DIVIDE unit"""
     p[0] = p[1] / p[3]
 
 def p_expression_3(p):
-    'expression : expression TIMES unit'
+    """unit_expression : unit_expression TIMES unit"""
     p[0] = p[1] * p[3]
 
-# unit-expression
 def p_unit_1(p):
     """unit :  base_unit"""
     p[0] = p[1]
@@ -76,20 +92,28 @@ def p_constant_4(p):
     p[0] = Number(ConstantNode(float(p[2])))
     
 def p_base_unit_1(p):
-    """base_unit : UNIT_NAME  """
+    """base_unit : BASE_UNIT  """
     p[0] = Number(IdentifierNode(p[1]))
     
 def p_error(p):
     raise Exception("Syntax error at '%s'" % p.value)
 
-# Parser class
-class UnitParser:
-    def __init__(self, dictUnits = None, dictFunctions = None):
+class UnitsParser:
+    """
+    The parser supports the following math. operators: *, /, ** in expressions like the following:
+       'kg', 'kg * m**2', 'm/s', 'm/s**2' ...
+    To evaluate the AST tree objects that support the above operators should be provided in dictBaseUnits.
+    Dictionary 'dictBaseUnits' should contain pairs of the following type:
+        unit-name:unit-object (unit-objects must define *, /, ** operators)
+    Instances of the 'unit' class from 'parser_objects.py' should be used as unit-objects.
+    dictBaseUnits with the most common base/derived units can be obtained by calling the 'unit' class-method:
+        dictBaseUnits = unit.getAllSupportedUnits()
+    """
+    def __init__(self, dictUnits = None):
         self.lexer  = lex.lex()
         self.parser = yacc.yacc() #(write_tables = 0)
         self.parseResult = None
-        self.dictUnits     = dictUnits
-        self.dictFunctions = dictFunctions
+        self.dictBaseUnits = dictUnits
         
     def parse(self, expression):
         self.parseResult = self.parser.parse(expression, debug = 0)
@@ -115,8 +139,8 @@ class UnitParser:
     def evaluate(self):
         if self.parseResult is None:
             raise RuntimeError('expression not parsed yet')
-        if self.dictUnits is None:
-            raise RuntimeError('dictUnits not set')
+        if self.dictBaseUnits is None:
+            raise RuntimeError('dictBaseUnits not set')
 
         node = None
         if isinstance(self.parseResult, Number):
@@ -124,60 +148,71 @@ class UnitParser:
         else:
             raise RuntimeError('Invalid parse result type')
 
-        result = node.evaluate(self.dictUnits, self.dictFunctions)
+        result = node.evaluate(self.dictBaseUnits, None)
         return result
 
-def testExpression(expression, do_evaluation = True):
+
+def testConsistency(parser, expression, expected_units):
+    parse_res    = parser.parse(expression)
+    latex_res    = parser.toLatex()
+    print 'Expression: ' + expression
+    try:
+        eval_res = parser.evaluate()
+        if eval_res.units.base_unit != expected_units.base_unit:
+            print 'Units consistency failed: evaluated {1}; expected {2}\n'.format(eval_res, eval_res.units.base_unit, expected_units.base_unit)
+        else:
+            print 'Units consistency: OK [{0}]\n'.format(eval_res)
+    except Exception, e:
+        print 'Units consistency failed: {0}\n'.format(str(e))
+        
+def testExpression(parser, expression, do_evaluation = True):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
     print 'Expression: ' + expression
     #print 'NodeTree:\n', repr(parse_res)
     print 'Parse result: ', str(parse_res)
     print 'Latex: ', latex_res
-    eval_res = 0
     if do_evaluation:
         eval_res = parser.evaluate()
-        print 'Evaluate result: {0}'.format(eval_res)
-    print '\n'
+        print 'Evaluate result String: {0}'.format(eval_res.toString())
+        print 'Evaluate result Latex: {0}'.format(eval_res.toLatex())
+    print ' '
 
     return parse_res, latex_res, eval_res
 
-if __name__ == "__main__":
-    # Basic SI units
-    kg  = unit(value = 1.0, M = 1, name = 'kg')
-    m   = unit(value = 1.0, L = 1, name = 'm')
-    s   = unit(value = 1.0, T = 1, name = 's')
-    cd  = unit(value = 1.0, C = 1, name = 'cd')
-    A   = unit(value = 1.0, A = 1, name = 'A')
-    K   = unit(value = 1.0, K = 1, name = 'K')
-    mol = unit(value = 1.0, N = 1, name = 'mol')
+def testUnitsConsistency():
+    dictIdentifiers = {}
+    dictFunctions   = {}
 
-    # Some derived units
-    g = 0.001 * kg
-    V = (kg * m**2) / (A * s**(-3))
-    mV = 0.001 * V
+    # Define some 'quantity' objects (they have 'value' and 'units')
+    y   = 15   * unit.mm
+    x1  = 1.0  * unit.m
+    x2  = 0.2  * unit.km
+    x3  = 15   * unit.N
+    x4  = 1.25 * unit.kJ
+    print 'y  = {0} ({1} {2})'.format(y,  y.value_in_SI_units,  y.units.base_unit.toString())
+    print 'x1 = {0} ({1} {2})'.format(x1, x1.value_in_SI_units, x1.units.base_unit.toString())
+    print 'x2 = {0} ({1} {2})'.format(x2, x2.value_in_SI_units, x2.units.base_unit.toString())
+    print 'x3 = {0} ({1} {2})'.format(x3, x3.value_in_SI_units, x3.units.base_unit.toString())
+    print 'x4 = {0} ({1} {2})'.format(x4, x4.value_in_SI_units, x4.units.base_unit.toString())
 
-    dictUnits     = {}
-    dictFunctions = {}
+    print 'x1({0}) == x2({1}) ({2})'.format(x1, x2, x1 == x2)
+    print 'x1({0}) != x2({1}) ({2})'.format(x1, x2, x1 != x2)
+    print 'x1({0}) > x2({1}) ({2})'.format(x1, x2, x1 > x2)
+    print 'x1({0}) >= x2({1}) ({2})'.format(x1, x2, x1 >= x2)
+    print 'x1({0}) < x2({1}) ({2})'.format(x1, x2, x1 < x2)
+    print 'x1({0}) <= x2({1}) ({2})'.format(x1, x2, x1 <= x2)
+    
+    # Define identifiers for the parser
+    dictIdentifiers['pi'] = math.pi
+    dictIdentifiers['e']  = math.e
+    dictIdentifiers['y']  = y
+    dictIdentifiers['x1'] = x1
+    dictIdentifiers['x2'] = x2
+    dictIdentifiers['x3'] = x3
+    dictIdentifiers['x4'] = x4
 
-    dictUnits['kg']  = kg
-    dictUnits['m']   = m
-    dictUnits['s']   = s
-    dictUnits['cd']  = cd
-    dictUnits['A']   = A
-    dictUnits['K']   = K
-    dictUnits['mol'] = mol
-    dictUnits['g']   = g
-    dictUnits['V']   = V
-    dictUnits['mV']  = mV
-
-    # if we want to evaluate and check units of an expression, we have to provide
-    # basic math. functions as well and some other identifiers (e, t, pi ...) 
-    """
-    dictUnits['t']  = model.time()
-    dictUnits['pi'] = math.pi
-    dictUnits['e']  = math.e
-
+    # Define math. functions for the parser
     dictFunctions['sin']   = parser_objects.sin
     dictFunctions['cos']   = parser_objects.cos
     dictFunctions['tan']   = parser_objects.tan
@@ -197,13 +232,25 @@ if __name__ == "__main__":
     dictFunctions['floor'] = parser_objects.floor
     dictFunctions['ceil']  = parser_objects.ceil
     dictFunctions['pow']   = parser_objects.pow
-    """
 
-    parser = UnitParser(dictUnits, dictFunctions)
+    #print 'Identifiers:\n', dictIdentifiers, '\n'
+    #print 'Functions:\n', dictFunctions, '\n'
 
-    print repr(g * K)
-    print 0.1*kg ** 2
-    print kg == 1.02*kg
+    parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
-    testExpression('kg*V/mV^2')
-    testExpression('kg*V/A^2')
+    testConsistency(parser, 'x1 * x3', unit.kJ)             # OK
+    testConsistency(parser, 'x1 - x3', None)                # Fail
+    testConsistency(parser, 'x1 * y', unit.m**2)            # OK
+    testConsistency(parser, '1 + x1/x2 + x1*x3/x4', unit()) # OK
+    
+def testUnitsParser():
+    dictBaseUnits = unit.getAllSupportedUnits()
+    parser        = UnitsParser(dictBaseUnits)
+
+    testExpression(parser, 'kg*V/mV^2')
+    testExpression(parser, 'kg*V/A^2')
+
+if __name__ == "__main__":
+    testUnitsParser()
+    testUnitsConsistency()
+

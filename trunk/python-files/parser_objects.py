@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License along with thi
 software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-import os, sys, operator, math
+import os, sys, operator, math, numbers
 from copy import copy, deepcopy
 
 class Node:
@@ -501,7 +501,7 @@ def getOperand(val):
         raise RuntimeError("Invalid operand type")
     return operand
 
-class Number:
+class Number(numbers.Number):
     def __init__(self, node):
         if node == None:
             raise RuntimeError("Invalid node")
@@ -525,127 +525,145 @@ class Number:
     def __add__(self, val):
         return Number(BinaryNode(self.Node,
                                  BinaryNode.opPlus,
-                                 val.Node
-                                )
-                     )
+                                 val.Node))
 
     def __sub__(self, val):
         return Number(BinaryNode(self.Node,
                                  BinaryNode.opMinus,
-                                 val.Node
-                                )
-                     )
+                                 val.Node))
 
     def __mul__(self, val):
         return Number(BinaryNode(self.Node,
                                  BinaryNode.opMulti,
-                                 val.Node
-                                )
-                     )
+                                 val.Node))
 
     def __div__(self, val):
         return Number(BinaryNode(self.Node,
                                  BinaryNode.opDivide,
-                                 val.Node
-                                )
-                     )
+                                 val.Node))
 
     def __pow__(self, val):
         return Number(BinaryNode(self.Node,
                                  BinaryNode.opPower,
-                                 val.Node
-                                )
-                     )
+                                 val.Node))
 
     def __eq__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opEQ,
-                                             val.Node
-                                )
-                     )
+                                             val.Node))
 
     def __ne__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opNE,
-                                             val.Node
-                                )
-                     )
+                                             val.Node))
+
+    def __lt__(self, val):
+        return Condition(ConditionBinaryNode(self.Node,
+                                             ConditionBinaryNode.opLT,
+                                             val.Node))
 
     def __le__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opLE,
-                                             val.Node
-                                )
-                     )
+                                             val.Node))
 
     def __gt__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opGT,
-                                             val.Node
-                                )
-                     )
+                                             val.Node))
 
     def __ge__(self, val):
         return Condition(ConditionBinaryNode(self.Node,
                                              ConditionBinaryNode.opGE,
-                                             val.Node
-                                )
-                     )
+                                             val.Node))
 
-class DimensionsError(Exception):
+class UnitsError(Exception):
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return repr(self.value)
 
-def format(name, U):
-    if U == 1:
-        return '{0}'.format(name, U)
-    elif U != 0:
-        return '({0}^{1})'.format(name, U)
+def to_string(name, exp):
+    if exp == float(int(exp)):
+        exp = int(exp)
+    if exp == 1:
+        return '{0}'.format(name)
+    elif exp != 0:
+        return '{0}^{1}'.format(name, exp)
     else:
         return None
 
-def format_and_append(name, U, l):
-    res = format(name, U)
+def to_string_and_append(name, exp, l):
+    res = to_string(name, exp)
     if res:
         l.append(res)
 
-def latex(name, U):
-    if U == 1:
+def to_latex(name, exp):
+    if exp == float(int(exp)):
+        exp = int(exp)
+    if exp == 1:
         return '{{{0}}}'.format(name)
-    elif U != 0:
-        return '{{{{{0}}}^{{{1}}}}}'.format(name, U)
+    elif exp != 0:
+        return '{{{{{0}}}^{{{1}}}}}'.format(name, exp)
     else:
         return None
 
-def latex_and_append(name, U, l):
-    res = latex(name, U)
+def to_latex_and_append(name, U, l):
+    res = to_latex(name, U)
     if res:
         l.append(res)
 
-class unit:
+__latex_space__            = '\\, '
+__string_unit_delimiter__  = ' '
+__latex_unit_delimiter__   = ' \\, '
+
+class base_unit:
+    """
+    Base-unit is the main building block for units and currently uses SI system as its base.
+    It consists of a multiplier and 7 fundamental dimansions:
+     - L: length, m
+     - M: mass, kg
+     - T: time, s
+     - C: luminous intensity, cd
+     - I: el. current, A
+     - O: temperature, K
+     - N: amount of a substance, mol 
+    By changing the multiplier the derived units like km, cm, mm etc can be defined.
+    The following basic math. operators (*, /, **) are supported and used to:
+        a) create scaled base_units: number * base_unit => scaled 'base_unit' object (ie. km = 1000 * m)
+        b) create compound base_units: base_unit1 * base_unit2 / base_unit3**1.2 => 'base_unit' object
+           (ie. Volt = kg * m**2 / (A * s**3)
+    Comparison operators (!=, ==) can be used to test if the base_units are of the same dimensions.
+    Base unit can be created in the following ways:
+        1)  kg = base_unit(multiplier = 1.0, M = 1)
+        2a) V  = base_unit(M = 1, L = 2, A = -1, T = -3)
+        2b) V  = kg * m**2 / (A * s**3) [where 'kg', 'm', 'A' and 's' are 'base_unit' objects]
+        2c) mV = base_unit(multiplier = 0.001, M = 1, L = 2, A = -1, T = -3)
+        2d) mV = 0.001 * V
+        3a) km = base_unit(multiplier = 1000, L = 1)
+        3b) km = 1000 * m
+    """
     def __init__(self, **kwargs):
-        self.L = kwargs.get('L', 0) # length, m
-        self.M = kwargs.get('M', 0) # mass, kg
-        self.T = kwargs.get('T', 0) # time, s
-        self.C = kwargs.get('C', 0) # candela, cd
-        self.A = kwargs.get('A', 0) # ampere, A
-        self.K = kwargs.get('K', 0) # kelvin, K
-        self.N = kwargs.get('N', 0) # mole, mol
-        self.name      = kwargs.get('name',      None)
-        #self.latexName = kwargs.get('latexName', self.name)
-        self.value     = kwargs.get('value',     0.0)
+        self.L          = float(kwargs.get('L',          0.0)) # length, m
+        self.M          = float(kwargs.get('M',          0.0)) # mass, kg
+        self.T          = float(kwargs.get('T',          0.0)) # time, s
+        self.C          = float(kwargs.get('C',          0.0)) # luminous intensity, cd
+        self.I          = float(kwargs.get('I',          0.0)) # el. current, A
+        self.O          = float(kwargs.get('K',          0.0)) # temperature, K
+        self.N          = float(kwargs.get('N',          0.0)) # amount of a substance, mol
+        self.multiplier = float(kwargs.get('multiplier', 1.0))
 
     def __eq__(self, other):
+        """Returns True if all dimensions are equal"""
         return self.areDimensionsEqual(other)
 
     def __ne__(self, other):
+        """Returns True if some of dimensions are not equal"""
         return not self.areDimensionsEqual(other)
 
     def isEqualTo(self, other):
-        if (self.value == other.value) and self.areDimensionsEqual(other):
+        if (self.multiplier == other.multiplier) and self.areDimensionsEqual(other):
            return True
         else:
             return False
@@ -653,14 +671,508 @@ class unit:
     def areDimensionsEqual(self, other):
         if ((self.M == other.M) and \
             (self.L == other.L) and \
-            (self.L == other.T) and \
-            (self.L == other.C) and \
-            (self.L == other.A) and \
-            (self.L == other.K) and \
-            (self.T == other.N)):
+            (self.T == other.T) and \
+            (self.C == other.C) and \
+            (self.I == other.I) and \
+            (self.O == other.O) and \
+            (self.N == other.N)):
            return True
         else:
             return False
+
+    def __mul__(self, other):
+        """
+        base_unit * base_unit = base_unit
+        base_unit * number    = base_unit
+        """
+        if isinstance(other, base_unit):
+            tmp   = base_unit()
+            tmp.L = self.L + other.L
+            tmp.M = self.M + other.M
+            tmp.T = self.T + other.T
+            tmp.C = self.C + other.C
+            tmp.I = self.I + other.I
+            tmp.O = self.O + other.O
+            tmp.N = self.N + other.N
+            tmp.multiplier = self.multiplier * other.multiplier
+            return tmp
+        elif isinstance(other, float) or isinstance(other, int):
+            tmp = deepcopy(self)
+            tmp.multiplier *= float(other)
+            return tmp
+        else:
+            raise UnitsError('Invalid right argument type ({0}) for: {1} * {2}'.format(type(other), self, other))
+
+    def __rmul__(self, other):
+        """number * base_unit = base_unit"""
+        if isinstance(other, float) or isinstance(other, int):
+            tmp = deepcopy(self)
+            tmp.multiplier *= float(other)
+            return tmp
+        else:
+            raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
+
+    def __div__(self, other):
+        """base_unit / base_unit = base_unit"""
+        if not isinstance(other, base_unit):
+            raise UnitsError('Invalid right argument type ({0}) for: {1} / {2}'.format(type(other), self, other))
+        tmp   = base_unit()
+        tmp.L = self.L - other.L
+        tmp.M = self.M - other.M
+        tmp.T = self.T - other.T
+        tmp.C = self.C - other.C
+        tmp.I = self.I - other.I
+        tmp.O = self.O - other.O
+        tmp.N = self.N - other.N
+        tmp.multiplier = self.multiplier / other.multiplier
+        return tmp
+
+    def __pow__(self, exponent):
+        """base_unit ** number = base_unit"""
+        if (not isinstance(exponent, float)) and (not isinstance(exponent, int)):
+            raise UnitsError('Invalid exponent type ({0}) for: {1} ** {2}'.format(type(exponent), self, exponent))
+        tmp   = deepcopy(self)
+        tmp.L = self.L * exponent
+        tmp.M = self.M * exponent
+        tmp.T = self.T * exponent
+        tmp.C = self.C * exponent
+        tmp.I = self.I * exponent
+        tmp.O = self.O * exponent
+        tmp.N = self.N * exponent
+        tmp.multiplier = self.multiplier ** exponent
+        return tmp
+
+    def toString(self):
+        """Returns the string representation of units (only)"""
+        units = []
+        to_string_and_append('kg',  self.M, units)
+        to_string_and_append('m',   self.L, units)
+        to_string_and_append('s',   self.T, units)
+        to_string_and_append('cd',  self.C, units)
+        to_string_and_append('A',   self.I, units)
+        to_string_and_append('K',   self.O, units)
+        to_string_and_append('mol', self.N, units)
+        res = __string_unit_delimiter__.join(units)
+        if len(res) == 0:
+            res = 'none'
+        return res
+
+    def toLatex(self):
+        """Returns the Latex representation of units (only)"""
+        units = []
+        to_latex_and_append('kg',  self.M, units)
+        to_latex_and_append('m',   self.L, units)
+        to_latex_and_append('s',   self.T, units)
+        to_latex_and_append('cd',  self.C, units)
+        to_latex_and_append('A',   self.I, units)
+        to_latex_and_append('K',   self.O, units)
+        to_latex_and_append('mol', self.N, units)
+        res = __latex_unit_delimiter__.join(units)
+        if len(res) == 0:
+            res = 'none'
+        return res
+
+    def __repr__(self):
+        template = 'base_unit(multiplier = {0}, M = {1}, L = {2}, T = {3}, C = {4}, A = {5}, K = {6}, N = {7})'
+        return template.format(self.multiplier, self.M, self.L, self.T, self.C, self.I, self.O, self.N)
+
+    def __str__(self):
+        return '{0}*[{1}]'.format(self.multiplier, self.toString())
+
+class unit:
+    """
+    Units consists of several base units and their exponents (stored in the 'self.units' dictionary).
+    Base units are 'base_unit' objects with predefined symbol (name) like kg, m, J, N, F ...
+    Therefore, the 'units' dictionary can contain entries like:
+        'kg':2, 'V':1, 'J':-2 ...
+    The following basic math. operators (*, /, **) are supported and used to:
+        a) create quantities: number * unit => 'quantity' object
+        b) create compound units: unit1 * unit2 / unit3**1.2 => 'unit' object
+    Comparison operators (!=, ==) can be used to test if the units are of the same dimensions.
+    Unit can be created in the following ways:
+        1)  kg = unit(kg = 1)
+        2a) V  = unit(V = 1)
+        2b) V  = kg * m**2 / (A * s**3) [where 'kg', 'm', 'A' and 's' are 'unit' objects]
+        2d) mV = 0.001 * V [where 'V' is a 'unit' object]
+    There is a large set of predefined unit objects available as static data members of the 'unit' class:
+        A   : 1.0 [A]
+        C   : 1.0 [s A]
+        F   : 1.0 [kg^-1 m^-2 s^4 A^2]
+        Hz  : 1.0 [s^-1]
+        J   : 1.0 [kg m^2 s^-2]
+        K   : 1.0 [none]
+        MHz : 1000000.0 [s^-1]
+        MPa : 1000000.0 [kg m^-1 s^-2]
+        N   : 1.0 [kg m s^-2]
+        Ohm : 1.0 [kg m^2 s^-3 A^-2]
+        P   : 1.0 [kg m^-1 s^-1]
+        Pa  : 1.0 [kg m^-1 s^-2]
+        St  : 0.0001 [m^2 s^-1]
+        V   : 1.0 [kg m^2 s^-3 A^-1]
+        W   : 1.0 [kg m^2 s^-3]
+        cd  : 1.0 [cd]
+        cm  : 0.01 [m]
+        day : 43200.0 [s]
+        dl  : 0.0001 [m^3]
+        dm  : 0.1 [m]
+        h   : 3600.0 [s]
+        kHz : 1000.0 [s^-1]
+        kJ  : 1000.0 [kg m^2 s^-2]
+        kPa : 1000.0 [kg m^-1 s^-2]
+        kW  : 1000.0 [kg m^2 s^-3]
+        kg  : 1.0 [kg]
+        km  : 1000.0 [m]
+        l   : 0.001 [m^3]
+        m   : 1.0 [m]
+        mA  : 0.001 [A]
+        mV  : 0.001 [kg m^2 s^-3 A^-1]
+        min : 60.0 [s]
+        mm  : 0.001 [m]
+        mol : 1.0 [mol]
+        ms  : 0.001 [s]
+        nm  : 1e-09 [m]
+        s   : 1.0 [s]
+        and many more ...
+    """
+    @classmethod
+    def init_base_units(cls):
+        # Scaling factors:
+        tera  = 1E+12
+        giga  = 1E+9
+        mega  = 1E+6
+        kilo  = 1E+3
+        deka  = 1E+1
+        deci  = 1E-1
+        centi = 1E-2
+        mili  = 1E-3
+        micro = 1E-6
+        nano  = 1E-9
+        pico  = 1E-12
+
+        # Base units:
+        _kg_  = base_unit(M = 1)
+        _m_   = base_unit(L = 1)
+        _s_   = base_unit(T = 1)
+        _cd_  = base_unit(C = 1)
+        _A_   = base_unit(I = 1)
+        _K_   = base_unit(O = 1)
+        _mol_ = base_unit(N = 1)
+
+        dimless = base_unit()
+
+        # Time:
+        _ms_   = mili  * _s_
+        _us_   = micro * _s_
+        _min_  = 60    * _s_
+        _hour_ = 3600  * _s_
+        _day_  = 43200 * _s_
+        _Hz_   = _s_**(-1)
+        _kHz_  = kilo * _Hz_
+        _MHz_  = mega * _Hz_
+
+        # Length related:
+        _km_ = kilo  * _m_
+        _dm_ = deci  * _m_
+        _cm_ = centi * _m_
+        _mm_ = mili  * _m_
+        _um_ = micro * _m_
+        _nm_ = nano  * _m_
+
+        # Volume:
+        _lit_ = 1E-3 * _m_**3
+        _dl_  = deci * _lit_
+
+        # Energy:
+        _N_  = _kg_ * _m_ / (_s_**2)
+        _J_  = _N_ * _m_
+        _kJ_ = kilo * _J_
+        _W_  = _J_ / _s_
+        _kW_ = kilo * _W_
+
+        # Electrical:
+        _V_ = _kg_ * _m_**2 / (_A_ * _s_**3) # Volt
+        _C_ = _A_ * _s_                      # Coulomb
+        _F_ = _C_ / _V_                      # Farad
+        _Ohm_ = _J_ * _s_ / (_C_**2)
+        _mV_ = mili * _V_
+        _mA_ = mili * _A_
+
+        # Pressure:
+        _Pa_ = _N_ / _m_**2
+        _kPa_ = kilo * _Pa_
+        _MPa_ = mega * _Pa_
+
+        # Viscosity
+        _P_  = _Pa_ * _s_      # Poise
+        _St_ = _cm_**2 / _s_   # Stoke
+
+        # Base units has to be represented by a single symbol and can be used to create compound units (mV/s, Pa/m^2 ...)
+        cls.__base_units__ =  { 'kg'  : _kg_,
+                                'm'   : _m_,
+                                's'   : _s_,
+                                'cd'  : _cd_,
+                                'A'   : _A_,
+                                'K'   : _K_,
+                                'mol' : _mol_,
+
+                                'ms'  : _ms_,
+                                'us'  : _us_,
+                                'min' : _min_,
+                                'h'   : _hour_,
+                                'day' : _day_,
+                                'Hz'  : _Hz_,
+                                'kHz' : _kHz_,
+                                'MHz' : _MHz_,
+
+                                'km'  : _km_,
+                                'dm'  : _dm_,
+                                'cm'  : _cm_,
+                                'mm'  : _mm_,
+                                'um'  : _um_,
+                                'nm'  : _nm_,
+
+                                'l'   : _lit_,
+                                'dl'  : _dl_,
+
+                                'N'   : _N_,
+                                'J'   : _J_,
+                                'kJ'  : _kJ_,
+                                'W'   : _W_,
+                                'kW'  : _kW_,
+
+                                'C'   : _C_,
+                                'F'   : _F_,
+                                'Ohm' : _Ohm_,
+                                'V'   : _V_,
+                                'mV'  : _mV_,
+                                'mA'  : _mA_,
+
+                                'Pa'  : _Pa_,
+                                'kPa' : _kPa_,
+                                'MPa' : _MPa_,
+
+                                'P'  : _P_,
+                                'St' : _St_,
+                              }
+
+        supportedUnits = cls.getAllSupportedUnits()
+        for key, u in supportedUnits.items():
+            setattr(cls, key, u)
+        setattr(cls, 'tera',  1E+12)
+        setattr(cls, 'giga',  1E+9)
+        setattr(cls, 'mega',  1E+6)
+        setattr(cls, 'kilo',  1E+3)
+        setattr(cls, 'deka',  1E+1)
+        setattr(cls, 'deci',  1E-1)
+        setattr(cls, 'centi', 1E-2)
+        setattr(cls, 'mili',  1E-3)
+        setattr(cls, 'micro', 1E-6)
+        setattr(cls, 'nano',  1E-9)
+        setattr(cls, 'pico',  1E-12)
+        
+    @classmethod
+    def create(cls, dictUnits):
+        if not isinstance(dictUnits, dict):
+            raise UnitsError('Invalid argument type ({0}); must be a dictionary'.format(type(dictUnits)))
+        return unit(**dictUnits)
+
+    @classmethod
+    def printBaseUnits(cls):
+        for key, baseunit in cls.__base_units__.items():
+            print '  ' + key + ': ' + str(baseunit)
+
+    @classmethod
+    def getAllSupportedUnits(cls):
+        supportedUnits = {}
+        for key, baseunit in cls.__base_units__.items():
+            supportedUnits[key] = unit.create({key : 1})
+        return supportedUnits
+
+    def __init__(self, **kwargs):
+        # if not already loaded, load all base units
+        #if not hasattr(unit, '__base_units__'):
+        #    unit.init_base_units()
+        self.units = {}
+        for key, exp in kwargs.items():
+            if key in unit.__base_units__:
+                self.units[key] = exp
+            else:
+                raise UnitsError('Cannot find the base_unit {0} in the __base_units__ dictionary'.format(key))
+
+    @property
+    def base_unit(self):
+        """Returns the 'base_unit' object built by joining dimensions from all items in the dictionary 'units'.
+        It multiplies base units from the dictionary (risen on the corresponding exponent)."""
+        res_unit = base_unit()
+        for base_unit_name, exp in self.units.items():
+            if not base_unit_name in unit.__base_units__:
+                raise UnitsError('Cannot find the base_unit {0} in the __base_units__ dictionary'.format(base_unit_name))
+            res_unit = res_unit * (unit.__base_units__[base_unit_name] ** exp)
+        return res_unit
+
+    def __repr__(self):
+        return 'unit({0})'.format(self.units)
+
+    def __str__(self):
+        return self.toString()
+
+    def toString(self):
+        units = []
+        for base_unit_name, exp in self.units.items():
+            to_string_and_append(base_unit_name, exp, units)
+        res = __string_unit_delimiter__.join(units)
+        return res
+
+    def toLatex(self):
+        units = []
+        for base_unit_name, exp in self.units.items():
+            to_latex_and_append(base_unit_name, exp, units)
+        res = __latex_unit_delimiter__.join(units)
+        return res
+
+    def __eq__(self, other):
+        return (self.base_unit == other.base_unit)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __mul__(self, other):
+        # unit * number = quantity
+        if isinstance(other, float) or isinstance(other, int):
+            return quantity(other, self)
+        # unit * unit = unit
+        elif isinstance(other, unit):
+            tmp       = unit()
+            # First add all units from self.units
+            tmp.units = deepcopy(self.units)
+            # Then iterate over other.units and either add it to the tmp.units or increase the exponent
+            for key, exp in other.units.items():
+                if key in tmp.units:
+                    tmp.units[key] += exp
+                else:
+                    tmp.units[key] = exp
+            return tmp
+        else:
+            raise UnitsError('Invalid right argument type ({0}) for: {1} * {2}'.format(type(other), self, other))
+
+    def __rmul__(self, other):
+        # number * unit = quantity
+        if isinstance(other, float) or isinstance(other, int):
+            return quantity(other, self)
+        else:
+            raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
+
+    def __div__(self, other):
+        # unit / number = quantity
+        if isinstance(other, float) or isinstance(other, int):
+            return quantity(1.0 / other, self)
+        # unit / unit = unit
+        elif isinstance(other, unit):
+            tmp   = unit()
+            tmp.units = deepcopy(self.units)
+            for key, exp in other.units.items():
+                if key in tmp.units:
+                    tmp.units[key] -= exp
+                else:
+                    tmp.units[key] = -exp
+            return tmp
+        else:
+            raise UnitsError('Invalid right argument type ({0}) for: {1} / {2}'.format(type(other), self, other))
+
+    def __rdiv__(self, other):
+        # number / unit = quantity
+        if isinstance(other, float) or isinstance(other, int):
+            return quantity(other, self.__pow__(-1))
+        else:
+            raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))
+
+    def __pow__(self, exponent):
+        # exponent must be a number
+        if isinstance(exponent, float) or isinstance(exponent, int):
+            n = float(exponent)
+        else:
+            raise UnitsError('Invalid exponent type ({0}) for: {1} ** {2}'.format(type(exponent), self, exponent))
+
+        tmp = unit()
+        for key, exp in self.units.items():
+            tmp.units[key] = exp * n
+        return tmp
+
+# Achtung, achtung!!!
+# Fill the __base_units__ dictionary and load all defined units into the 'unit' class
+unit.init_base_units()
+
+class quantity:
+    """
+    Quantities consists of the:
+     - 'value' (float)
+     - 'units' object (of 'unit' class)
+    All basic math. operators (+, -, *, /, **) and math. functions are supported.
+    Some functions operate only on radians/non dimensional units.
+    Comparison operators (<, <=, >, >=, !=, ==) compare values in SI units and
+    raise an exception if units are different; this way: 0.2 km == 200 m == 2.0e5 mm
+    """
+    def __init__(self, value = 0.0, units = unit()):
+        if not isinstance(units, unit):
+            raise UnitsError('Invalid argument type ({0})'.format(type(units)))
+        self.units = units
+        self.value = float(value)
+
+    @property
+    def value_in_SI_units(self):
+        """Returns the value in SI units"""
+        return self.value * self.units.base_unit.multiplier
+
+    def scaleTo(self, referrer):
+        """
+        Scales the value to the units given in the argument 'referrer',
+        and returns 'quantity' object in units of the 'referrer' object.
+        Argument 'referrer' can be 'quantity' or 'unit' object.
+        """
+        if isinstance(referrer, quantity):
+            units = referrer.units
+        elif isinstance(referrer, unit):
+            units = referrer
+        else:
+            raise UnitsError('Invalid argument type ({0})'.format(type(referrer)))
+
+        if self.units != units:
+            raise UnitsError('Units not consistent: scale from {0} to {1}'.format(self.units, units))
+
+        tmp = quantity()
+        tmp.units = deepcopy(units)
+        tmp.value = self.value * self.units.base_unit.multiplier / float(units.base_unit.multiplier)
+        return tmp
+
+    def __eq__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} == {1}'.format(self.units, other.units))
+        return self.value_in_SI_units == other.value_in_SI_units
+
+    def __ne__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} != {1}'.format(self.units, other.units))
+        return self.value_in_SI_units != other.value_in_SI_units
+
+    def __lt__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} < {1}'.format(self.units, other.units))
+        return self.value_in_SI_units < other.value_in_SI_units
+
+    def __le__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} <= {1}'.format(self.units, other.units))
+        return self.value_in_SI_units <= other.value_in_SI_units
+
+    def __gt__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} > {1}'.format(self.units, other.units))
+        return self.value_in_SI_units > other.value_in_SI_units
+
+    def __ge__(self, other):
+        if self.units != other.units:
+            raise UnitsError('Units not consistent for comparison: {0} >= {1}'.format(self.units, other.units))
+        return self.value_in_SI_units >= other.value_in_SI_units
 
     def __neg__(self):
         tmp       = deepcopy(self)
@@ -671,202 +1183,199 @@ class unit:
         return deepcopy(self)
 
     def __add__(self, other):
-        if not self.areDimensionsEqual(other):
-            raise DimensionsError('Units not consistent')
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid right argument type ({0}) for: {1} + {2}'.format(type(other), self, other))
+        if self.units != other.units:
+            raise UnitsError('Units not consistent: {0} + {1}'.format(self, other))
 
         tmp       = deepcopy(self)
-        tmp.value = self.value + other.value
+        tmp.value = self.value + other.scaleTo(self)
         return tmp
+
+    def __radd__(self, other):
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid left argument type ({0}) for: {1} + {2}'.format(type(other), other, self))
+        return other.__mul__(self)
 
     def __sub__(self, other):
-        if not self.areDimensionsEqual(other):
-            raise DimensionsError('Units not consistent')
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid right argument type ({0}) for: {1} - {2}'.format(type(other), self, other))
+        if self.units != other.units:
+            raise UnitsError('Units not consistent: {0} - {1}'.format(self, other))
 
         tmp       = deepcopy(self)
-        tmp.value = self.value - other.value
+        tmp.value = self.value - other.scaleTo(self)
         return tmp
 
-    def __mul__(self, other):
-        if not isinstance(other, unit):
-            val   = float(other)
-            other = unit(value = val)
+    def __rsub__(self, other):
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid left argument type ({0}) for: {1} - {2}'.format(type(other), other, self))
+        return other.__add__(self)
 
-        tmp   = unit()
-        tmp.L = self.L + other.L
-        tmp.M = self.M + other.M
-        tmp.T = self.T + other.T
-        tmp.C = self.C + other.C
-        tmp.A = self.A + other.A
-        tmp.K = self.K + other.K
-        tmp.N = self.N + other.N
+    def __mul__(self, other):
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid right argument type ({0}) for: {1} * {2}'.format(type(other), self, other))
+
+        tmp = quantity()
+        tmp.units = self.units * other.units
         tmp.value = self.value * other.value
         return tmp
 
     def __rmul__(self, other):
-        return self.__mul__(other)
+        if isinstance(other, float) or isinstance(other, int):
+            other = quantity(other)
+        else:
+            raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
+        return other.__mul__(self)
 
     def __div__(self, other):
-        if not isinstance(other, unit):
-            val   = float(other)
-            other = unit(value = val)
+        if not isinstance(other, quantity):
+            if isinstance(other, float) or isinstance(other, int):
+                other = quantity(other)
+            else:
+                raise UnitsError('Invalid right argument type ({0}) for: {1} / {2}'.format(type(other), self, other))
 
-        tmp   = unit()
-        tmp.L = self.L - other.L
-        tmp.M = self.M - other.M
-        tmp.T = self.T - other.T
-        tmp.C = self.C - other.C
-        tmp.A = self.A - other.A
-        tmp.K = self.K - other.K
-        tmp.N = self.N - other.N
+        tmp = quantity()
+        tmp.units = self.units / other.units
         tmp.value = self.value / other.value
         return tmp
 
     def __rdiv__(self, other):
-        if not isinstance(other, unit):
-            val = float(other)
-            other = unit(value = val)
-
+        if isinstance(other, float) or isinstance(other, int):
+            other = quantity(other)
+        else:
+            raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))
         return other.__div__(self)
 
-    def __pow__(self, power):
-        tmp   = deepcopy(self)
-        tmp.L = self.L * float(power)
-        tmp.M = self.M * float(power)
-        tmp.T = self.T * float(power)
-        tmp.C = self.C * float(power)
-        tmp.A = self.A * float(power)
-        tmp.K = self.K * float(power)
-        tmp.N = self.N * float(power)
-        tmp.value = self.value ** float(power)
+    def __pow__(self, exponent):
+        if isinstance(exponent, float) or isinstance(exponent, int):
+            n = float(exponent)
+        else:
+            raise UnitsError('Invalid exponent type ({0}) for: {1} ** {2}'.format(type(exponent), self, exponent))
+        tmp = quantity()
+        tmp.units = self.units ** n
+        tmp.value = self.value ** n
         return tmp
 
-    def unitsAsString(self):
-        if self.name:
-            return '{0} [{1}]'.format(self.value, self.name)
-        else:
-            units = []
-            format_and_append('kg',  self.M, units)
-            format_and_append('m',   self.L, units)
-            format_and_append('s',   self.T, units)
-            format_and_append('cd',  self.C, units)
-            format_and_append('A',   self.A, units)
-            format_and_append('K',   self.K, units)
-            format_and_append('mol', self.N, units)
-            return '*'.join(units)
+    def toString(self):
+        return '{0} {1}'.format(self.value, self.units.toString())
 
-    def unitsAsLatex(self):
-        if self.name:
-            return self.name
-        else:
-            units = []
-            latex_and_append('kg',  self.M, units)
-            latex_and_append('m',   self.L, units)
-            latex_and_append('s',   self.T, units)
-            latex_and_append('cd',  self.C, units)
-            latex_and_append('A',   self.A, units)
-            latex_and_append('K',   self.K, units)
-            latex_and_append('mol', self.N, units)
-            return ' \cdot '.join(units)
+    def toLatex(self):
+        return '{0}{1}{2}'.format(self.value, __latex_space__, self.units.toLatex())
 
     def __repr__(self):
-        template = 'unit(name = {0}, value = {1}, M = {2}, L = {3}, T = {4}, C = {5}, A = {6}, K = {7}, N = {8})'
-        return template.format(self.name, self.value, self.M, self.L, self.T, self.C, self.A, self.K, self.N)
+        return 'quantity({0}, {1})'.format(self.value, repr(self.units))
 
     def __str__(self):
-        return '{0} [{1}]'.format(self.value, self.unitsAsString())
+        return self.toString()
 
-def exp(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.exp(unit.value)
+def exp(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.exp(q.value)
     return tmp
 
-def pow(unit, n):
-    return unit ** n
+def pow(q, n):
+    return q ** n
 
-def log(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.log(unit.value)
+def log(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.log(q.value)
     return tmp
 
-def log10(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.log10(unit.value)
+def log10(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.log10(q.value)
     return tmp
 
-def sqrt(unit):
-    return unit ** 0.5
+def sqrt(q):
+    return q ** 0.5
 
-def sin(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.sin(unit.value)
+def sin(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.sin(q.value)
     return tmp
 
-def cos(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.cos(unit.value)
+def cos(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.cos(q.value)
     return tmp
 
-def tan(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.tan(unit.value)
+def tan(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.tan(q.value)
     return tmp
 
-def asin(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.asin(unit.value)
+def asin(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.asin(q.value)
     return tmp
 
-def acos(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.acos(unit.value)
+def acos(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.acos(q.value)
     return tmp
 
-def atan(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.atan(unit.value)
+def atan(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.atan(q.value)
     return tmp
 
-def sinh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.sinh(unit.value)
+def sinh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.sinh(q.value)
     return tmp
 
-def cosh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.cosh(unit.value)
+def cosh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.cosh(q.value)
     return tmp
 
-def tanh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.tanh(unit.value)
+def tanh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.tanh(q.value)
     return tmp
 
-def asinh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.asinh(unit.value)
+def asinh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.asinh(q.value)
     return tmp
 
-def acosh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.acosh(unit.value)
+def acosh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.acosh(q.value)
     return tmp
 
-def atanh(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.atanh(unit.value)
+def atanh(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.atanh(q.value)
     return tmp
 
-def abs(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.abs(unit.value)
+def abs(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.abs(q.value)
     return tmp
 
-def ceil(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.ceil(unit.value)
+def ceil(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.ceil(q.value)
     return tmp
 
-def floor(unit):
-    tmp       = deepcopy(unit)
-    tmp.value = math.floor(unit.value)
+def floor(q):
+    tmp       = deepcopy(q)
+    tmp.value = math.floor(q.value)
     return tmp
