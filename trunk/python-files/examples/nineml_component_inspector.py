@@ -10,7 +10,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 from nineml_tester_ui import Ui_ninemlTester
 from daetools.pyDAE.expression_parser import ExpressionParser
-from daetools.pyDAE.units_parser import UnitParser
+from daetools.pyDAE.units_parser import UnitsParser
 from StringIO import StringIO
 
 def printDictionary(dictionary):

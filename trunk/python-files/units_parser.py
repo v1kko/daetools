@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys, operator, math
 import ply.lex as lex
 import ply.yacc as yacc
@@ -11,7 +12,7 @@ Loading ALL units into the current module could be done by:
     supportedUnits = unit.getAllSupportedUnits()
     for key, u in supportedUnits.items():
         setattr(current_module, key, u)
-    #print globals()
+    #print(globals())
 ACHTUNG, ACHTUNG: it pollutes the namespace with tens of unit variables.
 Therefore, it is better to use 'unit' static members:
     unit.kg
@@ -47,8 +48,8 @@ t_ignore = " \t\n"
 t_BASE_UNIT = r'[a-zA-Z_][a-zA-Z_0-9]*'
 
 def t_error(t):
-    print "Illegal character '%s'" % t.value[0]
-    t.lexer.skip(1)
+    print("Illegal character '{0}' found while parsing '{1}'".format(t.value[0], t.value))
+    #t.lexer.skip(1)
 
 # Parser rules:
 def p_expression_1(p):
@@ -155,28 +156,30 @@ class UnitsParser:
 def testConsistency(parser, expression, expected_units):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
-    print 'Expression: ' + expression
+    print('Expression: ' + expression)
+    #print('NodeTree:\n', repr(parse_res))
+    print('Parse result: ', str(parse_res))
     try:
         eval_res = parser.evaluate()
         if eval_res.units.base_unit != expected_units.base_unit:
-            print 'Units consistency failed: evaluated {1}; expected {2}\n'.format(eval_res, eval_res.units.base_unit, expected_units.base_unit)
+            print('Units consistency failed: evaluated {0}; expected {1}\n'.format(eval_res.units, expected_units))
         else:
-            print 'Units consistency: OK [{0}]\n'.format(eval_res)
+            print('Units consistency: OK [{0} == {1}]\n'.format(eval_res.units, expected_units))
     except Exception, e:
-        print 'Units consistency failed: {0}\n'.format(str(e))
+        print('Units consistency failed: {0}\n'.format(str(e)))
         
 def testExpression(parser, expression, do_evaluation = True):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
-    print 'Expression: ' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result: ', str(parse_res)
-    print 'Latex: ', latex_res
+    print('Expression: ' + expression)
+    #print('NodeTree:\n', repr(parse_res))
+    print('Parse result: ', str(parse_res))
+    print('Latex: ', latex_res)
     if do_evaluation:
         eval_res = parser.evaluate()
-        print 'Evaluate result String: {0}'.format(eval_res.toString())
-        print 'Evaluate result Latex: {0}'.format(eval_res.toLatex())
-    print ' '
+        print('Evaluate result String: {0}'.format(eval_res.toString()))
+        print('Evaluate result Latex: {0}'.format(eval_res.toLatex()))
+    print(' ')
 
     return parse_res, latex_res, eval_res
 
@@ -190,18 +193,28 @@ def testUnitsConsistency():
     x2  = 0.2  * unit.km
     x3  = 15   * unit.N
     x4  = 1.25 * unit.kJ
-    print 'y  = {0} ({1} {2})'.format(y,  y.value_in_SI_units,  y.units.base_unit.toString())
-    print 'x1 = {0} ({1} {2})'.format(x1, x1.value_in_SI_units, x1.units.base_unit.toString())
-    print 'x2 = {0} ({1} {2})'.format(x2, x2.value_in_SI_units, x2.units.base_unit.toString())
-    print 'x3 = {0} ({1} {2})'.format(x3, x3.value_in_SI_units, x3.units.base_unit.toString())
-    print 'x4 = {0} ({1} {2})'.format(x4, x4.value_in_SI_units, x4.units.base_unit.toString())
+    print('y  = {0} ({1} {2})'.format(y,  y.value_in_SI_units,  y.units.base_unit.toString()))
+    print('x1 = {0} ({1} {2})'.format(x1, x1.value_in_SI_units, x1.units.base_unit.toString()))
+    print('x2 = {0} ({1} {2})'.format(x2, x2.value_in_SI_units, x2.units.base_unit.toString()))
+    print('x3 = {0} ({1} {2})'.format(x3, x3.value_in_SI_units, x3.units.base_unit.toString()))
+    print('x4 = {0} ({1} {2})'.format(x4, x4.value_in_SI_units, x4.units.base_unit.toString()))
 
-    print 'x1({0}) == x2({1}) ({2})'.format(x1, x2, x1 == x2)
-    print 'x1({0}) != x2({1}) ({2})'.format(x1, x2, x1 != x2)
-    print 'x1({0}) > x2({1}) ({2})'.format(x1, x2, x1 > x2)
-    print 'x1({0}) >= x2({1}) ({2})'.format(x1, x2, x1 >= x2)
-    print 'x1({0}) < x2({1}) ({2})'.format(x1, x2, x1 < x2)
-    print 'x1({0}) <= x2({1}) ({2})'.format(x1, x2, x1 <= x2)
+    print('x1({0}) == x2({1}) ({2})'.format(x1, x2, x1 == x2))
+    print('x1({0}) != x2({1}) ({2})'.format(x1, x2, x1 != x2))
+    print('x1({0}) > x2({1}) ({2})'.format(x1, x2, x1 > x2))
+    print('x1({0}) >= x2({1}) ({2})'.format(x1, x2, x1 >= x2))
+    print('x1({0}) < x2({1}) ({2})'.format(x1, x2, x1 < x2))
+    print('x1({0}) <= x2({1}) ({2})'.format(x1, x2, x1 <= x2))
+    
+    # quantity in [m]
+    z = 1 * unit.m
+    print(z)
+    z.value = 12.4 * unit.mm # set a new value given in [mm]
+    print(z)
+    z.value = 0.32 * unit.km # set a new value given in [km]
+    print(z)
+    z.value = 1 # set a new value in units in the quantity object, here in [m]
+    print(z)
     
     # Define identifiers for the parser
     dictIdentifiers['pi'] = math.pi
@@ -233,8 +246,8 @@ def testUnitsConsistency():
     dictFunctions['ceil']  = parser_objects.ceil
     dictFunctions['pow']   = parser_objects.pow
 
-    #print 'Identifiers:\n', dictIdentifiers, '\n'
-    #print 'Functions:\n', dictFunctions, '\n'
+    #print('Identifiers:\n', dictIdentifiers, '\n')
+    #print('Functions:\n', dictFunctions, '\n')
 
     parser = ExpressionParser(dictIdentifiers, dictFunctions)
 

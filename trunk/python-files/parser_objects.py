@@ -16,7 +16,7 @@ software; if not, see <http://www.gnu.org/licenses/>.
 import os, sys, operator, math, numbers
 from copy import copy, deepcopy
 
-class Node:
+class Node(object):
     def evaluate(self, dictIdentifiers, dictFunctions):
         pass
 
@@ -350,7 +350,7 @@ class BinaryNode(Node):
         else:
             raise RuntimeError("Not supported binary operator: {0}".format(self.Operator))
 
-class ConditionNode:
+class ConditionNode(object):
     def evaluate(self, dictIdentifiers, dictFunctions):
         pass
 
@@ -458,7 +458,7 @@ class ConditionExpressionNode(ConditionNode):
             raise RuntimeError("Not supported logical operator: {0}".format(self.Operator))
 
 
-class Condition:
+class Condition(object):
     def __init__(self, condNode):
         self.CondNode = condNode
 
@@ -501,7 +501,7 @@ def getOperand(val):
         raise RuntimeError("Invalid operand type")
     return operand
 
-class Number(numbers.Number):
+class Number(object):
     def __init__(self, node):
         if node == None:
             raise RuntimeError("Invalid node")
@@ -618,7 +618,7 @@ __latex_space__            = '\\, '
 __string_unit_delimiter__  = ' '
 __latex_unit_delimiter__   = ' \\, '
 
-class base_unit:
+class base_unit(object):
     """
     Base-unit is the main building block for units and currently uses SI system as its base.
     It consists of a multiplier and 7 fundamental dimansions:
@@ -696,7 +696,7 @@ class base_unit:
             tmp.N = self.N + other.N
             tmp.multiplier = self.multiplier * other.multiplier
             return tmp
-        elif isinstance(other, float) or isinstance(other, int):
+        elif isinstance(other, (float, int, long)):
             tmp = deepcopy(self)
             tmp.multiplier *= float(other)
             return tmp
@@ -705,7 +705,7 @@ class base_unit:
 
     def __rmul__(self, other):
         """number * base_unit = base_unit"""
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             tmp = deepcopy(self)
             tmp.multiplier *= float(other)
             return tmp
@@ -779,7 +779,7 @@ class base_unit:
     def __str__(self):
         return '{0}*[{1}]'.format(self.multiplier, self.toString())
 
-class unit:
+class unit(object):
     """
     Units consists of several base units and their exponents (stored in the 'self.units' dictionary).
     Base units are 'base_unit' objects with predefined symbol (name) like kg, m, J, N, F ...
@@ -850,109 +850,109 @@ class unit:
         pico  = 1E-12
 
         # Base units:
-        _kg_  = base_unit(M = 1)
-        _m_   = base_unit(L = 1)
-        _s_   = base_unit(T = 1)
-        _cd_  = base_unit(C = 1)
-        _A_   = base_unit(I = 1)
-        _K_   = base_unit(O = 1)
-        _mol_ = base_unit(N = 1)
+        kg  = base_unit(M = 1)
+        m   = base_unit(L = 1)
+        s   = base_unit(T = 1)
+        cd  = base_unit(C = 1)
+        A   = base_unit(I = 1)
+        K   = base_unit(O = 1)
+        mol = base_unit(N = 1)
 
         dimless = base_unit()
 
         # Time:
-        _ms_   = mili  * _s_
-        _us_   = micro * _s_
-        _min_  = 60    * _s_
-        _hour_ = 3600  * _s_
-        _day_  = 43200 * _s_
-        _Hz_   = _s_**(-1)
-        _kHz_  = kilo * _Hz_
-        _MHz_  = mega * _Hz_
+        ms   = mili  * s
+        us   = micro * s
+        min  = 60    * s
+        hour = 3600  * s
+        day  = 43200 * s
+        Hz   = s**(-1)
+        kHz  = kilo * Hz
+        MHz  = mega * Hz
 
         # Length related:
-        _km_ = kilo  * _m_
-        _dm_ = deci  * _m_
-        _cm_ = centi * _m_
-        _mm_ = mili  * _m_
-        _um_ = micro * _m_
-        _nm_ = nano  * _m_
+        km = kilo  * m
+        dm = deci  * m
+        cm = centi * m
+        mm = mili  * m
+        um = micro * m
+        nm = nano  * m
 
         # Volume:
-        _lit_ = 1E-3 * _m_**3
-        _dl_  = deci * _lit_
+        lit = 1E-3 * m**3
+        dl  = deci * lit
 
         # Energy:
-        _N_  = _kg_ * _m_ / (_s_**2)
-        _J_  = _N_ * _m_
-        _kJ_ = kilo * _J_
-        _W_  = _J_ / _s_
-        _kW_ = kilo * _W_
+        N  = kg * m / (s**2)
+        J  = N * m
+        kJ = kilo * J
+        W  = J / s
+        kW = kilo * W
 
         # Electrical:
-        _V_ = _kg_ * _m_**2 / (_A_ * _s_**3) # Volt
-        _C_ = _A_ * _s_                      # Coulomb
-        _F_ = _C_ / _V_                      # Farad
-        _Ohm_ = _J_ * _s_ / (_C_**2)
-        _mV_ = mili * _V_
-        _mA_ = mili * _A_
+        V   = kg * m**2 / (A * s**3) # Volt
+        C   = A * s                  # Coulomb
+        F   = C / V                  # Farad
+        Ohm = J * s / (C**2)
+        mV  = mili * V
+        mA  = mili * A
 
         # Pressure:
-        _Pa_ = _N_ / _m_**2
-        _kPa_ = kilo * _Pa_
-        _MPa_ = mega * _Pa_
+        Pa = N / m**2
+        kPa = kilo * Pa
+        MPa = mega * Pa
 
         # Viscosity
-        _P_  = _Pa_ * _s_      # Poise
-        _St_ = _cm_**2 / _s_   # Stoke
+        P  = Pa * s      # Poise
+        St = cm**2 / s   # Stoke
 
         # Base units has to be represented by a single symbol and can be used to create compound units (mV/s, Pa/m^2 ...)
-        cls.__base_units__ =  { 'kg'  : _kg_,
-                                'm'   : _m_,
-                                's'   : _s_,
-                                'cd'  : _cd_,
-                                'A'   : _A_,
-                                'K'   : _K_,
-                                'mol' : _mol_,
+        cls.__base_units__ =  { 'kg'  : kg,
+                                'm'   : m,
+                                's'   : s,
+                                'cd'  : cd,
+                                'A'   : A,
+                                'K'   : K,
+                                'mol' : mol,
 
-                                'ms'  : _ms_,
-                                'us'  : _us_,
-                                'min' : _min_,
-                                'h'   : _hour_,
-                                'day' : _day_,
-                                'Hz'  : _Hz_,
-                                'kHz' : _kHz_,
-                                'MHz' : _MHz_,
+                                'ms'  : ms,
+                                'us'  : us,
+                                'min' : min,
+                                'h'   : hour,
+                                'day' : day,
+                                'Hz'  : Hz,
+                                'kHz' : kHz,
+                                'MHz' : MHz,
 
-                                'km'  : _km_,
-                                'dm'  : _dm_,
-                                'cm'  : _cm_,
-                                'mm'  : _mm_,
-                                'um'  : _um_,
-                                'nm'  : _nm_,
+                                'km'  : km,
+                                'dm'  : dm,
+                                'cm'  : cm,
+                                'mm'  : mm,
+                                'um'  : um,
+                                'nm'  : nm,
 
-                                'l'   : _lit_,
-                                'dl'  : _dl_,
+                                'l'   : lit,
+                                'dl'  : dl,
 
-                                'N'   : _N_,
-                                'J'   : _J_,
-                                'kJ'  : _kJ_,
-                                'W'   : _W_,
-                                'kW'  : _kW_,
+                                'N'   : N,
+                                'J'   : J,
+                                'kJ'  : kJ,
+                                'W'   : W,
+                                'kW'  : kW,
 
-                                'C'   : _C_,
-                                'F'   : _F_,
-                                'Ohm' : _Ohm_,
-                                'V'   : _V_,
-                                'mV'  : _mV_,
-                                'mA'  : _mA_,
+                                'C'   : C,
+                                'F'   : F,
+                                'Ohm' : Ohm,
+                                'V'   : V,
+                                'mV'  : mV,
+                                'mA'  : mA,
 
-                                'Pa'  : _Pa_,
-                                'kPa' : _kPa_,
-                                'MPa' : _MPa_,
+                                'Pa'  : Pa,
+                                'kPa' : kPa,
+                                'MPa' : MPa,
 
-                                'P'  : _P_,
-                                'St' : _St_,
+                                'P'  : P,
+                                'St' : St
                               }
 
         supportedUnits = cls.getAllSupportedUnits()
@@ -975,11 +975,6 @@ class unit:
         if not isinstance(dictUnits, dict):
             raise UnitsError('Invalid argument type ({0}); must be a dictionary'.format(type(dictUnits)))
         return unit(**dictUnits)
-
-    @classmethod
-    def printBaseUnits(cls):
-        for key, baseunit in cls.__base_units__.items():
-            print '  ' + key + ': ' + str(baseunit)
 
     @classmethod
     def getAllSupportedUnits(cls):
@@ -1038,7 +1033,7 @@ class unit:
 
     def __mul__(self, other):
         # unit * number = quantity
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             return quantity(other, self)
         # unit * unit = unit
         elif isinstance(other, unit):
@@ -1057,14 +1052,14 @@ class unit:
 
     def __rmul__(self, other):
         # number * unit = quantity
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             return quantity(other, self)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
 
     def __div__(self, other):
         # unit / number = quantity
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             return quantity(1.0 / other, self)
         # unit / unit = unit
         elif isinstance(other, unit):
@@ -1081,7 +1076,7 @@ class unit:
 
     def __rdiv__(self, other):
         # number / unit = quantity
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             return quantity(other, self.__pow__(-1))
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))
@@ -1102,7 +1097,7 @@ class unit:
 # Fill the __base_units__ dictionary and load all defined units into the 'unit' class
 unit.init_base_units()
 
-class quantity:
+class quantity(object):
     """
     Quantities consists of the:
      - 'value' (float)
@@ -1115,14 +1110,33 @@ class quantity:
     def __init__(self, value = 0.0, units = unit()):
         if not isinstance(units, unit):
             raise UnitsError('Invalid argument type ({0})'.format(type(units)))
-        self.units = units
-        self.value = float(value)
+        self._units = units
+        self._value = float(value)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        if isinstance(new_value, quantity):
+            if self.units != new_value.units:
+                raise UnitsError('Cannot set a value given in: {0} to a quantity in: {1}'.format(new_value.units, self.units))
+            self._value = float(new_value.scaleTo(self).value)
+        elif isinstance(new_value, (float, int, long)):
+            self._value = float(new_value)
+        else:
+            raise UnitsError('Invalid argument type ({0})'.format(type(new_value)))
+    
+    @property
+    def units(self):
+        return self._units
 
     @property
     def value_in_SI_units(self):
         """Returns the value in SI units"""
         return self.value * self.units.base_unit.multiplier
-
+    
     def scaleTo(self, referrer):
         """
         Scales the value to the units given in the argument 'referrer',
@@ -1139,10 +1153,9 @@ class quantity:
         if self.units != units:
             raise UnitsError('Units not consistent: scale from {0} to {1}'.format(self.units, units))
 
-        tmp = quantity()
-        tmp.units = deepcopy(units)
-        tmp.value = self.value * self.units.base_unit.multiplier / float(units.base_unit.multiplier)
-        return tmp
+        units = deepcopy(units)
+        value = self.value * self.units.base_unit.multiplier / float(units.base_unit.multiplier)
+        return quantity(value, units)
 
     def __eq__(self, other):
         if self.units != other.units:
@@ -1184,7 +1197,7 @@ class quantity:
 
     def __add__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} + {2}'.format(type(other), self, other))
@@ -1192,12 +1205,12 @@ class quantity:
             raise UnitsError('Units not consistent: {0} + {1}'.format(self, other))
 
         tmp       = deepcopy(self)
-        tmp.value = self.value + other.scaleTo(self)
+        tmp.value = self.value + other.scaleTo(self).value
         return tmp
 
     def __radd__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid left argument type ({0}) for: {1} + {2}'.format(type(other), other, self))
@@ -1205,7 +1218,7 @@ class quantity:
 
     def __sub__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} - {2}'.format(type(other), self, other))
@@ -1213,12 +1226,12 @@ class quantity:
             raise UnitsError('Units not consistent: {0} - {1}'.format(self, other))
 
         tmp       = deepcopy(self)
-        tmp.value = self.value - other.scaleTo(self)
+        tmp.value = self.value - other.scaleTo(self).value
         return tmp
 
     def __rsub__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid left argument type ({0}) for: {1} - {2}'.format(type(other), other, self))
@@ -1226,18 +1239,17 @@ class quantity:
 
     def __mul__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} * {2}'.format(type(other), self, other))
 
-        tmp = quantity()
-        tmp.units = self.units * other.units
-        tmp.value = self.value * other.value
-        return tmp
+        units = self.units * other.units
+        value = self.value * other.value
+        return quantity(value, units)
 
     def __rmul__(self, other):
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             other = quantity(other)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
@@ -1245,18 +1257,17 @@ class quantity:
 
     def __div__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, float) or isinstance(other, int):
+            if isinstance(other, (float, int, long)):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} / {2}'.format(type(other), self, other))
 
-        tmp = quantity()
-        tmp.units = self.units / other.units
-        tmp.value = self.value / other.value
-        return tmp
+        units = self.units / other.units
+        value = self.value / other.value
+        return quantity(value, units)
 
     def __rdiv__(self, other):
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (float, int, long)):
             other = quantity(other)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))
@@ -1267,10 +1278,10 @@ class quantity:
             n = float(exponent)
         else:
             raise UnitsError('Invalid exponent type ({0}) for: {1} ** {2}'.format(type(exponent), self, exponent))
-        tmp = quantity()
-        tmp.units = self.units ** n
-        tmp.value = self.value ** n
-        return tmp
+        
+        units = self.units ** n
+        value = self.value ** n
+        return quantity(value, units)
 
     def toString(self):
         return '{0} {1}'.format(self.value, self.units.toString())

@@ -13,11 +13,13 @@ You should have received a copy of the GNU General Public License along with thi
 software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
+from __future__ import print_function
 import os, sys, operator
 import ply.lex as lex
 import ply.yacc as yacc
 from math import *
-from parser_objects import *
+from parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, Condition
+from parser_objects import NonstandardFunctionNode, StandardFunctionNode, AssignmentNode
 
 #logical_operator = {'and': 'and',
 #                    'or' : 'or'
@@ -101,8 +103,8 @@ def t_newline(t):
     t.lexer.lineno += t.value.count("\n")
 
 def t_error(t):
-    print "Illegal character '%s'" % t.value[0]
-    t.lexer.skip(1)
+    print("Illegal character '{0}' found while parsing '{1}'".format(t.value[0], t.value))
+    #t.lexer.skip(1)
 
 # Parser rules:
 # expression:
@@ -275,7 +277,7 @@ def p_postfix_expression_3(p):
 
 def p_postfix_expression_4(p):
     '''postfix_expression : postfix_expression LPAREN argument_expression_list RPAREN'''
-    print str(p[1]) + '(' + str(p[3]) + ')'
+    print(str(p[1]) + '(' + str(p[3]) + ')')
     p[0] = Number(NonstandardFunctionNode(str(p[1]), p[3]))
 
 # primary-expression
@@ -315,7 +317,6 @@ def p_identifier(p):
     p[0] = Number(IdentifierNode(p[1]))
 
 def p_error(p):
-    print "Syntax error at '%s'" % p.value
     raise Exception("Syntax error at '%s'" % p.value)
 
 # Parser class
@@ -384,18 +385,18 @@ class ExpressionParser:
 def testExpression(expression, expected_res, do_evaluation = True):
     parse_res    = parser.parse(expression)
     latex_res    = parser.toLatex()
-    print 'Expression: ' + expression
-    #print 'NodeTree:\n', repr(parse_res)
-    print 'Parse result: ', str(parse_res)
-    print 'Latex: ', latex_res
+    print('Expression: ' + expression)
+    #print('NodeTree:\n', repr(parse_res))
+    print('Parse result: ', str(parse_res))
+    print('Latex: ', latex_res)
     eval_res = 0
     if do_evaluation:
         eval_res = parser.evaluate()
         if fabs(eval_res - expected_res) > 0:
             raise RuntimeError('Expression evaluation failed: {0} (evaluated {1}; expected {2})'.format(expression, eval_res, expected_res))
         else:
-            print 'Evaluate result: OK (={0})'.format(eval_res)
-    print ' '
+            print('Evaluate result: OK (={0})'.format(eval_res))
+    print(' ')
 
     return parse_res, latex_res, eval_res
     
@@ -410,9 +411,9 @@ def testLatex(parser):
                 expression   = l + lop + r + op + l + rop + r
                 parse_res    = parser.parse(expression)
                 latex_res    = parser.toLatex()
-                print '\\begin{verbatim}' + str(counter) + '. ' + expression + '\\end{verbatim}\n'
-                print '\\begin{verbatim}Parse result: ' + str(parse_res) + '\\end{verbatim}\n'
-                print '$' + latex_res + '$\n\n'
+                print('\\begin{verbatim}' + str(counter) + '. ' + expression + '\\end{verbatim}\n')
+                print('\\begin{verbatim}Parse result: ' + str(parse_res) + '\\end{verbatim}\n')
+                print('$' + latex_res + '$\n\n')
                 counter += 1
 
 def Sum(a1, a2, a3):
@@ -479,8 +480,8 @@ if __name__ == "__main__":
     dictFunctions['impulse']  = impulse
     dictFunctions['linear']   = linear
 
-    print 'Identifiers:\n', dictIdentifiers, '\n'
-    print 'Functions:\n', dictFunctions, '\n'
+    print('Identifiers:\n', dictIdentifiers, '\n')
+    print('Functions:\n', dictFunctions, '\n')
 
     parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
@@ -489,7 +490,7 @@ if __name__ == "__main__":
     testExpression('step(1.2, 1.2)', 1.2)
     testExpression('impulse(1.2, 1.2)', 1.2)
     testExpression('linear(0.0, 1.0, 5, 10)', 10)
-    exit(0)
+    #exit(0)
 
     testExpression('log10(pi)', log10(pi))
     testExpression('log(pi)',   log(pi))
@@ -522,6 +523,6 @@ if __name__ == "__main__":
     testExpression('-sqrt(m1.m2.y + 2) / m1.x', -sqrt(m1_m2_y + 2) / m1_x)
     testExpression('(-exp(y + x2 / x4) + 4.0) - x1', (-exp(y + x2 / x4) + 4.0) - x1)
     parse_res, latex_res, eval_res = testExpression('R = sin(x1 + x3)/x4', sin(x1 + x3)/x4)
-    print 'Updated dictIdentifiers[R] = {0}\n'.format(dictIdentifiers['R'])
+    print('Updated dictIdentifiers[R] = {0}\n'.format(dictIdentifiers['R']))
     testExpression('(y + 4.0 >= x3 - 3.2e-03) || (y != 3) && (x1 <= 5)', (y + 4.0 >= x3 - 3.2e-03) or (y != 3) and (x1 <= 5))
     testExpression('(v_rest - V)/tau_m + (gE*(e_rev_E - V) + gI*(e_rev_I - V) + i_offset)/cm', 0, False)

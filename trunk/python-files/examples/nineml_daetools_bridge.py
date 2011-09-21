@@ -8,7 +8,7 @@ from nineml.abstraction_layer.testing_utils import std_pynn_simulation
 import os, sys, math, random
 from time import localtime, strftime, time
 from daetools.pyDAE.expression_parser import ExpressionParser
-from daetools.pyDAE.units_parser import UnitParser
+from daetools.pyDAE.units_parser import UnitsParser
 from daetools.pyDAE import *
 
 def addIdentifiers(model, parent, dictIdentifiers):
