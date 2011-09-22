@@ -12,6 +12,7 @@ from nineml_tester_ui import Ui_ninemlTester
 from daetools.pyDAE.expression_parser import ExpressionParser
 from daetools.pyDAE.units_parser import UnitsParser
 from StringIO import StringIO
+import dot2tex
 
 def printDictionary(dictionary):
     for key, value in dictionary.iteritems():
@@ -854,22 +855,30 @@ class nineml_component_inspector:
         else:
             return None
 
-    def generateLatexReport(self):
+    def generateLatexReport(self, tests = []):
+        """
+        'tests' argument is an array of tuples: (varName, xPoints, yPoints, plotFileName)
+        """
         if not self.ninemlComponent or not isinstance(self.ninemlComponent, nineml.abstraction_layer.ComponentClass):
             raise RuntimeError('Invalid input NineML component')
 
-        content = []
-        parser = ExpressionParser()
+        content       = []
+        tests_content = []
+        parser        = ExpressionParser()
 
         # Collect all unique components from sub-nodes:
         unique_components = {}
         self._detectUniqueComponents(self.ninemlComponent, unique_components)
 
-        # Now add all detected components to the report
+        # Add all detected components to the report
         for name, component in unique_components.items():
             self._addComponentToReport(content, component, name, parser)
 
-        return ''.join(content)
+        # Add all tests to the report
+        for test in tests:
+            self._addTestToReport(tests_content, test)
+
+        return (''.join(content), ''.join(tests_content))
 
     def _detectUniqueComponents(self, component, unique_components):
         if not component.name in unique_components:
@@ -878,6 +887,25 @@ class nineml_component_inspector:
         for name, subcomponent in component.subnodes.items():
             self._detectUniqueComponents(subcomponent, unique_components)
 
+    def _addTestToReport(self, content, test):
+        """
+        'test' argument is a tuple: (varName, xPoints, yPoints, plotFileName)
+        """
+        testName  = test[0]
+        testNotes = test[1]
+        plots     = test[2]
+        content.append('\\subsection*{{Test: {0}}}\n\n'.format(testName))
+        content.append('Description: \n{0}\n'.format(testNotes))
+        for plot in plots:
+            varName      = plot[0]
+            xPoints      = plot[1]
+            yPoints      = plot[2]
+            plotFileName = plot[3]
+            plotFilePath = plot[4]
+            tex_plot = '\\begin{center}\n\\includegraphics{./' + plotFileName + '}\n\\end{center}\n'
+            content.append(tex_plot)
+
+        
     def _addComponentToReport(self, content, component, name, parser):
         comp_name = name.replace('_', '\\_')
         content.append('\\section{{NineML Component: {0}}}\n\n'.format(comp_name))
@@ -887,7 +915,7 @@ class nineml_component_inspector:
         if len(parameters) > 0:
             content.append('\\subsection*{Parameters}\n\n')
             header_flags = ['l', 'c', 'l']
-            header_items = ['Name', 'Units', 'Description']
+            header_items = ['Name', 'Units', 'Notes']
             rows_items = []
             for param in parameters:
                 _name = param.name.replace('_', '\\_')
@@ -900,7 +928,7 @@ class nineml_component_inspector:
         if len(state_variables) > 0:
             content.append('\\subsection*{State-Variables}\n\n')
             header_flags = ['l', 'c', 'l']
-            header_items = ['Name', 'Units', 'Description']
+            header_items = ['Name', 'Units', 'Notes']
             rows_items = []
             for var in state_variables:
                 _name = var.name.replace('_', '\\_')
@@ -913,7 +941,7 @@ class nineml_component_inspector:
         if len(aliases) > 0:
             content.append('\\subsection*{Aliases}\n\n')
             header_flags = ['l', 'l', 'c', 'l']
-            header_items = ['Name', 'Expression', 'Units', 'Description']
+            header_items = ['Name', 'Expression', 'Units', 'Notes']
             rows_items = []
             for alias in aliases:
                 _name = '${0}$'.format(alias.lhs)
@@ -927,7 +955,7 @@ class nineml_component_inspector:
         if len(analog_ports) > 0:
             content.append('\\subsection*{Analog Ports}\n\n')
             header_flags = ['l', 'l', 'c', 'l']
-            header_items = ['Name', 'Type', 'Units', 'Description']
+            header_items = ['Name', 'Type', 'Units', 'Notes']
             rows_items = []
             for port in analog_ports:
                 _name = port.name.replace('_', '\\_')
@@ -941,7 +969,7 @@ class nineml_component_inspector:
         if len(event_ports) > 0:
             content.append('\\subsection*{Event ports}\n\n')
             header_flags = ['l', 'l', 'c', 'l']
-            header_items = ['Name', 'Type', 'Units', 'Description']
+            header_items = ['Name', 'Type', 'Units', 'Notes']
             rows_items = []
             for port in event_ports:
                 _name = port.name.replace('_', '\\_')
@@ -1041,11 +1069,16 @@ class nineml_component_inspector:
                 content.append('\n')
         """
         if len(regimes) > 0:
+            regimes_list     = []
+            transitions_list = []
+
             content.append('\\subsection*{Regimes}\n\n')
-            for regime in regimes:
-                counter = 0
+            for ir, regime in enumerate(regimes):
+                regimes_list.append(regime.name)
+
                 tex = ''
                 # 8a) Create time derivatives
+                counter = 0
                 for time_deriv in regime.time_derivatives:
                     if counter != 0:
                         tex += ' \\\\ '
@@ -1054,10 +1087,17 @@ class nineml_component_inspector:
 
                 # 8b) Create on_condition actions
                 for on_condition in regime.on_conditions:
-                    tex += ' \\\\ \\mbox{If } ' + parser.parse_to_latex(on_condition.trigger.rhs) + '\mbox{:}'
+                    regimeFrom = regime.name
+                    if on_condition.target_regime.name == '':
+                        regimeTo = regimeFrom
+                    else:
+                        regimeTo = on_condition.target_regime.name
+                    condition  = parser.parse_to_latex(on_condition.trigger.rhs)
 
-                    if on_condition.target_regime.name != '':
-                        tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(on_condition.target_regime.name)
+                    tex += ' \\\\ \\mbox{If } ' + condition + '\mbox{:}'
+
+                    if regimeTo != regimeFrom:
+                        tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(regimeTo)
 
                     for state_assignment in on_condition.state_assignments:
                         tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{set }} {0} = {1}'.format(state_assignment.lhs, parser.parse_to_latex(state_assignment.rhs))
@@ -1065,12 +1105,22 @@ class nineml_component_inspector:
                     for event_output in on_condition.event_outputs:
                         tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{emit }} {0}'.format(event_output.port_name)
 
+                    transition = '{0} -> {1} [label="{2}"];'.format(regimeFrom, regimeTo, condition)
+                    transitions_list.append(transition)
+
                 # 8c) Create on_event actions
                 for on_event in regime.on_events:
-                    tex += ' \\\\ \\mbox{On } ' + on_event.src_port_name + '\mbox{:}'
+                    regimeFrom = regime.name
+                    if on_event.target_regime.name == '':
+                        regimeTo = regimeFrom
+                    else:
+                        regimeTo = on_event.target_regime.name
+                    source_port = on_event.src_port_name
 
-                    if on_event.target_regime.name != '':
-                        tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(on_event.target_regime.name)
+                    tex += ' \\\\ \\mbox{On } ' + source_port + '\mbox{:}'
+
+                    if regimeTo != regimeFrom:
+                        tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{switch to }} {0}'.format(regimeTo)
 
                     for state_assignment in on_event.state_assignments:
                         tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{set }} {0} = {1}'.format(state_assignment.lhs, parser.parse_to_latex(state_assignment.rhs))
@@ -1078,10 +1128,27 @@ class nineml_component_inspector:
                     for event_output in on_event.event_outputs:
                         tex += ' \\\\ \\hspace*{{0.2in}} \\mbox{{emit }} {0}'.format(event_output.port_name)
 
+                    transition = '{0} -> {1} [label="{2}"];'.format(regimeFrom, regimeTo, source_port)
+                    transitions_list.append(transition)
+
                 tex = '${0} = \\begin{{cases}} {1} \\end{{cases}}$\n'.format(regime.name, tex)
                 tex += '\\newline \n'
                 content.append(tex)
 
+            dot_graph_template = '''
+            digraph finite_state_machine {{
+                rankdir=LR;
+                node [shape=ellipse]; {0};
+                {1}
+            }}
+            '''
+            if len(regimes_list) > 1:
+                dot_graph = dot_graph_template.format(' '.join(regimes_list), '\n'.join(transitions_list))
+                graph     = dot2tex.dot2tex(dot_graph, autosize=True, texmode='math', format='tikz', crop=True, figonly=True)
+                tex_graph = '\\begin{center}\n' + graph + '\\end{center}\n'
+                content.append(tex_graph)
+                content.append('\n')
+            
             content.append('\\newpage')
             content.append('\n')
 

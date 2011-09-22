@@ -12,11 +12,15 @@
 \usepackage{fancyhdr}
 \setlength{\headheight}{20mm}
 
+\usepackage{tikz}
+\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{amsmath}
+
 \title{MODEL-NAME}
 \author{INCF}
 
 \pagestyle{fancy}
-\lhead{\includegraphics[height=8mm,keepaspectratio=true]{LOGO_PATH/logo.png}}
+\lhead{\includegraphics[height=8mm,keepaspectratio=true]{./logo.png}}
 \chead{}
 \rhead{\bfseries MODEL-NAME}
 \lfoot{}
@@ -51,6 +55,8 @@
   bottom=20mm
 }
 
+%\graphicspath{.:GRAPHICS_PATH}
+ 
 \newcommand{\HRule}{\rule{\linewidth}{0.2mm}}
 
 \usepackage{sectsty}
@@ -65,7 +71,7 @@
 
 \vspace*{5cm}
 
-\includegraphics{LOGO_PATH/logo.png} \\[1cm]    
+\includegraphics{./logo.png} \\[1cm]    
 
 \textsc{\Large NineML Model report}\\[0.5cm]
 
@@ -97,11 +103,11 @@ TESTS
 
 APPENDIXES
 
-\section{XML Source code}
+\section{XML Source code (??)}
 
-\section{Python Source code}
+\section{Python Source code (??)}
 
-\section{Tests Source code}
+\section{Tests Source code (??)}
 
 \vfill
 

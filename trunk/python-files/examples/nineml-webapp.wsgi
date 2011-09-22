@@ -162,6 +162,7 @@ class nineml_webapp:
             tmpFolder = ''
             raw_arguments = ''
             content = ''
+            tests_content = ''
             log = None
             success = False
             timeHorizon = 0.0
@@ -268,11 +269,15 @@ class nineml_webapp:
             simulation.Finalize()
 
             # Create tmpFolder
-            tmpFolder = tempfile.mkdtemp(suffix='-nineml-webapp', prefix='tmp-')
+            tmpFolder = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
+            os.chmod(tmpFolder, 0777)
+
+            # Copt the logo image to tmp folder
             shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
 
-            datareporter.createPlots(tmpFolder)
-            log.Message(str(datareporter.plots), 0)
+            tests_data = []
+            tests_data.append(datareporter.createReportData('Dummy test', 'Dummy test description', tmpFolder))
+            #log.Message(str(tests_data), 0)
 
             log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
             content += log_output
@@ -280,11 +285,22 @@ class nineml_webapp:
             texReport = '{0}/{1}.tex'.format(tmpFolder, applicationID)
             pdfReport = '{0}/{1}.pdf'.format(tmpFolder, applicationID)
 
-            createLatexReport(inspector, baseFolder + '/nineml-tex-template.tex', texReport, tmpFolder)
+            # Generate Tex report
+            createLatexReport(inspector, tests_data, baseFolder + '/nineml-tex-template.tex', texReport, tmpFolder)
             #os.chmod(texReport, 0666)
 
-            result = createPDF(texReport, tmpFolder)
-            if result == 0 and os.path.isfile(pdfReport):
+            # Generate PDF report
+            createPDF = tmpFolder + '/createPDF.sh'
+            createPDFfile = open(createPDF, "w")
+            createPDFfile.write('cd {0}\n'.format(tmpFolder))
+            # Write this twice because of the problems with the Table Of Contents (we need two passes)
+            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
+            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
+            createPDFfile.close()
+            os.system('sh {0}'.format(createPDF))
+
+            # Read the contents of the report into a variable (to be sent together with the .html part)
+            if os.path.isfile(pdfReport):
                 pdf = open(pdfReport, "rb").read()
                 success = True
             else:

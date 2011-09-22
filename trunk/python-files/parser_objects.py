@@ -396,17 +396,17 @@ class ConditionBinaryNode(ConditionNode):
 
     def toLatex(self):
         if self.Operator == ConditionBinaryNode.opEQ:
-            return '\\left( {0} == {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} == {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionBinaryNode.opNE:
-            return '\\left( {0} \\neq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} \\neq {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionBinaryNode.opLT:
-            return '\\left( {0} < {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} < {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionBinaryNode.opLE:
-            return '\\left( {0} \\leq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} \\leq {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionBinaryNode.opGT:
-            return '\\left( {0} > {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} > {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionBinaryNode.opGE:
-            return '\\left( {0} \\geq {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '{0} \\geq {1}'.format(self.lNode.toLatex(), self.rNode.toLatex())
         else:
             raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 
@@ -443,9 +443,9 @@ class ConditionExpressionNode(ConditionNode):
 
     def toLatex(self):
         if self.Operator == ConditionExpressionNode.opAnd:
-            return '\\left( {0} \\land {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '\\left( {0} \\right) \\land \\left( {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
         elif self.Operator == ConditionExpressionNode.opOr:
-            return '\\left( {0} \\lor {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
+            return '\\left( {0} \\right) \\lor \\left( {1} \\right)'.format(self.lNode.toLatex(), self.rNode.toLatex())
         else:
             raise RuntimeError("Not supported logical binary operator: {0}".format(self.Operator))
 

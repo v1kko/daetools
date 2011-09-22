@@ -23,55 +23,42 @@ class texCommand:
 tex_itemize  = texCommand('\\begin{itemize}\n', '\\end{itemize}\n')
 tex_verbatim = texCommand(' \\begin{verbatim}', '\\end{verbatim} ')
 
-def createLatexReport(inspector, texTemplate, texOutputFile, find_files_dir = '.'):
+def createLatexReport(inspector, tests, texTemplate, texOutputFile, find_files_dir = '.'):
     tf = open(texTemplate, 'r')
     template = ''.join(tf.readlines())
     tf.close()
     of = open(texOutputFile, 'w')
-    content = inspector.generateLatexReport()
+    content, tests_content = inspector.generateLatexReport(tests)
 
     comp_name = inspector.ninemlComponent.name.replace('_', '\\_')
-    template  = template.replace('LOGO_PATH', find_files_dir)
     template  = template.replace('MODEL-NAME', comp_name)
-    template  = template.replace('MODEL-SPECIFICATION', ''.join(content))
-    template  = template.replace('TESTS', '')
+    template  = template.replace('MODEL-SPECIFICATION', content)
+    template  = template.replace('TESTS', tests_content)
     template  = template.replace('APPENDIXES', '')
+    #template  = template.replace('FILES_PATH', find_files_dir)
     
     of.write(template)
     of.close()
 
 def createPDF(texFile, outdir = None):
+    # Run pdflatex twice because of the problems with the Table Of Contents (we need two passes)
     if outdir:
-        res = os.system('/usr/bin/pdflatex -output-directory {0} {1}'.format(outdir, texFile))
+        res = os.system('/usr/bin/pdflatex -interaction=nonstopmode -output-directory {0} {1}'.format(outdir, texFile))
+        res = os.system('/usr/bin/pdflatex -interaction=nonstopmode -output-directory {0} {1}'.format(outdir, texFile))
     else:
-        res = os.system('/usr/bin/pdflatex {0}'.format(texFile))
+        res = os.system('/usr/bin/pdflatex -interaction=nonstopmode {0}'.format(texFile))
+        res = os.system('/usr/bin/pdflatex -interaction=nonstopmode {0}'.format(texFile))
         
     return res
 
-"""
-\begin{table}[placement=h]
-    \caption{A normal caption}
-    \begin{center}
-      \begin{tabular}{ | l | l |}
-    \hline
-    Time, ms & Vm, mV \\ \hline
-    0 & -50.0 \\
-    1 & -51.0 \\
-    2 & -52.0 \\
-    3 & -53.0 \\
-    4 & -54.0 \\
-    5 & -55.0 \\
-    \hline
-      \end{tabular}
-    \end{center}
-\end{table}
-"""
-
 if __name__ == "__main__":
-    nineml_component = TestableComponent('hierachical_iaf_1coba')()
+    component = 'hierachical_iaf_1coba'
+    tex = component + '.tex'
+    pdf = component + '.pdf'
+    nineml_component = TestableComponent(component)()
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_component)
-    createLatexReport(inspector, 'nineml-tex-template.tex', 'coba_iaf.tex')
-    res = createPDF('coba_iaf.tex')
-    subprocess.call(['evince', 'coba_iaf.pdf'], shell=False)
+    createLatexReport(inspector, [], 'nineml-tex-template.tex', tex)
+    res = createPDF(tex)
+    subprocess.call(['evince', pdf], shell=False)
 

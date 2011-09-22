@@ -113,36 +113,47 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
-        self.plots = []
 
-    def createPlots(self, tmp_folder = '/tmp'):
+    def createReportData(self, testName, testNotes, tmp_folder = '/tmp'):
         fp8  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
         fp9  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
         fp11 = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
 
+        font = {'family' : 'sans-serif',
+                'weight' : 'normal',
+                'size'   : 8}
+        mpl.rc('font', **font)
+        params = {'axes.labelsize':  9,
+                  'text.fontsize':   8,
+                  'xtick.labelsize': 8,
+                  'ytick.labelsize': 8,
+                  'text.usetex': True}
+        mpl.rcParams.update(params)
+
+        plots = []
         for i, var in enumerate(self.Process.Variables):
-            fileName   = tmp_folder + '/' + var.Name + '.png'
+            fileName   = var.Name
+            fileName   = fileName.replace('.', '')
+            fileName   = fileName.replace('_', '')
+            fileName   = fileName + '.png'
+            filePath   = tmp_folder + '/' + fileName
+            title      = var.Name.split('.')[-1] + ' = f(t)'
             xAxisLabel = 't'
             yAxisLabel = var.Name
             xPoints    = var.TimeValues
             yPoints    = var.Values.reshape(len(var.Values))
 
-            #plt.figure(i+1)
-            #plt.subplot(111)
-            #plt.plot(xPoints, yPoints)
-            #plt.title(var.Name)
-            #plt.xlabel(xAxisLabel)
-            #plt.ylabel(yAxisLabel)
-            #plt.savefig(fileName)
-
-            fig = plt.figure()
+            fig = plt.figure(figsize=(4, 3), dpi=(300))
             ax = fig.add_subplot(111)
             ax.plot(xPoints, yPoints)
+            ax.set_title(title)
             ax.set_xlabel(xAxisLabel)
-            ax.set_ylabel(yAxisLabel)
-            fig.savefig(fileName)
+            #ax.set_ylabel(yAxisLabel)
+            fig.savefig(filePath, dpi=(300))
 
-            self.plots.append((var.Name, xPoints, yPoints, fileName))
+            plots.append((var.Name, xPoints, yPoints, fileName, filePath))
+
+        return (testName, testNotes, plots)
 
     def Connect(self, ConnectionString, ProcessName):
         return True
@@ -315,17 +326,13 @@ if __name__ == "__main__":
     simulation.Run()
     simulation.Finalize()
 
-    
-    from PyQt4 import QtCore, QtGui
-    from daetools.pyDAE.WebViewDialog import WebView
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_comp)
 
-    datareporter.createPlots('/tmp')
-    print datareporter.plots
+    tests_data = []
+    tests_data.append(datareporter.createReportData('Dummy test', 'Dummy test notes', '.'))
 
-    app = QtGui.QApplication(sys.argv)
-    for plot in datareporter.plots:
-        url = QtCore.QUrl(plot[3])
-        wv = WebView(url)
-        wv.resize(400, 400)
-        wv.setWindowTitle(plot[3])
-        wv.exec_()
+    createLatexReport(inspector, tests_data, 'nineml-tex-template.tex', 'coba_iaf.tex')
+
+    res = createPDF('coba_iaf.tex')
+    subprocess.call(['evince', 'coba_iaf.pdf'], shell=False)

@@ -25,8 +25,8 @@ except Exception, e:
 """
 Sample json input data:
 {
-    "timeHorizon" : 10.0,
-    "reportingInterval" : 0.01,
+    "timeHorizon" : 1.0,
+    "reportingInterval" : 0.001,
     "parameters" : {
         "cobaExcit.q" : 3.0,
         "cobaExcit.tau" : 5.0,
