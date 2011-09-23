@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
@@ -21,7 +22,7 @@ class texCommand:
         return self.startCommand + content + self.endCommand
 
 tex_itemize  = texCommand('\\begin{itemize}\n', '\\end{itemize}\n')
-tex_verbatim = texCommand(' \\begin{verbatim}', '\\end{verbatim} ')
+tex_verbatim = texCommand('\\begin{verbatim}', '\\end{verbatim} ')
 
 def createLatexReport(inspector, tests, texTemplate, texOutputFile, find_files_dir = '.'):
     tf = open(texTemplate, 'r')

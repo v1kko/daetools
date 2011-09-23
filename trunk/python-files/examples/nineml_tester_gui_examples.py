@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import os, sys, math
 from time import localtime, strftime, time
 import nineml
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     if not results:
         exit(0)
 
-    print 'Input data from the GUI:'
+    print('Input data from the GUI:')
     inspector.printCollectedData()
 
     simulation_data = daeSimulationInputData()
@@ -216,14 +217,12 @@ if __name__ == "__main__":
     simulation_data.event_ports_expressions  = results['event_ports_expressions']
     simulation_data.variables_to_report      = results['variables_to_report']
 
-    print 'JSON data:'
+    print('JSON data:')
     jsonContent = simulation_data.dumpJSON()
-    #print 'jsonContent:', jsonContent
+    #print('jsonContent:', jsonContent)
     #simulation_data.loadJSON(jsonContent)
     #jsonContent1 = simulation_data.dumpJSON()
-    #print jsonContent1
-
-    #exit(0)
+    #print(jsonContent1)
 
     # Create Log, DAESolver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -261,12 +260,3 @@ if __name__ == "__main__":
     # Run
     simulation.Run()
     simulation.Finalize()
-
-    datareporter.createPlots('/tmp')
-    app = QtGui.QApplication(sys.argv)
-    for plot in datareporter.plots:
-        url = QtCore.QUrl(plot[3])
-        wv = WebView(url)
-        wv.resize(400, 400)
-        wv.setWindowTitle(plot[3])
-        wv.exec_()

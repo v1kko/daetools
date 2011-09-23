@@ -1,7 +1,9 @@
+from __future__ import print_function
 from pprint import pformat
 import os, sys, math, json, traceback, os.path, tempfile, shutil
 from time import localtime, strftime, time
 import urlparse
+import zipfile
 import cgitb
 cgitb.enable()
 
@@ -11,7 +13,7 @@ try:
     baseFolder = '/home/ciroki/Data/daetools/trunk/python-files/examples'
     sys.path.append(baseFolder)
     os.environ['HOME'] = tempfile.gettempdir()
-    print os.environ['HOME']
+    #print(os.environ['HOME'], file=sys.stderr)
 
     import nineml
     from nineml.abstraction_layer import readers
@@ -25,7 +27,7 @@ try:
     from nineml_daetools_simulation import daeSimulationInputData, nineml_daetools_simulation, ninemlTesterDataReporter
     from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getSelectComponentPage, createResultPage
 
-except Exception, e:
+except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     ___import_exception___           = str(e)
     ___import_exception_traceback___ = exc_traceback
@@ -131,10 +133,10 @@ class nineml_webapp:
             nineml_webapp.nineml_process_data[applicationID] = inspector
 
             formTemplate  = getSetupDataForm()
-            content      += formTemplate.format(inspector.generateHTMLForm(), applicationID)
+            content      += formTemplate.format(nineml_component.name, inspector.generateHTMLForm(), applicationID)
             html          = createSetupDataPage(content)
         
-        except Exception, e:
+        except Exception as e:
             content = 'Application environment:\n' + pformat(environ) + '\n\n'
             content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
             content += 'Form input:\n'
@@ -156,6 +158,7 @@ class nineml_webapp:
     def run_simulation(self, dictFormData, environ, start_response):
         try:
             pdf = None
+            zip = None
             html = ''
             texReport = ''
             pdfReport = ''
@@ -163,8 +166,8 @@ class nineml_webapp:
             raw_arguments = ''
             content = ''
             tests_content = ''
+            log_output = ''
             log = None
-            success = False
             timeHorizon = 0.0
             reportingInterval = 0.0
             parameters = {}
@@ -173,7 +176,12 @@ class nineml_webapp:
             event_ports_expressions = {}
             active_regimes = {}
             variables_to_report = {}
-
+            tests_data = []
+            applicationID = ''
+            inspector = None
+            
+            success = False
+            
             if not dictFormData.has_key('__NINEML_WEBAPP_ID__'):
                 raise RuntimeError('No application ID has been specified')
 
@@ -185,9 +193,155 @@ class nineml_webapp:
             if not inspector:
                 raise RuntimeError('Invalid inspector object')
 
-            # Remove inspector from the map since we got a reference to it and do not need it in the map anymore
+            nineml_component = inspector.ninemlComponent
+            if not nineml_component:
+                raise RuntimeError('Cannot load NineML component')
+
+            # Create tmpFolder
+            tmpFolder = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
+            os.chmod(tmpFolder, 0777)
+            # Copy the logo image to tmp folder
+            shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
+
+            isOK, results = self.run_test(nineml_component, dictFormData, tmpFolder)
+            if isOK:
+                testName, testDescription, dictInputs, plots, log_output = results
+                tests_data.append( (testName, testDescription, dictInputs, plots, log_output) )
+                content += 'Test status: {0} [SUCCEEDED]'.format(testName)
+            else:
+                #error    = results[5]
+                testName, testDescription, dictInputs, plots, log_output, error = results
+                content += 'Test status: {0} [FAILED]'.format(testName)
+                content += error
+                
+            texReport = '{0}/{1}.tex'.format(tmpFolder, applicationID)
+            pdfReport = '{0}/{1}.pdf'.format(tmpFolder, applicationID)
+
+            # Generate Tex report
+            createLatexReport(inspector, tests_data, baseFolder + '/nineml-tex-template.tex', texReport, tmpFolder)
+
+            # Generate PDF report
+            createPDF = tmpFolder + '/createPDF.sh'
+            createPDFfile = open(createPDF, "w")
+            createPDFfile.write('cd {0}\n'.format(tmpFolder))
+            # Run it twice because of the problems with the Table Of Contents (we need two passes)
+            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
+            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
+            createPDFfile.close()
+            os.system('sh {0}'.format(createPDF))
+
+            zipReport = '{0}/{1}.zip'.format(tmpFolder, applicationID)
+            self.pack_tests_data(zipReport, tests_data, tmpFolder)
+            
+            # Read the contents of the report into a variable (to be sent together with the .html part)
+            if os.path.isfile(pdfReport):
+                pdf = open(pdfReport, "rb").read()
+            if os.path.isfile(zipReport):
+                zip = open(zipReport, "rb").read()
+            
+            success = True
+            html = createResultPage(content)
+
+        except Exception as e:
+            content += 'Application environment:\n' + pformat(environ) + '\n\n'
+            content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
+            content += 'Simulation input:\n'
+            content += '  parameters:  {0}\n'.format(parameters)
+            content += '  initial_conditions:  {0}\n'.format(initial_conditions)
+            content += '  active_regimes:  {0}\n'.format(active_regimes)
+            content += '  analog_ports_expressions:  {0}\n'.format(analog_ports_expressions)
+            content += '  event_ports_expressions:  {0}\n'.format(event_ports_expressions)
+            content += '  variables_to_report:  {0}\n'.format(variables_to_report)
+            if log:
+                log_output = 'Log output:\n{0}'.format(log.JoinMessages('\n'))
+                content += '\n' + log_output
+
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            html = createErrorPage(str(e), exc_traceback, content)
+
+        # Remove temporary directory
+        if os.path.isdir(tmpFolder):
+            shutil.rmtree(tmpFolder)
+        # Remove inspector from the map
+        if nineml_webapp.nineml_process_data.has_key(applicationID):
             del nineml_webapp.nineml_process_data[applicationID]
             
+        if success:
+            part1 = ''
+            part2 = ''
+            part3 = ''
+            boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
+            if pdf:
+                part2 = '--{0}\r\nContent-Disposition: attachment; filename=model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
+            if zip:
+                part3 = '--{0}\r\nContent-Disposition: attachment; filename=report-data.zip\r\n\r\n{1}\n'.format(boundary, zip)
+            output = part1 + part2 + part3
+            output_len = len(output)
+            start_response('200 OK', [('Content-type', 'multipart/mixed; boundary={0}'.format(boundary)),
+                                    ('Content-Length', str(output_len))])
+            return [output]
+
+        else:
+            output_len = len(html)
+            start_response('200 OK', [('Content-type', 'text/html'),
+                                    ('Content-Length', str(output_len))])
+            return [html]
+
+    def pack_tests_data(self, zipReport, tests_data, tmpFolder):
+        try:
+            if len(tests_data) == 0:
+                return
+                
+            zip = zipfile.ZipFile(zipReport, "w")
+            
+            for i, test_data in enumerate(tests_data):
+                testName, testDescription, dictInputs, plots, log_output = test_data
+                testFolder = 'test-no.{0}/'.format(i+1, testName) 
+                
+                # Write log file contents
+                logName = '/log_output.txt'
+                f = open(tmpFolder + '/' + logName, "w")
+                f.write(log_output)
+                f.close()
+                zip.write(tmpFolder + '/' + logName, testFolder + logName)
+                
+                # Write .png and .csv files
+                for plot in plots:
+                    varName, xPoints, yPoints, pngName, csvName = plot
+                    zip.write(tmpFolder + '/' + pngName, testFolder + pngName)
+                    zip.write(tmpFolder + '/' + csvName, testFolder + csvName)
+            
+            zip.close()
+            
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            print(str(e), '\n'.join(traceback.format_tb(exc_traceback)), file=sys.stderr)
+    
+    def run_test(self, nineml_component, dictFormData, tmpFolder):
+        try:
+            testName = 'Test name'
+            testDescription = 'Test description'
+            timeHorizon = 0.0
+            reportingInterval = 0.0
+            parameters = {}
+            initial_conditions = {}
+            analog_ports_expressions = {}
+            event_ports_expressions = {}
+            active_regimes = {}
+            variables_to_report = {}
+            log_output = ''
+            log          = None
+            daesolver    = None
+            datareporter = None
+            model        = None
+            simulation   = None
+            dictInputs = {}
+
+            if dictFormData.has_key('testName'):
+                testName = str(dictFormData['testName'][0])
+            if dictFormData.has_key('testDescription'):
+                testDescription = str(dictFormData['testDescription'][0])
             if dictFormData.has_key('timeHorizon'):
                 timeHorizon = float(dictFormData['timeHorizon'][0])
             if dictFormData.has_key('reportingInterval'):
@@ -216,10 +370,6 @@ class nineml_webapp:
                     elif names[0] == nineml_component_inspector.categoryVariablesToReport:
                         if values[0] == 'on':
                             variables_to_report[canonicalName] = True
-
-            nineml_component = inspector.ninemlComponent
-            if not nineml_component:
-                raise RuntimeError('Cannot load NineML component')
 
             simulation_data = daeSimulationInputData()
             simulation_data.timeHorizon              = timeHorizon
@@ -268,81 +418,24 @@ class nineml_webapp:
             simulation.Run()
             simulation.Finalize()
 
-            # Create tmpFolder
-            tmpFolder = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
-            os.chmod(tmpFolder, 0777)
+            log_output = log.JoinMessages('\n')
+            
+            dictInputs['parameters']                = parameters
+            dictInputs['initial_conditions']        = initial_conditions
+            dictInputs['analog_ports_expressions']  = analog_ports_expressions
+            dictInputs['event_ports_expressions']   = event_ports_expressions
+            dictInputs['active_regimes']            = active_regimes
+            dictInputs['variables_to_report']       = variables_to_report
+            dictInputs['timeHorizon']               = timeHorizon
+            dictInputs['reportingInterval']         = reportingInterval
+            plots = datareporter.createReportData(tmpFolder)
 
-            # Copt the logo image to tmp folder
-            shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
-
-            tests_data = []
-            tests_data.append(datareporter.createReportData('Dummy test', 'Dummy test description', tmpFolder))
-            #log.Message(str(tests_data), 0)
-
-            log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
-            content += log_output
-
-            texReport = '{0}/{1}.tex'.format(tmpFolder, applicationID)
-            pdfReport = '{0}/{1}.pdf'.format(tmpFolder, applicationID)
-
-            # Generate Tex report
-            createLatexReport(inspector, tests_data, baseFolder + '/nineml-tex-template.tex', texReport, tmpFolder)
-            #os.chmod(texReport, 0666)
-
-            # Generate PDF report
-            createPDF = tmpFolder + '/createPDF.sh'
-            createPDFfile = open(createPDF, "w")
-            createPDFfile.write('cd {0}\n'.format(tmpFolder))
-            # Write this twice because of the problems with the Table Of Contents (we need two passes)
-            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
-            createPDFfile.write('/usr/bin/pdflatex -interaction=nonstopmode {0}\n'.format(texReport))
-            createPDFfile.close()
-            os.system('sh {0}'.format(createPDF))
-
-            # Read the contents of the report into a variable (to be sent together with the .html part)
-            if os.path.isfile(pdfReport):
-                pdf = open(pdfReport, "rb").read()
-                success = True
-            else:
-                success = False
-
-            html = createResultPage(content)
-
-            # Clean up
-            shutil.rmtree(tmpFolder)
-
-        except Exception, e:
-            content += 'Application environment:\n' + pformat(environ) + '\n\n'
-            content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
-            content += 'Simulation input:\n'
-            content += '  parameters:  {0}\n'.format(parameters)
-            content += '  initial_conditions:  {0}\n'.format(initial_conditions)
-            content += '  active_regimes:  {0}\n'.format(active_regimes)
-            content += '  analog_ports_expressions:  {0}\n'.format(analog_ports_expressions)
-            content += '  event_ports_expressions:  {0}\n'.format(event_ports_expressions)
-            content += '  variables_to_report:  {0}\n'.format(variables_to_report)
+            return True, (testName, testDescription, dictInputs, plots, log_output)
+            
+        except Exception as e:
             if log:
-                log_output = 'Log output:\n{0}'.format(log.JoinMessages('\n'))
-                content += '\n' + log_output
-
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            html = createErrorPage(str(e), exc_traceback, content)
-
-        if success:
-            boundary = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-            part1 = '--{0}\r\nContent-Type: text/html\r\n\r\n{1}\n'.format(boundary, html)
-            part2 = '--{0}\r\nContent-Disposition: attachment; filename=model-report.pdf\r\n\r\n{1}\n'.format(boundary, pdf)
-            output = part1 + part2
-            output_len = len(output)
-            start_response('200 OK', [('Content-type', 'multipart/mixed; boundary={0}'.format(boundary)),
-                                    ('Content-Length', str(output_len))])
-            return [output]
-
-        else:
-            output_len = len(html)
-            start_response('200 OK', [('Content-type', 'text/html'),
-                                    ('Content-Length', str(output_len))])
-            return [html]
+                log_output = '<pre>{0}</pre>'.format(log.JoinMessages('\n'))
+            return False, (testName, testDescription, dictInputs, None, log_output, str(e))
         
     def __call__(self, environ, start_response):
         try:
@@ -372,7 +465,7 @@ class nineml_webapp:
             else:
                 html = 'Error occurred:\n{0}\n{1}'.format(___import_exception___, ___import_exception_traceback___)
 
-        except Exception, e:
+        except Exception as e:
             content = 'Application environment:\n' + pformat(environ) + '\n\n'
             exc_type, exc_value, exc_traceback = sys.exc_info()
             html = createErrorPage(e, exc_traceback, content)

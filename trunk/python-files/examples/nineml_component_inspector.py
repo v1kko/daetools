@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
@@ -16,15 +17,15 @@ import dot2tex
 
 def printDictionary(dictionary):
     for key, value in dictionary.iteritems():
-        print '    {0} : {1}'.format(key, repr(value))
+        print('    {0} : {1}'.format(key, repr(value)))
 
 def printList(l):
     for value in l:
-        print '    {0}'.format(repr(value))
+        print('    {0}'.format(repr(value)))
 
 def updateDictionary(dictOld, dictNew):
     for key, value in dictNew.items():
-        if dictOld.has_key(key):
+        if key in dictOld:
             if isinstance(dictOld[key], float):
                 new_value = float(value)
             elif isinstance(dictOld[key], basestring):
@@ -36,7 +37,7 @@ def updateDictionary(dictOld, dictNew):
 
 def updateTree(item, dictNew):
     key = item.canonicalName
-    if dictNew.has_key(key):
+    if key in dictNew:
         if item.itemType == treeItem.typeFloat:
             item.value = float(dictNew[key])
 
@@ -134,8 +135,8 @@ def getValueFromDictionary(canonicalName, dictValues, defaultValue, excludeRootN
             key = '.'.join(names[1:])
     else:
         key = canonicalName
-    #print 'canonicalName = {0} -> key = {1}'.format(canonicalName, key)
-    if dictValues.has_key(key):
+    #print('canonicalName = {0} -> key = {1}'.format(canonicalName, key))
+    if key in dictValues:
         return dictValues[key]
     else:
         return defaultValue
@@ -149,7 +150,7 @@ def isValueInList(canonicalName, listValues, excludeRootName = False):
             key = '.'.join(names[1:])
     else:
         key = canonicalName
-    #print 'canonicalName = {0} -> key = {1}'.format(canonicalName, key)
+    #print('canonicalName = {0} -> key = {1}'.format(canonicalName, key))
     return (key in listValues)
 
 def collectParameters(nodeItem, component, dictParameters, initialValues = {}):
@@ -541,9 +542,9 @@ class nineml_component_inspector:
         if not isinstance(_variables_to_report, dict):
             raise RuntimeError('variables_to_report argument must be a dictionary')
 
-        if kwargs.has_key('timeHorizon'):
+        if 'timeHorizon' in kwargs:
             self.timeHorizon = float(kwargs.get('timeHorizon'))
-        if kwargs.has_key('reportingInterval'):
+        if 'reportingInterval' in kwargs:
             self.reportingInterval = float(kwargs.get('reportingInterval'))
 
         self.treeParameters = treeItem(None, self.ninemlComponent.name, None, None, treeItem.typeNoValue)
@@ -578,49 +579,49 @@ class nineml_component_inspector:
         return '\n'.join(res)
 
     def printCollectedData(self):
-        print 'timeHorizon: ' + str(self.timeHorizon)
-        print 'reportingInterval: ' + str(self.reportingInterval)
-        print 'parameters:'
+        print('timeHorizon: ' + str(self.timeHorizon))
+        print('reportingInterval: ' + str(self.reportingInterval))
+        print('parameters:')
         printDictionary(self.parameters)
-        print 'initial_conditions:'
+        print('initial_conditions:')
         printDictionary(self.initial_conditions)
-        print 'active_regimes:'
+        print('active_regimes:')
         printDictionary(self.active_regimes)
-        print 'analog_ports_expressions:'
+        print('analog_ports_expressions:')
         printDictionary(self.analog_ports_expressions)
-        print 'event_ports_expressions:'
+        print('event_ports_expressions:')
         printDictionary(self.event_ports_expressions)
-        print 'variables_to_report:'
+        print('variables_to_report:')
         printDictionary(self.variables_to_report)
     
     def printTrees(self):
-        print 'timeHorizon: ' + str(self.timeHorizon)
-        print 'reportingInterval: ' + str(self.reportingInterval)
-        print 'tree parameters:'
-        print str(self.treeParameters)
-        print 'tree initial_conditions:'
-        print str(self.treeInitialConditions)
-        print 'tree active_regimes:'
-        print str(self.treeActiveStates)
-        print 'tree event_ports_expressions:'
-        print str(self.treeEventPorts)
-        print 'tree analog_ports_expressions:'
-        print str(self.treeAnalogPorts)
-        print 'tree variables_to_report:'
-        print str(self.treeVariablesToReport)
+        print('timeHorizon: ' + str(self.timeHorizon))
+        print('reportingInterval: ' + str(self.reportingInterval))
+        print('tree parameters:')
+        print(str(self.treeParameters))
+        print('tree initial_conditions:')
+        print(str(self.treeInitialConditions))
+        print('tree active_regimes:')
+        print(str(self.treeActiveStates))
+        print('tree event_ports_expressions:')
+        print(str(self.treeEventPorts))
+        print('tree analog_ports_expressions:')
+        print(str(self.treeAnalogPorts))
+        print('tree variables_to_report:')
+        print(str(self.treeVariablesToReport))
 
     def printTreeDictionaries(self):
-        print 'tree parameters dictionary:'
+        print('tree parameters dictionary:')
         printDictionary(self.treeParameters.getDictionary())
-        print 'tree initial_conditions dictionary:'
+        print('tree initial_conditions dictionary:')
         printDictionary(self.treeInitialConditions.getDictionary())
-        print 'tree active_regimes dictionary:'
+        print('tree active_regimes dictionary:')
         printDictionary(self.treeActiveStates.getDictionary())
-        print 'tree event_ports_expressions dictionary:'
+        print('tree event_ports_expressions dictionary:')
         printDictionary(self.treeEventPorts.getDictionary())
-        print 'tree analog_ports_expressions dictionary:'
+        print('tree analog_ports_expressions dictionary:')
         printDictionary(self.treeAnalogPorts.getDictionary())
-        print 'tree variables_to_report dictionary:'
+        print('tree variables_to_report dictionary:')
         printDictionary(self.treeVariablesToReport.getDictionary())
 
     def updateData(self, **kwargs):
@@ -644,9 +645,9 @@ class nineml_component_inspector:
         if not isinstance(_variables_to_report, dict):
             raise RuntimeError('variables_to_report argument must be a dictionary')
 
-        if kwargs.has_key('timeHorizon'):
+        if 'timeHorizon' in kwargs:
             self.timeHorizon = float(kwargs.get('timeHorizon'))
-        if kwargs.has_key('reportingInterval'):
+        if 'reportingInterval' in kwargs:
             self.reportingInterval = float(kwargs.get('reportingInterval'))
         updateDictionary(self.parameters,               _parameters)
         updateDictionary(self.initial_conditions,       _initial_conditions)
@@ -681,42 +682,60 @@ class nineml_component_inspector:
         if not self.ninemlComponent or not isinstance(self.ninemlComponent, nineml.abstraction_layer.ComponentClass):
             raise RuntimeError('Invalid input NineML component')
         
-        form_template = """
-        <h1>NineMl component: {0}</h1>
-        {1}
-        """
         content = ''
+        content += '<fieldset>'
+        content += '<legend>General</legend>'
+        content += '<label for="testName">Test name</label>'
+        content += '<input type="text" name="testName" value="Dummy test"/><br/>'
+        content += '<label for="testDescription">Test description</label>'
+        content += '<textarea name="testDescription" rows="5" cols="50">Dummy test description</textarea><br/>'
+        content += '</fieldset>\n'
 
-        content += '<span>Time horizon</span><input type="text" name="timeHorizon" value="{0}"/>'.format(self.timeHorizon)
-        content += '<br/>'
-        content += '<span>Reporting interval</span><input type="text" name="reportingInterval" value="{0}"/>'.format(self.reportingInterval)
+        content += '<fieldset>'
+        content += '<legend>Simulation</legend>'
+        content += '<label for="timeHorizon">Time horizon</label>'
+        content += '<input type="text" name="timeHorizon" value="{0}"/><br/>'.format(self.timeHorizon)
+        content += '<label for="reportingInterval">Reporting interval</label>'
+        content += '<input type="text" name="reportingInterval" value="{0}"/><br/>'.format(self.reportingInterval)
+        content += '</fieldset>\n'
 
         if len(self.parameters) > 0:
-            content += '<h2>Parameters</h2>\n'
+            content += '<fieldset>'
+            content += '<legend>Parameters</legend>\n'
             content += self._generateHTMLFormTree(self.treeParameters, nineml_component_inspector.categoryParameters)
-            content += '\n'
+            content += '</fieldset>\n'
 
         if len(self.initial_conditions) > 0:
-            content += '<h2>Initial Conditions</h2>\n'
+            content += '<fieldset>'
+            content += '<legend>Initial Conditions</legend>\n'
             content += self._generateHTMLFormTree(self.treeInitialConditions, nineml_component_inspector.categoryInitialConditions) + '\n'
+            content += '</fieldset>\n'
 
         if len(self.active_regimes) > 0:
-            content += '<h2>Active Regimes</h2>\n'
+            content += '<fieldset>'
+            content += '<legend>Active Regimes</legend>\n'
             content += self._generateHTMLFormTree(self.treeActiveStates, nineml_component_inspector.categoryActiveStates)
+            content += '</fieldset>\n'
 
         if len(self.analog_ports_expressions) > 0:
-            content += '<h2>Analog Ports Expressions</h2>\n'
+            content += '<fieldset>'
+            content += '<legend>Analog Ports Expressions</legend>\n'
             content += self._generateHTMLFormTree(self.treeAnalogPorts, nineml_component_inspector.categoryAnalogPortsExpressions) + '\n'
+            content += '</fieldset>\n'
 
         if len(self.event_ports_expressions) > 0:
-            content += '<h2>Event Ports Expressions</h2>\n'
+            content += '<fieldset>'
+            content += '<legend>Event Ports Expressions</legend>\n'
             content += self._generateHTMLFormTree(self.treeEventPorts, nineml_component_inspector.categoryEventPortsExpressions) + '\n'
+            content += '</fieldset>\n'
 
         if len(self.variables_to_report) > 0:
-            content += '<h2>Variables To Report</h2>\n'
+            content += '<fieldset>'
+            content +='<legend>Variables To Report</legend>\n'
             content += self._generateHTMLFormTree(self.treeVariablesToReport, nineml_component_inspector.categoryVariablesToReport) + '\n'
+            content += '</fieldset>\n'
 
-        return form_template.format(self.ninemlComponent.name, content)
+        return content
 
     def _generateHTMLFormTree(self, item, category = ''):
         if category == '':
@@ -726,23 +745,23 @@ class nineml_component_inspector:
 
         content = '<ul>'
         if item.itemType == treeItem.typeFloat:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+            content += '<li><label for="{1}">{0}</label><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
 
         elif item.itemType == treeItem.typeInteger:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+            content += '<li><label for="{1}">{0}</label><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
 
         elif item.itemType == treeItem.typeString:
-            content += '<li><span>{0}</span><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
+            content += '<li><label for="{1}">{0}</label><input type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.value)
 
         elif item.itemType == treeItem.typeBoolean:
             if item.value:
-                content += '<li><span>{0}</span><input type="checkbox" name="{1}" checked/></li>'.format(item.name, inputName)
+                content += '<li><label for="{1}">{0}</label><input type="checkbox" name="{1}" checked/></li>'.format(item.name, inputName)
             else:
-                content += '<li><span>{0}</span><input type="checkbox" name="{1}"/></li>'.format(item.name, inputName)
+                content += '<li><label for="{1}">{0}</label><input type="checkbox" name="{1}"/></li>'.format(item.name, inputName)
 
         elif item.itemType == treeItem.typeList:
             if isinstance(item.data, collections.Iterable) and len(item.data) > 0:
-                content += '<li><span>{0}</span> <select name="{1}">'.format(item.name, inputName)
+                content += '<li><label for="{1}">{0}</label> <select name="{1}">'.format(item.name, inputName)
                 for available_regime in item.data:
                     if available_regime == item.value:
                         content += '<option value="{0}" selected>{0}</option>'.format(available_regime)
@@ -750,10 +769,10 @@ class nineml_component_inspector:
                         content += '<option value="{0}">{0}</option>'.format(available_regime)
                 content += '</select></li>'
             else:
-                content += '<li><span>{0}</span></li>'.format(item.name)
+                content += '<li>{0}</li>'.format(item.name)
 
         else:
-            content += '<li><span>{0}</span></li>'.format(item.name)
+            content += '<li>{0}</li>'.format(item.name)
 
         for child in item.children:
             content += self._generateHTMLFormTree(child, category)
@@ -888,21 +907,52 @@ class nineml_component_inspector:
             self._detectUniqueComponents(subcomponent, unique_components)
 
     def _addTestToReport(self, content, test):
-        """
-        'test' argument is a tuple: (varName, xPoints, yPoints, plotFileName)
-        """
-        testName  = test[0]
-        testNotes = test[1]
-        plots     = test[2]
+        #testName        = test[0]
+        #testDescription = test[1]
+        #dictInputs      = test[2]
+        #plots           = test[3]
+        testName, testDescription, dictInputs, plots, log_output = test
+        
+        testInputs = '\\begin{verbatim}\n'
+        testInputs += 'Time horizon = {0}\n'.format(dictInputs['timeHorizon'])
+        testInputs += 'Reporting interval = {0}\n'.format(dictInputs['reportingInterval'])
+        
+        testInputs += 'Parameters:\n'
+        for name, value in dictInputs['parameters'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += 'Initial conditions:\n'
+        for name, value in dictInputs['initial_conditions'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += 'Analog ports expressions:\n'
+        for name, value in dictInputs['analog_ports_expressions'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += 'Event ports expressions:\n'
+        for name, value in dictInputs['event_ports_expressions'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += 'Initially active regimes:\n'
+        for name, value in dictInputs['active_regimes'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += 'Variables to report:\n'
+        for name, value in dictInputs['variables_to_report'].items():
+            testInputs += '    {0} = {1}\n'.format(name, value)
+        
+        testInputs += '\\end{verbatim}\n'
+
         content.append('\\subsection*{{Test: {0}}}\n\n'.format(testName))
-        content.append('Description: \n{0}\n'.format(testNotes))
+        content.append('Description: \n{0}\\newline\n'.format(testDescription))
+        content.append('Input data: \n{0}\\newline\n'.format(testInputs))
         for plot in plots:
             varName      = plot[0]
             xPoints      = plot[1]
             yPoints      = plot[2]
-            plotFileName = plot[3]
-            plotFilePath = plot[4]
-            tex_plot = '\\begin{center}\n\\includegraphics{./' + plotFileName + '}\n\\end{center}\n'
+            pngFileName  = plot[3]
+            csvFileName  = plot[4]
+            tex_plot = '\\begin{center}\n\\includegraphics{./' + pngFileName + '}\n\\end{center}\n'
             content.append(tex_plot)
 
         
@@ -1203,20 +1253,14 @@ if __name__ == "__main__":
     variables_to_report['iaf_1coba.iaf.tspike'] = True
     inspector.updateData(variables_to_report = variables_to_report)
     inspector.updateTrees()
-    print 'New data'
+    print('New data')
     inspector.printTreeDictionaries()
     
-    #print inspector.getComponentXMLSourceCode()
+    #print(inspector.getComponentXMLSourceCode())
+    #print(inspector.generateHTMLForm())
+    #print(inspector.generateHTMLReport())
+    #print(inspector.generateLatexReport())
     
-    #print inspector.generateHTMLForm()
-
-    #print inspector.generateHTMLReport()
-
-    #print inspector.generateLatexReport()
-
-    """
-    simulation_data = daeSimulationInputData()
-    """
     import pickle
 
     ins = pickle.dumps(inspector)

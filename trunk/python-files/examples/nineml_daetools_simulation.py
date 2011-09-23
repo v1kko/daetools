@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import json
+from __future__ import print_function
+import json, numpy
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
@@ -52,40 +53,39 @@ class daeSimulationInputData:
 
     def loadJSON(self, jsonContent):
         data = json.loads(jsonContent)
-        print data
 
-        if data.has_key('timeHorizon'):
+        if 'timeHorizon' in data:
             self.timeHorizon = float(data['timeHorizon'])
 
-        if data.has_key('reportingInterval'):
+        if 'reportingInterval' in data:
             self.reportingInterval = float(data['reportingInterval'])
 
-        if data.has_key('parameters'):
+        if 'parameters' in data:
             temp = data['parameters']
             if isinstance(temp, dict):
                 self.parameters = temp
 
-        if data.has_key('initial_conditions'):
+        if 'initial_conditions' in data:
             temp = data['initial_conditions']
             if isinstance(temp, dict):
                 self.initial_conditions = temp
 
-        if data.has_key('analog_ports_expressions'):
+        if 'analog_ports_expressions' in data:
             temp = data['analog_ports_expressions']
             if isinstance(temp, dict):
                 self.analog_ports_expressions = temp
 
-        if data.has_key('event_ports_expressions'):
+        if 'event_ports_expressions' in data:
             temp = data['event_ports_expressions']
             if isinstance(temp, dict):
                 self.event_ports_expressions = temp
 
-        if data.has_key('active_regimes'):
+        if 'active_regimes' in data:
             temp = data['active_regimes']
             if isinstance(temp, list):
                 self.active_regimes = temp
 
-        if data.has_key('variables_to_report'):
+        if 'variables_to_report' in data:
             temp = data['variables_to_report']
             if isinstance(temp, list):
                 self.variables_to_report = temp
@@ -94,27 +94,23 @@ class daeSimulationInputData:
         return self.__str__()
 
     def __str__(self):
-        print 'timeHorizon:', timeHorizon
-        print 'reportingInterval:', reportingInterval
-        print 'parameters:'
-        printDictionary(self.parameters)
-        print 'initial_conditions:'
-        printDictionary(self.initial_conditions)
-        print 'active_regimes:'
-        printDictionary(self.active_regimes)
-        print 'analog_ports_expressions:'
-        printDictionary(self.analog_ports_expressions)
-        print 'event_ports_expressions:'
-        printDictionary(self.event_ports_expressions)
-        print 'variables_to_report:'
-        printDictionary(self.variables_to_report)
+        data = {}
+        data['timeHorizon']               = self.timeHorizon
+        data['reportingInterval']         = self.reportingInterval
+        data['parameters']                = self.parameters
+        data['initial_conditions']        = self.initial_conditions
+        data['analog_port_expressions']   = self.analog_port_expressions
+        data['event_port_expressions']    = self.event_port_expressions
+        data['active_regimes']            = self.active_regimes
+        data['variables_to_report']       = self.variables_to_report
+        return str(data)
 
 class ninemlTesterDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
 
-    def createReportData(self, testName, testNotes, tmp_folder = '/tmp'):
+    def createReportData(self, tmp_folder = '/tmp'):
         fp8  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
         fp9  = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
         fp11 = mpl.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
@@ -135,8 +131,10 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
             fileName   = var.Name
             fileName   = fileName.replace('.', '')
             fileName   = fileName.replace('_', '')
-            fileName   = fileName + '.png'
-            filePath   = tmp_folder + '/' + fileName
+            pngName    = fileName + '.png'
+            csvName    = fileName + '.csv'
+            pngPath    = tmp_folder + '/' + pngName
+            csvPath    = tmp_folder + '/' + csvName
             title      = var.Name.split('.')[-1] + ' = f(t)'
             xAxisLabel = 't'
             yAxisLabel = var.Name
@@ -149,11 +147,26 @@ class ninemlTesterDataReporter(daeDataReporterLocal):
             ax.set_title(title)
             ax.set_xlabel(xAxisLabel)
             #ax.set_ylabel(yAxisLabel)
-            fig.savefig(filePath, dpi=(300))
+            fig.savefig(pngPath, dpi=(300))
+            
+            if self.exportCSV(xPoints, yPoints, xAxisLabel, yAxisLabel, csvPath):
+                plots.append((var.Name, xPoints, yPoints, pngName, csvName))
+            else:
+                plots.append((var.Name, xPoints, yPoints, None, csvName))
 
-            plots.append((var.Name, xPoints, yPoints, fileName, filePath))
+        return plots
 
-        return (testName, testNotes, plots)
+    def exportCSV(self, x, y, xname, yname, filename):
+        try:
+            n = len(x)
+            f = open(filename, "w")
+            f.write('{0},{1}\n'.format(xname, yname))
+            for i in range(0, n):
+                f.write('%.18e,%.18e\n' % (x[i], y[i]))
+            f.close()
+            return True
+        except Exception as e:
+            return False
 
     def Connect(self, ConnectionString, ProcessName):
         return True
@@ -185,7 +198,7 @@ class nineml_daetools_simulation(daeSimulation):
         self.ReportingInterval         = float(kwargs.get('reportingInterval', 0.0))
 
     def SetUpParametersAndDomains(self):
-        for paramName, value in self._parameters.items():
+        for paramName, value in list(self._parameters.items()):
             paramName = str(paramName)
             parameter = getObjectFromCanonicalName(self.m, paramName, look_for_parameters = True)
             if parameter == None:
@@ -194,7 +207,7 @@ class nineml_daetools_simulation(daeSimulation):
             parameter.SetValue(value)
             
     def SetUpVariables(self):
-        for varName, value in self._initial_conditions.items():
+        for varName, value in list(self._initial_conditions.items()):
             varName = str(varName)
             variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
             if variable == None:
@@ -202,7 +215,7 @@ class nineml_daetools_simulation(daeSimulation):
             self.Log.Message('  --> Set the variable: {0} to: {1}'.format(varName, value), 0)
             variable.SetInitialCondition(value)
 
-        for portName, expression in self._analog_ports_expressions.items():
+        for portName, expression in list(self._analog_ports_expressions.items()):
             portName = str(portName)
             if expression == None or expression == '':
                 raise RuntimeError('An expression for the value of the analog port {0} cannot be empty'.format(portName))
@@ -211,7 +224,7 @@ class nineml_daetools_simulation(daeSimulation):
                 raise RuntimeError('Could not locate port {0}'.format(portName))
             self.Log.Message('port: {0} = {1}'.format(portName, self.parser.parse(expression)), 0)
 
-        for modelName, stateName in self._active_regimes.items():
+        for modelName, stateName in list(self._active_regimes.items()):
             modelName = str(modelName)
             stateName = str(stateName)
             stn = getObjectFromCanonicalName(self.m, modelName + '.' + nineml_daetools_bridge.ninemlSTNRegimesName, look_for_stns = True)
@@ -222,7 +235,7 @@ class nineml_daetools_simulation(daeSimulation):
             stn.ActiveState = stateName
 
         self.m.SetReportingOn(False)
-        for varName, value in self._variables_to_report.items():
+        for varName, value in list(self._variables_to_report.items()):
             varName = str(varName)
             if value:
                 variable = getObjectFromCanonicalName(self.m, varName, look_for_variables = True)
@@ -329,8 +342,21 @@ if __name__ == "__main__":
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_comp)
 
+    log_output = log.JoinMessages('\n')
+    plots = datareporter.createReportData('.')
+
+    dictInputs = {}
+    dictInputs['parameters']                = parameters
+    dictInputs['initial_conditions']        = initial_conditions
+    dictInputs['analog_ports_expressions']  = analog_ports_expressions
+    dictInputs['event_ports_expressions']   = event_ports_expressions
+    dictInputs['active_regimes']            = active_regimes
+    dictInputs['variables_to_report']       = variables_to_report
+    dictInputs['timeHorizon']               = timeHorizon
+    dictInputs['reportingInterval']         = reportingInterval
+    
     tests_data = []
-    tests_data.append(datareporter.createReportData('Dummy test', 'Dummy test notes', '.'))
+    tests_data.append( ('Dummy test', 'Dummy test notes', dictInputs, plots, log_output) )
 
     createLatexReport(inspector, tests_data, 'nineml-tex-template.tex', 'coba_iaf.tex')
 

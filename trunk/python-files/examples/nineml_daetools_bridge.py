@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
@@ -14,12 +15,12 @@ from daetools.pyDAE import *
 def addIdentifiers(model, parent, dictIdentifiers):
     for o in model.Parameters:
         relName = daeGetRelativeName(parent, o)
-        #print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        #print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
         dictIdentifiers[relName] = o()
 
     for o in model.Variables:
         relName = daeGetRelativeName(parent, o)
-        #print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        #print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
         dictIdentifiers[relName] = o()
 
     # Inlet analog ports do not have corresponding variable in the model (state or alias)
@@ -30,7 +31,7 @@ def addIdentifiers(model, parent, dictIdentifiers):
             if len(port.Variables) != 1:
                 raise RuntimeError('Number of variables has to be 1, in the port ' + port.CanonicalName)
             relName = daeGetRelativeName(parent, port)
-            #print 'CanonicalName: {0}, RelName: {1}'.format(port.CanonicalName, relName)
+            #print('CanonicalName: {0}, RelName: {1}'.format(port.CanonicalName, relName))
             dictIdentifiers[relName] = port.Variables[0]()
 
     for m in model.Models:
@@ -97,64 +98,64 @@ def getNineMLDictionaries(model):
 
 def printComponent(c, name, indent_string = '  ', level = 0):
     indent = level*indent_string
-    print indent + '+ COMPONENT: [{0}], class: [{1}]'.format(name, c.__class__.__name__)
+    print(indent + '+ COMPONENT: [{0}], class: [{1}]'.format(name, c.__class__.__name__))
 
     indent = indent + '  '
 
-    print indent + 'parameters:'
+    print(indent + 'parameters:')
     for o in c.parameters:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-    print indent + 'state_variables:'
+    print(indent + 'state_variables:')
     for o in c.state_variables:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-    print indent + 'aliases:'
+    print(indent + 'aliases:')
     for o in c.aliases:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-    print indent + 'regimes:'
+    print(indent + 'regimes:')
     for o in c.regimes:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-        print indent + indent_string + 'transitions:'
+        print(indent + indent_string + 'transitions:')
         for t in o.on_conditions:
-            print indent + 2*indent_string + 'source_regime.name: ' + t.source_regime.name
-            print indent + 2*indent_string + 'target_regime.name: ' + t.target_regime.name
-            print indent + 2*indent_string + 'trigger: ' + t.trigger.rhs
-            print indent + 2*indent_string + 'state_assignments:'
+            print(indent + 2*indent_string + 'source_regime.name: ' + t.source_regime.name)
+            print(indent + 2*indent_string + 'target_regime.name: ' + t.target_regime.name)
+            print(indent + 2*indent_string + 'trigger: ' + t.trigger.rhs)
+            print(indent + 2*indent_string + 'state_assignments:')
             for sa in t.state_assignments:
-                print indent + 3*indent_string + sa.lhs + ' = ' + sa.rhs
-            print indent + 2*indent_string + 'event_outputs:'
+                print(indent + 3*indent_string + sa.lhs + ' = ' + sa.rhs)
+            print(indent + 2*indent_string + 'event_outputs:')
             for eo in t.event_outputs:
-                print indent + 3*indent_string + str(eo)
+                print(indent + 3*indent_string + str(eo))
                 
         for t in o.on_events:
-            print indent + 2*indent_string + 'src_port_name: ' + t.src_port_name
-            print indent + 2*indent_string + 'source_regime_name: ' + t.source_regime.name
-            print indent + 2*indent_string + 'target_regime_name: ' + t.target_regime.name
-            print indent + 2*indent_string + 'state_assignments:'
+            print(indent + 2*indent_string + 'src_port_name: ' + t.src_port_name)
+            print(indent + 2*indent_string + 'source_regime_name: ' + t.source_regime.name)
+            print(indent + 2*indent_string + 'target_regime_name: ' + t.target_regime.name)
+            print(indent + 2*indent_string + 'state_assignments:')
             for sa in t.state_assignments:
-                print indent + 3*indent_string + sa.lhs + ' = ' + sa.rhs
-            print indent + 2*indent_string + 'event_outputs:'
+                print(indent + 3*indent_string + sa.lhs + ' = ' + sa.rhs)
+            print(indent + 2*indent_string + 'event_outputs:')
             for eo in t.event_outputs:
-                print indent + 3*indent_string + str(eo)
+                print(indent + 3*indent_string + str(eo))
 
 
-    print indent + 'analog_ports:'
+    print(indent + 'analog_ports:')
     for o in c.analog_ports:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-    print indent + 'event_ports:'
+    print(indent + 'event_ports:')
     for o in c.event_ports:
-        print indent + indent_string, o
+        print(indent + indent_string, o)
 
-    print indent + 'portconnections:'
+    print(indent + 'portconnections:')
     for o in c.portconnections:
-        print indent + indent_string + ' {0} -> {1}'.format(o[0].getstr('.'), o[1].getstr('.'))
+        print(indent + indent_string + ' {0} -> {1}'.format(o[0].getstr('.'), o[1].getstr('.')))
 
-    print indent + 'subnodes:'
-    for name, subc in c.subnodes.items():
+    print(indent + 'subnodes:')
+    for name, subc in list(c.subnodes.items()):
         printComponent(subc, name, indent_string, level+1)
 
 def findObjectInModel(model, name, **kwargs):
@@ -304,7 +305,7 @@ class nineml_daetools_bridge(daeModel):
 
         # 6) Create sub-nodes
         self.ninemlSubComponents = []
-        for name, subcomponent in self.ninemlComponent.subnodes.items():
+        for name, subcomponent in list(self.ninemlComponent.subnodes.items()):
             self.ninemlSubComponents.append( nineml_daetools_bridge(name, subcomponent, self) )
 
         # 7) Create port connections
@@ -370,7 +371,7 @@ class nineml_daetools_bridge(daeModel):
                     map_statevars_timederivs[time_deriv.dependent_variable] = time_deriv.rhs
                 #print map_statevars_timederivs
 
-                for var_name, rhs in map_statevars_timederivs.items():
+                for var_name, rhs in list(map_statevars_timederivs.items()):
                     variable = self.findVariable(var_name)
                     if variable == None:
                         raise RuntimeError('Cannot find state variable {0}'.format(var_name))
@@ -410,7 +411,6 @@ class nineml_daetools_bridge(daeModel):
 
                 # 2e) Create on_event actions
                 for on_event in regime.on_events:
-                    print self.Name, on_event.src_port_name
                     source_event_port = getObjectFromCanonicalName(self, on_event.src_port_name, look_for_eventports = True)
                     if source_event_port == None:
                         raise RuntimeError('Cannot find event port {0}'.format(on_event.src_port_name))

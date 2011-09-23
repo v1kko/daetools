@@ -102,7 +102,7 @@ class StandardFunctionNode(Node):
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
-            if not callable(fun):
+            if not isinstance(fun, collections.Callable):
                 raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
             argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
             return fun(argument0)

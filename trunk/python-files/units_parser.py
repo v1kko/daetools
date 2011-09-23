@@ -165,7 +165,7 @@ def testConsistency(parser, expression, expected_units):
             print('Units consistency failed: evaluated {0}; expected {1}\n'.format(eval_res.units, expected_units))
         else:
             print('Units consistency: OK [{0} == {1}]\n'.format(eval_res.units, expected_units))
-    except Exception, e:
+    except Exception as e:
         print('Units consistency failed: {0}\n'.format(str(e)))
         
 def testExpression(parser, expression, do_evaluation = True):
