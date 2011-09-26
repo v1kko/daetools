@@ -119,7 +119,9 @@ def test_hierachical_iaf_1coba():
         'iaf.tspike' : -1E99
     }
     analog_ports_expressions = {}
-    event_ports_expressions = {}
+    event_ports_expressions = {
+               'cobaExcit.spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
+    }
     active_regimes = {
         'cobaExcit' : 'cobadefaultregime',
         'iaf' : 'subthresholdregime'
@@ -127,6 +129,46 @@ def test_hierachical_iaf_1coba():
     variables_to_report = {
         'cobaExcit.I' : True,
         'iaf.V' : True
+    }
+
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
+
+def test_iaf():
+    nineml_component = TestableComponent('iaf')()
+    if not nineml_component:
+        raise RuntimeError('Cannot load NineML component')
+
+    timeHorizon = 1
+    reportingInterval = 0.001
+    parameters = {
+        'cm' : 1,
+        'gl' : 50,
+        'taurefrac' : 0.008,
+        'vreset' : -0.060,
+        'vrest' : -0.060,
+        'vthresh' : -0.040
+    }
+    initial_conditions = {
+        'V' : -0.060,
+        'tspike' : -1E99
+    }
+    analog_ports_expressions = {}
+    event_ports_expressions = {}
+    active_regimes = {
+        'iaf' : 'subthresholdregime'
+    }
+    variables_to_report = {
+        'V' : True
     }
 
     inspector = nineml_component_inspector()
@@ -200,7 +242,7 @@ if __name__ == "__main__":
     # test_hierachical_iaf_1coba
     # test_Hodgkin_Huxley
     # test_Izhikevich
-    results, inspector = test_hierachical_iaf_1coba()
+    results, inspector = test_iaf()
     if not results:
         exit(0)
 
@@ -227,7 +269,7 @@ if __name__ == "__main__":
     # Create Log, DAESolver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = ninemlTesterDataReporter()
+    datareporter = daeTCPIPDataReporter() #ninemlTesterDataReporter()
     model        = nineml_daetools_bridge(inspector.ninemlComponent.name, inspector.ninemlComponent)
     simulation   = nineml_daetools_simulation(model, timeHorizon              = simulation_data.timeHorizon,
                                                      reportingInterval        = simulation_data.reportingInterval,

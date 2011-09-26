@@ -5,7 +5,7 @@ import json, numpy
 import nineml
 from nineml.abstraction_layer.testing_utils import RecordValue, TestableComponent
 from nineml.abstraction_layer import ComponentClass
-import os, sys
+import os, sys, math
 from time import localtime, strftime, time
 from daetools.pyDAE import *
 from nineml_daetools_bridge import *
@@ -182,8 +182,8 @@ class nineml_daetools_simulation(daeSimulation):
         daeSimulation.__init__(self)
         self.m = model
 
-        dictIdentifiers, dictFunctions = getNineMLDictionaries(self.m)
-        self.parser = ExpressionParser(dictIdentifiers, dictFunctions)
+        dictIdentifiers, dictFunctions      = getAnalogPortsDictionaries(self.m)
+        self.analog_ports_expression_parser = ExpressionParser(dictIdentifiers, dictFunctions)
 
         # These dictionaries may contain unicode strings (if the input originated from the web form)
         # Therefore, str(...) should be used whenever a string is expected
@@ -196,6 +196,21 @@ class nineml_daetools_simulation(daeSimulation):
 
         self.TimeHorizon               = float(kwargs.get('timeHorizon', 0.0))
         self.ReportingInterval         = float(kwargs.get('reportingInterval', 0.0))
+        
+        self.intervals = {}
+        
+        # Initialize reduce ports
+        for portName, expression in list(self._analog_ports_expressions.items()):
+            portName = str(portName)
+            port = getObjectFromCanonicalName(self.m, portName, look_for_ports = True, look_for_reduceports = True)
+            if port == None:
+                raise RuntimeError('Could not locate port {0}'.format(portName))
+            if isinstance(port, ninemlReduceAnalogPort):
+                if len(port.Ports) != 0:
+                    raise RuntimeError('The reduce port {0} is connected and cannot be set a value'.format(portName))
+                a_port = port.addPort()
+            elif isinstance(port, ninemlAnalogPort):
+                pass
 
     def SetUpParametersAndDomains(self):
         for paramName, value in list(self._parameters.items()):
@@ -218,11 +233,43 @@ class nineml_daetools_simulation(daeSimulation):
         for portName, expression in list(self._analog_ports_expressions.items()):
             portName = str(portName)
             if expression == None or expression == '':
-                raise RuntimeError('An expression for the value of the analog port {0} cannot be empty'.format(portName))
+                raise RuntimeError('The analog port {0} is not connected and no value has been provided'.format(portName))
             port = getObjectFromCanonicalName(self.m, portName, look_for_ports = True, look_for_reduceports = True)
             if port == None:
                 raise RuntimeError('Could not locate port {0}'.format(portName))
-            self.Log.Message('port: {0} = {1}'.format(portName, self.parser.parse(expression)), 0)
+            
+            value = float(self.analog_ports_expression_parser.parse_and_evaluate(expression))
+            if isinstance(port, ninemlAnalogPort):
+                port.value.AssignValue(value)
+            elif isinstance(port, ninemlReduceAnalogPort):
+                for a_port in port.Ports:
+                    a_port.value.AssignValue(value)
+            else:
+                raise RuntimeError('Unknown port object: {0}'.format(portName))
+            self.Log.Message('  --> Assign the value of the port variable: {0} to {1} (evaluated value: {2})'.format(portName, expression, value), 0)
+        
+        for portName, expression in list(self._event_ports_expressions.items()):
+            portName = str(portName)
+            if expression == None or expression == '':
+                continue
+            port = getObjectFromCanonicalName(self.m, portName, look_for_eventports = True)
+            if port == None:
+                raise RuntimeError('Could not locate event port {0}'.format(portName))
+            
+            str_values = expression.split(',')
+            for item in str_values:
+                try:
+                    value = float(item)
+                except ValueError:
+                    raise RuntimeError('Cannot convert: {0} to floating point value in the event port expression: {1}'.format(item, expression))
+                # At this point self.intervals contain only event emit time points
+                if value in self.intervals:
+                    data = self.intervals[value]
+                else:
+                    data = []
+                data.append(port)
+                self.intervals[value] = data
+            self.Log.Message('  --> Event port {0} triggers at: {1}'.format(portName, expression), 0)
 
         for modelName, stateName in list(self._active_regimes.items()):
             modelName = str(modelName)
@@ -245,8 +292,35 @@ class nineml_daetools_simulation(daeSimulation):
                 variable.ReportingOn = True
         
     def Run(self):
+        # Add the normal reporting times
+        for t in self.ReportingTimes:
+            if not t in self.intervals:
+                self.intervals[t] = None
+        #for t, ports in sorted(self.intervals.items()):
+        #    print('%.18e: %s' % (t, str(ports)))
+        
+        for t, event_ports in sorted(self.intervals.items()):
+            # IDA complains when time horizon is too close to the current time 
+            if math.fabs(t - self.CurrentTime) < 1E-5:
+                self.Log.Message('WARNING: skipping the time point %.18e: too close to the neighbouring point' % t, 0)
+                continue
+            
+            # Integrate until 't'
+            self.Log.Message('Integrating from %.7f to %.7f ...' % (self.CurrentTime, t), 0)
+            self.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
+            
+            # Trigger the events (if any) and reinitialize
+            if event_ports:
+                for event_port in event_ports:
+                    event_port.ReceiveEvent(0.0)
+                self.Reinitialize()
+            
+            # Report the data
+            self.ReportData(self.CurrentTime)
+                    
+            
+        """
         spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
-
         dt = 0.1
         while self.CurrentTime < self.TimeHorizon:
             spikeinput.ReceiveEvent(0.0)
@@ -262,7 +336,8 @@ class nineml_daetools_simulation(daeSimulation):
                 self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
                 self.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
                 self.ReportData(self.CurrentTime)
-          
+        """
+        
 if __name__ == "__main__":
     parameters = {
         'cobaExcit.q' : 3.0,

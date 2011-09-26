@@ -1196,6 +1196,7 @@ class nineml_component_inspector:
                 dot_graph = dot_graph_template.format(' '.join(regimes_list), '\n'.join(transitions_list))
                 graph     = dot2tex.dot2tex(dot_graph, autosize=True, texmode='math', format='tikz', crop=True, figonly=True)
                 tex_graph = '\\begin{center}\n' + graph + '\\end{center}\n'
+                content.append('\\newline \n')
                 content.append(tex_graph)
                 content.append('\n')
             

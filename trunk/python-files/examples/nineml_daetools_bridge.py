@@ -81,6 +81,7 @@ def getNineMLDictionaries(model):
     dictFunctions['exp']   = Exp
     dictFunctions['floor'] = Floor
     dictFunctions['ceil']  = Ceil
+    dictFunctions['abs']   = Abs
 
     # Non-standard functions (multiple arguments)
     dictFunctions['pow']   = Pow
@@ -91,6 +92,42 @@ def getNineMLDictionaries(model):
     dictFunctions['random.binomial']    = random_binomial
     dictFunctions['random.poisson']     = random_poisson
     dictFunctions['random.exponential'] = random_exponential
+
+    dictIdentifiers = addIdentifiers(model, model, dictIdentifiers)
+
+    return dictIdentifiers, dictFunctions
+
+def getAnalogPortsDictionaries(model):
+    dictIdentifiers = {}
+    dictFunctions   = {}
+
+    dictIdentifiers['t']  = model.time()
+    dictIdentifiers['pi'] = math.pi
+    dictIdentifiers['e']  = math.e
+
+    # Standard math. functions (single argument)
+    dictFunctions['sin']   = math.sin
+    dictFunctions['cos']   = math.cos
+    dictFunctions['tan']   = math.tan
+    dictFunctions['asin']  = math.asin
+    dictFunctions['acos']  = math.acos
+    dictFunctions['atan']  = math.atan
+    dictFunctions['sinh']  = math.sinh
+    dictFunctions['cosh']  = math.cosh
+    dictFunctions['tanh']  = math.tanh
+    dictFunctions['asinh'] = math.asinh
+    dictFunctions['acosh'] = math.acosh
+    dictFunctions['atanh'] = math.atanh
+    dictFunctions['log10'] = math.log10
+    dictFunctions['log']   = math.log
+    dictFunctions['sqrt']  = math.sqrt
+    dictFunctions['exp']   = math.exp
+    dictFunctions['floor'] = math.floor
+    dictFunctions['ceil']  = math.ceil
+    dictFunctions['abs']   = math.fabs
+
+    # Non-standard functions (multiple arguments)
+    dictFunctions['pow']   = math.pow
 
     dictIdentifiers = addIdentifiers(model, model, dictIdentifiers)
 
