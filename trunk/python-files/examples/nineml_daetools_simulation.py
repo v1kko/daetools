@@ -302,7 +302,7 @@ class nineml_daetools_simulation(daeSimulation):
         for t, event_ports in sorted(self.intervals.items()):
             # IDA complains when time horizon is too close to the current time 
             if math.fabs(t - self.CurrentTime) < 1E-5:
-                self.Log.Message('WARNING: skipping the time point %.18e: too close to the neighbouring point' % t, 0)
+                self.Log.Message('WARNING: skipping the time point %.18e: too close to the previous time point' % t, 0)
                 continue
             
             # Integrate until 't'
@@ -318,26 +318,6 @@ class nineml_daetools_simulation(daeSimulation):
             # Report the data
             self.ReportData(self.CurrentTime)
                     
-            
-        """
-        spikeinput = getObjectFromCanonicalName(self.m, 'iaf_1coba.cobaExcit.spikeinput', look_for_eventports = True)
-        dt = 0.1
-        while self.CurrentTime < self.TimeHorizon:
-            spikeinput.ReceiveEvent(0.0)
-            self.Reinitialize()
-            self.ReportData(self.CurrentTime)
-
-            targetTime = self.CurrentTime + dt
-            if targetTime > self.TimeHorizon:
-                targetTime = self.TimeHorizon
-
-            while self.CurrentTime < targetTime:
-                t = self.NextReportingTime
-                self.Log.Message('Integrating from {0} to {1} ...'.format(self.CurrentTime, t), 0)
-                self.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity)
-                self.ReportData(self.CurrentTime)
-        """
-        
 if __name__ == "__main__":
     parameters = {
         'cobaExcit.q' : 3.0,

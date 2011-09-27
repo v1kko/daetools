@@ -305,10 +305,7 @@ if __name__ == "__main__":
 
     print('JSON data:')
     jsonContent = simulation_data.dumpJSON()
-    #print('jsonContent:', jsonContent)
-    #simulation_data.loadJSON(jsonContent)
-    #jsonContent1 = simulation_data.dumpJSON()
-    #print(jsonContent1)
+    print('jsonContent:', jsonContent)
 
     # Create Log, DAESolver, DataReporter and Simulation object
     log          = daePythonStdOutLog()

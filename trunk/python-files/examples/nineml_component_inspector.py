@@ -205,7 +205,7 @@ def collectAnalogPorts(nodeItem, component, dictAnalogPortsExpressions, connecte
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
             objName = nodeItem.canonicalName + '.' + obj.name
             if isValueInList(objName, connected_ports, False) == False:
-                value   = getValueFromDictionary(objName, expressions, '', True)
+                value   = str(getValueFromDictionary(objName, expressions, '', True))
                 dictAnalogPortsExpressions[objName] = value
                 item = treeItem(nodeItem, obj.name, value, None, treeItem.typeString)
 
@@ -217,7 +217,7 @@ def collectEventPorts(nodeItem, component, dictEventPortsExpressions, expression
     for obj in component.event_ports:
         if (obj.mode == 'recv') or (obj.mode == 'reduce'):
             objName = nodeItem.canonicalName + '.' + obj.name
-            value   = getValueFromDictionary(objName, expressions, '', True)
+            value   = str(getValueFromDictionary(objName, expressions, '', True))
             dictEventPortsExpressions[objName] = value
             item = treeItem(nodeItem, obj.name, value, None, treeItem.typeString)
 
@@ -688,7 +688,7 @@ class nineml_component_inspector:
         content += '<label for="testName">Test name</label>'
         content += '<input type="text" name="testName" value="Dummy test"/><br/>'
         content += '<label for="testDescription">Test description</label>'
-        content += '<textarea name="testDescription" rows="5" cols="50">Dummy test description</textarea><br/>'
+        content += '<textarea name="testDescription" rows="2" cols="50">Dummy test description</textarea><br/>'
         content += '</fieldset>\n'
 
         content += '<fieldset>'
@@ -707,31 +707,31 @@ class nineml_component_inspector:
 
         if len(self.initial_conditions) > 0:
             content += '<fieldset>'
-            content += '<legend>Initial Conditions</legend>\n'
+            content += '<legend>Initial conditions</legend>\n'
             content += self._generateHTMLFormTree(self.treeInitialConditions, nineml_component_inspector.categoryInitialConditions) + '\n'
             content += '</fieldset>\n'
 
         if len(self.active_regimes) > 0:
             content += '<fieldset>'
-            content += '<legend>Active Regimes</legend>\n'
+            content += '<legend>Initially active regimes</legend>\n'
             content += self._generateHTMLFormTree(self.treeActiveStates, nineml_component_inspector.categoryActiveStates)
             content += '</fieldset>\n'
 
         if len(self.analog_ports_expressions) > 0:
             content += '<fieldset>'
-            content += '<legend>Analog Ports Expressions</legend>\n'
+            content += '<legend>Analog-ports inputs</legend>\n'
             content += self._generateHTMLFormTree(self.treeAnalogPorts, nineml_component_inspector.categoryAnalogPortsExpressions) + '\n'
             content += '</fieldset>\n'
 
         if len(self.event_ports_expressions) > 0:
             content += '<fieldset>'
-            content += '<legend>Event Ports Expressions</legend>\n'
+            content += '<legend>Event-ports inputs</legend>\n'
             content += self._generateHTMLFormTree(self.treeEventPorts, nineml_component_inspector.categoryEventPortsExpressions) + '\n'
             content += '</fieldset>\n'
 
         if len(self.variables_to_report) > 0:
             content += '<fieldset>'
-            content +='<legend>Variables To Report</legend>\n'
+            content +='<legend>Variables to report</legend>\n'
             content += self._generateHTMLFormTree(self.treeVariablesToReport, nineml_component_inspector.categoryVariablesToReport) + '\n'
             content += '</fieldset>\n'
 

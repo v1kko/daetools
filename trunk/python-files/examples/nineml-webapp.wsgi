@@ -13,7 +13,7 @@ try:
     baseFolder = '/home/ciroki/Data/daetools/trunk/python-files/examples'
     sys.path.append(baseFolder)
     os.environ['HOME'] = tempfile.gettempdir()
-    #print(os.environ['HOME'], file=sys.stderr)
+    print(os.environ, file=sys.stderr)
 
     import nineml
     from nineml.abstraction_layer import readers
@@ -32,9 +32,9 @@ except Exception as e:
     ___import_exception___           = str(e)
     ___import_exception_traceback___ = exc_traceback
 
-class nineml_webapp:
-    nineml_process_data = {}
+nineml_process_data = {}
 
+class nineml_webapp:
     def __init__(self):
         pass
 
@@ -130,7 +130,7 @@ class nineml_webapp:
                                                 variables_to_report      = variables_to_report)
 
             applicationID = compName + strftime("[%d.%m.%Y-%H:%M:%S]", localtime())
-            nineml_webapp.nineml_process_data[applicationID] = inspector
+            nineml_process_data[applicationID] = inspector
 
             formTemplate  = getSetupDataForm()
             content      += formTemplate.format(nineml_component.name, inspector.generateHTMLForm(), applicationID)
@@ -186,10 +186,11 @@ class nineml_webapp:
                 raise RuntimeError('No application ID has been specified')
 
             applicationID = dictFormData['__NINEML_WEBAPP_ID__'][0]
-            if not nineml_webapp.nineml_process_data.has_key(applicationID):
+            print('applicationID = {0}\nnineml_process_data = {1}'.format(applicationID, nineml_process_data), file = sys.stderr)
+            if not nineml_process_data.has_key(applicationID):
                 return self.initial_page(environ, start_response)
 
-            inspector = nineml_webapp.nineml_process_data[applicationID]
+            inspector = nineml_process_data[applicationID]
             if not inspector:
                 raise RuntimeError('Invalid inspector object')
 
@@ -263,8 +264,8 @@ class nineml_webapp:
         if os.path.isdir(tmpFolder):
             shutil.rmtree(tmpFolder)
         # Remove inspector from the map
-        if nineml_webapp.nineml_process_data.has_key(applicationID):
-            del nineml_webapp.nineml_process_data[applicationID]
+        if nineml_process_data.has_key(applicationID):
+            del nineml_process_data[applicationID]
             
         if success:
             part1 = ''
