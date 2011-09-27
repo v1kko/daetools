@@ -143,6 +143,46 @@ def test_hierachical_iaf_1coba():
     results = inspector.showQtGUI()
     return results, inspector
 
+def test_coba_synapse():
+    nineml_component = TestableComponent('coba_synapse')()
+    if not nineml_component:
+        raise RuntimeError('Cannot load NineML component')
+
+    timeHorizon = 1
+    reportingInterval = 0.001
+    parameters = {
+        'q' : 3.0,
+        'tau' : 5.0,
+        'vrev' : 0.0
+    }
+    initial_conditions = {
+        'g' : 0.0,
+    }
+    analog_ports_expressions = {
+        'V' : -0.050
+    }
+    event_ports_expressions = {
+        'spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
+    }
+    active_regimes = {
+        'cobaExcit' : 'cobadefaultregime'
+    }
+    variables_to_report = {
+        'I' : True
+    }
+
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
+                                        reportingInterval        = reportingInterval,
+                                        parameters               = parameters,
+                                        initial_conditions       = initial_conditions,
+                                        active_regimes           = active_regimes,
+                                        analog_ports_expressions = analog_ports_expressions,
+                                        event_ports_expressions  = event_ports_expressions,
+                                        variables_to_report      = variables_to_report)
+    results = inspector.showQtGUI()
+    return results, inspector
+
 def test_iaf():
     nineml_component = TestableComponent('iaf')()
     if not nineml_component:
@@ -162,7 +202,9 @@ def test_iaf():
         'V' : -0.060,
         'tspike' : -1E99
     }
-    analog_ports_expressions = {}
+    analog_ports_expressions = {
+        'I' : 1.2
+    }
     event_ports_expressions = {}
     active_regimes = {
         'iaf' : 'subthresholdregime'
@@ -238,11 +280,13 @@ def test_hierachical_iaf_nmda():
     return results, inspector
 
 if __name__ == "__main__":
+    # test_iaf()
+    # test_coba_synapse
     # test_hierachical_iaf_nmda
     # test_hierachical_iaf_1coba
     # test_Hodgkin_Huxley
     # test_Izhikevich
-    results, inspector = test_iaf()
+    results, inspector = test_coba_synapse()
     if not results:
         exit(0)
 
