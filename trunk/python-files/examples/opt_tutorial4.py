@@ -66,7 +66,7 @@ class simTutorial(daeSimulation):
         self.m.x4.AssignValue(1)
         self.m.x5.AssignValue(1)
 
-    def SetUpOptimization(self):
+    def SetUpSensitivityAnalysis(self):
         self.ObjectiveFunction.Residual = 100 * (self.m.x2() - self.m.x1()**2)**2 + (1 - self.m.x1())**2 + \
                                           100 * (self.m.x3() - self.m.x2()**2)**2 + (1 - self.m.x2())**2 + \
                                           100 * (self.m.x3() - self.m.x3()**2)**2 + (1 - self.m.x3())**2 + \
@@ -81,7 +81,7 @@ class simTutorial(daeSimulation):
 def ObjectiveFunction(x, *args):
     simulation = args[0]
     
-    # This function will be called repeadetly to obtain the values of the objective function.
+    # This function will be called repeatedly to obtain the values of the objective function.
     # In order to call DAE Tools repedeatly the following sequence of calls is necessary:
     # 1. Set initial conditions, initial guesses, initially active states etc (function simulation.SetUpVariables)
     #    In general, variables values, active states, initial consitions etc can be saved in some arrays and
@@ -114,41 +114,40 @@ def ObjectiveFunction(x, *args):
     #    Objective function and constraints have Value (float) and Gradients (numpy array) properties where
     #    their values and gradients in respect to optimization variables are stored. Here, as the example,
     #    the value and gradients of the objective function are printed (since no constraints are involved).
-    print 'Objective function, x =', x
-    print '   .Value     =', simulation.ObjectiveFunction.Value
-    print '   .Gradients =', simulation.ObjectiveFunction.Gradients
-    print '-----------------------------------------------------------------------------------------------'
-
+    print 'Objective function inputs: '
+    print '   Inputs: {0}'.format(x)
+    print '   Value     = {0}'.format(simulation.ObjectiveFunction.Value)
+    print '   Gradients = {0}'.format(simulation.ObjectiveFunction.Gradients)
+    print ''
     return simulation.ObjectiveFunction.Value
 
+if __name__ == "__main__":
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
 
-log          = daePythonStdOutLog()
-daesolver    = daeIDAS()
-datareporter = daeTCPIPDataReporter()
-simulation   = simTutorial()
+    simulation.m.SetReportingOn(True)
 
-simulation.m.SetReportingOn(True)
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 5
 
-simulation.ReportingInterval = 1
-simulation.TimeHorizon = 5
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
 
-simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-if(datareporter.Connect("", simName) == False):
-    sys.exit()
+    # ACHTUNG, ACHTUNG!!
+    # To request simulation to calculate sensitivities use the keyword argument CalculateSensitivities:
+    simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
 
-# ACHTUNG, ACHTUNG!!
-# To request simulation to calculate sensitivities use the function:
-#     simulation.Initialize(..., CalculateSensitivities = True)!!
-simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    # Get the starting point from optimization variables
+    x0 = [simulation.ov1.StartingPoint, 
+          simulation.ov2.StartingPoint, 
+          simulation.ov3.StartingPoint, 
+          simulation.ov4.StartingPoint,
+          simulation.ov5.StartingPoint]
 
-# Get the starting point from optimization variables
-x0 = [simulation.ov1.StartingPoint, 
-      simulation.ov2.StartingPoint, 
-      simulation.ov3.StartingPoint, 
-      simulation.ov4.StartingPoint,
-      simulation.ov5.StartingPoint]
-
-print fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8)
+    print fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8)

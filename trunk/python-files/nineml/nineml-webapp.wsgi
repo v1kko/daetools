@@ -134,8 +134,6 @@ class nineml_webapp:
 
             applicationID   = os.path.split(tmpFolder)[1]
             pickle_filename = os.path.join(tmpFolder, 'webapp.pickle')
-            if not os.path.isfile(pickle_filename):
-                raise RuntimeError('Cannot access the directory: {0}'.format(pickle_filename))
             
             f_pickle = open(pickle_filename, 'wb')
             pickle.dump(inspector, f_pickle, pickle.HIGHEST_PROTOCOL)

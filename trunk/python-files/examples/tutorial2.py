@@ -196,8 +196,6 @@ def consoleRun():
     ro = daeVariableWrapper(simulation.m.ro, 'ro')
     print ro.Name
     print ro.Value
-    ro.Value = 9000
-    print ro.Value
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

@@ -18,9 +18,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 This tutorial shows the interoperability between DAE Tools and 3rd party optimization 
 software (scipy.optimize) used to fit the simple function with experimental data.
-DAE Tools simulation is used to calculate the objective function and its gradients,
+DAE Tools simulation object is used to calculate the objective function and its gradients,
 while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder)
-implementing  algorithm is used to estimate the parameters."""
+implementing Levenberg-Marquardt algorithm is used to estimate the parameters.
+"""
 
 import sys
 from daetools.pyDAE import *
@@ -51,9 +52,9 @@ class simTutorial(daeSimulation):
         self.m = modTutorial("opt_tutorial5")
         self.m.Description = "This tutorial shows the interoperability between DAE Tools and 3rd party optimization " \
                              "software (scipy.optimize) used to fit the simple function with experimental data. " \
-                             "DAE Tools simulation is used to calculate the objective function and its gradients, " \
+                             "DAE Tools simulation object is used to calculate the objective function and its gradients, " \
                              "while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder) " \
-                             "implementing  algorithm is used to estimate the parameters."
+                             "implementing Levenberg-Marquardt algorithm is used to estimate the parameters."
 
     def SetUpParametersAndDomains(self):
         pass

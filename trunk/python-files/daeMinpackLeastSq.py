@@ -84,7 +84,7 @@ def Calculate(p, minpack, calc_values):
                     # print 'Integrating from {0} to {1}...'.format(minpack.simulation.CurrentTime, t)
 
                     # Do not stop at discontinuity and do not report data around discontinuities!!!
-                    minpack.simulation.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity, false)
+                    minpack.simulation.IntegrateUntilTime(t, eDoNotStopAtDiscontinuity, False)
                     minpack.simulation.ReportData(minpack.simulation.CurrentTime)
 
                     for o in range(0, minpack.Nmeasured_variables):

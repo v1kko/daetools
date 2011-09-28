@@ -595,7 +595,8 @@ void daeOnEventActions::Export(std::string& strContent, daeeModelLanguage eLangu
 
 void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
 {
-	std::cout << "    Update received in the OnEventActions: " << GetName() << ", data = " << *((real_t*)data) << std::endl;
+	real_t inputData = *(static_cast<real_t*>(data));
+	std::cout << "    Update received in the OnEventActions: " << GetName() << ", data = " << inputData << std::endl;
 	Execute();
 }
 

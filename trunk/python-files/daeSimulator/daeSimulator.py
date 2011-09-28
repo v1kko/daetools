@@ -71,19 +71,21 @@ class daeSimulator(QtGui.QDialog):
         self.connect(self.ui.MatrixButton, QtCore.SIGNAL('clicked()'), self.slotOpenSparseMatrixImage)
         self.connect(self.ui.ExportButton, QtCore.SIGNAL('clicked()'), self.slotExportSparseMatrixAsMatrixMarketFormat)
 
-        self.app = app
-        self.simulation              = kwargs.get('simulation',   None)
-        self.optimization            = kwargs.get('optimization', None)
-        self.datareporter            = kwargs.get('datareporter', None)
-        self.log                     = kwargs.get('log',          None)
-        self.daesolver               = kwargs.get('daesolver',    None)
-        self.lasolver                = kwargs.get('lasolver',     None)
-        self.nlpsolver               = kwargs.get('nlpsolver',    None)
-        self.nlpsolver_setoptions_fn = kwargs.get('nlpsolver_setoptions_fn', None)
-        self.lasolver_setoptions_fn  = kwargs.get('lasolver_setoptions_fn',  None)
+        self.app                         = app
+        self.simulation                  = kwargs.get('simulation',                 None)
+        self.optimization                = kwargs.get('optimization',               None)
+        self.datareporter                = kwargs.get('datareporter',               None)
+        self.log                         = kwargs.get('log',                        None)
+        self.daesolver                   = kwargs.get('daesolver',                  None)
+        self.lasolver                    = kwargs.get('lasolver',                   None)
+        self.nlpsolver                   = kwargs.get('nlpsolver',                  None)
+        self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
+        self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
+        self.run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
 
         if self.app == None:
-            raise RuntimeError('daeSimulator: app object must not be None')
+            if not QtCore.QCoreApplication.instance():
+                self.app = QtGui.QApplication(sys.argv)
         if self.simulation == None:
             raise RuntimeError('daeSimulator: simulation object must not be None')
 
@@ -318,6 +320,8 @@ class daeSimulator(QtGui.QDialog):
                     self.lasolver_setoptions_fn(self.lasolver)
                 self.simulation.SolveInitial()
                 self.simulation.Run()
+                if self.run_after_simulation_end_fn:
+                    self.run_after_simulation_end_fn(simulation, log)
 
             else:
                 # If nlpsolver is not sent then create it based on the selection
@@ -366,6 +370,8 @@ class daeSimulator(QtGui.QDialog):
                 if(self.nlpsolver_setoptions_fn):
                     self.nlpsolver_setoptions_fn(self.nlpsolver)
                 self.optimization.Run()
+                if self.run_after_simulation_end_fn:
+                    self.run_after_simulation_end_fn(simulation, log)
 
         except Exception, error:
             self.ui.textEdit.append(str(error))

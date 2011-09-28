@@ -12,7 +12,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys
+import os, sys
 from time import localtime, strftime
 
 try:
@@ -44,7 +44,7 @@ except Exception, e:
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12
-    import opt_tutorial1, opt_tutorial2, opt_tutorial3
+    import opt_tutorial1, opt_tutorial2, opt_tutorial3, opt_tutorial4, opt_tutorial5, opt_tutorial6
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
 
@@ -102,11 +102,19 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(12, "tutorial12")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(13, "opt_tutorial1")
+        self.ui.comboBoxExample.setItemText(13, "tutorial13")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(14, "opt_tutorial2")
+        self.ui.comboBoxExample.setItemText(14, "opt_tutorial1")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(15, "opt_tutorial3")
+        self.ui.comboBoxExample.setItemText(15, "opt_tutorial2")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(16, "opt_tutorial3")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(17, "opt_tutorial4")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(18, "opt_tutorial5")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(19, "opt_tutorial6")
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -166,6 +174,11 @@ class RunExamples(QtGui.QDialog):
                 opt_tutorial2.guiRun(self.app)
             elif simName == "opt_tutorial3":
                 opt_tutorial3.guiRun(self.app)
+            elif simName == "opt_tutorial4":
+                path     = os.path.abspath(opt_tutorial4.__file__)
+                dir_path = os.path.dirname(path)
+                os.system(dir_path)
+                #opt_tutorial3.guiRun(self.app)
             else:
                 pass
         except RuntimeError, e:
