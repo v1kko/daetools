@@ -135,8 +135,7 @@ def Derivatives(p, simulation, xin, ymeas):
 def peval(x, p):
     return p[0]*sin(2*pi*p[1]*x+p[2])
 
-
-if __name__ == "__main__":
+def run():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
@@ -210,3 +209,6 @@ if __name__ == "__main__":
     plt.title('Least-squares fit to experimental data')
     plt.legend(['Fit', 'Experimental', 'Exact'])
     plt.show()
+
+if __name__ == "__main__":
+    run()

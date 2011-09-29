@@ -26,19 +26,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "export.h"
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-// Some M$ crap
-
-#pragma warning(disable: 4250)
-#pragma warning(disable: 4251)
-#pragma warning(disable: 4275)
-
-#ifdef AddPort
-#undef AddPort
-#endif
-
-#ifdef GetCurrentTime
-#undef GetCurrentTime
-#endif
 
 #ifdef DAEDLL
 #ifdef MODEL_EXPORTS

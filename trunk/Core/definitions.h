@@ -36,6 +36,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <typeinfo>
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#pragma warning(disable: 4250)
+#pragma warning(disable: 4251)
+#pragma warning(disable: 4275)
+
+#ifdef AddPort
+#undef AddPort
+#endif
+
+#ifdef GetCurrentTime
+#undef GetCurrentTime
+#endif
+
+#endif
+
 namespace dae 
 {
 using std::string;

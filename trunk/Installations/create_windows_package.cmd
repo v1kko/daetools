@@ -72,7 +72,7 @@ copy pyBONMIN.pyd                    %ROOT%\solvers
 copy pyIPOPT.pyd                     %ROOT%\solvers
 copy pyNLOPT.pyd                     %ROOT%\solvers
 copy pyTrilinos.pyd                  %ROOT%\solvers
-REM copy pySuperLU.pyd               %ROOT%\solvers
+copy pySuperLU.pyd                   %ROOT%\solvers
 REM copy pySuperLU_MT.pyd            %ROOT%\solvers
 REM copy pySuperLU_CUDA.pyd          %ROOT%\solvers
 
@@ -122,10 +122,10 @@ cd examples
 REM copy *.*            %ROOT%\examples
 copy *.css              %ROOT%\examples
 copy *.xsl              %ROOT%\examples
-copy *tutorial*.html    %ROOT%\examples
-copy *tutorial*.xml     %ROOT%\examples
-copy *tutorial*.py      %ROOT%\examples
+copy *whats_the_time*.* %ROOT%\examples
+copy *tutorial*.*       %ROOT%\examples
 copy *.init             %ROOT%\examples
+copy *RunExamples*.py   %ROOT%\examples
 copy daeRunExamples.py  %ROOT%\examples\daeRunExamples.pyw
 REM copy *.png          %ROOT%\examples
 cd images

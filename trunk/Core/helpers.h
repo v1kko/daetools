@@ -712,7 +712,7 @@ inline double GetTimeInSeconds(void)
 {
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
     DWORD time = GetTickCount();
-    return (double)(time * 1.0E3);
+    return (double)(time / 1.0E3);
 #else
 	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);

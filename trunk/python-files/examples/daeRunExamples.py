@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, subprocess
+from StringIO import StringIO
 from time import localtime, strftime
 
 try:
@@ -190,13 +191,19 @@ class RunExamples(QtGui.QDialog):
             QtGui.QMessageBox.warning(self, "daeRunExamples", "Exception raised: " + str(e))
 
     def consoleRunAndShowResults(self, module):
-        path  = module.__file__
-        popen = subprocess.Popen(['python ' + path, ''], shell = True, stdout = subprocess.PIPE)
-        message = popen.stdout.read()
-        view = WebView('<pre>{0}</pre>'.format(message))
-        view.resize(700, 500)
-        view.setWindowTitle('Console execution results')
-        view.exec_()
+        try:
+            output = StringIO()
+            saveout = sys.stdout
+            sys.stdout = output
+            module.run()
+            sys.stdout = saveout
+            message = output.getvalue()
+            view = WebView('<pre>{0}</pre>'.format(message))
+            view.resize(700, 500)
+            view.setWindowTitle('Console execution results')
+            view.exec_()
+        except:
+            sys.stdout = saveout
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

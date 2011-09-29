@@ -95,7 +95,7 @@ def plotExpFitComparison(minpack, input_variable_index, measured_variable_index,
     ax.legend(legend) #, frameon=False)
     return fig
     
-if __name__ == "__main__":
+def run():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
@@ -267,3 +267,6 @@ if __name__ == "__main__":
     plt.show()
         
     minpack.Finalize()
+
+if __name__ == "__main__":
+    run()

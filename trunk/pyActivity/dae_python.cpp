@@ -63,16 +63,16 @@ BOOST_PYTHON_MODULE(pyActivity)
        ;
        
     class_<daepython::daeDefaultSimulationWrapper, bases<daeSimulation_t>, boost::noncopyable>("daeSimulation")
-        .add_property("Model",                  make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
-        .add_property("model",                  make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
-        .add_property("m",                      make_function(&daepython::daeDefaultSimulationWrapper::GetModel_),
-                                                make_function(&daepython::daeDefaultSimulationWrapper::SetModel_))
+		.add_property("Model",                  &daepython::daeDefaultSimulationWrapper::GetModel_,
+												&daepython::daeDefaultSimulationWrapper::SetModel_)
+		.add_property("model",                  &daepython::daeDefaultSimulationWrapper::GetModel_,
+												&daepython::daeDefaultSimulationWrapper::SetModel_)
+		.add_property("m",                      &daepython::daeDefaultSimulationWrapper::GetModel_,
+												&daepython::daeDefaultSimulationWrapper::SetModel_)
         
-        .add_property("DataReporter",			make_function(&daeSimulation::GetDataReporter, return_internal_reference<>()))
-        .add_property("Log",					make_function(&daeSimulation::GetLog,          return_internal_reference<>()))
-        .add_property("DAESolver",				make_function(&daeSimulation::GetDAESolver,    return_internal_reference<>()))
+		.add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_)
+		.add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_)
+		.add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_)
 
         .add_property("CurrentTime",			&daeSimulation::GetCurrentTime)  
         .add_property("TimeHorizon",			&daeSimulation::GetTimeHorizon,			&daeSimulation::SetTimeHorizon)
@@ -85,7 +85,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("SimulationMode",			&daeSimulation::GetSimulationMode,			&daeSimulation::SetSimulationMode)
 
         .add_property("NumberOfObjectiveFunctions",		&daeSimulation::GetNumberOfObjectiveFunctions, &daeSimulation::SetNumberOfObjectiveFunctions)
-        .add_property("ObjectiveFunction",				make_function(&daepython::daeDefaultSimulationWrapper::GetObjectiveFunction, return_internal_reference<>()))
+		.add_property("ObjectiveFunction",				&daepython::daeDefaultSimulationWrapper::GetObjectiveFunction_)
         .add_property("ObjectiveFunctions",				&daepython::daeDefaultSimulationWrapper::GetObjectiveFunctions)
         .add_property("OptimizationVariables",			&daepython::daeDefaultSimulationWrapper::GetOptimizationVariables)
         .add_property("Constraints",					&daepython::daeDefaultSimulationWrapper::GetConstraints)

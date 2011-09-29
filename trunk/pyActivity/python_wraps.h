@@ -171,6 +171,21 @@ public:
 		this->m_pModel = pModel;
 	}
 
+	boost::python::object GetDataReporter_(void) const
+	{
+		return boost::python::object(boost::ref(m_pDataReporter));
+	}
+
+	boost::python::object GetLog_(void) const
+	{
+		return boost::python::object(boost::ref(m_pLog));
+	}
+
+	boost::python::object GetDAESolver_(void) const
+	{
+		return boost::python::object(boost::ref(m_pDAESolver));
+	}
+
 	void SetUpParametersAndDomains(void)
 	{
         if(boost::python::override f = this->get_override("SetUpParametersAndDomains"))
@@ -302,13 +317,14 @@ public:
     {
         return this->daeSimulation::SetModelParameter(a, LB, UB, defaultValue);
     }
-	
-	daeObjectiveFunction* GetObjectiveFunction(void) const
+
+	boost::python::object GetObjectiveFunction_(void)
 	{
 		if(m_arrObjectiveFunctions.empty())
 			daeDeclareAndThrowException(exInvalidCall);
 		
-		return m_arrObjectiveFunctions[0].get();
+		daeObjectiveFunction* pFobj = m_arrObjectiveFunctions[0].get();
+		return boost::python::object(boost::ref(pFobj));
 	}
 
 	boost::python::list GetOptimizationVariables(void)

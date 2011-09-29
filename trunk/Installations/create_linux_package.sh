@@ -292,11 +292,9 @@ cp ../python-files/model_library/*.py            ${PACKAGE_NAME}/model_library
 # Examples and Tutorials
 cp ../python-files/examples/*.css                ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.xsl                ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.html      ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.xml       ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.py        ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*tutorial*.*         ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*RunExamples*.py     ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*whats_the_time*.py  ${PACKAGE_NAME}/examples
+cp ../python-files/examples/*whats_the_time*.*   ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.init               ${PACKAGE_NAME}/examples
 cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 

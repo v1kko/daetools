@@ -121,7 +121,7 @@ def ObjectiveFunction(x, *args):
     print ''
     return simulation.ObjectiveFunction.Value
 
-if __name__ == "__main__":
+def run():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
@@ -151,3 +151,6 @@ if __name__ == "__main__":
           simulation.ov5.StartingPoint]
 
     print fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8)
+
+if __name__ == "__main__":
+    run()
