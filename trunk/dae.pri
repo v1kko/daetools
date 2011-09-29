@@ -275,7 +275,9 @@ SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib \
+													 ../clapack/LIB/Win32/BLAS_nowrap.lib \
+													 ../clapack/LIB/Win32/libf2c.lib
 linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
 linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
 

@@ -131,7 +131,7 @@
     <b><span style='color:#000000;'>print</span></b> <span style='color:#bf0303;'>''</span>
     <b><span style='color:#000000;'>return</span></b> simulation.ObjectiveFunction.Value
 
-<b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>__name__</span> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+<b><span style='color:#000000;'>def</span></b> run():
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
     daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
@@ -161,6 +161,9 @@
           simulation.ov5.StartingPoint]
 
     <b><span style='color:#000000;'>print</span></b> fmin(ObjectiveFunction, x0, args<span style='color:#0000ff;'>=</span>[simulation], xtol<span style='color:#0000ff;'>=</span><span style='color:#c000c0;'>1e-8</span>)
+
+<b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>__name__</span> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    run()
 </pre>
 </body>
 </html>

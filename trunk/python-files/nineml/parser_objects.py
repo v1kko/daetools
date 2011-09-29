@@ -102,7 +102,7 @@ class StandardFunctionNode(Node):
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
-            if not isinstance(fun, collections.Callable):
+            if not hasattr(fun, '__call__'):
                 raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
             argument0 = self.Node.evaluate(dictIdentifiers, dictFunctions)
             return fun(argument0)
@@ -149,7 +149,7 @@ class NonstandardFunctionNode(Node):
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
-            if not callable(fun):
+            if not hasattr(fun, '__call__'):
                 raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
             argument_list = ()
             for node in self.ArgumentsNodeList:

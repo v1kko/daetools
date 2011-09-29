@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, platform, sys, tempfile
+import os, platform, sys, tempfile, traceback
 from daetools.pyDAE import *
 from time import localtime, strftime
 from PyQt4 import QtCore, QtGui
@@ -178,112 +178,112 @@ class daeSimulator(QtGui.QDialog):
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laAmesos_Superlu:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laAmesos_Umfpack:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laAmesos_Lapack:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laAztecOO:
                     try:
                         from daetools.solvers import pyTrilinos
                         self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laIntelPardiso:
                     try:
                         from daetools.solvers import pyIntelPardiso
                         self.lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelPardiso LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create IntelPardiso LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laIntelMKL:
                     try:
                         from daetools.solvers import pyIntelMKL
                         self.lasolver = pyIntelMKL.daeCreateLapackSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IntelMKL LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create IntelMKL LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laAmdACML:
                     try:
                         from daetools.solvers import pyAmdACML
                         self.lasolver = pyAmdACML.daeCreateLapackSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create AmdACML LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create AmdACML LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laLapack:
                     try:
                         from daetools.solvers import pyLapack
                         self.lasolver = pyLapack.daeCreateLapackSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Lapack LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create Lapack LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laMagmaLapack:
                     try:
                         from daetools.solvers import pyMagma
                         self.lasolver = pyMagma.daeCreateLapackSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create Magma Lapack LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create Magma Lapack LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laSuperLU:
                     try:
                         from daetools.solvers import pySuperLU
                         self.lasolver = pySuperLU.daeCreateSuperLUSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create SuperLU LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laSuperLU_MT:
                     try:
                         from daetools.solvers import pySuperLU_MT
-                        self.lasolver = pySuperLU_MT.daeCreateSuperLU_MTSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_MT LA solver\nError: " + str(e))
+                        self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
+                    except Exception as e:
+                        self.showMessage("Cannot create SuperLU_MT LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laSuperLU_CUDA:
                     try:
                         from daetools.solvers import pySuperLU_CUDA
-                        self.lasolver = pySuperLU_CUDA.daeCreateSuperLU_CUDASolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
+                        self.lasolver = pySuperLU_CUDA.daeCreateSuperLUSolver()
+                    except Exception as e:
+                        self.showMessage("Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
                         return
 
                 elif lasolverIndex == self.laCUSP:
                     try:
                         from daetools.solvers import pyCUSP
                         self.lasolver = pyCUSP.daeCreateCUSPSolver()
-                    except Exception, e:
-                        QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create CUSP LA solver\nError: " + str(e))
+                    except Exception as e:
+                        self.showMessage("Cannot create CUSP LA solver\nError: " + str(e))
                         return
 
                 else:
@@ -311,7 +311,6 @@ class daeSimulator(QtGui.QDialog):
                 self.ui.ExportButton.setEnabled(True)
 
             if self.lasolver:
-                #QtGui.QMessageBox.warning(None, "daeSimulator", self.lasolver.Name)
                 self.daesolver.SetLASolver(self.lasolver)
 
             if self.optimization == None:
@@ -330,8 +329,8 @@ class daeSimulator(QtGui.QDialog):
                         try:
                             from daetools.solvers import pyIPOPT
                             self.nlpsolver = pyIPOPT.daeIPOPT()
-                        except Exception, e:
-                            QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create IPOPT NLP solver\nError: " + str(e))
+                        except Exception as e:
+                            self.showMessage("Cannot create IPOPT NLP solver\nError: " + str(e))
                             return
 
                     elif minlpsolverIndex == self.nlpNLOPT:
@@ -351,16 +350,16 @@ class daeSimulator(QtGui.QDialog):
                             if not ok:
                                 algorithm = 'NLOPT_LD_SLSQP'
                             self.nlpsolver = pyNLOPT.daeNLOPT(str(algorithm))
-                        except Exception, e:
-                            QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create NLOPT NLP solver\nError: " + str(e))
+                        except Exception as e:
+                            self.showMessage("Cannot create NLOPT NLP solver\nError: " + str(e))
                             return
 
                     elif minlpsolverIndex == self.nlpBONMIN:
                         try:
                             from daetools.solvers import pyBONMIN
                             self.nlpsolver = pyBONMIN.daeBONMIN()
-                        except Exception, e:
-                            QtGui.QMessageBox.warning(None, "daeSimulator", "Cannot create BONMIN MINLP solver\nError: " + str(e))
+                        except Exception as e:
+                            self.showMessage("Cannot create BONMIN MINLP solver\nError: " + str(e))
                             return
 
                     else:
@@ -373,12 +372,18 @@ class daeSimulator(QtGui.QDialog):
                 if self.run_after_simulation_end_fn:
                     self.run_after_simulation_end_fn(simulation, log)
 
-        except Exception, error:
-            self.ui.textEdit.append(str(error))
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            messages = traceback.format_tb(exc_traceback)
+            self.ui.textEdit.append('\n'.join(messages))
+            self.ui.textEdit.append(str(e))
             if self.ui.textEdit.isVisible() == True:
                 self.ui.textEdit.update()
             self.app.processEvents()
 
+    def showMessage(self, msg):
+        QtGui.QMessageBox.warning(self, "daeSimulator", str(msg))
+        
     #@QtCore.pyqtSlot()
     def slotOpenSparseMatrixImage(self):
         if(self.lasolver != None):

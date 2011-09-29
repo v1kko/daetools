@@ -105,7 +105,7 @@
     ax.legend(legend) <span style='color:#008000;'>#, frameon=False)</span>
     <b><span style='color:#000000;'>return</span></b> fig
     
-<b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>__name__</span> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+<b><span style='color:#000000;'>def</span></b> run():
     log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
     daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
     datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
@@ -277,6 +277,9 @@
     plt.show()
         
     minpack.Finalize()
+
+<b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>__name__</span> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    run()
 </pre>
 </body>
 </html>
