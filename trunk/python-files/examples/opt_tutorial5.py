@@ -136,77 +136,77 @@ def peval(x, p):
     return p[0]*sin(2*pi*p[1]*x+p[2])
 
 
+if __name__ == "__main__":
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
 
-log          = daePythonStdOutLog()
-daesolver    = daeIDAS()
-datareporter = daeTCPIPDataReporter()
-simulation   = simTutorial()
+    simulation.m.SetReportingOn(True)
 
-simulation.m.SetReportingOn(True)
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon = 5
 
-simulation.ReportingInterval = 1
-simulation.TimeHorizon = 5
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
 
-simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-if(datareporter.Connect("", simName) == False):
-    sys.exit()
+    simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
 
-simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    # Exact values of the parameters
+    A, k, theta = [10, 33.33333333, 0.523598333]
 
-# Exact values of the parameters
-A, k, theta = [10, 33.33333333, 0.523598333]
+    # Starting point for parameters
+    p0 = [8, 43.47826087, 1.047196667]
 
-# Starting point for parameters
-p0 = [8, 43.47826087, 1.047196667]
+    # Input data for the model
+    x = arange(0, 0.06, 0.002)
 
-# Input data for the model
-x = arange(0, 0.06, 0.002)
+    # The values of y for given x and exact values of A, k, and theta
+    y_true = A * sin(2 * pi * k * x + theta)
 
-# The values of y for given x and exact values of A, k, and theta
-y_true = A * sin(2 * pi * k * x + theta)
+    # Measured values for y
+    y_meas = zeros_like(x)
+    y_meas = [ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
+            4.78842863,   2.87467755,  -3.93427325,  -6.13071010,  -9.26168083,
+            -9.25272475, -10.42850414,  -4.71175587,  -3.60403013,  -0.11039750,
+            3.80372890,   8.51512082,   9.78232718,   9.91931747,   5.17108061,
+            6.47468360,   0.66528089,  -5.10344027,  -7.12668123,  -9.42080566,
+            -8.23170543,  -6.56081590,  -6.28524014,  -2.30246340,  -0.79571452]
 
-# Measured values for y
-y_meas = zeros_like(x)
-y_meas = [ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
-           4.78842863,   2.87467755,  -3.93427325,  -6.13071010,  -9.26168083,
-          -9.25272475, -10.42850414,  -4.71175587,  -3.60403013,  -0.11039750,
-           3.80372890,   8.51512082,   9.78232718,   9.91931747,   5.17108061,
-           6.47468360,   0.66528089,  -5.10344027,  -7.12668123,  -9.42080566,
-          -8.23170543,  -6.56081590,  -6.28524014,  -2.30246340,  -0.79571452]
+    # Call leastsq
+    p, cov_x, infodict, msg, ier = leastsq(Residuals, 
+                                        p0, 
+                                        Dfun=Derivatives, 
+                                        args=(simulation, x, y_meas), 
+                                        full_output=True)
 
-# Call leastsq
-p, cov_x, infodict, msg, ier = leastsq(Residuals, 
-                                       p0, 
-                                       Dfun=Derivatives, 
-                                       args=(simulation, x, y_meas), 
-                                       full_output=True)
+    # Print the results
+    print '------------------------------------------------------'
+    if ier in [1, 2, 3, 4]:
+        print 'Solution found!'
+    else:
+        print 'Least square method failed!'
+    print 'Status:', msg
 
-# Print the results
-print '------------------------------------------------------'
-if ier in [1, 2, 3, 4]:
-    print 'Solution found!'
-else:
-    print 'Least square method failed!'
-print 'Status:', msg
+    print 'Number of function evaluations =', infodict['nfev']
+    chisq = (infodict['fvec']**2).sum()
+    dof = len(x) - len(p0)
+    rmse = sqrt(chisq / dof)
+    print 'Root mean square deviation =', rmse
 
-print 'Number of function evaluations =', infodict['nfev']
-chisq = (infodict['fvec']**2).sum()
-dof = len(x) - len(p0)
-rmse = sqrt(chisq / dof)
-print 'Root mean square deviation =', rmse
+    A, k, theta = p
+    print 'Estimated parameters values:'
+    print '    A     =', A
+    print '    k     =', k
+    print '    theta =', theta
+    print '------------------------------------------------------'
 
-A, k, theta = p
-print 'Estimated parameters values:'
-print '    A     =', A
-print '    k     =', k
-print '    theta =', theta
-print '------------------------------------------------------'
-
-# Plot the comparison between the exact values, measured and fitted data
-plt.plot(x, peval(x, p), x, y_meas, 'o', x, y_true)
-plt.title('Least-squares fit to experimental data')
-plt.legend(['Fit', 'Experimental', 'Exact'])
-plt.show()
+    # Plot the comparison between the exact values, measured and fitted data
+    plt.plot(x, peval(x, p), x, y_meas, 'o', x, y_true)
+    plt.title('Least-squares fit to experimental data')
+    plt.legend(['Fit', 'Experimental', 'Exact'])
+    plt.show()

@@ -67,7 +67,7 @@ class modTutorial(daeModel):
 
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
-        self.dummy = daeVariable("dummy", no_t,          self, "dummy")
+        self.event = daeVariable("event", no_t,          self, "Variable which variable is set in ON_EVENT functon")
 
         # Here we create two event ports (inlet and outlet) and connect them.
         # It makes no sense in reality, but this is example is just a show case - in the real application
@@ -102,7 +102,7 @@ class modTutorial(daeModel):
         """
         self.ON_CONDITION(self.T()    > 340, switchTo           = 'Cooling',
                                              triggerEvents      = [],
-                                             setVariableValues  = [ (self.dummy, 1) ],
+                                             setVariableValues  = [ (self.event, 100) ],
                                              userDefinedActions = [] )
 
         self.ON_CONDITION(self.time() > 350, switchTo           = 'HeaterOff',
@@ -117,7 +117,7 @@ class modTutorial(daeModel):
 
         self.ON_CONDITION(self.T()    < 320, switchTo          = 'Heating',
                                              triggerEvents     = [],
-                                             setVariableValues = [ (self.dummy, 0) ],
+                                             setVariableValues = [ (self.event, 200) ],
                                              userDefinedActions = [] )
 
         self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
@@ -152,7 +152,7 @@ class modTutorial(daeModel):
         """
         self.ON_EVENT(self.epIn, switchToStates     = [ ('Regulator', 'HeaterOff')],
                                  triggerEvents      = [],
-                                 setVariableValues  = [ (self.dummy, self.epIn()) ],
+                                 setVariableValues  = [ (self.event, self.epIn()) ],
                                  userDefinedActions = [self.action])
 
 class simTutorial(daeSimulation):
@@ -180,7 +180,7 @@ class simTutorial(daeSimulation):
         self.m.stnRegulator.ActiveState = "Heating"
 
         self.m.T.SetInitialCondition(283)
-        self.m.dummy.AssignValue(0.0)
+        self.m.event.AssignValue(0.0)
 
 
 # Use daeSimulator class

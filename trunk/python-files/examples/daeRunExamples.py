@@ -12,7 +12,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys
+import os, sys, subprocess
 from time import localtime, strftime
 
 try:
@@ -43,7 +43,8 @@ except Exception, e:
     sys.exit()
 
 try:
-    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6, tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12
+    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
+    import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
     import opt_tutorial1, opt_tutorial2, opt_tutorial3, opt_tutorial4, opt_tutorial5, opt_tutorial6
 except Exception, e:
     print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
@@ -166,6 +167,8 @@ class RunExamples(QtGui.QDialog):
                 tutorial11.guiRun(self.app)
             elif simName == "tutorial12":
                 tutorial12.guiRun(self.app)
+            elif simName == "tutorial13":
+                tutorial13.guiRun(self.app)
             elif simName == "whats_the_time":
                 whats_the_time.guiRun(self.app)
             elif simName == "opt_tutorial1":
@@ -175,14 +178,25 @@ class RunExamples(QtGui.QDialog):
             elif simName == "opt_tutorial3":
                 opt_tutorial3.guiRun(self.app)
             elif simName == "opt_tutorial4":
-                path     = os.path.abspath(opt_tutorial4.__file__)
-                dir_path = os.path.dirname(path)
-                os.system(dir_path)
-                #opt_tutorial3.guiRun(self.app)
+                self.consoleRunAndShowResults(opt_tutorial4)
+            elif simName == "opt_tutorial5":
+                self.consoleRunAndShowResults(opt_tutorial5)
+            elif simName == "opt_tutorial6":
+                self.consoleRunAndShowResults(opt_tutorial6)
             else:
                 pass
-        except RuntimeError, e:
-            print "Exception: ", str(e)
+        
+        except RuntimeError as e:
+            QtGui.QMessageBox.warning(self, "daeRunExamples", "Exception raised: " + str(e))
+
+    def consoleRunAndShowResults(self, module):
+        path  = module.__file__
+        popen = subprocess.Popen(['python ' + path, ''], shell = True, stdout = subprocess.PIPE)
+        message = popen.stdout.read()
+        view = WebView('<pre>{0}</pre>'.format(message))
+        view.resize(700, 500)
+        view.setWindowTitle('Console execution results')
+        view.exec_()
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

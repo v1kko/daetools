@@ -19,4 +19,8 @@ class WebView(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_WebViewDialog()
         self.ui.setupUi(self)
-        self.ui.webView.load(url)
+        if isinstance(url, QtCore.QUrl):
+            self.ui.webView.load(url)
+        else:
+            self.ui.webView.setHtml(url)
+            
