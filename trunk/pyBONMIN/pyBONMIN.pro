@@ -90,18 +90,22 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
     python_wraps.h
 
+win32{
 BONMIN { 
-win32-msvc2008::QMAKE_POST_LINK = move /y \
+QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyBIMINLP1.dll \
 	$${DAE_DEST_DIR}/pyBONMIN.pyd
 }
 
 IPOPT { 
-win32-msvc2008::QMAKE_POST_LINK = move /y \
+QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyBIMINLP1.dll \
 	$${DAE_DEST_DIR}/pyIPOPT.pyd
 }
+}
 
-unix::QMAKE_POST_LINK = cp -f \
+unix{
+QMAKE_POST_LINK = cp -f \
 	$${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
 	$${DAE_DEST_DIR}/$${pyObject}.so
+}

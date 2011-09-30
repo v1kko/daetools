@@ -26,7 +26,7 @@ try:
     from nineml_daetools_bridge import nineml_daetools_bridge
     from nineml_tex_report import createLatexReport, createPDF
     from nineml_daetools_simulation import daeSimulationInputData, nineml_daetools_simulation, ninemlTesterDataReporter
-    from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getSelectComponentPage, createResultPage
+    from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getInitialPage, createResultPage
 
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -38,13 +38,23 @@ class nineml_webapp:
         pass
 
     def initial_page(self, environ, start_response):
-        html = getSelectComponentPage()
+        html = getInitialPage()
         output_len = len(html)
         start_response('200 OK', [('Content-type', 'text/html'),
                                 ('Content-Length', str(output_len))])
         return [html]
         
-    def setup_data(self, dictFormData, environ, start_response):
+    def create_nineml_component_and_display_gui(self, dictFormData, environ, start_response):
+        """
+        Inputs:
+            - Testable component name
+            - Initial values
+        Results:
+            - Creates a nineml component from the testable component name
+            - Creates a temporary folder and application ID
+            - Saves inspector object into the temp folder for later use
+            - Generates input form with the generated application ID
+        """
         try:
             html = ''
             content = ''
@@ -57,7 +67,6 @@ class nineml_webapp:
             event_ports_expressions = {}
             active_regimes = {}
             variables_to_report = {}
-            doTests = False
 
             if not dictFormData.has_key('TestableComponent'):
                 raise RuntimeError('No input NineML component has been specified')
@@ -67,9 +76,6 @@ class nineml_webapp:
             if not nineml_component:
                 raise RuntimeError('The specified component: {0} could not be loaded'.format(compName))
 
-            if dictFormData.has_key('AddTest'):
-                doTests = bool(dictFormData['AddTest'][0])
-            
             if dictFormData.has_key('InitialValues'):
                 data = json.loads(dictFormData['InitialValues'][0])
                 if not isinstance(data, dict):
@@ -132,12 +138,8 @@ class nineml_webapp:
                                                 event_ports_expressions  = event_ports_expressions,
                                                 variables_to_report      = variables_to_report)
 
-            # Create tmpFolder
-            tmpFolder = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
-            os.chmod(tmpFolder, 0777)
-
-            applicationID   = os.path.split(tmpFolder)[1]
-            pickle_filename = os.path.join(tmpFolder, 'webapp.pickle')
+            tmpFolder, applicationID = self.get_temp_folder()
+            pickle_filename          = self.get_pickle_filename(tmpFolder)
             
             f_pickle = open(pickle_filename, 'wb')
             pickle.dump(inspector, f_pickle, pickle.HIGHEST_PROTOCOL)
@@ -166,68 +168,61 @@ class nineml_webapp:
                                 ('Content-Length', str(output_len))])
         return [html]
 
-    def run_simulation(self, dictFormData, environ, start_response):
+    def generate_report_with_no_tests(self, dictFormData, environ, start_response):
+        try:
+            if not dictFormData.has_key('TestableComponent'):
+                raise RuntimeError('No input NineML component has been specified')
+
+            compName = dictFormData['TestableComponent'][0]
+            nineml_component = TestableComponent(compName)()
+            if not nineml_component:
+                raise RuntimeError('The specified component: {0} could not be loaded'.format(compName))
+
+            inspector = nineml_component_inspector()
+            inspector.inspect(nineml_component)
+            tmpFolder, applicationID = self.get_temp_folder()
+            return self.generate_report(dictFormData, tmpFolder, applicationID, inspector, nineml_component, False, environ, start_response)
+        
+        except Exception as e:
+            exc_traceback = sys.exc_info()[2]
+            messages = traceback.format_tb(exc_traceback)
+            print('\n'.join(messages), file=sys.stderr)
+            print(str(e), file=sys.stderr)
+            return self.initial_page(environ, start_response)
+
+    def generate_report_with_tests(self, dictFormData, environ, start_response):
+        try:
+            tmpFolder, applicationID, inspector, nineml_component = self.unpickle_inspector(dictFormData)
+            return self.generate_report(dictFormData, tmpFolder, applicationID, inspector, nineml_component, True, environ, start_response)
+       
+        except Exception as e:
+            exc_traceback = sys.exc_info()[2]
+            messages = traceback.format_tb(exc_traceback)
+            print('\n'.join(messages), file=sys.stderr)
+            print(str(e), file=sys.stderr)
+            return self.initial_page(environ, start_response)
+    
+    def generate_report(self, dictFormData, tmpFolder, applicationID, inspector, nineml_component, doTests, environ, start_response):
         try:
             pdf = None
             zip = None
             html = ''
+            html_tests = ''
             texReport = ''
             pdfReport = ''
-            tmpFolder = ''
-            raw_arguments = ''
-            content = ''
-            tests_content = ''
-            log_output = ''
-            log = None
-            timeHorizon = 0.0
-            reportingInterval = 0.0
-            parameters = {}
-            initial_conditions = {}
-            analog_ports_expressions = {}
-            event_ports_expressions = {}
-            active_regimes = {}
-            variables_to_report = {}
+            zipReport = ''
             tests_data = []
-            applicationID = ''
-            inspector = None
             
             success = False
             
-            if not dictFormData.has_key('__NINEML_WEBAPP_ID__'):
-                raise RuntimeError('No application ID has been specified')
-
-            applicationID   = dictFormData['__NINEML_WEBAPP_ID__'][0]
-            tmpFolder       = os.path.join(tempfile.gettempdir(), applicationID)
-            pickle_filename = os.path.join(tempfile.gettempdir(), applicationID, 'webapp.pickle')
-            if (applicationID == '') or (not os.path.isfile(pickle_filename)) or (not os.path.isdir(tmpFolder)):
-                return self.initial_page(environ, start_response)
-            
-            f_pickle  = open(pickle_filename)
-            inspector = pickle.load(f_pickle)
-            f_pickle.close()
-            if not inspector:
-                raise RuntimeError('Invalid inspector object')
-            nineml_component = inspector.ninemlComponent
-            if not nineml_component:
-                raise RuntimeError('Cannot load NineML component')
-
-            # Copy the logo image to tmp folder
-            shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
-
-            isOK, results = self.run_test(nineml_component, dictFormData, tmpFolder)
-            if isOK:
-                testName, testDescription, dictInputs, plots, log_output = results
-                tests_data.append( (testName, testDescription, dictInputs, plots, log_output) )
-                content += 'Test status: {0} [SUCCEEDED]'.format(testName)
-            else:
-                #error    = results[5]
-                testName, testDescription, dictInputs, plots, log_output, error = results
-                content += 'Test status: {0} [FAILED]'.format(testName)
-                content += error
+            if doTests:
+                html_tests, tests_data, zip = self.do_tests(nineml_component, applicationID, tmpFolder, dictFormData)
                 
             texReport = '{0}/{1}.tex'.format(tmpFolder, applicationID)
             pdfReport = '{0}/{1}.pdf'.format(tmpFolder, applicationID)
 
+            # Copy the logo image to tmp folder
+            shutil.copy2(baseFolder + '/logo.png', tmpFolder + '/logo.png')
             # Generate Tex report
             createLatexReport(inspector, tests_data, os.path.join(baseFolder, 'nineml-tex-template.tex'), texReport, tmpFolder)
 
@@ -241,33 +236,17 @@ class nineml_webapp:
             createPDFfile.close()
             os.system('sh {0}'.format(createPDF))
 
-            zipReport = '{0}/{1}.zip'.format(tmpFolder, applicationID)
-            self.pack_tests_data(zipReport, tests_data, tmpFolder)
-            
             # Read the contents of the report into a variable (to be sent together with the .html part)
             if os.path.isfile(pdfReport):
                 pdf = open(pdfReport, "rb").read()
-            if os.path.isfile(zipReport):
-                zip = open(zipReport, "rb").read()
             
             success = True
-            html = createResultPage(content)
+            html = createResultPage(html_tests)
 
         except Exception as e:
-            content += 'Application environment:\n' + pformat(environ) + '\n\n'
-            content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
-            content += 'Simulation input:\n'
-            content += '  parameters:  {0}\n'.format(parameters)
-            content += '  initial_conditions:  {0}\n'.format(initial_conditions)
-            content += '  active_regimes:  {0}\n'.format(active_regimes)
-            content += '  analog_ports_expressions:  {0}\n'.format(analog_ports_expressions)
-            content += '  event_ports_expressions:  {0}\n'.format(event_ports_expressions)
-            content += '  variables_to_report:  {0}\n'.format(variables_to_report)
-            if log:
-                log_output = 'Log output:\n{0}'.format(log.JoinMessages('\n'))
-                content += '\n' + log_output
-
-            exc_type, exc_value, exc_traceback = sys.exc_info()
+            content = 'Application environment:\n' + pformat(environ) + '\n\n'
+            content += 'Form arguments:\n  {0}\n\n'.format(dictFormData)
+            exc_traceback = sys.exc_info()[2]
             html = createErrorPage(str(e), exc_traceback, content)
 
         # Remove temporary directory
@@ -296,6 +275,61 @@ class nineml_webapp:
                                     ('Content-Length', str(output_len))])
             return [html]
 
+    def do_tests(self, nineml_component, applicationID, tmpFolder, dictFormData):
+        tests_data = []
+        html       = ''
+        zip        = None
+        
+        isOK, results = self.run_test(nineml_component, dictFormData, tmpFolder)
+        
+        if isOK:
+            testName, testDescription, dictInputs, plots, log_output = results
+            tests_data.append( (testName, testDescription, dictInputs, plots, log_output) )
+            zipReport = '{0}/{1}.zip'.format(tmpFolder, applicationID)
+            self.pack_tests_data(zipReport, tests_data, tmpFolder)
+            html += 'Test status: {0} [SUCCEEDED]'.format(testName)
+            if os.path.isfile(zipReport):
+                zip = open(zipReport, "rb").read()
+        else:
+            testName, testDescription, dictInputs, plots, log_output, error = results
+            html += 'Test status: {0} [FAILED]'.format(testName)
+            html += error
+        
+        return html, tests_data, zip
+
+    def unpickle_inspector(self, dictFormData):
+        if not dictFormData.has_key('__NINEML_WEBAPP_ID__'):
+            raise RuntimeError('No application ID has been specified')
+
+        applicationID   = dictFormData['__NINEML_WEBAPP_ID__'][0]
+        if applicationID == '':
+            raise RuntimeError('No application ID has been specified')
+        
+        tmpFolder       = os.path.join(tempfile.gettempdir(), applicationID)
+        pickle_filename = self.get_pickle_filename(tmpFolder)
+        if (not os.path.isfile(pickle_filename)) or (not os.path.isdir(tmpFolder)):
+            raise RuntimeError('Invalid application ID has been specified')
+        
+        f_pickle  = open(pickle_filename)
+        inspector = pickle.load(f_pickle)
+        f_pickle.close()
+        if not inspector:
+            raise RuntimeError('Invalid inspector object')
+        nineml_component = inspector.ninemlComponent
+        if not nineml_component:
+            raise RuntimeError('Cannot load NineML component')
+        
+        return tmpFolder, applicationID, inspector, nineml_component
+
+    def get_temp_folder(self):
+        tmpFolder       = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
+        applicationID   = os.path.split(tmpFolder)[1]
+        os.chmod(tmpFolder, 0777)
+        return tmpFolder, applicationID
+
+    def get_pickle_filename(self, tmpFolder):
+        return os.path.join(tmpFolder, 'webapp.pickle')
+
     def pack_tests_data(self, zipReport, tests_data, tmpFolder):
         try:
             if len(tests_data) == 0:
@@ -323,7 +357,7 @@ class nineml_webapp:
             zip.close()
             
         except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
+            exc_traceback = sys.exc_info()[2]
             print(str(e), '\n'.join(traceback.format_tb(exc_traceback)), file=sys.stderr)
     
     def run_test(self, nineml_component, dictFormData, tmpFolder):
@@ -461,15 +495,19 @@ class nineml_webapp:
                     if not dictFormData.has_key('__NINEML_WEBAPP_ACTION__'):
                         raise RuntimeError('Phase argument must be specified')
 
-                    phase = dictFormData['__NINEML_WEBAPP_ACTION__'][0]
-                    if phase == 'setupData':
-                        return self.setup_data(dictFormData, environ, start_response)
+                    action = dictFormData['__NINEML_WEBAPP_ACTION__'][0]
+                    print(action, file=sys.stderr)
+                    if action == 'Add test':
+                        return self.create_nineml_component_and_display_gui(dictFormData, environ, start_response)
 
-                    elif phase == 'runSimulation':
-                        return self.run_simulation(dictFormData, environ, start_response)
+                    elif action == 'Generate report':
+                        return self.generate_report_with_no_tests(dictFormData, environ, start_response)
 
+                    elif action == 'Generate report with tests':
+                        return self.generate_report_with_tests(dictFormData, environ, start_response)
+                    
                     else:
-                        raise RuntimeError('Invalid phase argument specified; ' + str(dictFormData))
+                        raise RuntimeError('Invalid action argument specified: {0}'.format(action))
             else:
                 html = 'Error occurred:\n{0}\n{1}'.format(___import_exception___, ___import_exception_traceback___)
 

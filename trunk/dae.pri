@@ -58,9 +58,6 @@ CONFIG(release, debug|release):message(release){
 DESTDIR = $${DAE_DEST_DIR}
 
 
-# Cross compiling:
-# configure --prefix=/usr/i586-mingw32msvc --host=i586-mingw32msvc --build=x86_64-linux
-
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
 # Necessary to pass lintian test in debian  
@@ -115,10 +112,10 @@ use_custom_python {
 message(use_custom_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
 }
 
-win32-msvc2008::PYTHONDIR                = C:\Python$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-msvc2008::PYTHON_INCLUDE_DIR       = $${PYTHONDIR}\include
-win32-msvc2008::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}\Lib\site-packages
-win32-msvc2008::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
+win32::PYTHONDIR                = C:\Python$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::PYTHON_INCLUDE_DIR       = $${PYTHONDIR}\include
+win32::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}\Lib\site-packages
+win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
 
 linux-g++::PYTHONDIR           = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 linux-g++-64::PYTHONDIR        = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
@@ -151,10 +148,10 @@ unix::PYTHON_LIB_DIR           =
 #    b) in user-config.jam located in $BOOST_BUILD or $HOME directory
 #       Add line: using python : 2.7 ;
 #####################################################################################
-win32-msvc2008::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
-win32-msvc2008::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-win32-msvc2008::BOOST_PYTHON_LIB =
-win32-msvc2008::BOOST_LIBS       =
+win32::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
+win32::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
+win32::BOOST_PYTHON_LIB =
+win32::BOOST_LIBS       =
 
 use_system_boost {
 unix::BOOSTDIR         = /usr/include/boost
@@ -183,8 +180,8 @@ SUNDIALS = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
-win32-msvc2008::SUNDIALS_LIBS = sundials_idas.lib \
-                                sundials_nvecserial.lib
+win32::SUNDIALS_LIBS = sundials_idas.lib \
+                       sundials_nvecserial.lib
 unix::SUNDIALS_LIBS = -lsundials_idas \
                       -lsundials_nvecserial
 
@@ -193,20 +190,21 @@ unix::SUNDIALS_LIBS = -lsundials_idas \
 #                                  MUMPS
 #####################################################################################
 MUMPS_DIR  = ../mumps
-win32-msvc2008::G95_LIBDIR = c:\MinGW\lib\gcc-lib\i686-pc-mingw32\4.1.2
+
+win32::G95_LIBDIR = c:\g95\lib\gcc-lib\i686-pc-mingw32\4.1.2
 
 MUMPS_LIBDIR   = $${MUMPS_DIR}/lib \
                  $${MUMPS_DIR}/libseq \
                  $${MUMPS_DIR}/blas \
                  $${G95_LIBDIR}
 
-win32-msvc2008::MUMPS_LIBS = blas.lib \
-                             libmpiseq.lib \
-                             libdmumps.lib \
-                             libmumps_common.lib \
-                             libpord.lib \
-                             libf95.a \
-                             libgcc.a
+win32::MUMPS_LIBS = blas.lib \
+					libmpiseq.lib \
+					libdmumps.lib \
+					libmumps_common.lib \
+					libpord.lib \
+					libf95.a \
+					libgcc.a
 unix::MUMPS_LIBS =
 
 
@@ -218,8 +216,8 @@ IPOPT_DIR = ../bonmin/build
 IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
-win32-msvc2008::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
-unix::IPOPT_LIBS           = -ldl -lblas -llapack -lipopt
+win32::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
+unix::IPOPT_LIBS  = -ldl -lblas -llapack -lipopt
 
 
 #####################################################################################
@@ -230,16 +228,16 @@ BONMIN_DIR = ../bonmin/build
 BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 
-win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-                              libBonmin.lib \
-                              libIpopt.lib \
-                              libCbc.lib \
-                              libCgl.lib \
-                              libClp.lib \
-                              libCoinUtils.lib \
-                              libOsiCbc.lib \
-                              libOsiClp.lib \
-                              libOsi.lib
+win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+					  libBonmin.lib \
+					  libIpopt.lib \
+					  libCbc.lib \
+					  libCgl.lib \
+					  libClp.lib \
+					  libCoinUtils.lib \
+					  libOsiCbc.lib \
+					  libOsiClp.lib \
+					  libOsi.lib
 unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
 						-lbonmin \
 						-lCbc \
@@ -256,28 +254,24 @@ unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
 #####################################################################################
 #                                 NLOPT
 #####################################################################################
-NLOPT_DIR = ../nlopt/build
+NLOPT_DIR     = ../nlopt/build
 NLOPT_INCLUDE = $${NLOPT_DIR}/include
 NLOPT_LIBDIR  = $${NLOPT_DIR}/lib
 
-win32-msvc2008::NLOPT_LIBS = nlopt.lib
-unix::NLOPT_LIBS           = -lnlopt -lm
+win32::NLOPT_LIBS = nlopt.lib
+unix::NLOPT_LIBS  = -lnlopt -lm
 
 
 ######################################################################################
 #                                   SuperLU
 ######################################################################################
-win32-msvc2008::SUPERLU_PATH = ..\superlu
-linux-g++::SUPERLU_PATH      = ../superlu
-linux-g++-64::SUPERLU_PATH   = ../superlu
-
+SUPERLU_PATH    = ../superlu
 SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
-
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib \
-													 ../clapack/LIB/Win32/BLAS_nowrap.lib \
-													 ../clapack/LIB/Win32/libf2c.lib
+win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib \
+					                              ../clapack/LIB/Win32/BLAS_nowrap.lib \
+					                              ../clapack/LIB/Win32/libf2c.lib
 linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
 linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
 
@@ -285,15 +279,11 @@ linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
 ######################################################################################
 #                                SuperLU_MT
 ######################################################################################
-win32-msvc2008::SUPERLU_MT_PATH = ..\superlu_mt
-linux-g++::SUPERLU_MT_PATH      = ../superlu_mt
-linux-g++-64::SUPERLU_MT_PATH   = ../superlu_mt
-
+SUPERLU_MT_PATH    = ../superlu_mt
 SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
-
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
-win32-msvc2008::SUPERLU_MT_LIBS = -L$${SUPERLU_MT_LIBPATH} superlu_mt.lib
+win32::SUPERLU_MT_LIBS          = 
 linux-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
 linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
 
@@ -301,37 +291,64 @@ linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
 ######################################################################################
 #                                SuperLU_CUDA
 ######################################################################################
-win32-msvc2008::CUDA_PATH = 
+win32::CUDA_PATH          = 
 linux-g++::CUDA_PATH      = /usr/local/cuda
 linux-g++-64::CUDA_PATH   = /usr/local/cuda
 
-win32-msvc2008::SUPERLU_CUDA_PATH = ..\superlu_mt-GPU
-linux-g++::SUPERLU_CUDA_PATH      = ../superlu_mt-GPU
-linux-g++-64::SUPERLU_CUDA_PATH   = ../superlu_mt-GPU
-
+SUPERLU_CUDA_PATH    = ../superlu_mt-GPU
 SUPERLU_CUDA_LIBPATH = $${SUPERLU_CUDA_PATH}/lib
-
 SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
 	                   $${CUDA_PATH}/include
 
-win32-msvc2008::CUDA_LIBS = -L$${CUDA_PATH}/lib cuda.lib cudart.lib
-linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib -lcuda -lcudart
+win32::CUDA_LIBS = 
+linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 linux-g++-64::CUDA_LIBS   = -L$${CUDA_PATH}/lib64 -lcuda -lcudart
+
+
+#####################################################################################
+#                                  TRILINOS 
+#####################################################################################
+TRILINOS_DIR  = ../trilinos/build
+
+win32::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
+                          $${TRILINOS_DIR}/../commonTools/WinInterface/include
+unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
+
+win32::BLAS_LAPACK_LIBDIR        = ../clapack/LIB/Win32
+linux-g++::BLAS_LAPACK_LIBDIR    = /usr/lib/atlas
+linux-g++-64::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
+
+win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+                        BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
+                        superlu.lib \
+                        aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
+
+linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+							  -lblas -llapack \
+							  -lcdaesuperlu \
+							  -lumfpack -lamd \
+							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos
+
+linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+							  -lblas -llapack \
+							  -lcdaesuperlu \
+							  -lumfpack -lamd \
+							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos
 
 
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32-msvc2008::DAE_CORE_LIB                = cdaeCore.lib
-win32-msvc2008::DAE_DATAREPORTING_LIB       = cdaeDataReporting.lib
-win32-msvc2008::DAE_ACTIVITY_LIB            = cdaeActivity.lib
-win32-msvc2008::DAE_IDAS_SOLVER_LIB         = cdaeIDAS_DAESolver.lib
-win32-msvc2008::DAE_SUPERLU_SOLVER_LIB      = cdaeSuperLU_LASolver.lib
-win32-msvc2008::DAE_SUPERLU_MT_SOLVER_LIB   = cdaeSuperLU_MT_LASolver.lib
-win32-msvc2008::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
-win32-msvc2008::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
-win32-msvc2008::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
-win32-msvc2008::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
+win32::DAE_CORE_LIB                = cdaeCore.lib
+win32::DAE_DATAREPORTING_LIB       = cdaeDataReporting.lib
+win32::DAE_ACTIVITY_LIB            = cdaeActivity.lib
+win32::DAE_IDAS_SOLVER_LIB         = cdaeIDAS_DAESolver.lib
+win32::DAE_SUPERLU_SOLVER_LIB      = cdaeSuperLU_LASolver.lib
+win32::DAE_SUPERLU_MT_SOLVER_LIB   = cdaeSuperLU_MT_LASolver.lib
+win32::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
+win32::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
+win32::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
+win32::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
 
 unix::DAE_CORE_LIB                = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB       = -lcdaeDataReporting

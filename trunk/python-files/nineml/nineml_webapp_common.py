@@ -114,7 +114,7 @@ _css = """
     </style>
 """
 
-def getSelectComponentPage():
+def getInitialPage():
     html = """
     <html>
         <head>
@@ -132,7 +132,7 @@ def getSelectComponentPage():
                     <label for="AddTest" style="width : 250;">Include a test in the repport (optional) </label> <br/>
                     -->
                     Initial values (in JSON format):<br/>
-                    <textarea name="InitialValues" rows="40" cols="80">
+                    <textarea name="InitialValues" rows="20" cols="80">
 {
     "timeHorizon" : 1.0,
     "reportingInterval" : 0.001,
@@ -167,9 +167,8 @@ def getSelectComponentPage():
 }
                 </textarea>
                 </p>
-                <input type="hidden" name="__NINEML_WEBAPP_ACTION__" value="setupData"/>
-                <br/>
-                <input type="submit" value="Submit" />
+                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Generate report" />
+                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Add test" />
             </form>
         </body>
         </html>
@@ -182,10 +181,10 @@ def getSetupDataForm():
         <h1>Test NineML component: {0}</h1>
         {1}
         <input type="hidden" name="__NINEML_WEBAPP_ID__" value="{2}"/>
-        <input type="hidden" name="__NINEML_WEBAPP_ACTION__" value="runSimulation"/>
+        <input type="hidden" name="__NINEML_WEBAPP_ACTION__" value="Generate report with tests" />
         <br/>
         
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Generate report" />
     </form>
     """
     return html

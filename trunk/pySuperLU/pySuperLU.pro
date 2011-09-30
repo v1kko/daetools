@@ -1,15 +1,3 @@
-#************************************************************************************
-#                 DAE Tools Project: www.daetools.com
-#                 Copyright (C) Dragan Nikolic, 2010
-#************************************************************************************
-# DAE Tools is free software; you can redistribute it and/or modify it under the 
-# terms of the GNU General Public License version 3 as published by the Free Software
-# Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with the
-# DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-#************************************************************************************
 include(../dae.pri)
 QT -= core gui
 TARGET = pySuperLU
@@ -90,8 +78,9 @@ pyObject = pySuperLU_CUDA
 
 OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
+win32{
 SuperLU {
-win32-msvc2008::QMAKE_POST_LINK = move \
+QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
     $${DAE_DEST_DIR}/pySuperLU.pyd
@@ -99,20 +88,23 @@ win32-msvc2008::QMAKE_POST_LINK = move \
 }
 
 SuperLU_MT {
-win32-msvc2008::QMAKE_POST_LINK = move \
+QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
     $${DAE_DEST_DIR}/pySuperLU_MT.pyd
 }
 
 SuperLU_CUDA {
-win32-msvc2008::QMAKE_POST_LINK = move \
+QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
     $${DAE_DEST_DIR}/pySuperLU_CUDA.pyd
 }
+}
 
-unix::QMAKE_POST_LINK = cp \
+unix{
+QMAKE_POST_LINK = cp \
     -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
     $${DAE_DEST_DIR}/$${pyObject}.so
+}
