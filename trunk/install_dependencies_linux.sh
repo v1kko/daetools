@@ -28,9 +28,9 @@ elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
                        wget subversion fakeroot
 
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
-  sudo yum check-update
+  #sudo yum check-update
   sudo yum install boost-devel PyQt4 numpy scipy python-matplotlib \
-                   blas lapack suitesparse-devel qt-creator qt-devel \
+                   blas blas-devel lapack lapack-devel suitesparse-devel qt-creator qt-devel \
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
                    wget subversion fakeroot
 

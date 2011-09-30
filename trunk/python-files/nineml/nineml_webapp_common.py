@@ -127,8 +127,10 @@ def getSelectComponentPage():
                     <input type="text" name="TestableComponent" value="hierachical_iaf_1coba"/>
                 </p>
                 <p>
-                    <input type="checkbox" name="AddTest" checked/>
+                    <!-- 
+                    <input type="checkbox" name="AddTest" checked/> 
                     <label for="AddTest" style="width : 250;">Include a test in the repport (optional) </label> <br/>
+                    -->
                     Initial values (in JSON format):<br/>
                     <textarea name="InitialValues" rows="40" cols="80">
 {

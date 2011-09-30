@@ -57,6 +57,7 @@ class nineml_webapp:
             event_ports_expressions = {}
             active_regimes = {}
             variables_to_report = {}
+            doTests = False
 
             if not dictFormData.has_key('TestableComponent'):
                 raise RuntimeError('No input NineML component has been specified')
@@ -66,6 +67,9 @@ class nineml_webapp:
             if not nineml_component:
                 raise RuntimeError('The specified component: {0} could not be loaded'.format(compName))
 
+            if dictFormData.has_key('AddTest'):
+                doTests = bool(dictFormData['AddTest'][0])
+            
             if dictFormData.has_key('InitialValues'):
                 data = json.loads(dictFormData['InitialValues'][0])
                 if not isinstance(data, dict):
