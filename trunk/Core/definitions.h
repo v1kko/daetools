@@ -40,6 +40,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #pragma warning(disable: 4250)
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
+#pragma warning(disable: 4100)
+#pragma warning(disable: 4101)
+#pragma warning(disable: 4189)
 
 #ifdef AddPort
 #undef AddPort

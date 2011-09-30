@@ -69,9 +69,10 @@ DESTDIR = $${DAE_DEST_DIR}
 ####################################################################################
 #                       Suppress some warnings
 ####################################################################################
+win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CXXFLAGS += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-unix::QMAKE_CFLAGS   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+unix::QMAKE_CXXFLAGS  += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+unix::QMAKE_CFLAGS    += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
 
 ####################################################################################
 # Creating .vcproj under windows:
@@ -149,7 +150,7 @@ unix::PYTHON_LIB_DIR           =
 #       Add line: using python : 2.7 ;
 #####################################################################################
 win32::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
-win32::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
+win32::BOOSTLIBPATH     = $${BOOSTDIR}/lib
 win32::BOOST_PYTHON_LIB =
 win32::BOOST_LIBS       =
 
