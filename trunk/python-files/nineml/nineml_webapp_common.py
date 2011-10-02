@@ -134,36 +134,36 @@ def getInitialPage():
                     Initial values (in JSON format):<br/>
                     <textarea name="InitialValues" rows="20" cols="80">
 {
-    "timeHorizon" : 1.0,
-    "reportingInterval" : 0.001,
-    "parameters" : {
-        "cobaExcit.q" : 3.0,
-        "cobaExcit.tau" : 5.0,
-        "cobaExcit.vrev" : 0.0,
-        "iaf.cm" : 1,
-        "iaf.gl" : 50,
-        "iaf.taurefrac" : 0.008,
-        "iaf.vreset" : -0.060,
-        "iaf.vrest" : -0.060,
-        "iaf.vthresh" : -0.040
-    },
-    "initial_conditions" : {
-        "cobaExcit.g" : 0.0,
-        "iaf.V" : -0.060,
-        "iaf.tspike" : -1E99
-    },
-    "analog_ports_expressions" : {},
-    "event_ports_expressions" : {
-        "cobaExcit.spikeinput" : "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90"
-    },
-    "active_regimes" : {
-        "cobaExcit" : "cobadefaultregime",
-        "iaf" : "subthresholdregime"
-    },
-    "variables_to_report" : {
-        "cobaExcit.I" : true,
-        "iaf.V" : true
-    }
+  "timeHorizon": 1.0, 
+  "reportingInterval": 0.001, 
+  "initial_conditions": {
+    "iaf_1coba.iaf.tspike": -1e+99, 
+    "iaf_1coba.iaf.V": -0.06, 
+    "iaf_1coba.cobaExcit.g": 0.0
+  }, 
+  "parameters": {
+    "iaf_1coba.iaf.gl": 50.0, 
+    "iaf_1coba.cobaExcit.vrev": 0.0, 
+    "iaf_1coba.cobaExcit.q": 3.0, 
+    "iaf_1coba.iaf.vreset": -0.06, 
+    "iaf_1coba.cobaExcit.tau": 5.0, 
+    "iaf_1coba.iaf.taurefrac": 0.008, 
+    "iaf_1coba.iaf.vthresh": -0.04, 
+    "iaf_1coba.iaf.vrest": -0.06, 
+    "iaf_1coba.iaf.cm": 1.0
+  }, 
+  "variables_to_report": {
+    "iaf_1coba.cobaExcit.I": true, 
+    "iaf_1coba.iaf.V": true
+  }, 
+  "event_ports_expressions": {
+    "iaf_1coba.cobaExcit.spikeinput": "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90"
+  }, 
+  "active_regimes": {
+    "iaf_1coba.cobaExcit": "cobadefaultregime", 
+    "iaf_1coba.iaf": "subthresholdregime"
+  }, 
+  "analog_ports_expressions": {}
 }
                 </textarea>
                 </p>
@@ -196,7 +196,9 @@ def createResultPage(content):
             {0}
         </head>
         <body>
-            {1}
+            <pre>
+                {1}
+            </pre>
         </body>
     </html>
     """

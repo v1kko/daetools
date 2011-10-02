@@ -51,7 +51,7 @@ class simpleUserAction(daeAction):
         try:
             from PyQt4 import QtCore, QtGui
             if QtCore.QCoreApplication.instance():
-                QtGui.QMessageBox.warning(None, 'tutorial5a', msg)
+                QtGui.QMessageBox.warning(None, 'tutorial13', msg)
         except:
             pass
         

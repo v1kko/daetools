@@ -126,6 +126,7 @@ def getConnectedAnalogPorts(root_model_name, component, connected_ports):
     return connected_ports
 
 def getValueFromDictionary(canonicalName, dictValues, defaultValue, excludeRootName = False):
+    """
     if excludeRootName:
         names = canonicalName.split('.')
         if len(names) == 1:
@@ -134,6 +135,9 @@ def getValueFromDictionary(canonicalName, dictValues, defaultValue, excludeRootN
             key = '.'.join(names[1:])
     else:
         key = canonicalName
+    """    
+    key = canonicalName
+    
     #print('canonicalName = {0} -> key = {1}'.format(canonicalName, key))
     if key in dictValues:
         return dictValues[key]
@@ -141,6 +145,7 @@ def getValueFromDictionary(canonicalName, dictValues, defaultValue, excludeRootN
         return defaultValue
 
 def isValueInList(canonicalName, listValues, excludeRootName = False):
+    """
     if excludeRootName:
         names = canonicalName.split('.')
         if len(names) == 1:
@@ -149,6 +154,8 @@ def isValueInList(canonicalName, listValues, excludeRootName = False):
             key = '.'.join(names[1:])
     else:
         key = canonicalName
+    """
+    key = canonicalName
     #print('canonicalName = {0} -> key = {1}'.format(canonicalName, key))
     return (key in listValues)
 
@@ -907,11 +914,7 @@ class nineml_component_inspector:
             self._detectUniqueComponents(subcomponent, unique_components)
 
     def _addTestToReport(self, content, test):
-        #testName        = test[0]
-        #testDescription = test[1]
-        #dictInputs      = test[2]
-        #plots           = test[3]
-        testName, testDescription, dictInputs, plots, log_output = test
+        testName, testDescription, dictInputs, plots, log_output, tmpFolder = test
         
         testInputs = '\\begin{verbatim}\n'
         testInputs += 'Time horizon = {0}\n'.format(dictInputs['timeHorizon'])

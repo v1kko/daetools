@@ -29,7 +29,6 @@ daeSimulation::daeSimulation(void)
 
 daeSimulation::~daeSimulation(void)
 {
-	Finalize();
 }
 
 void daeSimulation::SetUpParametersAndDomains()

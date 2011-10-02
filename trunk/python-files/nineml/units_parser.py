@@ -112,7 +112,7 @@ class UnitsParser:
     """
     def __init__(self, dictUnits = None):
         self.lexer  = lex.lex()
-        self.parser = yacc.yacc() #(write_tables = 0)
+        self.parser = yacc.yacc(debug=False, write_tables = 0)
         self.parseResult = None
         self.dictBaseUnits = dictUnits
         

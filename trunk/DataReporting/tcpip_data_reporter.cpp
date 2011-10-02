@@ -19,7 +19,8 @@ daeTCPIPDataReporter::daeTCPIPDataReporter()
 
 daeTCPIPDataReporter::~daeTCPIPDataReporter()
 {
-	Disconnect();
+	if(IsConnected())
+		Disconnect();
 }
 
 bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string& strProcessName)
@@ -103,6 +104,9 @@ bool daeTCPIPDataReporter::Disconnect()
 //		cout << "Error while closing daeTCPIPDataReporter: " << ec.message() << endl;
 //		return false;
 //	}
+
+	if(!IsConnected())
+		return false;
 
 	m_ptcpipSocket.reset();
 	

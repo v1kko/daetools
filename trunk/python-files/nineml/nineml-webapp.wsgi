@@ -33,6 +33,14 @@ except Exception as e:
     ___import_exception___           = str(e)
     ___import_exception_traceback___ = exc_traceback
 
+class daeNineMLWebAppLog(daeLogs.daeBaseLog):
+    def __init__(self):
+        daeLogs.daeBaseLog.__init__(self)
+
+    def Message(self, message, severity):
+        daeLogs.daeBaseLog.Message(self, message, severity)
+        print(self.IndentString + message, file=sys.stderr)
+
 class nineml_webapp:
     def __init__(self):
         pass
@@ -150,18 +158,7 @@ class nineml_webapp:
             html          = createSetupDataPage(content)
         
         except Exception as e:
-            content = 'Application environment:\n' + pformat(environ) + '\n\n'
-            content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
-            content += 'Form input:\n'
-            content += '  parameters:  {0}\n'.format(parameters)
-            content += '  initial_conditions:  {0}\n'.format(initial_conditions)
-            content += '  active_regimes:  {0}\n'.format(active_regimes)
-            content += '  analog_ports_expressions:  {0}\n'.format(analog_ports_expressions)
-            content += '  event_ports_expressions:  {0}\n'.format(event_ports_expressions)
-            content += '  variables_to_report:  {0}\n'.format(variables_to_report)
-
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            html = createErrorPage(str(e), exc_traceback, content)
+            return self.returnExceptionPage(str(e), environ, start_response)
 
         output_len = len(html)
         start_response('200 OK', [('Content-type', 'text/html'),
@@ -184,11 +181,7 @@ class nineml_webapp:
             return self.generate_report(dictFormData, tmpFolder, applicationID, inspector, nineml_component, False, environ, start_response)
         
         except Exception as e:
-            exc_traceback = sys.exc_info()[2]
-            messages = traceback.format_tb(exc_traceback)
-            print('\n'.join(messages), file=sys.stderr)
-            print(str(e), file=sys.stderr)
-            return self.initial_page(environ, start_response)
+            return self.returnExceptionPage(str(e), environ, start_response)
 
     def generate_report_with_tests(self, dictFormData, environ, start_response):
         try:
@@ -196,11 +189,7 @@ class nineml_webapp:
             return self.generate_report(dictFormData, tmpFolder, applicationID, inspector, nineml_component, True, environ, start_response)
        
         except Exception as e:
-            exc_traceback = sys.exc_info()[2]
-            messages = traceback.format_tb(exc_traceback)
-            print('\n'.join(messages), file=sys.stderr)
-            print(str(e), file=sys.stderr)
-            return self.initial_page(environ, start_response)
+            return self.returnExceptionPage(str(e), environ, start_response)
     
     def generate_report(self, dictFormData, tmpFolder, applicationID, inspector, nineml_component, doTests, environ, start_response):
         try:
@@ -244,10 +233,7 @@ class nineml_webapp:
             html = createResultPage(html_tests)
 
         except Exception as e:
-            content = 'Application environment:\n' + pformat(environ) + '\n\n'
-            content += 'Form arguments:\n  {0}\n\n'.format(dictFormData)
-            exc_traceback = sys.exc_info()[2]
-            html = createErrorPage(str(e), exc_traceback, content)
+            return self.returnExceptionPage(str(e), environ, start_response)
 
         # Remove temporary directory
         if os.path.isdir(tmpFolder):
@@ -284,15 +270,15 @@ class nineml_webapp:
         
         if isOK:
             testName, testDescription, dictInputs, plots, log_output = results
-            tests_data.append( (testName, testDescription, dictInputs, plots, log_output) )
+            tests_data.append( (testName, testDescription, dictInputs, plots, log_output, tmpFolder) )
             zipReport = '{0}/{1}.zip'.format(tmpFolder, applicationID)
-            self.pack_tests_data(zipReport, tests_data, tmpFolder)
+            self.pack_tests_data(zipReport, tests_data)
             html += 'Test status: {0} [SUCCEEDED]'.format(testName)
             if os.path.isfile(zipReport):
                 zip = open(zipReport, "rb").read()
         else:
             testName, testDescription, dictInputs, plots, log_output, error = results
-            html += 'Test status: {0} [FAILED]'.format(testName)
+            html += 'Test status: {0} [FAILED]\n'.format(testName)
             html += error
         
         return html, tests_data, zip
@@ -321,6 +307,18 @@ class nineml_webapp:
         
         return tmpFolder, applicationID, inspector, nineml_component
 
+    def returnExceptionPage(self, strError, environ, start_response):
+        content = 'Application environment:\n' + pformat(environ) + '\n\n'
+        #content += 'Form arguments:\n  {0}\n\n'.format(raw_arguments)
+
+        exc_traceback = sys.exc_info()[2]
+        html = createErrorPage(strError, exc_traceback, content)
+
+        output_len = len(html)
+        start_response('200 OK', [('Content-type', 'text/html'),
+                                ('Content-Length', str(output_len))])
+        return [html]
+    
     def get_temp_folder(self):
         tmpFolder       = tempfile.mkdtemp(prefix='nineml-webapp-', suffix='-tmp')
         applicationID   = os.path.split(tmpFolder)[1]
@@ -330,7 +328,7 @@ class nineml_webapp:
     def get_pickle_filename(self, tmpFolder):
         return os.path.join(tmpFolder, 'webapp.pickle')
 
-    def pack_tests_data(self, zipReport, tests_data, tmpFolder):
+    def pack_tests_data(self, zipReport, tests_data):
         try:
             if len(tests_data) == 0:
                 return
@@ -338,16 +336,23 @@ class nineml_webapp:
             zip = zipfile.ZipFile(zipReport, "w")
             
             for i, test_data in enumerate(tests_data):
-                testName, testDescription, dictInputs, plots, log_output = test_data
+                testName, testDescription, dictInputs, plots, log_output, tmpFolder = test_data
                 testFolder = 'test-no.{0}/'.format(i+1, testName) 
                 
                 # Write log file contents
-                logName = '/log_output.txt'
+                logName = '__log_output__.txt'
                 f = open(tmpFolder + '/' + logName, "w")
                 f.write(log_output)
                 f.close()
                 zip.write(tmpFolder + '/' + logName, testFolder + logName)
-                
+
+                # Write JSON input file
+                jsonName = '__json_simulation_input__.txt'
+                f = open(tmpFolder + '/' + jsonName, "w")
+                json.dump(dictInputs, f, indent = 2)
+                f.close()
+                zip.write(tmpFolder + '/' + jsonName, testFolder + jsonName)
+
                 # Write .png and .csv files
                 for plot in plots:
                     varName, xPoints, yPoints, pngName, csvName = plot
@@ -424,7 +429,7 @@ class nineml_webapp:
             simulation_data.variables_to_report      = variables_to_report
 
             # Create Log, DAESolver, DataReporter and Simulation object
-            log          = daeLogs.daeBaseLog()
+            log          = daeNineMLWebAppLog()
             daesolver    = pyIDAS.daeIDAS()
             datareporter = ninemlTesterDataReporter()
             model        = nineml_daetools_bridge(nineml_component.name, nineml_component)

@@ -11,6 +11,8 @@ daeFileDataReporter::daeFileDataReporter()
 
 daeFileDataReporter::~daeFileDataReporter()
 {
+	if(IsConnected())
+		Disconnect();
 }
 
 bool daeFileDataReporter::Connect(const string& strConnectString, const string& strProcessName)
@@ -35,6 +37,8 @@ bool daeFileDataReporter::IsConnected()
 
 bool daeFileDataReporter::Disconnect()
 {
+	if(!IsConnected())
+		return false;
 	WriteDataToFile();
 	of.flush();
 	of.close();

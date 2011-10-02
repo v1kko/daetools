@@ -22,108 +22,25 @@ def test_Izhikevich():
     timeHorizon = 1
     reportingInterval = 0.001
     parameters = {
-                    "a": 0.02,
-                    "b": 0.2,
-                    "c": -0.05,
-                    "d": 2.0,
-                    "theta": 0.03
+                    "Izhikevich.a": 0.02,
+                    "Izhikevich.b": 0.2,
+                    "Izhikevich.c": -0.05,
+                    "Izhikevich.d": 2.0,
+                    "Izhikevich.theta": 0.03
                  }
     initial_conditions = {
-                            "U": 0.0,
-                            "V": -0.07
+                            "Izhikevich.U": 0.0,
+                            "Izhikevich.V": -0.07
                          }
     analog_ports_expressions = {
-                                  "Isyn": "0.1"
+                                  "Izhikevich.Isyn": "0.1"
                                }
     event_ports_expressions = {}
     active_regimes = {}
     variables_to_report = {
-                             'U' : True,
-                             'V' : True
+                             'Izhikevich.U' : True,
+                             'Izhikevich.V' : True
                           }
-
-    inspector = nineml_component_inspector()
-    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
-                                        reportingInterval        = reportingInterval,
-                                        parameters               = parameters,
-                                        initial_conditions       = initial_conditions,
-                                        active_regimes           = active_regimes,
-                                        analog_ports_expressions = analog_ports_expressions,
-                                        event_ports_expressions  = event_ports_expressions,
-                                        variables_to_report      = variables_to_report)
-    results = inspector.showQtGUI()
-    return results, inspector
-
-def test_Izhikevich2():
-    nineml_component = TestableComponent('izhikevich2')()
-    if not nineml_component:
-        raise RuntimeError('Cannot load NineML component')
-
-    timeHorizon = 1
-    reportingInterval = 0.001
-    parameters = {
-                    "a": 0.02,
-                    "b": 0.2,
-                    "c": -0.05,
-                    "d": 2.0,
-                    "theta": 0.03
-                 }
-    initial_conditions = {
-                            "U": 0.0,
-                            "V": -0.07
-                         }
-    analog_ports_expressions = {
-                                  "Isyn": "0.1"
-                               }
-    event_ports_expressions = {}
-    active_regimes = {}
-    variables_to_report = {
-                             'U' : True,
-                             'V' : True
-                          }
-
-    inspector = nineml_component_inspector()
-    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
-                                        reportingInterval        = reportingInterval,
-                                        parameters               = parameters,
-                                        initial_conditions       = initial_conditions,
-                                        active_regimes           = active_regimes,
-                                        analog_ports_expressions = analog_ports_expressions,
-                                        event_ports_expressions  = event_ports_expressions,
-                                        variables_to_report      = variables_to_report)
-    results = inspector.showQtGUI()
-    return results, inspector
-
-def test_Hodgkin_Huxley():
-    nineml_component = TestableComponent('hh')()
-    if not nineml_component:
-        raise RuntimeError('Cannot load NineML component')
-
-    timeHorizon = 1
-    reportingInterval = 0.001
-    parameters = {
-        'C' : 1,
-        'ek' : -63,
-        'el' : 0.1,
-        'ena' : -190,
-        'gkbar' : 36,
-        'gnabar' : 120,
-        'theta' : -60,
-        'gl' : 0.3,
-        'celsius' : 1
-    }
-    initial_conditions = {
-        'n' : 0.31768,
-        'm' : 0.052932,
-        'h' : 0.59612,
-        'V' : -75
-    }
-    analog_ports_expressions = {
-        'Isyn' : '0.01'
-    }
-    event_ports_expressions = {}
-    active_regimes = {}
-    variables_to_report = {}
 
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
@@ -142,36 +59,36 @@ def test_hierachical_iaf_1coba():
     if not nineml_component:
         raise RuntimeError('Cannot load NineML component')
 
-    timeHorizon = 1
-    reportingInterval = 0.001
-    parameters = {
-        'cobaExcit.q' : 3.0,
-        'cobaExcit.tau' : 5.0,
-        'cobaExcit.vrev' : 0.0,
-        'iaf.cm' : 1,
-        'iaf.gl' : 50,
-        'iaf.taurefrac' : 0.008,
-        'iaf.vreset' : -0.060,
-        'iaf.vrest' : -0.060,
-        'iaf.vthresh' : -0.040
-    }
+    timeHorizon =  1.0
+    reportingInterval = 0.001 
     initial_conditions = {
-        'cobaExcit.g' : 0.0,
-        'iaf.V' : -0.060,
-        'iaf.tspike' : -1E99
+        "iaf_1coba.iaf.tspike": -1e+99, 
+        "iaf_1coba.iaf.V": -0.06, 
+        "iaf_1coba.cobaExcit.g": 0.0
     }
-    analog_ports_expressions = {}
-    event_ports_expressions = {
-               'cobaExcit.spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
-    }
-    active_regimes = {
-        'cobaExcit' : 'cobadefaultregime',
-        'iaf' : 'subthresholdregime'
-    }
+    parameters = {
+        "iaf_1coba.iaf.gl": 50.0, 
+        "iaf_1coba.cobaExcit.vrev": 0.0, 
+        "iaf_1coba.cobaExcit.q": 3.0, 
+        "iaf_1coba.iaf.vreset": -0.06, 
+        "iaf_1coba.cobaExcit.tau": 5.0, 
+        "iaf_1coba.iaf.taurefrac": 0.008, 
+        "iaf_1coba.iaf.vthresh": -0.04, 
+        "iaf_1coba.iaf.vrest": -0.06, 
+        "iaf_1coba.iaf.cm": 1.0
+    } 
     variables_to_report = {
-        'cobaExcit.I' : True,
-        'iaf.V' : True
-    }
+        "iaf_1coba.cobaExcit.I": True, 
+        "iaf_1coba.iaf.V": True
+    } 
+    event_ports_expressions = {
+        "iaf_1coba.cobaExcit.spikeinput": "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90"
+    } 
+    active_regimes = {
+        "iaf_1coba.cobaExcit": "cobadefaultregime", 
+        "iaf_1coba.iaf": "subthresholdregime"
+    } 
+    analog_ports_expressions = {}
 
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
@@ -193,24 +110,24 @@ def test_coba_synapse():
     timeHorizon = 1
     reportingInterval = 0.001
     parameters = {
-        'q' : 3.0,
-        'tau' : 5.0,
-        'vrev' : 0.0
+        'CobaSyn.q' : 3.0,
+        'CobaSyn.tau' : 5.0,
+        'CobaSyn.vrev' : 0.0
     }
     initial_conditions = {
-        'g' : 0.0,
+        'CobaSyn.g' : 0.0,
     }
     analog_ports_expressions = {
-        'V' : -0.050
+        'CobaSyn.V' : -0.050
     }
     event_ports_expressions = {
-        'spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
+        'CobaSyn.spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
     }
     active_regimes = {
-        'cobaExcit' : 'cobadefaultregime'
+        'CobaSyn' : 'cobadefaultregime'
     }
     variables_to_report = {
-        'I' : True
+        'CobaSyn.I' : True
     }
 
     inspector = nineml_component_inspector()
@@ -233,61 +150,26 @@ def test_iaf():
     timeHorizon = 1
     reportingInterval = 0.001
     parameters = {
-        'cm' : 1,
-        'gl' : 50,
-        'taurefrac' : 0.008,
-        'vreset' : -0.060,
-        'vrest' : -0.060,
-        'vthresh' : -0.040
+        'iaf.cm' : 1,
+        'iaf.gl' : 50,
+        'iaf.taurefrac' : 0.008,
+        'iaf.vreset' : -0.060,
+        'iaf.vrest' : -0.060,
+        'iaf.vthresh' : -0.040
     }
     initial_conditions = {
-        'V' : -0.060,
-        'tspike' : -1E99
+        'iaf.V' : -0.060,
+        'iaf.tspike' : -1E99
     }
     analog_ports_expressions = {
-        'I' : 1.2
+        'iaf.ISyn' : 1.2
     }
     event_ports_expressions = {}
     active_regimes = {
         'iaf' : 'subthresholdregime'
     }
     variables_to_report = {
-        'V' : True
-    }
-
-    inspector = nineml_component_inspector()
-    inspector.inspect(nineml_component, timeHorizon              = timeHorizon,
-                                        reportingInterval        = reportingInterval,
-                                        parameters               = parameters,
-                                        initial_conditions       = initial_conditions,
-                                        active_regimes           = active_regimes,
-                                        analog_ports_expressions = analog_ports_expressions,
-                                        event_ports_expressions  = event_ports_expressions,
-                                        variables_to_report      = variables_to_report)
-    results = inspector.showQtGUI()
-    return results, inspector
-
-def test_destexhe_ampa():
-    nineml_component = TestableComponent('destexhe_ampa')()
-    if not nineml_component:
-        raise RuntimeError('Cannot load NineML component')
-
-    timeHorizon = 1
-    reportingInterval = 0.001
-    parameters = {
-        'Cdur'  : 0.003, # (ms)  : transmitter duration (rising phase)
-        'Alpha' : 0.094, # (/ms) : forward (binding) rate
-        'Beta'  : 0.018, # (/ms) : backward (unbinding) rate
-        'Erev'  : 0.0    # (mV)  : reversal potential
-    }
-    initial_conditions = {
-    }
-    analog_ports_expressions = {
-    }
-    event_ports_expressions = {}
-    active_regimes = {
-    }
-    variables_to_report = {
+        'iaf.V' : True
     }
 
     inspector = nineml_component_inspector()
@@ -305,12 +187,9 @@ def test_destexhe_ampa():
 if __name__ == "__main__":
     # test_iaf
     # test_coba_synapse
-    # test_hierachical_iaf_nmda
     # test_hierachical_iaf_1coba
     # test_Izhikevich
-    # test_Izhikevich2
-    # test_destexhe_ampa
-    results, inspector = test_destexhe_ampa()
+    results, inspector = test_hierachical_iaf_1coba()
     if not results:
         exit(0)
 

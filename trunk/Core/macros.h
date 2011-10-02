@@ -15,29 +15,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "helpers.h"
 
-#define daeDeclareDomain(NAME)				daeDomain	NAME;
-#define daeDeclareVariable(NAME)			daeVariable NAME;
-#define daeDeclarePort(NAME)				daePort		NAME;
-#define daeDeclareSTN(NAME)					daeSTN		NAME;
-#define daeDeclareState(NAME)				daeState	NAME;
-
-#define daeDeclareModelArray1(CLASS, NAME)	daeModelArray1<CLASS> NAME;
-#define daeDeclareModelArray2(CLASS, NAME)	daeModelArray2<CLASS> NAME;
-#define daeDeclareModelArray3(CLASS, NAME)	daeModelArray3<CLASS> NAME;
-#define daeDeclareModelArray4(CLASS, NAME)	daeModelArray4<CLASS> NAME;
-#define daeDeclareModelArray5(CLASS, NAME)	daeModelArray5<CLASS> NAME;
-#define daeDeclareModelArray6(CLASS, NAME)	daeModelArray6<CLASS> NAME;
-#define daeDeclareModelArray7(CLASS, NAME)	daeModelArray7<CLASS> NAME;
-#define daeDeclareModelArray8(CLASS, NAME)	daeModelArray8<CLASS> NAME;
-
-#define daeDeclarePortArray1(CLASS, NAME)	daePortArray1<CLASS> NAME;
-#define daeDeclarePortArray2(CLASS, NAME)	daePortArray2<CLASS> NAME;
-#define daeDeclarePortArray3(CLASS, NAME)	daePortArray3<CLASS> NAME;
-#define daeDeclarePortArray4(CLASS, NAME)	daePortArray4<CLASS> NAME;
-#define daeDeclarePortArray5(CLASS, NAME)	daePortArray5<CLASS> NAME;
-#define daeDeclarePortArray6(CLASS, NAME)	daePortArray6<CLASS> NAME;
-#define daeDeclarePortArray7(CLASS, NAME)	daePortArray7<CLASS> NAME;
-#define daeDeclarePortArray8(CLASS, NAME)	daePortArray8<CLASS> NAME;
+#define daepython_try		try {
+#define daepython_catch		} \
+							catch(const boost::python::error_already_set&) \
+							{ \
+							} \
+							catch(const std::exception& e) \
+							{ \
+								PyErr_SetString(PyExc_RuntimeError, e.what()); \
+								boost::python::throw_error_already_set(); \
+							} \
+							catch(...) \
+							{ \
+								PyErr_SetString(PyExc_RuntimeError, "unidentifiable C++ exception"); \
+								boost::python::throw_error_already_set(); \
+							}
 
 #define AddFunction(MODEL_CLASS, FUNCTION)	AddEquation<MODEL_CLASS>(#FUNCTION, &MODEL_CLASS::FUNCTION);
 

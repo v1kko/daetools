@@ -23,7 +23,6 @@ daeOptimization::daeOptimization(void)
 
 daeOptimization::~daeOptimization(void)
 {
-	Finalize();
 }
 
 void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
