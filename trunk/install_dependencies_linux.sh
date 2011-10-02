@@ -32,7 +32,7 @@ elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   sudo yum install boost-devel PyQt4 numpy scipy python-matplotlib \
                    blas blas-devel lapack lapack-devel suitesparse-devel qt-creator qt-devel \
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
-                   wget subversion fakeroot
+                   wget subversion fakeroot rpm-build
 
 else
   echo "ERROR: unsupported GNU/Linux distribution; please edit the script to add support for: ${DISTRIBUTOR_ID}/${CODENAME}"
