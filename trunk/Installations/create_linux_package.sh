@@ -550,7 +550,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
-  echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
+  echo "Provides: ${PACKAGE_NAME}, libsuperlu.so.4.1, libsuperlu_mt.so.2.0"         >> ${SPEC}
   echo "Requires: boost-devel, PyQt4, numpy, scipy, python-matplotlib "             >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
