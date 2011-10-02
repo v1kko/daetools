@@ -4,7 +4,7 @@ set -e
 
 if [ "$1" = "-help" ]; then
   echo "Usage:"
-  echo "compile_linux [all]"
+  echo "compile_linux all | dae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt | cusp"
   return
 fi
 
@@ -58,6 +58,9 @@ compile () {
 
 case ${PROJECTS} in
   all)  echo Compile ALL projects
+        if [ ! -d ${TRUNK}/release ]; then
+          mkdir ${TRUNK}/release
+        fi
         cd ${TRUNK}/release
         rm -rf *
         cd ${TRUNK}

@@ -319,36 +319,36 @@ class nineml_daetools_simulation(daeSimulation):
             self.ReportData(self.CurrentTime)
                     
 if __name__ == "__main__":
-    parameters = {
-        'cobaExcit.q' : 3.0,
-        'cobaExcit.tau' : 5.0,
-        'cobaExcit.vrev' : 0.0,
-        'iaf.cm' : 1,
-        'iaf.gl' : 50,
-        'iaf.taurefrac' : 0.008,
-        'iaf.vreset' : -0.060,
-        'iaf.vrest' : -0.060,
-        'iaf.vthresh' : -0.040
-    }
-    initial_conditions = {
-        'cobaExcit.g' : 0.0,
-        'iaf.V' : -0.060,
-        'iaf.tspike' : -1E99
-    }
-    analog_ports_expressions = {}
-    event_ports_expressions = {
-        'cobaExcit.spikeinput' : '0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90'
-    }
-    active_regimes = {
-        'cobaExcit' : 'cobadefaultregime',
-        'iaf' : 'subthresholdregime'
-    }
-    variables_to_report = {
-        'cobaExcit.I' : True,
-        'iaf.V' : True
-    }
     timeHorizon       = 1
     reportingInterval = 0.001
+    parameters = {
+        "iaf_1coba.iaf.gl": 50.0, 
+        "iaf_1coba.cobaExcit.vrev": 0.0, 
+        "iaf_1coba.cobaExcit.q": 3.0, 
+        "iaf_1coba.iaf.vreset": -0.06, 
+        "iaf_1coba.cobaExcit.tau": 5.0, 
+        "iaf_1coba.iaf.taurefrac": 0.008, 
+        "iaf_1coba.iaf.vthresh": -0.04, 
+        "iaf_1coba.iaf.vrest": -0.06, 
+        "iaf_1coba.iaf.cm": 1.0
+    } 
+    initial_conditions = {
+        "iaf_1coba.iaf.tspike": -1e+99, 
+        "iaf_1coba.iaf.V": -0.06, 
+        "iaf_1coba.cobaExcit.g": 0.0
+    }
+    variables_to_report = {
+        "iaf_1coba.cobaExcit.I": True, 
+        "iaf_1coba.iaf.V": True
+    } 
+    event_ports_expressions = {
+        "iaf_1coba.cobaExcit.spikeinput": "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90"
+    } 
+    active_regimes = {
+        "iaf_1coba.cobaExcit": "cobadefaultregime", 
+        "iaf_1coba.iaf": "subthresholdregime"
+    } 
+    analog_ports_expressions = {}
 
     # Load the Component:
     nineml_comp  = TestableComponent('hierachical_iaf_1coba')()
@@ -382,13 +382,6 @@ if __name__ == "__main__":
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model reports for all models
-    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    #iaf  = findObjectInModel(simulation.m, 'iaf', look_for_models = True)
-    #iaf.SaveModelReport(iaf.Name + ".xml")
-    #coba = findObjectInModel(simulation.m, 'cobaExcit', look_for_models = True)
-    #coba.SaveModelReport(coba.Name + ".xml")
-
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
@@ -399,8 +392,9 @@ if __name__ == "__main__":
     inspector = nineml_component_inspector()
     inspector.inspect(nineml_comp)
 
+    tmpFolder = '.'
     log_output = log.JoinMessages('\n')
-    plots = datareporter.createReportData('.')
+    plots = datareporter.createReportData(tmpFolder)
 
     dictInputs = {}
     dictInputs['parameters']                = parameters
@@ -413,9 +407,14 @@ if __name__ == "__main__":
     dictInputs['reportingInterval']         = reportingInterval
     
     tests_data = []
-    tests_data.append( ('Dummy test', 'Dummy test notes', dictInputs, plots, log_output) )
+    tests_data.append( ('Dummy test', 'Dummy test notes', dictInputs, plots, log_output, tmpFolder) )
 
-    createLatexReport(inspector, tests_data, 'nineml-tex-template.tex', 'coba_iaf.tex')
+    tex = 'coba_iaf.tex'
+    pdf = 'coba_iaf.pdf'
+    createLatexReport(inspector, tests_data, 'nineml-tex-template.tex', tex)
 
-    res = createPDF('coba_iaf.tex')
-    subprocess.call(['evince', 'coba_iaf.pdf'], shell=False)
+    res = createPDF(tex, tmpFolder)
+    if os.name == 'nt':
+        os.filestart(pdf)
+    elif os.name == 'posix':
+        os.system('/usr/bin/xdg-open ' + pdf)  

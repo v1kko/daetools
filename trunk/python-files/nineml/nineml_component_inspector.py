@@ -868,6 +868,9 @@ class nineml_component_inspector:
                             analog_ports_expressions = self.treeAnalogPorts.getDictionary(),
                             event_ports_expressions  = self.treeEventPorts.getDictionary(),
                             variables_to_report      = self.treeVariablesToReport.getDictionary())
+            
+            testName        = gui.ui.testNameLineEdit.text()
+            testDescription = gui.ui.testDescriptionLineEdit.text()
             results = {}
             results['timeHorizon']              = self.timeHorizon
             results['reportingInterval']        = self.reportingInterval
@@ -877,7 +880,7 @@ class nineml_component_inspector:
             results['analog_ports_expressions'] = self.analog_ports_expressions
             results['event_ports_expressions']  = self.event_ports_expressions
             results['variables_to_report']      = self.variables_to_report
-            return results
+            return (testName, testDescription, results)
         else:
             return None
 
@@ -1030,23 +1033,6 @@ class nineml_component_inspector:
                 rows_items.append([_name, _type, ' - ', ' '])
             content.append(latex_table(header_flags, header_items, rows_items))
             content.append('\n')
-        '''
-        content.append("""\\begin{center}
-            \\begin{tabular}{ | l | l | l | p{5cm} |}
-            \\hline
-            Day & Min Temp & Max Temp & Summary \\\\ \\hline
-            Monday & 11C & 22C & A clear day with lots of sunshine.
-            However, the strong breeze will bring down the temperatures. \\\\ \\hline
-            Tuesday & 9C & 19C & Cloudy with rain, \\newline across many northern regions. \\newline Clear spells
-            across most of Scotland and Northern Ireland,
-            but rain reaching the far northwest. \\\\ \\hline
-            Wednesday & 10C & 21C & Rain will still linger for the morning.
-            Conditions will improve by early afternoon and continue
-            throughout the evening. \\\\
-            \\hline
-            \\end{tabular}
-            \\end{center}""")
-        '''
         
         # 6) Create sub-nodes
         if len(component.subnodes.items()) > 0:
@@ -1278,5 +1264,5 @@ if __name__ == "__main__":
                                         analog_ports_expressions = analog_ports_expressions,
                                         event_ports_expressions  = event_ports_expressions,
                                         variables_to_report      = variables_to_report)
-    isOK = inspector.showQtGUI()
+    inspector.showQtGUI()
     inspector.printCollectedData()

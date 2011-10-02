@@ -2,42 +2,48 @@
 
 set -e
 
-DAETOOLS_HTTP=http://daetools.sourceforge.net/compile-linux
 TRUNK=`pwd`
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 Ncpu=$(($Ncpu+1))
 
-vBONMIN=1.4.1
+vBONMIN=1.5.1
 vSUPERLU=4.1
 vSUPERLU_MT=2.0
-vNLOPT=2.2.1
+vNLOPT=2.2.4
 vIDAS=1.0.0
-vTRILINOS=10.6.2
+vTRILINOS=10.8.0
+
+DAETOOLS_HTTP=http://daetools.sourceforge.net/compile-linux
+IDAS_HTTP=${DAETOOLS_HTTP}
+BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
+SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
+TRILINOS_HTTP=http://trilinos.sandia.gov/download/files
+NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
 
 # Get the archives DAE Tools website
 if [ ! -e Bonmin-${vBONMIN}.zip ]; then
-    wget ${DAETOOLS_HTTP}/Bonmin-${vBONMIN}.zip
+    wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
 fi
 if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_${vSUPERLU}.tar.gz
+    wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
 fi
-if [ ! -e {DAETOOLS_HTTP}/superlu_makefiles.tar.gz ]; then
+if [ ! -e superlu_makefiles.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
 fi
 if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
+    wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
 fi
 if [ ! -e superlu_mt_makefiles.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
 fi
 if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/nlopt-${vNLOPT}.tar.gz
+    wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
 fi
 if [ ! -e idas-${vIDAS}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/idas-${vIDAS}.tar.gz
+    wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
 fi
 if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
+    wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
 fi
 if [ ! -e do-configure-trilinos.sh ]; then
     wget ${DAETOOLS_HTTP}/do-configure-trilinos.sh

@@ -38,14 +38,14 @@
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
          </property>
-         <item row="0" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="timeHorizonLabel">
            <property name="text">
             <string>Time horizon, s</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="timeHorizonSLineEdit">
            <property name="inputMask">
             <string/>
@@ -55,17 +55,45 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="reportingIntervalLabel">
            <property name="text">
             <string>Reporting interval, s</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="3" column="1">
           <widget class="QLineEdit" name="reportingIntervalSLineEdit">
            <property name="text">
             <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="testNameLabel">
+           <property name="text">
+            <string>Test name</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="testNameLineEdit">
+           <property name="text">
+            <string>Dummy test</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="testDescriptionLabel">
+           <property name="text">
+            <string>Test description</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="testDescriptionLineEdit">
+           <property name="text">
+            <string>Dummy test description</string>
            </property>
           </widget>
          </item>
@@ -83,12 +111,6 @@
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
          <attribute name="headerDefaultSectionSize">
           <number>300</number>
          </attribute>
@@ -125,12 +147,6 @@
          <attribute name="headerMinimumSectionSize">
           <number>100</number>
          </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
          <column>
           <property name="text">
            <string>Name</string>
@@ -158,12 +174,6 @@
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
          <attribute name="headerDefaultSectionSize">
           <number>300</number>
          </attribute>
@@ -206,12 +216,6 @@
          <attribute name="headerMinimumSectionSize">
           <number>100</number>
          </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
          <column>
           <property name="text">
            <string>Name</string>
@@ -239,12 +243,6 @@
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
          <attribute name="headerDefaultSectionSize">
           <number>300</number>
          </attribute>
@@ -283,15 +281,6 @@
          </attribute>
          <attribute name="headerDefaultSectionSize">
           <number>300</number>
-         </attribute>
-         <attribute name="headerMinimumSectionSize">
-          <number>100</number>
-         </attribute>
-         <attribute name="headerDefaultSectionSize">
-          <number>300</number>
-         </attribute>
-         <attribute name="headerVisible">
-          <bool>false</bool>
          </attribute>
          <attribute name="headerMinimumSectionSize">
           <number>100</number>
