@@ -451,11 +451,7 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "Priority: optional "                                                                        >> ${CONTROL}
   echo "Installed-Size: 11,700 "                                                                    >> ${CONTROL}
   echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                        >> ${CONTROL}
-  if [ ${DISTRO} = "Debian-5" ]; then
-    echo "Depends: python2.5, libboost1.35-dev, python-qt4, python-numpy, python-matplotlib, libc6" >> ${CONTROL}
-  else
-    echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, libc6" >> ${CONTROL}
-  fi
+  echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, libc6" >> ${CONTROL}
   echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
   echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
