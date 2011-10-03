@@ -27,7 +27,7 @@ try:
     from nineml_tex_report import createLatexReport, createPDF
     from nineml_daetools_simulation import daeSimulationInputData, nineml_daetools_simulation, ninemlTesterDataReporter
     from nineml_webapp_common import createErrorPage, getSetupDataForm, createSetupDataPage, getInitialPage, createResultPage
-
+    
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     ___import_exception___           = str(e)
@@ -46,7 +46,8 @@ class nineml_webapp:
         pass
 
     def initial_page(self, environ, start_response):
-        html = getInitialPage()
+        available_components = sorted(TestableComponent.list_available())
+        html = getInitialPage(available_components)
         output_len = len(html)
         start_response('200 OK', [('Content-type', 'text/html'),
                                 ('Content-Length', str(output_len))])
@@ -85,9 +86,10 @@ class nineml_webapp:
                 raise RuntimeError('The specified component: {0} could not be loaded'.format(compName))
 
             if dictFormData.has_key('InitialValues'):
-                data = json.loads(dictFormData['InitialValues'][0])
-                if not isinstance(data, dict):
-                    raise RuntimeError('InitialValues argument must be a dictionary in JSON')
+                try:
+                    data = json.loads(dictFormData['InitialValues'][0])
+                except Exception as e:
+                    data = {}
 
                 if data.has_key('timeHorizon'):
                     timeHorizon = float(data['timeHorizon'])

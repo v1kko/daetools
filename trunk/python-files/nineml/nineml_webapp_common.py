@@ -114,7 +114,7 @@ _css = """
     </style>
 """
 
-def getInitialPage():
+def getInitialPage(available_components):
     html = """
     <html>
         <head>
@@ -123,16 +123,37 @@ def getInitialPage():
         <body>
             <form action="nineml-webapp" method="post">
                 <p>
-                    NineML testable component name:<br/>
-                    <input type="text" name="TestableComponent" value="hierachical_iaf_1coba"/>
+                    <label for="TestableComponent" style="width:200px">NineML component:</label>
+                    <select name="TestableComponent">
+                        AVAILABLE_COMPONENTS
+                    </select>
                 </p>
                 <p>
-                    <!-- 
-                    <input type="checkbox" name="AddTest" checked/> 
-                    <label for="AddTest" style="width : 250;">Include a test in the repport (optional) </label> <br/>
-                    -->
                     Initial values (in JSON format):<br/>
-                    <textarea name="InitialValues" rows="20" cols="80">
+                    <textarea name="InitialValues" rows="10" cols="80" style="width:100%"></textarea>
+                </p>
+                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Generate report" />
+                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Add test" />
+            </form>
+            <hr />
+            <h3>Notes:</h3>
+            <p>
+            The web application takes a NineML component as an input and produces the component report in Latex/PDF format. 
+            Optionally it can show the GUI that allows user to enter the data necessary for simulation: values of the parameters,
+            initial conditions etc. Some predefined initial input values can be given in JSON format (to speed-up oftenly repeated tests).
+            If no initial values are provided the GUI will be populated with zeros and defaults. <br/>
+            The button <b>Generate report</b> produces the report with no test data added.<br/>
+            The button <b>Add test</b> generates GUI with the data that should be entered, runs the simulation, produces results/plots
+            and generates the report with the test data.<br/>
+            </p>
+            <p>
+            The analog ports input fields accept simple numbers or expressions made with the basic mathematical functions, pi, e and numbers. <br/>
+            The event ports input fields accept a comma-delimited values that represent time in seconds when the event will be triggered.
+            </p>
+            
+            <p>Some dummy input data that should work</p>
+            <p><b>Component: hierachical_iaf_1coba</b> <br/>
+                <pre>
 {
   "timeHorizon": 1.0, 
   "reportingInterval": 0.001, 
@@ -165,15 +186,78 @@ def getInitialPage():
   }, 
   "analog_ports_expressions": {}
 }
-                </textarea>
-                </p>
-                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Generate report" />
-                <input type="submit" name="__NINEML_WEBAPP_ACTION__" value="Add test" />
-            </form>
+                </pre>
+            </p>
+            
+            <p><b>Component: iaf</b><br/>
+                <pre>
+{
+  "timeHorizon": 1.0, 
+  "reportingInterval": 0.001, 
+  "initial_conditions": {
+    "iaf.tspike": -1e+99, 
+    "iaf.V": -0.06
+  }, 
+  "parameters": {
+    "iaf.gl": 50.0, 
+    "iaf.vreset": -0.06, 
+    "iaf.taurefrac": 0.008, 
+    "iaf.vthresh": -0.04, 
+    "iaf.vrest": -0.06, 
+    "iaf.cm": 1.0
+  }, 
+  "variables_to_report": {
+    "iaf.V": true
+  }, 
+  "event_ports_expressions": {}, 
+  "active_regimes": {
+    "iaf": "subthresholdregime"
+  }, 
+  "analog_ports_expressions": {
+    "iaf.ISyn" : "1.2"
+  }
+}
+                </pre>
+            </p>
+            
+            <p><b>Component: coba_synapse</b> <br/>
+                <pre>
+{
+  "timeHorizon": 1.0, 
+  "reportingInterval": 0.001, 
+  "initial_conditions": {
+    "cobaExcit.g": 0.0
+  }, 
+  "parameters": {
+    "CobaSyn.vrev": 0.0, 
+    "CobaSyn.q": 3.0, 
+    "CobaSyn.tau": 5.0
+  }, 
+  "variables_to_report": {
+    "CobaSyn.I": true 
+  }, 
+  "event_ports_expressions": {
+    "CobaSyn.spikeinput": "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90"
+  }, 
+  "active_regimes": {
+    "CobaSyn": "cobadefaultregime", 
+  }, 
+  "analog_ports_expressions": {
+    "CobaSyn.V" : "-0.050"
+  }
+}
+                </pre>
+            </p>
+
         </body>
         </html>
     """
-    return html.replace('CSS_STYLES', _css)
+    _av_comps = ''
+    for component in available_components:
+        _av_comps += '<option value="{0}">{0}</option>\n'.format(component)
+    html = html.replace('CSS_STYLES',           _css)
+    html = html.replace('AVAILABLE_COMPONENTS', _av_comps)
+    return html
 
 def getSetupDataForm():
     html = """

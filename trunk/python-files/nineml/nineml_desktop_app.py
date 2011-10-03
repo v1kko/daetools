@@ -184,12 +184,36 @@ def test_iaf():
     results = inspector.showQtGUI()
     return results, inspector
 
+def test_other(component_name):
+    nineml_component = TestableComponent(component_name)()
+    if not nineml_component:
+        raise RuntimeError('Cannot load NineML component {0}'.format(component_name))
+
+    inspector = nineml_component_inspector()
+    inspector.inspect(nineml_component)
+    results = inspector.showQtGUI()
+    return results, inspector
+
 if __name__ == "__main__":
     tests_data = []
     tmpFolder = '.'
     
-    # test_iaf, test_coba_synapse, test_hierachical_iaf_1coba, test_Izhikevich
-    results, inspector = test_hierachical_iaf_1coba()
+    app = QtGui.QApplication(sys.argv)
+    components = sorted(TestableComponent.list_available())
+    component_name, ok = QtGui.QInputDialog.getItem(None, "nineml_desktop_app", "Select the testable component name", components, 0, False)
+    if not ok:
+       exit(0) 
+
+    component_name = str(component_name)
+    if(component_name == 'iaf'):
+        results, inspector = test_iaf()
+    elif(component_name == 'coba_synapse'):
+        results, inspector = test_coba_synapse()
+    elif(component_name == 'hierachical_iaf_1coba'):
+        results, inspector = test_hierachical_iaf_1coba()
+    else:
+        results, inspector = test_other(component_name)
+    
     if results:
         try:
             testName, testDescription, inputs = results

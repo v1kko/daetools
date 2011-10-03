@@ -34,7 +34,6 @@ def createLatexReport(inspector, tests, texTemplate, texOutputFile, find_files_d
     template  = template.replace('MODEL-SPECIFICATION', content)
     template  = template.replace('TESTS', tests_content)
     template  = template.replace('APPENDIXES', '')
-    #template  = template.replace('FILES_PATH', find_files_dir)
     
     of.write(template)
     of.close()
@@ -59,5 +58,8 @@ if __name__ == "__main__":
     inspector.inspect(nineml_component)
     createLatexReport(inspector, [], 'nineml-tex-template.tex', tex)
     res = createPDF(tex)
-    subprocess.call(['evince', pdf], shell=False)
+    if os.name == 'nt':
+        os.filestart(pdf)
+    elif os.name == 'posix':
+        os.system('/usr/bin/xdg-open ' + pdf)  
 
