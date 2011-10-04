@@ -206,7 +206,7 @@ win32::MUMPS_LIBS = blas.lib \
 					libpord.lib \
 					libf95.a \
 					libgcc.a
-unix::MUMPS_LIBS =
+unix::MUMPS_LIBS = -lcoinmumps -lpthread -lblas -lgfortran -lm
 
 
 #####################################################################################
@@ -239,7 +239,7 @@ win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 					  libOsiCbc.lib \
 					  libOsiClp.lib \
 					  libOsi.lib
-unix::BONMIN_LIBS  =    -ldl -lblas -llapack \
+unix::BONMIN_LIBS  =    -ldl -lblas -llapack -lm -lz \
 						-lbonmin \
 						-lCbc \
 						-lCbcSolver \
