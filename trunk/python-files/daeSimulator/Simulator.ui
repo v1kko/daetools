@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
+    <width>617</width>
     <height>580</height>
    </rect>
   </property>
@@ -353,7 +353,7 @@ p, li { white-space: pre-wrap; }
         </size>
        </property>
        <property name="value">
-        <number>50</number>
+        <number>0</number>
        </property>
        <property name="invertedAppearance">
         <bool>false</bool>
@@ -363,7 +363,7 @@ p, li { white-space: pre-wrap; }
      <item>
       <widget class="QLabel" name="progressLabel">
        <property name="text">
-        <string>ETA: 01:06:15</string>
+        <string/>
        </property>
       </widget>
      </item>

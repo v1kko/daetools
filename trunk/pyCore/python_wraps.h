@@ -1183,6 +1183,19 @@ public:
 	{
         this->daeBaseLog::Message(strMessage, nSeverity);
 	}
+
+	void SetProgress(size_t nProgress)
+	{
+        if(boost::python::override f = this->get_override("SetProgress"))
+            f(nProgress);
+		else
+			this->daeBaseLog::SetProgress(nProgress);
+	}
+
+	void def_SetProgress(size_t nProgress)
+	{
+        this->daeBaseLog::SetProgress(nProgress);
+	}
 };
 
 class daeFileLogWrapper : public daeFileLog,

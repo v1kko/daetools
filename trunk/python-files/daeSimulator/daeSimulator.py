@@ -11,9 +11,9 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, platform, sys, tempfile, traceback, webbrowser
+import os, platform, sys, tempfile, traceback, webbrowser, math
 from daetools.pyDAE import *
-from time import localtime, strftime
+from time import ctime, time, localtime, strftime, struct_time
 from PyQt4 import QtCore, QtGui
 from Simulator_ui import Ui_SimulatorDialog
 
@@ -23,11 +23,37 @@ except Exception as e:
     print 'Cannot load WebView module\n Error: ', str(e)
 
 class daeTextEditLog(daeBaseLog):
-    def __init__(self, TextEdit, App):
+    def __init__(self, TextEdit, ProgressBar, ProgressLabel, App):
         daeBaseLog.__init__(self)
-        self.TextEdit = TextEdit
-        self.App      = App
+        self.TextEdit         = TextEdit
+        self.ProgressBar      = ProgressBar
+        self.ProgressLabel    = ProgressLabel
+        self.App              = App
+        self.time             = time()
 
+    def SetProgress(self, progress):
+        value = int(progress)
+        if progress > 100:
+            value = 100
+        elif progress < 0:
+            value = 0
+        self.ProgressBar.setValue(value)
+        now = time()
+        if value < 100 and value > 0:
+            s = 100.0 * (now - self.time) / (value + 1E-7) - (now - self.time)
+        else:
+            s = 0.0
+        
+        days  = int(math.floor(s / 86400))
+        left  = s - days * 86400
+        hours = int(math.floor(left / 3600))
+        left  = left - hours * 3600
+        mins  = int(math.floor(left / 60))
+        secs  = float(left - mins * 60)
+        eta = 'ETA: [{0:0>2d}d {1:0>2d}h {2:0>2d}m {3:0>4.1f}s]'.format(days, hours, mins, secs)
+        self.ProgressLabel.setText(eta)
+        self.App.processEvents()
+    
     def Message(self, message, severity):
         self.TextEdit.append(self.IndentString + message)
         if self.TextEdit.isVisible() == True:
@@ -160,7 +186,7 @@ class daeSimulator(QtGui.QDialog):
                     raise RuntimeError("Cannot connect daeTCPIPDataReporter")
                     return
             if self.log == None:
-                self.log = daeTextEditLog(self.ui.textEdit, self.app)
+                self.log = daeTextEditLog(self.ui.textEdit, self.ui.progressBar, self.ui.progressLabel, self.app)
             if self.daesolver == None:
                 self.daesolver = daeIDAS()
 

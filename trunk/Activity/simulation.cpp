@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <algorithm>
+#include <math.h>
 
 namespace dae
 {
@@ -538,7 +539,9 @@ void daeSimulation::Run(void)
 		
 		m_dCurrentTime = t;
 		ReportData(m_dCurrentTime);
-		m_pLog->SetProgress(m_dCurrentTime/m_dTimeHorizon);	
+		size_t newProgress = ceil(100.0 * m_dCurrentTime/m_dTimeHorizon); 
+		if(newProgress > m_pLog->GetProgress())
+			m_pLog->SetProgress(newProgress);	
 	}
 
 // Print the end of the simulation info if not in the optimization mode		
