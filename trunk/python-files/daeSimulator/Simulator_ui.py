@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Sat Apr  2 07:47:37 2011
+# Created: Thu Oct  6 15:55:33 2011
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,12 +12,12 @@ from PyQt4 import QtCore, QtGui
 class Ui_SimulatorDialog(object):
     def setupUi(self, SimulatorDialog):
         SimulatorDialog.setObjectName("SimulatorDialog")
-        SimulatorDialog.resize(600, 550)
+        SimulatorDialog.resize(606, 580)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("images/py.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SimulatorDialog.setWindowIcon(icon)
-        self.verticalLayout = QtGui.QVBoxLayout(SimulatorDialog)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(SimulatorDialog)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.formLayout = QtGui.QFormLayout()
         self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout.setObjectName("formLayout")
@@ -86,7 +86,7 @@ class Ui_SimulatorDialog(object):
         self.ReportingIntervalDoubleSpinBox.setMaximum(1000000000.0)
         self.ReportingIntervalDoubleSpinBox.setObjectName("ReportingIntervalDoubleSpinBox")
         self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.ReportingIntervalDoubleSpinBox)
-        self.verticalLayout.addLayout(self.formLayout)
+        self.verticalLayout_2.addLayout(self.formLayout)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -126,7 +126,9 @@ class Ui_SimulatorDialog(object):
         self.ResumeButton.setChecked(False)
         self.ResumeButton.setObjectName("ResumeButton")
         self.horizontalLayout.addWidget(self.ResumeButton)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
         self.textEdit = QtGui.QTextEdit(SimulatorDialog)
         self.textEdit.setEnabled(True)
         self.textEdit.setMinimumSize(QtCore.QSize(510, 180))
@@ -145,6 +147,24 @@ class Ui_SimulatorDialog(object):
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Courier New\';\"></p></body></html>")
         self.textEdit.setObjectName("textEdit")
         self.verticalLayout.addWidget(self.textEdit)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.progressBar = QtGui.QProgressBar(SimulatorDialog)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
+        self.progressBar.setSizePolicy(sizePolicy)
+        self.progressBar.setMinimumSize(QtCore.QSize(150, 0))
+        self.progressBar.setProperty("value", 50)
+        self.progressBar.setInvertedAppearance(False)
+        self.progressBar.setObjectName("progressBar")
+        self.horizontalLayout_3.addWidget(self.progressBar)
+        self.progressLabel = QtGui.QLabel(SimulatorDialog)
+        self.progressLabel.setObjectName("progressLabel")
+        self.horizontalLayout_3.addWidget(self.progressLabel)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
 
         self.retranslateUi(SimulatorDialog)
         QtCore.QMetaObject.connectSlotsByName(SimulatorDialog)
@@ -182,4 +202,5 @@ class Ui_SimulatorDialog(object):
         self.RunButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Start", None, QtGui.QApplication.UnicodeUTF8))
         self.PauseButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Pause", None, QtGui.QApplication.UnicodeUTF8))
         self.ResumeButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Resume", None, QtGui.QApplication.UnicodeUTF8))
+        self.progressLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "ETA: 01:06:15", None, QtGui.QApplication.UnicodeUTF8))
 

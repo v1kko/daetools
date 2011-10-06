@@ -33,8 +33,9 @@ class daeBaseLog : public daeLog_t
 public:
 	daeBaseLog(void)
 	{
-		m_bEnabled = true;
-		m_nIndent  = 0;
+		m_bEnabled  = true;
+		m_nIndent   = 0;
+		m_nProgress = 0;
 		
 		daeConfig& cfg  = daeConfig::GetConfig();
 		m_strIndentUnit = cfg.Get<std::string>("daetools.core.logIndent", "\t");
@@ -95,6 +96,16 @@ public:
 		}
 	}
 	
+	virtual void SetProgress(size_t nProgress)
+	{
+		m_nProgress = nProgress;
+	}
+
+	virtual size_t GetProgress(void) const
+	{
+		return m_nProgress;
+	}
+	
 	virtual string JoinMessages(const std::string& join = std::string("\n")) const
 	{
 		string strAllMessages;
@@ -114,6 +125,7 @@ protected:
 	std::vector<string> m_strarrMessages;
 	bool				m_bEnabled;
 	size_t				m_nIndent;
+	size_t				m_nProgress;
 	std::string			m_strIndent;
 	std::string			m_strIndentUnit;
 };

@@ -744,6 +744,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<daepython::daeLogWrapper, boost::noncopyable>("daeLog_t", no_init)
 		.add_property("Enabled",		&daeLog_t::GetEnabled,  &daeLog_t::SetEnabled)
 		.add_property("Indent",			&daeLog_t::GetIndent,   &daeLog_t::SetIndent)
+		.add_property("Progress",		&daeLog_t::GetProgress, &daeLog_t::SetProgress)
 		.add_property("IndentString",	&daeLog_t::GetIndentString)
 
 		.def("Message",			pure_virtual(&daeLog_t::Message))

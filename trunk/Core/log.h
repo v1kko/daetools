@@ -42,6 +42,8 @@ public:
 	virtual size_t		GetIndent(void) const									= 0;
 	virtual void		IncreaseIndent(size_t nOffset)							= 0;
 	virtual void		DecreaseIndent(size_t nOffset)							= 0;
+	virtual void		SetProgress(size_t nProgress)							= 0;
+	virtual size_t		GetProgress(void) const									= 0;
 };
 
 

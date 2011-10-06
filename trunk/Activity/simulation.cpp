@@ -445,6 +445,7 @@ void daeSimulation::SolveInitial(void)
 // Announce success	
 	m_InitializationEnd = dae::GetTimeInSeconds();
 	m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
+	m_pLog->SetProgress(0);
 }
 
 void daeSimulation::Run(void)
@@ -537,6 +538,7 @@ void daeSimulation::Run(void)
 		
 		m_dCurrentTime = t;
 		ReportData(m_dCurrentTime);
+		m_pLog->SetProgress(m_dCurrentTime/m_dTimeHorizon);	
 	}
 
 // Print the end of the simulation info if not in the optimization mode		
