@@ -6,10 +6,10 @@ TRUNK=`pwd`
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 Ncpu=$(($Ncpu+1))
 
-vBONMIN=1.4.1
+vBONMIN=1.5.1
 vSUPERLU=4.1
 vSUPERLU_MT=2.0
-vNLOPT=2.2.4
+vNLOPT=2.2.1
 vIDAS=1.0.0
 vTRILINOS=10.8.0
 

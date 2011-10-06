@@ -11,12 +11,16 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, platform, sys, tempfile, traceback
+import os, platform, sys, tempfile, traceback, webbrowser
 from daetools.pyDAE import *
 from time import localtime, strftime
 from PyQt4 import QtCore, QtGui
 from Simulator_ui import Ui_SimulatorDialog
-from daetools.pyDAE.WebViewDialog import WebView
+
+try:
+    from daetools.pyDAE.WebViewDialog import WebView
+except Exception as e:
+    print 'Cannot load WebView module\n Error: ', str(e)
 
 class daeTextEditLog(daeBaseLog):
     def __init__(self, TextEdit, App):
@@ -391,10 +395,13 @@ class daeSimulator(QtGui.QDialog):
             matName = tmpdir + self.simulation.m.Name + ".xpm"
             self.lasolver.SaveAsXPM(matName)
             url = QtCore.QUrl(matName)
-            wv = WebView(url)
-            wv.resize(400, 400)
-            wv.setWindowTitle("Sparse matrix: " + matName)
-            wv.exec_()
+            try:
+                wv = WebView(url)
+                wv.resize(400, 400)
+                wv.setWindowTitle("Sparse matrix: " + matName)
+                wv.exec_()
+            except Exception as e:
+                webbrowser.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotExportSparseMatrixAsMatrixMarketFormat(self):

@@ -34,6 +34,15 @@ elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
                    wget subversion fakeroot rpm-build
 
+elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
+  #sudo yum check-update
+  # Missing: scipy, suitesparse-devel, qt-creator 
+  # Should be manually installed, ie. from http://pkgs.org
+  sudo yum install boost-devel PyQt4 numpy python-matplotlib python-devel \
+                   blas blas-devel lapack lapack-devel qt-devel \
+                   automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
+                   wget subversion fakeroot rpm-build
+
 else
   echo "ERROR: unsupported GNU/Linux distribution; please edit the script to add support for: ${DISTRIBUTOR_ID}/${CODENAME}"
   exit -1

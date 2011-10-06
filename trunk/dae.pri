@@ -74,6 +74,9 @@ win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS
 unix::QMAKE_CXXFLAGS  += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
 unix::QMAKE_CFLAGS    += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
 
+# On some low-RAM machines pyCore cannot compile; set the following flags:
+#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
+
 ####################################################################################
 # Creating .vcproj under windows:
 # cd trunk

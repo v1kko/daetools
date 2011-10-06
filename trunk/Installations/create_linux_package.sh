@@ -92,6 +92,9 @@ elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   PCKG_TYPE="rpm"
   SITE_PACK="site-packages"
+elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
+  PCKG_TYPE="rpm"
+  SITE_PACK="site-packages"
 else
   echo "ERROR: undefined type of a package"
   exit
@@ -301,6 +304,10 @@ cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 # Documentation
 cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 
+# Strip python extension modules
+find ${PACKAGE_NAME}/pyDAE   -name \*.so* | xargs strip
+find ${PACKAGE_NAME}/solvers -name \*.so* | xargs strip
+
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
 echo "from distutils.core import setup " >> setup.py
@@ -346,12 +353,12 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
 # Magma libraries
-if [ -e ${MAGMA}/lib/libmagma.so ]; then
-  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-fi
-if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
-  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}${USRLIB}
-fi
+#if [ -e ${MAGMA}/lib/libmagma.so ]; then
+#  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}${USRLIB}
+#fi
+#if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
+#  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}${USRLIB}
+#fi
 
 # SuperLU libraries
 if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
@@ -363,7 +370,7 @@ if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
   cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}${USRLIB}
 fi
 
-# Change permissions and strip .so libraries
+# Change permissions and strip libraries in /usr/lib(64) 
 chmod -x ${BUILD_DIR}${USRLIB}/*.so*
 find ${BUILD_DIR}${USRLIB} -name \*.so* | xargs strip
 
@@ -465,9 +472,9 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
   echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
   echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
-  echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
-  echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
-  echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
+  #echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
+  #echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
+  #echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}

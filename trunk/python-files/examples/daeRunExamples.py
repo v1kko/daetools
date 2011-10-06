@@ -12,7 +12,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, subprocess
+import os, sys, subprocess, webbrowser
 from StringIO import StringIO
 from time import localtime, strftime
 
@@ -37,11 +37,8 @@ except Exception, e:
 try:
     from RunExamples_ui import Ui_RunExamplesDialog
     from daetools.pyDAE.WebViewDialog import WebView
-    #from daetools.WebView_ui import Ui_WebViewDialog
-    import webbrowser
 except Exception, e:
     print '[daePlotter]: Cannot load UI modules\n Error: ', str(e)
-    sys.exit()
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
@@ -123,21 +120,24 @@ class RunExamples(QtGui.QDialog):
         simName = str(self.ui.comboBoxExample.currentText())
         url   = QtCore.QUrl(simName + ".html")
         title = simName + ".py"
-        wv = WebView(url)
-        wv.setWindowTitle(title)
-        wv.exec_()
-
+        try:
+            wv = WebView(url)
+            wv.setWindowTitle(title)
+            wv.exec_()
+        except Exception as e:
+            webbrowser.open_new_tab(url)
+            
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
         url     = simName + ".xml"
-        webbrowser.open_new(url)
+        webbrowser.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotShowRuntimeModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
         url     = simName + "-rt.xml"
-        webbrowser.open_new(url)
+        webbrowser.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):
