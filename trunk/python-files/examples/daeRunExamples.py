@@ -118,14 +118,14 @@ class RunExamples(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
-        url   = QtCore.QUrl(simName + ".html")
-        title = simName + ".py"
         try:
+            url   = QtCore.QUrl(simName + ".html")
+            title = simName + ".py"
             wv = WebView(url)
             wv.setWindowTitle(title)
             wv.exec_()
         except Exception as e:
-            webbrowser.open_new_tab(url)
+            webbrowser.open_new_tab(simName + ".html")
             
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
@@ -197,11 +197,17 @@ class RunExamples(QtGui.QDialog):
             sys.stdout = output
             module.run()
             sys.stdout = saveout
-            message = output.getvalue()
-            view = WebView('<pre>{0}</pre>'.format(message))
-            view.resize(700, 500)
-            view.setWindowTitle('Console execution results')
-            view.exec_()
+            message = '<pre>{0}</pre>'.format(output.getvalue())
+            try:
+                view = WebView(message)
+                view.resize(700, 500)
+                view.setWindowTitle('Console execution results')
+                view.exec_()
+            except Exception as e:
+                f, path = tempfile.mkstemp(suffix='.html', prefix='')
+                f.write(message)
+                f.close()
+                webbrowser.open_new_tab(path)
         except:
             sys.stdout = saveout
 

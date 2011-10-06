@@ -401,7 +401,7 @@ class daeSimulator(QtGui.QDialog):
                 wv.setWindowTitle("Sparse matrix: " + matName)
                 wv.exec_()
             except Exception as e:
-                webbrowser.open_new_tab(url)
+                webbrowser.open_new_tab(matName)
 
     #@QtCore.pyqtSlot()
     def slotExportSparseMatrixAsMatrixMarketFormat(self):
