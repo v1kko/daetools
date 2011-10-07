@@ -13,7 +13,7 @@ vNLOPT=2.2.1
 vIDAS=1.0.0
 vTRILINOS=10.8.0
 
-DAETOOLS_HTTP=http://daetools.sourceforge.net/compile-linux
+DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
