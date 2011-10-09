@@ -52,7 +52,7 @@ class daeTextEditLog(daeBaseLog):
         secs  = float(left - mins * 60)
         eta = 'ETA: [{0:0>2d}d {1:0>2d}h {2:0>2d}m {3:0>4.1f}s]'.format(days, hours, mins, secs)
         self.ProgressLabel.setText(eta)
-        self.App.processEvents()
+        #self.App.processEvents()
     
     def Message(self, message, severity):
         self.TextEdit.append(self.IndentString + message)
@@ -182,7 +182,7 @@ class daeSimulator(QtGui.QDialog):
                 self.datareporter = daeTCPIPDataReporter()
                 simName = self.simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
                 if(self.datareporter.Connect(str(tcpipaddress), simName) == False):
-                    QtGui.QMessageBox.warning(None, "DAE Tools Simulator", "Cannot connect data reporter!\nDid you forget to start daePlotter?")
+                    self.showMessage("Cannot connect data reporter!\nDid you forget to start daePlotter?")
                     raise RuntimeError("Cannot connect daeTCPIPDataReporter")
                     return
             if self.log == None:
