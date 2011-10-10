@@ -529,7 +529,12 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   cd ${BUILD_DIR}
   tar -czvf ${TGZ} *
   cd ..
-
+  
+  if [ ${HOST_ARCH} = "x86_64" ]; then
+    SUPERLU_PROVIDES="libsuperlu.so.4.1()(64bit), libsuperlu_mt.so.2.0()(64bit)"
+  else
+    SUPERLU_PROVIDES="libsuperlu.so.4.1, libsuperlu_mt.so.2.0"
+  fi
   SPEC=dae-tools.spec
   echo "%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)"   > ${SPEC}
   echo "%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0) "         >> ${SPEC}
@@ -556,7 +561,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
-  echo "Provides: ${PACKAGE_NAME}, libsuperlu.so.4.1, libsuperlu_mt.so.2.0"         >> ${SPEC}
+  echo "Provides: ${PACKAGE_NAME}, ${SUPERLU_PROVIDES}"                             >> ${SPEC}
   echo "Requires: boost-devel, PyQt4, numpy, scipy, python-matplotlib "             >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
