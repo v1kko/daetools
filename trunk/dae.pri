@@ -353,6 +353,7 @@ win32::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
 win32::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
 win32::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
 win32::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
+win32::DAE_UNITS_LIB               = cdaeUnits.lib
 
 unix::DAE_CORE_LIB                = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB       = -lcdaeDataReporting
@@ -364,6 +365,7 @@ unix::DAE_SUPERLU_CUDA_SOLVER_LIB = -lcdaeSuperLU_CUDA_LASolver
 unix::DAE_BONMIN_SOLVER_LIB       = -lcdaeBONMIN_MINLPSolver
 unix::DAE_IPOPT_SOLVER_LIB        = -lcdaeIPOPT_NLPSolver
 unix::DAE_NLOPT_SOLVER_LIB        = -lcdaeNLOPT_NLPSolver
+unix::DAE_UNITS_LIB               = -lcdaeUnits
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 

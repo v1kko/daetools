@@ -222,6 +222,9 @@ void test_quantities()
 	doTest( std::cout << "(15 * J) / (1.2 * kJ) - 1.5 = " << ((15 * u::J) / (1.2 * u::kJ) - 1.5)  << std::endl )
 	doTest( std::cout << "(15 * J) / (1.2 * kJ) + 1.5 = " << ((15 * u::J) / (1.2 * u::kJ) + 1.5)  << std::endl )
 
+	doTest( std::cout << "1.5 + (15 * J) / (1.2 * kJ) = " << (1.5 + (15 * u::J) / (1.2 * u::kJ))  << std::endl )
+	doTest( std::cout << "1.5 - (15 * J) / (1.2 * kJ) = " << (1.5 - (15 * u::J) / (1.2 * u::kJ))  << std::endl )
+
 	quantity y = 1.23 * (u::km * u::mV * (u::ms ^ 2)); 
     doTest( std::cout << (boost::format("1.23 * (km * mV * (ms ^ 2)) = %1% (%2%) (%3%)") % y % y.getUnits().getBaseUnit() % y.getValueInSIUnits()).str() << std::endl )
 }

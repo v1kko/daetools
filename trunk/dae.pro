@@ -9,7 +9,6 @@ SUBDIRS = Core \
 	pyDataReporting \
 	pyIDAS  \
 	Units
-	#ExternalFunction
  
 HEADERS += dae.h \
     dae_develop.h
