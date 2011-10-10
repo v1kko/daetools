@@ -44,6 +44,8 @@ public:
 	virtual void		DecreaseIndent(size_t nOffset)							= 0;
 	virtual void		SetProgress(size_t nProgress)							= 0;
 	virtual size_t		GetProgress(void) const									= 0;
+	virtual std::string	GetETA(void) const										= 0;
+	virtual std::string	GetPercentageDone(void) const							= 0;
 };
 
 

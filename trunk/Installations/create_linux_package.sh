@@ -364,18 +364,18 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #fi
 
 # SuperLU libraries
-if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
-  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-fi
+#if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
+#  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}${USRLIB}
+#fi
 
 # SuperLU_MT libraries
-if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
-  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-fi
+#if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
+#  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}${USRLIB}
+#fi
 
 # Change permissions and strip libraries in /usr/lib(64) 
-chmod -x ${BUILD_DIR}${USRLIB}/*.so*
-find ${BUILD_DIR}${USRLIB} -name \*.so* | xargs strip
+#chmod -x ${BUILD_DIR}${USRLIB}/*.so*
+#find ${BUILD_DIR}${USRLIB} -name \*.so* | xargs strip
 
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
@@ -472,9 +472,9 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
-  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
-  echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
+  #SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+  #echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
+  #echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
   #echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
   #echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
   #echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
@@ -530,11 +530,12 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   tar -czvf ${TGZ} *
   cd ..
   
-  if [ ${HOST_ARCH} = "x86_64" ]; then
-    SUPERLU_PROVIDES="libsuperlu.so.4.1()(64bit), libsuperlu_mt.so.2.0()(64bit)"
-  else
-    SUPERLU_PROVIDES="libsuperlu.so.4.1, libsuperlu_mt.so.2.0"
-  fi
+  #if [ ${HOST_ARCH} = "x86_64" ]; then
+  #  SUPERLU_PROVIDES="libsuperlu.so.4.1()(64bit), libsuperlu_mt.so.2.0()(64bit)"
+  #else
+  #  SUPERLU_PROVIDES="libsuperlu.so.4.1, libsuperlu_mt.so.2.0"
+  #fi
+  
   SPEC=dae-tools.spec
   echo "%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)"   > ${SPEC}
   echo "%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0) "         >> ${SPEC}
@@ -561,7 +562,7 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
-  echo "Provides: ${PACKAGE_NAME}, ${SUPERLU_PROVIDES}"                             >> ${SPEC}
+  echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
   echo "Requires: boost-devel, PyQt4, numpy, scipy, python-matplotlib "             >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}

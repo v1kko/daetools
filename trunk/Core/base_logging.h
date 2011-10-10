@@ -18,8 +18,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iomanip>
 #include <vector>
+#include <math.h>
 #include "log.h"
 #include "../config.h"
+#include <boost/format.hpp>
+#include <boost/timer.hpp>
 
 namespace dae
 {
@@ -114,6 +117,31 @@ public:
 		return strAllMessages;
 	}
 	
+	virtual string GetETA(void) const
+	{
+		double dt, left, secs;
+		int days, hours, mins;
+		
+		dt = start.elapsed();
+		if(m_nProgress < 100 && m_nProgress > 0)
+			left = 100.0 * dt / m_nProgress - dt;
+		else
+			left = 0.0;
+		
+		days  = int(::floor(left / 86400));
+		left  = left - days * 86400;
+		hours = int(::floor(left / 3600));
+		left  = left - hours * 3600;
+		mins  = int(::floor(left / 60));
+		secs  = double(left - mins * 60);
+		return (boost::format("ETA: [%02dd %02dh %02dm %04.1fs]\r") % days % hours % mins % secs).str();
+	}
+	
+	virtual string GetPercentageDone(void) const
+	{
+		return (boost::format("%3d%%") % m_nProgress).str();
+	}
+
 	void UpdateIndent(void)
 	{
 		m_strIndent.clear();
@@ -128,6 +156,7 @@ protected:
 	size_t				m_nProgress;
 	std::string			m_strIndent;
 	std::string			m_strIndentUnit;
+	boost::timer        start;
 };
 
 /********************************************************************
@@ -152,7 +181,9 @@ public:
 		
 		if(m_bEnabled)
 		{
-			std::cout << m_strIndent + strMessage << std::endl;
+	        string msg = (boost::format("%-30s") % (m_strIndent + strMessage)).str();
+			std::cout << msg << std::endl;
+	        std::cout << (boost::format(" %s %s\r") % GetPercentageDone() % GetETA()).str();
 			std::cout.flush();
 		}
 	}

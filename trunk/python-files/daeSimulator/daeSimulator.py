@@ -32,26 +32,9 @@ class daeTextEditLog(daeBaseLog):
         self.time             = time()
 
     def SetProgress(self, progress):
-        value = int(progress)
-        if progress > 100:
-            value = 100
-        elif progress < 0:
-            value = 0
-        self.ProgressBar.setValue(value)
-        now = time()
-        if value < 100 and value > 0:
-            s = 100.0 * (now - self.time) / (value + 1E-7) - (now - self.time)
-        else:
-            s = 0.0
-        
-        days  = int(math.floor(s / 86400))
-        left  = s - days * 86400
-        hours = int(math.floor(left / 3600))
-        left  = left - hours * 3600
-        mins  = int(math.floor(left / 60))
-        secs  = float(left - mins * 60)
-        eta = 'ETA: [{0:0>2d}d {1:0>2d}h {2:0>2d}m {3:0>4.1f}s]'.format(days, hours, mins, secs)
-        self.ProgressLabel.setText(eta)
+        daeBaseLog.SetProgress(self, progress)
+        self.ProgressBar.setValue(self.Progress)
+        self.ProgressLabel.setText(self.ETA)
         #self.App.processEvents()
     
     def Message(self, message, severity):

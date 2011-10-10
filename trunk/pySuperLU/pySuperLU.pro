@@ -44,8 +44,8 @@ HEADERS += stdafx.h
 CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) { 
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
-LIBS += $${SUPERLU_LIBS} \
-        $${DAE_SUPERLU_SOLVER_LIB}
+LIBS += $${DAE_SUPERLU_SOLVER_LIB} \
+        $${SUPERLU_LIBS}
 INCLUDEPATH += $${SUPERLU_INCLUDE}
 pyObject = pySuperLU
 }
@@ -56,8 +56,8 @@ pyObject = pySuperLU
 CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) { 
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
-LIBS += $${SUPERLU_MT_LIBS} \
-        $${DAE_SUPERLU_MT_SOLVER_LIB}
+LIBS += $${DAE_SUPERLU_MT_SOLVER_LIB} \
+        $${SUPERLU_MT_LIBS}
 INCLUDEPATH += $${SUPERLU_MT_INCLUDE}
 pyObject = pySuperLU_MT
 }

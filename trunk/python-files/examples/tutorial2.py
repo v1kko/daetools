@@ -194,8 +194,7 @@ def consoleRun():
     # and finally gets the results from DAE Tools. 
     # This procedure can be repeated as many times as necessary.
     ro = daeVariableWrapper(simulation.m.ro, 'ro')
-    print ro.Name
-    print ro.Value
+    log.Message('{0} = {1}'.format(ro.Name, ro.Value), 0)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

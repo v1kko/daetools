@@ -12,7 +12,10 @@
 #include "superlu_solvers.h"
 
 #ifdef daeSuperLU_MT
+extern "C"
+{
 #include <pdsp_defs.h>
+}
 #endif
 
 #ifdef daeSuperLU_CUDA
@@ -22,7 +25,10 @@
 #endif
 
 #ifdef daeSuperLU
+extern "C"
+{
 #include <slu_ddefs.h>
+}
 #endif
 
 				

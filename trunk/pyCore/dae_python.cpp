@@ -746,6 +746,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Indent",			&daeLog_t::GetIndent,   &daeLog_t::SetIndent)
 		.add_property("Progress",		&daeLog_t::GetProgress, &daeLog_t::SetProgress)
 		.add_property("IndentString",	&daeLog_t::GetIndentString)
+        .add_property("PercentageDone",	&daeLog_t::GetPercentageDone)
+        .add_property("ETA",			&daeLog_t::GetETA)
 
 		.def("Message",			pure_virtual(&daeLog_t::Message))
 		.def("JoinMessages",	pure_virtual(&daeLog_t::JoinMessages))

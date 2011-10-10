@@ -276,8 +276,8 @@ SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib \
 					                              ../clapack/LIB/Win32/BLAS_nowrap.lib \
 					                              ../clapack/LIB/Win32/libf2c.lib
-linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lcdaesuperlu -lrt
+linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
 
 
 ######################################################################################
@@ -288,8 +288,8 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32::SUPERLU_MT_LIBS          = 
-linux-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
-linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lcdaesuperlu_mt -lrt
+linux-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
+linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
 
 
 ######################################################################################

@@ -209,7 +209,7 @@ public:
         to_string_and_add("mol", N, arrUnits);
 		
 		std::string _units = boost::algorithm::join(arrUnits, __string_unit_delimiter__);
-		return (boost::format("%1% [%2%]") % multiplier % _units).str();
+		return (boost::format("%17.10e [%s]") % multiplier % _units).str();
 	}
 	
 	friend std::ostream& operator<<(std::ostream& out, const base_unit& u)
@@ -461,7 +461,7 @@ public:
 		{
 			std::string name = (*iter).first;
 			double      exp  = (*iter).second;
-			to_string_and_add(name, exp , arrUnits);
+			to_string_and_add(name, exp, arrUnits);
 		}
 		return boost::algorithm::join(arrUnits, __string_unit_delimiter__);
 	}
@@ -610,7 +610,7 @@ public:
 	
 	std::string toString(void) const
 	{
-		return (boost::format("%1% %2%") % _value % _units.toString()).str();
+		return (boost::format("%17.10e %s") % _value % _units.toString()).str();
 	}
 
 	friend std::ostream& operator<<(std::ostream& out, const quantity& q)
@@ -641,7 +641,6 @@ public:
 	quantity operator+(double value) const
 	{
 		quantity q(value, unit());
-		std::cout << q << std::endl;
 		return (*this + q);
 	}
 	

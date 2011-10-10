@@ -11,6 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
+import sys
 from pyCore import *
 
 class daePythonStdOutLog(daeStdOutLog):
@@ -18,4 +19,6 @@ class daePythonStdOutLog(daeStdOutLog):
         daeStdOutLog.__init__(self)
 
     def Message(self, message, severity):
-        print self.IndentString + message
+        print '{0:30s}'.format(self.IndentString + message)
+        print ' {0} {1}'.format(self.PercentageDone, self.ETA), "\r",
+        sys.stdout.flush()

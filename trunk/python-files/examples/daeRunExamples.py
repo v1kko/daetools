@@ -12,40 +12,42 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, subprocess, webbrowser
+import os, sys, subprocess, webbrowser, traceback
 from StringIO import StringIO
 from time import localtime, strftime
 
 try:
     from PyQt4 import QtCore, QtGui
 except Exception, e:
-    print '[daePlotter]: Cannot load PyQt4 modules\n Error: ', str(e)
+    print '[daeRunExamples]: Cannot load PyQt4 modules\n Error: ', str(e)
     sys.exit()
 
 try:
     import numpy
 except Exception, e:
-    print '[daePlotter]: Cannot load numpy module\n Error: ', str(e)
+    print '[daeRunExamples]: Cannot load numpy module\n Error: ', str(e)
     sys.exit()
 
 try:
     from daetools.pyDAE import *
 except Exception, e:
-    print '[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)
+    print '[daeRunExamples]: Cannot load daetools.pyDAE module\n Error: ', str(e)
     sys.exit()
 
 try:
     from RunExamples_ui import Ui_RunExamplesDialog
     from daetools.pyDAE.WebViewDialog import WebView
 except Exception, e:
-    print '[daePlotter]: Cannot load UI modules\n Error: ', str(e)
+    print '[daeRunExamples]: Cannot load UI modules\n Error: ', str(e)
 
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
     import opt_tutorial1, opt_tutorial2, opt_tutorial3, opt_tutorial4, opt_tutorial5, opt_tutorial6
 except Exception, e:
-    print '[daePlotter]: Cannot load Tutorials modules\n Error: ', str(e)
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e)
 
 
 class daeTextEditLog(daeStdOutLog):
