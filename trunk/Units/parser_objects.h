@@ -324,6 +324,10 @@ class Number
 public:
     typedef typename boost::shared_ptr< Node<TYPE> > node_ptr;
     
+    Number()
+    {
+    }
+
     Number(node_ptr n)
     {
         node = n;

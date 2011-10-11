@@ -1,6 +1,7 @@
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/format.hpp>
 
 #include "parser_objects.h"
 #include "units.h"
@@ -10,53 +11,214 @@ using namespace units;
 namespace u  = units::units_pool;
 namespace bu = units::base_units_pool;
 
-typedef boost::shared_ptr< Node<double> >    node_ptr;
-typedef boost::shared_ptr< Node<base_unit> > base_unit_ptr;
+typedef boost::shared_ptr< Node<double> >  node_ptr;
+typedef boost::shared_ptr< Node<unit> >    unit_node_ptr;
 
 namespace parser
 {
 namespace qi    = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
-template <typename Iterator>
-struct units_grammar : qi::grammar<Iterator>
+using qi::grammar;
+using qi::rule;
+using qi::eps;
+using qi::lexeme;
+using qi::raw;
+using qi::eol;
+using qi::lit;
+using qi::_val;
+using qi::_1;
+using qi::float_;
+using qi::int_;
+using qi::uint_;
+using ascii::char_;
+using ascii::alpha;
+using ascii::alnum;
+using ascii::space_type;
+using ascii::space;
+
+class number
 {
-	units_grammar() : units_grammar::base_type(start)
+public:
+	number()
 	{
-		using qi::eps;
-		using qi::lit;
-		using qi::_val;
-		using qi::_1;
-		using ascii::char_;
-		
-		start = eps [_val = 0] >>
-		                          (
-		                              +lit('M')       [_val += 1000]
-		                              )
-		                          ;
-		constant = float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] 
-				 | lit('(') >> float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] >> lit(')');
-		
-		base_unit = float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] 
-		
-//		p[0] = Number(ConstantNode(int(p[1])))
-//		"""constant : LPAREN NUMBER RPAREN"""
-//		p[0] = Number(ConstantNode(int(p[2])))
-//		"""constant : FLOAT"""
-//		p[0] = Number(ConstantNode(float(p[1])))
-//		"""constant : LPAREN FLOAT RPAREN"""
-//		p[0] = Number(ConstantNode(float(p[2])))
-//		"""base_unit : BASE_UNIT  """
-//		p[0] = Number(IdentifierNode(p[1]))
+		value = 0.0;
+	}
+	number(double val)
+	{
+		value = val;
+	}
+	number(unsigned int val)
+	{
+		value = val;
 	}
 	
-	qi::rule<Iterator> unit_expression, 
-	                   unit,
-	                   base_unit,
-	                   constant,
-	                   start;
+    number operator+(const number& n)
+    {
+        return number(value + n.value);
+    }
+    
+	number operator-(const number& n)
+    {
+        return number(value - n.value);
+    }
+    
+	number operator+()
+    {
+        return number(value);
+    }
+    
+	number operator-()
+    {
+        return number(-value);
+    }
+    
+	number operator*(const number& n)
+    {
+        return number(value * n.value);
+    }
+    number operator/(const number& n)
+    {
+        return number(value / n.value);
+    }
+	
+    number& operator+=(const number& n)
+    {
+        value += n.value;
+		return *this;
+    }
+    
+	number& operator-=(const number& n)
+    {
+        value -= n.value;
+		return *this;
+    }
+    
+	number& operator*=(const number& n)
+    {
+        value *= n.value;
+		return *this;
+    }
+    number& operator/=(const number& n)
+    {
+        value /= n.value;
+		return *this;
+    }
+	
+	double value;
 };
 
+// Number<unit>( node_ptr( new ConstantNode<unit>(_1) ) )
+// Number<unit>( node_ptr( new IdentifierNode<unit>(_1) ) )
+
+template <typename Iterator>
+struct white_space : grammar<Iterator>
+{
+    white_space() : white_space::base_type(start)
+    {
+        using boost::spirit::ascii::char_;
+
+        start = space; // tab/space/cr/lf
+    }
+
+    rule<Iterator> start;
+};
+
+void createConstantNode(Number<unit>& _number, double val)
+{ 
+	unit_node_ptr nptr( new ConstantNode<unit>(val) );
+	_number.node = nptr;
+	std::cout << "createConstantNode(" << val << ")" << std::endl; 
+}
+
+void createIdentifierNode(Number<unit>& _number, std::string const& val)
+{ 
+	unit_node_ptr nptr( new IdentifierNode<unit>(val) );
+	_number.node = nptr;
+	std::cout << "createIdentifierNode(" << val << ")" << std::endl; 
+}
+
+template <typename Iterator>
+struct unit_parser : grammar<Iterator, Number<unit>(), ascii::space_type>
+{
+public:
+	unit_parser() : unit_parser::base_type(expression)
+	{
+		expression = unit_expression[_val = _1] 
+			       | unit_expression[_val = _1] >> *(unit_expression[_val = _val * _1]);
+
+		unit_expression = unit_name[_val = _1]
+			            | unit_name[_val = _1] >> char_("^") >> constant[_val = _val ^ _1];
+
+		unit_name = id[ createIdentifierNode ];
+		constant  = float_ [_val = _1];
+		id        = char_("a-zA-Z_")[_val = _1] >> *char_("a-zA-Z_0-9")[_val += _1];
+	}
+
+	rule<Iterator, Number<unit>(), ascii::space_type> expression, unit_expression, unit_name;
+	rule<Iterator, double(), ascii::space_type> constant;
+	rule<Iterator, std::string(), ascii::space_type> id;
+};
+
+template <typename Iterator>
+struct calculator : grammar<Iterator, number(), ascii::space_type>
+{
+public:
+	calculator() : calculator::base_type(expression)
+	{
+		expression = term[_val = _1] >> *(
+					                         ('+' >> term[_val += _1])
+				                           | ('-' >> term[_val -= _1])
+				                         );
+
+		term =
+			factor[_val = _1] >> *(
+					                  ('*' >> factor [_val *= _1])
+				                    | ('/' >> factor [_val /= _1])
+				                  );
+
+		factor =
+			float_ [_val = _1]
+			| '(' >> expression[_val = _1] >> ')'
+			|  ('-' >> factor[_val = -(_1)])
+			|  ('+' >> factor[_val = _1])
+			;
+	}
+
+	rule<Iterator, number(), ascii::space_type> expression, term, factor;
+};
+
+}
+
+int main()
+{
+	using boost::spirit::ascii::space;
+    typedef std::string::const_iterator iterator_type;
+    typedef parser::calculator<iterator_type>  calculator;
+    typedef parser::unit_parser<iterator_type> unit_parser;
+
+
+    calculator  _calc;
+    unit_parser _unit;
+	parser::number result;
+	Number<unit>   result1;
+
+    std::string input = "kg m^2";
+	std::string::const_iterator start = input.begin();
+	std::string::const_iterator end   = input.end();
+    
+	bool success = phrase_parse(start, end, _unit, space, result1);
+
+	if(success && start == end)
+	{
+		std::cout << "Parsing succeeded; result = " << result.value << std::endl;
+	}
+	else
+	{
+		std::string rest(start, end);
+		std::cout << "Parsing failed; stopped at: " << rest << std::endl;
+	}
+	return 0;
 }
 
 /*
@@ -237,7 +399,7 @@ void test_quantities()
     doTest( std::cout << (boost::format("1.23 * (km * mV * (ms ^ 2)) = %1% (%2%) (%3%)") % y % y.getUnits().getBaseUnit() % y.getValueInSIUnits()).str() << std::endl )
 }
 
-int main()
+int test()
 {
 	
 //	node_ptr c1(new ConstantNode<double>(5.7));
@@ -255,12 +417,14 @@ int main()
 //	base_unit_ptr id_(new IdentifierNode<base_unit>("mV"));
 //	Number<base_unit> mV(id_);
 //	std::cout << (mV * mV).node->toString() << std::endl;
-
+/*
 	std::cout << std::endl << "********************** test_base_units *********************" << std::endl;
 	test_base_units();
 	std::cout << std::endl << "************************ test_units ************************" << std::endl;
 	test_units();
 	std::cout << std::endl << "********************** test_quantities *********************" << std::endl;
 	test_quantities();
+*/
+	return 0;
 }
 
