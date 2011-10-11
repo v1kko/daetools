@@ -324,20 +324,20 @@ linux-g++-64::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
 
 win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
                         BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
-                        superlu.lib \
+                        $${SUPERLU_LIBS} \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
 linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
-							  -lblas -llapack \
-							  -lcdaesuperlu \
+							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
 							  -lumfpack -lamd \
-							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos
+							   $${SUPERLU_LIBS} \
+							  -lblas -llapack
 
 linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
-							  -lblas -llapack \
-							  -lcdaesuperlu \
+							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
 							  -lumfpack -lamd \
-							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos
+							   $${SUPERLU_LIBS} \
+							  -lblas -llapack
 
 
 #####################################################################################

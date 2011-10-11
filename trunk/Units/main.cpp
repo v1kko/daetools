@@ -5,15 +5,23 @@
 #include "parser_objects.h"
 #include "units.h"
 
+using namespace parser_objects;
+using namespace units;
+namespace u  = units::units_pool;
+namespace bu = units::base_units_pool;
+
+typedef boost::shared_ptr< Node<double> >    node_ptr;
+typedef boost::shared_ptr< Node<base_unit> > base_unit_ptr;
+
 namespace parser
 {
 namespace qi    = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
-/*
+
 template <typename Iterator>
-struct roman : qi::grammar<Iterator>
+struct units_grammar : qi::grammar<Iterator>
 {
-	roman() : roman::base_type(start)
+	units_grammar() : units_grammar::base_type(start)
 	{
 		using qi::eps;
 		using qi::lit;
@@ -26,7 +34,11 @@ struct roman : qi::grammar<Iterator>
 		                              +lit('M')       [_val += 1000]
 		                              )
 		                          ;
-//		constant = float_ 
+		constant = float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] 
+				 | lit('(') >> float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] >> lit(')');
+		
+		base_unit = float_ [_val = Number<unit>(   node_ptr(  new ConstantNode<unit>(_1)  )   )] 
+		
 //		p[0] = Number(ConstantNode(int(p[1])))
 //		"""constant : LPAREN NUMBER RPAREN"""
 //		p[0] = Number(ConstantNode(int(p[2])))
@@ -44,7 +56,7 @@ struct roman : qi::grammar<Iterator>
 	                   constant,
 	                   start;
 };
-*/
+
 }
 
 /*
@@ -124,10 +136,6 @@ def p_error(p):
 ///////////////////////////////////////////////////////////////////////////////
 //  Main program
 ///////////////////////////////////////////////////////////////////////////////
-using namespace parser_objects;
-using namespace units;
-namespace u  = units::units_pool;
-namespace bu = units::base_units_pool;
 
 int counter = 1;
 #define doTest(EXPRESSION) try{ std::cout << counter++ << ")  "; EXPRESSION;} catch(std::runtime_error& e){std::cout << e.what() << std::endl;}
@@ -231,8 +239,6 @@ void test_quantities()
 
 int main()
 {
-	typedef boost::shared_ptr< Node<double> >    node_ptr;
-	typedef boost::shared_ptr< Node<base_unit> > base_unit_ptr;
 	
 //	node_ptr c1(new ConstantNode<double>(5.7));
 //	node_ptr c2(new ConstantNode<double>(6.0));

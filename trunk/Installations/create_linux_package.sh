@@ -454,19 +454,17 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
 
   CONTROL=${BUILD_DIR}/DEBIAN/control
-  echo "Package: ${PACKAGE_NAME} "                                                                   > ${CONTROL}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD} "                                           >> ${CONTROL}
-  echo "Architecture: ${ARCH} "                                                                     >> ${CONTROL}
-  echo "Section: math "                                                                             >> ${CONTROL}
-  echo "Priority: optional "                                                                        >> ${CONTROL}
-  echo "Installed-Size: 11,700 "                                                                    >> ${CONTROL}
-  echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                        >> ${CONTROL}
+  echo "Package: ${PACKAGE_NAME} "                                                                                             > ${CONTROL}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD} "                                                                     >> ${CONTROL}
+  echo "Architecture: ${ARCH} "                                                                                               >> ${CONTROL}
+  echo "Section: math "                                                                                                       >> ${CONTROL}
+  echo "Priority: optional "                                                                                                  >> ${CONTROL}
+  echo "Installed-Size: 11,700 "                                                                                              >> ${CONTROL}
+  echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                                                  >> ${CONTROL}
   echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, libc6" >> ${CONTROL}
-  echo "Description: A cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
-  echo " DAE Tool is a cross-platform equation-oriented process modelling software. "               >> ${CONTROL}
-  echo " This package includes pyDAE modules. "                                                     >> ${CONTROL}
-  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                           >> ${CONTROL}
-  echo "Homepage: http://www.daetools.com "                                                         >> ${CONTROL}
+  echo "Description: A cross-platform equation-oriented process modelling, simulation and optimization software."             >> ${CONTROL}
+  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                                                     >> ${CONTROL}
+  echo "Homepage: http://www.daetools.com "                                                                                   >> ${CONTROL}
 
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
@@ -555,20 +553,20 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "%define disttag rhfc"       >> ${SPEC}
   echo "%endif"                     >> ${SPEC}
 
-  echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
+  echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling, simulation and optimization software." >> ${SPEC}
   echo "Name: ${PACKAGE_NAME}"                                                      >> ${SPEC}
   echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                         >> ${SPEC}
   echo "Release: ${VER_BUILD}"                                                      >> ${SPEC}
   echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
   echo "License: GNU GPL v3"                                                        >> ${SPEC}
   echo "URL: www.daetools.com"                                                      >> ${SPEC}
-  echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
-  echo "Requires: boost-devel, PyQt4, numpy, scipy, python-matplotlib "             >> ${SPEC}
+  #echo "Provides: ${PACKAGE_NAME}"                                                  >> ${SPEC}
+  echo "Requires: boost-devel >= 1.41, PyQt4, numpy, scipy, python-matplotlib "     >> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
 
   echo "%description"                                                               >> ${SPEC}
-  echo "DAE Tools: A cross-platform equation-oriented process modelling software (pyDAE modules). " >> ${SPEC}
+  echo "DAE Tools: A cross-platform equation-oriented process modelling, simulation and optimization software." >> ${SPEC}
 
   echo "%prep"                                                              >> ${SPEC}
   echo "%build"                                                             >> ${SPEC}
