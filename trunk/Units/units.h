@@ -332,6 +332,11 @@ public:
 		addUnit(u8, exp8);
 	}
 
+	unit(const std::map<std::string, double>& mapUnits)
+	{
+		setUnits(mapUnits);
+	}
+
 	void addUnit(std::string name, double exp)
 	{
 		if(name.empty())
@@ -340,6 +345,13 @@ public:
         if(iter == __base_units__.end())
 			throw units_error((boost::format("Cannot find the base_unit: %1%") % name).str());
         units[name] = exp;
+	}
+
+	void setUnits(const std::map<std::string, double>& mapUnits)
+	{
+		units.clear();
+        for(std::map<std::string, double>::const_iterator iter = mapUnits.begin(); iter != mapUnits.end(); iter++)
+			addUnit(iter->first, iter->second);
 	}
 
 	static int init_base_units(void);
