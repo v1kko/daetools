@@ -10,7 +10,8 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS +=	$${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
-        $${DAE_DATAREPORTING_LIB}
+        $${DAE_DATAREPORTING_LIB} \
+        $${DAE_UNITS_LIB}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

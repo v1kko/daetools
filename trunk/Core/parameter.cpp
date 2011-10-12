@@ -11,32 +11,32 @@ namespace core
 *******************************************************************/
 daeParameter::daeParameter(void)
 {
-	m_eParameterType	= ePTUnknown;
-	m_pModel			= NULL;
+	m_Unit	 = units_pool::dimensionless;
+	m_pModel = NULL;
 }
 	
-daeParameter::daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription, 
+daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_eParameterType	= ePTUnknown;
-	m_pModel			= NULL;
+	m_Unit	 = units_pool::dimensionless;
+	m_pModel = NULL;
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pModel->AddParameter(*this, strName, paramType, strDescription);
+	pModel->AddParameter(*this, strName, units, strDescription);
 	
 	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 	
-daeParameter::daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription, 
+daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_eParameterType	= ePTUnknown;
-	m_pModel			= NULL;
+	m_Unit	 = units_pool::dimensionless;
+	m_pModel = NULL;
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pPort->AddParameter(*this, strName, paramType, strDescription);
+	pPort->AddParameter(*this, strName, units, strDescription);
 	
 	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
@@ -47,7 +47,7 @@ daeParameter::~daeParameter(void)
 
 void daeParameter::Clone(const daeParameter& rObject)
 {
-	m_eParameterType = rObject.m_eParameterType;
+	m_Unit           = rObject.m_Unit;
 	m_darrValues	 = rObject.m_darrValues;
 	FindDomains(rObject.m_ptrDomains, m_ptrDomains, m_pModel);
 }
@@ -64,8 +64,8 @@ void daeParameter::Open(io::xmlTag_t* pTag)
 
 	daeObject::Open(pTag);
 
-	strName = "Type";
-	OpenEnum(pTag, strName, m_eParameterType);
+//	strName = "Units";
+//	OpenEnum(pTag, strName, m_Unit);
 
 	strName = "DomainRefs";
 	daeFindDomainByID del(m_pModel);
@@ -78,8 +78,8 @@ void daeParameter::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-	strName = "Type";
-	SaveEnum(pTag, strName, m_eParameterType);
+//	strName = "Units";
+//	SaveEnum(pTag, strName, m_Unit);
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
@@ -117,7 +117,7 @@ void daeParameter::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 			fmtFile.parse(strExport);
 			fmtFile % GetStrippedName() 
 					% m_strShortName 
-					% dae::io::g_EnumTypesCollection->esmap_daeeParameterType.GetString(m_eParameterType) 
+					% m_Unit.toString() 
 					% m_strDescription
 					% strDomains;
 		}
@@ -130,7 +130,7 @@ void daeParameter::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 			fmtFile.parse(strExport);
 			fmtFile % GetStrippedName() 
 					% m_strShortName 
-					% dae::io::g_EnumTypesCollection->esmap_daeeParameterType.GetString(m_eParameterType) 
+					% m_Unit.toString() 
 					% m_strDescription
 					% strDomains;
 		}
@@ -172,8 +172,8 @@ void daeParameter::SaveRuntime(io::xmlTag_t* pTag) const
 
 	daeObject::SaveRuntime(pTag);
 
-	strName = "Type";
-	SaveEnum(pTag, strName, m_eParameterType);
+//	strName = "Units";
+//	SaveEnum(pTag, strName, m_Unit);
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
@@ -405,14 +405,14 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 	return varArray;
 }
 
-daeeParameterType daeParameter::GetParameterType(void) const
+unit daeParameter::GetUnits(void) const
 {
-	return m_eParameterType;
+	return m_Unit;
 }
 
-void daeParameter::SetParameterType(daeeParameterType eParameterType)
+void daeParameter::SetUnits(const unit& units)
 {
-	m_eParameterType = eParameterType;
+	m_Unit = units;
 }
 
 void daeParameter::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
@@ -761,7 +761,7 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	return m_darrValues[CalculateIndex(indexes, 7)];
 }
 
-real_t daeParameter:: GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8)
+real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8)
 {
 	if(m_ptrDomains.size() != 8)
 	{	
@@ -780,6 +780,143 @@ real_t daeParameter:: GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3
 	return m_darrValues[CalculateIndex(indexes, 8)];
 }
 
+
+
+
+
+
+
+
+void daeParameter::SetQuantity(const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, nD4, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_Unit).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
+
+quantity daeParameter::GetQuantity(void)
+{
+	real_t value = GetValue();
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1)
+{
+	real_t value = GetValue(nD1);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2)
+{
+	real_t value = GetValue(nD1, nD2);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3)
+{
+	real_t value = GetValue(nD1, nD2, nD3);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7);
+	return quantity(value, m_Unit);
+}
+
+quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8);
+	return quantity(value, m_Unit);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool daeParameter::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
@@ -791,12 +928,12 @@ bool daeParameter::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 
 // Check parameter type	
-	if(m_eParameterType == ePTUnknown)
-	{
-		strError = "Invalid parameter type in parameter [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
+//	if(m_eParameterType == ePTUnknown)
+//	{
+//		strError = "Invalid parameter type in parameter [" + GetCanonicalName() + "]";
+//		strarrErrors.push_back(strError);
+//		bCheck = false;
+//	}
 	
 // Check value array	
 	if(m_darrValues.size() == 0)

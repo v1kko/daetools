@@ -14,6 +14,9 @@
 
 namespace units
 {
+/**************************************************************
+		units_error
+**************************************************************/
 class units_error : public std::runtime_error
 {
 public:
@@ -22,6 +25,9 @@ public:
 	}
 };
 
+/**************************************************************
+		Some handy functions
+**************************************************************/
 inline std::string to_string(const std::string& name, double exponent)
 {
 	if(exponent == 0)
@@ -41,6 +47,9 @@ inline void to_string_and_add(const std::string& name, double exponent, std::vec
 		arrUnits.push_back(res);
 }
 
+/**************************************************************
+		base_unit
+**************************************************************/
 const std::string __string_unit_delimiter__  = " ";
 
 class base_unit
@@ -196,7 +205,7 @@ public:
 		return base_unit();	
 	}
 	
-	std::string toString(void) const
+	std::string toString(bool bUnitsOnly = false) const
 	{
 		std::vector<std::string> arrUnits;
         
@@ -209,7 +218,10 @@ public:
         to_string_and_add("mol", N, arrUnits);
 		
 		std::string _units = boost::algorithm::join(arrUnits, __string_unit_delimiter__);
-		return (boost::format("%17.10e [%s]") % multiplier % _units).str();
+		if(bUnitsOnly)
+			return (boost::format("%s") % _units).str();
+		else
+			return (boost::format("%.10f [%s]") % multiplier % _units).str();
 	}
 	
 	friend std::ostream& operator<<(std::ostream& out, const base_unit& u)
@@ -247,6 +259,9 @@ const double micro = 1E-6;
 const double nano  = 1E-9;
 const double pico  = 1E-12;
 
+/**************************************************************
+		base_units_pool
+**************************************************************/
 namespace base_units_pool
 {
 const base_unit dimless = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0);
@@ -305,7 +320,9 @@ const base_unit P  = Pa * s;       // Poise
 const base_unit St = (cm^2) / s;   // Stoke
 }
 
-/**************************************************************/
+/**************************************************************
+		unit
+**************************************************************/
 class quantity;
 class unit
 {
@@ -319,9 +336,6 @@ public:
 	     std::string u7 = "", double exp7 = 0,
 	     std::string u8 = "", double exp8 = 0)
 	{
-		if(__base_units__.empty())
-			unit::init_base_units();
-		
 		addUnit(u1, exp1);
 		addUnit(u2, exp2);
 		addUnit(u3, exp3);
@@ -341,6 +355,7 @@ public:
 	{
 		if(name.empty())
 			return;
+		std::map<std::string, base_unit>& __base_units__ = get_base_units();
         std::map<std::string, base_unit>::const_iterator iter = __base_units__.find(name);
         if(iter == __base_units__.end())
 			throw units_error((boost::format("Cannot find the base_unit: %1%") % name).str());
@@ -354,11 +369,13 @@ public:
 			addUnit(iter->first, iter->second);
 	}
 
-	static int init_base_units(void);
+	static std::map<std::string, base_unit>& get_base_units(void);
 	
 	base_unit getBaseUnit(void) const
 	{
 		base_unit tmp = base_units_pool::dimless;
+		std::map<std::string, base_unit>& __base_units__ = get_base_units();
+		
 		for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
 		{
 			std::string name = (*iter).first;
@@ -485,8 +502,7 @@ public:
 	}
 	
 public:
-	std::map<std::string, double>           units;
-	static std::map<std::string, base_unit> __base_units__;
+	std::map<std::string, double> units;
 };
 quantity operator*(double value, const unit& self);
 quantity operator/(double value, const unit& self);
@@ -495,8 +511,13 @@ unit     operator-(double value, const unit& self);
 unit     pow      (const unit& self, double exponent);
 unit     pow      (const unit& self, const unit& exponent);
 
+/**************************************************************
+		units_pool
+**************************************************************/
 namespace units_pool
 {
+const unit dimensionless = unit();
+
 // Fundamental units:
 const unit m  = unit("m",   1);
 const unit kg = unit("kg",  1);
@@ -553,7 +574,9 @@ const unit P  = unit("P",  1);
 const unit St = unit("St", 1);
 }
 
-
+/**************************************************************
+		quantity
+**************************************************************/
 class quantity
 {
 public:
@@ -562,7 +585,7 @@ public:
 		_value = 0.0;
 	}
 	
-	quantity(double val, unit u)
+	quantity(double val, const unit& u)
 	{
 		_units = u;
 		_value = val;
@@ -578,9 +601,9 @@ public:
 		_value = val;
 	}
 	
-	void setValue(const quantity& val)
+	void setValue(const quantity& other)
 	{
-		_value = val.scaleTo(*this).getValue();
+		_value = other.scaleTo(*this).getValue();
 	}
 
 	unit getUnits(void) const
@@ -593,20 +616,14 @@ public:
 		_units = u;
 	}
 
-    double getValueInSIUnits(void)
+    double getValueInSIUnits(void) const
 	{
         return _value * _units.getBaseUnit().multiplier;
     }
 	
     quantity scaleTo(const quantity& referrer) const
 	{
-        if(_units.getBaseUnit() != referrer.getUnits().getBaseUnit())
-            throw units_error((boost::format("Units not consistent: scale from %1% to %2%") % _units % referrer.getUnits()).str());
-
-		quantity tmp;
-        tmp.setUnits(referrer.getUnits());
-        tmp.setValue(_value * _units.getBaseUnit().multiplier / referrer.getUnits().getBaseUnit().multiplier);
-        return tmp;
+		return scaleTo(referrer.getUnits());
 	}
 
     quantity scaleTo(const unit& referrer) const
@@ -622,7 +639,7 @@ public:
 	
 	std::string toString(void) const
 	{
-		return (boost::format("%17.10e %s") % _value % _units.toString()).str();
+		return (boost::format("%.10f %s") % _value % _units.toString()).str();
 	}
 
 	friend std::ostream& operator<<(std::ostream& out, const quantity& q)
@@ -633,12 +650,27 @@ public:
 	
 	bool operator==(const quantity& other) const
 	{
-		return (_units == other.getUnits());
+		if(_units != other.getUnits())
+			throw units_error((boost::format("Units not consistent: %1% == %2%") % _units % other.getUnits()).str());
+			
+		return (_value == other.scaleTo(*this).getValue());	
+	}
+	
+	bool operator==(double value) const
+	{
+	// Here assume that the value is in the same units as this quantity
+	// We need this for unit-consistency checks
+		return (getValueInSIUnits() == value);
 	}
 
 	bool operator!=(const quantity& other) const
 	{
 		return !(*this == other);
+	}
+	
+	bool operator!=(double value) const
+	{
+		return !(*this == value);
 	}
 
 	quantity operator+(const quantity& other) const
@@ -691,12 +723,10 @@ public:
 		return tmp;	
 	}
 
-	quantity operator*(double other) const
+	quantity operator*(double value) const
 	{
-		quantity tmp;
-        tmp.setUnits(_units);
-        tmp.setValue(_value * other);
-		return tmp;	
+		quantity q(value, unit());
+		return (*this * q);
 	}
 
 	quantity operator/(const quantity& other) const
@@ -707,18 +737,17 @@ public:
 		return tmp;	
 	}
 	
-	quantity operator/(double other) const
+	quantity operator/(double value) const
 	{
-		quantity tmp;
-        tmp.setUnits(_units);
-        tmp.setValue(_value / other);
-		return tmp;	
+		quantity q(value, unit());
+		return (*this / q);
 	}
 
 	quantity operator^(const quantity& other) const
 	{
-		throw units_error((boost::format("Invalid operation: %1% ^ %2%") % *this % other).str());
-		return quantity();	
+		if(other.getUnits() != unit())
+			throw units_error((boost::format("Exponent must be dimension-less in: %1% ^ %2%") % _units % other.getUnits()).str());
+		return (*this ^ other.getValueInSIUnits());
 	}
 
 	quantity operator^(double exponent) const
@@ -729,6 +758,62 @@ public:
 		return tmp;	
 	}
 
+    bool operator <=(const quantity& other) const
+	{
+		if(_units != other.getUnits())
+			throw units_error((boost::format("Units not consistent: %1% <= %2%") % _units % other.getUnits()).str());
+			
+		return _value <= other.scaleTo(*this).getValue();	
+	}
+   
+	bool operator <=(double value) const
+	{
+		quantity q(value, unit());
+		return (*this <= q);
+	}
+
+    bool operator >=(const quantity& other) const
+	{
+		if(_units != other.getUnits())
+			throw units_error((boost::format("Units not consistent: %1% >= %2%") % _units % other.getUnits()).str());
+			
+		return _value >= other.scaleTo(*this).getValue();	
+	}
+   
+    bool operator >=(double value) const
+	{
+		quantity q(value, unit());
+		return (*this >= q);
+	}
+
+    bool operator >(const quantity& other) const
+	{
+		if(_units != other.getUnits())
+			throw units_error((boost::format("Units not consistent: %1% > %2%") % _units % other.getUnits()).str());
+			
+		return _value > other.scaleTo(*this).getValue();	
+	}
+   
+    bool operator >(double value) const
+	{
+		quantity q(value, unit());
+		return (*this > q);
+	}
+
+    bool operator <(const quantity& other) const
+	{
+		if(_units != other.getUnits())
+			throw units_error((boost::format("Units not consistent: %1% < %2%") % _units % other.getUnits()).str());
+			
+		return _value < other.scaleTo(*this).getValue();	
+	}
+   
+    bool operator <(double value) const
+	{
+		quantity q(value, unit());
+		return (*this < q);
+	}
+	
 protected:
 	unit   _units;
 	double _value;
@@ -739,8 +824,16 @@ quantity operator/(double value, const quantity& self);
 quantity operator+(double value, const quantity& self);
 quantity operator-(double value, const quantity& self);
 quantity operator^(double value, const quantity& self);
+quantity pow      (double value, const quantity& exponent);
 quantity pow      (const quantity& self, double exponent);
 quantity pow      (const quantity& self, const quantity& exponent);
+
+bool operator ==(double value, const quantity& self);
+bool operator !=(double value, const quantity& self);
+bool operator <=(double value, const quantity& self);
+bool operator >=(double value, const quantity& self);
+bool operator > (double value, const quantity& self);
+bool operator < (double value, const quantity& self);
 
 
 }

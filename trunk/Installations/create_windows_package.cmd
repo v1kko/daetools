@@ -68,6 +68,7 @@ copy pyCore.pyd                      %ROOT%\pyDAE
 copy pyActivity.pyd                  %ROOT%\pyDAE
 copy pyDataReporting.pyd             %ROOT%\pyDAE
 copy pyIDAS.pyd                      %ROOT%\pyDAE
+copy pyUnits.pyd                     %ROOT%\pyDAE
 copy pyBONMIN.pyd                    %ROOT%\solvers
 copy pyIPOPT.pyd                     %ROOT%\solvers
 copy pyNLOPT.pyd                     %ROOT%\solvers

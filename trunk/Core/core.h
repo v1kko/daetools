@@ -15,7 +15,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "definitions.h"
 #include "log.h"
+#include "../Units/units.h"
 using namespace dae::logging;
+using namespace units;
 
 namespace dae 
 {
@@ -304,8 +306,8 @@ public:
 	virtual void	SetUpperBound(real_t dValue)			= 0;
 	virtual real_t	GetInitialGuess(void) const				= 0;
 	virtual void	SetInitialGuess(real_t dValue)			= 0;
-	virtual string	GetUnits(void) const					= 0;
-	virtual void	SetUnits(string strName)				= 0;
+	virtual unit	GetUnits(void) const					= 0;
+	virtual void	SetUnits(const unit& u)					= 0;
 	virtual real_t	GetAbsoluteTolerance(void) const		= 0;
 	virtual void	SetAbsoluteTolerance(real_t dTolerance)	= 0;
 };
@@ -351,9 +353,9 @@ public:
 class daeParameter_t : virtual public daeObject_t
 {
 public:
-	virtual daeeParameterType	GetParameterType(void) const							= 0;
-	virtual void				GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
-	virtual real_t*				GetValuePointer(void)									= 0;
+	virtual unit	GetUnits(void) const									= 0;
+	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
+	virtual real_t*	GetValuePointer(void)									= 0;
 
 	virtual void	SetValue(real_t value)																									= 0;
 	virtual void	SetValue(size_t nD1, real_t value)																						= 0;
@@ -374,6 +376,26 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
+
+	virtual void	SetQuantity(const quantity& value)																									= 0;
+	virtual void	SetQuantity(size_t nD1, const quantity& value)																						= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, const quantity& value)																			= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+
+	virtual quantity	GetQuantity(void)																							= 0;
+	virtual quantity	GetQuantity(size_t nD1)																						= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2) 																		= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3) 															= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4) 												= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) 									= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
 };	
 
 /******************************************************************

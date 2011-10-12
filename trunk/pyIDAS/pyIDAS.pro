@@ -14,6 +14,7 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
 LIBS +=	$${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${DAE_IDAS_SOLVER_LIB} \
+        $${DAE_UNITS_LIB} \
         $${SUNDIALS_LIBS}
 
 SOURCES += stdafx.cpp \

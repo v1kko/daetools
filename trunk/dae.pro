@@ -4,11 +4,12 @@ SUBDIRS = Core \
     DataReporting \
     Activity \
     IDAS_DAESolver \ 
+	Units \
 	pyCore \
 	pyActivity \
 	pyDataReporting \
-	pyIDAS  \
-	Units
+	pyIDAS \
+	pyUnits
  
 HEADERS += dae.h \
     dae_develop.h

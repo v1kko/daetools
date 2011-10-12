@@ -598,6 +598,51 @@ void SetParameterValue8(daeParameter& param, size_t n1, size_t n2, size_t n3, si
 	param.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
+void SetParameterQuantity0(daeParameter& param, quantity value)
+{
+	param.SetQuantity(value);
+}
+
+void SetParameterQuantity1(daeParameter& param, size_t n1, quantity value)
+{
+	param.SetQuantity(n1, value);
+}
+
+void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, quantity value)
+{
+	param.SetQuantity(n1, n2, value);
+}
+
+void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, value);
+}
+
+void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, n4, value);
+}
+
+void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, n4, n5, value);
+}
+
+void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, n4, n5, n6, value);
+}
+
+void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, n4, n5, n6, n7, value);
+}
+
+void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, quantity value)
+{
+	param.SetQuantity(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
 adouble_array ParameterArray1(daeParameter& param, object o1)
 {
 	return param.array(CreateArrayRange(o1));

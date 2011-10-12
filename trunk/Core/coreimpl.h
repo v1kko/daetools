@@ -101,7 +101,7 @@ public:
 	daeDeclareDynamicClass(daeVariableType)
 	daeVariableType(void);
 	daeVariableType(string strName,
-	                string strUnits,
+	                unit   units,
 					real_t dLowerBound,
 					real_t dUpperBound,
 					real_t dInitialGuess,
@@ -117,8 +117,8 @@ public:
 	virtual void	SetUpperBound(real_t dValue);
 	virtual real_t	GetInitialGuess(void) const;
 	virtual void	SetInitialGuess(real_t dValue);
-	virtual string	GetUnits(void) const;
-	virtual void	SetUnits(string strName);
+	virtual unit	GetUnits(void) const;
+	virtual void	SetUnits(const unit& u);
 	virtual real_t	GetAbsoluteTolerance(void) const;
 	virtual void	SetAbsoluteTolerance(real_t dTolerance);
 
@@ -134,7 +134,7 @@ public:
 
 protected:
 	string	m_strName;
-	string	m_strUnits;
+	unit	m_Units;
 	real_t	m_dLowerBound;
 	real_t	m_dUpperBound;
 	real_t	m_dInitialGuess;
@@ -1299,17 +1299,17 @@ class DAE_CORE_API daeParameter : virtual public daeObject,
 {
 public:
 	daeDeclareDynamicClass(daeParameter)
-	daeParameter(string strName, daeeParameterType paramType, daeModel* pModel, string strDescription = "", 
+	daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription = "", 
 				 daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
-	daeParameter(string strName, daeeParameterType paramType, daePort* pPort, string strDescription = "", 
+	daeParameter(string strName, const unit& units, daePort* pPort, string strDescription = "", 
 				 daeDomain* d1 = NULL, daeDomain* d2 = NULL, daeDomain* d3 = NULL, daeDomain* d4 = NULL, daeDomain* d5 = NULL, daeDomain* d6 = NULL, daeDomain* d7 = NULL, daeDomain* d8 = NULL);
 	daeParameter(void);
 	virtual ~daeParameter(void);
 
 public:	
-	virtual daeeParameterType	GetParameterType(void) const;
-	virtual void				GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
-	virtual real_t*				GetValuePointer(void);
+	virtual unit	GetUnits(void) const;
+	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
+	virtual real_t*	GetValuePointer(void);
 
 	virtual void	SetValue(real_t value);
 	virtual void	SetValue(size_t nD1, real_t value);
@@ -1331,6 +1331,26 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
+	virtual void	SetQuantity(const quantity& value);
+	virtual void	SetQuantity(size_t nD1, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
+	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+
+	virtual quantity	GetQuantity(void);
+	virtual quantity	GetQuantity(size_t nD1);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
+	
 public:	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -1381,7 +1401,7 @@ public:
 		adouble_array array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 protected:
-	void SetParameterType(daeeParameterType eParameterType);
+	void SetUnits(const unit& units);
 	void Initialize(void);
 
 	adouble Create_adouble(const size_t* indexes, const size_t N) const;
@@ -1394,7 +1414,7 @@ protected:
 
 protected:
 	std::vector<real_t>				m_darrValues;
-	daeeParameterType				m_eParameterType;
+	unit							m_Unit;
 	std::vector<daeDomain*>			m_ptrDomains;
 	friend class daePort;
 	friend class daeModel;
@@ -1795,7 +1815,7 @@ public:
 	void SetType(daeePortType eType);
 	void AddDomain(daeDomain& rDomain, const string& strName, string strDescription = "");
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
-	void AddParameter(daeParameter& rParameter, const string& strName, daeeParameterType eParameterType, string strDescription = "");
+	void AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription = "");
 	
 protected:
 	void			InitializeParameters(void);
@@ -2139,7 +2159,7 @@ public:
 protected:
 	void AddDomain(daeDomain& rDomain, const string& strName, string strDescription = "");
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
-	void AddParameter(daeParameter& rParameter, const string& strName, daeeParameterType eParameterType, string strDescription = "");
+	void AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription = "");
 	void AddModel(daeModel& rModel, const string& strName, string strDescription = "");
 	void AddPort(daePort& rPort, const string& strName, daeePortType ePortType, string strDescription = "");
 	void AddEventPort(daeEventPort& rPort, const string& strName, daeePortType ePortType, string strDescription);

@@ -45,7 +45,7 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
 	m_pModel     = pModel;
 	m_pDAESolver = pDAESolver;
 	
-	const daeVariableType varType("gradient_function_t", "-", -1.0e+100, 1.0e+100, 0.0, abstol);
+	const daeVariableType varType("gradient_function_t", unit(), -1.0e+100, 1.0e+100, 0.0, abstol);
 
 	m_nEquationIndexInBlock = ULONG_MAX;
 	m_nVariableIndexInBlock = ULONG_MAX;

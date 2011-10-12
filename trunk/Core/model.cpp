@@ -100,7 +100,7 @@ void daeModel::Clone(const daeModel& rObject)
 	for(size_t i = 0; i < rObject.m_ptrarrParameters.size(); i++)
 	{
 		daeParameter* pParameter = new daeParameter(rObject.m_ptrarrParameters[i]->m_strShortName, 
-													rObject.m_ptrarrParameters[i]->m_eParameterType, 
+													rObject.m_ptrarrParameters[i]->m_Unit, 
 													this, 
 													rObject.m_ptrarrParameters[i]->m_strDescription);
 		pParameter->Clone(*rObject.m_ptrarrParameters[i]);
@@ -994,11 +994,11 @@ void daeModel::AddVariable(daeVariable& rVariable, const string& strName, const 
 	AddVariable(&rVariable);
 }
 
-void daeModel::AddParameter(daeParameter& rParameter, const string& strName, daeeParameterType eParameterType, string strDescription)
+void daeModel::AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription)
 {
 	rParameter.SetName(strName);
 	rParameter.SetDescription(strDescription);
-	rParameter.SetParameterType(eParameterType);
+	rParameter.SetUnits(units);
 	AddParameter(&rParameter);
 }
 

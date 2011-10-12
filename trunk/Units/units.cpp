@@ -2,7 +2,9 @@
 
 namespace units
 {
-
+/**************************************************************
+		base_unit
+**************************************************************/
 base_unit operator*(double value, const base_unit& self)
 {
 	return self * value;
@@ -35,12 +37,12 @@ base_unit pow(const base_unit& self, const base_unit& exponent)
 	return self ^ exponent;
 }
 
-
-int unit::init_base_units(void)
+/**************************************************************
+		unit
+**************************************************************/
+inline void fill_base_units(std::map<std::string, base_unit>& __base_units__)
 {
 	using namespace base_units_pool;
-	
-	__base_units__ = std::map<std::string, base_unit>();
 	
 	__base_units__["kg"] = kg;
 	__base_units__["m"] = m;
@@ -88,15 +90,16 @@ int unit::init_base_units(void)
 	
 	__base_units__["P"] = P;
 	__base_units__["St"] = St;
-	
 	//for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
 	//	std::cout << (*iter).first << " = " << (*iter).second.toString() << std::endl;
-	
-	return 0;
 }
 
-std::map<std::string, base_unit> unit::__base_units__ = std::map<std::string, base_unit>();
-int __dummy = unit::init_base_units();
+std::map<std::string, base_unit>& unit::get_base_units(void)
+{
+	static std::map<std::string, base_unit> __base_units__;
+	fill_base_units(__base_units__);
+	return __base_units__;
+}
 
 quantity unit::operator*(double multi) const
 {
@@ -140,9 +143,9 @@ unit pow(const unit& self, double exponent)
 	return self ^ exponent;
 }
 
-
-
-
+/**************************************************************
+		quantity
+**************************************************************/
 quantity operator*(double value, const quantity& self)
 {
 	return self * value;	
@@ -167,8 +170,14 @@ quantity operator-(double value, const quantity& self)
 
 quantity operator^(double value, const quantity& self)
 {
-	throw units_error((boost::format("Invalid operation: %1% ^ %2%") % value % self).str());
-	return quantity();	
+	quantity q(value, unit());
+	return q ^ self;	
+}
+
+quantity pow(double value, const quantity& exponent)
+{
+	quantity q(value, unit());
+	return q ^ exponent;	
 }
 
 quantity pow(const quantity& self, double exponent)
@@ -178,9 +187,45 @@ quantity pow(const quantity& self, double exponent)
 
 quantity pow(const quantity& self, const quantity& exponent)
 {
-	throw units_error((boost::format("Invalid operation: %1% ^ %2%") % exponent % self).str());
-	return quantity();	
+	return (self ^ exponent);	
 }
+
+bool operator ==(double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q == self);
+}
+
+bool operator !=(double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q != self);
+}
+
+bool operator <=(double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q <= self);
+}
+
+bool operator >=(double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q >= self);
+}
+
+bool operator > (double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q > self);
+}
+
+bool operator < (double value, const quantity& self)
+{
+	quantity q(value, unit());
+	return (q < self);
+}
+
 
 
 }

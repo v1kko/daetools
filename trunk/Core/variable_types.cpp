@@ -14,7 +14,7 @@ daeVariableType::daeVariableType()
 }
 
 daeVariableType::daeVariableType(string strName,
-								 string strUnits,
+								 unit   units,
 								 real_t dLowerBound,
 								 real_t dUpperBound,
 								 real_t dInitialGuess,
@@ -23,7 +23,7 @@ daeVariableType::daeVariableType(string strName,
 	m_dInitialGuess		  = dInitialGuess;
 	m_dLowerBound		  = dLowerBound;
 	m_dUpperBound		  = dUpperBound;
-	m_strUnits            = strUnits;
+	m_Units               = units;
 	m_strName             = strName;
 	m_dAbsoluteTolerance  = dAbsoluteTolerance;
 }
@@ -62,14 +62,14 @@ void daeVariableType::SetInitialGuess(real_t dValue)
 	m_dInitialGuess = dValue;
 }
 
-string daeVariableType::GetUnits(void) const
+unit daeVariableType::GetUnits(void) const
 {
-	return m_strUnits;
+	return m_Units;
 }
 
-void daeVariableType::SetUnits(string strName)
+void daeVariableType::SetUnits(const unit& units)
 {
-	m_strUnits = strName;
+	m_Units = units;
 }
 
 string daeVariableType::GetName(void) const
@@ -99,8 +99,8 @@ void daeVariableType::Open(io::xmlTag_t* pTag)
 	strName = "Name";
 	pTag->Open(strName, m_strName);
 
-	strName = "Units";
-	pTag->Open(strName, m_strUnits);
+//	strName = "Units";
+//	pTag->Open(strName, m_Units);
 
 	strName = "LowerBound";
 	pTag->Open(strName, m_dLowerBound);
@@ -122,8 +122,8 @@ void daeVariableType::Save(io::xmlTag_t* pTag) const
 	strName = "Name";
 	pTag->Save(strName, m_strName);
 
-	strName = "Units";
-	pTag->Save(strName, m_strUnits);
+//	strName = "Units";
+//	pTag->Save(strName, m_Units);
 
 	strName = "LowerBound";
 	pTag->Save(strName, m_dLowerBound);
@@ -149,7 +149,7 @@ void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguag
 		fmtFile.parse(strFile);
 		fmtFile % m_strName 
 				% m_strName 
-				% m_strUnits 
+				% m_Units.toString()  
 				% m_dLowerBound
 				% m_dUpperBound
 				% m_dInitialGuess
@@ -161,7 +161,7 @@ void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguag
 		fmtFile.parse(strFile);
 		fmtFile % m_strName 
 				% m_strName 
-				% m_strUnits 
+				% m_Units.toString()  
 				% m_dLowerBound
 				% m_dUpperBound
 				% m_dInitialGuess
@@ -196,12 +196,12 @@ bool daeVariableType::CheckObject(vector<string>& strarrErrors) const
 		return false;
 	}
 
-	if(m_strUnits.empty())
-	{
-		strError = "Invalid units in variable type [" + m_strName + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
+//	if(m_strUnits.empty())
+//	{
+//		strError = "Invalid units in variable type [" + m_strName + "]";
+//		strarrErrors.push_back(strError);
+//		bCheck = false;
+//	}
 
 	if(m_dLowerBound >= m_dUpperBound)
 	{

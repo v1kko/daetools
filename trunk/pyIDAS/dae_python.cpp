@@ -8,7 +8,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 {
 	import_array(); 
 	boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
-  
+
 /**************************************************************
     Enums
 ***************************************************************/

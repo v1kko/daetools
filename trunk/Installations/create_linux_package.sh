@@ -207,6 +207,7 @@ cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
 cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
 cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
 cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyUnits.so            ${PACKAGE_NAME}/pyDAE
 
 if [ -e ../release/pyBONMIN.so ]; then
   cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers

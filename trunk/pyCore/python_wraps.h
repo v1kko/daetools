@@ -137,8 +137,8 @@ public:
 	{
 	}
 
-	daeParameterWrapper(string strName, daeeParameterType eType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeParameter(strName, eType, pModel, strDescription)
+	daeParameterWrapper(string strName, const unit& units, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
+		: daeParameter(strName, units, pModel, strDescription)
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
@@ -150,8 +150,8 @@ public:
 		}
 	}
 
-	daeParameterWrapper(string strName, daeeParameterType eType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeParameter(strName, eType, pPort, strDescription)
+	daeParameterWrapper(string strName, const unit& units, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
+		: daeParameter(strName, units, pPort, strDescription)
 	{
 		daeDomain* pDomain;
 		boost::python::ssize_t n = boost::python::len(domains);
@@ -182,44 +182,89 @@ public:
 		return GetValue();
 	}
 
-	real_t GetParameterValue1(real_t n1)
+	real_t GetParameterValue1(size_t n1)
 	{
 		return GetValue(n1);
 	}
 
-	real_t GetParameterValue2(real_t n1, real_t n2)
+	real_t GetParameterValue2(size_t n1, size_t n2)
 	{
 		return GetValue(n1, n2);
 	}
 
-	real_t GetParameterValue3(real_t n1, real_t n2, real_t n3)
+	real_t GetParameterValue3(size_t n1, size_t n2, size_t n3)
 	{
 		return GetValue(n1, n2, n3);
 	}
 
-	real_t GetParameterValue4(real_t n1, real_t n2, real_t n3, real_t n4)
+	real_t GetParameterValue4(size_t n1, size_t n2, size_t n3, size_t n4)
 	{
 		return GetValue(n1, n2, n3, n4);
 	}
 
-	real_t GetParameterValue5(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5)
+	real_t GetParameterValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
 	{
 		return GetValue(n1, n2, n3, n4, n5);
 	}
 
-	real_t GetParameterValue6(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6)
+	real_t GetParameterValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6);
 	}
 
-	real_t GetParameterValue7(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7)
+	real_t GetParameterValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7);
 	}
 
-	real_t GetParameterValue8(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7, real_t n8)
+	real_t GetParameterValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
+	}
+
+	quantity GetParameterQuantity0()
+	{
+		return GetQuantity();
+	}
+
+	quantity GetParameterQuantity1(size_t n1)
+	{
+		return GetQuantity(n1);
+	}
+
+	quantity GetParameterQuantity2(size_t n1, size_t n2)
+	{
+		return GetQuantity(n1, n2);
+	}
+
+	quantity GetParameterQuantity3(size_t n1, size_t n2, size_t n3)
+	{
+		return GetQuantity(n1, n2, n3);
+	}
+
+	quantity GetParameterQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
+	{
+		return GetQuantity(n1, n2, n3, n4);
+	}
+
+	quantity GetParameterQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5);
+	}
+
+	quantity GetParameterQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6);
+	}
+
+	quantity GetParameterQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
+	}
+
+	quantity GetParameterQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
 };
 
@@ -254,6 +299,16 @@ void SetParameterValue5(daeParameter& param, size_t n1, size_t n2, size_t n3, si
 void SetParameterValue6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
 void SetParameterValue7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetParameterValue8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
+
+void SetParameterQuantity0(daeParameter& param, quantity value);
+void SetParameterQuantity1(daeParameter& param, size_t n1, quantity value);
+void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, quantity value);
+void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, quantity value);
+void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, quantity value);
+void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, quantity value);
+void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, quantity value);
+void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, quantity value);
+void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, quantity value);
 
 adouble_array ParameterArray1(daeParameter& param, boost::python::object o1);
 adouble_array ParameterArray2(daeParameter& param, boost::python::object o1, boost::python::object o2);
@@ -325,42 +380,42 @@ public:
 		return GetValue();
 	}
 
-	real_t GetVariableValue1(real_t n1)
+	real_t GetVariableValue1(size_t n1)
 	{
 		return GetValue(n1);
 	}
 
-	real_t GetVariableValue2(real_t n1, real_t n2)
+	real_t GetVariableValue2(size_t n1, size_t n2)
 	{
 		return GetValue(n1, n2);
 	}
 
-	real_t GetVariableValue3(real_t n1, real_t n2, real_t n3)
+	real_t GetVariableValue3(size_t n1, size_t n2, size_t n3)
 	{
 		return GetValue(n1, n2, n3);
 	}
 
-	real_t GetVariableValue4(real_t n1, real_t n2, real_t n3, real_t n4)
+	real_t GetVariableValue4(size_t n1, size_t n2, size_t n3, size_t n4)
 	{
 		return GetValue(n1, n2, n3, n4);
 	}
 
-	real_t GetVariableValue5(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5)
+	real_t GetVariableValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
 	{
 		return GetValue(n1, n2, n3, n4, n5);
 	}
 
-	real_t GetVariableValue6(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6)
+	real_t GetVariableValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6);
 	}
 
-	real_t GetVariableValue7(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7)
+	real_t GetVariableValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7);
 	}
 
-	real_t GetVariableValue8(real_t n1, real_t n2, real_t n3, real_t n4, real_t n5, real_t n6, real_t n7, real_t n8)
+	real_t GetVariableValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
 	}

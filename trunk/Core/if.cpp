@@ -372,7 +372,7 @@ void daeIF::ExecuteOnConditionActions(void)
 	
 	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
 	{
-		pSTN = pState->m_ptrarrSTNs[i];
+		pSTN = m_pActiveState->m_ptrarrSTNs[i];
 
 		pSTN->ExecuteOnConditionActions();
 	}

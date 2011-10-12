@@ -50,6 +50,7 @@ SOURCES += xmlreadstream.cpp \
     tcpiplog.cpp \
     objfun_constraints.cpp \
     external_function.cpp
+
 HEADERS += xmlfunctions.h \
     xmlfile.h \
     stdafx.h \

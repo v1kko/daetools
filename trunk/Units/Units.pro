@@ -7,12 +7,9 @@ QT -= core gui
 #CONFIG -= app_bundle
 #TEMPLATE = app
 
-TARGET = pyUnits
+TARGET = cdaeUnits
 TEMPLATE = lib
-
-#TARGET = cdaeUnits
-#TEMPLATE = lib
-#CONFIG += staticlib
+CONFIG += staticlib
 
 INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_INCLUDE_DIR} \
@@ -21,25 +18,11 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS +=	$${BOOST_PYTHON_LIB} $${BOOST_LIBS}
 
-SOURCES += units.cpp \
-    dae_python.cpp
+SOURCES += dllmain.cpp \
+    units.cpp \
+	stdafx.cpp
 #    main.cpp
     
 
-HEADERS += \
-    parser_objects.h \
-    units.h \
-    stdafx.h \
-    python_wraps.h
-
-win32{
-QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyUnits.dll \
-	$${DAE_DEST_DIR}/pyUnits.pyd
-}
-
-unix{
-QMAKE_POST_LINK = cp -f \
-	$${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-	$${DAE_DEST_DIR}/pyUnits.so
-}
+HEADERS += units.h \
+    stdafx.h
