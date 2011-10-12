@@ -364,6 +364,11 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 	return true;
 }
 
+quantity adNodeImpl::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 
 /*********************************************************************************************
 	adConstantNode

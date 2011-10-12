@@ -34,6 +34,7 @@ public:
 	void ExportAsLatex(string strFileName);
 	bool IsLinear(void) const;
 	bool IsFunctionOfVariables(void) const;
+	quantity CheckConsistency(void) const;
 };
 
 /*********************************************************************************************
@@ -375,6 +376,7 @@ public:
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual bool		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<adNode>	m_pLeft;
@@ -408,6 +410,7 @@ public:
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual bool		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<condNode>		m_pNode;
@@ -440,6 +443,7 @@ public:
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual bool		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<condNode>		m_pLeft;

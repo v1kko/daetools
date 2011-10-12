@@ -215,6 +215,11 @@ void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 {	
 }
 
+quantity adNodeArrayImpl::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 /*********************************************************************************************
 	adConstantNodeArray
 **********************************************************************************************/

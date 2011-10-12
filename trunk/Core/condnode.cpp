@@ -420,6 +420,12 @@ bool condExpressionNode::Evaluate(const daeExecutionContext* pExecutionContext) 
 	}
 }
 
+bool condExpressionNode::CheckConsistency(void) const
+{
+	return true;
+}
+
+
 condNode* condExpressionNode::Clone(void) const
 {
 	return new condExpressionNode(*this);
@@ -648,6 +654,11 @@ bool condUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 	return bResult;
 }
 
+bool condUnaryNode::CheckConsistency(void) const
+{
+	return true;
+}
+
 condNode* condUnaryNode::Clone(void) const
 {
 	return new condUnaryNode(*this);
@@ -862,6 +873,11 @@ bool condBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 	return bResult;
+}
+
+bool condBinaryNode::CheckConsistency(void) const
+{
+	return true;
 }
 
 condNode* condBinaryNode::Clone(void) const

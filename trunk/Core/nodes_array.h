@@ -48,6 +48,7 @@ public:
 	bool IsFunctionOfVariables(void) const;
 	
 	virtual void GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual quantity CheckConsistency(void) const;
 };
 
 /*********************************************************************************************
