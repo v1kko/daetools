@@ -1253,7 +1253,54 @@ adouble_array adUnaryNodeArray::Evaluate(const daeExecutionContext* pExecutionCo
 
 quantity adUnaryNodeArray::CheckConsistency(void) const
 {
-	return quantity();
+	switch(eFunction)
+	{
+	case eSign:
+		return -(node->CheckConsistency());
+		break;
+	case eSin:
+ 		return sin(node->CheckConsistency());
+		break;
+	case eCos:
+		return cos(node->CheckConsistency());
+		break;
+	case eTan:
+		return tan(node->CheckConsistency());
+		break;
+	case eArcSin:
+		return asin(node->CheckConsistency());
+		break;
+	case eArcCos:
+		return acos(node->CheckConsistency());
+		break;
+	case eArcTan:
+		return atan(node->CheckConsistency());
+		break;
+	case eSqrt:
+		return sqrt(node->CheckConsistency());
+		break;
+	case eExp:
+		return exp(node->CheckConsistency());
+		break;
+	case eLn:
+		return log(node->CheckConsistency());
+		break;
+	case eLog:
+		return log10(node->CheckConsistency());
+		break;
+	case eAbs:
+		return abs(node->CheckConsistency());
+		break;
+	case eCeil:
+		return ceil(node->CheckConsistency());
+		break;
+	case eFloor:
+		return floor(node->CheckConsistency());
+		break;
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return quantity();
+	}
 }
 
 adNodeArray* adUnaryNodeArray::Clone(void) const
@@ -1954,7 +2001,33 @@ adouble_array adBinaryNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 
 quantity adBinaryNodeArray::CheckConsistency(void) const
 {
-	return quantity();
+	switch(eFunction)
+	{
+	case ePlus:
+		return left->CheckConsistency() + right->CheckConsistency();
+		break;
+	case eMinus:
+		return left->CheckConsistency() - right->CheckConsistency();
+		break;
+	case eMulti:
+		return left->CheckConsistency() * right->CheckConsistency();
+		break;
+	case eDivide:
+		return left->CheckConsistency() / right->CheckConsistency();
+		break;
+	case ePower:
+		daeDeclareAndThrowException(exNotImplemented);
+		break;
+	case eMin:
+		daeDeclareAndThrowException(exNotImplemented);
+		break;
+	case eMax:
+		daeDeclareAndThrowException(exNotImplemented);
+		break;
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return quantity();
+	}
 }
 
 adNodeArray* adBinaryNodeArray::Clone(void) const
@@ -2526,7 +2599,31 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 
 quantity adSetupSpecialFunctionNode::CheckConsistency(void) const
 {
-	return quantity();
+	quantity q = node->CheckConsistency();
+	size_t   n = node->GetSize();
+	
+	switch(eFunction)
+	{
+	case eSum:
+		return q;
+		break;
+	case eProduct:
+		std::cout << "adSetupSpecialFunctionNode size: " << n << std::endl;
+		return q ^ n;
+		break;
+	case eAverage:
+		return q;
+		break;
+	case eMinInArray:
+		return q;
+		break;
+	case eMaxInArray:
+		return q;
+		break;
+	default:
+		daeDeclareAndThrowException(exInvalidPointer);
+		return quantity();
+	}
 }
 
 adNode* adSetupSpecialFunctionNode::Clone(void) const
@@ -2833,7 +2930,8 @@ adouble adSetupExpressionDerivativeNode::Evaluate(const daeExecutionContext* pEx
 
 quantity adSetupExpressionDerivativeNode::CheckConsistency(void) const
 {
-	return quantity();
+	quantity q = node->CheckConsistency();
+	return quantity(0.0, q.getUnits() / units_pool::s);
 }
 
 // Here I work on runtime nodes!!
@@ -3097,6 +3195,8 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidPointer);
 
 	a = node->Evaluate(pExecutionContext);
 	tmp.setGatherInfo(true);
@@ -3106,7 +3206,11 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 
 quantity adSetupExpressionPartialDerivativeNode::CheckConsistency(void) const
 {
-	return quantity();
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	quantity q = node->CheckConsistency();
+	return quantity(0.0, q.getUnits() / m_pDomain->GetUnits());
 }
 
 // Here I work on runtime nodes!!
@@ -3425,9 +3529,8 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 		a = node->Evaluate(pExecutionContext);
 		
 		return m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), narrPoints);
-		break;
 	default:
-		daeDeclareAndThrowException(exInvalidPointer);
+		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
 	}
 	return adouble();
@@ -3435,7 +3538,21 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 
 quantity adSetupIntegralNode::CheckConsistency(void) const
 {
-	return quantity();
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	quantity q = node->CheckConsistency();
+	
+	switch(eFunction)
+	{
+	case eSingleIntegral:
+		return quantity(0.0, q.getUnits() * m_pDomain->GetUnits());
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return quantity();
+	}
 }
 
 adNode* adSetupIntegralNode::Clone(void) const
@@ -3640,7 +3757,10 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 
 quantity adSingleNodeArray::CheckConsistency(void) const
 {
-	return quantity();
+	if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	return node->CheckConsistency();
 }
 
 adNodeArray* adSingleNodeArray::Clone(void) const

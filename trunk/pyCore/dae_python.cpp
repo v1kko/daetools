@@ -581,7 +581,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("VariableType",	make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()) )
 		.add_property("ReportingOn",	&daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
 
-		.def("__str__",					&daepython::daeVariable_str)
+		.def("__str__",					&daepython::daeVariable_str) 
 		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain)
 
 		.def("__call__", &daepython::VariableFunctionCall0)
