@@ -15,7 +15,7 @@ BOOST_PYTHON_MODULE(pyUnits)
 	class_<base_unit>("base_unit")
         .def("__init__",	make_constructor(daepython::__init__base_unit))
         .def("__str__",		&daepython::base_unit__str__)
-		.def("__repr__",	&daepython::base_unit__repr__)
+		.def("__repr__",	&daepython::base_unit__repr__) 
 		
 		.def(self * self)
 		.def(self / self)
@@ -80,6 +80,9 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def(self <= self)
 		.def(self >  self)
 		.def(self >= self)
+
+		.def(self * unit())
+		.def(self / unit()) 
 
 		.def(self + double())
 		.def(self - double())

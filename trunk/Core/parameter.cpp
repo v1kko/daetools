@@ -78,8 +78,8 @@ void daeParameter::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-//	strName = "Units";
-//	SaveEnum(pTag, strName, m_Unit);
+	strName = "Units";
+	pTag->Save(strName, m_Unit.toString());
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
@@ -172,8 +172,8 @@ void daeParameter::SaveRuntime(io::xmlTag_t* pTag) const
 
 	daeObject::SaveRuntime(pTag);
 
-//	strName = "Units";
-//	SaveEnum(pTag, strName, m_Unit);
+	strName = "Units";
+	pTag->Save(strName, m_Unit.toString());
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
@@ -781,61 +781,55 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 }
 
 
-
-
-
-
-
-
-void daeParameter::SetQuantity(const quantity& q)
+void daeParameter::SetValue(const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, const quantity& q)
+void daeParameter::SetValue(size_t nD1, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, nD4, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, nD4, nD5, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
 }
 
-void daeParameter::SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
 {
 	real_t value = q.scaleTo(m_Unit).getValue();
 	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
@@ -894,26 +888,6 @@ quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD
 	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8);
 	return quantity(value, m_Unit);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

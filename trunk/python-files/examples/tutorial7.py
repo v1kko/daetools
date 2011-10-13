@@ -26,25 +26,26 @@ Here the heat flux at the bottom edge is defined as a variable. In the simulatio
 value will be fixed and manipulated in the custom operating procedure.
 """
 
-import sys
+import sys, math
 from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeDomain("x", self, "X axis domain")
-        self.y  = daeDomain("y", self, "Y axis domain")
+        self.x  = daeDomain("x", self, m, "X axis domain")
+        self.y  = daeDomain("y", self, m, "Y axis domain")
 
-        self.Qb = daeVariable("Q_b", heat_flux_t, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")
+        self.Qb = daeVariable("Q_b",  heat_flux_t, self, "Heat flux at the bottom edge of the plate, W/m2")
+        self.Qt = daeParameter("Q_t",    W/(m**2), self, "Heat flux at the top edge of the plate, W/m2")
 
-        self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.ro = daeParameter("&rho;",   kg/(m**3), self, "Density of the plate, kg/m3")
+        self.cp = daeParameter("c_p",      J/(kg*K), self, "Specific heat capacity of the plate, J/kgK")
+        self.k  = daeParameter("&lambda;",  W/(m*K), self, "Thermal conductivity of the plate, W/mK")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
@@ -123,12 +124,14 @@ class simTutorial(daeSimulation):
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100)
         self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
         self.m.Qb.ReAssignValue(2E6)
         self.Reinitialize()
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
         self.m.Qb.ReAssignValue(1.5E6)
         #self.m.Qt.SetValue(2E6)
@@ -137,10 +140,12 @@ class simTutorial(daeSimulation):
                 self.m.T.ReSetInitialCondition(x, y, 300)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
         self.Log.Message("OP: Finished", 0)
 
 # Use daeSimulator class

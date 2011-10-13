@@ -76,6 +76,7 @@ public:
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	real_t	m_dValue;
@@ -303,6 +304,7 @@ public:
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<adNodeArray>	node;
@@ -334,6 +336,7 @@ public:
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<adNodeArray>	left;
@@ -366,6 +369,7 @@ public:
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity CheckConsistency(void) const;
 
 public:
 	daeModel*						m_pModel;
@@ -394,6 +398,7 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity CheckConsistency(void) const;
 
 protected:
 	boost::shared_ptr<adNode> calc_dt(boost::shared_ptr<adNode> n, const daeExecutionContext* pExecutionContext) const;
@@ -425,6 +430,7 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity CheckConsistency(void) const;
 
 protected:
 	boost::shared_ptr<adNode> calc_d(boost::shared_ptr<adNode> n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const;
@@ -461,6 +467,7 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity CheckConsistency(void) const;
 
 public:
 	daeModel*						m_pModel;
@@ -493,6 +500,7 @@ public:
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	boost::shared_ptr<adNode>	node;
@@ -522,6 +530,7 @@ public:
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	daeParameter*			m_pParameter;
@@ -552,6 +561,7 @@ public:
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -583,6 +593,7 @@ public:
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	daeVariable*			m_pVariable;
@@ -616,6 +627,7 @@ public:
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual quantity		CheckConsistency(void) const;
 
 public:
 	daeVariable*			m_pVariable;

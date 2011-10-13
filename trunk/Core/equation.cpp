@@ -1800,6 +1800,21 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 	}
 	
+// Check unit-consistency of the equation	
+	try
+	{
+		m_pResidualNode->CheckConsistency();
+		//std::cout << (boost::format("Equation [%s] residual units [%s]") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
+	}
+	catch(std::exception& e)
+	{
+		strError = "Unit-consistency check failed in equation [" + GetCanonicalName() + "]";
+		strarrErrors.push_back(strError);
+		strError = "The reason: " + string(e.what());
+		strarrErrors.push_back(strError);
+		bCheck = false;
+	}
+
 // Check distributed equation domain infos	
 	if(m_ptrarrDistributedEquationDomainInfos.size() != 0)
 	{

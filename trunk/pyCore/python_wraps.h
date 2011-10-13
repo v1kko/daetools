@@ -280,16 +280,6 @@ adouble FunctionCallParameter6(daeParameter& param, boost::python::object o1, bo
 adouble FunctionCallParameter7(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7);
 adouble FunctionCallParameter8(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
 
-//real_t GetParameterValue0(daeParameter& param);
-//real_t GetParameterValue1(daeParameter& param, size_t n1);
-//real_t GetParameterValue2(daeParameter& param, size_t n1, size_t n2);
-//real_t GetParameterValue3(daeParameter& param, size_t n1, size_t n2, size_t n3);
-//real_t GetParameterValue4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4);
-//real_t GetParameterValue5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
-//real_t GetParameterValue6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6);
-//real_t GetParameterValue7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
-//real_t GetParameterValue8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
-
 void SetParameterValue0(daeParameter& param, real_t value);
 void SetParameterValue1(daeParameter& param, size_t n1, real_t value);
 void SetParameterValue2(daeParameter& param, size_t n1, size_t n2, real_t value);
@@ -419,6 +409,51 @@ public:
 	{
 		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
+
+	quantity GetVariableQuantity0()
+	{
+		return GetQuantity();
+	}
+
+	quantity GetVariableQuantity1(size_t n1)
+	{
+		return GetQuantity(n1);
+	}
+
+	quantity GetVariableQuantity2(size_t n1, size_t n2)
+	{
+		return GetQuantity(n1, n2);
+	}
+
+	quantity GetVariableQuantity3(size_t n1, size_t n2, size_t n3)
+	{
+		return GetQuantity(n1, n2, n3);
+	}
+
+	quantity GetVariableQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
+	{
+		return GetQuantity(n1, n2, n3, n4);
+	}
+
+	quantity GetVariableQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5);
+	}
+
+	quantity GetVariableQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6);
+	}
+
+	quantity GetVariableQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
+	}
+
+	quantity GetVariableQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+	{
+		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
+	}
 };
 
 boost::python::numeric::array GetNumPyArrayVariable(daeVariable& var);
@@ -432,26 +467,6 @@ adouble VariableFunctionCall5(daeVariable& var, boost::python::object o1, boost:
 adouble VariableFunctionCall6(daeVariable& var, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6);
 adouble VariableFunctionCall7(daeVariable& var, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7);
 adouble VariableFunctionCall8(daeVariable& var, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
-
-void AssignValue0(daeVariable& var, real_t value);
-void AssignValue1(daeVariable& var, size_t n1, real_t value);
-void AssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
-void AssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, real_t value);
-void AssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, real_t value);
-void AssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, real_t value);
-void AssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
-void AssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
-void AssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
-
-void ReAssignValue0(daeVariable& var, real_t value);
-void ReAssignValue1(daeVariable& var, size_t n1, real_t value);
-void ReAssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
-void ReAssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, real_t value);
-void ReAssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, real_t value);
-void ReAssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, real_t value);
-void ReAssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
-void ReAssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
-void ReAssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
 adouble Get_dt0(daeVariable& var);
 adouble Get_dt1(daeVariable& var, boost::python::object o1);
@@ -527,6 +542,26 @@ void SetVariableValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void SetVariableValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void AssignValue0(daeVariable& var, real_t value);
+void AssignValue1(daeVariable& var, size_t n1, real_t value);
+void AssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
+void AssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, real_t value);
+void AssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, real_t value);
+void AssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, real_t value);
+void AssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
+void AssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
+void AssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
+
+void ReAssignValue0(daeVariable& var, real_t value);
+void ReAssignValue1(daeVariable& var, size_t n1, real_t value);
+void ReAssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
+void ReAssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, real_t value);
+void ReAssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, real_t value);
+void ReAssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, real_t value);
+void ReAssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
+void ReAssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
+void ReAssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
+
 void SetInitialCondition0(daeVariable& var, real_t value);
 void SetInitialCondition1(daeVariable& var, size_t n1, real_t value);
 void SetInitialCondition2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -556,6 +591,66 @@ void SetInitialGuess5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t 
 void SetInitialGuess6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, real_t value);
 void SetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
+
+void qSetVariableValue0(daeVariable& var, const quantity& q);
+void qSetVariableValue1(daeVariable& var, size_t n1, const quantity& q);
+void qSetVariableValue2(daeVariable& var, size_t n1, size_t n2, const quantity& q);
+void qSetVariableValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& q);
+void qSetVariableValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q);
+void qSetVariableValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q);
+void qSetVariableValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
+void qSetVariableValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
+void qSetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
+
+void qAssignValue0(daeVariable& var, const quantity& value);
+void qAssignValue1(daeVariable& var, size_t n1, const quantity& value);
+void qAssignValue2(daeVariable& var, size_t n1, size_t n2, const quantity& value);
+void qAssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& value);
+void qAssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& value);
+void qAssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& value);
+void qAssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& value);
+void qAssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& value);
+void qAssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& value);
+
+void qReAssignValue0(daeVariable& var, const quantity& value);
+void qReAssignValue1(daeVariable& var, size_t n1, const quantity& value);
+void qReAssignValue2(daeVariable& var, size_t n1, size_t n2, const quantity& value);
+void qReAssignValue3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& value);
+void qReAssignValue4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& value);
+void qReAssignValue5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& value);
+void qReAssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& value);
+void qReAssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& value);
+void qReAssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& value);
+
+void qSetInitialCondition0(daeVariable& var, const quantity& q);
+void qSetInitialCondition1(daeVariable& var, size_t n1, const quantity& q);
+void qSetInitialCondition2(daeVariable& var, size_t n1, size_t n2, const quantity& q);
+void qSetInitialCondition3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& q);
+void qSetInitialCondition4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q);
+void qSetInitialCondition5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q);
+void qSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
+void qSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
+void qSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
+
+void qReSetInitialCondition0(daeVariable& var, const quantity& q);
+void qReSetInitialCondition1(daeVariable& var, size_t n1, const quantity& q);
+void qReSetInitialCondition2(daeVariable& var, size_t n1, size_t n2, const quantity& q);
+void qReSetInitialCondition3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& q);
+void qReSetInitialCondition4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q);
+void qReSetInitialCondition5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q);
+void qReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
+void qReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
+void qReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
+
+void qSetInitialGuess0(daeVariable& var, const quantity& q);
+void qSetInitialGuess1(daeVariable& var, size_t n1, const quantity& q);
+void qSetInitialGuess2(daeVariable& var, size_t n1, size_t n2, const quantity& q);
+void qSetInitialGuess3(daeVariable& var, size_t n1, size_t n2, size_t n3, const quantity& q);
+void qSetInitialGuess4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q);
+void qSetInitialGuess5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q);
+void qSetInitialGuess6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
+void qSetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
+void qSetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
 /*******************************************************
 	daeActionWrapper

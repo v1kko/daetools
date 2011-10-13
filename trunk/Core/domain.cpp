@@ -18,8 +18,9 @@ daeDomain::daeDomain()
 	m_eDiscretizationMethod	= eDMUnknown;
 }
 
-daeDomain::daeDomain(string strName, daeModel* pModel, string strDescription)
+daeDomain::daeDomain(string strName, daeModel* pModel, const unit& units, string strDescription)
 {
+	m_Unit					= units;
 	m_dLowerBound			= 0;
 	m_dUpperBound			= 0;
 	m_nNumberOfIntervals	= 0;
@@ -30,11 +31,12 @@ daeDomain::daeDomain(string strName, daeModel* pModel, string strDescription)
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pModel->AddDomain(*this, strName, strDescription);
+	pModel->AddDomain(*this, strName, units, strDescription);
 }
 
-daeDomain::daeDomain(string strName, daePort* pPort, string strDescription)
+daeDomain::daeDomain(string strName, daePort* pPort, const unit& units, string strDescription)
 {
+	m_Unit					= units;
 	m_dLowerBound			= 0;
 	m_dUpperBound			= 0;
 	m_nNumberOfIntervals	= 0;
@@ -45,7 +47,7 @@ daeDomain::daeDomain(string strName, daePort* pPort, string strDescription)
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
-	pPort->AddDomain(*this, strName, strDescription);
+	pPort->AddDomain(*this, strName, units, strDescription);
 }
 
 daeDomain::~daeDomain()
@@ -85,6 +87,9 @@ void daeDomain::Save(io::xmlTag_t* pTag) const
 
 	strName = "Type";
 	SaveEnum(pTag, strName, m_eDomainType);
+
+	strName = "Units";
+	pTag->Save(strName, m_Unit.toString());
 }
 	
 void daeDomain::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
@@ -148,6 +153,9 @@ void daeDomain::SaveRuntime(io::xmlTag_t* pTag) const
 
 	strName = "Type";
 	SaveEnum(pTag, strName, m_eDomainType);
+	
+	strName = "Units";
+	pTag->Save(strName, m_Unit.toString());
 
 	strName = "NumberOfIntervals";
 	pTag->Save(strName, m_nNumberOfIntervals);
@@ -403,6 +411,16 @@ void daeDomain::CreatePoints()
 void daeDomain::SetType(daeeDomainType eDomainType)
 {
 	m_eDomainType = eDomainType;
+}
+
+unit daeDomain::GetUnits(void) const
+{
+	return m_Unit;
+}
+
+void daeDomain::SetUnits(const unit& units)
+{
+	m_Unit = units;
 }
 
 daeeDomainType daeDomain::GetType(void) const

@@ -122,6 +122,7 @@
             <tr>
               <th>Name</th>
               <th>Type</th>
+              <th>Units</th>
               <th>Description</th>
 
               <th>LowerBound</th>
@@ -155,6 +156,10 @@
                     <!--<xsl:value-of select="Type"/>-->
                 </td>
 
+                <td>
+                  <xsl:value-of select="Units"/>
+                </td>
+                
                 <td>
                   <xsl:value-of select="Description"/>
                 </td>
@@ -220,7 +225,7 @@
         <thead>
           <tr>
             <th align="left">Name</th>
-            <th align="left">Type</th>
+            <th align="left">Units</th>
             <th align="left">Domains</th>
             <th align="left">Description</th>
           </tr>
@@ -234,16 +239,7 @@
               </td>
 
               <td align="left">
-                    <!--<xsl:value-of select="Type"/>-->
-                    <xsl:if test="Type = 'eReal'">
-                        Real
-                    </xsl:if>
-                    <xsl:if test="Type = 'eInteger'">
-                        Integer
-                    </xsl:if>
-                    <xsl:if test="Type = 'eBool'">
-                        Boolean
-                    </xsl:if>
+                 <xsl:value-of select="Units"/>
               </td>
 
               <td align="left">

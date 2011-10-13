@@ -979,8 +979,9 @@ void daeModel::AddEquation(daeEquation* pEquation)
 	dae_push_back(m_ptrarrEquations, pEquation);
 }
 
-void daeModel::AddDomain(daeDomain& rDomain, const string& strName, string strDescription)
+void daeModel::AddDomain(daeDomain& rDomain, const string& strName, const unit& units, string strDescription)
 {
+	rDomain.SetUnits(units);
 	rDomain.SetName(strName);
 	rDomain.SetDescription(strDescription);
 	AddDomain(&rDomain);

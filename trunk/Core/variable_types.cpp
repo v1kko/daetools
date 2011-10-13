@@ -122,8 +122,8 @@ void daeVariableType::Save(io::xmlTag_t* pTag) const
 	strName = "Name";
 	pTag->Save(strName, m_strName);
 
-//	strName = "Units";
-//	pTag->Save(strName, m_Units);
+	strName = "Units";
+	pTag->Save(strName, m_Units.toString());
 
 	strName = "LowerBound";
 	pTag->Save(strName, m_dLowerBound);

@@ -61,6 +61,13 @@ adouble_array adSetupParameterNodeArray::Evaluate(const daeExecutionContext* pEx
 	return tmp;
 }
 
+quantity adSetupParameterNodeArray::CheckConsistency(void) const
+{
+	if(!m_pParameter)
+		daeDeclareAndThrowException(exInvalidCall);
+	return quantity(0.0, m_pParameter->GetUnits());
+}
+
 adNodeArray* adSetupParameterNodeArray::Clone(void) const
 {
 	return new adSetupParameterNodeArray(*this);
@@ -181,6 +188,13 @@ adouble_array adSetupVariableNodeArray::Evaluate(const daeExecutionContext* pExe
 	delete[] ranges;
 
 	return tmp;
+}
+
+quantity adSetupVariableNodeArray::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
 adNodeArray* adSetupVariableNodeArray::Clone(void) const
@@ -306,6 +320,13 @@ adouble_array adSetupTimeDerivativeNodeArray::Evaluate(const daeExecutionContext
 	tmp = m_pVariable->Calculate_dt_array(ranges, N);
 	delete[] ranges;
 	return tmp;
+}
+
+quantity adSetupTimeDerivativeNodeArray::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / units_pool::s);
 }
 
 adNodeArray* adSetupTimeDerivativeNodeArray::Clone(void) const
@@ -438,6 +459,8 @@ adouble_array adSetupPartialDerivativeNodeArray::Evaluate(const daeExecutionCont
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidCall);
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
 	if(m_arrRanges.empty())
 		daeDeclareAndThrowException(exInvalidCall);
 
@@ -450,6 +473,18 @@ adouble_array adSetupPartialDerivativeNodeArray::Evaluate(const daeExecutionCont
 	tmp = m_pVariable->partial_array(m_nDegree, *m_pDomain, ranges, N);
 	delete[] ranges;
 	return tmp;
+}
+
+quantity adSetupPartialDerivativeNodeArray::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(m_nDegree == 1)
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
+	else
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / (m_pDomain->GetUnits() ^ 2));
 }
 
 adNodeArray* adSetupPartialDerivativeNodeArray::Clone(void) const

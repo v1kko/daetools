@@ -134,7 +134,14 @@ public:
 		left  = left - hours * 3600;
 		mins  = int(::floor(left / 60));
 		secs  = double(left - mins * 60);
-		return (boost::format("ETA: [%02dd %02dh %02dm %04.1fs]\r") % days % hours % mins % secs).str();
+		if(days > 0)
+			return (boost::format("ETA: [%02dd %02dh %02dm %04.1fs]\r") % days % hours % mins % secs).str();
+		else if(hours > 0)
+			return (boost::format("ETA: [%02dh %02dm %04.1fs]\r") % hours % mins % secs).str();
+		else if(mins > 0)
+			return (boost::format("ETA: [%02dm %04.1fs]\r") % mins % secs).str();
+		else
+			return (boost::format("ETA: [%04.1fs]\r") % secs).str();
 	}
 	
 	virtual string GetPercentageDone(void) const

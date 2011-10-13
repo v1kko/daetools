@@ -152,38 +152,46 @@ public:
 	{
 	}
 
-	daeModel_t* GetModel(void) const
+	void SetModel_(boost::python::object Model)
 	{
-		return dynamic_cast<daeModel*>(this->m_pModel);
+		model = Model;
+		daeModel* pModel = boost::python::extract<daeModel*>(Model);
+		this->m_pModel = pModel;
+	}
+
+	void Initialize(boost::python::object DAESolver, 
+		 		    boost::python::object DataReporter, 
+					boost::python::object Log, 
+					bool bCalculateSensitivities = false)
+	{
+		daesolver    = DAESolver;
+		datareporter = DataReporter;
+		log          = Log;
+		
+		daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
+		daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
+		daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
+		daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
 	}
 
 	boost::python::object GetModel_(void) const
 	{
 		return model;
 	}
-
-	void SetModel_(boost::python::object Model)
-	{
-		model = Model;
-		daeModel* pModel = boost::python::extract<daeModel*>(Model);
-		if(!pModel)
-			daeDeclareAndThrowException(exInvalidPointer)
-		this->m_pModel = pModel;
-	}
-
+	
 	boost::python::object GetDataReporter_(void) const
 	{
-		return boost::python::object(boost::ref(m_pDataReporter));
+		return datareporter;
 	}
 
 	boost::python::object GetLog_(void) const
 	{
-		return boost::python::object(boost::ref(m_pLog));
+		return log;
 	}
 
 	boost::python::object GetDAESolver_(void) const
 	{
-		return boost::python::object(boost::ref(m_pDAESolver));
+		return daesolver;
 	}
 
 	void SetUpParametersAndDomains(void)
@@ -431,6 +439,9 @@ public:
 
 public:
 	boost::python::object model;	
+	boost::python::object log;	
+	boost::python::object daesolver;	
+	boost::python::object datareporter;	
 };
 
 

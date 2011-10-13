@@ -39,36 +39,19 @@ adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionCont
 	size_t* indexes = new size_t[N];
 
 	for(size_t i = 0; i < N; i++)
-	{
 		indexes[i] = m_arrDomains[i].GetCurrentIndex();
-		
-//		if(m_arrDomains[i].m_eType == eConstantIndex)
-//		{
-//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_nIndex;
-//		}
-//		else if(m_arrDomains[i].m_eType == eDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-//		}
-//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
-//		}
-//		else
-//		{
-//			daeDeclareAndThrowException(exInvalidCall)
-//		}
-	}
 
 	tmp = m_pParameter->Create_adouble(indexes, N);
 	delete[] indexes;
 	return tmp;
+}
+
+quantity adSetupParameterNode::CheckConsistency(void) const
+{
+	if(!m_pParameter)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	return quantity(0.0, m_pParameter->GetUnits());
 }
 
 adNode* adSetupParameterNode::Clone(void) const
@@ -179,6 +162,15 @@ adouble adSetupDomainIteratorNode::Evaluate(const daeExecutionContext* pExecutio
 	return (*pDomain)[nIndex];
 }
 
+quantity adSetupDomainIteratorNode::CheckConsistency(void) const
+{
+	if(!m_pDEDI)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	daeDomain* pDomain = dynamic_cast<daeDomain*>(m_pDEDI->GetDomain());
+	return quantity(0.0, pDomain->GetUnits());
+}
+
 adNode* adSetupDomainIteratorNode::Clone(void) const
 {
 	return new adSetupDomainIteratorNode(*this);
@@ -276,36 +268,19 @@ adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionConte
 	size_t* indexes = new size_t[N];
 
 	for(size_t i = 0; i < N; i++)
-	{
 		indexes[i] = m_arrDomains[i].GetCurrentIndex();
-		
-//		if(m_arrDomains[i].m_eType == eConstantIndex)
-//		{
-//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_nIndex;
-//		}
-//		else if(m_arrDomains[i].m_eType == eDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-//		}
-//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
-//		}
-//		else
-//		{
-//			daeDeclareAndThrowException(exInvalidCall)
-//		}
-	}
 
 	tmp = m_pVariable->Create_adouble(indexes, N);
 	delete[] indexes;
 	return tmp;
+}
+
+quantity adSetupVariableNode::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
 adNode* adSetupVariableNode::Clone(void) const
@@ -315,7 +290,6 @@ adNode* adSetupVariableNode::Clone(void) const
 
 void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strName;
 	vector<string> strarrIndexes;
 
 	FillDomains(m_arrDomains, strarrIndexes);
@@ -422,36 +396,19 @@ adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutio
 	size_t* indexes = new size_t[N];
 
 	for(size_t i = 0; i < N; i++)
-	{
 		indexes[i] = m_arrDomains[i].GetCurrentIndex();
-		
-//		if(m_arrDomains[i].m_eType == eConstantIndex)
-//		{
-//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_nIndex;
-//		}
-//		else if(m_arrDomains[i].m_eType == eDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-//		}
-//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
-//		}
-//		else
-//		{
-//			daeDeclareAndThrowException(exInvalidCall)
-//		}
-	}
 
 	tmp = m_pVariable->Calculate_dt(indexes, N);
 	delete[] indexes;
 	return tmp;
+}
+
+quantity adSetupTimeDerivativeNode::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / units_pool::s);
 }
 
 adNode* adSetupTimeDerivativeNode::Clone(void) const
@@ -579,36 +536,24 @@ adouble adSetupPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecu
 	size_t* indexes = new size_t[N];
 
 	for(size_t i = 0; i < N; i++)
-	{
 		indexes[i] = m_arrDomains[i].GetCurrentIndex();
-		
-//		if(m_arrDomains[i].m_eType == eConstantIndex)
-//		{
-//			if(m_arrDomains[i].m_nIndex == ULONG_MAX)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_nIndex;
-//		}
-//		else if(m_arrDomains[i].m_eType == eDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex();
-//		}
-//		else if(m_arrDomains[i].m_eType == eIncrementedDomainIterator)
-//		{
-//			if(!m_arrDomains[i].m_pDEDI)
-//				daeDeclareAndThrowException(exInvalidCall);
-//			indexes[i] = m_arrDomains[i].m_pDEDI->GetCurrentIndex() + m_arrDomains[i].m_iIncrement;
-//		}
-//		else
-//		{
-//			daeDeclareAndThrowException(exInvalidCall);
-//		}
-	}
 
 	tmp = m_pVariable->partial(m_nDegree, *m_pDomain, indexes, N);
 	delete[] indexes;
 	return tmp;
+}
+
+quantity adSetupPartialDerivativeNode::CheckConsistency(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	if(m_nDegree == 1)
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
+	else
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / (m_pDomain->GetUnits() ^ 2));
 }
 
 adNode* adSetupPartialDerivativeNode::Clone(void) const

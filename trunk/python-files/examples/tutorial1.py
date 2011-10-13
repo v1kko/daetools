@@ -103,15 +103,17 @@ class modTutorial(daeModel):
         # daeDomain constructor accepts three arguments:
         #  - Name: string
         #  - Parent: daeModel object (indicating the model where the domain will be added)
+        #  - Units: unit object (specifying the units, such as 'm' for we are modelling a space distribution)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in Whats_the_time example) apply here as well.
         # Again, domains have to be declared as members of the new model class (like all the other objects)
-        self.x = daeDomain("x", self, "X axis domain")
-        self.y = daeDomain("y", self, "Y axis domain")
+        self.x = daeDomain("x", self, m, "X axis domain")
+        self.y = daeDomain("y", self, m, "Y axis domain")
 
         # Parameter can be defined as a time invariant quantity that will not change during a simulation.
         # daeParameter constructor accepts three arguments:
         #  - Name: string
+        #  - Units: unit object (specifying the units, such as 'kg', 'W', 'm/s', ...)
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
@@ -120,7 +122,7 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate, kg/m3")
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate, J/kgK")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate, W/mK")
-
+       
         # In this example we need a variable T which is distributed on the domains x and y. Variables (but also other objects)
         # can be distributed by using a function DistributeOnDomain, which accepts a domain object as
         # the argument (previously declared in the constructor).
@@ -200,15 +202,16 @@ class simTutorial(daeSimulation):
         self.m.x.CreateDistributed(eCFDM, 2, 25, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, 25, 0, 0.1)
 
-        # Parameters' value can be set by using a function SetValue.
-        #self.m.k.SetValue(401)
-        self.m.k.SetQuantity(401 * (W/(m*K)))
-        print 'k = {0}'.format(self.m.k.GetValue())
-        print 'k = {0}'.format(self.m.k.GetQuantity())
-        self.m.cp.SetValue(385)
-        self.m.ro.SetValue(8960)
-        self.m.Qb.SetValue(1e6)
-        self.m.Qt.SetValue(0)
+        # Parameter values can be set by using a function SetValue.
+        self.m.k.SetValue(401 * W/(m*K))
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.Qb.SetValue(1e6 * W/(m**2))
+        self.m.Qt.SetValue(0 * W/(m**2))
+        self.Log.Message('k  value = {0}; quantity = {1}'.format(self.m.k.GetValue(),  self.m.k.GetQuantity()), 0)
+        self.Log.Message('cp value = {0}; quantity = {1}'.format(self.m.cp.GetValue(), self.m.cp.GetQuantity()), 0)
+        self.Log.Message('ro value = {0}; quantity = {1}'.format(self.m.ro.GetValue(), self.m.ro.GetQuantity()), 0)
+        self.Log.Message('Qb value = {0}; quantity = {1}'.format(self.m.Qb.GetValue(), self.m.Qb.GetQuantity()), 0)
 
     def SetUpVariables(self):
         # SetInitialCondition function in the case of distributed variables can accept additional arguments

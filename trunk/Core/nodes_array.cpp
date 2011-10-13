@@ -217,6 +217,7 @@ void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 
 quantity adNodeArrayImpl::CheckConsistency(void) const
 {
+	daeDeclareAndThrowException(exNotImplemented)
 	return quantity();
 }
 
@@ -258,6 +259,11 @@ adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutio
 	tmp.Resize(1);
 	tmp[0] = adouble(m_dValue);
 	return tmp;
+}
+
+quantity adConstantNodeArray::CheckConsistency(void) const
+{
+	return quantity();
 }
 
 adNodeArray* adConstantNodeArray::Clone(void) const
@@ -1245,6 +1251,11 @@ adouble_array adUnaryNodeArray::Evaluate(const daeExecutionContext* pExecutionCo
 	return adouble_array();
 }
 
+quantity adUnaryNodeArray::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 adNodeArray* adUnaryNodeArray::Clone(void) const
 {
 	shared_ptr<adNodeArray> n = shared_ptr<adNodeArray>( (node ? node->Clone() : NULL) );
@@ -1941,6 +1952,11 @@ adouble_array adBinaryNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	}
 }
 
+quantity adBinaryNodeArray::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 adNodeArray* adBinaryNodeArray::Clone(void) const
 {
 	shared_ptr<adNodeArray> l = shared_ptr<adNodeArray>( (left  ? left->Clone()  : NULL) );
@@ -2508,6 +2524,11 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 	}
 }
 
+quantity adSetupSpecialFunctionNode::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 adNode* adSetupSpecialFunctionNode::Clone(void) const
 {
 	shared_ptr<adNodeArray> n = shared_ptr<adNodeArray>( (node ? node->Clone() : NULL) );
@@ -2810,6 +2831,11 @@ adouble adSetupExpressionDerivativeNode::Evaluate(const daeExecutionContext* pEx
 	return tmp;
 }
 
+quantity adSetupExpressionDerivativeNode::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 // Here I work on runtime nodes!!
 boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared_ptr<adNode> n, const daeExecutionContext* pExecutionContext) const
 {
@@ -3076,6 +3102,11 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 	tmp.setGatherInfo(true);
 	tmp.node = calc_d(a.node, m_pDomain, pExecutionContext);
 	return tmp;
+}
+
+quantity adSetupExpressionPartialDerivativeNode::CheckConsistency(void) const
+{
+	return quantity();
 }
 
 // Here I work on runtime nodes!!
@@ -3402,6 +3433,11 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 	return adouble();
 }
 
+quantity adSetupIntegralNode::CheckConsistency(void) const
+{
+	return quantity();
+}
+
 adNode* adSetupIntegralNode::Clone(void) const
 {
 	return new adSetupIntegralNode(*this);
@@ -3600,6 +3636,11 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	a = node->Evaluate(pExecutionContext);
 	tmp[0] = a;
 	return tmp;
+}
+
+quantity adSingleNodeArray::CheckConsistency(void) const
+{
+	return quantity();
 }
 
 adNodeArray* adSingleNodeArray::Clone(void) const

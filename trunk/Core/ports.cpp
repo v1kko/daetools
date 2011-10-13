@@ -412,8 +412,9 @@ void daePort::AddParameter(daeParameter* pParameter)
 	dae_push_back(m_ptrarrParameters, pParameter);
 }
 
-void daePort::AddDomain(daeDomain& rDomain, const string& strName, string strDescription)
+void daePort::AddDomain(daeDomain& rDomain, const string& strName, const unit& units, string strDescription)
 {
+	rDomain.SetUnits(units);
 	rDomain.SetName(strName);
 	rDomain.SetDescription(strDescription);
 	AddDomain(&rDomain);

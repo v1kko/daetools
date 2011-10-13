@@ -26,28 +26,6 @@ public:
 };
 
 /**************************************************************
-		Some handy functions
-**************************************************************/
-inline std::string to_string(const std::string& name, double exponent)
-{
-	if(exponent == 0)
-		return std::string();
-	if(exponent == 1)
-		return name;
-	if((int)exponent == exponent)
-		return (boost::format("%1%^%2%") % name % (int)exponent).str();
-	else	
-		return (boost::format("%1%^%2%") % name % exponent).str();
-}
-
-inline void to_string_and_add(const std::string& name, double exponent, std::vector<std::string>& arrUnits)
-{
-	std::string res = to_string(name, exponent);
-	if(!res.empty())
-		arrUnits.push_back(res);
-}
-
-/**************************************************************
 		base_unit
 **************************************************************/
 const std::string __string_unit_delimiter__  = " ";
@@ -55,180 +33,30 @@ const std::string __string_unit_delimiter__  = " ";
 class base_unit
 {
 public:
-	base_unit(void)
-	{
-        L          = 0; //length, m
-        M          = 0; //mass, kg
-        T          = 0; //time, s
-        C          = 0; //luminous intensity, cd
-        I          = 0; //el. current, A
-        O          = 0; //temperature, K
-        N          = 0; //amount of a substance, mol
-        multiplier = 1.0;	
-	}
-
+	base_unit(void);
 	base_unit(double multi, double _L, double _M, double _T, 
-	          double _C, double _I, double _O, double _N)
-	{
-        L          = _L; //length, m
-        M          = _M; //mass, kg
-        T          = _T; //time, s
-        C          = _C; //luminous intensity, cd
-        I          = _I; //el. current, A
-        O          = _O; //temperature, K
-        N          = _N; //amount of a substance, mol
-        multiplier = multi;	
-	}
+	          double _C, double _I, double _O, double _N);
 
-	bool operator==(const base_unit& other) const
-	{
-		return areDimensionsEqual(other);
-	}
+	bool operator==(const base_unit& other) const;
+	bool operator!=(const base_unit& other) const;
 
-	bool operator!=(const base_unit& other) const
-	{
-		return !(*this == other);
-	}
-
-    bool isEqualTo(const base_unit& other) const
-	{
-        if((multiplier == other.multiplier) && areDimensionsEqual(other))
-           return true;
-        else
-            return false;
-	}
-		    
-	bool areDimensionsEqual(const base_unit& other) const
-	{
-        if ((M == other.M) && (L == other.L) && (T == other.T) && (C == other.C) &&
-            (I == other.I) && (O == other.O) && (N == other.N))
-           return true;
-        else
-            return false;
-	}
-
-	base_unit operator*(const base_unit& other) const
-	{
-		base_unit tmp;
-        tmp.L = L + other.L;
-        tmp.M = M + other.M;
-        tmp.T = T + other.T;
-        tmp.C = C + other.C;
-        tmp.I = I + other.I;
-        tmp.O = O + other.O;
-        tmp.N = N + other.N;
-        tmp.multiplier = multiplier * other.multiplier;
-        return tmp;
-	}
-
-	base_unit operator*(double multi) const
-	{
-		base_unit tmp = *this;
-        tmp.multiplier = multiplier * multi;
-        return tmp;
-	}
+	base_unit operator*(const base_unit& other) const;
+	base_unit operator*(double multi) const;
+	base_unit operator/(const base_unit& other) const;
+	base_unit operator/(double multi) const;
+	base_unit operator^(double exponent) const;
+	base_unit operator^(const base_unit& other) const;
+	base_unit operator+(const base_unit& other) const;
+	base_unit operator+(double value) const;
+	base_unit operator+(void) const;
+	base_unit operator-(const base_unit& other) const;
+	base_unit operator-(double value) const;
+	base_unit operator-(void) const;
 	
-	base_unit operator/(const base_unit& other) const
-	{
-		base_unit tmp;
-        tmp.L = L - other.L;
-        tmp.M = M - other.M;
-        tmp.T = T - other.T;
-        tmp.C = C - other.C;
-        tmp.I = I - other.I;
-        tmp.O = O - other.O;
-        tmp.N = N - other.N;
-        tmp.multiplier = multiplier / other.multiplier;
-        return tmp;
-	}
+	std::string toString(bool bUnitsOnly = false) const;
+	friend std::ostream& operator<<(std::ostream& out, const base_unit& u);
 	
-	base_unit operator/(double multi) const
-	{
-		base_unit tmp = *this;
-        tmp.multiplier = multiplier / multi;
-        return tmp;
-	}
-
-	base_unit operator^(double exponent) const
-	{
-		base_unit tmp;
-	    tmp.L = L * exponent;
-	    tmp.M = M * exponent;
-	    tmp.T = T * exponent;
-	    tmp.C = C * exponent;
-	    tmp.I = I * exponent;
-	    tmp.O = O * exponent;
-	    tmp.N = N * exponent;
-	    tmp.multiplier = ::pow(multiplier, exponent);
-	    return tmp;		
-	}
-	
-	base_unit operator^(const base_unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% ^ %2%") % *this % other).str());
-		return base_unit();
-	}
-
-	base_unit operator+(const base_unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% + %2%") % *this % other).str());
-		return base_unit();	
-	}
-	
-	base_unit operator+(double value) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% + %2%") % *this % value).str());
-		return base_unit();	
-	}
-
-	base_unit operator+(void) const
-	{
-		throw units_error((boost::format("Invalid operation: +%1%") % *this).str());
-		return base_unit();	
-	}
-	
-	base_unit operator-(const base_unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% - %2%") % *this % other).str());
-		return base_unit();	
-	}
-	
-	base_unit operator-(double value) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% - %2%") % *this % value).str());
-		return base_unit();	
-	}
-
-	base_unit operator-(void) const
-	{
-		throw units_error((boost::format("Invalid operation: -%1%") % *this).str());
-		return base_unit();	
-	}
-	
-	std::string toString(bool bUnitsOnly = false) const
-	{
-		std::vector<std::string> arrUnits;
-        
-		to_string_and_add("m",   L, arrUnits);
-        to_string_and_add("kg",  M, arrUnits);
-        to_string_and_add("s",   T, arrUnits);
-        to_string_and_add("cd",  C, arrUnits);
-        to_string_and_add("A",   I, arrUnits);
-        to_string_and_add("K",   O, arrUnits);
-        to_string_and_add("mol", N, arrUnits);
-		
-		std::string _units = boost::algorithm::join(arrUnits, __string_unit_delimiter__);
-		if(bUnitsOnly)
-			return (boost::format("%s") % _units).str();
-		else
-			return (boost::format("%.10f [%s]") % multiplier % _units).str();
-	}
-	
-	friend std::ostream& operator<<(std::ostream& out, const base_unit& u)
-	{
-	    out << u.toString();
-	    return out;
-	}
+	bool areDimensionsEqual(const base_unit& other) const;
 
 public:
 	double L;
@@ -247,6 +75,11 @@ base_unit operator-(double value, const base_unit& self);
 base_unit pow      (const base_unit& self, double exponent);
 base_unit pow      (const base_unit& self, const base_unit& exponent);
 
+/**************************************************************
+		base_units_pool
+**************************************************************/
+namespace base_units_pool
+{
 const double tera  = 1E+12;
 const double giga  = 1E+9;
 const double mega  = 1E+6;
@@ -259,11 +92,6 @@ const double micro = 1E-6;
 const double nano  = 1E-9;
 const double pico  = 1E-12;
 
-/**************************************************************
-		base_units_pool
-**************************************************************/
-namespace base_units_pool
-{
 const base_unit dimless = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0);
 
 const base_unit m  = base_unit(1.0, 1, 0, 0, 0, 0, 0, 0);
@@ -334,172 +162,34 @@ public:
 	     std::string u5 = "", double exp5 = 0,
 	     std::string u6 = "", double exp6 = 0,
 	     std::string u7 = "", double exp7 = 0,
-	     std::string u8 = "", double exp8 = 0)
-	{
-		addUnit(u1, exp1);
-		addUnit(u2, exp2);
-		addUnit(u3, exp3);
-		addUnit(u4, exp4);
-		addUnit(u5, exp5);
-		addUnit(u6, exp6);
-		addUnit(u7, exp7);
-		addUnit(u8, exp8);
-	}
+	     std::string u8 = "", double exp8 = 0);
+	unit(const std::map<std::string, double>& mapUnits);
 
-	unit(const std::map<std::string, double>& mapUnits)
-	{
-		setUnits(mapUnits);
-	}
-
-	void addUnit(std::string name, double exp)
-	{
-		if(name.empty())
-			return;
-		std::map<std::string, base_unit>& __base_units__ = get_base_units();
-        std::map<std::string, base_unit>::const_iterator iter = __base_units__.find(name);
-        if(iter == __base_units__.end())
-			throw units_error((boost::format("Cannot find the base_unit: %1%") % name).str());
-        units[name] = exp;
-	}
-
-	void setUnits(const std::map<std::string, double>& mapUnits)
-	{
-		units.clear();
-        for(std::map<std::string, double>::const_iterator iter = mapUnits.begin(); iter != mapUnits.end(); iter++)
-			addUnit(iter->first, iter->second);
-	}
+	void addUnit(std::string name, double exp);
+	void setUnits(const std::map<std::string, double>& mapUnits);
 
 	static std::map<std::string, base_unit>& get_base_units(void);
+	base_unit getBaseUnit(void) const;
+
+	bool operator==(const unit& other) const;
+	bool operator!=(const unit& other) const;
 	
-	base_unit getBaseUnit(void) const
-	{
-		base_unit tmp = base_units_pool::dimless;
-		std::map<std::string, base_unit>& __base_units__ = get_base_units();
-		
-		for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
-		{
-			std::string name = (*iter).first;
-			double      exp  = (*iter).second;
-			tmp = tmp * (__base_units__[name] ^ exp);
-		}
-		return tmp;
-	}
-
-	bool operator==(const unit& other) const
-	{
-		return (getBaseUnit() == other.getBaseUnit());
-	}
-
-	bool operator!=(const unit& other) const
-	{
-		return !(*this == other);
-	}
-
-	unit operator*(const unit& other) const
-	{
-		unit tmp(*this);
-		for(std::map<std::string, double>::const_iterator iter = other.units.begin(); iter != other.units.end(); iter++)
-		{
-			std::string name = (*iter).first;
-			double      exp  = (*iter).second;
-			
-			if(tmp.units.find(name) == tmp.units.end())
-				tmp.units[name] = exp;
-			else
-				tmp.units[name] = tmp.units[name] + exp;
-		}
-        return tmp;
-	}
 	quantity operator*(double multi) const;
-	
-	unit operator/(const unit& other) const
-	{
-		unit tmp(*this);
-		for(std::map<std::string, double>::const_iterator iter = other.units.begin(); iter != other.units.end(); iter++)
-		{
-			std::string name = (*iter).first;
-			double      exp  = (*iter).second;
-			
-			if(tmp.units.find(name) == tmp.units.end())
-				tmp.units[name] = -exp;
-			else
-				tmp.units[name] = tmp.units[name] - exp;
-		}
-        return tmp;
-	}
 	quantity operator/(double multi) const;
-
-	unit operator^(double exponent) const
-	{
-		unit tmp;
-		for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
-		{
-			std::string name = (*iter).first;
-			double      exp  = (*iter).second;
-			tmp.units[name]  = exp * exponent;
-		}
-        return tmp;
-	}
 	
-	unit operator^(const unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% ^ %2%") % *this % other).str());
-		return unit();	
-	}
+	unit operator*(const unit& other) const;
+	unit operator/(const unit& other) const;
+	unit operator^(double exponent) const;
+	unit operator^(const unit& other) const;
+	unit operator+(const unit& other) const;
+	unit operator+(double value) const;
+	unit operator+(void) const;
+	unit operator-(const unit& other) const;
+	unit operator-(double value) const;
+	unit operator-(void) const;
 
-	unit operator+(const unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% + %2%") % *this % other).str());
-		return unit();	
-	}
-	
-	unit operator+(double value) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% + %2%") % *this % value).str());
-		return unit();	
-	}
-
-	unit operator+(void) const
-	{
-		throw units_error((boost::format("Invalid operation: +%1%") % *this).str());
-		return unit();	
-	}
-
-	unit operator-(const unit& other) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% - %2%") % *this % other).str());
-		return unit();	
-	}
-	
-	unit operator-(double value) const
-	{
-		throw units_error((boost::format("Invalid operation: %1% - %2%") % *this % value).str());
-		return unit();	
-	}
-
-	unit operator-(void) const
-	{
-		throw units_error((boost::format("Invalid operation: -%1%") % *this).str());
-		return unit();	
-	}
-
-	std::string toString(void) const
-	{
-		std::vector<std::string> arrUnits;
-		for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
-		{
-			std::string name = (*iter).first;
-			double      exp  = (*iter).second;
-			to_string_and_add(name, exp, arrUnits);
-		}
-		return boost::algorithm::join(arrUnits, __string_unit_delimiter__);
-	}
-
-	friend std::ostream& operator<<(std::ostream& out, const unit& u)
-	{
-	    out << u.toString();
-	    return out;
-	}
+	std::string toString(void) const;
+	friend std::ostream& operator<<(std::ostream& out, const unit& u);
 	
 public:
 	std::map<std::string, double> units;
@@ -580,239 +270,51 @@ const unit St = unit("St", 1);
 class quantity
 {
 public:
-	quantity(void)
-	{
-		_value = 0.0;
-	}
+	quantity(void);
+	quantity(double val, const unit& u);
 	
-	quantity(double val, const unit& u)
-	{
-		_units = u;
-		_value = val;
-	}
+	double getValue(void) const;
+	void setValue(double val);
+	void setValue(const quantity& other);
+    double getValueInSIUnits(void) const;
 	
-	double getValue(void) const
-	{
-		return _value;
-	}
+	unit getUnits(void) const;
+	void setUnits(const unit& u);
+    
+	quantity scaleTo(const quantity& referrer) const;
+    quantity scaleTo(const unit& referrer) const;
 	
-	void setValue(double val)
-	{
-		_value = val;
-	}
+	std::string toString(void) const;
+	friend std::ostream& operator<<(std::ostream& out, const quantity& q);
 	
-	void setValue(const quantity& other)
-	{
-		_value = other.scaleTo(*this).getValue();
-	}
-
-	unit getUnits(void) const
-	{
-		return _units;
-	}
+	bool operator==(const quantity& other) const;
+	bool operator==(double value) const;
+	bool operator!=(const quantity& other) const;
+	bool operator!=(double value) const;
 	
-	void setUnits(const unit& u)
-	{
-		_units = u;
-	}
-
-    double getValueInSIUnits(void) const
-	{
-        return _value * _units.getBaseUnit().multiplier;
-    }
-	
-    quantity scaleTo(const quantity& referrer) const
-	{
-		return scaleTo(referrer.getUnits());
-	}
-
-    quantity scaleTo(const unit& referrer) const
-	{
-        if(_units.getBaseUnit() != referrer.getBaseUnit())
-            throw units_error((boost::format("Units not consistent: scale from %1% to %2%") % _units % referrer).str());
-
-		quantity tmp;
-        tmp.setUnits(referrer);
-        tmp.setValue(_value * _units.getBaseUnit().multiplier / referrer.getBaseUnit().multiplier);
-        return tmp;
-	}
-	
-	std::string toString(void) const
-	{
-		return (boost::format("%.10f %s") % _value % _units.toString()).str();
-	}
-
-	friend std::ostream& operator<<(std::ostream& out, const quantity& q)
-	{
-	    out << q.toString();
-	    return out;
-	}
-	
-	bool operator==(const quantity& other) const
-	{
-		if(_units != other.getUnits())
-			throw units_error((boost::format("Units not consistent: %1% == %2%") % _units % other.getUnits()).str());
-			
-		return (_value == other.scaleTo(*this).getValue());	
-	}
-	
-	bool operator==(double value) const
-	{
-	// Here assume that the value is in the same units as this quantity
-	// We need this for unit-consistency checks
-		return (getValueInSIUnits() == value);
-	}
-
-	bool operator!=(const quantity& other) const
-	{
-		return !(*this == other);
-	}
-	
-	bool operator!=(double value) const
-	{
-		return !(*this == value);
-	}
-
-	quantity operator+(const quantity& other) const
-	{
-        if(_units != other.getUnits())
-            throw units_error((boost::format("Units not consistent: %1% + %2%") % _units % other.getUnits()).str());
-		
-		quantity tmp(_value + other.scaleTo(*this).getValue(), _units);
-		return tmp;	
-	}
-
-	quantity operator+(double value) const
-	{
-		quantity q(value, unit());
-		return (*this + q);
-	}
-	
-	quantity operator+(void) const
-	{
-		quantity tmp(_value, _units);
-		return tmp;	
-	}
-
-	quantity operator-(const quantity& other) const
-	{
-        if(_units != other.getUnits())
-            throw units_error((boost::format("Units not consistent: %1% - %2%") % _units % other.getUnits()).str());
-		
-		quantity tmp(_value - other.scaleTo(*this).getValue(), _units);
-		return tmp;	
-	}
-	
-	quantity operator-(double value) const
-	{
-		quantity q(value, unit());
-		return (*this - q);
-	}
-
-	quantity operator-(void) const
-	{
-		quantity tmp(-_value, _units);
-		return tmp;	
-	}
-
-	quantity operator*(const quantity& other) const
-	{
-		quantity tmp;
-        tmp.setUnits(_units * other.getUnits());
-        tmp.setValue(_value * other.getValue());
-		return tmp;	
-	}
-
-	quantity operator*(double value) const
-	{
-		quantity q(value, unit());
-		return (*this * q);
-	}
-
-	quantity operator/(const quantity& other) const
-	{
-		quantity tmp;
-        tmp.setUnits(_units / other.getUnits());
-        tmp.setValue(_value / other.getValue());
-		return tmp;	
-	}
-	
-	quantity operator/(double value) const
-	{
-		quantity q(value, unit());
-		return (*this / q);
-	}
-
-	quantity operator^(const quantity& other) const
-	{
-		if(other.getUnits() != unit())
-			throw units_error((boost::format("Exponent must be dimension-less in: %1% ^ %2%") % _units % other.getUnits()).str());
-		return (*this ^ other.getValueInSIUnits());
-	}
-
-	quantity operator^(double exponent) const
-	{
-		quantity tmp;
-        tmp.setUnits(_units ^ exponent);
-        tmp.setValue(::pow(_value, exponent));
-		return tmp;	
-	}
-
-    bool operator <=(const quantity& other) const
-	{
-		if(_units != other.getUnits())
-			throw units_error((boost::format("Units not consistent: %1% <= %2%") % _units % other.getUnits()).str());
-			
-		return _value <= other.scaleTo(*this).getValue();	
-	}
-   
-	bool operator <=(double value) const
-	{
-		quantity q(value, unit());
-		return (*this <= q);
-	}
-
-    bool operator >=(const quantity& other) const
-	{
-		if(_units != other.getUnits())
-			throw units_error((boost::format("Units not consistent: %1% >= %2%") % _units % other.getUnits()).str());
-			
-		return _value >= other.scaleTo(*this).getValue();	
-	}
-   
-    bool operator >=(double value) const
-	{
-		quantity q(value, unit());
-		return (*this >= q);
-	}
-
-    bool operator >(const quantity& other) const
-	{
-		if(_units != other.getUnits())
-			throw units_error((boost::format("Units not consistent: %1% > %2%") % _units % other.getUnits()).str());
-			
-		return _value > other.scaleTo(*this).getValue();	
-	}
-   
-    bool operator >(double value) const
-	{
-		quantity q(value, unit());
-		return (*this > q);
-	}
-
-    bool operator <(const quantity& other) const
-	{
-		if(_units != other.getUnits())
-			throw units_error((boost::format("Units not consistent: %1% < %2%") % _units % other.getUnits()).str());
-			
-		return _value < other.scaleTo(*this).getValue();	
-	}
-   
-    bool operator <(double value) const
-	{
-		quantity q(value, unit());
-		return (*this < q);
-	}
+	quantity operator+(const quantity& other) const;
+	quantity operator+(double value) const;
+	quantity operator+(void) const;
+	quantity operator-(const quantity& other) const;
+	quantity operator-(double value) const;
+	quantity operator-(void) const;
+	quantity operator*(const quantity& other) const;
+	quantity operator*(const unit& other) const;
+	quantity operator*(double value) const;
+	quantity operator/(const quantity& other) const;
+	quantity operator/(const unit& other) const;
+	quantity operator/(double value) const;
+	quantity operator^(const quantity& other) const;
+	quantity operator^(double exponent) const;
+    
+	bool operator <=(const quantity& other) const;
+	bool operator <=(double value) const;
+    bool operator >=(const quantity& other) const;
+    bool operator >=(double value) const;
+    bool operator >(const quantity& other) const;
+    bool operator >(double value) const;
+    bool operator <(const quantity& other) const;
+    bool operator <(double value) const;
 	
 protected:
 	unit   _units;
@@ -835,6 +337,35 @@ bool operator >=(double value, const quantity& self);
 bool operator > (double value, const quantity& self);
 bool operator < (double value, const quantity& self);
 
+quantity exp(const quantity &q);
+quantity log(const quantity &q);
+quantity log10(const quantity &q);
+quantity sqrt(const quantity &q);
+quantity sin(const quantity &q);
+quantity cos(const quantity &q);
+quantity tan(const quantity &q);
+quantity asin(const quantity &q);
+quantity acos(const quantity &q);
+quantity atan(const quantity &q);
+
+quantity sinh(const quantity &q);
+quantity cosh(const quantity &q);
+quantity tanh(const quantity &q);
+quantity asinh(const quantity &q);
+quantity acosh(const quantity &q);
+quantity atanh(const quantity &q);
+quantity atan2(const quantity &a, const quantity &b);
+
+quantity ceil(const quantity &q);
+quantity floor(const quantity &q);
+
+quantity abs(const quantity &q);
+quantity max(const quantity &a, const quantity &b);
+quantity max(double v, const quantity &q);
+quantity max(const quantity &q, double v);
+quantity min(const quantity &a, const quantity &b);
+quantity min(double v, const quantity &q);
+quantity min(const quantity &q, double v);
 
 }
 

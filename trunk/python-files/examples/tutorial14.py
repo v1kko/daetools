@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Define some 'quantity' objects (they have 'value' and 'units')
     y   = 15   * mm
     x1  = 1.0  * m
-    x2  = 0.2  * km
+    x2  = 0.2  * m
     x3  = 15   * N
     x4  = 1.25 * kJ
     

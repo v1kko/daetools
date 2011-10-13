@@ -341,111 +341,166 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
 }
 
-void daeVariable::SetValue(real_t dValue)
+void daeVariable::SetInitialGuess(const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(value);
 }
 
-void daeVariable::SetValue(size_t nD1, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[1] = {nD1};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[2] = {nD1, nD2};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[3] = {nD1, nD2, nD3};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[4] = {nD1, nD2, nD3, nD4};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, nD4, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, nD4, nD5, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, nD4, nD5, nD6, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
 }
 
-void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dValue)
+void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuess(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
 
-	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+void daeVariable::SetValue(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(value);
+}
+
+void daeVariable::SetValue(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, nD4, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
+
+quantity daeVariable::GetQuantity(void)
+{
+	real_t value = GetValue();
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1)
+{
+	real_t value = GetValue(nD1);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2)
+{
+	real_t value = GetValue(nD1, nD2);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3)
+{
+	real_t value = GetValue(nD1, nD2, nD3);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7);
+	return quantity(value, m_VariableType.GetUnits());
+}
+
+quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
+{
+	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8);
+	return quantity(value, m_VariableType.GetUnits());
 }
 
 void daeVariable::AssignValue(real_t dValue)
@@ -562,6 +617,60 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+}
+
+void daeVariable::AssignValue(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(value);
+}
+
+void daeVariable::AssignValue(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, nD4, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
 }
 
 void daeVariable::ReAssignValue(real_t dValue)
@@ -725,11 +834,59 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
 }
 
+void daeVariable::ReAssignValue(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(value);
+}
 
+void daeVariable::ReAssignValue(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, value);
+}
 
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, value);
+}
 
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, value);
+}
 
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, nD4, value);
+}
 
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
 
 real_t daeVariable::GetValue(void)
 {
@@ -836,6 +993,113 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, siz
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
 	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+}
+
+void daeVariable::SetValue(real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[1] = {nD1};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[2] = {nD1, nD2};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[3] = {nD1, nD2, nD3};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[4] = {nD1, nD2, nD3, nD4};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dValue)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
+	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
+	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
 }
 
 void daeVariable::SetInitialCondition(real_t dInitialCondition)
@@ -988,6 +1252,60 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	else
 		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
+}
+
+void daeVariable::SetInitialCondition(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, nD4, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
 }
 
 void daeVariable::ReSetInitialCondition(real_t dInitialCondition)
@@ -1187,6 +1505,60 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
 }
 
+void daeVariable::ReSetInitialCondition(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, nD4, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, nD4, nD5, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+}
+
+void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
+
 daeVariableType_t* daeVariable::GetVariableType(void)
 {
 	return &m_VariableType;
@@ -1226,132 +1598,6 @@ bool daeVariable::GetReportingOn(void) const
 void daeVariable::SetReportingOn(bool bOn)
 {
 	m_bReportingOn = bOn;
-}
-
-real_t daeVariable::TimeDerivative(void)
-{
-	return dt().getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1)
-{
-	return dt(nD1).getValue();
-}
-	
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2)
-{
-	return dt(nD1, nD2).getValue();
-}
-	
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3)
-{
-	return dt(nD1, nD2, nD3).getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
-{
-	return dt(nD1, nD2, nD3, nD4).getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
-{
-	return dt(nD1, nD2, nD3, nD4, nD5).getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
-{
-	return dt(nD1, nD2, nD3, nD4, nD5, nD6).getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
-{
-	return dt(nD1, nD2, nD3, nD4, nD5, nD6, nD7).getValue();
-}
-
-real_t daeVariable::TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
-{
-	return dt(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8).getValue();
-}
-
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1)
-{
-	return d(rDomain, nD1).getValue();
-}
-	
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2)
-{
-	return d(rDomain, nD1, nD2).getValue();
-}
-	
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3)
-{
-	return d(rDomain, nD1, nD2, nD3).getValue();
-}
-	
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4)
-{
-	return d(rDomain, nD1, nD2, nD3, nD4).getValue();
-}
-
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
-{
-	return d(rDomain, nD1, nD2, nD3, nD4, nD5).getValue();
-}
-
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
-{
-	return d(rDomain, nD1, nD2, nD3, nD4, nD5, nD6).getValue();
-}
-
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
-{
-	return d(rDomain, nD1, nD2, nD3, nD4, nD5, nD6, nD7).getValue();
-}
-
-real_t daeVariable::PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
-{
-	return d(rDomain, nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8).getValue();
-}
-
-
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1)
-{
-	return d2(rDomain, nD1).getValue();
-}
-	
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2)
-{
-	return d2(rDomain, nD1, nD2).getValue();
-}
-	
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3)
-{
-	return d2(rDomain, nD1, nD2, nD3).getValue();
-}
-	
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4)
-{
-	return d2(rDomain, nD1, nD2, nD3, nD4).getValue();
-}
-	
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
-{
-	return d2(rDomain, nD1, nD2, nD3, nD4, nD5).getValue();
-}
-
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
-{
-	return d2(rDomain, nD1, nD2, nD3, nD4, nD5, nD6).getValue();
-}
-
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
-{
-	return d2(rDomain, nD1, nD2, nD3, nD4, nD5, nD6, nD7).getValue();
-}
-
-real_t daeVariable::PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
-{
-	return d2(rDomain, nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8).getValue();
 }
 
 bool daeVariable::CheckObject(vector<string>& strarrErrors) const

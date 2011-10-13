@@ -366,6 +366,7 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 
 quantity adNodeImpl::CheckConsistency(void) const
 {
+	daeDeclareAndThrowException(exNotImplemented)
 	return quantity();
 }
 
@@ -396,6 +397,11 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
 		tmp.node = shared_ptr<adNode>( Clone() );
 	}
 	return tmp;
+}
+
+quantity adConstantNode::CheckConsistency(void) const
+{
+	return quantity(0.0, unit());
 }
 
 adNode* adConstantNode::Clone(void) const
@@ -476,6 +482,11 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 		tmp.node = shared_ptr<adNode>( Clone() );
 	}
 	return tmp;
+}
+
+quantity adTimeNode::CheckConsistency(void) const
+{
+	return quantity(0.0, units_pool::s);
 }
 
 adNode* adTimeNode::Clone(void) const
@@ -780,6 +791,9 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 // Here I check if I am inside of the GatherInfo mode and if I am
 // I clone the node (which is an equivalent for creation of a runtime node)
 // If I am not - I return the value of the point for the given index.
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
+
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adouble tmp;
@@ -789,6 +803,13 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 	}
 	
 	return adouble(m_pDomain->GetPoint(m_nIndex));
+}
+
+quantity adDomainIndexNode::CheckConsistency(void) const
+{
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
+	return quantity(0.0, m_pDomain->GetUnits());
 }
 
 adNode* adDomainIndexNode::Clone(void) const
@@ -1454,8 +1475,60 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 		return floor(node->Evaluate(pExecutionContext));
 		break;
 	default:
-		daeDeclareAndThrowException(exInvalidPointer);
+		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
+	}
+}
+
+quantity adUnaryNode::CheckConsistency(void) const
+{
+	switch(eFunction)
+	{
+	case eSign:
+		return -(node->CheckConsistency());
+		break;
+	case eSin:
+		return sin(node->CheckConsistency());
+		break;
+	case eCos:
+		return cos(node->CheckConsistency());
+		break;
+	case eTan:
+		return tan(node->CheckConsistency());
+		break;
+	case eArcSin:
+		return asin(node->CheckConsistency());
+		break;
+	case eArcCos:
+		return acos(node->CheckConsistency());
+		break;
+	case eArcTan:
+		return atan(node->CheckConsistency());
+		break;
+	case eSqrt:
+		return sqrt(node->CheckConsistency());
+		break;
+	case eExp:
+		return exp(node->CheckConsistency());
+		break;
+	case eLn:
+		return log(node->CheckConsistency());
+		break;
+	case eLog:
+		return log10(node->CheckConsistency());
+		break;
+	case eAbs:
+		return abs(node->CheckConsistency());
+		break;
+	case eCeil:
+		return ceil(node->CheckConsistency());
+		break;
+	case eFloor:
+		return floor(node->CheckConsistency());
+		break;
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return quantity();
 	}
 }
 
@@ -2158,28 +2231,45 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
 	{
 	case ePlus:
 		return left->Evaluate(pExecutionContext) + right->Evaluate(pExecutionContext);
-		break;
 	case eMinus:
 		return left->Evaluate(pExecutionContext) - right->Evaluate(pExecutionContext);
-		break;
 	case eMulti:
 		return left->Evaluate(pExecutionContext) * right->Evaluate(pExecutionContext);
-		break;
 	case eDivide:
 		return left->Evaluate(pExecutionContext) / right->Evaluate(pExecutionContext);
-		break;
 	case ePower:
 		return pow(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-		break;
 	case eMin:
 		return min(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-		break;
 	case eMax:
 		return max(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-		break;
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);
 		return adouble();
+	}
+}
+
+quantity adBinaryNode::CheckConsistency(void) const
+{
+	switch(eFunction)
+	{
+	case ePlus:
+		return left->CheckConsistency() + right->CheckConsistency();
+	case eMinus:
+		return left->CheckConsistency() - right->CheckConsistency();
+	case eMulti:
+		return left->CheckConsistency() * right->CheckConsistency();
+	case eDivide:
+		return left->CheckConsistency() / right->CheckConsistency();
+	case ePower:
+		return pow(left->CheckConsistency(), right->CheckConsistency());
+	case eMin:
+		return min(left->CheckConsistency(), right->CheckConsistency());
+	case eMax:
+		return max(left->CheckConsistency(), right->CheckConsistency());
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return quantity();
 	}
 }
 

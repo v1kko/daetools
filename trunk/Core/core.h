@@ -323,6 +323,7 @@ public:
 	virtual size_t						GetNumberOfIntervals(void) const		= 0;
 	virtual size_t						GetNumberOfPoints(void) const			= 0;
 	virtual real_t						GetPoint(size_t nIndex) const			= 0;
+	virtual unit						GetUnits(void) const					= 0;
 
 // Only for Distributed domains
 	virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const		= 0;
@@ -377,15 +378,15 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
 
-	virtual void	SetQuantity(const quantity& value)																									= 0;
-	virtual void	SetQuantity(size_t nD1, const quantity& value)																						= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, const quantity& value)																			= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+	virtual void	SetValue(const quantity& value)																									= 0;
+	virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value)																			= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
 
 	virtual quantity	GetQuantity(void)																							= 0;
 	virtual quantity	GetQuantity(size_t nD1)																						= 0;
@@ -485,35 +486,76 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition) = 0;
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition) = 0;
 
+	virtual void	SetValue(const quantity& value)																									= 0;
+	virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value)																			= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+
+	virtual quantity	GetQuantity(void)																							= 0;
+	virtual quantity	GetQuantity(size_t nD1)																						= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2) 																		= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3) 															= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4) 												= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) 									= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
+
+	virtual void	AssignValue(const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value) = 0;
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value) = 0;
+
+	virtual void	ReAssignValue(const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value) = 0;
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value) = 0;
+
+	virtual void	SetInitialGuess(const quantity& dInitialGuess) = 0;
+	virtual void	SetInitialGuess(size_t nD1, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, const quantity& dInitialGuesses)	= 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialGuesses) = 0;
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialGuesses) = 0;
+
+	virtual void	SetInitialCondition(const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialCondition)	= 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition) = 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition) = 0;
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition) = 0;
+
+	virtual void	ReSetInitialCondition(const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialCondition)	= 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition) = 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition) = 0;
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition) = 0;
+
 	virtual void	SetAbsoluteTolerances(real_t dAbsTolerances) = 0;
-
-	virtual real_t	TimeDerivative(void) = 0;
-	virtual real_t	TimeDerivative(size_t nD1) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7) = 0;
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8) = 0;
-
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7) = 0;
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8) = 0;
-
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7) = 0;
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8) = 0;
 };	
 
 /******************************************************************

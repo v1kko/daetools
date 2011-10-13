@@ -288,8 +288,8 @@ class DAE_CORE_API daeDomain : virtual public daeObject,
 public:
 	daeDeclareDynamicClass(daeDomain)
 	daeDomain(void);
-	daeDomain(string strName, daeModel* pModel, string strDescription = "");
-	daeDomain(string strName, daePort* pPort, string strDescription = "");
+	daeDomain(string strName, daeModel* pModel, const unit& units, string strDescription = "");
+	daeDomain(string strName, daePort* pPort, const unit& units, string strDescription = "");
 	virtual ~daeDomain(void);
 
 // Public interface
@@ -299,6 +299,7 @@ public:
 	virtual size_t						GetNumberOfIntervals(void) const;
 	virtual size_t						GetNumberOfPoints(void) const;
 	virtual real_t						GetPoint(size_t nIndex) const;
+	virtual unit						GetUnits(void) const;
 
 // Only for Distributed domains
 	virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const;
@@ -337,12 +338,14 @@ public:
 protected:
 	void	CreatePoints(void);
 	void	SetType(daeeDomainType eDomainType);
+	void	SetUnits(const unit& units);
 	virtual adouble pd_BFD(daePartialDerivativeVariable& pdv) const;
 	virtual adouble pd_FFD(daePartialDerivativeVariable& pdv) const;
 	virtual adouble pd_CFD(daePartialDerivativeVariable& pdv) const;
 	virtual adouble customPartialDerivative(daePartialDerivativeVariable& pdv) const;
 
 protected:
+	unit							m_Unit;
 	daeeDiscretizationMethod		m_eDiscretizationMethod;
 	size_t							m_nDiscretizationOrder;
 	daeeDomainType					m_eDomainType;
@@ -351,6 +354,8 @@ protected:
 	size_t							m_nNumberOfPoints;
 	size_t							m_nNumberOfIntervals;
 	std::vector<real_t>				m_darrPoints;
+	friend class daePort;
+	friend class daeModel;
 	friend class daeParameter;
 	friend class daeDistributedEquationDomainInfo;
 	friend class daeVariable;
@@ -1331,15 +1336,15 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
-	virtual void	SetQuantity(const quantity& value);
-	virtual void	SetQuantity(size_t nD1, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
-	virtual void	SetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+	virtual void	SetValue(const quantity& value);
+	virtual void	SetValue(size_t nD1, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
 
 	virtual quantity	GetQuantity(void);
 	virtual quantity	GetQuantity(size_t nD1);
@@ -1468,6 +1473,26 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
+	virtual void	SetValue(const quantity& value);
+	virtual void	SetValue(size_t nD1, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
+	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+
+	virtual quantity	GetQuantity(void);
+	virtual quantity	GetQuantity(size_t nD1);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
+	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
+
 	virtual void	AssignValue(real_t value);
 	virtual void	AssignValue(size_t nD1, real_t value);
 	virtual void	AssignValue(size_t nD1, size_t nD2, real_t value);
@@ -1519,35 +1544,57 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition);
 
+	virtual void	AssignValue(const quantity& value);
+	virtual void	AssignValue(size_t nD1, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
+	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+
+	virtual void	ReAssignValue(const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
+	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+	
+	virtual void	SetInitialGuess(const quantity& dInitialGuess);
+	virtual void	SetInitialGuess(size_t nD1, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialGuesses);
+
+	virtual void	SetInitialCondition(const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition);
+	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition);
+
+	virtual void	ReSetInitialCondition(const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition);
+	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition);
+
 	virtual void	SetAbsoluteTolerances(real_t dAbsTolerances);
-
-	virtual real_t	TimeDerivative(void);
-	virtual real_t	TimeDerivative(size_t nD1);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
-	virtual real_t	TimeDerivative(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
-
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
-	virtual real_t	PartialDerivative1(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
-
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
-	virtual real_t	PartialDerivative2(const daeDomain_t& rDomain, size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
 
 public:
 	void Open(io::xmlTag_t* pTag);
@@ -1813,7 +1860,7 @@ public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void SetType(daeePortType eType);
-	void AddDomain(daeDomain& rDomain, const string& strName, string strDescription = "");
+	void AddDomain(daeDomain& rDomain, const string& strName, const unit& units, string strDescription = "");
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
 	void AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription = "");
 	
@@ -2157,7 +2204,7 @@ public:
 	virtual void DeclareEquations(void);
 
 protected:
-	void AddDomain(daeDomain& rDomain, const string& strName, string strDescription = "");
+	void AddDomain(daeDomain& rDomain, const string& strName, const unit& units, string strDescription = "");
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
 	void AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription = "");
 	void AddModel(daeModel& rModel, const string& strName, string strDescription = "");

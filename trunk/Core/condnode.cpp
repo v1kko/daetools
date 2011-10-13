@@ -346,32 +346,21 @@ daeCondition condExpressionNode::CreateRuntimeNode(const daeExecutionContext* pE
 
 	adouble left  = m_pLeft->Evaluate(pExecutionContext);
 	adouble right = m_pRight->Evaluate(pExecutionContext);
+	
 	switch(m_eConditionType)
 	{
 	case eNotEQ:
 		return (left != right);
-		break;
-
 	case eEQ:
 		return (left == right);
-		break;
-
 	case eGT:
 		return (left > right);
-		break;
-
 	case eGTEQ:
 		return (left >= right);
-		break;
-
 	case eLT:
 		return (left < right);
-		break;
-
 	case eLTEQ:
 		return (left <= right);
-		break;
-
 	default:
 		daeDeclareAndThrowException(exNotImplemented); 
 		return daeCondition();
@@ -388,32 +377,21 @@ bool condExpressionNode::Evaluate(const daeExecutionContext* pExecutionContext) 
 
 	real_t left  = m_pLeft->Evaluate(pExecutionContext).getValue();
 	real_t right = m_pRight->Evaluate(pExecutionContext).getValue();
+	
 	switch(m_eConditionType)
 	{
 	case eNotEQ:
-		return (left != right ? true : false);
-		break;
-
+		return (left != right);
 	case eEQ:
-		return (left == right ? true : false);
-		break;
-
+		return (left == right);
 	case eGT:
-		return (left > right ? true : false);
-		break;
-
+		return (left > right);
 	case eGTEQ:
-		return (left >= right ? true : false);
-		break;
-
+		return (left >= right);
 	case eLT:
-		return (left < right ? true : false);
-		break;
-
+		return (left < right);
 	case eLTEQ:
-		return (left <= right ? true : false);
-		break;
-
+		return (left <= right);
 	default:
 		daeDeclareAndThrowException(exNotImplemented); 
 		return false;
@@ -422,9 +400,33 @@ bool condExpressionNode::Evaluate(const daeExecutionContext* pExecutionContext) 
 
 bool condExpressionNode::CheckConsistency(void) const
 {
-	return true;
-}
+	if(!m_pLeft)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pRight)
+		daeDeclareAndThrowException(exInvalidPointer);
 
+	quantity left  = m_pLeft->CheckConsistency();
+	quantity right = m_pRight->CheckConsistency();
+	
+	switch(m_eConditionType)
+	{
+	case eNotEQ:
+		return (left != right);
+	case eEQ:
+		return (left == right);
+	case eGT:
+		return (left > right);
+	case eGTEQ:
+		return (left >= right);
+	case eLT:
+		return (left < right);
+	case eLTEQ:
+		return (left <= right);
+	default:
+		daeDeclareAndThrowException(exNotImplemented); 
+		return false;
+	}
+}
 
 condNode* condExpressionNode::Clone(void) const
 {
@@ -448,20 +450,21 @@ void condExpressionNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & pt
 // This have to be added always!
 	dae_push_back(ptrarrExpressions, ad.node);
 
-// Depending on the type I have to add some additional expressions
+// If not set, set it to some default value
 	if(dEventTolerance == 0)
 		dEventTolerance = 1E-7;
 
 /*
-                       Explanation:
+	Depending on the type I have to add some additional expressions
+    Explanation:
   
 left-right = f(t)
     ^          
     |         /
     |        /
-    |       X (2): ad2 = ad - Et   (l - r = +Et, thus: l - r - Et = 0)
- ---|------X--(0)-----------------------------------------------------------> Time
-    |     X   (1): ad1 = ad + Et   (l - r = -Et, thus: l - r + Et = 0)
+    |       X (2): ad2 = ad - Et   (l - r = +Et, therefore: l - r - Et = 0)
+ ---|------X--(0)----------------------------------------------------------------> Time
+    |     X   (1): ad1 = ad + Et   (l - r = -Et, therefore: l - r + Et = 0)
     |    /
     |   /
     |  
@@ -642,21 +645,26 @@ daeCondition condUnaryNode::CreateRuntimeNode(const daeExecutionContext* pExecut
 
 bool condUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	bool bResult = false;
 	switch(m_eLogicalOperator)
 	{
 	case eNot:
-		bResult = !(m_pNode->Evaluate(pExecutionContext));
-		break;
+		return (!m_pNode->Evaluate(pExecutionContext));
 	default:
 		daeDeclareAndThrowException(exNotImplemented); 
+		return true;
 	}
-	return bResult;
 }
 
 bool condUnaryNode::CheckConsistency(void) const
 {
-	return true;
+	switch(m_eLogicalOperator)
+	{
+	case eNot:
+		return (!m_pNode->CheckConsistency());
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return true;
+	}
 }
 
 condNode* condUnaryNode::Clone(void) const
@@ -860,24 +868,36 @@ daeCondition condBinaryNode::CreateRuntimeNode(const daeExecutionContext* pExecu
 
 bool condBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	bool bResult = false;
+	bool left  = m_pLeft->Evaluate(pExecutionContext);
+	bool right = m_pRight->Evaluate(pExecutionContext);
+
 	switch(m_eLogicalOperator)
 	{
 	case eAnd:
-		bResult = m_pLeft->Evaluate(pExecutionContext) && m_pRight->Evaluate(pExecutionContext);
-		break;
+		return (left && right);
 	case eOr:
-		bResult = m_pLeft->Evaluate(pExecutionContext) || m_pRight->Evaluate(pExecutionContext);
-		break;
+		return (left || right);
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
+		return true;
 	}
-	return bResult;
 }
 
 bool condBinaryNode::CheckConsistency(void) const
 {
-	return true;
+	bool left  = m_pLeft->CheckConsistency();
+	bool right = m_pRight->CheckConsistency();
+
+	switch(m_eLogicalOperator)
+	{
+	case eAnd:
+		return (left && right);
+	case eOr:
+		return (left || right);
+	default:
+		daeDeclareAndThrowException(exNotImplemented);
+		return true;
+	}
 }
 
 condNode* condBinaryNode::Clone(void) const
