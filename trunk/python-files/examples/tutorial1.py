@@ -131,6 +131,8 @@ class modTutorial(daeModel):
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
         self.T.Description = "Temperature of the plate, K"
+        
+        self.test = daeVariable("test", temperature_t, self)
 
     def DeclareEquations(self):
         # To distribute an equation on a domain the function DistributeOnDomain can be again used.
@@ -176,10 +178,15 @@ class modTutorial(daeModel):
         eq.Residual = self.T.d(self.x, x, y)
 
         # The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:
-        eq = self.CreateEquation("BC_righ", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
+        
+        xr = daeIndexRange(self.x)
+        eq = self.CreateEquation("test")
+        eq.Residual = self.test() - self.average(self.T.array(xr, 0))
+
 
 class simTutorial(daeSimulation):
     def __init__(self):
