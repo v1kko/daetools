@@ -174,7 +174,7 @@ const adouble_array adouble_array::operator +(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -231,7 +231,7 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -272,7 +272,7 @@ const adouble_array adouble_array::operator -(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -329,7 +329,7 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -370,7 +370,7 @@ const adouble_array adouble_array::operator *(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -427,7 +427,7 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -468,7 +468,7 @@ const adouble_array adouble_array::operator /(const real_t v) const
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)) ));
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -525,7 +525,7 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v)),
+														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -805,6 +805,14 @@ const adouble daeModel::time(void) const
 	return tmp;
 }
 
+const adouble daeModel::constant(const quantity& q) const
+{
+	adouble tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = shared_ptr<adNode>(new adConstantNode(q));
+	return tmp;
+}
+
 const adouble_array exp(const adouble_array& a)
 {
 	adouble_array tmp;
@@ -1039,24 +1047,6 @@ const adouble_array atan(const adouble_array& a)
 	return tmp;
 }
 
-//const adouble_array pow(const adouble_array& a, real_t v)
-//{
-//	adouble_array tmp;
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePower, 
-//																 CLONE_NODE_ARRAY(a.node),
-//																 shared_ptr<adNodeArray>(new adConstantNodeArray(v, a.GetSize())) ));
-//	    return tmp;
-//	}
-//	
-//	size_t n = a.GetSize();
-//	tmp.Resize(n);
-//	for(size_t i = 0; i < n; i++)
-//		tmp[i] = pow(a[i], v);
-//	return tmp;
-//}
 
 }
 }

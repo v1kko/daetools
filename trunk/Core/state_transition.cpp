@@ -292,6 +292,20 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 	}
 
+// Check unit-consistency of the condition
+	try
+	{
+		bool b = m_Condition.m_pSetupConditionNode->GetQuantity();
+	}
+	catch(std::exception& e)
+	{
+		strError = "Unit-consistency check failed in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
+		strarrErrors.push_back(strError);
+		strError = "  " + string(e.what());
+		strarrErrors.push_back(strError);
+		bCheck = false;
+	}
+	
 /////////////////////////////////////////////////////////////
 // ERROR!!
 // Here I dont have expressions since I havent created them yet!

@@ -394,7 +394,7 @@ unit unit::operator-(void) const
 //}
 std::string unit::toString(void) const
 {
-	std::string strPositive, strNegative;
+	std::string strPositive, strNegative, strUnits;
 	std::vector<std::string> arrPositive, arrNegative;
 	
 	for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
@@ -411,11 +411,13 @@ std::string unit::toString(void) const
 	strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
 	
 	if(arrNegative.size() == 0)
-		return strPositive;
+		strUnits = strPositive;
 	else if(arrNegative.size() == 1)
-		return strPositive + "/" + strNegative;
+		strUnits = strPositive + "/" + strNegative;
 	else
-		return strPositive + "/(" + strNegative + ")"; 
+		strUnits = strPositive + "/(" + strNegative + ")"; 
+	
+	return "[" + strUnits + "]"; 
 }
 
 std::ostream& operator<<(std::ostream& out, const unit& u)
@@ -426,61 +428,90 @@ std::ostream& operator<<(std::ostream& out, const unit& u)
 
 inline void fill_base_units(std::map<std::string, base_unit>& __base_units__)
 {
-	__base_units__["kg"] = base_units_pool::kg;
 	__base_units__["m"] = base_units_pool::m;
 	__base_units__["s"] = base_units_pool::s;
 	__base_units__["cd"] = base_units_pool::cd;
 	__base_units__["A"] = base_units_pool::A;
-	__base_units__["K"] = base_units_pool::K;
 	__base_units__["mol"] = base_units_pool::mol;
-	
-	__base_units__["ms"] = base_units_pool::ms;
-	__base_units__["us"] = base_units_pool::us;
-	__base_units__["min"] = base_units_pool::min;
-	__base_units__["hour"] = base_units_pool::hour;
-	__base_units__["day"] = base_units_pool::day;
+
 	__base_units__["Hz"] = base_units_pool::Hz;
-	__base_units__["kHz"] = base_units_pool::kHz;
-	__base_units__["MHz"] = base_units_pool::MHz;
-	
-	__base_units__["km"] = base_units_pool::km;
-	__base_units__["dm"] = base_units_pool::dm;
-	__base_units__["cm"] = base_units_pool::cm;
-	__base_units__["mm"] = base_units_pool::mm;
-	__base_units__["um"] = base_units_pool::um;
-	__base_units__["nm"] = base_units_pool::nm;
-	
-	__base_units__["l"] = base_units_pool::lit;
-	__base_units__["dl"] = base_units_pool::dl;
 	
 	__base_units__["N"] = base_units_pool::N;
 	__base_units__["J"] = base_units_pool::J;
-	__base_units__["kJ"] = base_units_pool::kJ;
 	__base_units__["W"] = base_units_pool::W;
-	__base_units__["kW"] = base_units_pool::kW;
 	
+	__base_units__["V"] = base_units_pool::V;
 	__base_units__["C"] = base_units_pool::C;
 	__base_units__["F"] = base_units_pool::F;
 	__base_units__["Ohm"] = base_units_pool::Ohm;
-	__base_units__["V"] = base_units_pool::V;
-	__base_units__["mV"] = base_units_pool::mV;
-	__base_units__["mA"] = base_units_pool::mA;
+	__base_units__["T"]  = base_units_pool::T;
+	__base_units__["H"]  = base_units_pool::H;
+	__base_units__["S"]  = base_units_pool::S;
+	__base_units__["Wb"] = base_units_pool::Wb;
 	
 	__base_units__["Pa"] = base_units_pool::Pa;
-	__base_units__["kPa"] = base_units_pool::kPa;
-	__base_units__["MPa"] = base_units_pool::MPa;
 	
-	__base_units__["P"] = base_units_pool::P;
+	__base_units__["P"]  = base_units_pool::P;
 	__base_units__["St"] = base_units_pool::St;
+
+	__base_units__["Bq"]  = base_units_pool::Bq;
+	__base_units__["Gy"]  = base_units_pool::Gy;
+	__base_units__["Sv"]  = base_units_pool::Sv;
 	
-	//for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
-	//	std::cout << (*iter).first << " = " << (*iter).second.toString() << std::endl;
+	__base_units__["lx"] = base_units_pool::lx;
+	__base_units__["lm"] = base_units_pool::lm;
+	
+	__base_units__["kat"] = base_units_pool::kat;
+	
+	__base_units__["knot"] = base_units_pool::knot;
+	__base_units__["bar"]  = base_units_pool::bar;
+	__base_units__["b"]    = base_units_pool::b;
+	__base_units__["Ci"]   = base_units_pool::Ci;
+	__base_units__["R"]    = base_units_pool::R;
+	__base_units__["rd"]   = base_units_pool::rd;
+	__base_units__["rem"]  = base_units_pool::rem;
+	
+	std::map<std::string, base_unit> __scaled_units__;
+	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
+	{
+		__scaled_units__["T"  + (*iter).first] = base_units_pool::tera  * (*iter).second;
+		__scaled_units__["G"  + (*iter).first] = base_units_pool::giga  * (*iter).second;
+		__scaled_units__["M"  + (*iter).first] = base_units_pool::mega  * (*iter).second;
+		__scaled_units__["k"  + (*iter).first] = base_units_pool::kilo  * (*iter).second;
+		__scaled_units__["h"  + (*iter).first] = base_units_pool::hecto * (*iter).second;
+		__scaled_units__["da" + (*iter).first] = base_units_pool::deka  * (*iter).second;
+		__scaled_units__["d"  + (*iter).first] = base_units_pool::deci  * (*iter).second;
+		__scaled_units__["c"  + (*iter).first] = base_units_pool::centi * (*iter).second;
+		__scaled_units__["m"  + (*iter).first] = base_units_pool::mili  * (*iter).second;
+		__scaled_units__["u"  + (*iter).first] = base_units_pool::micro * (*iter).second;
+		__scaled_units__["n"  + (*iter).first] = base_units_pool::nano  * (*iter).second;
+		__scaled_units__["p"  + (*iter).first] = base_units_pool::pico  * (*iter).second;
+	}
+	__base_units__.insert(__scaled_units__.begin(), __scaled_units__.end());
+	
+	__base_units__["kg"] = base_units_pool::kg;
+	__base_units__["K"]  = base_units_pool::K;
+	
+	__base_units__["rad"] = base_units_pool::rad;
+	__base_units__["sr"]  = base_units_pool::sr;
+	
+	__base_units__["min"]  = base_units_pool::min;
+	__base_units__["hour"] = base_units_pool::hour;
+	__base_units__["day"]  = base_units_pool::day;
+
+	__base_units__["l"]  = base_units_pool::l;
+	__base_units__["dl"] = base_units_pool::dl;
+	
+//	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
+//		std::cout << (*iter).first << " = " << (*iter).second << std::endl;
 }
+
 
 std::map<std::string, base_unit>& unit::get_base_units(void)
 {
 	static std::map<std::string, base_unit> __base_units__;
-	fill_base_units(__base_units__);
+	if(__base_units__.empty())
+		fill_base_units(__base_units__);
 	return __base_units__;
 }
 

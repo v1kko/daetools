@@ -215,9 +215,8 @@ void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 {	
 }
 
-quantity adNodeArrayImpl::CheckConsistency(void) const
+quantity adNodeArrayImpl::GetQuantity(void) const
 {
-	daeDeclareAndThrowException(exNotImplemented)
 	return quantity();
 }
 
@@ -225,6 +224,11 @@ quantity adNodeArrayImpl::CheckConsistency(void) const
 	adConstantNodeArray
 **********************************************************************************************/
 adConstantNodeArray::adConstantNodeArray(const real_t d) : m_dValue(d)
+{
+}
+
+adConstantNodeArray::adConstantNodeArray(const real_t d, const unit& units) 
+	               : m_dValue(d), m_Unit(units)
 {
 }
 
@@ -261,9 +265,9 @@ adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutio
 	return tmp;
 }
 
-quantity adConstantNodeArray::CheckConsistency(void) const
+quantity adConstantNodeArray::GetQuantity(void) const
 {
-	return quantity();
+	return quantity(0.0, m_Unit);
 }
 
 adNodeArray* adConstantNodeArray::Clone(void) const
@@ -1251,51 +1255,51 @@ adouble_array adUnaryNodeArray::Evaluate(const daeExecutionContext* pExecutionCo
 	return adouble_array();
 }
 
-quantity adUnaryNodeArray::CheckConsistency(void) const
+quantity adUnaryNodeArray::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case eSign:
-		return -(node->CheckConsistency());
+		return -(node->GetQuantity());
 		break;
 	case eSin:
- 		return sin(node->CheckConsistency());
+ 		return sin(node->GetQuantity());
 		break;
 	case eCos:
-		return cos(node->CheckConsistency());
+		return cos(node->GetQuantity());
 		break;
 	case eTan:
-		return tan(node->CheckConsistency());
+		return tan(node->GetQuantity());
 		break;
 	case eArcSin:
-		return asin(node->CheckConsistency());
+		return asin(node->GetQuantity());
 		break;
 	case eArcCos:
-		return acos(node->CheckConsistency());
+		return acos(node->GetQuantity());
 		break;
 	case eArcTan:
-		return atan(node->CheckConsistency());
+		return atan(node->GetQuantity());
 		break;
 	case eSqrt:
-		return sqrt(node->CheckConsistency());
+		return sqrt(node->GetQuantity());
 		break;
 	case eExp:
-		return exp(node->CheckConsistency());
+		return exp(node->GetQuantity());
 		break;
 	case eLn:
-		return log(node->CheckConsistency());
+		return log(node->GetQuantity());
 		break;
 	case eLog:
-		return log10(node->CheckConsistency());
+		return log10(node->GetQuantity());
 		break;
 	case eAbs:
-		return abs(node->CheckConsistency());
+		return abs(node->GetQuantity());
 		break;
 	case eCeil:
-		return ceil(node->CheckConsistency());
+		return ceil(node->GetQuantity());
 		break;
 	case eFloor:
-		return floor(node->CheckConsistency());
+		return floor(node->GetQuantity());
 		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
@@ -1999,21 +2003,21 @@ adouble_array adBinaryNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	}
 }
 
-quantity adBinaryNodeArray::CheckConsistency(void) const
+quantity adBinaryNodeArray::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case ePlus:
-		return left->CheckConsistency() + right->CheckConsistency();
+		return left->GetQuantity() + right->GetQuantity();
 		break;
 	case eMinus:
-		return left->CheckConsistency() - right->CheckConsistency();
+		return left->GetQuantity() - right->GetQuantity();
 		break;
 	case eMulti:
-		return left->CheckConsistency() * right->CheckConsistency();
+		return left->GetQuantity() * right->GetQuantity();
 		break;
 	case eDivide:
-		return left->CheckConsistency() / right->CheckConsistency();
+		return left->GetQuantity() / right->GetQuantity();
 		break;
 	case ePower:
 		daeDeclareAndThrowException(exNotImplemented);
@@ -2597,9 +2601,9 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 	}
 }
 
-quantity adSetupSpecialFunctionNode::CheckConsistency(void) const
+quantity adSetupSpecialFunctionNode::GetQuantity(void) const
 {
-	quantity q = node->CheckConsistency();
+	quantity q = node->GetQuantity();
 	size_t   n = node->GetSize();
 	
 	switch(eFunction)
@@ -2928,9 +2932,9 @@ adouble adSetupExpressionDerivativeNode::Evaluate(const daeExecutionContext* pEx
 	return tmp;
 }
 
-quantity adSetupExpressionDerivativeNode::CheckConsistency(void) const
+quantity adSetupExpressionDerivativeNode::GetQuantity(void) const
 {
-	quantity q = node->CheckConsistency();
+	quantity q = node->GetQuantity();
 	return quantity(0.0, q.getUnits() / units_pool::s);
 }
 
@@ -3204,12 +3208,12 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 	return tmp;
 }
 
-quantity adSetupExpressionPartialDerivativeNode::CheckConsistency(void) const
+quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
 {
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	quantity q = node->CheckConsistency();
+	quantity q = node->GetQuantity();
 	return quantity(0.0, q.getUnits() / m_pDomain->GetUnits());
 }
 
@@ -3536,14 +3540,14 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 	return adouble();
 }
 
-quantity adSetupIntegralNode::CheckConsistency(void) const
+quantity adSetupIntegralNode::GetQuantity(void) const
 {
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	quantity q = node->CheckConsistency();
+	quantity q = node->GetQuantity();
 	
 	switch(eFunction)
 	{
@@ -3755,12 +3759,12 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	return tmp;
 }
 
-quantity adSingleNodeArray::CheckConsistency(void) const
+quantity adSingleNodeArray::GetQuantity(void) const
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	return node->CheckConsistency();
+	return node->GetQuantity();
 }
 
 adNodeArray* adSingleNodeArray::Clone(void) const

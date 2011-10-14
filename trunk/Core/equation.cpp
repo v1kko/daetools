@@ -1803,14 +1803,14 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 // Check unit-consistency of the equation	
 	try
 	{
-		m_pResidualNode->CheckConsistency();
-		//std::cout << (boost::format("Equation [%s] residual units [%s]") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
+		quantity q = m_pResidualNode->GetQuantity();
+		std::cout << (boost::format("Equation [%s] residual units %s") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
 	}
 	catch(std::exception& e)
 	{
-		strError = "Unit-consistency check failed in equation [" + GetCanonicalName() + "]";
+		strError = "Unit-consistency check failed in equation [" + GetCanonicalName() + "]:";
 		strarrErrors.push_back(strError);
-		strError = "The reason: " + string(e.what());
+		strError = "  " + string(e.what());
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}

@@ -101,14 +101,14 @@ public:
 
     modTutorial1(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        x("x", this, "X axis domain"),
-        y("y", this, "Y axis domain"),
-        Q_b("Q_b", eReal, this, "Heat flux at the bottom edge of the plate, W/m2"),
-        Q_t("Q_t", eReal, this, "Heat flux at the top edge of the plate, W/m2"),
-        rho("&rho;", eReal, this, "Density of the plate, kg/m3"),
-        c_p("c_p", eReal, this, "Specific heat capacity of the plate, J/kgK"),
-        k("&lambda;_p", eReal, this, "Thermal conductivity of the plate, W/mK"),
-        T("T", temperature_t, this, "Temperature of the plate, K", &x, &y)
+        x("x",         this, m,        "X axis domain"),
+        y("y",         this, m,        "Y axis domain"),
+        Q_b("Q_b",      W/(m^2),       this, "Heat flux at the bottom edge of the plate, W/m2"),
+        Q_t("Q_t",      W/(m^2),       this, "Heat flux at the top edge of the plate, W/m2"),
+        rho("&rho;",    kg/(m^3),      this, "Density of the plate, kg/m3"),
+        c_p("c_p",      J/(kg*K),      this, "Specific heat capacity of the plate, J/kgK"),
+        k("&lambda;_p", W/(m*K),       this, "Thermal conductivity of the plate, W/mK"),
+        T("T",          temperature_t, this, "Temperature of the plate, K", &x, &y)
     {
     }
 

@@ -140,14 +140,14 @@ condExpressionNode::condExpressionNode(const adouble& left, daeeConditionType ty
 		daeDeclareAndThrowException(exInvalidPointer);  
 	m_pLeft				= shared_ptr<adNode>(left.node->Clone());
 	m_eConditionType	= type;
-	m_pRight			= shared_ptr<adNode>(new adConstantNode(right));
+	m_pRight			= shared_ptr<adNode>(new adConstantNode(right, UNITS(left.node)));
 }
 
 condExpressionNode::condExpressionNode(real_t left, daeeConditionType type, const adouble& right)
 {
 	if(!right.node)
 		daeDeclareAndThrowException(exInvalidPointer);  
-	m_pLeft				= shared_ptr<adNode>(new adConstantNode(left));
+	m_pLeft				= shared_ptr<adNode>(new adConstantNode(left, UNITS(right.node)));
 	m_eConditionType	= type;
 	m_pRight			= shared_ptr<adNode>(right.node->Clone());
 }
@@ -398,15 +398,15 @@ bool condExpressionNode::Evaluate(const daeExecutionContext* pExecutionContext) 
 	}
 }
 
-bool condExpressionNode::CheckConsistency(void) const
+bool condExpressionNode::GetQuantity(void) const
 {
 	if(!m_pLeft)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pRight)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	quantity left  = m_pLeft->CheckConsistency();
-	quantity right = m_pRight->CheckConsistency();
+	quantity left  = m_pLeft->GetQuantity();
+	quantity right = m_pRight->GetQuantity();
 	
 	switch(m_eConditionType)
 	{
@@ -655,12 +655,12 @@ bool condUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 	}
 }
 
-bool condUnaryNode::CheckConsistency(void) const
+bool condUnaryNode::GetQuantity(void) const
 {
 	switch(m_eLogicalOperator)
 	{
 	case eNot:
-		return (!m_pNode->CheckConsistency());
+		return (!m_pNode->GetQuantity());
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return true;
@@ -883,10 +883,10 @@ bool condBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 	}
 }
 
-bool condBinaryNode::CheckConsistency(void) const
+bool condBinaryNode::GetQuantity(void) const
 {
-	bool left  = m_pLeft->CheckConsistency();
-	bool right = m_pRight->CheckConsistency();
+	bool left  = m_pLeft->GetQuantity();
+	bool right = m_pRight->GetQuantity();
 
 	switch(m_eLogicalOperator)
 	{

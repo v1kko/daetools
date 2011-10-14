@@ -364,9 +364,8 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 	return true;
 }
 
-quantity adNodeImpl::CheckConsistency(void) const
+quantity adNodeImpl::GetQuantity(void) const
 {
-	daeDeclareAndThrowException(exNotImplemented)
 	return quantity();
 }
 
@@ -376,6 +375,16 @@ quantity adNodeImpl::CheckConsistency(void) const
 **********************************************************************************************/
 adConstantNode::adConstantNode(const real_t d)
 	          : m_dValue(d)
+{
+}
+
+adConstantNode::adConstantNode(const real_t d, const unit& units)
+	          : m_dValue(d), m_Unit(units)
+{
+}
+
+adConstantNode::adConstantNode(const quantity& q)
+	          : m_dValue(q.getValue()), m_Unit(q.getUnits())
 {
 }
 
@@ -399,9 +408,9 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
 	return tmp;
 }
 
-quantity adConstantNode::CheckConsistency(void) const
+quantity adConstantNode::GetQuantity(void) const
 {
-	return quantity(0.0, unit());
+	return quantity(0.0, m_Unit);
 }
 
 adNode* adConstantNode::Clone(void) const
@@ -411,10 +420,16 @@ adNode* adConstantNode::Clone(void) const
 
 void adConstantNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	if(m_dValue < 0)
-		strContent += "(" + toStringFormatted<real_t>(m_dValue, -1, 12, false, true) + ")";
+	string strUnits;
+	if(m_Unit == unit())
+		strUnits = "";
 	else
-		strContent += toStringFormatted<real_t>(m_dValue, -1, 12, false, true);
+		strUnits = " " + m_Unit.toString();
+		
+	if(m_dValue < 0)
+		strContent += (boost::format("(%.12f%s)") % m_dValue % strUnits).str();
+	else
+		strContent += (boost::format("%.12f%s") % m_dValue % strUnits).str();
 }
 //string adConstantNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
 //{
@@ -434,8 +449,11 @@ void adConstantNode::Open(io::xmlTag_t* pTag)
 
 void adConstantNode::Save(io::xmlTag_t* pTag) const
 {
-	string strName = "Value";
-	pTag->Save(strName, m_dValue);
+	string strName  = "Value";
+	pTag->Save(strName, toStringFormatted<real_t>(m_dValue, -1, 12, false, true));
+	
+	strName  = "Units";
+	pTag->Save(strName, m_Unit.toString());
 }
 
 void adConstantNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
@@ -484,7 +502,7 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 	return tmp;
 }
 
-quantity adTimeNode::CheckConsistency(void) const
+quantity adTimeNode::GetQuantity(void) const
 {
 	return quantity(0.0, units_pool::s);
 }
@@ -805,7 +823,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 	return adouble(m_pDomain->GetPoint(m_nIndex));
 }
 
-quantity adDomainIndexNode::CheckConsistency(void) const
+quantity adDomainIndexNode::GetQuantity(void) const
 {
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
@@ -1480,51 +1498,51 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 	}
 }
 
-quantity adUnaryNode::CheckConsistency(void) const
+quantity adUnaryNode::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case eSign:
-		return -(node->CheckConsistency());
+		return -(node->GetQuantity());
 		break;
 	case eSin:
-		return sin(node->CheckConsistency());
+		return sin(node->GetQuantity());
 		break;
 	case eCos:
-		return cos(node->CheckConsistency());
+		return cos(node->GetQuantity());
 		break;
 	case eTan:
-		return tan(node->CheckConsistency());
+		return tan(node->GetQuantity());
 		break;
 	case eArcSin:
-		return asin(node->CheckConsistency());
+		return asin(node->GetQuantity());
 		break;
 	case eArcCos:
-		return acos(node->CheckConsistency());
+		return acos(node->GetQuantity());
 		break;
 	case eArcTan:
-		return atan(node->CheckConsistency());
+		return atan(node->GetQuantity());
 		break;
 	case eSqrt:
-		return sqrt(node->CheckConsistency());
+		return sqrt(node->GetQuantity());
 		break;
 	case eExp:
-		return exp(node->CheckConsistency());
+		return exp(node->GetQuantity());
 		break;
 	case eLn:
-		return log(node->CheckConsistency());
+		return log(node->GetQuantity());
 		break;
 	case eLog:
-		return log10(node->CheckConsistency());
+		return log10(node->GetQuantity());
 		break;
 	case eAbs:
-		return abs(node->CheckConsistency());
+		return abs(node->GetQuantity());
 		break;
 	case eCeil:
-		return ceil(node->CheckConsistency());
+		return ceil(node->GetQuantity());
 		break;
 	case eFloor:
-		return floor(node->CheckConsistency());
+		return floor(node->GetQuantity());
 		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
@@ -2249,24 +2267,24 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
 	}
 }
 
-quantity adBinaryNode::CheckConsistency(void) const
+quantity adBinaryNode::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case ePlus:
-		return left->CheckConsistency() + right->CheckConsistency();
+		return left->GetQuantity() + right->GetQuantity();
 	case eMinus:
-		return left->CheckConsistency() - right->CheckConsistency();
+		return left->GetQuantity() - right->GetQuantity();
 	case eMulti:
-		return left->CheckConsistency() * right->CheckConsistency();
+		return left->GetQuantity() * right->GetQuantity();
 	case eDivide:
-		return left->CheckConsistency() / right->CheckConsistency();
+		return left->GetQuantity() / right->GetQuantity();
 	case ePower:
-		return pow(left->CheckConsistency(), right->CheckConsistency());
+		return pow(left->GetQuantity(), right->GetQuantity());
 	case eMin:
-		return min(left->CheckConsistency(), right->CheckConsistency());
+		return min(left->GetQuantity(), right->GetQuantity());
 	case eMax:
-		return max(left->CheckConsistency(), right->CheckConsistency());
+		return max(left->GetQuantity(), right->GetQuantity());
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return quantity();

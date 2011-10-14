@@ -102,22 +102,6 @@ const adouble adouble::operator + () const
 	return tmp;
 }
 
-//const adouble adouble::operator + (const real_t v) const 
-//{
-//    adouble tmp;
-//	if(adouble::bIsParsing)
-//	{
-//		tmp.node = shared_ptr<adNode>(new adBinaryNode(ePlus, 
-//			                                           CLONE_NODE(node, m_dValue), 
-//									                   shared_ptr<adNode>(new adConstantNode(v)) ));
-//	    return tmp;
-//	}
-//
-//    tmp.m_dValue = m_dValue + v;
-//    tmp.m_dDeriv = m_dDeriv;
-//    return tmp;
-//}
-
 const adouble operator +(const adouble& a, const real_t v) 
 {
     adouble tmp;
@@ -126,7 +110,7 @@ const adouble operator +(const adouble& a, const real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(ePlus, 
 			                                           CLONE_NODE(a.node, a.m_dValue), 
-									                   shared_ptr<adNode>(new adConstantNode(v)) ));
+									                   shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
 
@@ -159,7 +143,7 @@ const adouble operator +(const real_t v, const adouble& a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(ePlus, 
-													   shared_ptr<adNode>(new adConstantNode(v)), 
+													   shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))), 
 													   CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
@@ -169,21 +153,6 @@ const adouble operator +(const real_t v, const adouble& a)
 	return tmp;
 }
 
-//const adouble adouble::operator - (const real_t v) const 
-//{
-//    adouble tmp;
-//	if(adouble::bIsParsing)
-//	{
-//		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMinus, 
-//													   CLONE_NODE(node, m_dValue), 
-//													   shared_ptr<adNode>(new adConstantNode(v)) ));
-//	    return tmp;
-//	}
-//    tmp.m_dValue = m_dValue - v;
-//    tmp.m_dDeriv = m_dDeriv;
-//    return tmp;
-//}
-
 const adouble operator -(const adouble& a, const real_t v) 
 {
     adouble tmp;
@@ -192,7 +161,7 @@ const adouble operator -(const adouble& a, const real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMinus, 
 													   CLONE_NODE(a.node, a.m_dValue), 
-													   shared_ptr<adNode>(new adConstantNode(v)) ));
+													   shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
     tmp.m_dValue = a.m_dValue - v;
@@ -224,7 +193,7 @@ const adouble operator - (const real_t v, const adouble& a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMinus, 
-													   shared_ptr<adNode>(new adConstantNode(v)), 
+													   shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))), 
 													   CLONE_NODE(a.node, a.m_dValue)));
 	    return tmp;
 	}
@@ -234,22 +203,6 @@ const adouble operator - (const real_t v, const adouble& a)
     return tmp;
 }
 
-//const adouble adouble::operator * (const real_t v) const 
-//{
-//    adouble tmp;
-// 	if(adouble::bIsParsing)
-//	{
-//		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMulti, 
-//														CLONE_NODE(node, m_dValue),
-//														shared_ptr<adNode>(new adConstantNode(v)) ));  
-//	    return tmp;
-//	}
-//
-//    tmp.m_dValue = m_dValue * v;
-//    tmp.m_dDeriv = m_dDeriv * v;
-//    return tmp;
-//}
-
 const adouble operator *(const adouble& a, const real_t v) 
 {
     adouble tmp;
@@ -258,7 +211,7 @@ const adouble operator *(const adouble& a, const real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMulti, 
 														CLONE_NODE(a.node, a.m_dValue),
-														shared_ptr<adNode>(new adConstantNode(v)) ));  
+														shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) ));  
 	    return tmp;
 	}
 
@@ -291,7 +244,7 @@ const adouble operator * (const real_t v, const adouble& a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(	eMulti, 
-														shared_ptr<adNode>(new adConstantNode(v)),
+														shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))),
 														CLONE_NODE(a.node, a.m_dValue) )); 
 	    return tmp;
 	}
@@ -299,21 +252,6 @@ const adouble operator * (const real_t v, const adouble& a)
     tmp.m_dDeriv = v * a.m_dDeriv;
     return tmp;
 }
-
-//const adouble adouble::operator / (const real_t v) const 
-//{
-//    adouble tmp;
-// 	if(adouble::bIsParsing)
-//	{
-//		tmp.node = shared_ptr<adNode>(new adBinaryNode( eDivide, 
-//														CLONE_NODE(node, m_dValue),  
-//														shared_ptr<adNode>(new adConstantNode(v)) )); 
-//	    return tmp;
-//	}
-//    tmp.m_dValue = m_dValue / v;
-//    tmp.m_dDeriv = m_dDeriv / v;
-//    return tmp;
-//}
 
 const adouble operator /(const adouble& a, const real_t v) 
 {
@@ -323,7 +261,7 @@ const adouble operator /(const adouble& a, const real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode( eDivide, 
 														CLONE_NODE(a.node, a.m_dValue),  
-														shared_ptr<adNode>(new adConstantNode(v)) )); 
+														shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) )); 
 	    return tmp;
 	}
     tmp.m_dValue = a.m_dValue / v;
@@ -354,7 +292,7 @@ const adouble operator / (const real_t v, const adouble& a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(	eDivide, 
-														shared_ptr<adNode>(new adConstantNode(v)), 
+														shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))), 
 														CLONE_NODE(a.node, a.m_dValue) ));  
 	    return tmp;
 	}
@@ -847,7 +785,7 @@ const adouble max(real_t v, const adouble &a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMax, 
-									  			       shared_ptr<adNode>(new adConstantNode(v)),
+									  			       shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))),
 									  			       CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
@@ -884,7 +822,7 @@ const adouble max(const adouble &a, real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMax, 
 									  			       CLONE_NODE(a.node, a.m_dValue),
-									  			       shared_ptr<adNode>(new adConstantNode(v)) ));
+									  			       shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
 
@@ -955,7 +893,7 @@ const adouble min(real_t v, const adouble &a)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMin, 
-									  			       shared_ptr<adNode>(new adConstantNode(v)),
+									  			       shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))),
 									  			       CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
@@ -992,7 +930,7 @@ const adouble min(const adouble &a, real_t v)
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(eMin, 
 									  			       CLONE_NODE(a.node, a.m_dValue),
-									  			       shared_ptr<adNode>(new adConstantNode(v)) ));
+									  			       shared_ptr<adNode>(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
 

@@ -21,6 +21,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         #$${DAE_SUPERLU_SOLVER_LIB} \
         $${BOOST_LIBS} \
         #$${IPOPT_LIBS} \
+        $${DAE_UNITS_LIB} \
         $${MUMPS_LIBS} -lrt -lgfortran
 
 SOURCES += main.cpp \

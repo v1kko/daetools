@@ -181,7 +181,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = self.T.d(self.x, x, y) - 5
         
         xr = daeIndexRange(self.x)
         eq = self.CreateEquation("test")
@@ -215,7 +215,7 @@ class simTutorial(daeSimulation):
         self.m.ro.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
         self.m.Qt.SetValue(0 * W/(m**2))
-        self.Log.Message('k  value = {0}; quantity = {1}'.format(self.m.k.GetValue(),  self.m.k.GetQuantity()), 0)
+        self.Log.Message('k  value = {0}; quantity = {1}'.format(self.m.k.GetValue(),  self.m.k.GetQuantity()),  0)
         self.Log.Message('cp value = {0}; quantity = {1}'.format(self.m.cp.GetValue(), self.m.cp.GetQuantity()), 0)
         self.Log.Message('ro value = {0}; quantity = {1}'.format(self.m.ro.GetValue(), self.m.ro.GetQuantity()), 0)
         self.Log.Message('Qb value = {0}; quantity = {1}'.format(self.m.Qb.GetValue(), self.m.Qb.GetQuantity()), 0)
@@ -226,7 +226,7 @@ class simTutorial(daeSimulation):
         # thus we start the loop with 1 and end with NumberOfPoints-1 (for both domains)
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300 * K)
 
 def export(simulation, objects_to_export):
     pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)

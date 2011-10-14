@@ -3,7 +3,8 @@
 
 import sys, inspect
 from daetools.pyDAE import *
-from daetools.pyDAE.pyUnits import *
+import daetools.pyDAE.pyUnits
+from daetools.pyDAE.pyUnits import m, mm, km, kg, N, kJ, MPa, cSt
 from time import localtime, strftime
 
 def printQuantityInfo(name, q):
@@ -48,6 +49,8 @@ if __name__ == "__main__":
     print(z)
     z.value = 1 # set a new value in units in the quantity object, here in [m]
     print(z)
+    
+    print 1*MPa / (2*(cSt**2))
     
     try:
         result = (1*kg) < (2.3*m)

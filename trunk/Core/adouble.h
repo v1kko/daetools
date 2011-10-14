@@ -386,7 +386,7 @@ public:
 public:
 	virtual adNode*  Clone(void) const												= 0;
 	virtual adouble  Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual quantity CheckConsistency(void) const									= 0;
+	virtual quantity GetQuantity(void) const										= 0;
 
 	virtual void	Open(io::xmlTag_t* pTag)										= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const									= 0;
@@ -414,6 +414,7 @@ public:
 };
 
 #define CLONE_NODE(NODE, VALUE) (  boost::shared_ptr<adNode>(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
+#define UNITS(NODE) ( NODE ? NODE->GetQuantity().getUnits() : unit() )
 
 /*********************************************************************************************
 	adNodeArray
@@ -427,7 +428,7 @@ public:
 	virtual size_t			GetSize(void) const												= 0;
 	virtual adNodeArray*	Clone(void) const												= 0;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual quantity		CheckConsistency(void) const									= 0;
+	virtual quantity		GetQuantity(void) const											= 0;
 
 	virtual void	Open(io::xmlTag_t* pTag)												= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const											= 0;
@@ -469,7 +470,7 @@ public:
 public:	
 	virtual condNode*		Clone(void) const																= 0;
 	virtual bool			Evaluate(const daeExecutionContext* pExecutionContext) const					= 0;
-	virtual bool			CheckConsistency(void) const													= 0;
+	virtual bool			GetQuantity(void) const															= 0;
 	virtual daeCondition	CreateRuntimeNode(const daeExecutionContext* pExecutionContext) const			= 0;
 
 	virtual void		Open(io::xmlTag_t* pTag)															= 0;

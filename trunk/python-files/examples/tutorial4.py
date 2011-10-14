@@ -34,27 +34,24 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       eReal, self, "Mass of the copper plate, kg")
-        self.cp    = daeParameter("c_p",     eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.alpha = daeParameter("&alpha;", eReal, self, "Heat transfer coefficient, W/m2K")
-        self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
-        self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
+        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
 
-        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
-        self.time = daeVariable("&tau;", no_t,          self, "Time elapsed in the process, s")
-        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
+        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater")
+        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
-
-        eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.time.dt() - 1.0
 
         # Symmetrical STNs in DAE Tools can be created by using IF/ELSE_IF/ELSE/END_IF statements.
         # These statements are more or less used as normal if/else if/else blocks in all programming languages.
@@ -94,7 +91,7 @@ class modTutorial(daeModel):
         # go to the state ELSE.
         # In this example, input power of the heater will be 1500 Watts if the time is less than 200.
         # Once we reach 200 seconds the heater is switched off (power is 0 W) and the sytem starts to cool down.
-        self.IF(self.time() < 200, eventTolerance = 1E-5)
+        self.IF(self.time() < self.constant(200*s), eventTolerance = 1E-5)
 
         eq = self.CreateEquation("Q_on", "The heater is on")
         eq.Residual = self.Qin() - 1500
@@ -125,7 +122,6 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         self.m.T.SetInitialCondition(283)
-        self.m.time.SetInitialCondition(0)
 
 # Use daeSimulator class
 def guiRun(app):
