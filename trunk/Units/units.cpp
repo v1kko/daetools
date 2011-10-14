@@ -474,18 +474,18 @@ inline void fill_base_units(std::map<std::string, base_unit>& __base_units__)
 	std::map<std::string, base_unit> __scaled_units__;
 	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
 	{
-		__scaled_units__["T"  + (*iter).first] = base_units_pool::tera  * (*iter).second;
-		__scaled_units__["G"  + (*iter).first] = base_units_pool::giga  * (*iter).second;
-		__scaled_units__["M"  + (*iter).first] = base_units_pool::mega  * (*iter).second;
-		__scaled_units__["k"  + (*iter).first] = base_units_pool::kilo  * (*iter).second;
-		__scaled_units__["h"  + (*iter).first] = base_units_pool::hecto * (*iter).second;
-		__scaled_units__["da" + (*iter).first] = base_units_pool::deka  * (*iter).second;
-		__scaled_units__["d"  + (*iter).first] = base_units_pool::deci  * (*iter).second;
-		__scaled_units__["c"  + (*iter).first] = base_units_pool::centi * (*iter).second;
-		__scaled_units__["m"  + (*iter).first] = base_units_pool::mili  * (*iter).second;
-		__scaled_units__["u"  + (*iter).first] = base_units_pool::micro * (*iter).second;
-		__scaled_units__["n"  + (*iter).first] = base_units_pool::nano  * (*iter).second;
-		__scaled_units__["p"  + (*iter).first] = base_units_pool::pico  * (*iter).second;
+		__scaled_units__["T"  + (*iter).first] = base_units_pool::tera  * base_unit((*iter).second);
+		__scaled_units__["G"  + (*iter).first] = base_units_pool::giga  * base_unit((*iter).second);
+		__scaled_units__["M"  + (*iter).first] = base_units_pool::mega  * base_unit((*iter).second);
+		__scaled_units__["k"  + (*iter).first] = base_units_pool::kilo  * base_unit((*iter).second);
+		__scaled_units__["h"  + (*iter).first] = base_units_pool::hecto * base_unit((*iter).second);
+		__scaled_units__["da" + (*iter).first] = base_units_pool::deka  * base_unit((*iter).second);
+		__scaled_units__["d"  + (*iter).first] = base_units_pool::deci  * base_unit((*iter).second);
+		__scaled_units__["c"  + (*iter).first] = base_units_pool::centi * base_unit((*iter).second);
+		__scaled_units__["m"  + (*iter).first] = base_units_pool::mili  * base_unit((*iter).second);
+		__scaled_units__["u"  + (*iter).first] = base_units_pool::micro * base_unit((*iter).second);
+		__scaled_units__["n"  + (*iter).first] = base_units_pool::nano  * base_unit((*iter).second);
+		__scaled_units__["p"  + (*iter).first] = base_units_pool::pico  * base_unit((*iter).second);
 	}
 	__base_units__.insert(__scaled_units__.begin(), __scaled_units__.end());
 	
@@ -502,8 +502,8 @@ inline void fill_base_units(std::map<std::string, base_unit>& __base_units__)
 	__base_units__["l"]  = base_units_pool::l;
 	__base_units__["dl"] = base_units_pool::dl;
 	
-//	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
-//		std::cout << (*iter).first << " = " << (*iter).second << std::endl;
+	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
+		std::cout << (*iter).first << " = " << (*iter).second << std::endl;
 }
 
 
