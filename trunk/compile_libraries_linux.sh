@@ -45,9 +45,6 @@ fi
 if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
 fi
-if [ ! -e do-configure-trilinos.sh ]; then
-    wget ${DAETOOLS_HTTP}/do-configure-trilinos.sh
-fi
 
 # Unpack and compile libraries
 unzip Bonmin-${vBONMIN}.zip

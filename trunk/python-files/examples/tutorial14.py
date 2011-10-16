@@ -14,8 +14,8 @@ if __name__ == "__main__":
     u = unit({'kg':2, 'm':-3})
     print u
 
-    u = kg
-    print u
+    u = mm
+    print u.baseUnit
     print u*u
     print kg ** 2.3
     print kg * m**2 / 15 

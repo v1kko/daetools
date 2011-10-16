@@ -28,13 +28,14 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeDomain("x", self, "X axis domain")
-        self.y  = daeDomain("y", self, "Y axis domain")
+        self.x  = daeDomain("x", self, m, "X axis domain")
+        self.y  = daeDomain("y", self, m, "Y axis domain")
 
         self.Qb = daeParameter("Q_b", eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
         self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")

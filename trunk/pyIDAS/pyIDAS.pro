@@ -11,12 +11,12 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${SUNDIALS_LIBDIR}
 
-LIBS +=	$${BOOST_PYTHON_LIB} \
-        $${BOOST_LIBS} \
-        $${DAE_IDAS_SOLVER_LIB} \
+LIBS +=	$${DAE_IDAS_SOLVER_LIB} \
         $${DAE_UNITS_LIB} \
-        $${SUNDIALS_LIBS}
-
+        $${SUNDIALS_LIBS} \
+        $${BOOST_PYTHON_LIB} \
+        $${BOOST_LIBS}
+        
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \

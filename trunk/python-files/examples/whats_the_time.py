@@ -46,7 +46,7 @@ from time import localtime, strftime
 #     - InitialGuess: float
 #     - AbsoluteTolerance: float
 #    Here, a very simple variable type is declared:
-typeNone = daeVariableType("typeNone", "-", 0, 1E10,   0, 1e-5)
+typeNone = daeVariableType("typeNone", unit(), 0, 1E10,   0, 1e-5)
 
 # 3. Define a model
 #    New models are derived from the base daeModel class.

@@ -11,14 +11,13 @@ namespace core
 *******************************************************************/
 daeParameter::daeParameter(void)
 {
-	m_Unit	 = units_pool::dimensionless;
 	m_pModel = NULL;
 }
 	
 daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit	 = units_pool::dimensionless;
+	m_Unit   = units;
 	m_pModel = NULL;
 
 	if(!pModel)
@@ -26,12 +25,13 @@ daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, 
 	pModel->AddParameter(*this, strName, units, strDescription);
 	
 	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+	std::cout << (boost::format("%s units = %s, %s") % GetCanonicalName() % m_Unit % m_Unit.getBaseUnit()).str() << std::endl;
 }
 	
 daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit	 = units_pool::dimensionless;
+	m_Unit   = units;
 	m_pModel = NULL;
 
 	if(!pPort)

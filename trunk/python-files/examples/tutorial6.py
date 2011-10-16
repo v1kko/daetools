@@ -33,6 +33,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 # Ports, like models, consist of domains, parameters and variables. Parameters and variables
 # can be distributed as well. Here we define a very simple port, with only one variable.

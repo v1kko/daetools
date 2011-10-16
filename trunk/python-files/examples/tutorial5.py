@@ -33,19 +33,20 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       eReal, self, "Mass of the copper plate, kg")
-        self.cp    = daeParameter("c_p",     eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.alpha = daeParameter("&alpha;", eReal, self, "Heat transfer coefficient, W/m2K")
-        self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
-        self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
+        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
 
-        self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
-        self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
+        self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
+        self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")

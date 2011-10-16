@@ -115,7 +115,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Resume",                      &daeSimulation::Resume)
    
         .def("Initialize",					&daepython::daeDefaultSimulationWrapper::Initialize, ( boost::python::arg("CalculateSensitivities") = false ) )
-        .def("Reinitialize",                &daeSimulation::Reinitialize)
+        .def("Reinitialize",                &daeSimulation::Reinitialize)  
         .def("SolveInitial",                &daeSimulation::SolveInitial)
         .def("Integrate",                   &daeSimulation::Integrate, ( boost::python::arg("ReportDataAroundDiscontinuities") = true ) )
         .def("IntegrateForTimeInterval",    &daeSimulation::IntegrateForTimeInterval, ( boost::python::arg("ReportDataAroundDiscontinuities") = true ) )

@@ -504,7 +504,7 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 
 quantity adTimeNode::GetQuantity(void) const
 {
-	return quantity(0.0, units_pool::s);
+	return quantity(0.0, unit("s", 1));
 }
 
 adNode* adTimeNode::Clone(void) const

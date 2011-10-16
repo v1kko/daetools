@@ -73,7 +73,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("EndRegistration",		&daeBlackHoleDataReporter::EndRegistration)
 		.def("StartNewResultSet",	&daeBlackHoleDataReporter::StartNewResultSet)
 		.def("EndOfData",	    	&daeBlackHoleDataReporter::EndOfData)
-		.def("SendVariable",	  	&daeBlackHoleDataReporter::SendVariable)
+		.def("SendVariable",	  	&daeBlackHoleDataReporter::SendVariable)  
 		;
 
 	class_<daepython::daeDelegateDataReporterWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDelegateDataReporter")

@@ -29,13 +29,14 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeDomain("x", self, "X axis domain")
-        self.y  = daeDomain("y", self, "Y axis domain")
+        self.x  = daeDomain("x", self, m, "X axis domain")
+        self.y  = daeDomain("y", self, m, "Y axis domain")
 
         # Nq is an array (a discrete distribution domain) with 2 elements
         self.Nq  = daeDomain("Nq", self, "Number of heat fluxes")

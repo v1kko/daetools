@@ -4,7 +4,6 @@
 using namespace dae;
 #include "xmlfunctions.h"
 #include <typeinfo>
-#include "xmlfunctions.h"
 using namespace dae::xml;
 using namespace boost;
 
@@ -2935,7 +2934,7 @@ adouble adSetupExpressionDerivativeNode::Evaluate(const daeExecutionContext* pEx
 quantity adSetupExpressionDerivativeNode::GetQuantity(void) const
 {
 	quantity q = node->GetQuantity();
-	return quantity(0.0, q.getUnits() / units_pool::s);
+	return quantity(0.0, q.getUnits() / unit("s", 1));
 }
 
 // Here I work on runtime nodes!!

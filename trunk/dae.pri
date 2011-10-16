@@ -161,16 +161,14 @@ use_system_boost {
 unix::BOOSTDIR         = /usr/include/boost
 unix::BOOSTLIBPATH     = 
 unix::BOOST_PYTHON_LIB = -lboost_python
-unix::BOOST_LIBS       = -lboost_system \
-                         -lboost_thread
+unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
 }
 
 use_custom_boost { 
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB = -lboost_python
-unix::BOOST_LIBS       = -lboost_system \
-                         -lboost_thread
+unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
 }
 
 #####################################################################################

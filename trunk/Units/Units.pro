@@ -22,4 +22,5 @@ SOURCES += dllmain.cpp \
 
 # main.cpp
 HEADERS += units.h \
-    stdafx.h
+    stdafx.h \
+    units_pool.h

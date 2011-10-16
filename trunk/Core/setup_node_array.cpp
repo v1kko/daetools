@@ -4,7 +4,6 @@
 #include "xmlfunctions.h"
 using namespace dae;
 #include <typeinfo>
-#include "xmlfunctions.h"
 using namespace dae::xml;
 
 namespace dae 
@@ -326,7 +325,7 @@ quantity adSetupTimeDerivativeNodeArray::GetQuantity(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidCall);
-	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / units_pool::s);
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / unit("s", 1));
 }
 
 adNodeArray* adSetupTimeDerivativeNodeArray::Clone(void) const
