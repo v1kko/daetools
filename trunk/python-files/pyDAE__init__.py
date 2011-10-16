@@ -1,4 +1,4 @@
-#from pyUnits import base_unit, unit, quantity
+from pyUnits import base_unit, unit, quantity
 from pyCore import *
 from pyActivity import *
 from pyDataReporting import *
