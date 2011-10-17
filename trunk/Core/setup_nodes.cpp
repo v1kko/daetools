@@ -46,12 +46,12 @@ adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionCont
 	return tmp;
 }
 
-quantity adSetupParameterNode::GetQuantity(void) const
+const quantity adSetupParameterNode::GetQuantity(void) const
 {
 	if(!m_pParameter)
 		daeDeclareAndThrowException(exInvalidCall);
 	
-	std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
+	//std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
 	return quantity(0.0, m_pParameter->GetUnits());
 }
 
@@ -163,7 +163,7 @@ adouble adSetupDomainIteratorNode::Evaluate(const daeExecutionContext* pExecutio
 	return (*pDomain)[nIndex];
 }
 
-quantity adSetupDomainIteratorNode::GetQuantity(void) const
+const quantity adSetupDomainIteratorNode::GetQuantity(void) const
 {
 	if(!m_pDEDI)
 		daeDeclareAndThrowException(exInvalidCall);
@@ -276,12 +276,12 @@ adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionConte
 	return tmp;
 }
 
-quantity adSetupVariableNode::GetQuantity(void) const
+const quantity adSetupVariableNode::GetQuantity(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
 	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
@@ -405,12 +405,12 @@ adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutio
 	return tmp;
 }
 
-quantity adSetupTimeDerivativeNode::GetQuantity(void) const
+const quantity adSetupTimeDerivativeNode::GetQuantity(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
 	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / unit("s", 1));
 }
 
@@ -546,14 +546,14 @@ adouble adSetupPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecu
 	return tmp;
 }
 
-quantity adSetupPartialDerivativeNode::GetQuantity(void) const
+const quantity adSetupPartialDerivativeNode::GetQuantity(void) const
 {
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidCall);
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % (m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits()).getBaseUnit()).str() << std::endl;
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % (m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits()).getBaseUnit()).str() << std::endl;
 	if(m_nDegree == 1)
 		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
 	else

@@ -90,11 +90,15 @@ class modTutorial(daeModel):
         # The solver will check the condition 'time > 200' and will find out that it is satisfied and it will
         # go to the state ELSE.
         # In this example, input power of the heater will be 1500 Watts if the time is less than 200.
-        # Once we reach 200 seconds the heater is switched off (power is 0 W) and the sytem starts to cool down.
+        # Once we reach 200 seconds the heater is switched off (power is 0 W) and the system starts to cool down.
+        # Regarding the logival expression, we can use simply use:
+        #              self.time() < 200
+        # However, in order to be unit-consistent we may use also daeModel.constant() function that takes
+        # as an argument quantity object and return adouble. This way the unit consistency is always checked.
         self.IF(self.time() < self.constant(200*s), eventTolerance = 1E-5)
 
         eq = self.CreateEquation("Q_on", "The heater is on")
-        eq.Residual = self.Qin() - 1500
+        eq.Residual = self.Qin() - self.constant(1500 * W)
 
         self.ELSE()
 
@@ -114,14 +118,14 @@ class simTutorial(daeSimulation):
                               "removed and the metal cools down slowly again to the ambient temperature."
 
     def SetUpParametersAndDomains(self):
-        self.m.cp.SetValue(385)
-        self.m.m.SetValue(1)
-        self.m.alpha.SetValue(200)
-        self.m.A.SetValue(0.1)
-        self.m.Tsurr.SetValue(283)
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.m.SetValue(1 * kg)
+        self.m.alpha.SetValue(200 * W/((m**2)*K))
+        self.m.A.SetValue(0.1 * m**2)
+        self.m.Tsurr.SetValue(283 * K)
 
     def SetUpVariables(self):
-        self.m.T.SetInitialCondition(283)
+        self.m.T.SetInitialCondition(283 * K)
 
 # Use daeSimulator class
 def guiRun(app):

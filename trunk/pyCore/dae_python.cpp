@@ -145,9 +145,9 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<adouble>("adouble")
 		.add_property("Value",		&adouble::getValue,      &adouble::setValue)
-		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative)
+		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative)   
 
-        //.def("__repr__",     &daepython::adouble_repr)
+        .def("__repr__",     &daepython::adouble_repr)
 
         .def(- self)
 		.def(+ self)
@@ -591,7 +591,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReSetInitialCondition", &daepython::qReSetInitialCondition8)
 
 		.def("SetAbsoluteTolerances", &daeVariable::SetAbsoluteTolerances)
-		.def("SetInitialGuesses",     &daeVariable::SetInitialGuesses)
+		.def("SetInitialGuesses",     &daepython::SetInitialGuesses)
+		.def("SetInitialGuesses",     &daepython::qSetInitialGuesses)
 
 		.def("dt", &daepython::Get_dt0)
 		.def("dt", &daepython::Get_dt1)

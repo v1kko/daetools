@@ -364,12 +364,6 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 	return true;
 }
 
-quantity adNodeImpl::GetQuantity(void) const
-{
-	return quantity();
-}
-
-
 /*********************************************************************************************
 	adConstantNode
 **********************************************************************************************/
@@ -408,7 +402,7 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
 	return tmp;
 }
 
-quantity adConstantNode::GetQuantity(void) const
+const quantity adConstantNode::GetQuantity(void) const
 {
 	return quantity(0.0, m_Unit);
 }
@@ -502,7 +496,7 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 	return tmp;
 }
 
-quantity adTimeNode::GetQuantity(void) const
+const quantity adTimeNode::GetQuantity(void) const
 {
 	return quantity(0.0, unit("s", 1));
 }
@@ -596,6 +590,11 @@ adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionConte
 		tmp.node = shared_ptr<adNode>( Clone() );
 	}
 	return tmp;
+}
+
+const quantity adEventPortDataNode::GetQuantity(void) const
+{
+	return quantity();
 }
 
 adNode* adEventPortDataNode::Clone(void) const
@@ -693,6 +692,15 @@ adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionCo
 		return tmp;
 	}
 	return adouble(m_dValue);
+}
+
+const quantity adRuntimeParameterNode::GetQuantity(void) const
+{
+	if(!m_pParameter)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	//std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
+	return quantity(0.0, m_pParameter->GetUnits());
 }
 
 adNode* adRuntimeParameterNode::Clone(void) const
@@ -823,7 +831,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 	return adouble(m_pDomain->GetPoint(m_nIndex));
 }
 
-quantity adDomainIndexNode::GetQuantity(void) const
+const quantity adDomainIndexNode::GetQuantity(void) const
 {
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
@@ -988,6 +996,15 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 	{
 		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
+}
+
+const quantity adRuntimeVariableNode::GetQuantity(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
 adNode* adRuntimeVariableNode::Clone(void) const
@@ -1191,6 +1208,15 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 	}
 }
 
+const quantity adRuntimeTimeDerivativeNode::GetQuantity(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
+	return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / unit("s", 1));
+}
+
 adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 {
 	return new adRuntimeTimeDerivativeNode(*this);
@@ -1327,6 +1353,20 @@ adouble adRuntimePartialDerivativeNode::Evaluate(const daeExecutionContext* pExe
 	return pardevnode->Evaluate(pExecutionContext);
 }
 
+const quantity adRuntimePartialDerivativeNode::GetQuantity(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidCall);
+	if(!m_pDomain)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % (m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits()).getBaseUnit()).str() << std::endl;
+	if(m_nDegree == 1)
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
+	else
+		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / (m_pDomain->GetUnits() ^ 2));
+}
+
 adNode* adRuntimePartialDerivativeNode::Clone(void) const
 {
 	return new adRuntimePartialDerivativeNode(*this);
@@ -1452,98 +1492,70 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 	{
 	case eSign:
 		return -(node->Evaluate(pExecutionContext));
-		break;
 	case eSin:
 		return sin(node->Evaluate(pExecutionContext));
-		break;
 	case eCos:
 		return cos(node->Evaluate(pExecutionContext));
-		break;
 	case eTan:
 		return tan(node->Evaluate(pExecutionContext));
-		break;
 	case eArcSin:
 		return asin(node->Evaluate(pExecutionContext));
-		break;
 	case eArcCos:
 		return acos(node->Evaluate(pExecutionContext));
-		break;
 	case eArcTan:
 		return atan(node->Evaluate(pExecutionContext));
-		break;
 	case eSqrt:
 		return sqrt(node->Evaluate(pExecutionContext));
-		break;
 	case eExp:
 		return exp(node->Evaluate(pExecutionContext));
-		break;
 	case eLn:
 		return log(node->Evaluate(pExecutionContext));
-		break;
 	case eLog:
 		return log10(node->Evaluate(pExecutionContext));
-		break;
 	case eAbs:
 		return abs(node->Evaluate(pExecutionContext));
-		break;
 	case eCeil:
 		return ceil(node->Evaluate(pExecutionContext));
-		break;
 	case eFloor:
 		return floor(node->Evaluate(pExecutionContext));
-		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
 	}
 }
 
-quantity adUnaryNode::GetQuantity(void) const
+const quantity adUnaryNode::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case eSign:
 		return -(node->GetQuantity());
-		break;
 	case eSin:
 		return sin(node->GetQuantity());
-		break;
 	case eCos:
 		return cos(node->GetQuantity());
-		break;
 	case eTan:
 		return tan(node->GetQuantity());
-		break;
 	case eArcSin:
 		return asin(node->GetQuantity());
-		break;
 	case eArcCos:
 		return acos(node->GetQuantity());
-		break;
 	case eArcTan:
 		return atan(node->GetQuantity());
-		break;
 	case eSqrt:
 		return sqrt(node->GetQuantity());
-		break;
 	case eExp:
 		return exp(node->GetQuantity());
-		break;
 	case eLn:
 		return log(node->GetQuantity());
-		break;
 	case eLog:
 		return log10(node->GetQuantity());
-		break;
 	case eAbs:
 		return abs(node->GetQuantity());
-		break;
 	case eCeil:
 		return ceil(node->GetQuantity());
-		break;
 	case eFloor:
 		return floor(node->GetQuantity());
-		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return quantity();
@@ -2267,19 +2279,22 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
 	}
 }
 
-quantity adBinaryNode::GetQuantity(void) const
+const quantity adBinaryNode::GetQuantity(void) const
 {
 	switch(eFunction)
 	{
 	case ePlus:
+		std::cout << (boost::format("%1% + %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return left->GetQuantity() + right->GetQuantity();
 	case eMinus:
+		std::cout << (boost::format("%1% - %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return left->GetQuantity() - right->GetQuantity();
 	case eMulti:
 		return left->GetQuantity() * right->GetQuantity();
 	case eDivide:
 		return left->GetQuantity() / right->GetQuantity();
 	case ePower:
+		std::cout << (boost::format("pow(%1%, %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return pow(left->GetQuantity(), right->GetQuantity());
 	case eMin:
 		return min(left->GetQuantity(), right->GetQuantity());
@@ -2862,6 +2877,11 @@ adouble adExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionCo
 		tmp.node = shared_ptr<adNode>( Clone() );
 	}
 	return tmp;
+}
+
+const quantity adExternalFunctionNode::GetQuantity(void) const
+{
+	return quantity();
 }
 
 adNode* adExternalFunctionNode::Clone(void) const

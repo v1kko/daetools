@@ -91,17 +91,16 @@ class simTutorial(daeSimulation):
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
 
-        self.m.k.SetValue(401)
-        self.m.cp.SetValue(385)
-        self.m.ro.SetValue(8960)
-
-        self.m.Qt.SetValue(0)
+        self.m.k.SetValue(401 * W/(m*K))
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.Qt.SetValue(0 * W/(m**2))
 
     def SetUpVariables(self):
-        self.m.Qb.AssignValue(1e6)
+        self.m.Qb.AssignValue(1e6 * W/(m**2))
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300 * K)
 
     # daeDynamicSimulation class defines the function Run which is called after successful initialization
     # to run the simulation. By default it runs for time period defined by the TimeHorizon property,
@@ -126,18 +125,18 @@ class simTutorial(daeSimulation):
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        self.m.Qb.ReAssignValue(2E6)
+        self.m.Qb.ReAssignValue(2E6 * W/(m**2))
         self.Reinitialize()
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        self.m.Qb.ReAssignValue(1.5E6)
+        self.m.Qb.ReAssignValue(1.5E6 * W/(m**2))
         #self.m.Qt.SetValue(2E6)
         for x in range(1, self.m.x.NumberOfPoints-1):
             for y in range(1, self.m.y.NumberOfPoints-1):
-                self.m.T.ReSetInitialCondition(x, y, 300)
+                self.m.T.ReSetInitialCondition(x, y, 300 * K)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   

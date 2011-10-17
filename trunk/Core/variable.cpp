@@ -395,6 +395,12 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 	SetInitialGuess(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
 }
 
+void daeVariable::SetInitialGuesses(const quantity& q)
+{
+	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialGuesses(value);
+}
+
 void daeVariable::SetValue(const quantity& q)
 {
 	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();

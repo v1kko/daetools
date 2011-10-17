@@ -384,9 +384,9 @@ public:
 	virtual ~adNode(void){}
 
 public:
-	virtual adNode*  Clone(void) const												= 0;
-	virtual adouble  Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual quantity GetQuantity(void) const										= 0;
+	virtual adNode*			Clone(void) const												= 0;
+	virtual adouble			Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
+	virtual const quantity	GetQuantity(void) const											= 0;
 
 	virtual void	Open(io::xmlTag_t* pTag)										= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const									= 0;
@@ -428,7 +428,7 @@ public:
 	virtual size_t			GetSize(void) const												= 0;
 	virtual adNodeArray*	Clone(void) const												= 0;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual quantity		GetQuantity(void) const											= 0;
+	virtual const quantity	GetQuantity(void) const											= 0;
 
 	virtual void	Open(io::xmlTag_t* pTag)												= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const											= 0;

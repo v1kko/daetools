@@ -306,6 +306,7 @@ const adouble pow(const adouble &a, real_t v)
     adouble tmp;
 	if(a.getGatherInfo())
 	{
+		std::cout << (boost::format("pow1(%1%, %2%)") % a.node->GetQuantity() % v).str() << std::endl;
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(	ePower, 
 														CLONE_NODE(a.node, a.m_dValue),     
@@ -324,6 +325,7 @@ const adouble pow(const adouble &a, const adouble &b)
     adouble tmp;
 	if(a.m_bGatherInfo || b.getGatherInfo())
 	{
+		std::cout << (boost::format("pow2(%1%, %2%)") % a.node->GetQuantity() % b.node->GetQuantity()).str() << std::endl;
 		tmp.m_bGatherInfo = true;
 		tmp.node = shared_ptr<adNode>(new adBinaryNode(	ePower, 
 														CLONE_NODE(a.node, a.m_dValue), 

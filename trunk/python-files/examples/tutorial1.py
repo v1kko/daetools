@@ -117,11 +117,11 @@ class modTutorial(daeModel):
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate, W/m2")
-        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate, W/mK")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
        
         # In this example we need a variable T which is distributed on the domains x and y. Variables (but also other objects)
         # can be distributed by using a function DistributeOnDomain, which accepts a domain object as

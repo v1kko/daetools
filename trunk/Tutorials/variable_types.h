@@ -2,6 +2,7 @@
 #define DAE_EXAMPLE_VARIABLE_TYPES_H
 
 #include "../dae_develop.h"
+#include "../Units/units_pool.h"
 namespace
 {
 using namespace units::units_pool;

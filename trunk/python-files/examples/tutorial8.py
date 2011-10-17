@@ -40,6 +40,7 @@ from daetools.pyDAE.daeDataReporters import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, J, W
 
 # The best starting point in creating custom data reporters that can export the results
 # into a file is daeDataReporterLocal class. It internally does all the processing
@@ -111,12 +112,12 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.Qin  = daeParameter("Q_in", eReal, self, "Power of the heater, W")
+        self.Qin  = daeParameter("Q_in", W, self, "Power of the heater")
 
-        self.m  = daeParameter("m",   eReal, self, "Mass of the plate, kg")
-        self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
+        self.m  = daeParameter("m",   kg, self, "Mass of the plate")
+        self.cp = daeParameter("c_p", J/(kg*K), self, "Specific heat capacity of the plate")
 
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation.")
@@ -131,12 +132,12 @@ class simTutorial(daeSimulation):
                              "the data processing to other data reporters. "
 
     def SetUpParametersAndDomains(self):
-        self.m.cp.SetValue(385)
-        self.m.m.SetValue(1)
-        self.m.Qin.SetValue(500)
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.m.SetValue(1 * kg)
+        self.m.Qin.SetValue(500 * W)
 
     def SetUpVariables(self):
-        self.m.T.SetInitialCondition(300)
+        self.m.T.SetInitialCondition(300 * K)
 
 # All data reporters should be members of let's say simulation object, otherwise
 # the objects are destroyed at the exit of setupDataReporters function and

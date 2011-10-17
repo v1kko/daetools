@@ -582,6 +582,7 @@ void ReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, s
 void ReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void ReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void SetInitialGuesses(daeVariable& var, real_t value);
 void SetInitialGuess0(daeVariable& var, real_t value);
 void SetInitialGuess1(daeVariable& var, size_t n1, real_t value);
 void SetInitialGuess2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -642,6 +643,7 @@ void qReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, 
 void qReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
 void qReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
+void qSetInitialGuesses(daeVariable& var, const quantity& q);
 void qSetInitialGuess0(daeVariable& var, const quantity& q);
 void qSetInitialGuess1(daeVariable& var, size_t n1, const quantity& q);
 void qSetInitialGuess2(daeVariable& var, size_t n1, size_t n2, const quantity& q);

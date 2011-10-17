@@ -37,16 +37,15 @@ class modTutorial(daeModel):
         self.x  = daeDomain("x", self, m, "X axis domain")
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
-        self.Qb = daeParameter("Q_b", eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")
-
-        self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
-        self.Tave = daeVariable("T_ave", temperature_t, self, "The average temperature, K")
-        self.Tsum = daeVariable("T_sum", temperature_t, self, "The sum of heat fluxes at the bottom edge of the plate, W/m2")
+        self.Tave = daeVariable("T_ave", temperature_t, self, "The average temperature")
+        self.Qsum = daeVariable("Q_sum", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
@@ -106,8 +105,8 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
         eq.Residual = self.Tave() - self.average(self.T.array(xr, yr))
 
-        eq = self.CreateEquation("T_sum", "The sum of the plate temperatures")
-        eq.Residual = self.Tsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
+        eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
+        eq.Residual = self.Qsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -132,17 +131,16 @@ class simTutorial(daeSimulation):
         self.m.y.Points = [0.000, 0.005, 0.010, 0.015, 0.020, 0.025, 0.030, 0.035, 0.040, 0.070, 0.100]
         self.Log.Message("  After:" + str(self.m.y.Points), 0)
 
-        self.m.ro.SetValue(8960)
-        self.m.cp.SetValue(385)
-        self.m.k.SetValue(401)
-
-        self.m.Qb.SetValue(1e6)
-        self.m.Qt.SetValue(0)
+        self.m.k.SetValue(401   * W/(m*K))
+        self.m.cp.SetValue(385  * J/(kg*K))
+        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.Qb.SetValue(1e6  * W/(m**2))
+        self.m.Qt.SetValue(0    * W/(m**2))
 
     def SetUpVariables(self):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300*K)
 
 # Use daeSimulator class
 def guiRun(app):

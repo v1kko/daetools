@@ -28,6 +28,21 @@ daeVariableType::daeVariableType(string strName,
 	m_dAbsoluteTolerance  = dAbsoluteTolerance;
 }
 
+bool daeVariableType::operator ==(const daeVariableType& other)
+{
+	return  (m_dInitialGuess	   == other.m_dInitialGuess) &&
+			(m_dLowerBound		   == other.m_dLowerBound)   &&
+			(m_dUpperBound		   == other.m_dUpperBound)   &&
+			(m_Units               == other.m_Units)         &&
+			(m_strName             == other.m_strName)       &&
+			(m_dAbsoluteTolerance  == other.m_dAbsoluteTolerance);
+}
+
+bool daeVariableType::operator !=(const daeVariableType& other)
+{
+	return !(*this == other);
+}
+
 daeVariableType::~daeVariableType()
 {
 }

@@ -25,13 +25,17 @@ cools down slowly again to the ambient temperature.
 */
 
 #include "variable_types.h"
-
+using units_pool::m;
+using units_pool::kg;
+using units_pool::K;
+using units_pool::J;
+using units_pool::W;
 
 class modTutorial5 : public daeModel
 {
 daeDeclareDynamicClass(modTutorial5)
 public:
-    daeParameter m;
+    daeParameter mass;
     daeParameter c_p;
     daeParameter alpha;
     daeParameter A;
@@ -43,11 +47,11 @@ public:
 
     modTutorial5(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        m("m", eReal, this, "Mass of the copper plate, kg"),
-        c_p("c_p", eReal, this, "Specific heat capacity of the plate, J/kgK"),
-        alpha("&alpha;", eReal, this, "Heat transfer coefficient, W/m2K"),
-        A("A", eReal, this, "Area of the plate, m2"),
-        T_surr("T_surr", eReal, this, "Temperature of the surroundings, K"),
+        mass("m", kg, this, "Mass of the copper plate, kg"),
+        c_p("c_p", J/(kg*K), this, "Specific heat capacity of the plate, J/kgK"),
+        alpha("&alpha;", W/((m^2)*K), this, "Heat transfer coefficient, W/m2K"),
+        A("A", m^2, this, "Area of the plate, m2"),
+        T_surr("T_surr", K, this, "Temperature of the surroundings, K"),
         Q_in("Q_in", power_t, this, "Power of the heater, W"),
         tau("&tau;", no_t, this, "Time elapsed in the process, s"),
         T("T", temperature_t, this, "Temperature of the plate, K")
@@ -59,7 +63,7 @@ public:
         daeEquation* eq;
 
         eq = CreateEquation("HeatBalance", "Integral heat balance equation");
-        eq->SetResidual((((m() * c_p()) * T.dt()) - Q_in()) + ((alpha() * A()) * (T() - T_surr())));
+        eq->SetResidual( mass() * c_p() * T.dt() - Q_in() + alpha() * A() * (T() - T_surr()) );
 
         eq = CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.");
         eq->SetResidual(tau.dt() - 1);
@@ -123,7 +127,7 @@ public:
     void SetUpParametersAndDomains(void)
     {
         m.c_p.SetValue(385);
-        m.m.SetValue(1);
+        m.mass.SetValue(1);
         m.alpha.SetValue(200);
         m.A.SetValue(0.1);
         m.T_surr.SetValue(283);

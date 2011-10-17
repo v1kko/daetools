@@ -183,7 +183,7 @@ string daeDEDI_str(const daeDEDI& self)
 
 string adouble_repr(const adouble& self)
 {
-    return self.node->SaveAsLatex(NULL);
+    return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % string(typeid(*self.node.get()).name())).str();
 }
 
 /*******************************************************
@@ -1270,6 +1270,11 @@ void SetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 	var.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
+void SetInitialGuesses(daeVariable& var, real_t value)
+{
+	var.SetInitialGuesses(value);
+}
+
 void SetInitialGuess0(daeVariable& var, real_t value)
 {
 	var.SetInitialGuess(value);
@@ -1448,6 +1453,11 @@ void qSetVariableValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_
 void qSetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& value)
 {
     var.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
+void qSetInitialGuesses(daeVariable& var, const quantity& value)
+{
+    var.SetInitialGuesses(value);
 }
 
 void qSetInitialGuess0(daeVariable& var, const quantity& value)

@@ -39,32 +39,32 @@ class modTutorial(daeModel):
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
         # Nq is an array (a discrete distribution domain) with 2 elements
-        self.Nq  = daeDomain("Nq", self, "Number of heat fluxes")
+        self.Nq  = daeDomain("Nq", self, unit(), "Number of heat fluxes")
 
         # In this example the heat capacity is not a constant value but the temperature dependent (at every point in x and y domains).
         # To calculate cp a simple temperature dependency is proposed which depends on 2 parameters: a and b
-        self.cp = daeVariable("c_p", specific_heat_capacity_t, self, "Specific heat capacity of the plate, J/kgK")
+        self.cp = daeVariable("c_p", specific_heat_capacity_t, self, "Specific heat capacity of the plate")
         self.cp.DistributeOnDomain(self.x)
         self.cp.DistributeOnDomain(self.y)
 
-        self.a = daeParameter("a", eReal, self, "Coefficient for calculation of cp")
-        self.b = daeParameter("b", eReal, self, "Coefficient for calculation of cp")
+        self.a = daeParameter("a", J/(kg*K),      self, "Coefficient for calculation of cp")
+        self.b = daeParameter("b", J/(kg*(K**2)), self, "Coefficient for calculation of cp")
 
         # To introduce arrays (discrete distribution domains) parameters Qb and Qt are combined
         # into a single variable Q distributed on the domain Nq (that is as an array of fluxes)
-        self.Q  = daeParameter("Q", eReal, self, "Heat flux array at the edges of the plate (bottom/top), W/m2")
+        self.Q  = daeParameter("Q", W/(m**2), self, "Heat flux array at the edges of the plate (bottom/top)")
         self.Q.DistributeOnDomain(self.Nq)
 
         # In this example the thermal conductivity is a distributed parameter (on domains x and y)
-        self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.k  = daeParameter("&lambda;",  W/(m*K), self, "Thermal conductivity of the plate")
         self.k.DistributeOnDomain(self.x)
         self.k.DistributeOnDomain(self.y)
 
         # In this example the density is now a variable
-        self.ro = daeVariable("&rho;", density_t, self, "Density of the plate, kg/m3")
+        self.ro = daeVariable("&rho;", density_t, self, "Density of the plate")
 
         # Domains that variables/parameters are distributed on can be specified in a constructor:
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K", [self.x, self.y])
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate", [self.x, self.y])
         # Another way would be by using DistributeOnDomain() function:
         #self.T.DistributeOnDomain(self.x)
         #self.T.DistributeOnDomain(self.y)
@@ -121,15 +121,15 @@ class simTutorial(daeSimulation):
         # Nq is an array of size 2
         self.m.Nq.CreateArray(2)
 
-        self.m.a.SetValue(367.0)
-        self.m.b.SetValue(0.07)
+        self.m.a.SetValue(367.0 * J/(kg*K))
+        self.m.b.SetValue(0.07  * J/(kg*(K**2)))
 
-        self.m.Q.SetValue(0, 1e6)
-        self.m.Q.SetValue(1, 0.0)
+        self.m.Q.SetValue(0, 1e6 * W/(m**2))
+        self.m.Q.SetValue(1, 0.0 * W/(m**2))
 
         for x in range(0, self.m.x.NumberOfPoints):
             for y in range(0, self.m.y.NumberOfPoints):
-                self.m.k.SetValue(x, y, 401)
+                self.m.k.SetValue(x, y, 401 * W/(m*K))
 
     def SetUpVariables(self):
         # In the above model we defined 2*N*N+1 variables and 2*N*N equations,
@@ -139,20 +139,20 @@ class simTutorial(daeSimulation):
         # of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).
         # In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables.
         # The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:
-        self.m.ro.AssignValue(8960)
+        self.m.ro.AssignValue(8960 * kg/(m**3))
 
         # To help the DAE solver it is possible to set initial guesses of of the variables.
         # Closer the initial guess is to the solution - faster the solver will converge to the solution
         # Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.
         # Despite that, the solver will successfully initialize the system!
-        self.m.T.SetInitialGuesses(1000)
+        self.m.T.SetInitialGuesses(1000 * K)
         for x in range(self.m.x.NumberOfPoints):
             for y in range(self.m.y.NumberOfPoints):
-                self.m.cp.SetInitialGuess(x, y, 1000)
+                self.m.cp.SetInitialGuess(x, y, 1000 * J/(kg*K))
 
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300 * K)
 
 # Use daeSimulator class
 def guiRun(app):

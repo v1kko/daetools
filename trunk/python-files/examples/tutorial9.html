@@ -56,22 +56,22 @@
 <span style='color:#008000;'>#from daetools.solvers import pyLapack</span>
 
 <span style='color:#008000;'># Standard variable types are defined in daeVariableTypes.py</span>
+<span style='color:#0000ff;'>from</span> daetools.pyDAE.pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, J, W
 
 <b><span style='color:#000000;'>class</span></b> modTutorial(daeModel):
     <b><span style='color:#000000;'>def</span></b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>None</span>, Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.x  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.x  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, m, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, m, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Qb <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate, W/m2&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Qt <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate, W/m2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Qb <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>,         W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Qt <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>,         W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.ro <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>,      kg<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.cp <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,         J<span style='color:#0000ff;'>/</span>(kg<span style='color:#0000ff;'>*</span>K), <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.k  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;_p&quot;</span>,   W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>*</span>K), <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.ro <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate, kg/m3&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cp <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
-
-        <span style='color:#0000ff;'>self</span>.T <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.T <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
 
@@ -114,17 +114,16 @@
         <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
         <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span>)
-        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span>)
-        <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span>)
-
-        <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1e6</span>)
-        <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span>)
+        <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <span style='color:#0000ff;'>*</span> W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>*</span>K))
+        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <span style='color:#0000ff;'>*</span> J<span style='color:#0000ff;'>/</span>(kg<span style='color:#0000ff;'>*</span>K))
+        <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span> <span style='color:#0000ff;'>*</span> kg<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>3</span>))
+        <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1e6</span> <span style='color:#0000ff;'>*</span> W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>2</span>))
+        <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span> <span style='color:#0000ff;'>*</span> W<span style='color:#0000ff;'>/</span>(m<span style='color:#0000ff;'>**</span><span style='color:#c000c0;'>2</span>))
 
     <b><span style='color:#000000;'>def</span></b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         <b><span style='color:#000000;'>for</span></b> x <span style='color:#0000ff;'>in</span> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
             <b><span style='color:#000000;'>for</span></b> y <span style='color:#0000ff;'>in</span> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
-                <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
+                <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span> <span style='color:#0000ff;'>*</span> K)
 
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b><span style='color:#000000;'>def</span></b> guiRun(app):

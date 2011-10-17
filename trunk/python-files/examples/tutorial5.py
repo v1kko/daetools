@@ -69,19 +69,19 @@ class modTutorial(daeModel):
         self.STATE("Heating")
 
         eq = self.CreateEquation("Q_in", "The heater is on")
-        eq.Residual = self.Qin() - 1500
+        eq.Residual = self.Qin() - self.constant(1500 * W) # this can simply be: self.Qin() - 1500
 
         # Here the daeModel.time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("Cooling",   self.T()    > 340)
-        self.SWITCH_TO("HeaterOff", self.time() > 350)
+        self.SWITCH_TO("Cooling",   self.T()    > self.constant(340 * K)) # this can simply be: self.T() > 340
+        self.SWITCH_TO("HeaterOff", self.time() > self.constant(350 * s)) # this can simply be: self.time() > 350
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T()    < 320)
-        self.SWITCH_TO("HeaterOff", self.time() > 350)
+        self.SWITCH_TO("Heating",   self.T()    < self.constant(320 * K)) # this can simply be: self.T() < 320
+        self.SWITCH_TO("HeaterOff", self.time() > self.constant(350 * s)) # this can simply be: self.time() > 350
 
         self.STATE("HeaterOff")
 
@@ -102,17 +102,17 @@ class simTutorial(daeSimulation):
                              "[320 - 340] for at least 350 seconds. After 350s the heat source is removed and the metal" \
                              "cools down slowly again to the ambient temperature."
     def SetUpParametersAndDomains(self):
-        self.m.cp.SetValue(385)
-        self.m.m.SetValue(1)
-        self.m.alpha.SetValue(200)
-        self.m.A.SetValue(0.1)
-        self.m.Tsurr.SetValue(283)
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.m.SetValue(1 * kg)
+        self.m.alpha.SetValue(200 * W/((m**2)*K))
+        self.m.A.SetValue(0.1 * m**2)
+        self.m.Tsurr.SetValue(283 * K)
 
     def SetUpVariables(self):
         # Set the state active at the beginning (the default is the first declared state; here 'Heating')
         self.m.stnRegulator.ActiveState = "Heating"
 
-        self.m.T.SetInitialCondition(283)
+        self.m.T.SetInitialCondition(283 * K)
 
 
 # Use daeSimulator class

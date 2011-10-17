@@ -123,6 +123,9 @@ public:
 	virtual void	SetAbsoluteTolerance(real_t dTolerance);
 
 public:	
+	bool operator ==(const daeVariableType& other);
+	bool operator !=(const daeVariableType& other);
+	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
@@ -1573,6 +1576,7 @@ public:
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialGuesses);
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialGuesses);
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialGuesses);
+	virtual void	SetInitialGuesses(const quantity& dInitialGuesses);
 
 	virtual void	SetInitialCondition(const quantity& dInitialCondition);
 	virtual void	SetInitialCondition(size_t nD1, const quantity& dInitialCondition);

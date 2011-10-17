@@ -40,7 +40,7 @@ from time import localtime, strftime
 #    Variable types are typically declared outside of model classes since they define common, reusable types.
 #    The daeVariable constructor takes 6 arguments:
 #     - Name: string
-#     - Units: string
+#     - Units: unit object
 #     - LowerBound: float
 #     - UpperBound: float
 #     - InitialGuess: float

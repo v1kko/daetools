@@ -534,6 +534,8 @@ public:
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialGuesses) = 0;
+	// Set them for all indexes
+	virtual void	SetInitialGuesses(const quantity& dInitialGuesses) = 0;
 
 	virtual void	SetInitialCondition(const quantity& dInitialCondition)	= 0;
 	virtual void	SetInitialCondition(size_t nD1, const quantity& dInitialCondition)	= 0;

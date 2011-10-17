@@ -29,35 +29,35 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeDomain("x", self, "X axis domain")
-        self.y  = daeDomain("y", self, "Y axis domain")
+        self.x  = daeDomain("x", self, m, "X axis domain")
+        self.y  = daeDomain("y", self, m, "Y axis domain")
 
-        self.dx = daeParameter("&delta;_x", eReal, self, "Width of the plate, m")
-        self.dy = daeParameter("&delta;_y", eReal, self, "Height of the plate, m")
+        self.dx = daeParameter("&delta;_x", m, self, "Width of the plate")
+        self.dy = daeParameter("&delta;_y", m, self, "Height of the plate")
 
-        self.Qb = daeParameter("Q_b", eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t", eReal, self, "Heat flux at the top edge of the plate, W/m2")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
-        self.ro = daeParameter("&rho;", eReal, self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p", eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;",  eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.Q_int = daeVariable("Q_int", heat_flux_t, self, "The heat flux")
 
-        self.Q_int = daeVariable("Q_int", temperature_t, self, "The heat input per unit of length, W/m")
-
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 
         # Data needed to calculate the area of a semi-circle
-        self.c  = daeDomain("c", self, "Domain for a circle")
-        self.semicircle = daeVariable("SemiCircle", no_t, self, "Semi-circle")
+        self.c  = daeDomain("c", self, m, "Domain for a circle")
+        self.semicircle = daeVariable("SemiCircle", length_t, self, "Semi-circle")
         self.semicircle.DistributeOnDomain(self.c)
-        self.area = daeVariable("area", no_t, self, "Area of the semi-circle, m2")
+        self.area = daeVariable("area", area_t, self, "Area of the semi-circle")
 
     def DeclareEquations(self):
         # All equations are written so that they use only functions d() and dt() from daeModel
@@ -102,7 +102,9 @@ class modTutorial(daeModel):
         # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
         eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
         c = eq.DistributeOnDomain(self.c, eClosedClosed)
-        eq.Residual = self.semicircle(c) - Sqrt( 1**2 - c()**2 )
+        #print repr(c())
+        print 'repr(c() ** 0.5) = ', repr(c() ** 0.5)
+        eq.Residual = self.semicircle(c) - Sqrt( 1 - c()**2 )
 
         cr = daeIndexRange(self.c)
         eq = self.CreateEquation("Area", "Area of the semi-circle")

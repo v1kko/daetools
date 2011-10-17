@@ -143,6 +143,11 @@ const unit day  = unit("day",  1);
 const unit l  = unit("l",  1);
 const unit dl = unit("dl", 1);
 
+// Energy:
+DECLARE_UNIT(N);
+DECLARE_UNIT(J);
+DECLARE_UNIT(W);
+
 // Electrical:
 DECLARE_UNIT(V);
 DECLARE_UNIT(C);
