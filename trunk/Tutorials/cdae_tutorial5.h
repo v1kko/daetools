@@ -43,6 +43,7 @@ public:
     daeVariable Q_in;
     daeVariable tau;
     daeVariable T;
+    daeVariable xxx;
 	daeSTN* stnRegulator;
 
     modTutorial5(string strName, daeModel* pParent = NULL, string strDescription = "") 
@@ -54,6 +55,7 @@ public:
         T_surr("T_surr", K, this, "Temperature of the surroundings, K"),
         Q_in("Q_in", power_t, this, "Power of the heater, W"),
         tau("&tau;", no_t, this, "Time elapsed in the process, s"),
+        xxx("xxx", temperature_t, this, "Temperature of the plate, K"),
         T("T", temperature_t, this, "Temperature of the plate, K")
     {
     }
@@ -68,6 +70,9 @@ public:
         eq = CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.");
         eq->SetResidual(tau.dt() - 1);
 
+        eq = CreateEquation("xxx", "Differential equation to calculate the time elapsed in the process.");
+        eq->SetResidual(xxx() - sqrt(pow(T_surr(), 2.0)));
+		
     /*
         Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
         Again, states MUST contain the SAME NUMBER OF EQUATIONS.

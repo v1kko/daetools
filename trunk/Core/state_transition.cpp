@@ -297,13 +297,20 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 	{
 		bool b = m_Condition.m_pSetupConditionNode->GetQuantity();
 	}
-	catch(std::exception& e)
+	catch(units_error& e)
 	{
 		strError = "Unit-consistency check failed in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
 		strarrErrors.push_back(strError);
 		strError = "  " + string(e.what());
 		strarrErrors.push_back(strError);
 		bCheck = false;
+	}
+	catch(std::exception& e)
+	{
+		strError = "Exception occurred during unit-consistency check in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
+		strarrErrors.push_back(strError);
+		strError = "  " + string(e.what());
+		strarrErrors.push_back(strError);
 	}
 	
 /////////////////////////////////////////////////////////////

@@ -30,19 +30,20 @@ from daetools.solvers import pyTrilinos
 from daetools.solvers.aztecoo_options import daeAztecOptions
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x = daeDomain("x", self, "X axis domain")
-        self.y = daeDomain("y", self, "Y axis domain")
+        self.x = daeDomain("x", self, m, "X axis domain")
+        self.y = daeDomain("y", self, m, "Y axis domain")
 
-        self.Qb = daeParameter("Q_b",      eReal, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t",      eReal, self, "Heat flux at the top edge of the plate, W/m2")
-        self.ro = daeParameter("&rho;",    eReal, self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p",      eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;", eReal, self, "Thermal conductivity of the plate, W/mK")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         self.T = daeVariable("T", temperature_t, self)
         self.T.DistributeOnDomain(self.x)
@@ -87,16 +88,16 @@ class simTutorial(daeSimulation):
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
 
-        self.m.k.SetValue(401)
-        self.m.cp.SetValue(385)
-        self.m.ro.SetValue(8960)
-        self.m.Qb.SetValue(1e6)
-        self.m.Qt.SetValue(0)
+        self.m.k.SetValue(401 * W/(m*K))
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.Qb.SetValue(1e6 * W/(m**2))
+        self.m.Qt.SetValue(0 * W/(m**2))
 
     def SetUpVariables(self):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300 * K)
 
 # Function to create the Trilinos linear equation solver.
 # AztecOO solvers do not work well yet

@@ -7,190 +7,189 @@
 <title>tutorial12.py</title>
 </head>
 <body>
-<pre style='color:#141312;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<pre style='color:#181615;background-color:#ffffff;'>
+<i><span style='color:#898887;'>#!/usr/bin/env python</span></i>
+<i><span style='color:#898887;'># -*- coding: utf-8 -*-</span></i>
 
-<span style='color:#008000;'>&quot;&quot;&quot;********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial12.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>********************************************************************************&quot;&quot;&quot;</span>
+<i><span style='color:#898887;'>&quot;&quot;&quot;********************************************************************************</span></i>
+<i><span style='color:#898887;'>                             tutorial12.py</span></i>
+<i><span style='color:#898887;'>                 DAE Tools: pyDAE module, www.daetools.com</span></i>
+<i><span style='color:#898887;'>                 Copyright (C) Dragan Nikolic, 2010</span></i>
+<i><span style='color:#898887;'>***********************************************************************************</span></i>
+<i><span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span></i>
+<i><span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span></i>
+<i><span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span></i>
+<i><span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span></i>
+<i><span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></i>
+<i><span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span></i>
+<i><span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span></i>
+<i><span style='color:#898887;'>********************************************************************************&quot;&quot;&quot;</span></i>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>As of the version 1.1.1 the main linear algebraic equations solver is superLU.</span>
-<span style='color:#008000;'>Originally it comes in three variates:</span>
-<span style='color:#008000;'> - sequential (superlu)</span>
-<span style='color:#008000;'> - multithreaded (OpenMP/posix threads) superlu_MT</span>
-<span style='color:#008000;'> - MPI (superlu_MPI)</span>
-<span style='color:#008000;'>The first two are available in daetools with the addition of a new port: superlu_CUDA</span>
-<span style='color:#008000;'>that works on computers with NVidia CUDA enabled video cards. However, the later is</span>
-<span style='color:#008000;'>still in an early stage of the development and some help would be appreciated.</span>
+<i><span style='color:#898887;'>&quot;&quot;&quot;</span></i>
+<i><span style='color:#898887;'>As of the version 1.1.1 the main linear algebraic equations solver is superLU.</span></i>
+<i><span style='color:#898887;'>Originally it comes in three variates:</span></i>
+<i><span style='color:#898887;'> - sequential (superlu)</span></i>
+<i><span style='color:#898887;'> - multithreaded (OpenMP/posix threads) superlu_MT</span></i>
+<i><span style='color:#898887;'> - MPI (superlu_MPI)</span></i>
+<i><span style='color:#898887;'>The first two are available in daetools with the addition of a new port: superlu_CUDA</span></i>
+<i><span style='color:#898887;'>that works on computers with NVidia CUDA enabled video cards. However, the later is</span></i>
+<i><span style='color:#898887;'>still in an early stage of the development and some help would be appreciated.</span></i>
 
-<span style='color:#008000;'>In this example, usage and available options of superlu and superlu_MT are explored.</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<i><span style='color:#898887;'>In this example, usage and available options of superlu and superlu_MT are explored.</span></i>
+<i><span style='color:#898887;'>&quot;&quot;&quot;</span></i>
 
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <span style='color:#0000ff;'>*</span>
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.solvers <span style='color:#0000ff;'>import</span> pySuperLU <span style='color:#0000ff;'>as</span> superlu
-<span style='color:#008000;'>#from daetools.solvers import pySuperLU_MT as superlu</span>
-<span style='color:#008000;'>#from daetools.solvers import pySuperLU_CUDA as superlu</span>
+<span style='color:#ff80e0;'>import</span> sys
+<span style='color:#ff80e0;'>from</span> daetools.pyDAE <span style='color:#ff80e0;'>import</span> <b>*</b>
+<span style='color:#ff80e0;'>from</span> time <span style='color:#ff80e0;'>import</span> localtime, strftime
+<span style='color:#ff80e0;'>from</span> daetools.solvers <span style='color:#ff80e0;'>import</span> pySuperLU <span style='color:#ff80e0;'>as</span> superlu
+<i><span style='color:#898887;'>#from daetools.solvers import pySuperLU_MT as superlu</span></i>
+<i><span style='color:#898887;'>#from daetools.solvers import pySuperLU_CUDA as superlu</span></i>
 
-<span style='color:#008000;'># Standard variable types are defined in daeVariableTypes.py</span>
+<i><span style='color:#898887;'># Standard variable types are defined in daeVariableTypes.py</span></i>
+<span style='color:#ff80e0;'>from</span> daetools.pyDAE.pyUnits <span style='color:#ff80e0;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-<b><span style='color:#000000;'>class</span></b> modTutorial(daeModel):
-    <b><span style='color:#000000;'>def</span></b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>None</span>, Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>, Name, Parent <b>=</b> <span style='color:#006e28;'>None</span>, Description <b>=</b> <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.x  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y  <span style='color:#0000ff;'>=</span> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
+        <span style='color:#006e28;'>self</span>.x  <b>=</b> daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#006e28;'>self</span>, m, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
+        <span style='color:#006e28;'>self</span>.y  <b>=</b> daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#006e28;'>self</span>, m, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Qb <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate, W/m2&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Qt <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate, W/m2&quot;</span>)
+        <span style='color:#006e28;'>self</span>.Qb <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>,         W<b>/</b>(m<b>**</b><span style='color:#b08000;'>2</span>), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.Qt <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>,         W<b>/</b>(m<b>**</b><span style='color:#b08000;'>2</span>), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.ro <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>,      kg<b>/</b>(m<b>**</b><span style='color:#b08000;'>3</span>), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.cp <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,         J<b>/</b>(kg<b>*</b>K), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.k  <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;_p&quot;</span>,   W<b>/</b>(m<b>*</b>K), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.ro <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate, kg/m3&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cp <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>, eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k  <span style='color:#0000ff;'>=</span> daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;&quot;</span>,  eReal, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate, W/mK&quot;</span>)
+        <span style='color:#006e28;'>self</span>.T <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
+        <span style='color:#006e28;'>self</span>.T.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x)
+        <span style='color:#006e28;'>self</span>.T.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y)
 
-        <span style='color:#0000ff;'>self</span>.T <span style='color:#0000ff;'>=</span> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
-        <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y)
+    <b>def</b> DeclareEquations(<span style='color:#006e28;'>self</span>):
+        eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Heat balance equation. Valid on the open x and y domains&quot;</span>)
+        x <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x, eOpenOpen)
+        y <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y, eOpenOpen)
+        eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.ro() <b>*</b> <span style='color:#006e28;'>self</span>.cp() <b>*</b> <span style='color:#006e28;'>self</span>.T.dt(x, y) <b>-</b> <span style='color:#006e28;'>self</span>.k() <b>*</b> \
+                     (<span style='color:#006e28;'>self</span>.T.d2(<span style='color:#006e28;'>self</span>.x, x, y) <b>+</b> <span style='color:#006e28;'>self</span>.T.d2(<span style='color:#006e28;'>self</span>.y, x, y))
 
-    <b><span style='color:#000000;'>def</span></b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Heat balance equation. Valid on the open x and y domains&quot;</span>)
-        x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
-        y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.ro() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.cp() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.k() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>\</span>
-                     (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <span style='color:#0000ff;'>+</span> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))
+        eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_bottom&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
+        x <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x, eClosedClosed)
+        y <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y, eLowerBound)
+        eq.Residual <b>=</b> <b>-</b> <span style='color:#006e28;'>self</span>.k() <b>*</b> <span style='color:#006e28;'>self</span>.T.d(<span style='color:#006e28;'>self</span>.y, x, y) <b>-</b> <span style='color:#006e28;'>self</span>.Qb()
 
-        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_bottom&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
-        x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
-        y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)
-        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.k() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Qb()
+        eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_top&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the top edge&quot;</span>)
+        x <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x, eClosedClosed)
+        y <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y, eUpperBound)
+        eq.Residual <b>=</b> <b>-</b> <span style='color:#006e28;'>self</span>.k() <b>*</b> <span style='color:#006e28;'>self</span>.T.d(<span style='color:#006e28;'>self</span>.y, x, y) <b>-</b> <span style='color:#006e28;'>self</span>.Qt()
 
-        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_top&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the top edge&quot;</span>)
-        x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
-        y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.k() <span style='color:#0000ff;'>*</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <span style='color:#0000ff;'>-</span> <span style='color:#0000ff;'>self</span>.Qt()
+        eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_left&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions at the left edge&quot;</span>)
+        x <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x, eLowerBound)
+        y <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y, eOpenOpen)
+        eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.T.d(<span style='color:#006e28;'>self</span>.x, x, y)
 
-        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_left&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions at the left edge&quot;</span>)
-        x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eLowerBound)
-        y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_right&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the right edge&quot;</span>)
+        x <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.x, eUpperBound)
+        y <b>=</b> eq.DistributeOnDomain(<span style='color:#006e28;'>self</span>.y, eOpenOpen)
+        eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.T.d(<span style='color:#006e28;'>self</span>.x, x, y)
 
-        eq <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_right&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the right edge&quot;</span>)
-        x <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eUpperBound)
-        y <span style='color:#0000ff;'>=</span> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <span style='color:#0000ff;'>=</span> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>)
+        <span style='color:#006e28;'>self</span>.m <b>=</b> modTutorial(<span style='color:#bf0303;'>&quot;tutorial12&quot;</span>)
+        <span style='color:#006e28;'>self</span>.m.Description <b>=</b> <span style='color:#bf0303;'>&quot;This tutorial explains how to create 3rd party linear solvers. &quot;</span>
 
-<b><span style='color:#000000;'>class</span></b> simTutorial(daeSimulation):
-    <b><span style='color:#000000;'>def</span></b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <span style='color:#0000ff;'>=</span> modTutorial(<span style='color:#bf0303;'>&quot;tutorial12&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <span style='color:#0000ff;'>=</span> <span style='color:#bf0303;'>&quot;This tutorial explains how to create 3rd party linear solvers. &quot;</span>
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#006e28;'>self</span>):
+        n <b>=</b> <span style='color:#b08000;'>20</span>
 
-    <b><span style='color:#000000;'>def</span></b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        n <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>20</span>
+        <span style='color:#006e28;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#b08000;'>2</span>, n, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
+        <span style='color:#006e28;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#b08000;'>2</span>, n, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#006e28;'>self</span>.m.k.SetValue(<span style='color:#b08000;'>401</span> <b>*</b> W<b>/</b>(m<b>*</b>K))
+        <span style='color:#006e28;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> <b>*</b> J<b>/</b>(kg<b>*</b>K))
+        <span style='color:#006e28;'>self</span>.m.ro.SetValue(<span style='color:#b08000;'>8960</span> <b>*</b> kg<b>/</b>(m<b>**</b><span style='color:#b08000;'>3</span>))
+        <span style='color:#006e28;'>self</span>.m.Qb.SetValue(<span style='color:#b08000;'>1e6</span> <b>*</b> W<b>/</b>(m<b>**</b><span style='color:#b08000;'>2</span>))
+        <span style='color:#006e28;'>self</span>.m.Qt.SetValue(<span style='color:#b08000;'>0</span> <b>*</b> W<b>/</b>(m<b>**</b><span style='color:#b08000;'>2</span>))
 
-        <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span>)
-        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span>)
-        <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span>)
+    <b>def</b> SetUpVariables(<span style='color:#006e28;'>self</span>):
+        <b>for</b> x <b>in</b> <span style='color:#0057ae;'>range</span>(<span style='color:#b08000;'>1</span>, <span style='color:#006e28;'>self</span>.m.x.NumberOfPoints <b>-</b> <span style='color:#b08000;'>1</span>):
+            <b>for</b> y <b>in</b> <span style='color:#0057ae;'>range</span>(<span style='color:#b08000;'>1</span>, <span style='color:#006e28;'>self</span>.m.y.NumberOfPoints <b>-</b> <span style='color:#b08000;'>1</span>):
+                <span style='color:#006e28;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#b08000;'>300</span> <b>*</b> K)
 
-        <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1e6</span>)
-        <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span>)
+<b>def</b> CreateLASolver():
+    lasolver <b>=</b> superlu.daeCreateSuperLUSolver()
+    options  <b>=</b> lasolver.GetOptions()
 
-    <b><span style='color:#000000;'>def</span></b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <b><span style='color:#000000;'>for</span></b> x <span style='color:#0000ff;'>in</span> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
-            <b><span style='color:#000000;'>for</span></b> y <span style='color:#0000ff;'>in</span> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <span style='color:#0000ff;'>-</span> <span style='color:#c000c0;'>1</span>):
-                <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span>)
+    <b>if</b> lasolver.Name <b>==</b> <span style='color:#bf0303;'>'SuperLU'</span>:
+        <i><span style='color:#898887;'># SuperLU options:</span></i>
+        options.PrintStat       <b>=</b> superlu.YES       <i><span style='color:#898887;'># {YES, NO}</span></i>
+        options.ColPerm         <b>=</b> superlu.COLAMD    <i><span style='color:#898887;'># {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}</span></i>
+        options.RowPerm         <b>=</b> superlu.NOROWPERM <i><span style='color:#898887;'># {NOROWPERM, LargeDiag}</span></i>
+        options.DiagPivotThresh <b>=</b> <span style='color:#b08000;'>1.0</span>               <i><span style='color:#898887;'># Between 0.0 and 1.0</span></i>
 
-<b><span style='color:#000000;'>def</span></b> CreateLASolver():
-    lasolver <span style='color:#0000ff;'>=</span> superlu.daeCreateSuperLUSolver()
-    options  <span style='color:#0000ff;'>=</span> lasolver.GetOptions()
+    <b>elif</b> lasolver.Name <b>==</b> <span style='color:#bf0303;'>'SuperLU_MT'</span>:
+        <i><span style='color:#898887;'># SuperLU_MT options:</span></i>
+        options.nprocs            <b>=</b> <span style='color:#b08000;'>4</span>                 <i><span style='color:#898887;'># No. of threads (= no. of CPUs/Cores)</span></i>
+        options.PrintStat         <b>=</b> superlu.YES       <i><span style='color:#898887;'># {YES, NO}</span></i>
+        options.ColPerm           <b>=</b> superlu.COLAMD    <i><span style='color:#898887;'># {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}</span></i>
+        options.diag_pivot_thresh <b>=</b> <span style='color:#b08000;'>1.0</span>               <i><span style='color:#898887;'># Between 0.0 and 1.0</span></i>
+        options.panel_size        <b>=</b> <span style='color:#b08000;'>8</span>                 <i><span style='color:#898887;'># Integer value</span></i>
+        options.relax             <b>=</b> <span style='color:#b08000;'>6</span>                 <i><span style='color:#898887;'># Integer value</span></i>
+        options.drop_tol          <b>=</b> <span style='color:#b08000;'>0.0</span>               <i><span style='color:#898887;'># Floating point value</span></i>
 
-    <b><span style='color:#000000;'>if</span></b> lasolver.Name <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>'SuperLU'</span>:
-        <span style='color:#008000;'># SuperLU options:</span>
-        options.PrintStat       <span style='color:#0000ff;'>=</span> superlu.YES       <span style='color:#008000;'># {YES, NO}</span>
-        options.ColPerm         <span style='color:#0000ff;'>=</span> superlu.COLAMD    <span style='color:#008000;'># {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}</span>
-        options.RowPerm         <span style='color:#0000ff;'>=</span> superlu.NOROWPERM <span style='color:#008000;'># {NOROWPERM, LargeDiag}</span>
-        options.DiagPivotThresh <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1.0</span>               <span style='color:#008000;'># Between 0.0 and 1.0</span>
+    <b>return</b> lasolver
 
-    <b><span style='color:#000000;'>elif</span></b> lasolver.Name <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>'SuperLU_MT'</span>:
-        <span style='color:#008000;'># SuperLU_MT options:</span>
-        options.nprocs            <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>4</span>                 <span style='color:#008000;'># No. of threads (= no. of CPUs/Cores)</span>
-        options.PrintStat         <span style='color:#0000ff;'>=</span> superlu.YES       <span style='color:#008000;'># {YES, NO}</span>
-        options.ColPerm           <span style='color:#0000ff;'>=</span> superlu.COLAMD    <span style='color:#008000;'># {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}</span>
-        options.diag_pivot_thresh <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1.0</span>               <span style='color:#008000;'># Between 0.0 and 1.0</span>
-        options.panel_size        <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>8</span>                 <span style='color:#008000;'># Integer value</span>
-        options.relax             <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>6</span>                 <span style='color:#008000;'># Integer value</span>
-        options.drop_tol          <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>0.0</span>               <span style='color:#008000;'># Floating point value</span>
-
-    <b><span style='color:#000000;'>return</span></b> lasolver
-
-<span style='color:#008000;'># Use daeSimulator class</span>
-<b><span style='color:#000000;'>def</span></b> guiRun(app):
-    sim <span style='color:#0000ff;'>=</span> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
-    sim.TimeHorizon       <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1000</span>
-    la <span style='color:#0000ff;'>=</span> CreateLASolver()
-    simulator <span style='color:#0000ff;'>=</span> daeSimulator(app, simulation <span style='color:#0000ff;'>=</span> sim, lasolver <span style='color:#0000ff;'>=</span> la)
+<i><span style='color:#898887;'># Use daeSimulator class</span></i>
+<b>def</b> guiRun(app):
+    sim <b>=</b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#006e28;'>True</span>)
+    sim.ReportingInterval <b>=</b> <span style='color:#b08000;'>10</span>
+    sim.TimeHorizon       <b>=</b> <span style='color:#b08000;'>1000</span>
+    la <b>=</b> CreateLASolver()
+    simulator <b>=</b> daeSimulator(app, simulation <b>=</b> sim, lasolver <b>=</b> la)
     simulator.exec_()
 
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
-<b><span style='color:#000000;'>def</span></b> consoleRun():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <span style='color:#0000ff;'>=</span> daePythonStdOutLog()
-    daesolver    <span style='color:#0000ff;'>=</span> daeIDAS()
-    datareporter <span style='color:#0000ff;'>=</span> daeTCPIPDataReporter()
-    simulation   <span style='color:#0000ff;'>=</span> simTutorial()
-    lasolver     <span style='color:#0000ff;'>=</span> CreateLASolver()
+<i><span style='color:#898887;'># Setup everything manually and run in a console</span></i>
+<b>def</b> consoleRun():
+    <i><span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span></i>
+    log          <b>=</b> daePythonStdOutLog()
+    daesolver    <b>=</b> daeIDAS()
+    datareporter <b>=</b> daeTCPIPDataReporter()
+    simulation   <b>=</b> simTutorial()
+    lasolver     <b>=</b> CreateLASolver()
     daesolver.SetLASolver(lasolver)
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <i><span style='color:#898887;'># Enable reporting of all variables</span></i>
+    simulation.m.SetReportingOn(<span style='color:#006e28;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon <span style='color:#0000ff;'>=</span> <span style='color:#c000c0;'>1000</span>
+    <i><span style='color:#898887;'># Set the time horizon and the reporting interval</span></i>
+    simulation.ReportingInterval <b>=</b> <span style='color:#b08000;'>10</span>
+    simulation.TimeHorizon <b>=</b> <span style='color:#b08000;'>1000</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <span style='color:#0000ff;'>=</span> simulation.m.Name <span style='color:#0000ff;'>+</span> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b><span style='color:#000000;'>if</span></b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <span style='color:#0000ff;'>==</span> <span style='color:#0000ff;'>False</span>):
+    <i><span style='color:#898887;'># Connect data reporter</span></i>
+    simName <b>=</b> simulation.m.Name <b>+</b> strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <b>==</b> <span style='color:#006e28;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <i><span style='color:#898887;'># Initialize the simulation</span></i>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <span style='color:#0000ff;'>+</span> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <i><span style='color:#898887;'># Save the model report and the runtime model report</span></i>
+    simulation.m.SaveModelReport(simulation.m.Name <b>+</b> <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b>+</b> <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <i><span style='color:#898887;'># Solve at time=0 (initialization)</span></i>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <i><span style='color:#898887;'># Run</span></i>
     simulation.Run()
     simulation.Finalize()
 
-<b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>__name__</span> <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b><span style='color:#000000;'>if</span></b> <span style='color:#0000ff;'>len</span>(sys.argv) <span style='color:#0000ff;'>&gt;</span> <span style='color:#c000c0;'>1</span> <span style='color:#0000ff;'>and</span> (sys.argv[<span style='color:#c000c0;'>1</span>] <span style='color:#0000ff;'>==</span> <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#0057ae;'>__name__</span> <b>==</b> <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#0057ae;'>len</span>(sys.argv) <b>&gt;</b> <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] <b>==</b> <span style='color:#bf0303;'>'console'</span>):
         consoleRun()
-    <b><span style='color:#000000;'>else</span></b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <span style='color:#0000ff;'>=</span> QtGui.QApplication(sys.argv)
+    <b>else</b>:
+        <span style='color:#ff80e0;'>from</span> PyQt4 <span style='color:#ff80e0;'>import</span> QtCore, QtGui
+        app <b>=</b> QtGui.QApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

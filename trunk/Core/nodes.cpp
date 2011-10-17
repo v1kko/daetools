@@ -404,7 +404,7 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
 
 const quantity adConstantNode::GetQuantity(void) const
 {
-	return quantity(0.0, m_Unit);
+	return quantity(m_dValue, m_Unit);
 }
 
 adNode* adConstantNode::Clone(void) const
@@ -700,7 +700,7 @@ const quantity adRuntimeParameterNode::GetQuantity(void) const
 		daeDeclareAndThrowException(exInvalidCall);
 	
 	//std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
-	return quantity(0.0, m_pParameter->GetUnits());
+	return quantity(m_dValue, m_pParameter->GetUnits());
 }
 
 adNode* adRuntimeParameterNode::Clone(void) const
@@ -2284,17 +2284,14 @@ const quantity adBinaryNode::GetQuantity(void) const
 	switch(eFunction)
 	{
 	case ePlus:
-		std::cout << (boost::format("%1% + %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return left->GetQuantity() + right->GetQuantity();
 	case eMinus:
-		std::cout << (boost::format("%1% - %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return left->GetQuantity() - right->GetQuantity();
 	case eMulti:
 		return left->GetQuantity() * right->GetQuantity();
 	case eDivide:
 		return left->GetQuantity() / right->GetQuantity();
 	case ePower:
-		std::cout << (boost::format("pow(%1%, %2%)") % left->GetQuantity() % right->GetQuantity()).str() << std::endl;
 		return pow(left->GetQuantity(), right->GetQuantity());
 	case eMin:
 		return min(left->GetQuantity(), right->GetQuantity());

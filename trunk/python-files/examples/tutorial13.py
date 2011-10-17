@@ -31,6 +31,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
+from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
 
 # User defined action executed in OnEvent handler
 # The __init__ function accepts an event port as an argument that is used 
@@ -44,7 +45,6 @@ class simpleUserAction(daeAction):
         # The floating point value of the data sent with the event can be retrieved 
         # using daeEventPort property EventData 
         msg = 'simpleUserAction executed; input data = {0}'.format(self.eventPort.EventData)
-        print msg
         
         # Try to show a message box if there is application instance already defined
         # that is we are in the 'gui' mode
@@ -53,20 +53,20 @@ class simpleUserAction(daeAction):
             if QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(None, 'tutorial13', msg)
         except:
-            pass
+            print msg
         
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       eReal, self, "Mass of the copper plate, kg")
-        self.cp    = daeParameter("c_p",     eReal, self, "Specific heat capacity of the plate, J/kgK")
-        self.alpha = daeParameter("&alpha;", eReal, self, "Heat transfer coefficient, W/m2K")
-        self.A     = daeParameter("A",       eReal, self, "Area of the plate, m2")
-        self.Tsurr = daeParameter("T_surr",  eReal, self, "Temperature of the surroundings, K")
+        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
 
-        self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater, W")
-        self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate, K")
+        self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
+        self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
         self.event = daeVariable("event", no_t,          self, "Variable which variable is set in ON_EVENT functon")
 
         # Here we create two event ports (inlet and outlet) and connect them.
@@ -86,7 +86,7 @@ class modTutorial(daeModel):
         self.STATE("Heating")
 
         eq = self.CreateEquation("Q_in", "The heater is on")
-        eq.Residual = self.Qin() - 1500
+        eq.Residual = self.Qin() - self.constant(1500 * W) # this can simply be: self.Qin() - 1500
 
         """
                                           ON_CONDITION() function
@@ -100,7 +100,7 @@ class modTutorial(daeModel):
              will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
           - 'userDefinedActions' is a list of user defined daeAction-derived objects
         """
-        self.ON_CONDITION(self.T()    > 340, switchTo           = 'Cooling',
+        self.ON_CONDITION(self.T() > 340,    switchTo           = 'Cooling',
                                              triggerEvents      = [],
                                              setVariableValues  = [ (self.event, 100) ],
                                              userDefinedActions = [] )
@@ -115,7 +115,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.ON_CONDITION(self.T()    < 320, switchTo          = 'Heating',
+        self.ON_CONDITION(self.T() < 320,    switchTo          = 'Heating',
                                              triggerEvents     = [],
                                              setVariableValues = [ (self.event, 200) ],
                                              userDefinedActions = [] )
@@ -169,17 +169,17 @@ class simTutorial(daeSimulation):
                              "  - User defined actions" \
 
     def SetUpParametersAndDomains(self):
-        self.m.cp.SetValue(385)
-        self.m.m.SetValue(1)
-        self.m.alpha.SetValue(200)
-        self.m.A.SetValue(0.1)
-        self.m.Tsurr.SetValue(283)
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.m.SetValue(1 * kg)
+        self.m.alpha.SetValue(200 * W/((m**2)*K))
+        self.m.A.SetValue(0.1 * m**2)
+        self.m.Tsurr.SetValue(283 * K)
 
     def SetUpVariables(self):
         # Set the state active at the beginning (the default is the first declared state; here 'Heating')
         self.m.stnRegulator.ActiveState = "Heating"
 
-        self.m.T.SetInitialCondition(283)
+        self.m.T.SetInitialCondition(283 * K)
         self.m.event.AssignValue(0.0)
 
 

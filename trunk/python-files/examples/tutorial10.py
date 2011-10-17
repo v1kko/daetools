@@ -102,8 +102,6 @@ class modTutorial(daeModel):
         # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
         eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
         c = eq.DistributeOnDomain(self.c, eClosedClosed)
-        #print repr(c())
-        print 'repr(c() ** 0.5) = ', repr(c() ** 0.5)
         eq.Residual = self.semicircle(c) - Sqrt( 1 - c()**2 )
 
         cr = daeIndexRange(self.c)
@@ -124,24 +122,23 @@ class simTutorial(daeSimulation):
         # The domain for a semi-circle
         self.m.c.CreateDistributed(eCFDM, 2, 100, -1, 1)
 
-        self.m.dx.SetValue(0.1)
-        self.m.dy.SetValue(0.1)
+        self.m.dx.SetValue(0.1 * m)
+        self.m.dy.SetValue(0.1 * m)
 
         # Domain bounds can depend on input parameters:
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, self.m.dx.GetValue())
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, self.m.dy.GetValue())
 
-        self.m.ro.SetValue(8960)
-        self.m.cp.SetValue(385)
-        self.m.k.SetValue(401)
-
-        self.m.Qb.SetValue(1e6)
-        self.m.Qt.SetValue(0)
+        self.m.k.SetValue(401 * W/(m*K))
+        self.m.cp.SetValue(385 * J/(kg*K))
+        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.Qb.SetValue(1e6 * W/(m**2))
+        self.m.Qt.SetValue(0 * W/(m**2))
 
     def SetUpVariables(self):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300)
+                self.m.T.SetInitialCondition(x, y, 300 * K)
 
         # Load initialization file previously saved after the successful initialization phase (see below)
         self.LoadInitializationValues("tutorial10.init")

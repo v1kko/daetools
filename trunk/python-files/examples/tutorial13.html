@@ -41,6 +41,7 @@
 <span style='color:#ff80e0;'>from</span> time <span style='color:#ff80e0;'>import</span> localtime, strftime
 
 <i><span style='color:#898887;'># Standard variable types are defined in daeVariableTypes.py</span></i>
+<span style='color:#ff80e0;'>from</span> daetools.pyDAE.pyUnits <span style='color:#ff80e0;'>import</span> m, kg, s, K, Pa, mol, J, W
 
 <i><span style='color:#898887;'># User defined action executed in OnEvent handler</span></i>
 <i><span style='color:#898887;'># The __init__ function accepts an event port as an argument that is used </span></i>
@@ -54,7 +55,6 @@
         <i><span style='color:#898887;'># The floating point value of the data sent with the event can be retrieved </span></i>
         <i><span style='color:#898887;'># using daeEventPort property EventData </span></i>
         msg <b>=</b> <span style='color:#bf0303;'>'simpleUserAction executed; input data = {0}'</span>.<span style='color:#0057ae;'>format</span>(<span style='color:#006e28;'>self</span>.eventPort.EventData)
-        <b>print</b> msg
         
         <i><span style='color:#898887;'># Try to show a message box if there is application instance already defined</span></i>
         <i><span style='color:#898887;'># that is we are in the 'gui' mode</span></i>
@@ -63,20 +63,20 @@
             <b>if</b> QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(<span style='color:#006e28;'>None</span>, <span style='color:#bf0303;'>'tutorial13'</span>, msg)
         <b>except</b>:
-            <b>pass</b>
+            <b>print</b> msg
         
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>, Name, Parent <b>=</b> <span style='color:#006e28;'>None</span>, Description <b>=</b> <span style='color:#bf0303;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#006e28;'>self</span>.m     <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;m&quot;</span>,       eReal, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Mass of the copper plate, kg&quot;</span>)
-        <span style='color:#006e28;'>self</span>.cp    <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,     eReal, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate, J/kgK&quot;</span>)
-        <span style='color:#006e28;'>self</span>.alpha <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>, eReal, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Heat transfer coefficient, W/m2K&quot;</span>)
-        <span style='color:#006e28;'>self</span>.A     <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;A&quot;</span>,       eReal, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Area of the plate, m2&quot;</span>)
-        <span style='color:#006e28;'>self</span>.Tsurr <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;T_surr&quot;</span>,  eReal, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the surroundings, K&quot;</span>)
+        <span style='color:#006e28;'>self</span>.m     <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;m&quot;</span>,       kg,           <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.cp    <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,     J<b>/</b>(kg<b>*</b>K),     <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.alpha <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>, W<b>/</b>((m<b>**</b><span style='color:#b08000;'>2</span>)<b>*</b>K), <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#006e28;'>self</span>.A     <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;A&quot;</span>,       m<b>**</b><span style='color:#b08000;'>2</span>,         <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#006e28;'>self</span>.Tsurr <b>=</b> daeParameter(<span style='color:#bf0303;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the surroundings&quot;</span>)
 
-        <span style='color:#006e28;'>self</span>.Qin   <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Power of the heater, W&quot;</span>)
-        <span style='color:#006e28;'>self</span>.T     <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate, K&quot;</span>)
+        <span style='color:#006e28;'>self</span>.Qin   <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#006e28;'>self</span>.T     <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>)
         <span style='color:#006e28;'>self</span>.event <b>=</b> daeVariable(<span style='color:#bf0303;'>&quot;event&quot;</span>, no_t,          <span style='color:#006e28;'>self</span>, <span style='color:#bf0303;'>&quot;Variable which variable is set in ON_EVENT functon&quot;</span>)
 
         <i><span style='color:#898887;'># Here we create two event ports (inlet and outlet) and connect them.</span></i>
@@ -96,7 +96,7 @@
         <span style='color:#006e28;'>self</span>.STATE(<span style='color:#bf0303;'>&quot;Heating&quot;</span>)
 
         eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>, <span style='color:#bf0303;'>&quot;The heater is on&quot;</span>)
-        eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.Qin() <b>-</b> <span style='color:#b08000;'>1500</span>
+        eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.Qin() <b>-</b> <span style='color:#006e28;'>self</span>.constant(<span style='color:#b08000;'>1500</span> <b>*</b> W) <i><span style='color:#898887;'># this can simply be: self.Qin() - 1500</span></i>
 
         <i><span style='color:#898887;'>&quot;&quot;&quot;</span></i>
 <i><span style='color:#898887;'>                                          ON_CONDITION() function</span></i>
@@ -110,7 +110,7 @@
 <i><span style='color:#898887;'>             will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)</span></i>
 <i><span style='color:#898887;'>          - 'userDefinedActions' is a list of user defined daeAction-derived objects</span></i>
 <i><span style='color:#898887;'>        &quot;&quot;&quot;</span></i>
-        <span style='color:#006e28;'>self</span>.ON_CONDITION(<span style='color:#006e28;'>self</span>.T()    <b>&gt;</b> <span style='color:#b08000;'>340</span>, switchTo           <b>=</b> <span style='color:#bf0303;'>'Cooling'</span>,
+        <span style='color:#006e28;'>self</span>.ON_CONDITION(<span style='color:#006e28;'>self</span>.T() <b>&gt;</b> <span style='color:#b08000;'>340</span>,    switchTo           <b>=</b> <span style='color:#bf0303;'>'Cooling'</span>,
                                              triggerEvents      <b>=</b> [],
                                              setVariableValues  <b>=</b> [ (<span style='color:#006e28;'>self</span>.event, <span style='color:#b08000;'>100</span>) ],
                                              userDefinedActions <b>=</b> [] )
@@ -125,7 +125,7 @@
         eq <b>=</b> <span style='color:#006e28;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>, <span style='color:#bf0303;'>&quot;The heater is off&quot;</span>)
         eq.Residual <b>=</b> <span style='color:#006e28;'>self</span>.Qin()
 
-        <span style='color:#006e28;'>self</span>.ON_CONDITION(<span style='color:#006e28;'>self</span>.T()    <b>&lt;</b> <span style='color:#b08000;'>320</span>, switchTo          <b>=</b> <span style='color:#bf0303;'>'Heating'</span>,
+        <span style='color:#006e28;'>self</span>.ON_CONDITION(<span style='color:#006e28;'>self</span>.T() <b>&lt;</b> <span style='color:#b08000;'>320</span>,    switchTo          <b>=</b> <span style='color:#bf0303;'>'Heating'</span>,
                                              triggerEvents     <b>=</b> [],
                                              setVariableValues <b>=</b> [ (<span style='color:#006e28;'>self</span>.event, <span style='color:#b08000;'>200</span>) ],
                                              userDefinedActions <b>=</b> [] )
@@ -169,27 +169,27 @@
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>)
         <span style='color:#006e28;'>self</span>.m <b>=</b> modTutorial(<span style='color:#bf0303;'>&quot;tutorial13&quot;</span>)
-        <span style='color:#006e28;'>self</span>.m.Description <b>=</b> <span style='color:#bf0303;'>&quot;In this example we use the same problem as in the tutorial 5. </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;Here we introduce: </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;  - The event ports </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;  - ON_CONDITION() function showing the new types of actions that can be executed &quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;during state transitions </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;  - ON_EVENT() function showing the new types of actions that can be executed &quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;when an event is triggered </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> <b>\</b>
-                             <span style='color:#bf0303;'>&quot;  - User defined actions&quot;</span> <b>\</b>
+        <span style='color:#006e28;'>self</span>.m.Description <b>=</b> <span style='color:#bf0303;'>&quot;In this example we use the same problem as in the tutorial 5. </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> \
+                             <span style='color:#bf0303;'>&quot;Here we introduce: </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> \
+                             <span style='color:#bf0303;'>&quot;  - The event ports </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> \
+                             <span style='color:#bf0303;'>&quot;  - ON_CONDITION() function showing the new types of actions that can be executed &quot;</span> \
+                             <span style='color:#bf0303;'>&quot;during state transitions </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> \
+                             <span style='color:#bf0303;'>&quot;  - ON_EVENT() function showing the new types of actions that can be executed &quot;</span> \
+                             <span style='color:#bf0303;'>&quot;when an event is triggered </span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>&quot;</span> \
+                             <span style='color:#bf0303;'>&quot;  - User defined actions&quot;</span> \
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#006e28;'>self</span>):
-        <span style='color:#006e28;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span>)
-        <span style='color:#006e28;'>self</span>.m.m.SetValue(<span style='color:#b08000;'>1</span>)
-        <span style='color:#006e28;'>self</span>.m.alpha.SetValue(<span style='color:#b08000;'>200</span>)
-        <span style='color:#006e28;'>self</span>.m.A.SetValue(<span style='color:#b08000;'>0.1</span>)
-        <span style='color:#006e28;'>self</span>.m.Tsurr.SetValue(<span style='color:#b08000;'>283</span>)
+        <span style='color:#006e28;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> <b>*</b> J<b>/</b>(kg<b>*</b>K))
+        <span style='color:#006e28;'>self</span>.m.m.SetValue(<span style='color:#b08000;'>1</span> <b>*</b> kg)
+        <span style='color:#006e28;'>self</span>.m.alpha.SetValue(<span style='color:#b08000;'>200</span> <b>*</b> W<b>/</b>((m<b>**</b><span style='color:#b08000;'>2</span>)<b>*</b>K))
+        <span style='color:#006e28;'>self</span>.m.A.SetValue(<span style='color:#b08000;'>0.1</span> <b>*</b> m<b>**</b><span style='color:#b08000;'>2</span>)
+        <span style='color:#006e28;'>self</span>.m.Tsurr.SetValue(<span style='color:#b08000;'>283</span> <b>*</b> K)
 
     <b>def</b> SetUpVariables(<span style='color:#006e28;'>self</span>):
         <i><span style='color:#898887;'># Set the state active at the beginning (the default is the first declared state; here 'Heating')</span></i>
         <span style='color:#006e28;'>self</span>.m.stnRegulator.ActiveState <b>=</b> <span style='color:#bf0303;'>&quot;Heating&quot;</span>
 
-        <span style='color:#006e28;'>self</span>.m.T.SetInitialCondition(<span style='color:#b08000;'>283</span>)
+        <span style='color:#006e28;'>self</span>.m.T.SetInitialCondition(<span style='color:#b08000;'>283</span> <b>*</b> K)
         <span style='color:#006e28;'>self</span>.m.event.AssignValue(<span style='color:#b08000;'>0.0</span>)
 
 

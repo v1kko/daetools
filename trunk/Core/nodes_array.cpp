@@ -2683,7 +2683,6 @@ const quantity adSetupSpecialFunctionNode::GetQuantity(void) const
 	case eSum:
 		return q;
 	case eProduct:
-		std::cout << "adSetupSpecialFunctionNode size: " << n << std::endl;
 		return q ^ n;
 	case eAverage:
 		return q;
