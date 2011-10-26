@@ -755,6 +755,7 @@ void daeModel::DetectVariableTypesForExport(std::vector<const daeVariableType*>&
 		m_ptrarrModelArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 }
 
+/*
 //#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 //#include <***.h>
 //#else
@@ -786,6 +787,7 @@ boost::shared_ptr<daeExternalObject_t> daeModel::LoadExternalObject(const string
 	
 	return extobj;
 }
+*/
 
 void daeModel::AddDomain(daeDomain* pDomain)
 {

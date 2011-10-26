@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include "nodes.h"
+#include "nodes_array.h"
 #include "xmlfunctions.h"
 #include <typeinfo>
 using namespace dae;
@@ -70,32 +72,124 @@ namespace core
 //}
 
 /*********************************************************************************************
-	daeExternalFunction
+	daeScalarExternalFunction
 **********************************************************************************************/
-//daeExternalFunction::daeExternalFunction(void)
-//{
-//}
+daeScalarExternalFunction::daeScalarExternalFunction(void)
+{
+}
 
-//daeExternalFunction::~daeExternalFunction(void)
-//{
-//}
+daeScalarExternalFunction::~daeScalarExternalFunction(void)
+{
+}
 
-//void daeExternalFunction::GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const
-//{
-//}
+void daeScalarExternalFunction::SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments)
+{
+	std::string strName;
+	daeExternalFunctionArgument_t argument;
+	daeExternalFunctionArgumentMap_t::const_iterator iter;
+	
+	m_mapArgumentNodes.clear();
+	for(iter = mapArguments.begin(); iter != mapArguments.end(); iter++)
+	{
+		strName  = iter->first;
+		argument = iter->second;
+		
+		adouble*       ad    = boost::get<adouble>(&argument);
+		adouble_array* adarr = boost::get<adouble_array>(&argument);
+		
+		if(ad)
+		{
+			m_mapArgumentNodes[strName] = (*ad).node;
+		}
+		else if(adarr)
+		{
+			m_mapArgumentNodes[strName] = (*adarr).node;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exInvalidCall);
+		}
+	}
+}
 
-//void daeExternalFunction::Calculate(real_t* results, size_t n)
-//{
-//}
+const daeExternalFunctionNodeMap_t& daeScalarExternalFunction::GetArgumentNodes(void) const
+{
+	return m_mapArgumentNodes;
+}
 
-//void daeExternalFunction::CalculateDerivatives(daeMatrix<real_t>& derivatives)
-//{
-//}
+adouble daeScalarExternalFunction::Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return adouble();
+}
 
-//daeExternalFunctionInfo_t daeExternalFunction::GetInfo(void) const
-//{
-//	return daeExternalFunctionInfo_t();
-//}
+adouble daeScalarExternalFunction::operator() (void) const
+{
+	adouble tmp;
+	tmp.node = boost::shared_ptr<adNode>(new adScalarExternalFunctionNode(*this));
+	tmp.setGatherInfo(true);
+	return tmp;
+}
+
+/*********************************************************************************************
+	daeVectorExternalFunction
+**********************************************************************************************/
+daeVectorExternalFunction::daeVectorExternalFunction(void)
+{
+}
+
+daeVectorExternalFunction::~daeVectorExternalFunction(void)
+{
+}
+
+void daeVectorExternalFunction::SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments)
+{
+	std::string strName;
+	daeExternalFunctionArgument_t argument;
+	daeExternalFunctionArgumentMap_t::const_iterator iter;
+	
+	m_mapArgumentNodes.clear();
+	for(iter = mapArguments.begin(); iter != mapArguments.end(); iter++)
+	{
+		strName  = iter->first;
+		argument = iter->second;
+		
+		adouble*       ad    = boost::get<adouble>(&argument);
+		adouble_array* adarr = boost::get<adouble_array>(&argument);
+		
+		if(ad)
+		{
+			m_mapArgumentNodes[strName] = (*ad).node;
+		}
+		else if(adarr)
+		{
+			m_mapArgumentNodes[strName] = (*adarr).node;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exInvalidCall);
+		}
+	}
+}
+
+const daeExternalFunctionNodeMap_t& daeVectorExternalFunction::GetArgumentNodes(void) const
+{
+	return m_mapArgumentNodes;
+}
+
+std::vector<adouble> daeVectorExternalFunction::Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+	return std::vector<adouble>();
+}
+
+adouble_array daeVectorExternalFunction::operator() (void) const
+{
+	adouble_array tmp;
+	tmp.node = boost::shared_ptr<adNodeArray>(new adVectorExternalFunctionNode(*this));
+	tmp.setGatherInfo(true);
+	return tmp;
+}
 
 /*********************************************************************************************
 	daeExternalObject

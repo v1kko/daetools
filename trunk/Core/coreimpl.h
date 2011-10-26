@@ -16,6 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/smart_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/variant.hpp>
 
 #include "../config.h"
 #include "io_impl.h"
@@ -2131,14 +2132,14 @@ public:
 	
 	virtual daeeInitialConditionMode GetInitialConditionMode(void) const;
 	virtual void SetInitialConditionMode(daeeInitialConditionMode eMode);
-//	virtual void SetInitialConditions(real_t value);
+	//virtual void SetInitialConditions(real_t value);
 	
 	virtual void StoreInitializationValues(const std::string& strFileName) const;
 	virtual void LoadInitializationValues(const std::string& strFileName) const;
 	
 	virtual bool IsModelDynamic() const;
 	
-	boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
+	//boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -3252,88 +3253,90 @@ void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeD
 /*********************************************************************************************
 	daeExternalFunctionArgument
 **********************************************************************************************/
-class DAE_CORE_API daeExternalFunctionArgument : public daeExternalFunctionArgument_t
-{
-public:
-	daeExternalFunctionArgument(const string& strName, size_t n)
-	{
-		if(n == 0)
-			daeDeclareAndThrowException(exInvalidCall);
-		
-		N          = n;
-		m_strName  = strName;
-		m_pdValues = new real_t[N];
-	}
-	
-	virtual ~daeExternalFunctionArgument(void)
-	{
-		if(m_pdValues)
-			delete[] m_pdValues;
-	}
+typedef boost::variant<adouble, adouble_array>										daeExternalFunctionArgument_t;
+typedef std::map<std::string, daeExternalFunctionArgument_t>						daeExternalFunctionArgumentMap_t;
+typedef boost::variant<adouble, std::vector<adouble> >								daeExternalFunctionArgumentValue_t;
+typedef std::map<std::string, daeExternalFunctionArgumentValue_t>					daeExternalFunctionArgumentValueMap_t;
+typedef boost::variant<boost::shared_ptr<adNode>, boost::shared_ptr<adNodeArray> >	daeExternalFunctionNode_t;
+typedef std::map<std::string, daeExternalFunctionNode_t>							daeExternalFunctionNodeMap_t;
 
-public:
-	void GetValues(real_t* values, size_t n)
-	{
-		if(n != N)
-			daeDeclareAndThrowException(exInvalidCall);
-		if(!m_pdValues)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		for(size_t i = 0; i < n; i++)
-			values[i] = m_pdValues[i];
-	}
-	
-	void SetValues(const real_t* values, size_t n)
-	{
-		if(n != N)
-			daeDeclareAndThrowException(exInvalidCall);
-		if(!m_pdValues)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		for(size_t i = 0; i < n; i++)
-			m_pdValues[i] = values[i];
-	}
-	
-	daeExternalFunctionArgumentInfo_t GetInfo(void)
-	{
-		daeExternalFunctionArgumentInfo_t info;
-		info.m_strName = m_strName;
-		info.m_nLength = N;
-		return info;
-	}
-	
-	real_t operator [](size_t i) const
-	{
-		if(i >= N)
-			daeDeclareAndThrowException(exInvalidCall);
-		if(!m_pdValues)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		return m_pdValues[i];
-	}
-
-protected:
-	std::string m_strName;
-	real_t*     m_pdValues;
-	size_t      N;
-};
-
-
-///*********************************************************************************************
-//	daeExternalFunction
-//**********************************************************************************************/
-//class DAE_CORE_API daeExternalFunction : public daeExternalFunction_t
+//class DAE_CORE_API daeExternalFunctionArgument : public daeExternalFunctionArgument_t
 //{
 //public:
-//	daeExternalFunction(void);
-//	virtual ~daeExternalFunction(void);
-
+//	daeExternalFunctionArgument(std::string strName, const adouble& arg) 
+//	{
+//		m_strName = strName;
+//		m_node    = arg.node;
+//	}
+//
+//	daeExternalFunctionArgument(std::string strName, const adouble_array& arg) 
+//	{
+//		m_strName = strName;
+//		m_node    = arg.node;
+//	}
+//	
+//	virtual ~daeExternalFunctionArgument(void)
+//	{
+//	}
+//
 //public:
-//	virtual void						GetArguments(std::vector<daeExternalFunctionArgument_t*>& ptrarrArguments) const;
-//	virtual void						Calculate(real_t* results, size_t n);
-//	virtual void						CalculateDerivatives(daeMatrix<real_t>& derivatives);
-//	virtual daeExternalFunctionInfo_t	GetInfo(void) const;
+//	// This function sets the argument value(s)
+//	void Evaluate(const daeExecutionContext* pExecutionContext) const
+//	{
+//		m_value = m_node->Evaluate(pExecutionContext);
+//	}
+//	
+//	adouble GetValue(const daeExecutionContext* pExecutionContext) const
+//	{
+//		return m_node->Evaluate(pExecutionContext);
+//	}
+//	
+//	adouble_array GetValues(const daeExecutionContext* pExecutionContext) const
+//	{
+//		return m_node->Evaluate(pExecutionContext);
+//	}
+//
+//protected:
+//	daeExternalFunctionNode	m_node;
+//	std::string				m_strName;
+//	daeArgumentValue		m_value;
 //};
+
+
+/*********************************************************************************************
+	daeExternalFunction
+**********************************************************************************************/
+class DAE_CORE_API daeScalarExternalFunction /*: public daeExternalFunction_t*/
+{
+public:
+	daeScalarExternalFunction(void);
+	virtual ~daeScalarExternalFunction(void);
+
+public:
+	virtual void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
+	virtual const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
+	virtual adouble									Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const;
+	virtual adouble									operator() (void) const;
+
+protected:
+	daeExternalFunctionNodeMap_t m_mapArgumentNodes;
+};
+
+class DAE_CORE_API daeVectorExternalFunction /*: public daeExternalFunction_t*/
+{
+public:
+	daeVectorExternalFunction(void);
+	virtual ~daeVectorExternalFunction(void);
+
+public:
+	virtual void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
+	virtual const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
+	virtual std::vector<adouble>					Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const;
+	virtual adouble_array							operator() (void) const;
+	
+protected:
+	daeExternalFunctionNodeMap_t m_mapArgumentNodes;
+};
 
 ///*********************************************************************************************
 //	daeExternalObject

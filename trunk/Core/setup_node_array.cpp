@@ -5,6 +5,7 @@
 using namespace dae;
 #include <typeinfo>
 using namespace dae::xml;
+using namespace boost;
 
 namespace dae 
 {
@@ -583,6 +584,117 @@ void adSetupPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size
 }
 
 
+/*********************************************************************************************
+	adVectorExternalFunctionNode
+**********************************************************************************************/
+adVectorExternalFunctionNode::adVectorExternalFunctionNode(const daeVectorExternalFunction& externalFunction) 
+{
+	m_pExternalFunction = &externalFunction;
+}
+
+adVectorExternalFunctionNode::~adVectorExternalFunctionNode()
+{
+}
+
+void adVectorExternalFunctionNode::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+{	
+}
+
+size_t adVectorExternalFunctionNode::GetSize(void) const
+{
+	size_t size = 1;
+//	for(size_t i = 0; i < m_arrRanges.size(); i++)
+//		size *= m_arrRanges[i].GetNoPoints();
+    return size;
+}
+
+adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+	if(!m_pExternalFunction)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	adouble_array tmp;
+	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+	{
+		tmp.setGatherInfo(true);
+		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		return tmp;
+	}
+	
+	daeExternalFunctionArgumentValue_t value;
+	daeExternalFunctionArgumentValueMap_t mapValues;
+	daeExternalFunctionNodeMap_t::const_iterator iter;
+	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
+	
+	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+	{
+		std::string               strName  = iter->first;
+		daeExternalFunctionNode_t argument = iter->second;
+		
+		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
+		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		
+		if(ad)
+		{
+			value = (*ad)->Evaluate(pExecutionContext);
+		}
+		else if(adarr)
+		{
+			value = (*adarr)->Evaluate(pExecutionContext).m_arrValues;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exInvalidCall);
+		}
+		
+		mapValues[strName] = value;		
+	}
+	
+	tmp.m_arrValues = m_pExternalFunction->Calculate(mapValues);
+	return tmp;
+}
+
+const quantity adVectorExternalFunctionNode::GetQuantity(void) const
+{
+	return quantity(0.0, unit());
+}
+
+adNodeArray* adVectorExternalFunctionNode::Clone(void) const
+{
+	return new adVectorExternalFunctionNode(*this);
+}
+
+void adVectorExternalFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+}
+//string adVectorExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//{
+//}
+
+string adVectorExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+{
+}
+
+void adVectorExternalFunctionNode::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adVectorExternalFunctionNode::Save(io::xmlTag_t* pTag) const
+{
+}
+
+void adVectorExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+{
+}
+
+void adVectorExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+{
+}
+
+void adVectorExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+}
 
 }
 }

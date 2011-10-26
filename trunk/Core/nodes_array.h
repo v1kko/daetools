@@ -643,6 +643,36 @@ public:
 	vector<daeArrayRange>	m_arrRanges;
 };
 
+
+/*********************************************************************************************
+	adVectorExternalFunctionNode
+**********************************************************************************************/
+class DAE_CORE_API adVectorExternalFunctionNode : public adNodeArrayImpl
+{
+public:
+	daeDeclareDynamicClass(adVectorExternalFunctionNode)
+	adVectorExternalFunctionNode(const daeVectorExternalFunction& externalFunction);
+	virtual ~adVectorExternalFunctionNode(void);
+
+public:
+	virtual size_t			GetSize(void) const;
+	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNodeArray*	Clone(void) const;
+	virtual void			Open(io::xmlTag_t* pTag);
+	virtual void			Save(io::xmlTag_t* pTag) const;
+	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity	GetQuantity(void) const;
+
+public:
+	const daeVectorExternalFunction* m_pExternalFunction;
+};
+
+
 inline void FillDomains(const vector<daeArrayRange>& arrRanges, vector<string>& strarrDomains)
 {
 	size_t n = arrRanges.size();

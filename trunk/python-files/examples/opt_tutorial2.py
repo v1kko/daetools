@@ -86,7 +86,7 @@ def setOptions(nlpsolver):
     nlpsolver.SetOption('bonmin.algorithm', 'B-Hyb')
 
     # 2) Load the options file (if file name is empty load the default: /etc/daetools/bonfig.cfg)
-    nlpsolver.LoadOptionsFile("")
+    #nlpsolver.LoadOptionsFile("")
 
     # Print options loaded at pyBonmin startup and the user set options:
     nlpsolver.PrintOptions()

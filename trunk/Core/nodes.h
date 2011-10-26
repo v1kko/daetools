@@ -622,14 +622,14 @@ public:
 };
 
 /*********************************************************************************************
-	adExternalFunctionNode
+	adScalarExternalFunctionNode
 **********************************************************************************************/
-class DAE_CORE_API adExternalFunctionNode : public adNodeImpl
+class DAE_CORE_API adScalarExternalFunctionNode : public adNodeImpl
 {
 public:
-	daeDeclareDynamicClass(adExternalFunctionNode)
-	adExternalFunctionNode(void);
-	virtual ~adExternalFunctionNode(void);
+	daeDeclareDynamicClass(adScalarExternalFunctionNode)
+	adScalarExternalFunctionNode(const daeScalarExternalFunction& externalFunction);
+	virtual ~adScalarExternalFunctionNode(void);
 
 public:
 	virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
@@ -646,8 +646,8 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
+	const daeScalarExternalFunction* m_pExternalFunction;
 };
-
 
 /*********************************************************************************************
 	daeFPUCommand

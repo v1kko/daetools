@@ -2855,76 +2855,115 @@ bool adBinaryNode::IsFunctionOfVariables(void) const
 
 
 /*********************************************************************************************
-	adExternalFunctionNode
+	adScalarExternalFunctionNode
 **********************************************************************************************/
-adExternalFunctionNode::adExternalFunctionNode()
+adScalarExternalFunctionNode::adScalarExternalFunctionNode(const daeScalarExternalFunction& externalFunction)
+{
+	m_pExternalFunction = &externalFunction;
+}
+
+adScalarExternalFunctionNode::~adScalarExternalFunctionNode()
 {
 }
 
-adExternalFunctionNode::~adExternalFunctionNode()
+adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-}
+	std::cout << "adScalarExternalFunctionNode::Evaluate" << std::endl;
+	if(!m_pExternalFunction)
+		daeDeclareAndThrowException(exInvalidPointer);
 
-adouble adExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
-{
 	adouble tmp;
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNode>( Clone() );
+		return tmp;
 	}
+	
+	daeExternalFunctionArgumentValue_t value;
+	daeExternalFunctionArgumentValueMap_t mapValues;
+	daeExternalFunctionNodeMap_t::const_iterator iter;
+	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
+	
+	std::cout << "Evaluate = " << mapArgumentNodes.size() << std::endl;
+	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+	{
+		std::string               strName  = iter->first;
+		daeExternalFunctionNode_t argument = iter->second;
+		
+		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
+		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		
+		if(ad)
+		{
+			value = (*ad)->Evaluate(pExecutionContext);
+			std::cout << strName << " = " << (*ad)->Evaluate(pExecutionContext).getValue() << std::endl;
+		}
+		else if(adarr)
+		{
+			value = (*adarr)->Evaluate(pExecutionContext).m_arrValues;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exInvalidCall);
+		}
+		
+		mapValues[strName] = value;		
+	}
+	
+	tmp = m_pExternalFunction->Calculate(mapValues);
 	return tmp;
 }
 
-const quantity adExternalFunctionNode::GetQuantity(void) const
+const quantity adScalarExternalFunctionNode::GetQuantity(void) const
 {
 	return quantity();
 }
 
-adNode* adExternalFunctionNode::Clone(void) const
+adNode* adScalarExternalFunctionNode::Clone(void) const
 {
-	return new adExternalFunctionNode(*this);
+	return new adScalarExternalFunctionNode(*this);
 }
 
-void adExternalFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+void adScalarExternalFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 }
-//string adExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adScalarExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
 //{
 //	return string("");
 //}
 
-string adExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adScalarExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
 	return string("");
 }
 
-void adExternalFunctionNode::Open(io::xmlTag_t* pTag)
+void adScalarExternalFunctionNode::Open(io::xmlTag_t* pTag)
 {
 }
 
-void adExternalFunctionNode::Save(io::xmlTag_t* pTag) const
+void adScalarExternalFunctionNode::Save(io::xmlTag_t* pTag) const
 {
 }
 
-void adExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adScalarExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
 }
 
-void adExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
 }
 
-void adExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+void adScalarExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
 }
 
-bool adExternalFunctionNode::IsLinear(void) const
+bool adScalarExternalFunctionNode::IsLinear(void) const
 {
 	return false;
 }
 
-bool adExternalFunctionNode::IsFunctionOfVariables(void) const
+bool adScalarExternalFunctionNode::IsFunctionOfVariables(void) const
 {
 	return true;
 }

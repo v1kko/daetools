@@ -1277,6 +1277,176 @@ public:
 };
 
 /*******************************************************
+	daeScalarExternalFunctionWrapper
+*******************************************************/
+class daeScalarExternalFunctionWrapper : public daeScalarExternalFunction,
+                                         public boost::python::wrapper<daeScalarExternalFunction>
+{
+public:
+	daeScalarExternalFunctionWrapper()
+	{
+	}
+	
+	daeScalarExternalFunctionWrapper(boost::python::dict arguments)
+	{
+		string name;
+		boost::python::ssize_t i, n;
+		boost::python::tuple t;
+		daeExternalFunctionArgumentMap_t mapArguments;
+		
+		boost::python::list items = arguments.items();
+		n = boost::python::len(items);
+		
+		for(i = 0; i < n; i++)
+		{
+			t = boost::python::extract<boost::python::tuple>(items[i]);
+			name  = boost::python::extract<string>(t[0]);
+			boost::python::extract<adouble> get_adouble(t[1]);
+			boost::python::extract<adouble_array> get_adouble_array(t[1]);
+			
+			if(get_adouble.check())
+				mapArguments[name] = get_adouble();
+			else if(get_adouble_array.check())
+				mapArguments[name] = get_adouble_array();
+		}
+		std::cout << "mapArguments = " << mapArguments.size() << std::endl;
+		SetArguments(mapArguments);
+	}
+	
+	boost::python::object Calculate_(boost::python::tuple arguments, boost::python::dict values)
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+		return boost::python::object();
+	}
+
+	adouble Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+	{
+		boost::python::tuple arguments;
+		boost::python::dict values;
+
+		std::cout << "mapValues = " << mapValues.size() << std::endl;
+        if(boost::python::override f = this->get_override("Calculate"))
+        {
+            for(daeExternalFunctionArgumentValueMap_t::const_iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
+			{
+				const adouble*              ad    = boost::get<adouble>              (&iter->second);
+				const std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+				
+				if(ad)
+					values[iter->first] = *ad;
+				else if(adarr)
+					values[iter->first] = *adarr;
+				else
+					daeDeclareAndThrowException(exInvalidCall);
+			}
+			
+			boost::python::object res = f(*arguments, **values);
+			boost::python::extract<adouble> get_adouble(res);
+			if(get_adouble.check())
+			{
+				return get_adouble();
+			}
+			else
+			{
+				daeDeclareAndThrowException(exInvalidCall);
+				return adouble();
+			}			
+		}
+		else
+		{
+			return daeScalarExternalFunctionWrapper::Calculate(mapValues);
+		}
+	}
+};
+
+/*******************************************************
+	daeVectorExternalFunctionWrapper
+*******************************************************/
+class daeVectorExternalFunctionWrapper : public daeVectorExternalFunction,
+                                         public boost::python::wrapper<daeVectorExternalFunction>
+{
+public:
+	daeVectorExternalFunctionWrapper()
+	{
+	}
+	
+	daeVectorExternalFunctionWrapper(boost::python::dict arguments)
+	{
+		string name;
+		boost::python::ssize_t i, n;
+		boost::python::tuple t;
+		daeExternalFunctionArgumentMap_t mapArguments;
+		
+		boost::python::list items = arguments.items();
+		n = boost::python::len(items);
+		
+		for(i = 0; i < n; i++)
+		{
+			t = boost::python::extract<boost::python::tuple>(items[i]);
+			name  = boost::python::extract<string>(t[0]);
+			boost::python::extract<adouble> get_adouble(t[1]);
+			boost::python::extract<adouble_array> get_adouble_array(t[1]);
+			
+			if(get_adouble.check())
+				mapArguments[name] = get_adouble();
+			else if(get_adouble_array.check())
+				mapArguments[name] = get_adouble_array();
+		}
+		SetArguments(mapArguments);
+	}
+	
+	boost::python::list Calculate_(boost::python::tuple arguments, boost::python::dict values)
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+		return boost::python::list();
+	}
+
+	std::vector<adouble> Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+	{
+		std::vector<adouble> arrResults;
+		boost::python::list results;
+		boost::python::tuple arguments;
+		boost::python::dict values;
+        
+		if(boost::python::override f = this->get_override("Calculate"))
+        {
+            for(daeExternalFunctionArgumentValueMap_t::const_iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
+			{
+				const adouble*              ad    = boost::get<adouble>              (&iter->second);
+				const std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+				
+				if(ad)
+					values[iter->first] = *ad;
+				else if(adarr)
+					values[iter->first] = *adarr;
+				else
+					daeDeclareAndThrowException(exInvalidCall);
+			}
+			
+			results = f(*arguments, **values);
+			
+			boost::python::ssize_t n = boost::python::len(results);
+			arrResults.resize(n);
+			
+			for(boost::python::ssize_t i = 0; i < n; i++)
+			{
+				boost::python::extract<adouble> get_adouble(results[i]);
+				if(get_adouble.check())
+					arrResults[i] = get_adouble();
+				else
+					daeDeclareAndThrowException(exInvalidCall);
+			}
+			return arrResults;
+		}
+		else
+		{
+			return daeVectorExternalFunctionWrapper::Calculate(mapValues);
+		}
+	}
+};
+
+
+/*******************************************************
 	daeStateTransition
 *******************************************************/
 class daeStateTransitionWrapper : public daeStateTransition,
