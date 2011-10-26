@@ -43,8 +43,27 @@ A typical simulation imcludes 8 basic tasks:
     - AbsoluteTolerance: float
    Here, a very simple variable type is declared: 
 */
-daeVariableType typeNone("typeNone", "-", 0, 1E10,   0, 1e-5);
+daeVariableType typeNone("typeNone", unit(), 0, 1E10,   0, 1e-5);
 
+class extfn : public daeScalarExternalFunction
+{
+public:
+    extfn(adouble tau)
+	{
+		daeExternalFunctionArgumentMap_t mapArguments;
+		mapArguments["tau"] = tau;
+		SetArguments(mapArguments);
+	}
+	
+	adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
+	{
+        daeExternalFunctionArgumentValue_t val = mapValues["tau"];
+        adouble tau = boost::get<adouble>(val);
+        std::cout << "tau = " << tau.getValue() << std::endl;
+        return 2 * tau;
+	}
+};
+	
 /* 3. Define a model
     New models are derived from the base daeModel class. */
 class modWhatsTheTime : public daeModel
@@ -52,6 +71,9 @@ class modWhatsTheTime : public daeModel
 daeDeclareDynamicClass(modWhatsTheTime)
 public:
     daeVariable tau;
+	daeVariable foo;
+	
+	extfn efun;
 
 /*
     3.1 Declare domains/parameters/variables/ports
@@ -75,7 +97,9 @@ public:
 */
     modWhatsTheTime(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        tau("&tau;", typeNone, this, "Time elapsed in the process, s")
+        tau("&tau;", typeNone, this, "Time elapsed in the process, s"),
+		foo("foo", typeNone, this, ""),
+	    efun(foo())
     {
     }
 
@@ -101,6 +125,9 @@ public:
 
         eq = CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.");
         eq->SetResidual(tau.dt() - 1);
+
+        eq = CreateEquation("foo", "");
+        eq->SetResidual(foo() - efun());
     }
 };
 

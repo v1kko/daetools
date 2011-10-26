@@ -24,27 +24,8 @@ daeModel::daeModel()
 	m_ptrarrModels.SetOwnershipOnPointers(false);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(false);
 	m_ptrarrModelArrays.SetOwnershipOnPointers(false);
+	m_ptrarrExternalFunctions.SetOwnershipOnPointers(false);
 }
-
-//daeModel::daeModel(string strName)
-//{
-//	_currentSTN							= NULL;
-//	m_pExecutionContextForGatherInfo	= NULL;
-//	m_nVariablesStartingIndex			= 0;
-//	m_nTotalNumberOfVariables			= 0;
-//	m_pCondition						= NULL;
-//
-//// When used programmatically they dont own pointers !!!!!
-//	m_ptrarrDomains.SetOwnershipOnPointers(false);
-//	m_ptrarrPorts.SetOwnershipOnPointers(false);
-//	m_ptrarrVariables.SetOwnershipOnPointers(false);
-//	m_ptrarrParameters.SetOwnershipOnPointers(false);
-//	m_ptrarrModels.SetOwnershipOnPointers(false);
-//	m_ptrarrPortArrays.SetOwnershipOnPointers(false);
-//	m_ptrarrModelArrays.SetOwnershipOnPointers(false);
-//	
-//	SetName(strName);
-//}
 
 daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 {
@@ -63,6 +44,7 @@ daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 	m_ptrarrModels.SetOwnershipOnPointers(false);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(false);
 	m_ptrarrModelArrays.SetOwnershipOnPointers(false);
+	m_ptrarrExternalFunctions.SetOwnershipOnPointers(false);
 	
 	SetName(strName);
 	SetDescription(strDescription);
@@ -975,6 +957,12 @@ void daeModel::AddModelArray(daeModelArray* pModelArray)
 	dae_push_back(m_ptrarrModelArrays, pModelArray);
 }
 
+void daeModel::AddExternalFunction(daeExternalFunction_t* pExternalFunction)
+{
+    //SetModelAndCanonicalName(pExternalFunction);
+	dae_push_back(m_ptrarrExternalFunctions, pExternalFunction);
+}
+
 void daeModel::AddEquation(daeEquation* pEquation)
 {
     SetModelAndCanonicalName(pEquation);
@@ -1524,6 +1512,11 @@ void daeModel::RemovePortArray(daePortArray* pObject)
 void daeModel::RemoveModelArray(daeModelArray* pObject)
 {
 	m_ptrarrModelArrays.Remove(pObject);
+}
+
+void daeModel::RemoveExternalFunction(daeExternalFunction_t* pObject)
+{
+	m_ptrarrExternalFunctions.Remove(pObject);
 }
 
 daeeInitialConditionMode daeModel::GetInitialConditionMode(void) const
@@ -2111,6 +2104,7 @@ void daeModel::BuildUpSTNsAndEquations()
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
 		InitializeOnEventActions();		
+		InitializeExternalFunctions();		
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -2361,6 +2355,37 @@ void daeModel::InitializeOnEventActions(void)
 	}
 }
 
+void daeModel::InitializeExternalFunctions()
+{
+	size_t i;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	daeExternalFunction_t* pExternalFunction;
+
+	for(i = 0; i < m_ptrarrExternalFunctions.size(); i++)
+	{
+		pExternalFunction = m_ptrarrExternalFunctions[i];
+		if(!pExternalFunction)
+			daeDeclareAndThrowException(exInvalidPointer);
+	
+		pExternalFunction->Initialize();
+	}
+	
+	// Next, initialize ExternalFunctions in each child-model
+		for(i = 0; i < m_ptrarrModels.size(); i++)
+		{
+			pModel = m_ptrarrModels[i];
+			pModel->InitializeExternalFunctions();
+		}
+		
+	// Finally, initialize ExternalFunctions in each modelarray
+		for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+		{
+			pModelArray = m_ptrarrModelArrays[i];
+			pModelArray->InitializeExternalFunctions();
+		}
+}
+
 void daeModel::InitializeSTNs(void)
 {
 	size_t i;
@@ -2401,6 +2426,7 @@ void daeModel::InitializeEquations()
 	daePortConnection* pConnection;
 	daeModelArray* pModelArray;
 	daeEquation* pEquation;
+	daeExternalFunction_t* pExternalFunction;
 	vector<daeEquationExecutionInfo*> ptrarrEqnExecutionInfosCreated;
 	
 // First, create EqnExecInfos info for equations in this model
@@ -2441,7 +2467,7 @@ void daeModel::InitializeEquations()
 
 		pSTN->CreateEquationExecutionInfo();
 	}
-
+	
 // Next, create EqnExecInfos for equations in each child-model
 	for(i = 0; i < m_ptrarrModels.size(); i++)
 	{

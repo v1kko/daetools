@@ -2885,7 +2885,6 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 	daeExternalFunctionNodeMap_t::const_iterator iter;
 	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
 	
-	std::cout << "Evaluate = " << mapArgumentNodes.size() << std::endl;
 	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
 	{
 		std::string               strName  = iter->first;
@@ -2896,8 +2895,10 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 		
 		if(ad)
 		{
-			value = (*ad)->Evaluate(pExecutionContext);
-			std::cout << strName << " = " << (*ad)->Evaluate(pExecutionContext).getValue() << std::endl;
+			adNode* node = (*ad).get();
+			adouble a = node->Evaluate(pExecutionContext);
+			value = a; //(*ad)->Evaluate(pExecutionContext);
+			std::cout << strName << " = " << a.getValue() << std::endl;
 		}
 		else if(adarr)
 		{

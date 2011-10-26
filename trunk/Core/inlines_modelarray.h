@@ -94,6 +94,12 @@ protected:
 			it->InitializeOnEventActions();
 	}
 	
+	void InitializeExternalFunctions(void)
+	{
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->InitializeExternalFunctions();
+	}
+	
 	virtual void InitializeDEDIs(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

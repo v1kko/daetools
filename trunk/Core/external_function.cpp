@@ -13,82 +13,30 @@ namespace dae
 namespace core 
 {
 /*********************************************************************************************
-	daeExternalFunctionArgument
+	daeExternalFunction_t
 **********************************************************************************************/
-//daeExternalFunctionArgument::daeExternalFunctionArgument(const string& strName, size_t n)
-//{
-//	if(n == 0)
-//		daeDeclareAndThrowException(exInvalidCall);
-	
-//	N          = n;
-//	m_strName  = strName;
-//	m_pdValues = new real_t[N];
-//}
+daeExternalFunction_t::daeExternalFunction_t(void)
+{
+	m_pModel = NULL;
+}
 
-//daeExternalFunctionArgument::~daeExternalFunctionArgument(void)
-//{
-//	if(m_pdValues)
-//		delete[] m_pdValues;
-//}
+daeExternalFunction_t::daeExternalFunction_t(daeModel& model)
+{
+	m_pModel = &model;
+	model.AddExternalFunction(this);
+}
 
-//void daeExternalFunctionArgument::GetValues(real_t* values, size_t n)
-//{
-//	if(n != N)
-//		daeDeclareAndThrowException(exInvalidCall);
-//	if(!m_pdValues)
-//		daeDeclareAndThrowException(exInvalidPointer);
-	
-//	for(size_t i = 0; i < n; i++)
-//		values[i] = m_pdValues[i];
-//}
-
-//void daeExternalFunctionArgument::SetValues(const real_t* values, size_t n)
-//{
-//	if(n != N)
-//		daeDeclareAndThrowException(exInvalidCall);
-//	if(!m_pdValues)
-//		daeDeclareAndThrowException(exInvalidPointer);
-	
-//	for(size_t i = 0; i < n; i++)
-//		m_pdValues[i] = values[i];
-//}
-
-//real_t daeExternalFunctionArgument::operator [](size_t i) const
-//{
-//	if(i >= N)
-//		daeDeclareAndThrowException(exInvalidCall);
-//	if(!m_pdValues)
-//		daeDeclareAndThrowException(exInvalidPointer);
-	
-//	return m_pdValues[i];
-//}
-
-//daeExternalFunctionArgumentInfo_t daeExternalFunctionArgument::GetInfo(void) const
-//{
-//	daeExternalFunctionArgumentInfo_t info;
-//	info.m_strName = m_strName;
-//	info.m_nLength = N;
-//	return info;
-//}
-
-/*********************************************************************************************
-	daeScalarExternalFunction
-**********************************************************************************************/
-daeScalarExternalFunction::daeScalarExternalFunction(void)
+daeExternalFunction_t::~daeExternalFunction_t(void)
 {
 }
 
-daeScalarExternalFunction::~daeScalarExternalFunction(void)
-{
-}
-
-void daeScalarExternalFunction::SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments)
+void daeExternalFunction_t::SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments)
 {
 	std::string strName;
 	daeExternalFunctionArgument_t argument;
 	daeExternalFunctionArgumentMap_t::const_iterator iter;
 	
-	m_mapArgumentNodes.clear();
+	m_mapSetupArgumentNodes.clear();
 	for(iter = mapArguments.begin(); iter != mapArguments.end(); iter++)
 	{
 		strName  = iter->first;
@@ -99,11 +47,11 @@ void daeScalarExternalFunction::SetArguments(const daeExternalFunctionArgumentMa
 		
 		if(ad)
 		{
-			m_mapArgumentNodes[strName] = (*ad).node;
+			m_mapSetupArgumentNodes[strName] = (*ad).node;
 		}
 		else if(adarr)
 		{
-			m_mapArgumentNodes[strName] = (*adarr).node;
+			m_mapSetupArgumentNodes[strName] = (*adarr).node;
 		}
 		else
 		{
@@ -112,12 +60,67 @@ void daeScalarExternalFunction::SetArguments(const daeExternalFunctionArgumentMa
 	}
 }
 
-const daeExternalFunctionNodeMap_t& daeScalarExternalFunction::GetArgumentNodes(void) const
+const daeExternalFunctionNodeMap_t& daeExternalFunction_t::GetArgumentNodes(void) const
 {
+// Achtung, Achtung!!
+// Returns Runtime nodes!!!
 	return m_mapArgumentNodes;
 }
 
-adouble daeScalarExternalFunction::Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+void daeExternalFunction_t::Initialize(void)
+{
+	std::string strName;
+	daeExecutionContext EC;
+	daeExternalFunctionNode_t setup_node;
+	daeExternalFunctionNodeMap_t::iterator iter;
+	
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+	m_mapArgumentNodes.clear();
+	for(iter = m_mapSetupArgumentNodes.begin(); iter != m_mapSetupArgumentNodes.end(); iter++)
+	{
+		strName    = iter->first;
+		setup_node = iter->second;
+		
+		shared_ptr<adNode>*      ad    = boost::get<shared_ptr<adNode> >     (&setup_node);
+		shared_ptr<adNodeArray>* adarr = boost::get<shared_ptr<adNodeArray> >(&setup_node);
+		
+		if(ad)
+		{
+			m_mapArgumentNodes[strName] = (*ad)->Evaluate(&EC).node;
+		}
+		else if(adarr)
+		{
+			m_mapArgumentNodes[strName] = (*adarr)->Evaluate(&EC).node;
+		}
+		else
+		{
+			daeDeclareAndThrowException(exInvalidCall);
+		}
+	}
+}
+
+/*********************************************************************************************
+	daeScalarExternalFunction
+**********************************************************************************************/
+daeScalarExternalFunction::daeScalarExternalFunction(void)
+{
+}
+
+daeScalarExternalFunction::daeScalarExternalFunction(daeModel& model)
+                         : daeExternalFunction_t(model)
+{	
+}
+
+daeScalarExternalFunction::~daeScalarExternalFunction(void)
+{
+}
+
+adouble daeScalarExternalFunction::Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
 {
 	daeDeclareAndThrowException(exNotImplemented);
 	return adouble();
@@ -138,46 +141,16 @@ daeVectorExternalFunction::daeVectorExternalFunction(void)
 {
 }
 
+daeVectorExternalFunction::daeVectorExternalFunction(daeModel& model)
+                         : daeExternalFunction_t(model)
+{	
+}
+
 daeVectorExternalFunction::~daeVectorExternalFunction(void)
 {
 }
 
-void daeVectorExternalFunction::SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments)
-{
-	std::string strName;
-	daeExternalFunctionArgument_t argument;
-	daeExternalFunctionArgumentMap_t::const_iterator iter;
-	
-	m_mapArgumentNodes.clear();
-	for(iter = mapArguments.begin(); iter != mapArguments.end(); iter++)
-	{
-		strName  = iter->first;
-		argument = iter->second;
-		
-		adouble*       ad    = boost::get<adouble>(&argument);
-		adouble_array* adarr = boost::get<adouble_array>(&argument);
-		
-		if(ad)
-		{
-			m_mapArgumentNodes[strName] = (*ad).node;
-		}
-		else if(adarr)
-		{
-			m_mapArgumentNodes[strName] = (*adarr).node;
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall);
-		}
-	}
-}
-
-const daeExternalFunctionNodeMap_t& daeVectorExternalFunction::GetArgumentNodes(void) const
-{
-	return m_mapArgumentNodes;
-}
-
-std::vector<adouble> daeVectorExternalFunction::Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+std::vector<adouble> daeVectorExternalFunction::Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
 {
 	daeDeclareAndThrowException(exNotImplemented);
 	return std::vector<adouble>();
@@ -191,29 +164,6 @@ adouble_array daeVectorExternalFunction::operator() (void) const
 	return tmp;
 }
 
-/*********************************************************************************************
-	daeExternalObject
-**********************************************************************************************/
-//daeExternalObject::daeExternalObject(void)
-//{
-//}
-
-//daeExternalObject::~daeExternalObject(void)
-//{
-//}
-
-//daeExternalFunction_t* daeExternalObject::CreateFunction(const std::string& strFunctionName)
-//{
-//	return NULL;
-//}
-
-//daeExternalObjectInfo_t daeExternalObject::GetInfo(void) const
-//{
-//	return daeExternalObjectInfo_t();
-//}
-
-
-	
 	
 }
 }

@@ -135,7 +135,7 @@ unix::PYTHON_LIB_DIR           =
 #####################################################################################
 #                                    BOOST
 #####################################################################################
-# Boost version installed must be 1.35+ (asio, system, python, thread, regex)
+# Boost version installed must be 1.41+ (asio, system, python, thread, regex)
 # 1. Install bjam and Boost.Build
 #    a) On windows:
 #       - Go to the directory tools\build\v2\.

@@ -1287,7 +1287,8 @@ public:
 	{
 	}
 	
-	daeScalarExternalFunctionWrapper(boost::python::dict arguments)
+	daeScalarExternalFunctionWrapper(daeModel& model, boost::python::dict arguments)
+	    : daeScalarExternalFunction(model)
 	{
 		string name;
 		boost::python::ssize_t i, n;
@@ -1309,7 +1310,6 @@ public:
 			else if(get_adouble_array.check())
 				mapArguments[name] = get_adouble_array();
 		}
-		std::cout << "mapArguments = " << mapArguments.size() << std::endl;
 		SetArguments(mapArguments);
 	}
 	
@@ -1319,18 +1319,17 @@ public:
 		return boost::python::object();
 	}
 
-	adouble Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+	adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
 	{
 		boost::python::tuple arguments;
 		boost::python::dict values;
 
-		std::cout << "mapValues = " << mapValues.size() << std::endl;
         if(boost::python::override f = this->get_override("Calculate"))
         {
-            for(daeExternalFunctionArgumentValueMap_t::const_iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
+            for(daeExternalFunctionArgumentValueMap_t::iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
 			{
-				const adouble*              ad    = boost::get<adouble>              (&iter->second);
-				const std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+				adouble*              ad    = boost::get<adouble>              (&iter->second);
+				std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
 				
 				if(ad)
 					values[iter->first] = *ad;
@@ -1370,7 +1369,8 @@ public:
 	{
 	}
 	
-	daeVectorExternalFunctionWrapper(boost::python::dict arguments)
+	daeVectorExternalFunctionWrapper(daeModel& model, boost::python::dict arguments)
+	    : daeVectorExternalFunction(model)
 	{
 		string name;
 		boost::python::ssize_t i, n;
@@ -1401,7 +1401,7 @@ public:
 		return boost::python::list();
 	}
 
-	std::vector<adouble> Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const
+	std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
 	{
 		std::vector<adouble> arrResults;
 		boost::python::list results;
@@ -1410,10 +1410,10 @@ public:
         
 		if(boost::python::override f = this->get_override("Calculate"))
         {
-            for(daeExternalFunctionArgumentValueMap_t::const_iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
+            for(daeExternalFunctionArgumentValueMap_t::iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
 			{
-				const adouble*              ad    = boost::get<adouble>              (&iter->second);
-				const std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+				adouble*              ad    = boost::get<adouble>              (&iter->second);
+				std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
 				
 				if(ad)
 					values[iter->first] = *ad;

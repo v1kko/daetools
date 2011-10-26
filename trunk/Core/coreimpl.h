@@ -2083,6 +2083,7 @@ class daeIF;
 class daeSTN;
 class daeModelArray;
 class daePortArray;
+class daeExternalFunction_t;
 class DAE_CORE_API daeModel : virtual public daeObject,
 						      virtual public daeModel_t
 {
@@ -2200,6 +2201,7 @@ public:
 	void AddPortConnection(daePortConnection* pPortConnection);
 	void AddPortArray(daePortArray* pPortArray);
 	void AddModelArray(daeModelArray* pModelArray);
+	void AddExternalFunction(daeExternalFunction_t* pExternalFunction);
 
 	void ConnectPorts(daePort* pPortFrom, daePort* pPortTo);
 	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
@@ -2287,6 +2289,7 @@ public:
 	void RemoveOnEventAction(daeOnEventActions* pObject);
 	void RemovePortArray(daePortArray* pObject);
 	void RemoveModelArray(daeModelArray* pObject);
+	void RemoveExternalFunction(daeExternalFunction_t* pObject);
 
 // Internal functions
 protected:
@@ -2297,6 +2300,7 @@ protected:
 	void		InitializePortAndModelArrays(void);
 	void		InitializeSTNs(void);
 	void		InitializeOnEventActions(void);
+	void		InitializeExternalFunctions(void);
 	void		DoBlockDecomposition(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
@@ -2335,19 +2339,20 @@ protected:
 	size_t								m_nVariablesStartingIndex;
 	size_t								m_nTotalNumberOfVariables;
 
-	daePtrVector<daeModel*>			m_ptrarrModels;
-	daePtrVector<daeEquation*>		m_ptrarrEquations;
-	daePtrVector<daeSTN*>			m_ptrarrSTNs;
-	daePtrVector<daePortConnection*> m_ptrarrPortConnections;
+	daePtrVector<daeModel*>					m_ptrarrModels;
+	daePtrVector<daeEquation*>				m_ptrarrEquations;
+	daePtrVector<daeSTN*>					m_ptrarrSTNs;
+	daePtrVector<daePortConnection*>		m_ptrarrPortConnections;
 // When used programmatically they dont own pointers
-	daePtrVector<daeDomain*>		m_ptrarrDomains;
-	daePtrVector<daeParameter*>		m_ptrarrParameters;
-	daePtrVector<daeVariable*>		m_ptrarrVariables;
-	daePtrVector<daePort*>			m_ptrarrPorts;
-	daePtrVector<daeEventPort*>		m_ptrarrEventPorts;
-	daePtrVector<daeOnEventActions*> m_ptrarrOnEventActions;
-	daePtrVector<daePortArray*>		m_ptrarrPortArrays;
-	daePtrVector<daeModelArray*>	m_ptrarrModelArrays;
+	daePtrVector<daeDomain*>				m_ptrarrDomains;
+	daePtrVector<daeParameter*>				m_ptrarrParameters;
+	daePtrVector<daeVariable*>				m_ptrarrVariables;
+	daePtrVector<daePort*>					m_ptrarrPorts;
+	daePtrVector<daeEventPort*>				m_ptrarrEventPorts;
+	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
+	daePtrVector<daePortArray*>				m_ptrarrPortArrays;
+	daePtrVector<daeModelArray*>			m_ptrarrModelArrays;
+	daePtrVector<daeExternalFunction_t*>	m_ptrarrExternalFunctions;
 
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 
@@ -2381,6 +2386,7 @@ protected:
 	friend class daeDistributedEquationDomainInfo;
 	friend class daeOptimizationVariable;
 	friend class daeVariableWrapper;
+	friend class daeExternalFunction_t;
 };
 
 /******************************************************************
@@ -2430,6 +2436,7 @@ protected:
 	virtual void InitializeEquations(void)																						= 0;
 	virtual void InitializeSTNs(void)																							= 0;
 	virtual void InitializeOnEventActions(void)																					= 0;
+	virtual void InitializeExternalFunctions(void)																				= 0;
 	virtual void InitializeDEDIs(void)																		                    = 0;
 	virtual void CreatePortConnectionEquations(void)																			= 0;
 	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)												= 0;
@@ -3251,7 +3258,7 @@ daeEventPort*	FindEventPort(const daeEventPort* pSource, daeModel* pParentModel)
 void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeDomain*>& ptrarrDestination, daeModel* pParentModel);
 
 /*********************************************************************************************
-	daeExternalFunctionArgument
+	daeExternalFunction_t
 **********************************************************************************************/
 typedef boost::variant<adouble, adouble_array>										daeExternalFunctionArgument_t;
 typedef std::map<std::string, daeExternalFunctionArgument_t>						daeExternalFunctionArgumentMap_t;
@@ -3260,82 +3267,45 @@ typedef std::map<std::string, daeExternalFunctionArgumentValue_t>					daeExterna
 typedef boost::variant<boost::shared_ptr<adNode>, boost::shared_ptr<adNodeArray> >	daeExternalFunctionNode_t;
 typedef std::map<std::string, daeExternalFunctionNode_t>							daeExternalFunctionNodeMap_t;
 
-//class DAE_CORE_API daeExternalFunctionArgument : public daeExternalFunctionArgument_t
-//{
-//public:
-//	daeExternalFunctionArgument(std::string strName, const adouble& arg) 
-//	{
-//		m_strName = strName;
-//		m_node    = arg.node;
-//	}
-//
-//	daeExternalFunctionArgument(std::string strName, const adouble_array& arg) 
-//	{
-//		m_strName = strName;
-//		m_node    = arg.node;
-//	}
-//	
-//	virtual ~daeExternalFunctionArgument(void)
-//	{
-//	}
-//
-//public:
-//	// This function sets the argument value(s)
-//	void Evaluate(const daeExecutionContext* pExecutionContext) const
-//	{
-//		m_value = m_node->Evaluate(pExecutionContext);
-//	}
-//	
-//	adouble GetValue(const daeExecutionContext* pExecutionContext) const
-//	{
-//		return m_node->Evaluate(pExecutionContext);
-//	}
-//	
-//	adouble_array GetValues(const daeExecutionContext* pExecutionContext) const
-//	{
-//		return m_node->Evaluate(pExecutionContext);
-//	}
-//
-//protected:
-//	daeExternalFunctionNode	m_node;
-//	std::string				m_strName;
-//	daeArgumentValue		m_value;
-//};
-
-
-/*********************************************************************************************
-	daeExternalFunction
-**********************************************************************************************/
-class DAE_CORE_API daeScalarExternalFunction /*: public daeExternalFunction_t*/
+class DAE_CORE_API daeExternalFunction_t : public daeObject
 {
 public:
-	daeScalarExternalFunction(void);
-	virtual ~daeScalarExternalFunction(void);
+	daeExternalFunction_t(void);
+	daeExternalFunction_t(daeModel& model);
+	virtual ~daeExternalFunction_t(void);
 
 public:
-	virtual void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
-	virtual const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
-	virtual adouble									Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const;
-	virtual adouble									operator() (void) const;
+	void									Initialize(void);
+	void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
+	const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
 
 protected:
+	daeExternalFunctionNodeMap_t m_mapSetupArgumentNodes;
 	daeExternalFunctionNodeMap_t m_mapArgumentNodes;
 };
 
-class DAE_CORE_API daeVectorExternalFunction /*: public daeExternalFunction_t*/
+class DAE_CORE_API daeScalarExternalFunction : public daeExternalFunction_t
+{
+public:
+	daeScalarExternalFunction(void);
+	daeScalarExternalFunction(daeModel& model);
+	virtual ~daeScalarExternalFunction(void);
+
+public:
+	virtual adouble	Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
+	virtual adouble	operator() (void) const;
+};
+
+class DAE_CORE_API daeVectorExternalFunction : public daeExternalFunction_t
 {
 public:
 	daeVectorExternalFunction(void);
+	daeVectorExternalFunction(daeModel& model);
 	virtual ~daeVectorExternalFunction(void);
 
 public:
-	virtual void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
-	virtual const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
-	virtual std::vector<adouble>					Calculate(const daeExternalFunctionArgumentValueMap_t& mapValues) const;
-	virtual adouble_array							operator() (void) const;
-	
-protected:
-	daeExternalFunctionNodeMap_t m_mapArgumentNodes;
+	virtual std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
+	virtual adouble_array operator() (void) const;
 };
 
 ///*********************************************************************************************
