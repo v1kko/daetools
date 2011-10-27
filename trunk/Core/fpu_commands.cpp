@@ -13,12 +13,6 @@ void SetValue(daeFPUCommand* cmd, bool isLeft, real_t value);
 void SetOperand(daeFPUCommand* cmd, bool isLeft, size_t value);
 bool FillOperandInfo(adNode* node, daeFPUCommand* cmd, bool isLeft);
 
-ostream& operator << (ostream& os, const adouble& ad)
-{
-	os << "[" << ad.getValue() << ", " << ad.getDerivative() << "]";
-	return os;
-}
-
 ostream& operator << (ostream& os, const daeFPUCommand& cmd)
 {
 	os << "info.kind     = ";

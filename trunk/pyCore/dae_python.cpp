@@ -829,14 +829,12 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")
 		;
 	
-	class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction")
-		.def(init<daeModel&, boost::python::dict>())
+	class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction", init<const string&, daeModel*, const unit&, boost::python::dict>())
 		.def("Calculate",	pure_virtual(&daepython::daeScalarExternalFunctionWrapper::Calculate_))
 		.def("__call__",	&daeScalarExternalFunction::operator())
 		;
 	
-	class_<daepython::daeVectorExternalFunctionWrapper, boost::noncopyable>("daeVectorExternalFunction")
-		.def(init<daeModel&, boost::python::dict>())
+	class_<daepython::daeVectorExternalFunctionWrapper, boost::noncopyable>("daeVectorExternalFunction", init<const string&, daeModel*, const unit&, size_t, boost::python::dict>())
 		.def("Calculate",	pure_virtual(&daepython::daeVectorExternalFunctionWrapper::Calculate_)) 
 		.def("__call__",	&daeVectorExternalFunction::operator())
 		;

@@ -38,6 +38,7 @@ HEADERS += stdafx.h \
 #    cdae_tutorial7.h \
 #    cdae_tutorial8.h \
 #    cdae_tutorial9.h \
+    cdae_tutorial15.h \
 #    cdae_opt_tutorial1.h \
 #    cdae_opt_tutorial2.h \
 #    cdae_opt_tutorial3.h \

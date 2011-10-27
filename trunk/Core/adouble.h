@@ -250,6 +250,8 @@ inline const adouble __min__(const adouble &a, const adouble &b)
 	return min(a, b);
 }
 
+std::ostream& operator<<(std::ostream& out, const adouble& a);
+
 /******************************************************************
 	adouble_array
 *******************************************************************/
@@ -289,7 +291,7 @@ public:
 	
 	bool getGatherInfo(void) const;
 	void setGatherInfo(bool bGatherInfo);
-
+	
 public:
 	bool							m_bGatherInfo;
 	boost::shared_ptr<adNodeArray>	node;

@@ -31,9 +31,32 @@ using units_pool::K;
 using units_pool::J;
 using units_pool::W;
 
-class modTutorial5 : public daeModel
+class extfnPower : public daeScalarExternalFunction
 {
-daeDeclareDynamicClass(modTutorial5)
+public:
+    extfnPower(const string& strName, daeModel* pModel, const unit& units, adouble m, adouble cp, adouble dT) 
+		: daeScalarExternalFunction(strName, pModel, units)
+	{
+		daeExternalFunctionArgumentMap_t mapArguments;
+		mapArguments["m"]  = m;
+		mapArguments["cp"] = cp;
+		mapArguments["dT"] = dT;
+		SetArguments(mapArguments);
+	}
+	
+	adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
+	{
+        adouble m  = boost::get<adouble>(mapValues["m"]);
+        adouble cp = boost::get<adouble>(mapValues["cp"]);
+        adouble dT = boost::get<adouble>(mapValues["dT"]);
+		std::cout << (boost::format("m = %1%, cp = %2%, dT = %3%, mcpdT = %4%") % m % cp % dT % (m*cp*dT)).str() << std::endl;
+        return m * cp * dT;
+	}
+};
+
+class modTutorial15 : public daeModel
+{
+daeDeclareDynamicClass(modTutorial15)
 public:
     daeParameter mass;
     daeParameter c_p;
@@ -44,7 +67,10 @@ public:
     daeVariable T;
 	daeSTN* stnRegulator;
 
-    modTutorial5(string strName, daeModel* pParent = NULL, string strDescription = "") 
+    daeVariable Power;
+	boost::shared_ptr<extfnPower> P;
+
+    modTutorial15(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
         mass("m", kg, this, "Mass of the copper plate"),
         c_p("c_p", J/(kg*K), this, "Specific heat capacity of the plate"),
@@ -52,7 +78,9 @@ public:
         A("A", m^2, this, "Area of the plate"),
         T_surr("T_surr", K, this, "Temperature of the surroundings"),
         Q_in("Q_in", power_t, this, "Power of the heater"),
-        T("T", temperature_t, this, "Temperature of the plate")
+        T("T", temperature_t, this, "Temperature of the plate"),
+		
+		Power("Power", power_t, this, "External function power")
     {
     }
 
@@ -63,6 +91,11 @@ public:
         eq = CreateEquation("HeatBalance", "Integral heat balance equation");
         eq->SetResidual( mass() * c_p() * T.dt() - Q_in() + alpha() * A() * (T() - T_surr()) );
 
+		P = boost::shared_ptr<extfnPower>(new extfnPower("Power", this, W, mass(), c_p(), T.dt()));
+		
+        eq = CreateEquation("ExternalFunction", "");
+        eq->SetResidual( Power() - (*P)() ); //mass()* c_p() * T.dt() ); //(*P)() );
+		
     /*
         Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
         Again, states MUST contain the SAME NUMBER OF EQUATIONS.
@@ -100,13 +133,13 @@ public:
     }
 };
 
-class simTutorial5 : public daeSimulation
+class simTutorial15 : public daeSimulation
 {
 public:
-    modTutorial5 m;
+    modTutorial15 m;
     
 public:
-    simTutorial5(void) : m("cdaeTutorial5")
+    simTutorial15(void) : m("cdaeTutorial15")
     {
         SetModel(&m);
         m.SetDescription("This tutorial explains how to define and use another type of discontinuous equations: " 
@@ -137,9 +170,9 @@ public:
     }
 };
 
-void runTutorial5(void)
+void runTutorial15(void)
 { 
-    boost::scoped_ptr<daeSimulation_t>      pSimulation(new simTutorial5);  
+    boost::scoped_ptr<daeSimulation_t>      pSimulation(new simTutorial15);  
     boost::scoped_ptr<daeDataReporter_t>    pDataReporter(daeCreateTCPIPDataReporter());
     boost::scoped_ptr<daeIDASolver>         pDAESolver(new daeIDASolver());
     boost::scoped_ptr<daeLog_t>             pLog(daeCreateStdOutLog());
@@ -163,7 +196,7 @@ void runTutorial5(void)
     if(!pDataReporter->Connect(string(""), simName))
         daeDeclareAndThrowException(exInvalidCall); 
 
-    pSimulation->SetReportingInterval(2);
+    pSimulation->SetReportingInterval(0.5);
     pSimulation->SetTimeHorizon(500);
     pSimulation->GetModel()->SetReportingOn(true);
     

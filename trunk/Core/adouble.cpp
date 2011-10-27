@@ -2,6 +2,7 @@
 #include "coreimpl.h"
 #include "nodes.h"
 #include <limits>
+#include <boost/format.hpp>
 using namespace boost;
 
 
@@ -1122,6 +1123,11 @@ daeCondition operator <  (const real_t v, const adouble &a)
 	shared_ptr<condNode> node(expr);
 	daeCondition cond(node);
     return cond;
+}
+
+std::ostream& operator<<(std::ostream& out, const adouble& a)
+{
+	return out << (boost::format("(%1%, %2%)") % a.getValue() % a.getDerivative()).str();
 }
 
 }

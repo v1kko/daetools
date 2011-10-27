@@ -1283,12 +1283,8 @@ class daeScalarExternalFunctionWrapper : public daeScalarExternalFunction,
                                          public boost::python::wrapper<daeScalarExternalFunction>
 {
 public:
-	daeScalarExternalFunctionWrapper()
-	{
-	}
-	
-	daeScalarExternalFunctionWrapper(daeModel& model, boost::python::dict arguments)
-	    : daeScalarExternalFunction(model)
+	daeScalarExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, boost::python::dict arguments)
+	    : daeScalarExternalFunction(strName, pModel, units)
 	{
 		string name;
 		boost::python::ssize_t i, n;
@@ -1365,12 +1361,8 @@ class daeVectorExternalFunctionWrapper : public daeVectorExternalFunction,
                                          public boost::python::wrapper<daeVectorExternalFunction>
 {
 public:
-	daeVectorExternalFunctionWrapper()
-	{
-	}
-	
-	daeVectorExternalFunctionWrapper(daeModel& model, boost::python::dict arguments)
-	    : daeVectorExternalFunction(model)
+	daeVectorExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, size_t nNumberofArguments, boost::python::dict arguments)
+	    : daeVectorExternalFunction(strName, pModel, units, nNumberofArguments)
 	{
 		string name;
 		boost::python::ssize_t i, n;

@@ -3270,25 +3270,29 @@ typedef std::map<std::string, daeExternalFunctionNode_t>							daeExternalFuncti
 class DAE_CORE_API daeExternalFunction_t : public daeObject
 {
 public:
-	daeExternalFunction_t(void);
-	daeExternalFunction_t(daeModel& model);
+	daeExternalFunction_t(const string& strName, daeModel* pModel, const unit& units);
 	virtual ~daeExternalFunction_t(void);
 
 public:
 	void									Initialize(void);
 	void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
 	const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
+	unit									GetUnits(void) const;
 
 protected:
-	daeExternalFunctionNodeMap_t m_mapSetupArgumentNodes;
-	daeExternalFunctionNodeMap_t m_mapArgumentNodes;
+	string							m_strName;
+	unit							m_Unit;
+	daeExternalFunctionNodeMap_t	m_mapSetupArgumentNodes;
+	daeExternalFunctionNodeMap_t	m_mapArgumentNodes;
 };
 
+/*********************************************************************************************
+	daeScalarExternalFunction
+**********************************************************************************************/
 class DAE_CORE_API daeScalarExternalFunction : public daeExternalFunction_t
 {
 public:
-	daeScalarExternalFunction(void);
-	daeScalarExternalFunction(daeModel& model);
+	daeScalarExternalFunction(const string& strName, daeModel* pModel, const unit& units);
 	virtual ~daeScalarExternalFunction(void);
 
 public:
@@ -3296,32 +3300,23 @@ public:
 	virtual adouble	operator() (void) const;
 };
 
+/*********************************************************************************************
+	daeVectorExternalFunction
+**********************************************************************************************/
 class DAE_CORE_API daeVectorExternalFunction : public daeExternalFunction_t
 {
 public:
-	daeVectorExternalFunction(void);
-	daeVectorExternalFunction(daeModel& model);
+	daeVectorExternalFunction(const string& strName, daeModel* pModel, const unit& units, size_t nNumberofArguments);
 	virtual ~daeVectorExternalFunction(void);
 
 public:
 	virtual std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
 	virtual adouble_array operator() (void) const;
+	virtual size_t GetNumberOfResults(void) const;
+
+protected:
+	const size_t m_nNumberofArguments;
 };
-
-///*********************************************************************************************
-//	daeExternalObject
-//**********************************************************************************************/
-//class DAE_CORE_API daeExternalObject : public daeExternalObject_t
-//{
-//public:
-//	daeExternalObject(void);
-//	virtual ~daeExternalObject(void);
-
-//public:
-//	virtual daeExternalFunction_t*	CreateFunction(const std::string& strFunctionName);
-//	virtual daeExternalObjectInfo_t	GetInfo(void) const;
-//};
-
 
 /******************************************************************
 	daeCoreClassFactory

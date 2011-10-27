@@ -2868,7 +2868,6 @@ adScalarExternalFunctionNode::~adScalarExternalFunctionNode()
 
 adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	std::cout << "adScalarExternalFunctionNode::Evaluate" << std::endl;
 	if(!m_pExternalFunction)
 		daeDeclareAndThrowException(exInvalidPointer);
 
@@ -2894,20 +2893,11 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
 		
 		if(ad)
-		{
-			adNode* node = (*ad).get();
-			adouble a = node->Evaluate(pExecutionContext);
-			value = a; //(*ad)->Evaluate(pExecutionContext);
-			std::cout << strName << " = " << a.getValue() << std::endl;
-		}
+			value = (*ad)->Evaluate(pExecutionContext);
 		else if(adarr)
-		{
 			value = (*adarr)->Evaluate(pExecutionContext).m_arrValues;
-		}
 		else
-		{
 			daeDeclareAndThrowException(exInvalidCall);
-		}
 		
 		mapValues[strName] = value;		
 	}
@@ -2918,7 +2908,9 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 
 const quantity adScalarExternalFunctionNode::GetQuantity(void) const
 {
-	return quantity();
+	if(!m_pExternalFunction)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return quantity(0.0, m_pExternalFunction->GetUnits());
 }
 
 adNode* adScalarExternalFunctionNode::Clone(void) const
@@ -2957,6 +2949,27 @@ void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 
 void adScalarExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
+	if(!m_pExternalFunction)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeExternalFunctionNodeMap_t::const_iterator iter;
+	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
+	
+	// This operates on RuntimeNodes!!
+	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+	{
+		daeExternalFunctionNode_t argument = iter->second;
+		
+		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
+		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		
+		if(ad)
+			(*ad)->AddVariableIndexToArray(mapIndexes, bAddFixed);
+		else if(adarr)
+			(*adarr)->AddVariableIndexToArray(mapIndexes, bAddFixed);
+		else
+			daeDeclareAndThrowException(exInvalidCall);
+	}
 }
 
 bool adScalarExternalFunctionNode::IsLinear(void) const

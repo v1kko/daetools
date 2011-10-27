@@ -15,15 +15,15 @@ namespace core
 /*********************************************************************************************
 	daeExternalFunction_t
 **********************************************************************************************/
-daeExternalFunction_t::daeExternalFunction_t(void)
+daeExternalFunction_t::daeExternalFunction_t(const string& strName, daeModel* pModel, const unit& units)
 {
-	m_pModel = NULL;
-}
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
 
-daeExternalFunction_t::daeExternalFunction_t(daeModel& model)
-{
-	m_pModel = &model;
-	model.AddExternalFunction(this);
+	m_strName = strName;
+	m_Unit    = units;
+	m_pModel  = pModel;
+	m_pModel->AddExternalFunction(this);
 }
 
 daeExternalFunction_t::~daeExternalFunction_t(void)
@@ -104,15 +104,16 @@ void daeExternalFunction_t::Initialize(void)
 	}
 }
 
+unit daeExternalFunction_t::GetUnits(void) const
+{
+	return m_Unit;
+}
+
 /*********************************************************************************************
 	daeScalarExternalFunction
 **********************************************************************************************/
-daeScalarExternalFunction::daeScalarExternalFunction(void)
-{
-}
-
-daeScalarExternalFunction::daeScalarExternalFunction(daeModel& model)
-                         : daeExternalFunction_t(model)
+daeScalarExternalFunction::daeScalarExternalFunction(const string& strName, daeModel* pModel, const unit& units)
+                         : daeExternalFunction_t(strName, pModel, units)
 {	
 }
 
@@ -137,12 +138,8 @@ adouble daeScalarExternalFunction::operator() (void) const
 /*********************************************************************************************
 	daeVectorExternalFunction
 **********************************************************************************************/
-daeVectorExternalFunction::daeVectorExternalFunction(void)
-{
-}
-
-daeVectorExternalFunction::daeVectorExternalFunction(daeModel& model)
-                         : daeExternalFunction_t(model)
+daeVectorExternalFunction::daeVectorExternalFunction(const string& strName, daeModel* pModel, const unit& units, size_t nNumberofArguments)
+                         : daeExternalFunction_t(strName, pModel, units), m_nNumberofArguments(nNumberofArguments)
 {	
 }
 
@@ -162,6 +159,11 @@ adouble_array daeVectorExternalFunction::operator() (void) const
 	tmp.node = boost::shared_ptr<adNodeArray>(new adVectorExternalFunctionNode(*this));
 	tmp.setGatherInfo(true);
 	return tmp;
+}
+
+size_t daeVectorExternalFunction::GetNumberOfResults(void) const
+{
+	return m_nNumberofArguments;
 }
 
 	
