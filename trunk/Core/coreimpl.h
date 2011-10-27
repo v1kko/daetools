@@ -2300,7 +2300,6 @@ protected:
 	void		InitializePortAndModelArrays(void);
 	void		InitializeSTNs(void);
 	void		InitializeOnEventActions(void);
-	void		InitializeExternalFunctions(void);
 	void		DoBlockDecomposition(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
@@ -2436,7 +2435,6 @@ protected:
 	virtual void InitializeEquations(void)																						= 0;
 	virtual void InitializeSTNs(void)																							= 0;
 	virtual void InitializeOnEventActions(void)																					= 0;
-	virtual void InitializeExternalFunctions(void)																				= 0;
 	virtual void InitializeDEDIs(void)																		                    = 0;
 	virtual void CreatePortConnectionEquations(void)																			= 0;
 	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)												= 0;
@@ -3274,7 +3272,7 @@ public:
 	virtual ~daeExternalFunction_t(void);
 
 public:
-	void									Initialize(void);
+	void									InitializeArguments(const daeExecutionContext* pExecutionContext);
 	void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
 	const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
 	unit									GetUnits(void) const;
@@ -3297,7 +3295,7 @@ public:
 
 public:
 	virtual adouble	Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
-	virtual adouble	operator() (void) const;
+	virtual adouble	operator() (void);
 };
 
 /*********************************************************************************************
@@ -3311,7 +3309,7 @@ public:
 
 public:
 	virtual std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
-	virtual adouble_array operator() (void) const;
+	virtual adouble_array operator() (void);
 	virtual size_t GetNumberOfResults(void) const;
 
 protected:

@@ -587,9 +587,9 @@ void adSetupPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size
 /*********************************************************************************************
 	adVectorExternalFunctionNode
 **********************************************************************************************/
-adVectorExternalFunctionNode::adVectorExternalFunctionNode(const daeVectorExternalFunction& externalFunction) 
+adVectorExternalFunctionNode::adVectorExternalFunctionNode(daeVectorExternalFunction* externalFunction) 
 {
-	m_pExternalFunction = &externalFunction;
+	m_pExternalFunction = externalFunction;
 }
 
 adVectorExternalFunctionNode::~adVectorExternalFunctionNode()
@@ -616,6 +616,11 @@ adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* 
 	adouble_array tmp;
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
+	// Here I have to initialize arguments (which are at this moment setup nodes)
+	// Creation of runtime nodes will also add variable indexes into the equation execution info
+		daeVectorExternalFunction* pExtFun = const_cast<daeVectorExternalFunction*>(m_pExternalFunction);
+		pExtFun->InitializeArguments(pExecutionContext);
+		
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNodeArray>( Clone() );
 		return tmp;

@@ -2104,7 +2104,6 @@ void daeModel::BuildUpSTNsAndEquations()
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
 		InitializeOnEventActions();		
-		InitializeExternalFunctions();		
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -2353,37 +2352,6 @@ void daeModel::InitializeOnEventActions(void)
 		pModelArray = m_ptrarrModelArrays[i];
 		pModelArray->InitializeOnEventActions();
 	}
-}
-
-void daeModel::InitializeExternalFunctions()
-{
-	size_t i;
-	daeModel* pModel;
-	daeModelArray* pModelArray;
-	daeExternalFunction_t* pExternalFunction;
-
-	for(i = 0; i < m_ptrarrExternalFunctions.size(); i++)
-	{
-		pExternalFunction = m_ptrarrExternalFunctions[i];
-		if(!pExternalFunction)
-			daeDeclareAndThrowException(exInvalidPointer);
-	
-		pExternalFunction->Initialize();
-	}
-	
-	// Next, initialize ExternalFunctions in each child-model
-		for(i = 0; i < m_ptrarrModels.size(); i++)
-		{
-			pModel = m_ptrarrModels[i];
-			pModel->InitializeExternalFunctions();
-		}
-		
-	// Finally, initialize ExternalFunctions in each modelarray
-		for(i = 0; i < m_ptrarrModelArrays.size(); i++)
-		{
-			pModelArray = m_ptrarrModelArrays[i];
-			pModelArray->InitializeExternalFunctions();
-		}
 }
 
 void daeModel::InitializeSTNs(void)

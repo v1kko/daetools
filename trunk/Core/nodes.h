@@ -628,7 +628,7 @@ class DAE_CORE_API adScalarExternalFunctionNode : public adNodeImpl
 {
 public:
 	daeDeclareDynamicClass(adScalarExternalFunctionNode)
-	adScalarExternalFunctionNode(const daeScalarExternalFunction& externalFunction);
+	adScalarExternalFunctionNode(daeScalarExternalFunction* externalFunction);
 	virtual ~adScalarExternalFunctionNode(void);
 
 public:
@@ -646,7 +646,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	const daeScalarExternalFunction* m_pExternalFunction;
+	daeScalarExternalFunction* m_pExternalFunction;
 };
 
 /*********************************************************************************************

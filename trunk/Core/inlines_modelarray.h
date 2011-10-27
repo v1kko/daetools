@@ -88,12 +88,6 @@ protected:
 			it->InitializeSTNs();
 	}
 	
-	void InitializeOnEventActions(void)
-	{
-		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
-			it->InitializeOnEventActions();
-	}
-	
 	void InitializeExternalFunctions(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

@@ -67,19 +67,15 @@ const daeExternalFunctionNodeMap_t& daeExternalFunction_t::GetArgumentNodes(void
 	return m_mapArgumentNodes;
 }
 
-void daeExternalFunction_t::Initialize(void)
+void daeExternalFunction_t::InitializeArguments(const daeExecutionContext* pExecutionContext)
 {
 	std::string strName;
-	daeExecutionContext EC;
 	daeExternalFunctionNode_t setup_node;
 	daeExternalFunctionNodeMap_t::iterator iter;
 	
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_eEquationCalculationMode	= eCalculate;
-
 	m_mapArgumentNodes.clear();
 	for(iter = m_mapSetupArgumentNodes.begin(); iter != m_mapSetupArgumentNodes.end(); iter++)
 	{
@@ -91,11 +87,11 @@ void daeExternalFunction_t::Initialize(void)
 		
 		if(ad)
 		{
-			m_mapArgumentNodes[strName] = (*ad)->Evaluate(&EC).node;
+			m_mapArgumentNodes[strName] = (*ad)->Evaluate(pExecutionContext).node;
 		}
 		else if(adarr)
 		{
-			m_mapArgumentNodes[strName] = (*adarr)->Evaluate(&EC).node;
+			m_mapArgumentNodes[strName] = (*adarr)->Evaluate(pExecutionContext).node;
 		}
 		else
 		{
@@ -127,10 +123,10 @@ adouble daeScalarExternalFunction::Calculate(daeExternalFunctionArgumentValueMap
 	return adouble();
 }
 
-adouble daeScalarExternalFunction::operator() (void) const
+adouble daeScalarExternalFunction::operator() (void)
 {
 	adouble tmp;
-	tmp.node = boost::shared_ptr<adNode>(new adScalarExternalFunctionNode(*this));
+	tmp.node = boost::shared_ptr<adNode>(new adScalarExternalFunctionNode(this));
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -153,10 +149,10 @@ std::vector<adouble> daeVectorExternalFunction::Calculate(daeExternalFunctionArg
 	return std::vector<adouble>();
 }
 
-adouble_array daeVectorExternalFunction::operator() (void) const
+adouble_array daeVectorExternalFunction::operator() (void)
 {
 	adouble_array tmp;
-	tmp.node = boost::shared_ptr<adNodeArray>(new adVectorExternalFunctionNode(*this));
+	tmp.node = boost::shared_ptr<adNodeArray>(new adVectorExternalFunctionNode(this));
 	tmp.setGatherInfo(true);
 	return tmp;
 }

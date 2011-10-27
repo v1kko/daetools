@@ -2857,9 +2857,9 @@ bool adBinaryNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adScalarExternalFunctionNode
 **********************************************************************************************/
-adScalarExternalFunctionNode::adScalarExternalFunctionNode(const daeScalarExternalFunction& externalFunction)
+adScalarExternalFunctionNode::adScalarExternalFunctionNode(daeScalarExternalFunction* externalFunction)
 {
-	m_pExternalFunction = &externalFunction;
+	m_pExternalFunction = externalFunction;
 }
 
 adScalarExternalFunctionNode::~adScalarExternalFunctionNode()
@@ -2874,6 +2874,11 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 	adouble tmp;
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
+	// Here I have to initialize arguments (which are at this moment setup nodes)
+	// Creation of runtime nodes will also add variable indexes into the equation execution info
+		daeScalarExternalFunction* pExtFun = const_cast<daeScalarExternalFunction*>(m_pExternalFunction);
+		pExtFun->InitializeArguments(pExecutionContext);
+		
 		tmp.setGatherInfo(true);
 		tmp.node = shared_ptr<adNode>( Clone() );
 		return tmp;

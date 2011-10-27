@@ -651,7 +651,7 @@ class DAE_CORE_API adVectorExternalFunctionNode : public adNodeArrayImpl
 {
 public:
 	daeDeclareDynamicClass(adVectorExternalFunctionNode)
-	adVectorExternalFunctionNode(const daeVectorExternalFunction& externalFunction);
+	adVectorExternalFunctionNode(daeVectorExternalFunction* externalFunction);
 	virtual ~adVectorExternalFunctionNode(void);
 
 public:
@@ -669,7 +669,7 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	const daeVectorExternalFunction* m_pExternalFunction;
+	daeVectorExternalFunction* m_pExternalFunction;
 };
 
 

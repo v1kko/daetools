@@ -49,7 +49,7 @@ public:
         adouble m  = boost::get<adouble>(mapValues["m"]);
         adouble cp = boost::get<adouble>(mapValues["cp"]);
         adouble dT = boost::get<adouble>(mapValues["dT"]);
-		std::cout << (boost::format("m = %1%, cp = %2%, dT = %3%, mcpdT = %4%") % m % cp % dT % (m*cp*dT)).str() << std::endl;
+//		std::cout << (boost::format("m = %1%, cp = %2%, dT = %3%, mcpdT = %4%") % m % cp % dT % (m*cp*dT)).str() << std::endl;
         return m * cp * dT;
 	}
 };
