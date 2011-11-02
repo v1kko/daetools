@@ -65,7 +65,8 @@ public:
 	virtual void				SetUpSensitivityAnalysis(void);
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
-	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const;
+	virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const;
+	virtual void GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const;
 	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const;
 

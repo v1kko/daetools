@@ -814,6 +814,12 @@ void daeSimulation::GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& 
 		ptrarrObjectiveFunctions.push_back(m_arrObjectiveFunctions[i].get());
 }
 
+void daeSimulation::GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const
+{
+	for(size_t i = 0; i < m_arrMeasuredVariables.size(); i++)
+		ptrarrMeasuredVariables.push_back(m_arrMeasuredVariables[i].get());
+}
+
 daeObjectiveFunction_t* daeSimulation::GetObjectiveFunction(void) const
 {
 	if(m_arrObjectiveFunctions.empty())

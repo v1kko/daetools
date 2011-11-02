@@ -3,16 +3,30 @@
 
 #include "../Core/optimization.h"
 #include "../Core/helpers.h"
+#include <boost/functional/hash.hpp>
+#include <boost/multi_array.hpp>
 
 namespace dae
 {
 namespace nlpsolver
 {
+//class daePastResults
+//{
+//public:
+//	real_t				fobj;
+//	std::vector<real_t> constraints;
+//	std::vector<real_t> measured_vars;
+	
+//	std::vector<real_t>			                                 fobj_derivs;
+//	std::map<daeOptimizationConstraint_t*, std::vector<real_t> > constraints_derivs;
+//	std::map<daeMeasuredVariable_t*,       std::vector<real_t> > measured_vars_derivs;
+//};
+
 class daeNLPCommon
 {
 public:
 	daeNLPCommon(void)
-	{		
+	{
 		m_pSimulation	= NULL;
 		m_pDAESolver	= NULL;
 		m_pDataReporter	= NULL;
@@ -22,7 +36,7 @@ public:
 	}
 	
 	virtual ~daeNLPCommon(void)
-	{		
+	{
 	}
 
 public:
@@ -55,6 +69,8 @@ public:
 		
 		m_pSimulation->GetOptimizationConstraints(m_ptrarrConstraints);
 		m_pSimulation->GetOptimizationVariables(m_ptrarrOptVariables);
+		m_pSimulation->GetMeasuredVariables(m_ptrarrMeasuredVariables);
+		
 		m_pObjectiveFunction = m_pSimulation->GetObjectiveFunction();
 	
 		if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
@@ -124,6 +140,38 @@ public:
 		}		
 	}
 
+	void Calculate_measured_var(daeMeasuredVariable_t* pMeasuredVariable, double& meas_var)
+	{
+		meas_var = pMeasuredVariable->GetValue();
+		
+		if(m_bPrintInfo) 
+		{
+			string strMessage;
+			m_pLog->Message(pMeasuredVariable->GetName() + " value: ", 0);
+			strMessage += toStringFormatted<real_t>(meas_var, -1, 10, true) + " ";
+			m_pLog->Message(strMessage, 0);
+		}
+	}
+
+	void Calculate_measured_var_gradient(daeMeasuredVariable_t* pMeasuredVariable, double* grad_meas_var)
+	{
+		size_t Nv = m_ptrarrMeasuredVariables.size();
+		daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
+		if(Nv != matSens.GetNrows())
+			daeDeclareAndThrowException(exInvalidCall)
+	
+		pMeasuredVariable->GetGradients(matSens, grad_meas_var, Nv);
+	
+		if(m_bPrintInfo) 
+		{
+			string strMessage;
+			m_pLog->Message(pMeasuredVariable->GetName() + " gradient: ", 0);
+			for(size_t j = 0; j < Nv; j++)
+				strMessage += toStringFormatted<real_t>(grad_meas_var[j], -1, 10, true) + " ";
+			m_pLog->Message(strMessage, 0);
+		}		
+	}
+
 protected:
 	void PrintSolution(double fobj, const double* x, const double* g)
 	{
@@ -181,6 +229,10 @@ protected:
 		m_pLog->Message(string(" "), 0);
 	}
 	
+	/*
+	  Can be called with the values of the optimization variables (in case of optimization),
+	  or with the values of the parameters (in case of parameter estimation)
+	*/
 	void CopyOptimizationVariablesToSimulationAndRun(const double* x)
 	{
 		size_t i;
@@ -419,6 +471,7 @@ public:
 	daeObjectiveFunction_t*					   m_pObjectiveFunction;
 	std::vector<daeOptimizationConstraint_t*>  m_ptrarrConstraints;
 	std::vector<daeOptimizationVariable_t*>    m_ptrarrOptVariables;
+	std::vector<daeMeasuredVariable_t*>		   m_ptrarrMeasuredVariables;
 	
 	int  m_iRunCounter;
 	bool m_bPrintInfo;

@@ -32,16 +32,6 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
 	if(!pDAESolver)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-//	daeModel_t* pModel = pSimulation->GetModel();
-//	if(!pModel)
-//		daeDeclareAndThrowException(exInvalidPointer);
-//	cout << " *pSimulation is: " << typeid(*pSimulation).name() << endl;
-//	cout << " *pModel is: " << typeid(*pModel).name() << endl;
-//	
-//	m_pModel = dynamic_cast<daeModel*>(pModel);
-//	if(!m_pModel)
-//		daeDeclareAndThrowException(exInvalidPointer);
-		
 	m_pModel     = pModel;
 	m_pDAESolver = pDAESolver;
 	
@@ -110,7 +100,7 @@ real_t daeFunctionWithGradients::GetValue(void) const
 	...   | ...                   |
 	Np-1  | . . . . . . . . x . . |  -> Sensitivity of the variable with the index k on parameter Np-1 
 
- a) Steady-state model
+ a) Steady-state model [ACHTUNG, ACHTUNG!!! OUTDATED!!! ONLY THE OPTION b) IS USED]
  Index k is equal to m_nEquationIndexInBlock for the steady-state model since then we have the following equation:
 	Fobj(p1,p2,...,pm) - Vobj = 0  
  and in that case the sensitivity of the variable Vobj is:
@@ -166,10 +156,6 @@ daeMatrix<real_t>& daeFunctionWithGradients::GetSensitivitiesMatrix(void) const
 	if(!m_pDAESolver)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-//	daeDAESolver_t* pDAESolver = m_pSimulation->GetDAESolver();
-//	if(!pDAESolver)
-//		daeDeclareAndThrowException(exInvalidPointer);
-
 	daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
 	if(m_nNumberOfOptimizationVariables != matSens.GetNrows())
 		daeDeclareAndThrowException(exInvalidCall);

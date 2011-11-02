@@ -73,8 +73,7 @@ daeArrayRange CreateArrayRange(object& o)
 
 boost::python::object daeGetConfig(void)
 {
-	boost::python::object o(new daeConfig());
-	return o;
+	return boost::ref(daeConfig::GetConfig());
 }
 
 bool GetBoolean(daeConfig& self, const std::string& strPropertyPath)

@@ -3232,7 +3232,7 @@ protected:
 };
 
 /******************************************************************
-	daeObjectiveFunction
+	daeMeasuredVariable
 *******************************************************************/
 class DAE_CORE_API daeMeasuredVariable : virtual public daeFunctionWithGradients,
                                          virtual public daeMeasuredVariable_t

@@ -97,7 +97,8 @@ public:
 												   bool bReportDataAroundDiscontinuities = true)		= 0;
 	
 	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
-	virtual void GetOptimizationVariables  (std::vector<daeOptimizationVariable_t*>&   ptrarrOptVariables) const = 0;
+	virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const	 = 0;
+	virtual void GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const		 = 0;
 	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const     = 0;	
 	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
 	
