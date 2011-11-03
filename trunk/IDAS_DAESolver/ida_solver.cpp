@@ -105,7 +105,7 @@ daeIDASolver::daeIDASolver(void)
 	m_dRelTolerance                  = cfg.Get<real_t>("daetools.IDAS.relativeTolerance",             1e-5);
 	m_dNextTimeAfterReinitialization = cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization", 1e-2);
 	m_strSensitivityMethod           = cfg.Get<string>("daetools.IDAS.sensitivityMethod",             "Simultaneous");
-	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.errorControl",                  false);
+	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					  false);
 	m_bPrintInfo                     = cfg.Get<bool>  ("daetools.IDAS.printInfo",                     false);
 }
 

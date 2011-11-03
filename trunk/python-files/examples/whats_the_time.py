@@ -48,18 +48,6 @@ from time import localtime, strftime
 #    Here, a very simple variable type is declared:
 typeNone = daeVariableType("typeNone", unit(), 0, 1E10,   0, 1e-5)
 
-class extfn(daeScalarExternalFunction):
-    def __init__(self, **kwargs):
-        # daeScalarExternalFunction constructor accepts dict object
-        daeScalarExternalFunction.__init__(self, kwargs)
-        
-        print kwargs
-    
-    def Calculate(self, *args, **kwargs):
-        tau = kwargs.get('tau', None)
-        print 'tau = {0}'.format(tau)
-        return 2 * tau
-        
 # 3. Define a model
 #    New models are derived from the base daeModel class.
 class modTutorial(daeModel):
@@ -88,9 +76,6 @@ class modTutorial(daeModel):
         #     In this example we use Greek character 'τ' to name the variable 'tau'.
         daeModel.__init__(self, Name, Parent, Description)
         self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process, s")
-        
-        self.efun = daeVariable("efun", typeNone, self, "")
-        self.fn = extfn(tau = self.tau())
 
     def DeclareEquations(self):
         # 3.2 Declare equations and state transition networks
@@ -109,11 +94,6 @@ class modTutorial(daeModel):
         #     Note that the variables should be accessed through the model object, therefore we use self.tau
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.tau.dt() - 1.0
-
-        eq = self.CreateEquation("efun", "")
-        eq.Residual = self.efun() - self.fn()
-        a = self.fn()
-        print 'a = ', str(a)
 
 # 4. Define a simulation
 #    Simulations are derived from the base daeSimulation class

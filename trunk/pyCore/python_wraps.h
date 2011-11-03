@@ -53,6 +53,13 @@ real_t      GetFloat1(daeConfig& self, const std::string& strPropertyPath, const
 int         GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int defValue);
 std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue);
 
+void SetBoolean(daeConfig& self, const std::string& strPropertyPath, bool value);
+void SetFloat(daeConfig& self, const std::string& strPropertyPath, real_t value);
+void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value);
+void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value);
+
+std::string daeConfig__str__(daeConfig& self);
+
 /*******************************************************
 	adouble
 *******************************************************/

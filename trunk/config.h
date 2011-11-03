@@ -39,6 +39,12 @@ public:
 		return pt.get<T>(strPropertyPath, defValue);
 	}
 
+	template<class T>
+	void Set(const std::string& strPropertyPath, const T value)
+	{
+		pt.put<T>(strPropertyPath, value);
+	}
+
 	static daeConfig& GetConfig(void)
 	{
 		static daeConfig config;
@@ -76,6 +82,13 @@ public:
 #else
 		return std::string("/etc/daetools/");
 #endif
+	}
+
+	std::string toString(void) const
+	{
+		std::stringstream ss;
+		boost::property_tree::info_parser::write_info(ss, pt);
+		return ss.str();
 	}
 	
 protected:

@@ -127,15 +127,36 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("GetFloat",	   &daepython::GetFloat1)
 		.def("GetInteger",	   &daepython::GetInteger1)
 		.def("GetString",	   &daepython::GetString1)
-
+	  
 		.def("GetBoolean",	   &daepython::GetBoolean)
 		.def("GetFloat",	   &daepython::GetFloat)
 		.def("GetInteger",	   &daepython::GetInteger)
 		.def("GetString",	   &daepython::GetString)
 
-		.def("Reload",         &daeConfig::Reload)
-	;
+		.def("SetBoolean",	   &daepython::SetBoolean)
+		.def("SetFloat",	   &daepython::SetFloat)
+		.def("SetInteger",	   &daepython::SetInteger)
+		.def("SetString",	   &daepython::SetString)
 
+	    .def("Reload", &daeConfig::Reload)
+	    .def("__str__",&daepython::daeConfig__str__)
+	;
+/*
+  .def("GetBoolean",	   &daepython::GetBoolean1)
+  .def("GetFloat",	   &daepython::GetFloat1)
+  .def("GetInteger",	   &daepython::GetInteger1)
+  .def("GetString",	   &daepython::GetString1)
+
+  .def("GetBoolean",	   &daepython::GetBoolean)
+  .def("GetFloat",	   &daepython::GetFloat)
+  .def("GetInteger",	   &daepython::GetInteger)
+  .def("GetString",	   &daepython::GetString)
+
+  .def("PutBoolean",	   &daepython::PutBoolean)
+  .def("PutFloat",	   &daepython::PutFloat)
+  .def("PutInteger",	   &daepython::PutInteger)
+  .def("PutString",	   &daepython::PutString)
+*/  
 	class_<daeCondition>("daeCondition")
 		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
 		//.def(!self)

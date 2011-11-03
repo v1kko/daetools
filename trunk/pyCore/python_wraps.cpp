@@ -5,6 +5,7 @@
 using namespace std;
 using namespace boost;
 using namespace boost::python;
+#include <boost/property_tree/json_parser.hpp>
 
 namespace daepython
 {
@@ -73,7 +74,7 @@ daeArrayRange CreateArrayRange(object& o)
 
 boost::python::object daeGetConfig(void)
 {
-	return boost::ref(daeConfig::GetConfig());
+	return boost::python::object( boost::ref(daeConfig::GetConfig()) );
 }
 
 bool GetBoolean(daeConfig& self, const std::string& strPropertyPath)
@@ -114,6 +115,31 @@ int GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int d
 std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue)
 {
 	return self.Get<std::string>(strPropertyPath, defValue);
+}
+
+void SetBoolean(daeConfig& self, const std::string& strPropertyPath, bool value)
+{
+	self.Set<bool>(strPropertyPath, value);
+}
+
+void SetFloat(daeConfig& self, const std::string& strPropertyPath, real_t value)
+{
+	self.Set<real_t>(strPropertyPath, value);
+}
+
+void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value)
+{
+	self.Set<int>(strPropertyPath, value);
+}
+
+void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value)
+{
+	self.Set<std::string>(strPropertyPath, value);
+}
+
+std::string daeConfig__str__(daeConfig& self)
+{
+	return self.toString();
 }
 
 /*******************************************************
