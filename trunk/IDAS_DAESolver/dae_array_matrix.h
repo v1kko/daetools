@@ -478,6 +478,7 @@ public:
 		A        = NULL;
 		IA       = NULL;
 		JA       = NULL;
+		BTF		 = NULL;
 		indexing = CSR_C_STYLE;
 	}
 	
@@ -541,12 +542,15 @@ public:
 			free(IA);
 		if(JA)
 			free(JA);
+		if(BTF)
+			free(BTF);
 		
 		N   = 0;
 		NNZ = 0;
 		A   = NULL;
 		IA  = NULL;
 		JA  = NULL;
+		BTF = NULL;
 	}
 	
 	real_t GetItem(size_t i, size_t j) const
@@ -770,6 +774,66 @@ public:
 		of.close();
 		delete[] row;
 	}
+
+	void SaveBTFMatrixAsXPM(const std::string& strFilename)
+	{
+		size_t i, j;
+		std::ofstream of(strFilename.c_str(), std::ios_base::out);
+		if(!of.is_open())
+			return;
+		
+		if(!BTF)
+			return;
+		
+		char* row  = new char[N+1];
+		row[N]  = '\0';
+	
+		of << "/* XPM */" << std::endl;
+		of << "static char *dummy[]={" << std::endl;
+		of << "\"" << N << " " << N << " " << 2 << " " << 1 << "\"," << std::endl;
+		of << "\"- c #ffffff\"," << std::endl;
+		of << "\"X c #000000\"," << std::endl;
+		
+		for(i = 0; i < N; i++)
+		{
+			memset(row, '-', N);
+			for(j = 0; j < N; j++)
+			{				
+				if(indexing == CSR_C_STYLE)
+				{
+					if(CalcIndex(BTF[i], j) >= 0)
+						row[j] = 'X';			
+				}
+				else
+				{
+					if(CalcIndex(BTF[i]+1, j+1) >= 0)
+						row[j] = 'X';			
+				}
+			}
+			of << "\"" << row << (i == N-1 ? "\"" : "\",") << std::endl;
+			of.flush();
+		}
+		of << "};" << std::endl;
+		of.close();
+		delete[] row;
+	}
+	
+	FLOAT GetBTFItem(INT i) const
+	{
+		INT index = CalcIndex(BTF[i], BTF[i]);
+		std::cout << "BTF[" << i << "] = " << BTF[i] << std::endl; 
+		if(index >= 0)
+			return A[index];
+		else
+			daeDeclareAndThrowException(exInvalidCall);
+		return 0.0;
+	}
+	
+	void SetBlockTriangularForm(const INT* btf)
+	{
+		BTF = (INT*)realloc(BTF, N*sizeof(INT));
+		memcpy(BTF, btf, N * sizeof(INT));
+	}
 	
 	void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
 	{
@@ -822,6 +886,7 @@ public:
 	FLOAT*  A;        // values
 	INT*    IA;       // row indexes data
 	INT*    JA;       // column indexes
+	INT*    BTF;      // block triangular form
 	bool    indexing; // C style arrays start from 0, FORTRAN from 1
 	
 protected:

@@ -24,9 +24,9 @@ public:
 		m_vectorAbsTolerances			= NULL;
 		m_vectorInitialConditionsTypes	= NULL;
 		
-		m_matKrylov						= NULL;
-		m_vectorPivot					= NULL;
-		m_vectorInvMaxElements			= NULL;
+//		m_matKrylov						= NULL;
+//		m_vectorPivot					= NULL;
+//		m_vectorInvMaxElements			= NULL;
 		
 		m_pvectorSVariables				= NULL;
 		m_pvectorSTimeDerivatives		= NULL;
@@ -62,12 +62,12 @@ public:
 		if(ppdSensResiduals)
 			delete[] ppdSensResiduals;
 		
-		if(m_vectorPivot)
-			free(m_vectorPivot);
-		if(m_vectorInvMaxElements)
-			free(m_vectorInvMaxElements);
-		if(m_matKrylov)
-			DestroyMat(m_matKrylov);
+//		if(m_vectorPivot)
+//			free(m_vectorPivot);
+//		if(m_vectorInvMaxElements)
+//			free(m_vectorInvMaxElements);
+//		if(m_matKrylov)
+//			DestroyMat(m_matKrylov);
 	}
 
 	void CreateSerialArrays(size_t N)
@@ -157,21 +157,21 @@ public:
 	
 	void SetMaxElements()
 	{
-		real_t** m = m_matKrylov->cols;
-		for(size_t i = 0; i < m_N; i++)
-		{
-			if(m[i][i] == 0.0)
-				m_vectorInvMaxElements[i] = 1e-7;
-			else
-				m_vectorInvMaxElements[i] = 1.0 / m[i][i];
-		}
+//		real_t** m = m_matKrylov->cols;
+//		for(size_t i = 0; i < m_N; i++)
+//		{
+//			if(m[i][i] == 0.0)
+//				m_vectorInvMaxElements[i] = 1e-7;
+//			else
+//				m_vectorInvMaxElements[i] = 1.0 / m[i][i];
+//		}
 	}
 
 	void CreatePreconditionerArrays(size_t N)
 	{
-		m_vectorPivot          = (int*)malloc(N * sizeof(int));
-		m_vectorInvMaxElements = (real_t*)malloc(N * sizeof(real_t));
-		m_matKrylov            = NewDenseMat(N, N);
+//		m_vectorPivot          = (int*)malloc(N * sizeof(int));
+//		m_vectorInvMaxElements = (real_t*)malloc(N * sizeof(real_t));
+//		m_matKrylov            = NewDenseMat(N, N);
 	}
 	
 public:
@@ -185,12 +185,15 @@ public:
 
 	size_t					m_N;
 	size_t					m_Ns;
-	int*					m_vectorPivot;
-	real_t*					m_vectorInvMaxElements;
-	DlsMat					m_matKrylov;
 	realtype**				ppdSValues;
 	realtype**				ppdSDValues;
 	realtype**				ppdSensResiduals;
+
+	daeCSRMatrix<real_t, int> matJacobian;
+	
+//	int*					m_vectorPivot;
+//	real_t*					m_vectorInvMaxElements;
+//	DlsMat					m_matKrylov;
 };
 	
 

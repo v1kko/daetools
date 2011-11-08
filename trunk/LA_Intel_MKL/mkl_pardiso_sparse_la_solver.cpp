@@ -463,8 +463,11 @@ int free_la(IDAMem ida_mem)
 	
 	int ret = pSolver->Free(ida_mem);
 
-	delete pSolver;
-	ida_mem->ida_lmem = NULL;
+// ACHTUNG, ACHTUNG!!
+// It is the responsibility of the user to delete LA solver pointer!!
+//    delete pSolver;
+
+    ida_mem->ida_lmem = NULL;
 
 	return ret;
 }

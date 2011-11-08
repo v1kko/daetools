@@ -39,7 +39,7 @@ BOOST_MINOR = 42
 BOOST_BUILD = 0
 
 # Set CONFIG += enable_mpi to use MPI libraries
-CONFIG += enable_mpi
+#CONFIG += enable_mpi
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -124,15 +124,15 @@ win32::PYTHON_INCLUDE_DIR       = $${PYTHONDIR}\include
 win32::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}\Lib\site-packages
 win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
 
-linux-g++::PYTHONDIR           = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-linux-g++-64::PYTHONDIR        = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
-unix::PYTHON_INCLUDE_DIR       = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
-							     /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                                 /usr/share/pyshared
-unix::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}/dist-packages \
-                                 $${PYTHONDIR}/site-packages
-unix::PYTHON_LIB_DIR           =
+unix::PYTHON_INCLUDE_DIR        = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
+							      /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                                  /usr/share/pyshared
+unix::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages \
+                                  $${PYTHONDIR}/site-packages
+unix::PYTHON_LIB_DIR            =
 
 
 #####################################################################################
@@ -277,7 +277,7 @@ SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib \
 					                              ../clapack/LIB/Win32/BLAS_nowrap.lib \
 					                              ../clapack/LIB/Win32/libf2c.lib
-linux-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
+linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
 linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
 
 
@@ -289,7 +289,7 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32::SUPERLU_MT_LIBS          = 
-linux-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
+linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
 linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
 
 
@@ -297,7 +297,7 @@ linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt
 #                                SuperLU_CUDA
 ######################################################################################
 win32::CUDA_PATH          = 
-linux-g++::CUDA_PATH      = /usr/local/cuda
+linux-g++-32::CUDA_PATH   = /usr/local/cuda
 linux-g++-64::CUDA_PATH   = /usr/local/cuda
 
 SUPERLU_CUDA_PATH    = ../superlu_mt-GPU
@@ -306,7 +306,7 @@ SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
 	                   $${CUDA_PATH}/include
 
 win32::CUDA_LIBS = 
-linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib   -lcuda -lcudart
+linux-g++-32::CUDA_LIBS   = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 linux-g++-64::CUDA_LIBS   = -L$${CUDA_PATH}/lib64 -lcuda -lcudart
 
 
@@ -320,7 +320,7 @@ win32::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
 unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
 
 win32::BLAS_LAPACK_LIBDIR        = ../clapack/LIB/Win32
-linux-g++::BLAS_LAPACK_LIBDIR    = /usr/lib/atlas
+linux-g++-32::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
 linux-g++-64::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
 
 win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
@@ -328,11 +328,11 @@ win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPE
                         $${SUPERLU_LIBS} \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
-linux-g++::TRILINOS_LIBS  =   -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
-							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-							  -lumfpack -lamd \
-							   $${SUPERLU_LIBS} \
-							  -lblas -llapack
+linux-g++-32::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+							   -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+							   -lumfpack -lamd \
+							    $${SUPERLU_LIBS} \
+							   -lblas -llapack
 
 linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
 							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \

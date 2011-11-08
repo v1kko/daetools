@@ -48,6 +48,7 @@ LIBS += $${DAE_SUPERLU_SOLVER_LIB} \
         $${SUPERLU_LIBS}
 INCLUDEPATH += $${SUPERLU_INCLUDE}
 pyObject = pySuperLU
+message(SUPERLU_LIBS: $${SUPERLU_LIBS})
 }
 
 ######################################################################################

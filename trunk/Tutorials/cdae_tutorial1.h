@@ -202,6 +202,7 @@ void runTutorial1(void)
 	boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 	boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 	boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
+	//boost::scoped_ptr<daeIDALASolver_t>		pLASolver(daeCreateSuperLUSolver());
 	
 	if(!pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer); 
@@ -212,6 +213,9 @@ void runTutorial1(void)
 	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
+	pDAESolver->SetLASolver(eSundialsGMRES);
+	//pDAESolver->SetLASolver(pLASolver.get());
+	
 	time_t rawtime;
 	struct tm* timeinfo;
 	char buffer[80];

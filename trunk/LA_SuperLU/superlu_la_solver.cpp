@@ -437,6 +437,8 @@ int daeSuperLUSolver::Init(void* ida)
 	return IDA_SUCCESS;
 }
 
+#include <suitesparse/btf.h>
+
 int daeSuperLUSolver::Setup(void*		ida,
 							N_Vector	vectorVariables, 
 							N_Vector	vectorTimeDerivatives, 
@@ -478,6 +480,44 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_matJacobian, 
 							    dInverseTimeStep);
 
+/* Test the BTF stuff here */
+
+	double work;
+	int* Match = new int[m_nNoEquations];
+	int* Work  = new int[5 * m_nNoEquations];
+	
+	int btf_columns_matched = btf_maxtrans
+	(
+	    Neq,
+	    Neq,
+	    m_matJacobian.IA,	// size ncol+1
+	    m_matJacobian.JA,	// size nz = Ap [ncol]
+	    0,					// maximum amount of work to do is maxwork*nnz(A); no limit if <= 0
+							// --- output, not defined on input ---
+	    &work,				// work = -1 if maxwork > 0 and the total work performed
+							// reached the maximum of maxwork*nnz(A).
+							// Otherwise, work = the total work performed.
+	    Match,				// size nrow.  Match [i] = j if column j matched to row i
+							// (see above for the singular-matrix case)
+							// --- workspace, not defined on input or output ---
+	    Work				// size 5*ncol
+	);
+	
+//	std::cout << "m_nNoEquations = " << m_nNoEquations << std::endl; 
+//	std::cout << "work = " << work << std::endl; 
+//	std::cout << "btf_columns_matched = " << btf_columns_matched << std::endl; 
+//	for(size_t i = 0; i < m_nNoEquations; i++)
+//		std::cout << "Match[" << i << "] = " << Match[i] << std::endl; 
+	
+	m_matJacobian.SetBlockTriangularForm(Match);
+	m_matJacobian.SaveBTFMatrixAsXPM("/home/ciroki/matrix.xpm");
+	
+	delete[] Match;
+	delete[] Work;
+
+	
+/* End of the BTF test */
+	
 	double start, end, memcopy;
 	start = dae::GetTimeInSeconds();
 	
@@ -841,7 +881,10 @@ int free_la(IDAMem ida_mem)
 	
 	int ret = pSolver->Free(ida_mem);
 
-	delete pSolver;
+// ACHTUNG, ACHTUNG!!
+// It is the responsibility of the user to delete LA solver pointer!!
+//	delete pSolver;
+	
 	ida_mem->ida_lmem = NULL;
 
 	return ret;

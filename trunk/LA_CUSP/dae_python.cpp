@@ -24,6 +24,6 @@ BOOST_PYTHON_MODULE(pyCUSP)
 		.def("SaveAsMatrixMarketFile",	&daeCUSPSolver::SaveAsMatrixMarketFile)
 		;
 
-	def("daeCreateCUSPSolver", daeCreateCUSPSolver, return_value_policy<reference_existing_object>());
+	def("daeCreateCUSPSolver", daeCreateCUSPSolver);
 
 }

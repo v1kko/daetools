@@ -32,5 +32,5 @@ BOOST_PYTHON_MODULE(pyAmdACML)
 		.def("SaveAsMatrixMarketFile",	&daeLapackSolver::SaveAsMatrixMarketFile)
 		;
 
-	def("daeCreateLapackSolver",  daeCreateLapackSolver,  return_value_policy<reference_existing_object>());
+	def("daeCreateLapackSolver",  daeCreateLapackSolver);
 }

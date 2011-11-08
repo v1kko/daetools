@@ -27,7 +27,7 @@ compile () {
   if [ ${HOST_ARCH} = "x86_64" ]; then
     ARCH=g++-64
   else
-    ARCH=g++
+    ARCH=g++-32
   fi
 
   if [ ${DIR} = "dae" ]; then
