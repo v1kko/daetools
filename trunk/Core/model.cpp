@@ -1673,6 +1673,11 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 	}
 /***************************************************************************************************/
 	
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pDataProxy.get();
+	EC.m_pEquationExecutionInfo		= NULL;
+	EC.m_eEquationCalculationMode	= eGatherInfo;
+	
 	if(nNoDomains > 0)
 	{
 		// Here I have to create one EquationExecutionInfo for each point in each domain
@@ -1695,7 +1700,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1726,7 +1731,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1761,7 +1766,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1800,7 +1805,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1843,7 +1848,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1891,7 +1896,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1943,7 +1948,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1999,7 +2004,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo();
+				pEquationExecutionInfo->GatherInfo(EC);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -2020,7 +2025,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			AddEquationExecutionInfo(pEquationExecutionInfo);
 		else
 			ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-		pEquationExecutionInfo->GatherInfo();
+		pEquationExecutionInfo->GatherInfo(EC);
 
 		// This vector is redundant - all EquationExecutionInfos already exist in models and states
 		// However, it is useful when saving RuntimeReport
@@ -2493,9 +2498,6 @@ void daeModel::CollectEquationExecutionInfosFromSTNs(vector<daeEquationExecution
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pSTN->CollectEquationExecutionInfos(ptrarrEquationExecutionInfo);
 	}
 

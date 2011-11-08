@@ -6,6 +6,12 @@
 #include "../config.h"
 #include "../Core/optimization.h"
 
+#if defined(DAE_MPI)
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/utility.hpp>
+#endif
+
 namespace dae
 {
 namespace activity

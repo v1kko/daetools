@@ -129,7 +129,7 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
 }
 
-void daeEquationExecutionInfo::GatherInfo(void)
+void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -138,20 +138,17 @@ void daeEquationExecutionInfo::GatherInfo(void)
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eGatherInfo;
+	EC.m_pEquationExecutionInfo = this;
 
 	m_pModel->PropagateGlobalExecutionContext(&EC);
 		m_pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
 	m_pModel->PropagateGlobalExecutionContext(NULL);
 
-	if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-		daeFPU::CreateCommandStack(m_EquationEvaluationNode.get(), m_ptrarrEquationCommands);
+//	if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
+//		daeFPU::CreateCommandStack(m_EquationEvaluationNode.get(), m_ptrarrEquationCommands);
 }
 
-void daeEquationExecutionInfo::Residual(void)
+void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -160,56 +157,20 @@ void daeEquationExecutionInfo::Residual(void)
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pBlock						= m_pBlock;
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculate;
+	EC.m_pEquationExecutionInfo = this;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{
 		adouble __ad = m_EquationEvaluationNode->Evaluate(&EC);
 		m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
-		
-		/* Old code:
-		m_pEquation->SetResidual(m_nEquationIndexInBlock, __ad.getValue(), m_pBlock);
-
-		real_t res;
-		daeFPU::fpuResidual(&EC, m_ptrarrEquationCommands, res);
-		if(res != __ad.getValue())
-			daeDeclareAndThrowException(exInvalidCall);
-		*/
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
 	{
 		daeDeclareAndThrowException(exInvalidCall)
-				
-		/* Old code 
-		I think I dont need this evaluation mode anymore
-		What about foreign objects??
-		
-		daeExecutionContext* pEC;
-		map<size_t, size_t>::iterator iter;
-		for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
-		{
-			pEC = m_pModel->m_pDataProxy->GetExecutionContext((*iter).first);
-			pEC->m_pBlock						= m_pBlock;
-			pEC->m_dInverseTimeStep				= m_pBlock->GetInverseTimeStep();
-			pEC->m_pEquationExecutionInfo		= this;
-			pEC->m_eEquationCalculationMode		= eCalculate;
-			pEC->m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
-		}
-		m_pEquation->Residual(m_narrDomainIndexes, EC);
-		*/
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
 		daeDeclareAndThrowException(exInvalidCall)
-
-		//real_t res;
-		//daeFPU::fpuResidual(&EC, m_ptrarrEquationCommands, res);
-		//m_pEquation->SetResidual(m_nEquationIndexInBlock, res, m_pBlock);
 	}
 	else
 	{
@@ -217,19 +178,14 @@ void daeEquationExecutionInfo::Residual(void)
 	}
 }
 
-void daeEquationExecutionInfo::Jacobian(void)
+void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pBlock						= m_pBlock;
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateJacobian;
+	EC.m_pEquationExecutionInfo = this;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{
@@ -243,37 +199,15 @@ void daeEquationExecutionInfo::Jacobian(void)
 			nVariableindexInBlock = (*iter).second;
 			__ad = m_EquationEvaluationNode->Evaluate(&EC);
 			m_pBlock->SetJacobian(m_nEquationIndexInBlock, nVariableindexInBlock, __ad.getDerivative());
-			
-			//      This was before:
-			//m_pEquation->SetJacobianItem(m_nEquationIndexInBlock, nVariableindexInBlock, __ad.getDerivative(), m_pBlock);
-
-			//real_t jacob;
-			//daeFPU::fpuJacobian(&EC, m_ptrarrEquationCommands, jacob);
-			//if(jacob != __ad.getDerivative())
-			//	daeDeclareAndThrowException(exInvalidCall);
 		}
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
 	{
 		daeDeclareAndThrowException(exInvalidCall)
-		
-		//m_pEquation->Jacobian(m_narrDomainIndexes, m_mapIndexes, EC);
 	}
 	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
 	{
 		daeDeclareAndThrowException(exInvalidCall)
-
-		//real_t jacob;
-		//map<size_t, size_t>::iterator iter;
-		//size_t nVariableindexInBlock;
-
-		//for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
-		//{
-		//	EC.m_nCurrentVariableIndexForJacobianEvaluation = (*iter).first;
-		//	nVariableindexInBlock = (*iter).second;
-		//	daeFPU::fpuJacobian(&EC, m_ptrarrEquationCommands, jacob);
-		//	m_pBlock->SetJacobian(m_nEquationIndexInBlock, nVariableindexInBlock, jacob);
-		//}
 	}
 	else
 	{
@@ -281,19 +215,14 @@ void daeEquationExecutionInfo::Jacobian(void)
 	}
 }
 
-void daeEquationExecutionInfo::SensitivityResiduals(const std::vector<size_t>& narrParameterIndexes)
+void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pBlock						= m_pBlock;
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
+	EC.m_pEquationExecutionInfo = this;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{
@@ -321,19 +250,15 @@ void daeEquationExecutionInfo::SensitivityResiduals(const std::vector<size_t>& n
 	}
 }
 
-void daeEquationExecutionInfo::SensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes)
+// Should not be used anymore, but double-check
+void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pBlock						= m_pBlock;
-	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
-	EC.m_dInverseTimeStep			= m_pBlock->GetInverseTimeStep();
-	EC.m_pEquationExecutionInfo		= this;
-	EC.m_eEquationCalculationMode	= eCalculateSensitivityParametersGradients;
+	EC.m_pEquationExecutionInfo = this;
 
 	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
 	{

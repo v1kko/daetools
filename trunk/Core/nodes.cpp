@@ -929,7 +929,7 @@ adRuntimeVariableNode::~adRuntimeVariableNode()
 
 adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in evaluate mode we dont need the value
+// If we are in the evaluate mode we dont need the value
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adouble tmp;

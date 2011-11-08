@@ -5,10 +5,12 @@ TARGET = cdaeIDAS_DAESolver
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
-    $${SUNDIALS_INCLUDE}
+               $${SUNDIALS_INCLUDE} \
+               $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
-LIBS +=	$${SUNDIALS_LIBS}
+LIBS +=	$${SUNDIALS_LIBS} \
+        $${MPI_LIBS}
 
 SOURCES += stdafx.cpp \
     ida_solver.cpp \

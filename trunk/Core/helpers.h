@@ -207,13 +207,13 @@ std::vector<T> makeVector(T a1, T a2, T a3, T a4, T a5, T a6, T a7, T a8)
 }
 
 template<class T>
-std::string toString(const std::vector<T>& std_array)
+std::string toString(const std::vector<T>& std_array, const std::string& strDelimiter = std::string(", "))
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
-			result += ", ";
+			result += strDelimiter;
 		result += toString<T>(std_array[i]);
 	}
 	return result;
@@ -225,13 +225,14 @@ std::string toStringFormatted(const std::vector<T>& std_array,
 							  std::streamsize width = -1, 
 							  std::streamsize precision = -1, 
 							  bool scientific = false,
-							  bool strip_if_integer = false)
+							  bool strip_if_integer = false,
+                              const std::string& strDelimiter = std::string(", "))
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
-			result += ", ";
+			result += strDelimiter;
 		result += toStringFormatted<T>(std_array[i], width, precision, scientific, strip_if_integer);
 	}
 	return result;
@@ -239,26 +240,30 @@ std::string toStringFormatted(const std::vector<T>& std_array,
 
 // T must be a pointer-type for a daeObject-derived object
 template<class T>
-std::string toString_Names(const std::vector<T>& std_array, const std::string& strPrependToEachObject = std::string(""))
+std::string toString_Names(const std::vector<T>& std_array, 
+                           const std::string& strPrependToEachObject = std::string(""), 
+                           const std::string& strDelimiter = std::string(", "))
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
-			result += ", ";
+			result += strDelimiter;
 		result += strPrependToEachObject + std_array[i]->GetName();
 	}
 	return result;
 }
 
 template<class T>
-std::string toString_StrippedNames(const std::vector<T>& std_array, const std::string& strPrependToEachObject = std::string(""))
+std::string toString_StrippedNames(const std::vector<T>& std_array, 
+                                   const std::string& strPrependToEachObject = std::string(""), 
+                                   const std::string& strDelimiter = std::string(", "))
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
-			result += ", ";
+			result += strDelimiter;
 		result += strPrependToEachObject + std_array[i]->GetStrippedName();
 	}
 	return result;
@@ -267,13 +272,14 @@ std::string toString_StrippedNames(const std::vector<T>& std_array, const std::s
 template<class T, class PARENT>
 std::string toString_StrippedRelativeNames(const std::vector<T>& std_array,
 										   const PARENT parent, 
-										   const std::string& strPrependToEachObject = std::string(""))
+										   const std::string& strPrependToEachObject = std::string(""),
+                                           const std::string& strDelimiter = std::string(", "))
 {
 	std::string result;
 	for(size_t i = 0; i < std_array.size(); i++)
 	{
 		if(i != 0)
-			result += ", ";
+			result += strDelimiter;
 		result += strPrependToEachObject + daeGetStrippedRelativeName(parent, std_array[i]);
 	}
 	return result;

@@ -4,7 +4,12 @@ QT -= core \
 TARGET = cdaeCore
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += $${BOOSTDIR}
+
+INCLUDEPATH += $${BOOSTDIR} \
+	           $${MPI_INCLUDE}
+
+LIBS +=	$${MPI_LIBS}
+
 SOURCES += xmlreadstream.cpp \
     xmlfunctions.cpp \
     xmlfile.cpp \

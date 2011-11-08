@@ -5,11 +5,15 @@ TARGET = pyUnits
 TEMPLATE = lib
 
 INCLUDEPATH += $${BOOSTDIR} \
-    $${PYTHON_INCLUDE_DIR} \
-    $${PYTHON_SITE_PACKAGES_DIR}
+               $${PYTHON_INCLUDE_DIR} \
+               $${PYTHON_SITE_PACKAGES_DIR} \
+	           $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
-LIBS +=	$${DAE_UNITS_LIB} $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
+
+LIBS +=	$${DAE_UNITS_LIB} \
+        $${BOOST_PYTHON_LIB} \
+        $${BOOST_LIBS}
 
 SOURCES += dllmain.cpp \
 	stdafx.cpp \

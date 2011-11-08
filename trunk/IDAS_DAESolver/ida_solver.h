@@ -8,6 +8,12 @@
 #include "ida_la_solver_interface.h"
 #include "../config.h"
 
+#if defined(DAE_MPI)
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/utility.hpp>
+#endif
+
 namespace dae
 {
 namespace solver

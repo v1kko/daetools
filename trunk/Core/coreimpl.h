@@ -26,6 +26,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "adouble.h"
 #include "export.h"
 
+#if defined(DAE_MPI)
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/utility.hpp>
+#endif
+
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 #ifdef DAEDLL
@@ -400,11 +406,12 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 public:
-	void GatherInfo(void);
-	void Residual(void);
-	void Jacobian(void);
-	void SensitivityResiduals(const std::vector<size_t>& narrParameterIndexes);
-	void SensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes);
+	void GatherInfo(daeExecutionContext& EC);
+	void Residual(daeExecutionContext& EC);
+	void Jacobian(daeExecutionContext& EC);
+	void SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
+	void SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
+	
 	void AddVariableInEquation(size_t nIndex);
 	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
 
@@ -1238,9 +1245,9 @@ public:
 
 public:			
 // Used by adNode members during calculation
-	real_t GetValue(size_t nOverallIndex) const;
-	real_t GetADValue(size_t nOverallIndex) const;
-	real_t GetTimeDerivative(size_t nOverallIndex) const;
+//	real_t GetValue(size_t nOverallIndex) const;
+//	real_t GetADValue(size_t nOverallIndex) const;
+//	real_t GetTimeDerivative(size_t nOverallIndex) const;
 
 public:
 	void AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
@@ -1290,14 +1297,19 @@ public:
 
 	size_t	m_nCurrentVariableIndexForJacobianEvaluation;
 
-// Given by a solver during Residual/Jacobian/Hesian calculation
+// Given by a solver during Residual/Jacobian calculation
 	real_t				m_dCurrentTime;
 	real_t				m_dInverseTimeStep;
 	daeArray<real_t>*	m_parrResidual; 
 	daeMatrix<real_t>*	m_pmatJacobian; 
-	daeMatrix<real_t>*	m_pmatSValues;
-	daeMatrix<real_t>*	m_pmatSTimeDerivatives; 
-	daeMatrix<real_t>*	m_pmatSResiduals;
+
+#if defined(DAE_MPI)
+	size_t m_nEquationIndexesStart;
+	size_t m_nEquationIndexesEnd;
+	size_t m_nVariableIndexesStart;
+	size_t m_nVariableIndexesEnd;
+#endif
+
 };
 
 /******************************************************************
@@ -2908,10 +2920,10 @@ protected:
 	void			CollectVariableIndexes(std::map<size_t, size_t>& mapVariableIndexes);
 	void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
 
-	void			CalculateResiduals(void);
-	void			CalculateJacobian(void);
-	void			CalculateSensitivityResiduals(const std::vector<size_t>& narrParameterIndexes);
-	void			CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes);
+	void			CalculateResiduals(daeExecutionContext& EC);
+	void			CalculateJacobian(daeExecutionContext& EC);
+	void			CalculateSensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
+	void			CalculateSensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
 
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 

@@ -451,7 +451,7 @@ adouble_array DomainArray1(daeDomain& domain)
 	return domain.array();
 }
 
-adouble_array DomainArray2(daeDomain& domain, slice s)
+adouble_array DomainArray2(daeDomain& domain, boost::python::slice s)
 {
 	extract<int> get_start(s.start());
 	extract<int> get_end(s.stop());

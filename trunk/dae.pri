@@ -38,6 +38,9 @@ BOOST_MAJOR = 1
 BOOST_MINOR = 42
 BOOST_BUILD = 0
 
+# Set CONFIG += enable_mpi to use MPI libraries
+CONFIG += enable_mpi
+
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
 
@@ -336,6 +339,26 @@ linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L
 							  -lumfpack -lamd \
 							   $${SUPERLU_LIBS} \
 							  -lblas -llapack
+
+
+#####################################################################################
+#                                 MPI SUPPORT
+#####################################################################################
+enable_mpi {
+QMAKE_CXXFLAGS += -DDAE_MPI
+
+win32::MPI = 
+unix::MPI  = 
+
+win32::MPI_INCLUDE = 
+unix::MPI_INCLUDE  = /usr/include/mpi
+
+win32::MPI_LIBDIR = 
+unix::MPI_LIBDIR  = 
+
+win32::MPI_LIBS = 
+unix::MPI_LIBS  = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
+}
 
 
 #####################################################################################

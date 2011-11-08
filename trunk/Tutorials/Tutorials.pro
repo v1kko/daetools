@@ -5,7 +5,8 @@ CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
 INCLUDEPATH += $${BOOSTDIR} \
-               $${IPOPT_INCLUDE}
+               $${IPOPT_INCLUDE} \
+               $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${IPOPT_LIBDIR} \
@@ -22,6 +23,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BOOST_LIBS} \
         #$${IPOPT_LIBS} \
         $${DAE_UNITS_LIB} \
+        $${MPI_LIBS} \
         $${MUMPS_LIBS} -lrt -lgfortran
 
 SOURCES += main.cpp \

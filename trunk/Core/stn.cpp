@@ -92,6 +92,7 @@ void daeSTN::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMod
 			fmtFile % GetStrippedName() 
 					% m_strShortName 
 					% strStates;
+			strContent += fmtFile.str();
 		}
 		else if(eLanguage == eCDAE)
 		{
@@ -104,14 +105,13 @@ void daeSTN::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMod
 			fmtFile % GetStrippedName() 
 					% m_strShortName 
 					% strStates;
+			strContent += fmtFile.str();
 		}
 		else
 		{
 			daeDeclareAndThrowException(exNotImplemented); 
 		}
 	}
-	
-	strContent += fmtFile.str();
 }
 
 void daeSTN::OpenRuntime(io::xmlTag_t* pTag)
@@ -854,7 +854,7 @@ daeState_t* daeSTN::GetActiveState()
 	return m_pActiveState;
 }
 
-void daeSTN::CalculateResiduals(void)
+void daeSTN::CalculateResiduals(daeExecutionContext& EC)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -871,7 +871,7 @@ void daeSTN::CalculateResiduals(void)
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->Residual();
+		pEquationExecutionInfo->Residual(EC);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -880,11 +880,11 @@ void daeSTN::CalculateResiduals(void)
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateResiduals();
+		pSTN->CalculateResiduals(EC);
 	}
 }
 
-void daeSTN::CalculateJacobian(void)
+void daeSTN::CalculateJacobian(daeExecutionContext& EC)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -901,7 +901,7 @@ void daeSTN::CalculateJacobian(void)
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->Jacobian();
+		pEquationExecutionInfo->Jacobian(EC);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -910,11 +910,11 @@ void daeSTN::CalculateJacobian(void)
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateJacobian();
+		pSTN->CalculateJacobian(EC);
 	}
 }
 
-void daeSTN::CalculateSensitivityResiduals(const std::vector<size_t>& narrParameterIndexes)
+void daeSTN::CalculateSensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -931,7 +931,7 @@ void daeSTN::CalculateSensitivityResiduals(const std::vector<size_t>& narrParame
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->SensitivityResiduals(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -940,11 +940,11 @@ void daeSTN::CalculateSensitivityResiduals(const std::vector<size_t>& narrParame
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateSensitivityResiduals(narrParameterIndexes);
+		pSTN->CalculateSensitivityResiduals(EC, narrParameterIndexes);
 	}
 }
 
-void daeSTN::CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes)
+void daeSTN::CalculateSensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -961,7 +961,7 @@ void daeSTN::CalculateSensitivityParametersGradients(const std::vector<size_t>& 
 		if(!pEquationExecutionInfo)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pEquationExecutionInfo->SensitivityParametersGradients(narrParameterIndexes);
+		pEquationExecutionInfo->SensitivityParametersGradients(EC, narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
@@ -970,7 +970,7 @@ void daeSTN::CalculateSensitivityParametersGradients(const std::vector<size_t>& 
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		pSTN->CalculateSensitivityParametersGradients(narrParameterIndexes);
+		pSTN->CalculateSensitivityParametersGradients(EC, narrParameterIndexes);
 	}
 }
 

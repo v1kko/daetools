@@ -4,9 +4,11 @@ QT -= core gui
 TARGET = cdaeActivity
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += $${BOOSTDIR}
+INCLUDEPATH += $${BOOSTDIR} \
+	           $${MPI_INCLUDE}
 
-LIBS += $${DAE_CORE_LIB} 
+LIBS += $${DAE_CORE_LIB} \
+        $${MPI_LIBS}
 
 HEADERS += stdafx.h \
     simulation.h \
