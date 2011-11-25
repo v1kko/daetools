@@ -1438,8 +1438,8 @@ void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 
 void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
 {
-// Here, portFrom is observer and portTo is subject
-// When the outlet port send an event its function Notify() is called which in turn calls the function Update() in the portFrom.
+// Here, portFrom (inlet) is observer and portTo (outlet) is subject
+// When the outlet port sends an event its function Notify() is called which in turn calls the function Update() in the portFrom.
 // portFrom then calls its function Notify which calls Update() in all attached observers (daeAction).
 	if(pPortFrom->GetType() != eInletPort)
 		daeDeclareAndThrowException(exInvalidCall);
