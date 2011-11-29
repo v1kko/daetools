@@ -101,13 +101,13 @@ class modTutorial(daeModel):
           - 'userDefinedActions' is a list of user defined daeAction-derived objects
         """
         self.ON_CONDITION(self.T() > 340,    switchTo           = 'Cooling',
-                                             triggerEvents      = [],
                                              setVariableValues  = [ (self.event, 100) ],
+                                             triggerEvents      = [],
                                              userDefinedActions = [] )
 
         self.ON_CONDITION(self.time() > 350, switchTo           = 'HeaterOff',
-                                             triggerEvents      = [ (self.epOut, self.T() + 5.0) ],
                                              setVariableValues  = [],
+                                             triggerEvents      = [ (self.epOut, self.T() + 5.0) ],
                                              userDefinedActions = [] )
 
         self.STATE("Cooling")
@@ -115,14 +115,14 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.ON_CONDITION(self.T() < 320,    switchTo          = 'Heating',
-                                             triggerEvents     = [],
-                                             setVariableValues = [ (self.event, 200) ],
+        self.ON_CONDITION(self.T() < 320,    switchTo           = 'Heating',
+                                             setVariableValues  = [ (self.event, 200) ],
+                                             triggerEvents      = [],
                                              userDefinedActions = [] )
 
-        self.ON_CONDITION(self.time() > 350, switchTo          = 'HeaterOff',
-                                             triggerEvents     = [ (self.epOut, self.T() + 6.0) ],
-                                             setVariableValues = [],
+        self.ON_CONDITION(self.time() > 350, switchTo           = 'HeaterOff',
+                                             setVariableValues  = [],
+                                             triggerEvents      = [ (self.epOut, self.T() + 6.0) ],
                                              userDefinedActions = [] )
 
         self.STATE("HeaterOff")
@@ -151,8 +151,8 @@ class modTutorial(daeModel):
         when the action is executed to get the value of the event data (ie. to set a new value of a variable).
         """
         self.ON_EVENT(self.epIn, switchToStates     = [ ('Regulator', 'HeaterOff')],
-                                 triggerEvents      = [],
                                  setVariableValues  = [ (self.event, self.epIn()) ],
+                                 triggerEvents      = [],
                                  userDefinedActions = [self.action])
 
 class simTutorial(daeSimulation):

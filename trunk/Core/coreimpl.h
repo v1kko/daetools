@@ -2056,7 +2056,8 @@ class DAE_CORE_API daePortConnection : virtual public daeObject,
 {
 public:
 	daeDeclareDynamicClass(daePortConnection)
-	daePortConnection(void);
+	daePortConnection();
+	daePortConnection(daePort* pPortFrom, daePort* pPortTo);
 	virtual ~daePortConnection(void);
 
 public:
@@ -2088,6 +2089,47 @@ protected:
 };
 
 /******************************************************************
+	daeEventPortConnection
+*******************************************************************/
+class daeRemoteEventReceiver;
+class daeRemoteEventSender;
+
+class DAE_CORE_API daeEventPortConnection : virtual public daeObject,
+						                    virtual public daeEventPortConnection_t
+{
+public:
+	daeDeclareDynamicClass(daeEventPortConnection)
+	daeEventPortConnection();
+	daeEventPortConnection(daeEventPort* pPortFrom, daeEventPort* pPortTo);
+	virtual ~daeEventPortConnection(void);
+
+public:
+	virtual daeEventPort_t*	GetPortFrom(void) const;
+	virtual daeEventPort_t*	GetPortTo(void) const;
+
+public:	
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
+
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	void Clone(const daePortConnection& rObject);
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+
+protected:
+	void SetModelAndCanonicalName(daeObject* pObject);
+
+protected:
+	boost::shared_ptr<daeRemoteEventReceiver> receiver;
+	boost::shared_ptr<daeRemoteEventSender>   sender;
+
+	daeEventPort* m_pPortFrom;
+	daeEventPort* m_pPortTo;
+	friend class daeModel;
+};
+
+/******************************************************************
 	daeModel
 *******************************************************************/
 class daeState;
@@ -2115,6 +2157,7 @@ public:
 	virtual void	GetVariables(std::vector<daeVariable_t*>& ptrarrVariables);
 	virtual void	GetParameters(std::vector<daeParameter_t*>& ptrarrParameters);
 	virtual void	GetPortConnections(std::vector<daePortConnection_t*>& ptrarrPortConnections);
+	virtual void	GetEventPortConnections(std::vector<daeEventPortConnection_t*>& ptrarrEventPortConnections);
 	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays);
 	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays);
 
@@ -2211,6 +2254,7 @@ public:
 	void AddEventPort(daeEventPort* pPort);
 	void AddOnEventAction(daeOnEventActions* pOnEventAction);
 	void AddPortConnection(daePortConnection* pPortConnection);
+	void AddEventPortConnection(daeEventPortConnection* pEventPortConnection);
 	void AddPortArray(daePortArray* pPortArray);
 	void AddModelArray(daeModelArray* pModelArray);
 	void AddExternalFunction(daeExternalFunction_t* pExternalFunction);
@@ -2285,6 +2329,7 @@ protected:
 public:
 	daeDomain*		FindDomain(unsigned long nID) const;
 	daePort*		FindPort(unsigned long nID) const;
+	daeEventPort*	FindEventPort(unsigned long nID) const;
 	daeVariable*	FindVariable(unsigned long nID) const;
 
 	boost::shared_ptr<daeDataProxy_t> GetDataProxy(void) const;
@@ -2293,6 +2338,7 @@ public:
 	void RemoveEquation(daeEquation* pObject);
 	void RemoveSTN(daeSTN* pObject);
 	void RemovePortConnection(daePortConnection* pObject);
+	void RemoveEventPortConnection(daeEventPortConnection* pObject);
 	void RemoveDomain(daeDomain* pObject);
 	void RemoveParameter(daeParameter* pObject);
 	void RemoveVariable(daeVariable* pObject);
@@ -2354,6 +2400,8 @@ protected:
 	daePtrVector<daeEquation*>				m_ptrarrEquations;
 	daePtrVector<daeSTN*>					m_ptrarrSTNs;
 	daePtrVector<daePortConnection*>		m_ptrarrPortConnections;
+	daePtrVector<daeEventPortConnection*>	m_ptrarrEventPortConnections;
+	
 // When used programmatically they dont own pointers
 	daePtrVector<daeDomain*>				m_ptrarrDomains;
 	daePtrVector<daeParameter*>				m_ptrarrParameters;

@@ -101,6 +101,29 @@ public:
 };
 
 /****************************************************************************************
+	daeFindEventPortByID
+*****************************************************************************************/
+class daeFindEventPortByID : public io::daeOnOpenRefDelegate_t<daeEventPort>
+{
+public:
+	daeFindEventPortByID(daeModel* pModel)
+	{
+		m_pModel = pModel;
+	}
+
+	daeEventPort* FindObjectByID(size_t nID)
+	{
+		if(!m_pModel)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		return m_pModel->FindEventPort(nID);
+	}
+
+public:
+	daeModel* m_pModel;
+};
+
+/****************************************************************************************
 	daeFindVariableByID
 *****************************************************************************************/
 class daeFindVariableByID : public io::daeOnOpenRefDelegate_t<daeVariable>

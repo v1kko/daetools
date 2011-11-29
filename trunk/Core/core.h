@@ -655,6 +655,16 @@ public:
 };
 
 /******************************************************************
+	daeEventPortConnection_t
+*******************************************************************/
+class daeEventPortConnection_t : virtual public daeObject_t
+{
+public:
+	virtual daeEventPort_t*	GetPortFrom(void) const = 0;
+	virtual daeEventPort_t*	GetPortTo(void) const	= 0;
+};
+
+/******************************************************************
 	daeState_t
 *******************************************************************/
 class daeSTN_t;
@@ -908,24 +918,25 @@ struct daeModelInfo
 class daeModel_t : virtual public daeObject_t
 {
 public:
-	virtual void	GetModelInfo(daeModelInfo& mi) const											= 0;
-	virtual void	GetSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)										= 0;
-	virtual void	GetPorts(std::vector<daePort_t*>& ptrarrPorts)									= 0;
-	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)						= 0;
-	virtual void	GetModels(std::vector<daeModel_t*>& ptrarrModels)								= 0;
-	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)							= 0;
-	virtual void	GetVariables(std::vector<daeVariable_t*>& ptrarrVariables)						= 0;
-	virtual void	GetParameters(std::vector<daeParameter_t*>& ptrarrParameters)					= 0;
-	virtual void	GetPortConnections(std::vector<daePortConnection_t*>& ptrarrPortConnections)	= 0;
-	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays)					= 0;
-	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays)				= 0;
+	virtual void	GetModelInfo(daeModelInfo& mi) const														= 0;
+	virtual void	GetSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)													= 0;
+	virtual void	GetPorts(std::vector<daePort_t*>& ptrarrPorts)												= 0;
+	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)									= 0;
+	virtual void	GetModels(std::vector<daeModel_t*>& ptrarrModels)											= 0;
+	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)										= 0;
+	virtual void	GetVariables(std::vector<daeVariable_t*>& ptrarrVariables)									= 0;
+	virtual void	GetParameters(std::vector<daeParameter_t*>& ptrarrParameters)								= 0;
+	virtual void	GetPortConnections(std::vector<daePortConnection_t*>& ptrarrPortConnections)				= 0;
+	virtual void	GetEventPortConnections(std::vector<daeEventPortConnection_t*>& ptrarrEventPortConnections) = 0;
+	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays)								= 0;
+	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays)							= 0;
 
-	virtual void	InitializeStage1(void)															= 0;
-	virtual void	InitializeStage2(void)															= 0;
-	virtual void	InitializeStage3(daeLog_t* pLog)												= 0;
-	virtual void	InitializeStage4(void)															= 0;
+	virtual void	InitializeStage1(void)																		= 0;
+	virtual void	InitializeStage2(void)																		= 0;
+	virtual void	InitializeStage3(daeLog_t* pLog)															= 0;
+	virtual void	InitializeStage4(void)																		= 0;
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, 
-									 std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
+									 std::vector<daeBlock_t*>& ptrarrBlocks)					= 0;
 
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;

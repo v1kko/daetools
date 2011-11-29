@@ -137,6 +137,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrEquations.EmptyAndFreeMemory();
 	m_ptrarrSTNs.EmptyAndFreeMemory();
 	m_ptrarrPortConnections.EmptyAndFreeMemory();
+	m_ptrarrEventPortConnections.EmptyAndFreeMemory();
 	m_ptrarrDomains.EmptyAndFreeMemory();
 	m_ptrarrParameters.EmptyAndFreeMemory();
 	m_ptrarrVariables.EmptyAndFreeMemory();
@@ -150,6 +151,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrEquations.SetOwnershipOnPointers(true);
 	m_ptrarrSTNs.SetOwnershipOnPointers(true);
 	m_ptrarrPortConnections.SetOwnershipOnPointers(true);
+	m_ptrarrEventPortConnections.SetOwnershipOnPointers(true);
 	m_ptrarrDomains.SetOwnershipOnPointers(true);
 	m_ptrarrParameters.SetOwnershipOnPointers(true);
 	m_ptrarrVariables.SetOwnershipOnPointers(true);
@@ -202,9 +204,13 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	strName = "STNs";
 	pTag->OpenObjectArray(strName, m_ptrarrSTNs, &del);
 
-// PORTCONNECTIONs
+// PORT CONNECTIONs
 	strName = "PortConnections";
 	pTag->OpenObjectArray(strName, m_ptrarrPortConnections, &del);
+
+// EVENT PORT CONNECTIONs
+	strName = "EventPortConnections";
+	pTag->OpenObjectArray(strName, m_ptrarrEventPortConnections, &del);
 
 // CHILD MODELS
 	strName = "Units";
@@ -260,6 +266,10 @@ void daeModel::Save(io::xmlTag_t* pTag) const
 // PORTCONNECTIONs
 	strName = "PortConnections";
 	pTag->SaveObjectArray(strName, m_ptrarrPortConnections);
+	
+// EVENT PORT CONNECTIONs
+	strName = "EventPortConnections";
+	pTag->SaveObjectArray(strName, m_ptrarrEventPortConnections);
 
 // CHILD MODELS
 	strName = "Units";
@@ -276,100 +286,6 @@ void daeModel::Save(io::xmlTag_t* pTag) const
 
 void daeModel::OpenRuntime(io::xmlTag_t* pTag)
 {
-/*
-	string strName;
-
-	daeObject::OpenRuntime(pTag);
-
-	m_ptrarrModels.EmptyAndFreeMemory();
-	m_ptrarrEquations.EmptyAndFreeMemory();
-	m_ptrarrSTNs.EmptyAndFreeMemory();
-	m_ptrarrPortConnections.EmptyAndFreeMemory();
-	m_ptrarrDomains.EmptyAndFreeMemory();
-	m_ptrarrParameters.EmptyAndFreeMemory();
-	m_ptrarrVariables.EmptyAndFreeMemory();
-	m_ptrarrPorts.EmptyAndFreeMemory();
-	m_ptrarrEquationExecutionInfos.EmptyAndFreeMemory();
-	m_ptrarrPortArrays.EmptyAndFreeMemory();
-	m_ptrarrModelArrays.EmptyAndFreeMemory();
-
-	m_ptrarrModels.SetOwnershipOnPointers(true);
-	m_ptrarrEquations.SetOwnershipOnPointers(true);
-	m_ptrarrSTNs.SetOwnershipOnPointers(true);
-	m_ptrarrPortConnections.SetOwnershipOnPointers(true);
-	m_ptrarrDomains.SetOwnershipOnPointers(true);
-	m_ptrarrParameters.SetOwnershipOnPointers(true);
-	m_ptrarrVariables.SetOwnershipOnPointers(true);
-	m_ptrarrPorts.SetOwnershipOnPointers(true);
-	m_ptrarrEquationExecutionInfos.SetOwnershipOnPointers(true);
-	m_ptrarrPortArrays.SetOwnershipOnPointers(true);
-	m_ptrarrModelArrays.SetOwnershipOnPointers(true);
-	
-	m_pDataProxy.reset();
-	m_nVariablesStartingIndex	= 0;
-	m_ptrarrEquationExecutionInfos.EmptyAndFreeMemory();
-
-	if(m_strShortName.empty())
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	daeSetModelAndCanonicalNameDelegate<daeObject> del(this, this);
-
-// VARIABLE TYPES
-	//strName = "VariableTypes";
-	//pTag->OpenObjectArray(strName, m_ptrarrVariableTypes, &del);
-
-// DOMAINS
-	strName = "Domains";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrDomains, &del);
-
-// PARAMETERS
-	strName = "Parameters";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrParameters, &del);
-
-// VARIABLES
-	strName = "Variables";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrVariables, &del);
-
-// PORTS
-	strName = "Ports";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrPorts, &del);
-
-// EQUATIONS
-	strName = "Equations";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrEquations, &del);
-
-// STNs
-	strName = "STNs";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrSTNs, &del);
-
-// PORTCONNECTIONs
-	strName = "PortConnections";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrPortConnections, &del);
-
-// CHILD MODELS
-	strName = "Models";
-	OpenObjectArrayRuntime(pTag, strName, m_ptrarrModels, &del);
-
-// MODEL ARRAYS
-	//strName = "ModelArrays";
-	//OpenObjectArrayRuntime(pTag, strName, m_ptrarrModelArrays, &del);
-
-// PORT ARRAYS
-	//strName = "PortArrays";
-	//OpenObjectArrayRuntime(pTag, strName, m_ptrarrPortArrays, &del);
-
-// DATA PROXY
-	daeDataProxy_t* pDataProxy = pTag->OpenObject<daeDataProxy_t, daeDataProxy_t>(strName);
-	m_pDataProxy.reset(pDataProxy);
-
-// TOTAL NUMBER OF VARIABLES
-	strName = "TotalNumberOfVariables";
-	pTag->Open(strName, m_nTotalNumberOfVariables);
-
-// EQUATION EXECUTION INFOS
-	strName = "EquationExecutionInfos";
-	pTag->OpenObjectArray<daeEquationExecutionInfo, daeEquationExecutionInfo>(strName, m_ptrarrEquationExecutionInfos);
-*/
 }
 
 void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
@@ -413,6 +329,10 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 // PORTCONNECTIONs
 	strName = "PortConnections";
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrPortConnections);
+
+// EVENT PORT CONNECTIONs
+	strName = "EventPortConnections";
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrEventPortConnections);
 
 // CHILD MODELS
 	strName = "Units";
@@ -631,10 +551,11 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrModelArrays,     strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,      strConstructor, eLanguage, c);
 		
-		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrOnEventActions,		   strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrEquations,			strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs,					strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortConnections,		strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrEventPortConnections,	strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrOnEventActions,		strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strConstructor % (strDeclareEquations.empty() ? (c.CalculateIndent(c.m_nPythonIndentLevel) + "pass\n") : strDeclareEquations);
@@ -688,10 +609,11 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		c.m_bExportDefinition = false;
 		c.m_nPythonIndentLevel = 2;
 		
-		ExportObjectArray(m_ptrarrEquations,       strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrSTNs,            strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrPortConnections, strDeclareEquations, eLanguage, c);
-		ExportObjectArray(m_ptrarrOnEventActions,         strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrEquations,			strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrSTNs,					strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrPortConnections,		strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrEventPortConnections,	strDeclareEquations, eLanguage, c);
+		ExportObjectArray(m_ptrarrOnEventActions,		strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor % strDeclareEquations;
@@ -915,6 +837,12 @@ void daeModel::AddPortConnection(daePortConnection* pPortConnection)
 {
     SetModelAndCanonicalName(pPortConnection);
 	dae_push_back(m_ptrarrPortConnections, pPortConnection);
+}
+
+void daeModel::AddEventPortConnection(daeEventPortConnection* pEventPortConnection)
+{
+    SetModelAndCanonicalName(pEventPortConnection);
+	dae_push_back(m_ptrarrEventPortConnections, pEventPortConnection);
 }
 
 void daeModel::AddPortArray(daePortArray* pPortArray)
@@ -1428,11 +1356,9 @@ daeEquation* daeModel::CreateEquation(const string& strName, string strDescripti
 
 void daeModel::ConnectPorts(daePort* pPortFrom, daePort* pPortTo)
 {
-	daePortConnection* pPortConnection = new daePortConnection;
+	daePortConnection* pPortConnection = new daePortConnection(pPortFrom, pPortTo);
 	string strName = pPortFrom->GetName() + "_" + pPortTo->GetName();
 	pPortConnection->SetName(strName);
-	pPortConnection->m_pPortFrom = pPortFrom;
-	pPortConnection->m_pPortTo   = pPortTo;
 	AddPortConnection(pPortConnection);
 }
 
@@ -1446,7 +1372,10 @@ void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
 	if(pPortTo->GetType() != eOutletPort)
 		daeDeclareAndThrowException(exInvalidCall);
 	
-	pPortTo->Attach(pPortFrom);
+	daeEventPortConnection* pEventPortConnection = new daeEventPortConnection(pPortFrom, pPortTo);
+	string strName = pPortFrom->GetName() + "_" + pPortTo->GetName();
+	pEventPortConnection->SetName(strName);
+	AddEventPortConnection(pEventPortConnection);
 }
 
 boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
@@ -1472,6 +1401,11 @@ void daeModel::RemoveSTN(daeSTN* pObject)
 void daeModel::RemovePortConnection(daePortConnection* pObject)
 {
 	m_ptrarrPortConnections.Remove(pObject);
+}
+
+void daeModel::RemoveEventPortConnection(daeEventPortConnection* pObject)
+{
+	m_ptrarrEventPortConnections.Remove(pObject);
 }
 
 void daeModel::RemoveDomain(daeDomain* pObject)
@@ -3073,6 +3007,33 @@ daePort* daeModel::FindPort(unsigned long nID) const
 	return NULL;
 }
 
+daeEventPort* daeModel::FindEventPort(unsigned long nID) const
+{
+	size_t i;
+	daeModel* pModel;
+	daeEventPort* pEventPort;
+
+	for(i = 0; i < m_ptrarrEventPorts.size(); i++)
+	{
+		pEventPort = m_ptrarrEventPorts[i];
+		if(pEventPort && pEventPort->m_nID == nID)
+			return pEventPort;
+	}
+// Look in child models' event ports
+	for(i = 0; i < m_ptrarrModels.size(); i++)
+	{
+		pModel = m_ptrarrModels[i];
+		if(!pModel)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pEventPort = pModel->FindEventPort(nID);
+		if(pEventPort)
+			return pEventPort;
+	}
+
+	return NULL;
+}
+
 bool daeModel::FindObject(string& strCanonicalName, daeObjectType& ObjectType)
 {
 	bool bFound;
@@ -3515,6 +3476,7 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 	dae_capacity_check(m_ptrarrModelArrays);
 	dae_capacity_check(m_ptrarrPortArrays);
 	dae_capacity_check(m_ptrarrPortConnections);
+	dae_capacity_check(m_ptrarrEventPortConnections);
 	
 // Check all domains
 	for(i = 0; i < m_ptrarrDomains.size(); i++)
@@ -3794,6 +3756,13 @@ void daeModel::GetPortConnections(vector<daePortConnection_t*>& ptrarrPortConnec
 	ptrarrPortConnections.clear();
 	for(size_t i = 0; i < m_ptrarrPortConnections.size(); i++)
 		ptrarrPortConnections.push_back(m_ptrarrPortConnections[i]);
+}
+
+void daeModel::GetEventPortConnections(vector<daeEventPortConnection_t*>& ptrarrEventPortConnections)
+{
+	ptrarrEventPortConnections.clear();
+	for(size_t i = 0; i < m_ptrarrEventPortConnections.size(); i++)
+		ptrarrEventPortConnections.push_back(m_ptrarrEventPortConnections[i]);
 }
 
 void daeModel::GetParameters(vector<daeParameter_t*>& ptrarrParameters)

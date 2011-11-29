@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include "event_handling.h"
 
 namespace dae 
 {
@@ -833,9 +834,19 @@ bool daePort::CheckObject(vector<string>& strarrErrors) const
 *******************************************************************/
 daePortConnection::daePortConnection()
 {
-	m_pModel    = NULL;
 	m_pPortFrom = NULL;
 	m_pPortTo   = NULL;
+}
+
+daePortConnection::daePortConnection(daePort* pPortFrom, daePort* pPortTo)
+{
+	if(!pPortFrom)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!pPortTo)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	
+	m_pPortFrom = pPortFrom;
+	m_pPortTo   = pPortTo;
 }
 
 daePortConnection::~daePortConnection()
@@ -1061,7 +1072,7 @@ bool daePortConnection::CheckObject(vector<string>& strarrErrors) const
 // Check left port pointer	
 	if(!m_pPortFrom)
 	{
-		strError = "Invalid left port in port connection [" + GetCanonicalName() + "]";
+		strError = "Invalid from-port in port connection [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		return false;
 	}
@@ -1069,7 +1080,7 @@ bool daePortConnection::CheckObject(vector<string>& strarrErrors) const
 // Check right port pointer	
 	if(!m_pPortTo)
 	{
-		strError = "Invalid right port in port connection [" + GetCanonicalName() + "]";
+		strError = "Invalid to-port in port connection [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		return false;
 	}
@@ -1167,6 +1178,187 @@ bool daePortConnection::CheckObject(vector<string>& strarrErrors) const
 		}
 	}
 		
+	return bCheck;
+}
+
+/******************************************************************
+	daeEventPortConnection
+*******************************************************************/
+daeEventPortConnection::daeEventPortConnection() //: sender(&receiver)
+{
+	m_pPortFrom = NULL;
+	m_pPortTo   = NULL;
+}
+
+daeEventPortConnection::daeEventPortConnection(daeEventPort* pPortFrom, daeEventPort* pPortTo) //: sender(&receiver)
+{
+	if(!pPortFrom)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!pPortTo)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	
+	m_pPortFrom = pPortFrom;
+	m_pPortTo   = pPortTo;
+	
+	//pPortTo->Attach(pPortFrom);
+
+	receiver.reset(new daeRemoteEventReceiver());
+	sender.reset(new daeRemoteEventSender());
+
+	pPortTo->Attach(sender.get());
+	receiver->Attach(pPortFrom);
+}
+
+daeEventPortConnection::~daeEventPortConnection()
+{
+}
+
+void daeEventPortConnection::Open(io::xmlTag_t* pTag)
+{
+	string strName;
+
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer); 
+
+	daeObject::Open(pTag);
+
+	daeFindEventPortByID del(m_pModel);
+
+	strName = "PortFrom";
+	m_pPortFrom = pTag->OpenObjectRef(strName, &del);
+	if(!m_pPortFrom)
+		daeDeclareAndThrowException(exXMLIOError); 
+
+	strName = "PortTo";
+	m_pPortTo = pTag->OpenObjectRef(strName, &del);
+	if(!m_pPortTo)
+		daeDeclareAndThrowException(exXMLIOError); 
+}
+
+void daeEventPortConnection::Save(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!m_pPortFrom)
+		daeDeclareAndThrowException(exInvalidPointer); 
+	if(!m_pPortTo)
+		daeDeclareAndThrowException(exInvalidPointer); 
+
+	daeObject::Save(pTag);
+
+	strName = "PortFrom";
+	pTag->SaveObjectRef(strName, m_pPortFrom, m_pModel);
+
+	strName = "PortTo";
+	pTag->SaveObjectRef(strName, m_pPortTo, m_pModel);
+}
+
+void daeEventPortConnection::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	string strExport;
+	boost::format fmtFile;
+
+	if(c.m_bExportDefinition)
+	{
+	}
+	else
+	{
+		if(eLanguage == ePYDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.ConnectEventPorts(self.%1%, self.%2%)\n";
+			fmtFile.parse(strExport);
+			fmtFile % daeGetStrippedRelativeName(m_pModel, m_pPortFrom) 
+					% daeGetStrippedRelativeName(m_pModel, m_pPortTo);
+		}
+		else if(eLanguage == eCDAE)
+		{
+			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "ConnectEventPorts(&%1%, &%2%);\n";
+			fmtFile.parse(strExport);
+			fmtFile % daeGetStrippedRelativeName(m_pModel, m_pPortFrom) 
+					% daeGetStrippedRelativeName(m_pModel, m_pPortTo);
+		}
+		else
+		{
+			daeDeclareAndThrowException(exNotImplemented); 
+		}
+	}
+	
+	strContent += fmtFile.str();
+}
+
+void daeEventPortConnection::OpenRuntime(io::xmlTag_t* pTag)
+{
+	daeObject::OpenRuntime(pTag);
+}
+
+void daeEventPortConnection::SaveRuntime(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pPortFrom)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pPortTo)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeObject::SaveRuntime(pTag);
+
+	strName = "PortFrom";
+	pTag->SaveObjectRef(strName, m_pPortFrom, m_pModel);
+
+	strName = "PortTo";
+	pTag->SaveObjectRef(strName, m_pPortTo, m_pModel);
+}
+
+daeEventPort_t* daeEventPortConnection::GetPortFrom(void) const
+{
+	return m_pPortFrom;
+}
+	
+daeEventPort_t* daeEventPortConnection::GetPortTo(void) const
+{
+	return m_pPortFrom;
+}
+
+void daeEventPortConnection::SetModelAndCanonicalName(daeObject* pObject)
+{
+	if(!pObject)
+		daeDeclareAndThrowException(exInvalidPointer);
+	string strName;
+	strName = m_strCanonicalName + "." + pObject->GetName();
+	pObject->SetCanonicalName(strName);
+	pObject->SetModel(m_pModel);
+}
+
+bool daeEventPortConnection::CheckObject(vector<string>& strarrErrors) const
+{
+	string strError;
+
+	bool bCheck = true;
+	
+// Check base class	
+	if(!daeObject::CheckObject(strarrErrors))
+		bCheck = false;
+
+// Check left port pointer	
+	if(!m_pPortFrom)
+	{
+		strError = "Invalid from-port in event port connection [" + GetCanonicalName() + "]";
+		strarrErrors.push_back(strError);
+		return false;
+	}
+
+// Check right port pointer	
+	if(!m_pPortTo)
+	{
+		strError = "Invalid to-port in event port connection [" + GetCanonicalName() + "]";
+		strarrErrors.push_back(strError);
+		return false;
+	}
+
 	return bCheck;
 }
 

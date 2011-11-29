@@ -68,6 +68,7 @@
             <xsl:apply-templates select="Model/Ports"/>
             <xsl:apply-templates select="Model/EventPorts"/>
             <xsl:apply-templates select="Model/PortConnections"/>
+            <xsl:apply-templates select="Model/EventPortConnections"/>
             <xsl:apply-templates select="Model/Domains"/>
             <xsl:apply-templates select="Model/Parameters"/>
             <xsl:apply-templates select="Model/Variables"/>
@@ -459,6 +460,57 @@
     </div>
   </xsl:template>
 
+  <xsl:template match="EventPortConnections">
+    <div>
+        <xsl:if test="count(Object) > 0">
+            <h2> <a name="EventPortConnections"></a>Event-Port Connections</h2>
+
+<!--
+            <xsl:for-each select="Object">
+                <p>
+                    <b>
+                        <xsl:value-of select="Name"/>:<xsl:value-of select="PortType"/>
+                    </b>
+                </p>
+            </xsl:for-each>
+-->
+
+            <table class="width100pc">
+                <thead>
+                    <tr>
+                        <th align="left">Port 1</th>
+                        <th align="left">Port 2</th>
+                        <th align="left">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <xsl:for-each select="Object">
+                        <tr>
+                            <td align="left">
+                                <!--<xsl:value-of select="Name"/>-->
+                                <i>
+                                    <xsl:copy-of select="PortFrom/ObjectRefMathML"/>
+                                </i>
+                            </td>
+
+                            <td align="left">
+                                <!--<xsl:value-of select="Name"/>-->
+                                <i>
+                                    <xsl:copy-of select="PortTo/ObjectRefMathML"/>
+                                </i>
+                            </td>
+
+                            <td>
+                                <xsl:value-of select="Description"/>
+                            </td>
+                        </tr>
+                    </xsl:for-each>
+                </tbody>
+            </table>
+
+       </xsl:if>
+    </div>
+  </xsl:template>
 
   <xsl:template match="Equations">
     <div>

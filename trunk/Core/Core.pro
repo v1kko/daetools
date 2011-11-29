@@ -54,7 +54,8 @@ SOURCES += xmlreadstream.cpp \
     global_functions.cpp \
     tcpiplog.cpp \
     objfun_constraints.cpp \
-    external_function.cpp
+    external_function.cpp \
+    event_handling.cpp
 
 HEADERS += xmlfunctions.h \
     xmlfile.h \
@@ -85,4 +86,6 @@ HEADERS += xmlfunctions.h \
     nodes_array.h \
     tcpiplog.h \
     optimization.h \
-    export.h
+    export.h \
+    event_handling.h
+

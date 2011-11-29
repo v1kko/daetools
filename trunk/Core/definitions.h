@@ -286,7 +286,7 @@ public:
 		}
 	}
 
-	void Notify(void* data)
+	virtual void Notify(void* data)
 	{
 		daeObserver<SUBJECT>* observer;
 		for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
