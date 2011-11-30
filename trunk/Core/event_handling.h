@@ -15,6 +15,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "coreimpl.h"
 #include <boost/interprocess/ipc/message_queue.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/thread.hpp>
 
 namespace dae
@@ -36,7 +38,7 @@ public:
 
 protected:
 	boost::shared_ptr<boost::interprocess::message_queue>	mqEventQueue;
-	boost::shared_ptr<boost::interprocess::message_queue>	mqStatusQueue;
+	//boost::shared_ptr<boost::interprocess::message_queue>	mqStatusQueue;
 	boost::shared_ptr<boost::thread>						m_pThread;
 };
 
@@ -55,7 +57,7 @@ public:
 protected:
 	//daeRemoteEventReceiver* m_pReceiver;
 	boost::shared_ptr<boost::interprocess::message_queue>	mqEventQueue;
-	boost::shared_ptr<boost::interprocess::message_queue>	mqStatusQueue;
+	//boost::shared_ptr<boost::interprocess::message_queue>	mqStatusQueue;
 };
 
 }
