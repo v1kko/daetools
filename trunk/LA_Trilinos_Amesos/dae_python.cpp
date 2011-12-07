@@ -118,6 +118,6 @@ BOOST_PYTHON_MODULE(pyTrilinos)
 		.def("GetAmesosOptions",		&daeTrilinosSolver::GetAmesosOptions,  return_value_policy<reference_existing_object>())
 		;
 
-	def("daeCreateTrilinosSolver",      daeCreateTrilinosSolver);
+	def("daeCreateTrilinosSolver",      daeCreateTrilinosSolver, return_value_policy<manage_new_object>());
 	def("daeTrilinosSupportedSolvers",  pydaeTrilinosSupportedSolvers);
 }

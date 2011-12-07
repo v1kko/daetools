@@ -111,6 +111,6 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 	
 #endif
 	
-	def("daeCreateSuperLUSolver", daeCreateSuperLUSolver);
+	def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<manage_new_object>());
 
 }
