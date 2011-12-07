@@ -213,7 +213,7 @@ void runTutorial1(void)
 	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
-	pDAESolver->SetLASolver(eSundialsGMRES);
+	//pDAESolver->SetLASolver(eSundialsGMRES);
 	//pDAESolver->SetLASolver(pLASolver.get());
 	
 	time_t rawtime;
