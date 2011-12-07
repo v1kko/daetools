@@ -1117,7 +1117,7 @@ int sens_residuals(int		 Ns,
 	return 0;
 }
 
-#include <suitesparse/btf.h>
+//#include <suitesparse/btf.h>
 
 int setup_preconditioner(realtype	time, 
 						 N_Vector	vectorVariables, 
@@ -1129,75 +1129,75 @@ int setup_preconditioner(realtype	time,
 						 N_Vector	vectorTemp2, 
 						 N_Vector	vectorTemp3)
 {
-	realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
+//	realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
 
-	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
-	if(!pSolver || !pSolver->m_pIDASolverData)
-		return -1;
+//	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
+//	if(!pSolver || !pSolver->m_pIDASolverData)
+//		return -1;
 	
-	daeBlock_t* pBlock = pSolver->m_pBlock;
-	if(!pBlock)
-		return -1;
+//	daeBlock_t* pBlock = pSolver->m_pBlock;
+//	if(!pBlock)
+//		return -1;
 
-	size_t Neq = pBlock->GetNumberOfEquations();
-	int nnz = 0;
-	pBlock->CalcNonZeroElements(nnz);
+//	size_t Neq = pBlock->GetNumberOfEquations();
+//	int nnz = 0;
+//	pBlock->CalcNonZeroElements(nnz);
 
-	pdValues			= NV_DATA_S(vectorVariables); 
-	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
-	pdResiduals			= NV_DATA_S(vectorResiduals);
+//	pdValues			= NV_DATA_S(vectorVariables); 
+//	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
+//	pdResiduals			= NV_DATA_S(vectorResiduals);
 
-	pSolver->m_pIDASolverData->matJacobian.Reset(Neq, nnz, CSR_C_STYLE);
-	pSolver->m_pIDASolverData->matJacobian.ResetCounters();
-	pBlock->FillSparseMatrix(&pSolver->m_pIDASolverData->matJacobian);
-	pSolver->m_pIDASolverData->matJacobian.Sort();
+//	pSolver->m_pIDASolverData->matJacobian.Reset(Neq, nnz, CSR_C_STYLE);
+//	pSolver->m_pIDASolverData->matJacobian.ResetCounters();
+//	pBlock->FillSparseMatrix(&pSolver->m_pIDASolverData->matJacobian);
+//	pSolver->m_pIDASolverData->matJacobian.Sort();
 	
-	pSolver->m_arrValues.InitArray(Neq, pdValues);
-	pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
-	pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
+//	pSolver->m_arrValues.InitArray(Neq, pdValues);
+//	pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
+//	pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
 	
-	pSolver->m_pIDASolverData->matJacobian.ClearValues();
-	pBlock->CalculateJacobian(time, 
-		                      pSolver->m_arrValues, 
-							  pSolver->m_arrResiduals, 
-							  pSolver->m_arrTimeDerivatives, 
-							  pSolver->m_pIDASolverData->matJacobian, 
-							  dInverseTimeStep);
+//	pSolver->m_pIDASolverData->matJacobian.ClearValues();
+//	pBlock->CalculateJacobian(time, 
+//		                      pSolver->m_arrValues, 
+//							  pSolver->m_arrResiduals, 
+//							  pSolver->m_arrTimeDerivatives, 
+//							  pSolver->m_pIDASolverData->matJacobian, 
+//							  dInverseTimeStep);
 	
-	double work;
-	int* Match = new int[Neq];
-	int* Work  = new int[5 * Neq];
+//	double work;
+//	int* Match = new int[Neq];
+//	int* Work  = new int[5 * Neq];
 	
-	int btf_columns_matched = btf_maxtrans
-	(
-	    Neq,
-	    Neq,
-	    pSolver->m_pIDASolverData->matJacobian.IA,		/* size ncol+1 */
-	    pSolver->m_pIDASolverData->matJacobian.JA,		/* size nz = Ap [ncol] */
-	    0,					/* maximum amount of work to do is maxwork*nnz(A); no limit if <= 0 */
-							/* --- output, not defined on input --- */
-	    &work,				/* work = -1 if maxwork > 0 and the total work performed
-							 * reached the maximum of maxwork*nnz(A).
-							 * Otherwise, work = the total work performed. */
-	    Match,				/* size nrow.  Match [i] = j if column j matched to row i
-							 * (see above for the singular-matrix case) */
-							/* --- workspace, not defined on input or output --- */
-	    Work				/* size 5*ncol */
-	);
+//	int btf_columns_matched = btf_maxtrans
+//	(
+//	    Neq,
+//	    Neq,
+//	    pSolver->m_pIDASolverData->matJacobian.IA,		/* size ncol+1 */
+//	    pSolver->m_pIDASolverData->matJacobian.JA,		/* size nz = Ap [ncol] */
+//	    0,					/* maximum amount of work to do is maxwork*nnz(A); no limit if <= 0 */
+//							/* --- output, not defined on input --- */
+//	    &work,				/* work = -1 if maxwork > 0 and the total work performed
+//							 * reached the maximum of maxwork*nnz(A).
+//							 * Otherwise, work = the total work performed. */
+//	    Match,				/* size nrow.  Match [i] = j if column j matched to row i
+//							 * (see above for the singular-matrix case) */
+//							/* --- workspace, not defined on input or output --- */
+//	    Work				/* size 5*ncol */
+//	);
 	
-	std::cout << "Neq = " << Neq << std::endl; 
-	std::cout << "work = " << work << std::endl; 
-	std::cout << "btf_columns_matched = " << btf_columns_matched << std::endl; 
-//	for(size_t i = 0; i < Neq; i++)
-//		std::cout << " " << Match[i]; 
-//	std::cout << std::endl; 
+//	std::cout << "Neq = " << Neq << std::endl; 
+//	std::cout << "work = " << work << std::endl; 
+//	std::cout << "btf_columns_matched = " << btf_columns_matched << std::endl; 
+////	for(size_t i = 0; i < Neq; i++)
+////		std::cout << " " << Match[i]; 
+////	std::cout << std::endl; 
 	
-	pSolver->m_pIDASolverData->matJacobian.SetBlockTriangularForm(Match);
-	pSolver->m_pIDASolverData->matJacobian.SaveBTFMatrixAsXPM("/home/ciroki/btf_matrix.xpm");
-	pSolver->m_pIDASolverData->matJacobian.SaveMatrixAsXPM("/home/ciroki/matrix.xpm");
+//	pSolver->m_pIDASolverData->matJacobian.SetBlockTriangularForm(Match);
+//	pSolver->m_pIDASolverData->matJacobian.SaveBTFMatrixAsXPM("/home/ciroki/btf_matrix.xpm");
+//	pSolver->m_pIDASolverData->matJacobian.SaveMatrixAsXPM("/home/ciroki/matrix.xpm");
 	
-	delete[] Match;
-	delete[] Work;
+//	delete[] Match;
+//	delete[] Work;
 	
 	
 /*
@@ -1255,34 +1255,34 @@ int solve_preconditioner(realtype	time,
 						 void*		pUserData, 
 						 N_Vector	vectorTemp)
 {
-	realtype *pdR, *pdZ;
+//	realtype *pdR, *pdZ;
 
-	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
-	if(!pSolver || !pSolver->m_pIDASolverData)
-		return -1;
+//	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
+//	if(!pSolver || !pSolver->m_pIDASolverData)
+//		return -1;
 
-	daeBlock_t* pBlock = pSolver->m_pBlock;
-	if(!pBlock)
-		return -1;
+//	daeBlock_t* pBlock = pSolver->m_pBlock;
+//	if(!pBlock)
+//		return -1;
 
-	size_t Neq = pBlock->GetNumberOfEquations();
+//	size_t Neq = pBlock->GetNumberOfEquations();
 
-	pdR			= NV_DATA_S(vectorR); 
-	pdZ			= NV_DATA_S(vectorZ);
+//	pdR			= NV_DATA_S(vectorR); 
+//	pdZ			= NV_DATA_S(vectorZ);
 
-	daeDenseArray r, z;
-	r.InitArray(Neq, pdR);
+//	daeDenseArray r, z;
+//	r.InitArray(Neq, pdR);
 
-	for(size_t i = 0; i < Neq; i++)
-	{
-		int k = pSolver->m_pIDASolverData->matJacobian.BTF[i];
-		double val = pSolver->m_pIDASolverData->matJacobian.GetItem(k, i);
-		std::cout << "val = " << val << std::endl; 
-		pdZ[i] = pdR[i] / val;
-	}
-	std::cout << "z" << std::endl;
-	z.InitArray(Neq, pdZ);
-	z.Print();
+//	for(size_t i = 0; i < Neq; i++)
+//	{
+//		int k = pSolver->m_pIDASolverData->matJacobian.BTF[i];
+//		double val = pSolver->m_pIDASolverData->matJacobian.GetItem(k, i);
+//		std::cout << "val = " << val << std::endl; 
+//		pdZ[i] = pdR[i] / val;
+//	}
+//	std::cout << "z" << std::endl;
+//	z.InitArray(Neq, pdZ);
+//	z.Print();
 	
 /*
 	realtype *pdR, *pdZ;
