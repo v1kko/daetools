@@ -25,8 +25,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${DAE_UNITS_LIB} \
         $${MPI_LIBS} \
         $${MUMPS_LIBS} -lrt -lgfortran \
-        $${SUPERLU_LIBS} \
-        -lbtf
+        $${SUPERLU_LIBS}
 
 SOURCES += main.cpp \
     stdafx.cpp
