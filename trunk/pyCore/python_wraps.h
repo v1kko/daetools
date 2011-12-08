@@ -811,9 +811,9 @@ public:
 	}
 
     void ON_CONDITION(const daeCondition& rCondition,
-                      const string& strStateTo = string(),
-                      boost::python::list triggerEvents = boost::python::list(),
-                      boost::python::list setVariableValues = boost::python::list(),
+                      const string& strStateTo               = string(),
+                      boost::python::list setVariableValues  = boost::python::list(),
+	                  boost::python::list triggerEvents      = boost::python::list(),
 					  boost::python::list userDefinedActions = boost::python::list(),
                       real_t dEventTolerance = 0.0)
     {
@@ -914,8 +914,8 @@ public:
 
     void ON_EVENT(daeEventPort* pTriggerEventPort,
                   boost::python::list switchToStates     = boost::python::list(),
+	              boost::python::list setVariableValues  = boost::python::list(),
                   boost::python::list triggerEvents      = boost::python::list(),
-                  boost::python::list setVariableValues  = boost::python::list(),
 				  boost::python::list userDefinedActions = boost::python::list())
     {
 		daeAction* pAction;

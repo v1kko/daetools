@@ -1200,13 +1200,13 @@ daeEventPortConnection::daeEventPortConnection(daeEventPort* pPortFrom, daeEvent
 	m_pPortFrom = pPortFrom;
 	m_pPortTo   = pPortTo;
 	
-	//pPortTo->Attach(pPortFrom);
-
+	pPortTo->Attach(pPortFrom);
+/*
 	receiver.reset(new daeRemoteEventReceiver());
 	sender.reset(new daeRemoteEventSender());
-
 	pPortTo->Attach(sender.get());
 	receiver->Attach(pPortFrom);
+*/
 }
 
 daeEventPortConnection::~daeEventPortConnection()

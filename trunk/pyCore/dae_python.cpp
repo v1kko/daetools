@@ -805,13 +805,13 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
 		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
         .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")           = string(),
+	                                                                         boost::python::arg("setVariableValues")  = boost::python::list(),
                                                                              boost::python::arg("triggerEvents")      = boost::python::list(),
-                                                                             boost::python::arg("setVariableValues")  = boost::python::list(),
                                                                              boost::python::arg("userDefinedActions") = boost::python::list(),
                                                                              boost::python::arg("eventTolerance")     = 0.0) )
         .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT, ( boost::python::arg("switchToStates")     = boost::python::list(),
+	                                                                     boost::python::arg("setVariableValues")  = boost::python::list(),
 																		 boost::python::arg("triggerEvents")      = boost::python::list(),
-																		 boost::python::arg("setVariableValues")  = boost::python::list(),
 																		 boost::python::arg("userDefinedActions") = boost::python::list()) )
 		
 		.def("SaveModelReport",			&daeModel::SaveModelReport)
