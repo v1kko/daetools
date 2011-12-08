@@ -481,7 +481,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    dInverseTimeStep);
 
 /* Test the BTF stuff here */
-
+/*
 	double work;
 	int* Match = new int[m_nNoEquations];
 	int* Work  = new int[5 * m_nNoEquations];
@@ -514,7 +514,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 	
 	delete[] Match;
 	delete[] Work;
-
+*/
 	
 /* End of the BTF test */
 	
