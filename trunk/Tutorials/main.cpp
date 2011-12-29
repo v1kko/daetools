@@ -12,15 +12,15 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
-		runWhatsTheTime();
-		runTutorial1();
+//		runWhatsTheTime();
+//		runTutorial1();
 		//runTutorial2();
 		//runTutorial3();
 		//runTutorial4();
 		runTutorial5();
-		runTutorial6();
-		runTutorial13();
-		runTutorial15();
+//		runTutorial6();
+//		runTutorial13();
+//		runTutorial15();
 	}
 	catch(std::exception& e)
 	{ 

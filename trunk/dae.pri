@@ -12,8 +12,8 @@
 #************************************************************************************
 
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 1
-DAE_TOOLS_BUILD = 3
+DAE_TOOLS_MINOR = 2
+DAE_TOOLS_BUILD = 0
 
 # Set CONFIG += use_system_python to use the default system's python
 # 1. On GNU/LINUX:

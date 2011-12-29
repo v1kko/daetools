@@ -25,7 +25,6 @@ daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, 
 	pModel->AddParameter(*this, strName, units, strDescription);
 	
 	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
-	std::cout << (boost::format("%s units = %s, %s") % GetCanonicalName() % m_Unit % m_Unit.getBaseUnit()).str() << std::endl;
 }
 	
 daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 

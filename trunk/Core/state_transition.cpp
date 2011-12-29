@@ -293,24 +293,28 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 	}
 
 // Check unit-consistency of the condition
-	try
+	daeConfig& cfg = daeConfig::GetConfig();
+	if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
 	{
-		bool b = m_Condition.m_pSetupConditionNode->GetQuantity();
-	}
-	catch(units_error& e)
-	{
-		strError = "Unit-consistency check failed in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
-		strarrErrors.push_back(strError);
-		strError = "  " + string(e.what());
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-	catch(std::exception& e)
-	{
-		strError = "Exception occurred during unit-consistency check in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
-		strarrErrors.push_back(strError);
-		strError = "  " + string(e.what());
-		strarrErrors.push_back(strError);
+		try
+		{
+			bool b = m_Condition.m_pSetupConditionNode->GetQuantity();
+		}
+		catch(units_error& e)
+		{
+			strError = "Unit-consistency check failed in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
+			strarrErrors.push_back(strError);
+			strError = "  " + string(e.what());
+			strarrErrors.push_back(strError);
+			bCheck = false;
+		}
+		catch(std::exception& e)
+		{
+			strError = "Exception occurred during unit-consistency check in condition [" + m_Condition.SaveNodeAsPlainText() + "]:";
+			strarrErrors.push_back(strError);
+			strError = "  " + string(e.what());
+			strarrErrors.push_back(strError);
+		}
 	}
 	
 /////////////////////////////////////////////////////////////

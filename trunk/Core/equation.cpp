@@ -1726,25 +1726,29 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 	}
 	
 // Check unit-consistency of the equation	
-	try
+	daeConfig& cfg = daeConfig::GetConfig();
+	if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
 	{
-		quantity q = m_pResidualNode->GetQuantity();
-		std::cout << (boost::format("Equation [%s] residual units %s") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
-	}
-	catch(units_error& e)
-	{
-		strError = "Unit-consistency check failed in equation [" + GetCanonicalName() + "]:";
-		strarrErrors.push_back(strError);
-		strError = "  " + string(e.what());
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-	catch(std::exception& e)
-	{
-		strError = "Exception occurred while unit-consistency check in equation [" + GetCanonicalName() + "]:";
-		strarrErrors.push_back(strError);
-		strError = "  " + string(e.what());
-		strarrErrors.push_back(strError);
+		try
+		{
+			quantity q = m_pResidualNode->GetQuantity();
+			std::cout << (boost::format("Equation [%s] residual units %s") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
+		}
+		catch(units_error& e)
+		{
+			strError = "Unit-consistency check failed in equation [" + GetCanonicalName() + "]:";
+			strarrErrors.push_back(strError);
+			strError = "  " + string(e.what());
+			strarrErrors.push_back(strError);
+			bCheck = false;
+		}
+		catch(std::exception& e)
+		{
+			strError = "Exception occurred while unit-consistency check in equation [" + GetCanonicalName() + "]:";
+			strarrErrors.push_back(strError);
+			strError = "  " + string(e.what());
+			strarrErrors.push_back(strError);
+		}
 	}
 
 // Check distributed equation domain infos	
