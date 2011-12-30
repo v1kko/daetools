@@ -90,14 +90,14 @@ public:
 		if(!pDomain1)
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Invalid domain in model array [" << this->m_strCanonicalName << "]";
+			e << "Invalid domain in model array [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
 		if(n1 < 0 || n1 >= pDomain1->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
@@ -132,7 +132,7 @@ public:
 	// Check object array
 		if(this->m_ptrarrObjects.num_dimensions() != this->N)
 		{
-			strError = "Invalid number of dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid number of dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -143,7 +143,7 @@ public:
 
 		if(n1 != dimensions[0])
 		{
-			strError = "Invalid dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -201,20 +201,20 @@ public:
 		if(!pDomain1 || !pDomain2)
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Invalid domain in model array [" << this->m_strCanonicalName << "]";
+			e << "Invalid domain in model array [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
 		if(n1 < 0 || n1 >= pDomain1->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n2 < 0 || n2 >= pDomain2->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
@@ -249,7 +249,7 @@ public:
 	// Check object array
 		if(this->m_ptrarrObjects.num_dimensions() != this->N)
 		{
-			strError = "Invalid number of dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid number of dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -262,7 +262,7 @@ public:
 		if(n1 != dimensions[0] ||
 		   n2 != dimensions[1] )
 		{
-			strError = "Invalid dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -324,26 +324,26 @@ public:
 		if(!pDomain1 || !pDomain2 || !pDomain3)
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Invalid domain in model array [" << this->m_strCanonicalName << "]";
+			e << "Invalid domain in model array [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
 		if(n1 < 0 || n1 >= pDomain1->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n2 < 0 || n2 >= pDomain2->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n3 < 0 || n3 >= pDomain3->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 3 [" << n3 << "] out of range (0, " << pDomain3->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 3 [" << n3 << "] out of range (0, " << pDomain3->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
@@ -378,7 +378,7 @@ public:
 	// Check object array
 		if(this->m_ptrarrObjects.num_dimensions() != this->N)
 		{
-			strError = "Invalid number of dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid number of dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -393,7 +393,7 @@ public:
 		   n2 != dimensions[1] ||
 		   n3 != dimensions[2] )
 		{
-			strError = "Invalid dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -459,32 +459,32 @@ public:
 		if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4)
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Invalid domain in model array [" << this->m_strCanonicalName << "]";
+			e << "Invalid domain in model array [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
 		if(n1 < 0 || n1 >= pDomain1->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 1 [" << n1 << "] out of range (0, " << pDomain1->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n2 < 0 || n2 >= pDomain2->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 2 [" << n2 << "] out of range (0, " << pDomain2->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n3 < 0 || n3 >= pDomain3->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 3 [" << n3 << "] out of range (0, " << pDomain3->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 3 [" << n3 << "] out of range (0, " << pDomain3->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 		if(n4 < 0 || n4 >= pDomain4->GetNumberOfPoints())
 		{	
 			daeDeclareException(exOutOfBounds);
-			e << "Index 4 [" << n4 << "] out of range (0, " << pDomain4->GetNumberOfPoints()-1 << ") in [" << this->m_strCanonicalName << "]";
+			e << "Index 4 [" << n4 << "] out of range (0, " << pDomain4->GetNumberOfPoints()-1 << ") in [" << this->GetCanonicalName() << "]";
 			throw e;
 		}
 
@@ -519,7 +519,7 @@ public:
 	// Check object array
 		if(this->m_ptrarrObjects.num_dimensions() != this->N)
 		{
-			strError = "Invalid number of dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid number of dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}
@@ -536,7 +536,7 @@ public:
 		   n3 != dimensions[2] ||
 		   n4 != dimensions[3] )
 		{
-			strError = "Invalid dimensions in port array [" + this->m_strCanonicalName + "]";
+			strError = "Invalid dimensions in port array [" + this->GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
 			bCheck = false;
 		}

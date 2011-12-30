@@ -23,7 +23,7 @@ daeObject::~daeObject(void)
 void daeObject::Clone(const daeObject& rObject)
 {
 	m_pModel           = NULL;
-	m_strCanonicalName = rObject.m_strCanonicalName;
+//	m_strCanonicalName = rObject.m_strCanonicalName;
 	m_strShortName     = rObject.m_strShortName;
 	m_strDescription   = rObject.m_strDescription;
 }
@@ -36,7 +36,7 @@ void daeObject::Open(io::xmlTag_t* pTag)
 
 	strName = "Name";
 	pTag->Open(strName, m_strShortName);
-	m_strCanonicalName = m_strShortName;
+//	m_strCanonicalName = m_strShortName;
 	
 	strName = "Description";
 	pTag->Open(strName, m_strDescription);
@@ -133,19 +133,22 @@ void daeObject::SaveRuntime(io::xmlTag_t* pTag) const
 
 string daeObject::GetCanonicalName(void) const
 {
-	return m_strCanonicalName;
+	if(m_pModel)
+		return m_pModel->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return m_strShortName;
 }
 
-void daeObject::SetCanonicalName(const string& strCanonicalName)
-{
-	if(strCanonicalName.empty())
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "The name cannot be empty";
-		throw e;
-	}
-	m_strCanonicalName = strCanonicalName;
-}
+//void daeObject::SetCanonicalName(const string& strCanonicalName)
+//{
+//	if(strCanonicalName.empty())
+//	{	
+//		daeDeclareException(exInvalidCall);
+//		e << "The name cannot be empty";
+//		throw e;
+//	}
+//	m_strCanonicalName = strCanonicalName;
+//}
 
 string daeObject::GetDescription(void) const
 {
@@ -219,37 +222,37 @@ string daeObject::GetName(void) const
 	
 void daeObject::SetName(const string& strName)
 {
-	if(m_strCanonicalName.empty() || m_strCanonicalName == "")
-	{
-		m_strCanonicalName = strName;
-	}
-	else
-	{
-		std::vector<std::string> strarrNames = ParseString(m_strCanonicalName, '.');
-		size_t n = strarrNames.size();
-		if(n == 1)
-		{
-			m_strCanonicalName = strName;
-		}
-		else
-		{
-			strarrNames.pop_back();
-			strarrNames.push_back(strName);
-			m_strCanonicalName.clear();
-			for(size_t i = 0; i < n; i++)
-			{
-				if(i == 0)
-				{
-					m_strCanonicalName = strarrNames[i];
-				}
-				else
-				{
-					m_strCanonicalName += ".";
-					m_strCanonicalName += strarrNames[i];
-				}
-			}
-		}
-	}
+//	if(m_strCanonicalName.empty() || m_strCanonicalName == "")
+//	{
+//		m_strCanonicalName = strName;
+//	}
+//	else
+//	{
+//		std::vector<std::string> strarrNames = ParseString(m_strCanonicalName, '.');
+//		size_t n = strarrNames.size();
+//		if(n == 1)
+//		{
+//			m_strCanonicalName = strName;
+//		}
+//		else
+//		{
+//			strarrNames.pop_back();
+//			strarrNames.push_back(strName);
+//			m_strCanonicalName.clear();
+//			for(size_t i = 0; i < n; i++)
+//			{
+//				if(i == 0)
+//				{
+//					m_strCanonicalName = strarrNames[i];
+//				}
+//				else
+//				{
+//					m_strCanonicalName += ".";
+//					m_strCanonicalName += strarrNames[i];
+//				}
+//			}
+//		}
+//	}
 	
 	m_strShortName = strName;
 }
@@ -322,15 +325,9 @@ bool daeObject::CheckObject(vector<string>& strarrErrors) const
 	}
 
 // Check cannonical name
-	if(m_strCanonicalName.empty())
-	{	
-		strError = "Object cannonical name is empty in object [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-//	else if(m_strCanonicalName != (m_pModel->GetCanonicalName() + "." + m_strShortName))
+//	if(m_strCanonicalName.empty())
 //	{	
-//		strError = "Inconsistent cannonical name in object [" + GetCanonicalName() + "]";
+//		strError = "Object cannonical name is empty in object [" + GetCanonicalName() + "]";
 //		strarrErrors.push_back(strError);
 //		bCheck = false;
 //	}

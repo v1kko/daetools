@@ -416,7 +416,10 @@ public:
 };
 
 #define CLONE_NODE(NODE, VALUE) (  boost::shared_ptr<adNode>(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
-#define UNITS(NODE) ( NODE ? NODE->GetQuantity().getUnits() : unit() )
+
+// UNITS is used to create adConstantNone/adConstantNoneArray; they should be dimensionless if created on simple float numbers!!
+// #define UNITS(NODE) ( NODE ? NODE->GetQuantity().getUnits() : unit() )
+#define UNITS(NODE) ( unit() )
 
 /*********************************************************************************************
 	adNodeArray

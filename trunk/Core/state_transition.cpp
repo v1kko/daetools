@@ -104,13 +104,13 @@ void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& st
 	if(!pStateFrom)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal start state in StateTransition [" << m_strCanonicalName << "], start state [" << pStateFrom->m_strCanonicalName << "]";
+		e << "Illegal start state in StateTransition [" << GetCanonicalName() << "], start state [" << pStateFrom->GetCanonicalName() << "]";
 		throw e;
 	}
 	if(strStateToName.empty())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal end state in StateTransition [" << m_strCanonicalName << "], end state [" << strStateToName << "]";
+		e << "Illegal end state in StateTransition [" << GetCanonicalName() << "], end state [" << strStateToName << "]";
 		throw e;
 	}
 
@@ -139,13 +139,13 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom,
 	if(!pStateFrom)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal start state in StateTransition [" << m_strCanonicalName << "], start state [" << pStateFrom->m_strCanonicalName << "]";
+		e << "Illegal start state in StateTransition [" << GetCanonicalName() << "], start state [" << pStateFrom->GetCanonicalName() << "]";
 		throw e;
 	}
 	if(ptrarrActions.empty())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Empty list of actions in StateTransition [" << m_strCanonicalName;
+		e << "Empty list of actions in StateTransition [" << GetCanonicalName();
 		throw e;
 	}
 
@@ -161,20 +161,28 @@ void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom,
 	dae_set_vector(ptrarrActions, m_ptrarrActions);
 	dae_set_vector(ptrarrUserDefinedActions, m_ptrarrUserDefinedActions);
 	
-	m_Condition		= rCondition;
-	m_Condition.m_pModel = m_pModel;
+	m_Condition		              = rCondition;
+	m_Condition.m_pModel          = m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
 
 	pStateFrom->AddStateTransition(this);
 }
 	
+string daeStateTransition::GetCanonicalName(void) const
+{
+	if(m_pSTN)
+		return m_pSTN->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return m_strShortName;
+}
+
 // IF block cannot execute any action, so no need to specify them
 void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateTo)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal end state in StateTransition [" << m_strCanonicalName << "]";
+		e << "Illegal end state in StateTransition [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -314,6 +322,7 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 			strarrErrors.push_back(strError);
 			strError = "  " + string(e.what());
 			strarrErrors.push_back(strError);
+			bCheck = false;
 		}
 	}
 	

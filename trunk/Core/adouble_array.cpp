@@ -669,7 +669,7 @@ const adouble daeModel::integral(const adouble_array& a) const
 	if(nCount != 1)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "At the moment, it is possible to calculate one dimensional integrals only, in model [" << m_strCanonicalName << "]";
+		e << "At the moment, it is possible to calculate one dimensional integrals only, in model [" << GetCanonicalName() << "]";
 		throw e;
 	}
 	

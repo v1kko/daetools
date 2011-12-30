@@ -3,6 +3,7 @@ from pyUnits import unit, m, kg, s, K, Pa, mol, J, W
 
 dimless = unit()
 
+time_t                       = daeVariableType("time_t",                       s,               0.0, 1.0e+20,     0.0, 1e-05)
 length_t                     = daeVariableType("length_t",                     m,               0.0, 1.0e+05,     1.0, 1e-05)
 area_t                       = daeVariableType("area_t",                       m**2,            0.0, 1.0e+05,     1.0, 1e-05)
 volume_t                     = daeVariableType("volume_t",                     m**3,            0.0, 1.0e+05,     1.0, 1e-06)

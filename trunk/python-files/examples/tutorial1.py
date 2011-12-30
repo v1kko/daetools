@@ -181,7 +181,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y) - 5
+        eq.Residual = self.T.d(self.x, x, y)
         
         xr = daeIndexRange(self.x)
         eq = self.CreateEquation("test")

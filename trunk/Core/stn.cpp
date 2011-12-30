@@ -132,6 +132,14 @@ void daeSTN::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrStates);
 }
 
+string daeSTN::GetCanonicalName(void) const
+{
+	if(m_pParentState)
+		return m_pParentState->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
+}
+
 void daeSTN::ReconnectStateTransitionsAndStates()
 {
 	daeDeclareAndThrowException(exInvalidCall);
@@ -156,7 +164,7 @@ void daeSTN::ReconnectStateTransitionsAndStates()
 //			if(!pST->m_pStateFrom)
 //			{	
 //				daeDeclareException(exInvalidCall); 
-//				e << "Illegal start state in STN [" << m_strCanonicalName << "]";
+//				e << "Illegal start state in STN [" << GetCanonicalName() << "]";
 //				throw e;
 //			}
 //
@@ -164,7 +172,7 @@ void daeSTN::ReconnectStateTransitionsAndStates()
 //			if(!pST->m_pStateTo)
 //			{	
 //				daeDeclareException(exInvalidCall); 
-//				e << "Illegal end state in STN [" << m_strCanonicalName << "]";
+//				e << "Illegal end state in STN [" << GetCanonicalName() << "]";
 //				throw e;
 //			}
 //		}
@@ -262,7 +270,7 @@ void daeSTN::CreateEquationExecutionInfo(void)
 	if(m_ptrarrStates.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Number of states is 0; there must be at least two states in STN [" << m_strCanonicalName << "]";
+		e << "Number of states is 0; there must be at least two states in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -419,7 +427,7 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 				if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
 				{
 					daeDeclareException(exInvalidCall);
-					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->m_strCanonicalName;
+					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->GetCanonicalName();
 					throw e;
 				}
 				(*iter).second = (*iterIndexInBlock).second;
@@ -454,7 +462,7 @@ void daeSTN::AddExpressionsToBlock(daeBlock* pBlock)
 	if(!pState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -558,7 +566,7 @@ bool daeSTN::CheckDiscontinuities(void)
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -593,7 +601,7 @@ void daeSTN::ExecuteOnConditionActions(void)
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -632,7 +640,7 @@ bool daeSTN::CheckDiscontinuities(void)
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in STN [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -793,7 +801,7 @@ daeState* daeSTN::AddState(string strName)
 	dae_push_back(m_ptrarrStates, pState);
 	
 	pState->Create(strName, this);
-	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
+//	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
 
 // Put it on the stack
 	m_pModel->PutStateToStack(pState);
@@ -814,7 +822,7 @@ void daeSTN::SetActiveState2(const string& strStateName)
 	if(!pState)
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "The state [" << strStateName << "] does not exist in STN [" << m_strCanonicalName << "]";
+		e << "The state [" << strStateName << "] does not exist in STN [" << GetCanonicalName() << "]";
 		throw e;
 	}
 	

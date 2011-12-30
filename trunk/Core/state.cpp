@@ -182,6 +182,14 @@ void daeState::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->SaveObjectRef(strName, m_pSTN);
 }
 
+string daeState::GetCanonicalName(void) const
+{
+	if(m_pSTN)
+		return m_pSTN->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return m_strShortName;
+}
+
 void daeState::Create(const string& strName, daeSTN* pSTN)
 {
 	m_pModel		= pSTN->m_pModel;
@@ -262,9 +270,10 @@ void daeState::SetModelAndCanonicalName(daeObject* pObject)
 {
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
-	string strName;
-	strName = m_strCanonicalName + "." + pObject->m_strShortName;
-	pObject->m_strCanonicalName = strName;
+//	string strName;
+//	strName = m_strCanonicalName + "." + pObject->m_strShortName;
+//	pObject->m_strCanonicalName = strName;
+
 	pObject->m_pModel = m_pModel;
 }
 
@@ -273,6 +282,7 @@ void daeState::AddEquation(daeEquation* pEquation)
 	if(!pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
 	SetModelAndCanonicalName(pEquation);
+	pEquation->m_pParentState = this;
 	dae_push_back(m_ptrarrEquations, pEquation);
 }
 
@@ -281,6 +291,7 @@ void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string&
 	rOnEventAction.SetName(strName);
 	rOnEventAction.SetDescription(strDescription);
     SetModelAndCanonicalName(&rOnEventAction);
+	rOnEventAction.m_pParentState = this;
 	
 	if(strName.empty())
 	{

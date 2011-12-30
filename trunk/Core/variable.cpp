@@ -15,6 +15,7 @@ daeVariable::daeVariable()
 	m_bReportingOn		= false;
 	m_nOverallIndex		= ULONG_MAX;
 	m_pModel			= NULL;
+	m_pParentPort       = NULL;
 }
 
 daeVariable::daeVariable(string strName, 
@@ -25,7 +26,8 @@ daeVariable::daeVariable(string strName,
 {
 	m_bReportingOn		= false;
 	m_nOverallIndex		= ULONG_MAX;
-	m_pModel			= NULL;
+	m_pModel			= pModel;
+	m_pParentPort       = NULL;
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -43,6 +45,7 @@ daeVariable::daeVariable(string strName,
 	m_bReportingOn		= false;
 	m_nOverallIndex		= ULONG_MAX;
 	m_pModel			= NULL;
+	m_pParentPort       = pPort;
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -193,6 +196,14 @@ void daeVariable::SaveRuntime(io::xmlTag_t* pTag) const
 
 	strName = "OverallIndex";
 	pTag->Save(strName, m_nOverallIndex);
+}
+
+string daeVariable::GetCanonicalName(void) const
+{
+	if(m_pParentPort)
+		return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
 }
 
 real_t daeVariable::GetInitialCondition(const size_t* indexes, const size_t N)
@@ -690,7 +701,7 @@ void daeVariable::ReAssignValue(real_t dValue)
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -708,7 +719,7 @@ void daeVariable::ReAssignValue(size_t nD1, real_t dValue)
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -726,7 +737,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, real_t dValue)
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -744,7 +755,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValu
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -762,7 +773,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -780,7 +791,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -798,7 +809,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -816,7 +827,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -834,7 +845,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reassign the value of the state variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
@@ -1325,7 +1336,7 @@ void daeVariable::ReSetInitialCondition(real_t dInitialCondition)
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1347,7 +1358,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, real_t dInitialCondition)
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1369,7 +1380,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, real_t dInitialC
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1391,7 +1402,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, real
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1413,7 +1424,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1435,7 +1446,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1457,7 +1468,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1479,7 +1490,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 
@@ -1501,7 +1512,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << m_strCanonicalName << "] variable";
+		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
 

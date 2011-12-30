@@ -59,7 +59,7 @@ void daePortArray::Create()
 		if(pDomain->GetNumberOfPoints() == 0)
 		{	
 			daeDeclareException(exInvalidCall); 
-			e << "Number of points in domain [" << pDomain->m_strCanonicalName << "] is 0; did you forget to initialize it?";
+			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] is 0; did you forget to initialize it?";
 			throw e;
 		}
 	}
@@ -364,7 +364,7 @@ void daeModelArray::Create()
 		if(pDomain->GetNumberOfPoints() == 0)
 		{	
 			daeDeclareException(exInvalidCall); 
-			e << "Number of points in domain [" << pDomain->m_strCanonicalName << "] is 0; did you forget to initialize it?";
+			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] is 0; did you forget to initialize it?";
 			throw e;
 		}
 	}

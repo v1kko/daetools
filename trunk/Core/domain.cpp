@@ -16,6 +16,7 @@ daeDomain::daeDomain()
 	m_eDomainType			= eDTUnknown;
 	m_nDiscretizationOrder  = 0;
 	m_eDiscretizationMethod	= eDMUnknown;
+	m_pParentPort           = NULL;
 }
 
 daeDomain::daeDomain(string strName, daeModel* pModel, const unit& units, string strDescription)
@@ -28,6 +29,7 @@ daeDomain::daeDomain(string strName, daeModel* pModel, const unit& units, string
 	m_eDomainType			= eDTUnknown;
 	m_nDiscretizationOrder  = 0;
 	m_eDiscretizationMethod	= eDMUnknown;
+	m_pParentPort           = NULL;
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -44,6 +46,7 @@ daeDomain::daeDomain(string strName, daePort* pPort, const unit& units, string s
 	m_eDomainType			= eDTUnknown;
 	m_nDiscretizationOrder  = 0;
 	m_eDiscretizationMethod	= eDMUnknown;
+	m_pParentPort           = pPort;
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -188,21 +191,21 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
 	if(nNoIntervals == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << m_strCanonicalName << "] cannot be zero";
+		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be zero";
 		throw e;
 	}
 
 	if(nNoIntervals < 2)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << m_strCanonicalName << "] cannot be less than 2";
+		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be less than 2";
 		throw e;
 	}
 
 	if(dLB >= dUB)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "The lower bound is greater than the upper one in domain [" << m_strCanonicalName;
+		e << "The lower bound is greater than the upper one in domain [" << GetCanonicalName();
 		throw e;
 	}
 
@@ -221,7 +224,7 @@ void daeDomain::CreateArray(size_t nNoIntervals)
 	if(nNoIntervals == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << m_strCanonicalName << "] cannot be zero";
+		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be zero";
 		throw e;
 	}
 
@@ -233,6 +236,14 @@ void daeDomain::CreateArray(size_t nNoIntervals)
 	m_eDiscretizationMethod	= eDMUnknown;
 
 	CreatePoints();
+}
+
+string daeDomain::GetCanonicalName(void) const
+{
+	if(m_pParentPort)
+		return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
 }
 
 adouble daeDomain::partial(daePartialDerivativeVariable& pdv) const
@@ -351,13 +362,13 @@ void daeDomain::SetPoints(const vector<real_t>& darrPoints)
 	if(m_eDomainType == eArray)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Cannot reset an array, domain [" << m_strCanonicalName << "]";
+		e << "Cannot reset an array, domain [" << GetCanonicalName() << "]";
 		throw e;
 	}
 	if(m_nNumberOfPoints != darrPoints.size())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid number of points in domain [" << m_strCanonicalName << "]";
+		e << "Invalid number of points in domain [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -375,7 +386,7 @@ void daeDomain::CreatePoints()
 	if(m_nNumberOfIntervals == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid number of intervals in domain [" << m_strCanonicalName << "]";
+		e << "Invalid number of intervals in domain [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -475,7 +486,7 @@ adouble_array daeDomain::array(int start, int end, int step)
 //	if(!m_pModel)
 //	{	
 //		daeDeclareException(exInvalidCall); 
-//		e << "Invalid parent model in domain [" << m_strCanonicalName << "]";
+//		e << "Invalid parent model in domain [" << GetCanonicalName() << "]";
 //		throw e;
 //	}
 //	

@@ -192,7 +192,7 @@ public:
 	void SaveNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag) const;
 	void SaveRelativeNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag, const daeObject* pParent = NULL) const;
 
-	void SetCanonicalName(const string& strCanonicalName);
+	//void SetCanonicalName(const string& strCanonicalName);
 	void SetName(const string& strName);
 	void SetDescription(const string& strDescription);
 	void SetModel(daeModel* pModel);
@@ -202,7 +202,7 @@ public:
 	string GetStrippedNameRelativeToParentModel(void) const;
 	
 protected:
-	string			m_strCanonicalName;
+//	string			m_strCanonicalName;
 	string			m_strDescription;
 	string 			m_strShortName;
 	daeModel*		m_pModel;
@@ -220,6 +220,8 @@ protected:
 	friend class daeModelArray;
 	friend class daeDistributedEquationDomainInfo;
 	friend class daeOnEventActions;
+	friend class daeEventPortConnection;
+	friend class daePortConnection;
 };
 
 string daeGetRelativeName(const daeObject* parent, const daeObject* child);
@@ -304,6 +306,8 @@ public:
 
 // Public interface
 public:	
+	virtual string GetCanonicalName(void) const;
+	
 // Common for both Discrete and Distributed domains
 	virtual daeeDomainType				GetType(void) const;
 	virtual size_t						GetNumberOfIntervals(void) const;
@@ -364,6 +368,7 @@ protected:
 	size_t							m_nNumberOfPoints;
 	size_t							m_nNumberOfIntervals;
 	std::vector<real_t>				m_darrPoints;
+	daePort*						m_pParentPort;
 	friend class daePort;
 	friend class daeModel;
 	friend class daeParameter;
@@ -1328,6 +1333,7 @@ public:
 	virtual ~daeParameter(void);
 
 public:	
+	virtual string	GetCanonicalName(void) const;
 	virtual unit	GetUnits(void) const;
 	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 	virtual real_t*	GetValuePointer(void);
@@ -1437,6 +1443,7 @@ protected:
 	std::vector<real_t>				m_darrValues;
 	unit							m_Unit;
 	std::vector<daeDomain*>			m_ptrDomains;
+	daePort*						m_pParentPort;
 	friend class daePort;
 	friend class daeModel;
 	friend class adSetupParameterNode;
@@ -1460,6 +1467,7 @@ public:
 	virtual ~daeVariable(void);
 
 public:	
+	virtual string				GetCanonicalName(void) const;
 	virtual daeVariableType_t*	GetVariableType(void);
 	virtual void				GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 
@@ -1795,6 +1803,7 @@ protected:
 	daeVariableType			m_VariableType;
 	bool					m_bReportingOn;
 	std::vector<daeDomain*>	m_ptrDomains;
+	daePort*				m_pParentPort;
 	friend class daePort;
 	friend class daeModel;
 	friend class daeAction;
@@ -2028,8 +2037,9 @@ public:
 	virtual ~daeOnEventActions(void);
 
 public:
-	virtual void Execute(void);
-	virtual void Update(daeEventPort_t *pSubject, void* data);
+	virtual string GetCanonicalName(void) const;
+	virtual void   Execute(void);
+	virtual void   Update(daeEventPort_t *pSubject, void* data);
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -2046,6 +2056,8 @@ protected:
 	daeEventPort*            m_pEventPort;
 	daePtrVector<daeAction*> m_ptrarrOnEventActions;
 	std::vector<daeAction*>  m_ptrarrUserDefinedOnEventActions;
+	daeState*				 m_pParentState;
+	friend class daeState;
 };
 
 /******************************************************************
@@ -2784,6 +2796,7 @@ public:
 	virtual ~daeState(void);
 
 public:
+	virtual string	GetCanonicalName(void) const;
 	virtual void	GetStateTransitions(std::vector<daeStateTransition_t*>& ptrarrStateTransitions);
 	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations);
 	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs);
@@ -2869,6 +2882,7 @@ public:
 	virtual ~daeStateTransition(void);
 
 public:
+	string GetCanonicalName(void) const;
 	void GetActions(std::vector<daeAction_t*>& ptrarrActions) const;
 	void ExecuteActions(void);
 
@@ -2923,6 +2937,7 @@ public:
 	virtual ~daeSTN(void);
 
 public:
+	virtual string      GetCanonicalName(void) const;
 	virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates);
 	virtual daeState_t*	GetActiveState(void);
 
@@ -3034,7 +3049,8 @@ public:
 	virtual ~daeEquation(void);
 
 public:
-	virtual void GetDomainDefinitions(std::vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo);
+	virtual string GetCanonicalName(void) const;
+	virtual void   GetDomainDefinitions(std::vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo);
 
 public:	
 	void	 SetResidual(adouble res);
@@ -3084,6 +3100,7 @@ protected:
 	void SetModelAndCanonicalName(daeObject* pObject);
 
 protected:
+	daeState*											m_pParentState;
 	daeeEquationDefinitionMode							m_eEquationDefinitionMode;
 	daeeEquationEvaluationMode							m_eEquationEvaluationMode;
 	boost::shared_ptr<adNode>							m_pResidualNode;
@@ -3093,6 +3110,7 @@ protected:
 	std::vector<daeEquationExecutionInfo*>				m_ptrarrEquationExecutionInfos;
 	
 	friend class daeModel;
+	friend class daeState;
 	friend class daeEquationExecutionInfo;
 };
 

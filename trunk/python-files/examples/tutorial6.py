@@ -44,7 +44,7 @@ class portSimple(daePort):
     def __init__(self, Name, PortType, Model, Description = ""):
         daePort.__init__(self, Name, PortType, Model, Description)
 
-        self.t = daeVariable("t", no_t, self, "Time elapsed in the process, s")
+        self.t = daeVariable("t", time_t, self, "Time elapsed in the process, s")
 
 # Here we define two models, 'modPortIn' and 'modPortOut' each having one port of type portSimple.
 # The model 'modPortIn' contains inlet port Pin while the model 'modPortOut' contains outlet port Pout.
@@ -62,7 +62,7 @@ class modPortOut(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.Pout = portSimple("P_out", eOutletPort, self, "The simple port")
-        self.time = daeVariable("Time", no_t, self, "Time elapsed in the process, s")
+        self.time = daeVariable("Time", time_t, self, "Time elapsed in the process, s")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("time", "Differential equation to calculate the time elapsed in the process.")

@@ -1515,14 +1515,14 @@ void daeModel::SetReportingOn(bool bOn)
 //void daeModel::DeclareData()
 //{
 //	daeDeclareException(exNotImplemented);
-//	e << "DeclareData() function MUST be implemented in daeModel derived classes, model [" << m_strCanonicalName << "]";
+//	e << "DeclareData() function MUST be implemented in daeModel derived classes, model [" << GetCanonicalName() << "]";
 //	throw e;
 //}
 
 void daeModel::DeclareEquations()
 {
 	daeDeclareException(exNotImplemented);
-	e << "DeclareEquations() function MUST be implemented in daeModel derived classes, model [" << m_strCanonicalName << "]";
+	e << "DeclareEquations() function MUST be implemented in daeModel derived classes, model [" << GetCanonicalName() << "]";
 	throw e;
 }
 
@@ -2628,7 +2628,7 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 				if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
 				{
 					daeDeclareException(exInvalidCall);
-					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExec->m_pEquation->m_strCanonicalName;
+					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExec->m_pEquation->GetCanonicalName();
 					throw e;
 				}
 				(*iter).second = (*iterIndexInBlock).second;
@@ -2647,7 +2647,7 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 			if(pSTN->m_ptrarrStates.size() == 0)
 			{
 				daeDeclareException(exInvalidCall);
-				e << "Number of states is 0 in STN " << pSTN->m_strCanonicalName;
+				e << "Number of states is 0 in STN " << pSTN->GetCanonicalName();
 				throw e;
 			}
 
@@ -3703,9 +3703,10 @@ void daeModel::SetModelAndCanonicalName(daeObject* pObject)
 {
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
-	string strName;
-	strName = m_strCanonicalName + "." + pObject->m_strShortName;
-	pObject->m_strCanonicalName = strName;
+//	string strName;
+//	strName = m_strCanonicalName + "." + pObject->m_strShortName;
+//	pObject->m_strCanonicalName = strName;
+	
 	pObject->m_pModel = this;
 }
 

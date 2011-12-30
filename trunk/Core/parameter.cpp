@@ -11,14 +11,16 @@ namespace core
 *******************************************************************/
 daeParameter::daeParameter(void)
 {
-	m_pModel = NULL;
+	m_pModel      = NULL;
+	m_pParentPort = NULL;
 }
 	
 daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit   = units;
-	m_pModel = NULL;
+	m_Unit        = units;
+	m_pModel      = pModel;
+	m_pParentPort = NULL;
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -30,8 +32,9 @@ daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, 
 daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit   = units;
-	m_pModel = NULL;
+	m_Unit        = units;
+	m_pModel      = NULL;
+	m_pParentPort = pPort;
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -181,6 +184,14 @@ void daeParameter::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->SaveArray(strName, m_darrValues);
 }
 
+string daeParameter::GetCanonicalName(void) const
+{
+	if(m_pParentPort)
+		return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
+}
+
 void daeParameter::Initialize(void)
 {
 	vector<daeDomain*>::size_type i;
@@ -196,7 +207,7 @@ void daeParameter::Initialize(void)
 		if(pDomain->GetNumberOfPoints() == 0)
 		{
 			daeDeclareException(exInvalidCall);
-			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in parameter [" << m_strCanonicalName << "] must not be zero; did you forget to initialize it?";
+			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in parameter [" << GetCanonicalName() << "] must not be zero; did you forget to initialize it?";
 			throw e;
 		}
 		nTotalNumberOfPoints *= pDomain->GetNumberOfPoints();
@@ -257,7 +268,7 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeDomainIndex with the domain [" << indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() 
 				  << "]; you must use domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". index argument "
-				  << "in parameter [" << m_strCanonicalName << "] in operator()";
+				  << "in parameter [" << GetCanonicalName() << "] in operator()";
 				throw e;
 			}
 		}
@@ -374,7 +385,7 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 					daeDeclareException(exInvalidCall);
 					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
 					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-					  << "in parameter [" << m_strCanonicalName << "] in function array()";
+					  << "in parameter [" << GetCanonicalName() << "] in function array()";
 					throw e;
 				}
 			}
@@ -386,7 +397,7 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName() 
 				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in parameter [" << m_strCanonicalName << "] in function array()";
+				  << "in parameter [" << GetCanonicalName() << "] in function array()";
 				throw e;
 			}
 		}
@@ -439,7 +450,7 @@ size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains, parameter " << m_strCanonicalName;
+		e << "Illegal number of domains, parameter " << GetCanonicalName();
 		throw e;
 	}
 
@@ -471,7 +482,7 @@ void daeParameter::SetValue(real_t value)
 	if(m_ptrDomains.size() != 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 0; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 0; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -486,7 +497,7 @@ void daeParameter::SetValue(size_t nDomain1, real_t value)
 	if(m_ptrDomains.size() != 1)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 1; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 1; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -502,7 +513,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, real_t value)
 	if(m_ptrDomains.size() != 2)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 2; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 2; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -518,7 +529,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, r
 	if(m_ptrDomains.size() != 3)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 3; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 3; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -534,7 +545,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, s
 	if(m_ptrDomains.size() != 4)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 4; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 4; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -550,7 +561,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, s
 	if(m_ptrDomains.size() != 5)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 5; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 5; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -566,7 +577,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, s
 	if(m_ptrDomains.size() != 6)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 6; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 6; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -582,7 +593,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, s
 	if(m_ptrDomains.size() != 7)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 7; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 7; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -598,7 +609,7 @@ void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, s
 	if(m_ptrDomains.size() != 8)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 8; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 8; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 // If not previously initialized, do it now
@@ -614,13 +625,13 @@ real_t daeParameter::GetValue(void)
 	if(m_ptrDomains.size() != 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 0; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 0; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -632,13 +643,13 @@ real_t daeParameter::GetValue(size_t nDomain1)
 	if(m_ptrDomains.size() != 1)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 1; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 1; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -651,13 +662,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2)
 	if(m_ptrDomains.size() != 2)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 2; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 2; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -670,13 +681,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3)
 	if(m_ptrDomains.size() != 3)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 3; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 3; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -689,13 +700,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	if(m_ptrDomains.size() != 4)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 4; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 4; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -708,13 +719,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	if(m_ptrDomains.size() != 5)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 5; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 5; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -727,13 +738,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	if(m_ptrDomains.size() != 6)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 6; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 6; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -746,13 +757,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	if(m_ptrDomains.size() != 7)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 7; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 7; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 
@@ -765,13 +776,13 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	if(m_ptrDomains.size() != 8)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid set parameter value call for [" << m_strCanonicalName << "]" << "Number of domains is 8; it should be " << m_ptrDomains.size();
+		e << "Invalid set parameter value call for [" << GetCanonicalName() << "]" << "Number of domains is 8; it should be " << m_ptrDomains.size();
 		throw e;
 	}
 	if(m_darrValues.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in parameter [" << m_strCanonicalName << "] is zero; did you forget to initialize the domains that it is distributed on?";
+		e << "Number of points in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize the domains that it is distributed on?";
 		throw e;
 	}
 

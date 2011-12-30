@@ -33,7 +33,7 @@ size_t daeVariable::GetNumberOfPoints() const
 		if(pDomain->m_nNumberOfPoints == 0)
 		{	
 			daeDeclareException(exInvalidCall); 
-			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in variable [" << m_strCanonicalName << "] must not be zero; did you forget to initialize it?";
+			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in variable [" << GetCanonicalName() << "] must not be zero; did you forget to initialize it?";
 			throw e;
 		}
 		nTotalNumberOfVariables *= pDomain->m_nNumberOfPoints;
@@ -71,7 +71,7 @@ size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal number of domains, parameter " << m_strCanonicalName;
+		e << "Illegal number of domains, parameter " << GetCanonicalName();
 		throw e;
 	}
 
@@ -344,13 +344,13 @@ adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges,
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid variable array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid variable array call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -366,7 +366,7 @@ adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges,
 					daeDeclareException(exInvalidCall);
 					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
 					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-					  << "in variable [" << m_strCanonicalName << "] in function array()";
+					  << "in variable [" << GetCanonicalName() << "] in function array()";
 					throw e;
 				}
 			}
@@ -378,7 +378,7 @@ adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges,
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName() 
 				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in variable [" << m_strCanonicalName << "] in function array()";
+				  << "in variable [" << GetCanonicalName() << "] in function array()";
 				throw e;
 			}
 		}
@@ -403,13 +403,13 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid time derivative array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid time derivative array call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -425,7 +425,7 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 					daeDeclareException(exInvalidCall);
 					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
 					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-					  << "in variable [" << m_strCanonicalName << "] in function dt_array()";
+					  << "in variable [" << GetCanonicalName() << "] in function dt_array()";
 					throw e;
 				}
 			}
@@ -437,7 +437,7 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName() 
 				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in variable [" << m_strCanonicalName << "] in function dt_array()";
+				  << "in variable [" << GetCanonicalName() << "] in function dt_array()";
 				throw e;
 			}
 		}
@@ -463,13 +463,13 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid partial derivative array call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid partial derivative array call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -485,7 +485,7 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 					daeDeclareException(exInvalidCall);
 					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
 					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-					  << "in variable [" << m_strCanonicalName << "] in function d/d2_array()";
+					  << "in variable [" << GetCanonicalName() << "] in function d/d2_array()";
 					throw e;
 				}
 			}
@@ -497,7 +497,7 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName() 
 				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in variable [" << m_strCanonicalName << "] in function d/d2_array()";
+				  << "in variable [" << GetCanonicalName() << "] in function d/d2_array()";
 				throw e;
 			}
 		}
@@ -576,7 +576,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 		if(!pExecutionContext)
 		{	
 			daeDeclareException(exInvalidPointer); 
-			e << "Cannot find ExecutionContext for variable: " << m_strCanonicalName << ", index: " << nIndex;
+			e << "Cannot find ExecutionContext for variable: " << GetCanonicalName() << ", index: " << nIndex;
 			throw e;
 		}
 
@@ -647,13 +647,13 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid get value call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid get value call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -667,7 +667,7 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeDomainIndex with the domain [" << indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() 
 				  << "]; you must use domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". index argument "
-				  << "in variable [" << m_strCanonicalName << "] in operator()";
+				  << "in variable [" << GetCanonicalName() << "] in operator()";
 				throw e;
 			}
 		}
@@ -704,7 +704,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnFixed)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Differential variable [" << m_strCanonicalName << "] cannot be fixed";
+		e << "Differential variable [" << GetCanonicalName() << "] cannot be fixed";
 		throw e;
 	}
 
@@ -735,7 +735,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 				if(m_pModel->m_pDataProxy->GetVariableTypeGathered(nIndex) != cnDifferential)
 				{	
 					daeDeclareException(exInvalidCall); 
-					e << "Cannot get time derivative for non differential variable [" << m_strCanonicalName;
+					e << "Cannot get time derivative for non differential variable [" << GetCanonicalName();
 					throw e;
 				}
 			}
@@ -759,7 +759,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		if(m_pModel->m_pDataProxy->GetVariableTypeGathered(nIndex) != cnDifferential)
 		{	
 			daeDeclareException(exInvalidCall); 
-			e << "Cannot get time derivative for non differential variable [" << m_strCanonicalName;
+			e << "Cannot get time derivative for non differential variable [" << GetCanonicalName();
 			throw e;
 		}
 	}
@@ -807,7 +807,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 	{
 		// Unknown state
 		daeDeclareException(exInvalidCall);
-		e << "Unknown function evaluation mode for variable [" << m_strCanonicalName;
+		e << "Unknown function evaluation mode for variable [" << GetCanonicalName();
 		throw e;
 	}
 */
@@ -836,13 +836,13 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid time derivative call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid time derivative call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -856,7 +856,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeDomainIndex with the domain [" << indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() 
 				  << "]; you must use domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". index argument "
-				  << "in variable [" << m_strCanonicalName << "] in function dt()";
+				  << "in variable [" << GetCanonicalName() << "] in function dt()";
 				throw e;
 			}
 		}
@@ -891,19 +891,19 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 	if(m_ptrDomains.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Cannot get partial derivative for non distributed variable [" << m_strCanonicalName;
+		e << "Cannot get partial derivative for non distributed variable [" << GetCanonicalName();
 		throw e;
 	}
 	if(N != m_ptrDomains.size())
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains, variable " << m_strCanonicalName;
+		e << "Illegal number of domains, variable " << GetCanonicalName();
 		throw e;
 	}
 	if(D.GetType() != eDistributed)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Cannot get partial derivative for non-distributed domain [" << D.GetCanonicalName() << "], variable [" << m_strCanonicalName << "]";
+		e << "Cannot get partial derivative for non-distributed domain [" << D.GetCanonicalName() << "], variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -917,7 +917,7 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 	if(nFixedDomain == ULONG_MAX)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal domain for partial derivative, variable [" << m_strCanonicalName << "]";
+		e << "Illegal domain for partial derivative, variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -958,13 +958,13 @@ adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const dae
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid partial derivative call for [" << m_strCanonicalName << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
+		e << "Invalid partial derivative call for [" << GetCanonicalName() << "], number of domains is " << m_ptrDomains.size() << " - but only " << N << " is given";
 		throw e;
 	}
 	if(!m_pModel)
 	{	
 		daeDeclareException(exInvalidPointer); 
-		e << "Invalid parent model in variable [" << m_strCanonicalName << "]";
+		e << "Invalid parent model in variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 // Check if domains in indexes correspond to domains here
@@ -978,7 +978,7 @@ adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const dae
 				daeDeclareException(exInvalidCall);
 				e << "You cannot create daeDomainIndex with the domain [" << indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() 
 				  << "]; you must use domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". index argument " 
-				  << "in variable [" << m_strCanonicalName << "] in function d/d2()";
+				  << "in variable [" << GetCanonicalName() << "] in function d/d2()";
 				throw e;
 			}
 		}

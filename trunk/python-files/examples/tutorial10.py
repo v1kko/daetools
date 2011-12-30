@@ -102,7 +102,7 @@ class modTutorial(daeModel):
         # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
         eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
         c = eq.DistributeOnDomain(self.c, eClosedClosed)
-        eq.Residual = self.semicircle(c) - Sqrt( 1 - c()**2 )
+        eq.Residual = self.semicircle(c) - Sqrt( self.constant(1.0 * m**2) - c()**2 )
 
         cr = daeIndexRange(self.c)
         eq = self.CreateEquation("Area", "Area of the semi-circle")

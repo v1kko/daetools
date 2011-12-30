@@ -741,9 +741,10 @@ void daePort::SetModelAndCanonicalName(daeObject* pObject)
 {
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
-	string strName;
-	strName = m_strCanonicalName + "." + pObject->m_strShortName;
-	pObject->m_strCanonicalName = strName;
+//	string strName;
+//	strName = m_strCanonicalName + "." + pObject->m_strShortName;
+//	pObject->m_strCanonicalName = strName;
+
 	pObject->m_pModel = m_pModel;
 }
 
@@ -1050,10 +1051,11 @@ void daePortConnection::SetModelAndCanonicalName(daeObject* pObject)
 {
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
-	string strName;
-	strName = m_strCanonicalName + "." + pObject->GetName();
-	pObject->SetCanonicalName(strName);
-	pObject->SetModel(m_pModel);
+//	string strName;
+//	strName = m_strCanonicalName + "." + pObject->GetName();
+//	pObject->SetCanonicalName(strName);
+
+	pObject->m_pModel = m_pModel;
 }
 
 bool daePortConnection::CheckObject(vector<string>& strarrErrors) const
@@ -1327,10 +1329,11 @@ void daeEventPortConnection::SetModelAndCanonicalName(daeObject* pObject)
 {
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
-	string strName;
-	strName = m_strCanonicalName + "." + pObject->GetName();
-	pObject->SetCanonicalName(strName);
-	pObject->SetModel(m_pModel);
+//	string strName;
+//	strName = m_strCanonicalName + "." + pObject->GetName();
+//	pObject->SetCanonicalName(strName);
+
+	pObject->m_pModel = m_pModel;
 }
 
 bool daeEventPortConnection::CheckObject(vector<string>& strarrErrors) const

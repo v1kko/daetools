@@ -228,7 +228,7 @@ bool daeIF::CheckDiscontinuities()
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in IF [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in IF [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -279,7 +279,7 @@ bool daeIF::CheckDiscontinuities(void)
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in IF [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in IF [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -334,7 +334,7 @@ void daeIF::ExecuteOnConditionActions(void)
 	if(!m_pActiveState)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Active state does not exist in IF [" << m_strCanonicalName << "]";
+		e << "Active state does not exist in IF [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -407,7 +407,7 @@ daeState* daeIF::AddState(string strName)
 	
 	string strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
 	pState->Create(strStateName, this);
-	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
+//	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
 
 // Put it on the stack
 	m_pModel->PutStateToStack(pState);
@@ -420,7 +420,7 @@ daeState* daeIF::CreateElse(void)
 	daeState* pELSE = daeSTN::AddState(strName);
 // Override default State_XXX name with ELSE
 	pELSE->SetName(strName);
-	pELSE->SetCanonicalName(m_strCanonicalName + "." + strName);
+//	pELSE->SetCanonicalName(m_strCanonicalName + "." + strName);
 	return pELSE;
 }
 

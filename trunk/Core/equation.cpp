@@ -324,13 +324,13 @@ daeDistributedEquationDomainInfo::daeDistributedEquationDomainInfo(daeEquation* 
 	if(!pDomain)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid domain in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		e << "Invalid domain in DEDI, in equation [ " << pEquation->GetCanonicalName() << "]";
 		throw e;
 	}
 	if(eDomainBounds == eDBUnknown || eDomainBounds == eCustomBound)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid domain bounds in DEDI on the domain [ " << m_pDomain->m_strCanonicalName 
+		e << "Invalid domain bounds in DEDI on the domain [ " << m_pDomain->GetCanonicalName() 
 		  << "]; must be on of [eOpenOpen, eOpenClosed, eClosedOpen, eClosedClosed, eLowerBound, eUpperBound]";
 		throw e;
 	}
@@ -349,13 +349,13 @@ daeDistributedEquationDomainInfo::daeDistributedEquationDomainInfo(daeEquation* 
 	if(!pDomain)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid domain in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		e << "Invalid domain in DEDI, in equation [ " << pEquation->GetCanonicalName() << "]";
 		throw e;
 	}
 	if(narrDomainIndexes.size() == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points cannot be 0 in DEDI, in equation [ " << pEquation->m_strCanonicalName << "]";
+		e << "Number of points cannot be 0 in DEDI, in equation [ " << pEquation->GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -394,7 +394,7 @@ void daeDistributedEquationDomainInfo::Initialize(void)
 	if(iNoPoints == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of points in domain [ " << m_pDomain->m_strCanonicalName << "] is 0; it should be at least 1";
+		e << "Number of points in domain [ " << m_pDomain->GetCanonicalName() << "] is 0; it should be at least 1";
 		throw e;
 	}
 
@@ -703,7 +703,8 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 *******************************************************************/
 daeEquation::daeEquation()
 {
-	m_pModel = NULL;
+	m_pParentState			  = NULL;
+	m_pModel			      = NULL;
 	m_eEquationDefinitionMode = eEDMUnknown;
 	m_eEquationEvaluationMode = eEEMUnknown;
 }
@@ -1161,6 +1162,14 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 	}
 }
 
+string daeEquation::GetCanonicalName(void) const
+{
+	if(m_pParentState)
+		return m_pParentState->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
+}
+
 size_t daeEquation::GetNumberOfEquations(void) const
 {
 	daeDEDI* pDedi;
@@ -1310,7 +1319,7 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 	if(nNumberOfDomains != narrDomainIndexes.size())
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
+		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -1393,7 +1402,7 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 //		else
 //		{	
 //			daeDeclareException(exInvalidCall);
-//			e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
+//			e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
 //			throw e;
 //		}
 
@@ -1418,7 +1427,7 @@ void daeEquation::Residual(const vector<size_t>& narrDomainIndexes, const daeExe
 	if(nNumberOfDomains != narrDomainIndexes.size())
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
+		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -1491,7 +1500,7 @@ void daeEquation::Residual(const vector<size_t>& narrDomainIndexes, const daeExe
 	else
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Maximal number of domains is 8, equation [ " << m_strCanonicalName << "]";
+		e << "Maximal number of domains is 8, equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -1509,7 +1518,7 @@ void daeEquation::Jacobian(const vector<size_t>& narrDomainIndexes, const map<si
 	if(nNumberOfDomains != narrDomainIndexes.size())
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << m_strCanonicalName << "]";
+		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -1603,7 +1612,7 @@ void daeEquation::Jacobian(const vector<size_t>& narrDomainIndexes, const map<si
 		else
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Maximal number of domains is 8, equation [ " << m_strCanonicalName << "]";
+			e << "Maximal number of domains is 8, equation [ " << GetCanonicalName() << "]";
 			throw e;
 		}
 		SetJacobianItem(nEquationIndex, nVariableindexInBlock, __ad.getDerivative(), EC.m_pBlock);
@@ -1657,9 +1666,10 @@ void daeEquation::SetModelAndCanonicalName(daeObject* pObject)
 	if(!pObject)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	string strCanonicalName;
-	strCanonicalName = this->m_strCanonicalName + "." + pObject->GetName();
-	pObject->SetCanonicalName(strCanonicalName);
+//	string strCanonicalName;
+//	strCanonicalName = this->GetCanonicalName() + "." + pObject->GetName();
+//	pObject->SetCanonicalName(strCanonicalName);
+	
 	pObject->SetModel(m_pModel);
 }
 
@@ -1668,7 +1678,7 @@ void daeEquation::SetResidual(adouble res)
 	if(!res.node)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Invalid residual, equation [ " << m_strCanonicalName << "]";
+		e << "Invalid residual, equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
 
@@ -1732,7 +1742,7 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 		try
 		{
 			quantity q = m_pResidualNode->GetQuantity();
-			std::cout << (boost::format("Equation [%s] residual units %s") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
+			//std::cout << (boost::format("Equation [%s] residual units %s") % GetCanonicalName() % q.getUnits().toString()).str() << std::endl;
 		}
 		catch(units_error& e)
 		{
@@ -1748,6 +1758,7 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 			strarrErrors.push_back(strError);
 			strError = "  " + string(e.what());
 			strarrErrors.push_back(strError);
+			bCheck = false;
 		}
 	}
 

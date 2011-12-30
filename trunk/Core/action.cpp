@@ -32,7 +32,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, const string& strS
 	m_pModel = pModel;
 	SetName(strName);
 	SetDescription(strDescription);
-	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
+//	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
 	m_eActionType = eChangeState;
 
 // For eChangeState:
@@ -54,7 +54,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, cons
 	m_pModel = pModel;
 	SetName(strName);
 	SetDescription(strDescription);
-	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
+//	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
 	m_eActionType = eChangeState;
 
 // For eChangeState:
@@ -75,7 +75,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 	m_pModel = pModel;
 	SetName(strName);
 	SetDescription(strDescription);
-	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
+//	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
 	m_eActionType = eSendEvent;
 	
 // For eChangeState:
@@ -99,7 +99,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 	m_pModel = pModel;
 	SetName(strName);
 	SetDescription(strDescription);
-	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
+//	SetCanonicalName(pModel->GetCanonicalName() + "." + m_strShortName);
 	m_eActionType = eReAssignOrReInitializeVariable;
 	
 // For eChangeState:
@@ -259,6 +259,7 @@ void daeAction::Execute(void)
 
 bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 {
+	string strError;
 	bool bReturn = true;
 
 	bReturn = daeObject::CheckObject(strarrErrors);
@@ -293,6 +294,31 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			strarrErrors.push_back(string("Send EventPort must be the outlet port, in action: ") + GetName());
 			return false;
 		}
+		
+		daeConfig& cfg = daeConfig::GetConfig();
+		if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+		{
+			try
+			{
+				quantity q = m_pSetupNode->GetQuantity();
+			}
+			catch(units_error& e)
+			{
+				strError = "Unit-consistency check failed for the expression in action [" + GetName() + "]:";
+				strarrErrors.push_back(strError);
+				strError = "  " + string(e.what());
+				strarrErrors.push_back(strError);
+				return false;
+			}
+			catch(std::exception& e)
+			{
+				strError = "Exception occurred while unit-consistency check in action [" + GetName() + "]:";
+				strarrErrors.push_back(strError);
+				strError = "  " + string(e.what());
+				strarrErrors.push_back(strError);
+				return false;
+			}
+		}
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
@@ -310,6 +336,42 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		{
 			strarrErrors.push_back(string("Invalid variable index, in action: ") + GetName());
 			return false;
+		}
+		
+		daeConfig& cfg = daeConfig::GetConfig();
+		if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+		{
+		// Check the expression unit-consistency
+			try
+			{
+				quantity q = m_pSetupNode->GetQuantity();
+			}
+			catch(units_error& e)
+			{
+				strError = "Unit-consistency check failed for the expression in action [" + GetCanonicalName() + "]:";
+				strarrErrors.push_back(strError);
+				strError = "  " + string(e.what());
+				strarrErrors.push_back(strError);
+				return false;
+			}
+			catch(std::exception& e)
+			{
+				strError = "Exception occurred while unit-consistency check in action [" + GetCanonicalName() + "]:";
+				strarrErrors.push_back(strError);
+				strError = "  " + string(e.what());
+				strarrErrors.push_back(strError);
+				return false;
+			}
+
+		// Check if the expression units match those of the variable
+			unit var_units   = m_pVariable->GetVariableType()->GetUnits();
+			unit value_units = m_pSetupNode->GetQuantity().getUnits();
+			if(var_units != value_units)
+			{
+				strError = "The expression units " + value_units.toString() + " do not match the variable units " + var_units.toString() + " in action [" + GetCanonicalName() + "]:";
+				strarrErrors.push_back(strError);
+				return false;
+			}
 		}
 	}
 	else if(m_eActionType == eUserDefinedAction)
@@ -461,7 +523,8 @@ void daeAction::Export(std::string& strContent, daeeModelLanguage eLanguage, dae
 **********************************************************************************************/
 daeOnEventActions::daeOnEventActions(void)
 {
-	m_pEventPort = NULL;
+	m_pEventPort   = NULL;
+	m_pParentState = NULL;
 }
 
 daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort, 
@@ -477,7 +540,8 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 	
 	pModel->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
 
-	m_pEventPort = pEventPort;
+	m_pEventPort   = pEventPort;
+	m_pParentState = NULL;
 	
 	dae_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
 	dae_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
@@ -496,7 +560,8 @@ daeOnEventActions::daeOnEventActions(daeEventPort* pEventPort,
 	
 	pState->AddOnEventAction(*this, "OnEventAction_" + pEventPort->GetName(), strDescription);
 
-	m_pEventPort = pEventPort;
+	m_pEventPort   = pEventPort;
+	m_pParentState = pState;
 	
 	dae_set_vector(ptrarrOnEventActions,            m_ptrarrOnEventActions);
 	dae_set_vector(ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
@@ -520,6 +585,14 @@ void daeOnEventActions::Clone(const daeOnEventActions& rObject)
 	}
 	
 	dae_set_vector(rObject.m_ptrarrUserDefinedOnEventActions, m_ptrarrUserDefinedOnEventActions);
+}
+
+string daeOnEventActions::GetCanonicalName(void) const
+{
+	if(m_pParentState)
+		return m_pParentState->GetCanonicalName() + '.' + m_strShortName;
+	else
+		return daeObject::GetCanonicalName();
 }
 
 daeEventPort* daeOnEventActions::GetEventPort(void) const

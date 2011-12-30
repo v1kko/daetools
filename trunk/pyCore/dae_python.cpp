@@ -295,15 +295,15 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
     class_<daeObject, boost::noncopyable>("daeObject", no_init)
-        .add_property("Name",           &daeObject::GetName,            &daeObject::SetName)
-        .add_property("CanonicalName",  &daeObject::GetCanonicalName,   &daeObject::SetCanonicalName)
-        .add_property("Description",    &daeObject::GetDescription,     &daeObject::SetDescription)
+        .add_property("Name",           &daeObject::GetName,        &daeObject::SetName)
+        .add_property("Description",    &daeObject::GetDescription, &daeObject::SetDescription)
+        .add_property("CanonicalName",  &daeObject::GetCanonicalName)
 
         .def("GetNameRelativeToParentModel",            &daeObject::GetNameRelativeToParentModel)
         .def("GetStrippedName",                         &daeObject::GetStrippedName)
         .def("GetStrippedNameRelativeToParentModel",    &daeObject::GetStrippedNameRelativeToParentModel)
         ;
-	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1);
+	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1); 
 	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2);
 	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName);
 
@@ -405,7 +405,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetValue", &daepython::SetParameterValue5)
 		.def("SetValue", &daepython::SetParameterValue6)
 		.def("SetValue", &daepython::SetParameterValue7)
-		.def("SetValue", &daepython::SetParameterValue8)
+		.def("SetValue", &daepython::SetParameterValue8)  
 
 		.def("GetQuantity", &daepython::daeParameterWrapper::GetParameterQuantity0)
 		.def("GetQuantity", &daepython::daeParameterWrapper::GetParameterQuantity1)

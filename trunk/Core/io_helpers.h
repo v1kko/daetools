@@ -47,8 +47,8 @@ public:
 		if(!m_pParent)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		string strName = m_pParent->GetCanonicalName() + "." + pObject->GetName();
-		pObject->SetCanonicalName(strName);
+		//string strName = m_pParent->GetCanonicalName() + "." + pObject->GetName();
+		//pObject->SetCanonicalName(strName);
 	}
 	
 	void AfterAllObjectsOpened(void)
