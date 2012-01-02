@@ -192,7 +192,6 @@ public:
 	void SaveNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag) const;
 	void SaveRelativeNameAsMathML(io::xmlTag_t* pTag, string strMathMLTag, const daeObject* pParent = NULL) const;
 
-	//void SetCanonicalName(const string& strCanonicalName);
 	void SetName(const string& strName);
 	void SetDescription(const string& strDescription);
 	void SetModel(daeModel* pModel);
@@ -202,7 +201,6 @@ public:
 	string GetStrippedNameRelativeToParentModel(void) const;
 	
 protected:
-//	string			m_strCanonicalName;
 	string			m_strDescription;
 	string 			m_strShortName;
 	daeModel*		m_pModel;

@@ -33,12 +33,6 @@ public:
 	}
 	
 protected:
-	virtual void DeclareData(void)
-	{
-		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
-			it->DeclareData();
-	}
-	
 	virtual void InitializeParameters(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
