@@ -762,12 +762,12 @@ void daeModel::AddModel(daeModel* pModel)
 		e << "Model name cannot be empty";
 		throw e;
 	}
-	if(CheckName(m_ptrarrModels, strName))
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "Child Model [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
-		throw e;
-	}
+//	if(CheckName(m_ptrarrModels, strName))
+//	{
+//		daeDeclareException(exInvalidCall); 
+//		e << "Child Model [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+//		throw e;
+//	}
 
     SetModelAndCanonicalName(pModel);
 	dae_push_back(m_ptrarrModels, pModel);

@@ -192,7 +192,7 @@ void daeAction::Initialize(void)
 
 void daeAction::Execute(void)
 {
-	std::cout << "    Execute called in the action: " << GetName() << std::endl;
+	std::cout << "    Execute called in the action: " << GetCanonicalName() << std::endl;
 	
 	if(m_eActionType == eChangeState)
 	{
