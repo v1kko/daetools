@@ -623,49 +623,59 @@ void SetParameterValue8(daeParameter& param, size_t n1, size_t n2, size_t n3, si
 	param.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
-void SetParameterQuantity0(daeParameter& param, quantity value)
+void SetParameterQuantity0(daeParameter& param, const quantity& q)
 {
-	param.SetValue(value);
+	param.SetValue(q);
 }
 
-void SetParameterQuantity1(daeParameter& param, size_t n1, quantity value)
+void SetParameterQuantity1(daeParameter& param, size_t n1, const quantity& q)
 {
-	param.SetValue(n1, value);
+	param.SetValue(n1, q);
 }
 
-void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, quantity value)
+void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, const quantity& q)
 {
-	param.SetValue(n1, n2, value);
+	param.SetValue(n1, n2, q);
 }
 
-void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, quantity value)
+void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, value);
+	param.SetValue(n1, n2, n3, q);
 }
 
-void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, quantity value)
+void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, n4, value);
+	param.SetValue(n1, n2, n3, n4, q);
 }
 
-void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, quantity value)
+void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, n4, n5, value);
+	param.SetValue(n1, n2, n3, n4, n5, q);
 }
 
-void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, quantity value)
+void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, n4, n5, n6, value);
+	param.SetValue(n1, n2, n3, n4, n5, n6, q);
 }
 
-void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, quantity value)
+void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, n4, n5, n6, n7, value);
+	param.SetValue(n1, n2, n3, n4, n5, n6, n7, q);
 }
 
-void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, quantity value)
+void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q)
 {
-	param.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
+	param.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, q);
+}
+
+void SetParameterValues(daeParameter& param, real_t values)
+{
+	param.SetValues(values);
+}
+
+void qSetParameterValues(daeParameter& param, const quantity& q)
+{
+	param.SetValues(q);
 }
 
 adouble_array ParameterArray1(daeParameter& param, object o1)
@@ -1295,11 +1305,6 @@ void SetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 	var.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
-void SetInitialGuesses(daeVariable& var, real_t value)
-{
-	var.SetInitialGuesses(value);
-}
-
 void SetInitialGuess0(daeVariable& var, real_t value)
 {
 	var.SetInitialGuess(value);
@@ -1480,11 +1485,6 @@ void qSetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_
     var.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
-void qSetInitialGuesses(daeVariable& var, const quantity& value)
-{
-    var.SetInitialGuesses(value);
-}
-
 void qSetInitialGuess0(daeVariable& var, const quantity& value)
 {
     var.SetInitialGuess(value);
@@ -1618,6 +1618,58 @@ void qReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, 
 void qReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& value)
 {
     var.ReSetInitialCondition(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
+
+
+void AssignValues(daeVariable& var, real_t values)
+{
+	var.AssignValues(values);
+}
+
+void qAssignValues(daeVariable& var, const quantity& q)
+{
+    var.AssignValues(q);
+}
+
+void ReAssignValues(daeVariable& var, real_t values)
+{
+	var.ReAssignValues(values);
+}
+
+void qReAssignValues(daeVariable& var, const quantity& q)
+{
+    var.ReAssignValues(q);
+}
+
+void SetInitialConditions(daeVariable& var, real_t values)
+{
+	var.SetInitialConditions(values);
+}
+
+void qSetInitialConditions(daeVariable& var, const quantity& q)
+{
+    var.SetInitialConditions(q);
+}
+
+void ReSetInitialConditions(daeVariable& var, real_t values)
+{
+	var.ReSetInitialConditions(values);
+}
+
+void qReSetInitialConditions(daeVariable& var, const quantity& q)
+{
+    var.ReSetInitialConditions(q);
+}
+
+void SetInitialGuesses(daeVariable& var, real_t values)
+{
+	var.SetInitialGuesses(values);
+}
+
+void qSetInitialGuesses(daeVariable& var, const quantity& q)
+{
+    var.SetInitialGuesses(q);
 }
 
 /*******************************************************

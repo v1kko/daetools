@@ -297,15 +297,18 @@ void SetParameterValue6(daeParameter& param, size_t n1, size_t n2, size_t n3, si
 void SetParameterValue7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetParameterValue8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
-void SetParameterQuantity0(daeParameter& param, quantity value);
-void SetParameterQuantity1(daeParameter& param, size_t n1, quantity value);
-void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, quantity value);
-void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, quantity value);
-void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, quantity value);
-void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, quantity value);
-void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, quantity value);
-void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, quantity value);
-void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, quantity value);
+void SetParameterQuantity0(daeParameter& param, const quantity& q);
+void SetParameterQuantity1(daeParameter& param, size_t n1, const quantity& q);
+void SetParameterQuantity2(daeParameter& param, size_t n1, size_t n2, const quantity& q);
+void SetParameterQuantity3(daeParameter& param, size_t n1, size_t n2, size_t n3, const quantity& q);
+void SetParameterQuantity4(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, const quantity& q);
+void SetParameterQuantity5(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, const quantity& q);
+void SetParameterQuantity6(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
+void SetParameterQuantity7(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
+void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
+
+void SetParameterValues(daeParameter& param, real_t values);
+void qSetParameterValues(daeParameter& param, const quantity& q);
 
 adouble_array ParameterArray1(daeParameter& param, boost::python::object o1);
 adouble_array ParameterArray2(daeParameter& param, boost::python::object o1, boost::python::object o2);
@@ -589,7 +592,6 @@ void ReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, s
 void ReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void ReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
-void SetInitialGuesses(daeVariable& var, real_t value);
 void SetInitialGuess0(daeVariable& var, real_t value);
 void SetInitialGuess1(daeVariable& var, size_t n1, real_t value);
 void SetInitialGuess2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -650,7 +652,6 @@ void qReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, 
 void qReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
 void qReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
-void qSetInitialGuesses(daeVariable& var, const quantity& q);
 void qSetInitialGuess0(daeVariable& var, const quantity& q);
 void qSetInitialGuess1(daeVariable& var, size_t n1, const quantity& q);
 void qSetInitialGuess2(daeVariable& var, size_t n1, size_t n2, const quantity& q);
@@ -660,6 +661,21 @@ void qSetInitialGuess5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void qSetInitialGuess6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, const quantity& q);
 void qSetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
 void qSetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
+
+void AssignValues(daeVariable& var, real_t values);
+void qAssignValues(daeVariable& var, const quantity& q);
+
+void ReAssignValues(daeVariable& var, real_t values);
+void qReAssignValues(daeVariable& var, const quantity& q);
+
+void SetInitialConditions(daeVariable& var, real_t values);
+void qSetInitialConditions(daeVariable& var, const quantity& q);
+
+void ReSetInitialConditions(daeVariable& var, real_t values);
+void qReSetInitialConditions(daeVariable& var, const quantity& q);
+
+void SetInitialGuesses(daeVariable& var, real_t values);
+void qSetInitialGuesses(daeVariable& var, const quantity& q);
 
 /*******************************************************
 	daeActionWrapper

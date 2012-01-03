@@ -520,6 +520,21 @@ quantity daeVariable::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 	return quantity(value, m_VariableType.GetUnits());
 }
 
+void daeVariable::AssignValues(real_t dValues)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t nTotalNumberOfVariables = GetNumberOfPoints();
+	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+	{
+		m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dValues);
+		m_pModel->m_pDataProxy->SetVariableType(m_nOverallIndex + i, cnFixed);
+	}	
+}
+
 void daeVariable::AssignValue(real_t dValue)
 {
 	if(!m_pModel)
@@ -636,6 +651,12 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
 }
 
+void daeVariable::AssignValues(const quantity& q)
+{
+	real_t values = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	AssignValues(values);
+}
+
 void daeVariable::AssignValue(const quantity& q)
 {
 	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
@@ -688,6 +709,26 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 {
 	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
 	AssignValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
+
+void daeVariable::ReAssignValues(real_t dValues)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t nTotalNumberOfVariables = GetNumberOfPoints();
+	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+	{
+		if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnFixed)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
+			throw e;
+		}		
+		m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dValues);
+	}
 }
 
 void daeVariable::ReAssignValue(real_t dValue)
@@ -849,6 +890,12 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		throw e;
 	}		
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
+}
+
+void daeVariable::ReAssignValues(const quantity& q)
+{
+	real_t values = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReAssignValues(values);
 }
 
 void daeVariable::ReAssignValue(const quantity& q)
@@ -1119,6 +1166,25 @@ void daeVariable::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_
 	m_pModel->m_pDataProxy->SetValue(nIndex, dValue);
 }
 
+void daeVariable::SetInitialConditions(real_t dInitialConditions)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t nTotalNumberOfVariables = GetNumberOfPoints();
+	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+	{
+		if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
+			m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dInitialConditions);
+		else
+			m_pModel->m_pDataProxy->SetTimeDerivative(m_nOverallIndex + i, dInitialConditions);
+		
+		m_pModel->m_pDataProxy->SetVariableType(m_nOverallIndex + i, cnDifferential);
+	}
+}
+
 void daeVariable::SetInitialCondition(real_t dInitialCondition)
 {
 	if(!m_pModel)
@@ -1271,6 +1337,12 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
+void daeVariable::SetInitialConditions(const quantity& q)
+{
+	real_t values = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	SetInitialConditions(values);
+}
+
 void daeVariable::SetInitialCondition(const quantity& q)
 {
 	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
@@ -1323,6 +1395,30 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 {
 	real_t value = q.scaleTo(m_VariableType.GetUnits()).getValue();
 	SetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+}
+
+void daeVariable::ReSetInitialConditions(real_t dInitialConditions)
+{
+	if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t nTotalNumberOfVariables = GetNumberOfPoints();
+	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+	{
+		if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnDifferential)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
+			throw e;
+		}		
+
+		if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
+			m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dInitialConditions);
+		else
+			m_pModel->m_pDataProxy->SetTimeDerivative(m_nOverallIndex + i, dInitialConditions);
+	}
 }
 
 void daeVariable::ReSetInitialCondition(real_t dInitialCondition)
@@ -1520,6 +1616,12 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
 	else
 		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+}
+
+void daeVariable::ReSetInitialConditions(const quantity& q)
+{
+	real_t values = q.scaleTo(m_VariableType.GetUnits()).getValue();
+	ReSetInitialConditions(values);
 }
 
 void daeVariable::ReSetInitialCondition(const quantity& q)

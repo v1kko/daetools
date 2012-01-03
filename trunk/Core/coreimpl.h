@@ -1345,6 +1345,7 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value);
+	virtual void	SetValues(real_t values);
 
 	virtual real_t	GetValue(void);
 	virtual real_t	GetValue(size_t nD1);
@@ -1365,6 +1366,7 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+	virtual void	SetValues(const quantity& values);
 
 	virtual quantity	GetQuantity(void);
 	virtual quantity	GetQuantity(size_t nD1);
@@ -1524,6 +1526,7 @@ public:
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value);
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value);
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value);
+	virtual void	AssignValues(real_t values);
 
 	virtual void	ReAssignValue(real_t value);
 	virtual void	ReAssignValue(size_t nD1, real_t value);
@@ -1534,6 +1537,7 @@ public:
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value);
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value);
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value);
+	virtual void	ReAssignValues(real_t values);
 	
 	virtual void	SetInitialGuess(real_t dInitialGuess);
 	virtual void	SetInitialGuess(size_t nD1, real_t dInitialGuesses);
@@ -1555,6 +1559,7 @@ public:
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialCondition);
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition);
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition);
+	virtual void	SetInitialConditions(real_t dInitialConditions);
 
 	virtual void	ReSetInitialCondition(real_t dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, real_t dInitialCondition);
@@ -1565,6 +1570,7 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition);
+	virtual void	ReSetInitialConditions(real_t dInitialConditions);
 
 	virtual void	AssignValue(const quantity& value);
 	virtual void	AssignValue(size_t nD1, const quantity& value);
@@ -1575,6 +1581,7 @@ public:
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+	virtual void	AssignValues(const quantity& values);
 
 	virtual void	ReAssignValue(const quantity& value);
 	virtual void	ReAssignValue(size_t nD1, const quantity& value);
@@ -1585,6 +1592,7 @@ public:
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value);
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value);
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value);
+	virtual void	ReAssignValues(const quantity& values);
 	
 	virtual void	SetInitialGuess(const quantity& dInitialGuess);
 	virtual void	SetInitialGuess(size_t nD1, const quantity& dInitialGuesses);
@@ -1606,6 +1614,7 @@ public:
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition);
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition);
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition);
+	virtual void	SetInitialConditions(const quantity& dInitialConditions);
 
 	virtual void	ReSetInitialCondition(const quantity& dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, const quantity& dInitialCondition);
@@ -1616,6 +1625,7 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition);
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition);
+	virtual void	ReSetInitialConditions(const quantity& dInitialConditions);
 
 	virtual void	SetAbsoluteTolerances(real_t dAbsTolerances);
 

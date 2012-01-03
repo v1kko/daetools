@@ -477,6 +477,15 @@ size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
 	return nIndex;
 }
 
+void daeParameter::SetValues(real_t values)
+{
+// If not previously initialized, do it now
+	if(m_darrValues.size() == 0)
+		Initialize();
+
+	m_darrValues.assign(m_darrValues.size(), values);
+}
+
 void daeParameter::SetValue(real_t value)
 {
 	if(m_ptrDomains.size() != 0)
@@ -790,6 +799,12 @@ real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3,
 	return m_darrValues[CalculateIndex(indexes, 8)];
 }
 
+
+void daeParameter::SetValues(const quantity& q)
+{
+	real_t values = q.scaleTo(m_Unit).getValue();
+	SetValues(values);
+}
 
 void daeParameter::SetValue(const quantity& q)
 {

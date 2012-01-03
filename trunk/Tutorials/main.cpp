@@ -12,6 +12,18 @@ int main(int argc, char *argv[])
 { 
 	try
 	{
+		std::cout << "sizeof(daeParameter) = " << sizeof(daeParameter) << std::endl;
+		std::cout << "sizeof(daeVariable) = " << sizeof(daeVariable) << std::endl;
+		std::cout << "sizeof(daeModel) = " << sizeof(daeModel) << std::endl;
+		std::cout << "sizeof(daeEquation) = " << sizeof(daeEquation) << std::endl;
+		std::cout << "sizeof(daeSTN) = " << sizeof(daeSTN) << std::endl;
+		std::cout << "sizeof(daeState) = " << sizeof(daeState) << std::endl;
+		std::cout << "sizeof(daeStateTransition) = " << sizeof(daeStateTransition) << std::endl;
+		std::cout << "sizeof(daePort) = " << sizeof(daePort) << std::endl;
+		std::cout << "sizeof(daeEventPort) = " << sizeof(daeEventPort) << std::endl;
+		std::cout << "sizeof(daeAction) = " << sizeof(daeAction) << std::endl;
+		std::cout << "sizeof(daeOnEventActions) = " << sizeof(daeOnEventActions) << std::endl;
+		
 //		runWhatsTheTime();
 //		runTutorial1();
 		//runTutorial2();
