@@ -239,6 +239,10 @@ private:
 	bool   m_bGatherInfo;
 };
 
+DAE_CORE_API const adouble Time(void);
+DAE_CORE_API const adouble Constant(const quantity& q);
+DAE_CORE_API const adouble Constant(real_t c);
+
 // Issues with daeModel::min/max
 inline const adouble __max__(const adouble &a, const adouble &b)
 {

@@ -2252,8 +2252,6 @@ public:
 	const adouble max(const adouble_array& a) const;
 	const adouble average(const adouble_array& a) const;
 	const adouble integral(const adouble_array& a) const;
-	const adouble time(void) const;
-	const adouble constant(const quantity& q) const;
 
 // Internal functions
 	const adouble __sum__(const adouble_array& a) const;

@@ -69,19 +69,19 @@ class modTutorial(daeModel):
         self.STATE("Heating")
 
         eq = self.CreateEquation("Q_in", "The heater is on")
-        eq.Residual = self.Qin() - self.constant(1500 * W) # this can simply be: self.Qin() - 1500
+        eq.Residual = self.Qin() - Constant(1500 * W)
 
-        # Here the daeModel.time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("Cooling",   self.T()    > self.constant(340 * K)) # this can simply be: self.T() > 340
-        self.SWITCH_TO("HeaterOff", self.time() > self.constant(350 * s)) # this can simply be: self.time() > 350
+        # Here the Time() function is used to get the current time (time elapsed) in the simulation
+        self.SWITCH_TO("Cooling",   self.T() > Constant(340 * K))
+        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T()    < self.constant(320 * K)) # this can simply be: self.T() < 320
-        self.SWITCH_TO("HeaterOff", self.time() > self.constant(350 * s)) # this can simply be: self.time() > 350
+        self.SWITCH_TO("Heating",   self.T() < Constant(320 * K))
+        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
 
         self.STATE("HeaterOff")
 

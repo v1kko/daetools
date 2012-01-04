@@ -93,7 +93,7 @@ class modTutorial(daeModel):
         #     which calculates the time as the current time elapsed in the simulation (which is a common way to obtain the current time within the model).
         #     Note that the variables should be accessed through the model object, therefore we use self.tau
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.tau.dt() - self.constant(1.0 * 1/s)
+        eq.Residual = self.tau.dt() - Constant(1.0 * 1/s)
 
 # 4. Define a simulation
 #    Simulations are derived from the base daeSimulation class

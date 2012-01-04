@@ -214,6 +214,16 @@ string adouble_repr(const adouble& self)
 /*******************************************************
 	adouble
 *******************************************************/
+const adouble ad_Constant_q(const quantity& q)
+{
+	return Constant(q);
+}
+
+const adouble ad_Constant_c(real_t c)
+{
+	return Constant(c);
+}
+
 const adouble ad_exp(const adouble &a)
 {
 	return exp(a);

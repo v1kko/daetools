@@ -241,6 +241,10 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Pow",   &daepython::ad_pow2);
 	def("Pow",   &daepython::ad_pow3);
 
+	def("Time",			&Time);
+	def("Constant",		&daepython::ad_Constant_c);
+	def("Constant",		&daepython::ad_Constant_q);
+	
 	class_<adouble_array>("adouble_array")
 		.def("__getitem__", &adouble_array::GetItem)
 		.def(- self)
@@ -805,8 +809,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("average",			&daeModel::average)
 		.def("dt",				&daeModel::dt)
 		.def("d",				&daeModel::d)
-		.def("time",			&daeModel::time)
-		.def("constant",		&daeModel::constant)
 
 		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
 		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("eventTolerance") = 0.0 ) )

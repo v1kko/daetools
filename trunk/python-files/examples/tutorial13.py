@@ -86,7 +86,7 @@ class modTutorial(daeModel):
         self.STATE("Heating")
 
         eq = self.CreateEquation("Q_in", "The heater is on")
-        eq.Residual = self.Qin() - self.constant(1500 * W)
+        eq.Residual = self.Qin() - Constant(1500 * W)
 
         """
                                           ON_CONDITION() function
@@ -100,30 +100,30 @@ class modTutorial(daeModel):
              will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
           - 'userDefinedActions' is a list of user defined daeAction-derived objects
         """
-        self.ON_CONDITION(self.T() > self.constant(340*K),    switchTo           = 'Cooling',
-                                                              setVariableValues  = [ (self.event, 100) ], # event variable is dimensionless
-                                                              triggerEvents      = [],
-                                                              userDefinedActions = [] )
+        self.ON_CONDITION(self.T() > Constant(340*K),    switchTo           = 'Cooling',
+                                                         setVariableValues  = [ (self.event, 100) ], # event variable is dimensionless
+                                                         triggerEvents      = [],
+                                                         userDefinedActions = [] )
 
-        self.ON_CONDITION(self.time() > self.constant(350*s), switchTo           = 'HeaterOff',
-                                                              setVariableValues  = [],
-                                                              triggerEvents      = [ (self.epOut, self.T() + self.constant(5.0*K)) ],
-                                                              userDefinedActions = [] )
+        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [ (self.epOut, self.T() + Constant(5.0*K)) ],
+                                                    userDefinedActions = [] )
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.ON_CONDITION(self.T() < self.constant(320*K),    switchTo           = 'Heating',
-                                                              setVariableValues  = [ (self.event, 200) ], # event variable is dimensionless
-                                                              triggerEvents      = [],
-                                                              userDefinedActions = [] )
+        self.ON_CONDITION(self.T() < Constant(320*K),    switchTo           = 'Heating',
+                                                         setVariableValues  = [ (self.event, 200) ], # event variable is dimensionless
+                                                         triggerEvents      = [],
+                                                         userDefinedActions = [] )
 
-        self.ON_CONDITION(self.time() > self.constant(350*s), switchTo           = 'HeaterOff',
-                                                              setVariableValues  = [],
-                                                              triggerEvents      = [ (self.epOut, self.T() + self.constant(6.0*K)) ],
-                                                              userDefinedActions = [] )
+        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [ (self.epOut, self.T() + Constant(6.0*K)) ],
+                                                    userDefinedActions = [] )
 
         self.STATE("HeaterOff")
 

@@ -65,8 +65,8 @@ class modTutorial(daeModel):
         # Finally call the function END_IF() to finalize the state transition network.
         # There is an optional argument eventTolerance of functions IF and ELSE_IF. It is used by the solver
         # to control the process of discovering the discontinuities.
-        # Details about the eventTolerance purpose will be given for the condition time < 200, given below.
-        # Conditions like time < 200 will be internally transformed into the following equations:
+        # Details about the eventTolerance purpose will be given for the condition Time < 200, given below.
+        # Conditions like Time < 200 will be internally transformed into the following equations:
         #        time - 200 - eventTolerance = 0
         #        time - 200 = 0
         #        time - 200 + eventTolerance = 0
@@ -91,14 +91,14 @@ class modTutorial(daeModel):
         # go to the state ELSE.
         # In this example, input power of the heater will be 1500 Watts if the time is less than 200.
         # Once we reach 200 seconds the heater is switched off (power is 0 W) and the system starts to cool down.
-        # Regarding the logival expression, we can use simply use:
-        #              self.time() < 200
-        # However, in order to be unit-consistent we may use also daeModel.constant() function that takes
-        # as an argument quantity object and return adouble. This way the unit consistency is always checked.
-        self.IF(self.time() < self.constant(200*s), eventTolerance = 1E-5)
+        # Regarding the logical expression, we can use simply use:
+        #              Time() < 200
+        # However, in order to be unit-consistent we may use also Constant() function that takes
+        # as an argument quantity object and returns adouble. This way the unit consistency is always checked.
+        self.IF(Time() < Constant(200*s), eventTolerance = 1E-5)
 
         eq = self.CreateEquation("Q_on", "The heater is on")
-        eq.Residual = self.Qin() - self.constant(1500 * W)
+        eq.Residual = self.Qin() - Constant(1500 * W)
 
         self.ELSE()
 

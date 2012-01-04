@@ -797,22 +797,6 @@ const adouble daeModel::__max__(const adouble_array& a) const
 	return tmp;
 }
 
-const adouble daeModel::time(void) const
-{
-	adouble tmp;
-	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adTimeNode());
-	return tmp;
-}
-
-const adouble daeModel::constant(const quantity& q) const
-{
-	adouble tmp;
-	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adConstantNode(q));
-	return tmp;
-}
-
 const adouble_array exp(const adouble_array& a)
 {
 	adouble_array tmp;

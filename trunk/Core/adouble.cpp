@@ -959,6 +959,28 @@ const adouble min(const adouble &a, real_t v)
 	return tmp;
 }
 
+const adouble Time(void)
+{
+	adouble tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = shared_ptr<adNode>(new adTimeNode());
+	return tmp;
+}
+
+const adouble Constant(const quantity& q)
+{
+	adouble tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = shared_ptr<adNode>(new adConstantNode(q));
+	return tmp;
+}
+
+const adouble Constant(real_t c)
+{
+	quantity q(c, unit());
+	return Constant(q);
+}
+
 void adouble::operator =(const real_t v) 
 {
 	//if(getGatherInfo())

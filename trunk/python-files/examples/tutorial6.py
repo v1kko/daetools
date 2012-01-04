@@ -62,7 +62,7 @@ class modPortOut(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.Pout = portSimple("P_out", eOutletPort, self, "The simple port")
-        self.time = daeVariable("Time", time_t, self, "Time elapsed in the process, s")
+        self.time = daeVariable("time", time_t, self, "Time elapsed in the process, s")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("time", "Differential equation to calculate the time elapsed in the process.")

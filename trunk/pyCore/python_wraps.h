@@ -96,6 +96,9 @@ const adouble ad_min1(const adouble &a, const adouble &b);
 const adouble ad_min2(real_t v, const adouble &a);
 const adouble ad_min3(const adouble &a, real_t v);
 
+const adouble ad_Constant_q(const quantity& q);
+const adouble ad_Constant_c(real_t c);
+
 /*******************************************************
 	adouble_array
 *******************************************************/

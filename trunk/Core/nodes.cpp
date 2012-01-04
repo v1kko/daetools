@@ -509,9 +509,9 @@ adNode* adTimeNode::Clone(void) const
 void adTimeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 	if(eLanguage == eCDAE)
-		strContent += "time()";
+		strContent += "Time()";
 	else if(eLanguage == ePYDAE)
-		strContent += "self.time()";
+		strContent += "Time()";
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
