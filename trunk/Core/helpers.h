@@ -18,6 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <map>
 #include <stdexcept>
 #include <stdlib.h>
 #include <time.h>
@@ -215,6 +216,23 @@ std::string toString(const std::vector<T>& std_array, const std::string& strDeli
 		if(i != 0)
 			result += strDelimiter;
 		result += toString<T>(std_array[i]);
+	}
+	return result;
+}
+
+template<class T1, class T2>
+std::string toString(const std::map<T1, T2>& std_map, const std::string& strDelimiter = std::string(", "))
+{
+	typedef typename std::map<T1,T2>::const_iterator _iterator;
+	
+	std::string result;
+	_iterator citer;
+	
+	for(citer = std_map.begin(); citer != std_map.end(); citer++)
+	{
+		if(citer != std_map.begin())
+			result += strDelimiter;
+		result += "(" + toString<T1>(citer->first) + ", " + toString<T2>(citer->second) + ")";
 	}
 	return result;
 }

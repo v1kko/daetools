@@ -2847,6 +2847,7 @@ public:
 	
 	void CalcNonZeroElements(int& NNZ);
 	void FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
+	void GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes);
 	void ConnectOnEventActions(void);
 	void DisconnectOnEventActions(void);
 
@@ -2969,6 +2970,7 @@ public:
 	void			SetActiveState(daeState* pState);
 	void			CalcNonZeroElements(int& NNZ);
 	void			FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
+	void			GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes);
 
 	daeState*		GetParentState(void) const;
 	void			SetParentState(daeState* pParentState);
@@ -3004,6 +3006,7 @@ protected:
 	daeState*				m_pActiveState;
 	daeeSTNType				m_eSTNType;
 	bool					m_bInitialized;
+	bool					m_bResetLAMatrixAfterDiscontinuity;
 	friend class daeIF;
 	friend class daeModel;
 	friend class daeState;

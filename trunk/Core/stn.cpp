@@ -15,6 +15,9 @@ daeSTN::daeSTN()
 	m_pActiveState	= NULL;
 	m_eSTNType		= eSTN;
 	m_bInitialized  = false;
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+	m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
 }
 
 daeSTN::~daeSTN()
@@ -984,14 +987,83 @@ void daeSTN::CalculateSensitivityParametersGradients(daeExecutionContext& EC, co
 
 void daeSTN::CalcNonZeroElements(int& NNZ)
 {
-	daeState* pState = m_pActiveState;	
-	pState->CalcNonZeroElements(NNZ);
+	if(m_bResetLAMatrixAfterDiscontinuity)
+	{
+		m_pActiveState->CalcNonZeroElements(NNZ);
+	}
+	else
+	{
+	// This will add the maximal number of non-zeroes found in one of the states
+	// so that NNZ will always be large enough to hold all the data, with no need
+	// to re-alloc memory after a state-change.
+		daeState* pState;	
+		
+		int _nnz    = 0;
+		int max_nnz = 0;
+		
+		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+		{
+			_nnz = 0;
+			pState = m_ptrarrStates[i];
+			
+			pState->CalcNonZeroElements(_nnz);
+			max_nnz = std::max(max_nnz, _nnz);
+		}
+		NNZ += max_nnz;
+	}
 }
 
 void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 {
-	daeState* pState = m_pActiveState;	
-	pState->FillSparseMatrix(pMatrix);	
+	if(m_bResetLAMatrixAfterDiscontinuity)
+	{
+		m_pActiveState->FillSparseMatrix(pMatrix);	
+	}
+	else
+	{
+		daeState* pState;	
+		size_t i, k;
+		size_t neq = GetNumberOfEquations();
+		vector< map<size_t, size_t> > arrIndexes;
+		vector< map<size_t, size_t> > arrTemp;
+		vector< map<size_t, size_t> >::const_iterator citer;
+		
+		arrTemp.reserve(neq);
+		arrIndexes.reserve(neq);
+		
+		for(i = 0; i < m_ptrarrStates.size(); i++)
+		{
+			pState = m_ptrarrStates[i];
+		
+		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
+			pState->GetSparseMatrixIndexes(arrTemp);
+			
+		// arrTemp contains variable indexes in the following format: <OverallIndex, BlockIndex>
+//			std::cout << (boost::format("arrTemp[%1%]:\n  ") % i).str();
+//			for(k = 0; k < neq; k++)
+//				std::cout << toString(arrTemp[k]) << " ";
+//			std::cout << std::endl;
+
+			for(k = 0; k < neq; k++)
+				arrIndexes[k].insert(arrTemp[k].begin(), arrTemp[k].end());
+		}
+		
+//		std::cout << "arrIndexes:\n  ";
+//		for(k = 0; k < neq; k++)
+//			std::cout << toString(arrIndexes[k]) << " ";
+//		std::cout << std::endl;
+	}
+}
+
+void daeSTN::GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes)
+{
+	daeState* pState;	
+	
+	for(i = 0; i < m_ptrarrStates.size(); i++)
+	{
+		pState = m_ptrarrStates[i];
+		pState->GetSparseMatrixIndexes(arrIndexes);
+	}
 }
 
 bool daeSTN::CheckObject(vector<string>& strarrErrors) const

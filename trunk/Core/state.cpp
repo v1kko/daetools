@@ -433,6 +433,27 @@ void daeState::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 	}
 }
 
+void daeState::GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes)
+{
+	size_t i;
+	daeSTN* pSTN;
+	daeEquationExecutionInfo* pEquationExecutionInfo;
+
+// First find in normal equations (non-STN)
+	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+	{
+		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
+		arrIndexes.push_back(pEquationExecutionInfo->m_mapIndexes);
+	}
+
+// Then in nested STNs
+	for(i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		pSTN->GetSparseMatrixIndexes(arrIndexes);
+	}
+}
+
 bool daeState::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
