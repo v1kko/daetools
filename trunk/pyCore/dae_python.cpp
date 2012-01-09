@@ -136,10 +136,16 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetBoolean",	   &daepython::SetBoolean)
 		.def("SetFloat",	   &daepython::SetFloat)
 		.def("SetInteger",	   &daepython::SetInteger)
-		.def("SetString",	   &daepython::SetString)
+		.def("SetString",	   &daepython::SetString) 
 
-	    .def("Reload", &daeConfig::Reload)
-	    .def("__str__",&daepython::daeConfig__str__)
+	    .def("Reload",		   &daeConfig::Reload)
+        
+        .def("has_key",		   &daepython::daeConfig_has_key) 
+	    .def("__contains__",   &daepython::daeConfig__contains__)
+        .def("__getitem__",	   &daepython::daeConfig__getitem__)
+        .def("__setitem__",	   &daepython::daeConfig__setitem__)
+	        
+        .def("__str__",		   &daepython::daeConfig__str__)
 	;
 /*
   .def("GetBoolean",	   &daepython::GetBoolean1)

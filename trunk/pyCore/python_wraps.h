@@ -59,6 +59,10 @@ void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value);
 void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value);
 
 std::string daeConfig__str__(daeConfig& self);
+boost::python::object daeConfig__contains__(daeConfig& self, boost::python::object key);
+boost::python::object daeConfig_has_key(daeConfig& self, boost::python::object key);
+boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::object key);
+void                  daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::python::object value);
 
 /*******************************************************
 	adouble

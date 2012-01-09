@@ -102,6 +102,7 @@ public:
 	std::string							m_strSensitivityMethod;
 	bool								m_bErrorControl;
 	bool								m_bPrintInfo;
+	bool								m_bResetLAMatrixAfterDiscontinuity;
 };
 
 

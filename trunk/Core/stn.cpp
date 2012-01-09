@@ -993,29 +993,33 @@ void daeSTN::CalcNonZeroElements(int& NNZ)
 	}
 	else
 	{
-	// This will add the maximal number of non-zeroes found in one of the states
-	// so that NNZ will always be large enough to hold all the data, with no need
-	// to re-alloc memory after a state-change.
+	// First add all indexes from equations to a map (one map per equation).
+	// Then add the number of those indexes in each combined equation to the NNZ
 		daeState* pState;	
+		size_t i, nCurrentEquaton, neq;
+		vector< map<size_t, size_t> > arrIndexes;
 		
-		int _nnz    = 0;
-		int max_nnz = 0;
+		neq = GetNumberOfEquations();
+		arrIndexes.resize(neq);
 		
-		for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+		for(i = 0; i < m_ptrarrStates.size(); i++)
 		{
-			_nnz = 0;
 			pState = m_ptrarrStates[i];
+			if(pState->GetNumberOfEquations() != arrIndexes.size())
+				daeDeclareAndThrowException(exInvalidCall);
 			
-			pState->CalcNonZeroElements(_nnz);
-			max_nnz = std::max(max_nnz, _nnz);
+		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
+			nCurrentEquaton = 0;
+			pState->AddIndexesFromAllEquations(arrIndexes, nCurrentEquaton);
 		}
-		NNZ += max_nnz;
+		
+		for(i = 0; i < arrIndexes.size(); i++)
+			NNZ += arrIndexes[i].size();
 	}
 }
 
 void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 {
-	std::cout << "m_bResetLAMatrixAfterDiscontinuity = " << m_bResetLAMatrixAfterDiscontinuity << std::endl;
 	if(m_bResetLAMatrixAfterDiscontinuity)
 	{
 		m_pActiveState->FillSparseMatrix(pMatrix);	
@@ -1024,12 +1028,10 @@ void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 	{
 		daeState* pState;	
 		size_t i, nCurrentEquaton, neq;
-		daePtrVector< map<size_t, size_t>* > arrIndexes;
+		vector< map<size_t, size_t> > arrIndexes;
 		
 		neq = GetNumberOfEquations();
-		arrIndexes.reserve(neq);
-		for(i = 0; i < neq; i++)
-			arrIndexes.push_back(new map<size_t, size_t>());
+		arrIndexes.resize(neq);
 			
 		for(i = 0; i < m_ptrarrStates.size(); i++)
 		{
@@ -1043,26 +1045,20 @@ void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 		}
 
 		for(i = 0; i < neq; i++)
-		{
-			std::map<size_t, size_t>* m = arrIndexes[i];
-			std::cout << toString(*m) << std::endl;
-			pMatrix->AddRow(*m);
-		}
+			pMatrix->AddRow(arrIndexes[i]);
 		
-		std::cout << GetCanonicalName() << " arrIndexes:  " << std::endl;
+/*		std::cout << GetCanonicalName() << " arrIndexes:  " << std::endl;
 		for(i = 0; i < neq; i++)
 		{
-			for(std::map<size_t, size_t>::const_iterator citer = arrIndexes[i]->begin(); citer!= arrIndexes[i]->end(); citer++)
-				std::cout << "(" + toString(citer->first) + ", " + toString(citer->second) + ") ";
+			for(std::map<size_t, size_t>::iterator iter = arrIndexes[i].begin(); iter != arrIndexes[i].end(); iter++)
+				std::cout << "(" + toString(iter->first) + ", " + toString(iter->second) + ") ";
 			std::cout << std::endl;
 		}
-		std::cout << std::endl;
-		
-		arrIndexes.EmptyAndFreeMemory();
+		std::cout << std::endl;*/
 	}
 }
 
-void daeSTN::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton)
+void daeSTN::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t> >& arrIndexes, size_t& nCurrentEquaton)
 {
 	daeState* pState;	
 	

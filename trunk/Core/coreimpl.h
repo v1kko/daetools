@@ -2862,7 +2862,7 @@ protected:
 	void	SetSTN(daeSTN* pSTN);
 
 	void	SetModelAndCanonicalName(daeObject* pObject);
-	void	AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton);
+	void	AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t> >& arrIndexes, size_t& nCurrentEquaton);
 
 protected:
 	daeSTN*									m_pSTN;
@@ -2998,7 +2998,7 @@ protected:
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 
 	void			ReconnectStateTransitionsAndStates(void);
-	void			AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton);
+	void			AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t> >& arrIndexes, size_t& nCurrentEquaton);
 
 protected:
 	daeState*				m_pParentState;

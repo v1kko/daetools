@@ -686,7 +686,7 @@ public:
 	{
 		std::map<size_t, size_t>::const_iterator iter;
 		for(iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
-			SetColumnIndex(iter->second);
+			SetColumnIndex(static_cast<INT>(iter->second));
 		NextRow();
 	}
 
@@ -714,7 +714,7 @@ public:
 			IA[rowCounter] = counter + 1;
 	}
 	
-	void SetColumnIndex(size_t col)
+	void SetColumnIndex(INT col)
 	{
 		if(indexing == CSR_C_STYLE)
 			JA[counter] = col;

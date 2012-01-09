@@ -27,6 +27,20 @@ public:
 		boost::property_tree::info_parser::read_info(configfile, pt);
 	}
 	
+	bool HasKey(const std::string& strPropertyPath) const
+	{
+		try
+		{
+			pt.get_child(strPropertyPath);
+			return true;
+		}
+		catch(boost::property_tree::ptree_bad_path& e)
+		{
+		}
+		
+		return false;
+	}
+
 	template<class T>
 	T Get(const std::string& strPropertyPath)
 	{
@@ -89,6 +103,11 @@ public:
 		std::stringstream ss;
 		boost::property_tree::info_parser::write_info(ss, pt);
 		return ss.str();
+	}
+	
+	const boost::property_tree::ptree& GetPropertyTree(void) const
+	{
+		return pt;
 	}
 	
 protected:

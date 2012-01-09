@@ -192,7 +192,7 @@ void daeAction::Initialize(void)
 
 void daeAction::Execute(void)
 {
-	std::cout << "    Execute called in the action: " << GetCanonicalName() << std::endl;
+	//std::cout << "    Execute called in the action: " << GetCanonicalName() << std::endl;
 	
 	if(m_eActionType == eChangeState)
 	{
@@ -223,8 +223,8 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t data = m_pNode->Evaluate(&EC).getValue();
-		std::cout << "    Event data : " << data << std::endl;
-
+		//std::cout << "    Event data : " << data << std::endl;
+		
 		m_pSendEventPort->SendEvent(data);
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
@@ -234,9 +234,8 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t value = m_pNode->Evaluate(&EC).getValue();
-		std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
+		//std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
 		
-		//std::cout << "Action: " << GetName() << ", nIndex = " << m_nIndex << ", Type = " << m_pModel->m_pDataProxy->GetVariableType(m_nIndex) << std::endl;
 		if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnFixed)
 			m_pVariable->ReAssignValue(value);
 		else if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnDifferential)
@@ -669,7 +668,8 @@ void daeOnEventActions::Export(std::string& strContent, daeeModelLanguage eLangu
 void daeOnEventActions::Update(daeEventPort_t* pSubject, void* data)
 {
 	real_t inputData = *(static_cast<real_t*>(data));
-	std::cout << "    Update received in the OnEventActions: " << GetName() << ", data = " << inputData << std::endl;
+	//std::cout << "    Update received in the OnEventActions: " << GetName() << ", data = " << inputData << std::endl;
+	
 	Execute();
 }
 

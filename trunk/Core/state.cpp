@@ -433,7 +433,7 @@ void daeState::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 	}
 }
 
-void daeState::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton)
+void daeState::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t> >& arrIndexes, size_t& nCurrentEquaton)
 {
 	size_t i;
 	daeSTN* pSTN;
@@ -443,7 +443,7 @@ void daeState::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>*
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
-		arrIndexes[nCurrentEquaton]->insert(pEquationExecutionInfo->m_mapIndexes.begin(), pEquationExecutionInfo->m_mapIndexes.end());
+		arrIndexes[nCurrentEquaton].insert(pEquationExecutionInfo->m_mapIndexes.begin(), pEquationExecutionInfo->m_mapIndexes.end());
 		nCurrentEquaton++;
 	}
 

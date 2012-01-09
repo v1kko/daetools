@@ -102,11 +102,12 @@ daeIDASolver::daeIDASolver(void)
 	m_pIDASolverData.reset(new daeIDASolverData);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	m_dRelTolerance                  = cfg.Get<real_t>("daetools.IDAS.relativeTolerance",             1e-5);
-	m_dNextTimeAfterReinitialization = cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization", 1e-2);
-	m_strSensitivityMethod           = cfg.Get<string>("daetools.IDAS.sensitivityMethod",             "Simultaneous");
-	m_bErrorControl                  = cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					  false);
-	m_bPrintInfo                     = cfg.Get<bool>  ("daetools.IDAS.printInfo",                     false);
+	m_dRelTolerance						= cfg.Get<real_t>("daetools.IDAS.relativeTolerance",               1e-5);
+	m_dNextTimeAfterReinitialization	= cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization",   1e-2);
+	m_strSensitivityMethod				= cfg.Get<string>("daetools.IDAS.sensitivityMethod",               "Simultaneous");
+	m_bErrorControl						= cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					   false);
+	m_bPrintInfo						= cfg.Get<bool>  ("daetools.IDAS.printInfo",                       false);
+	m_bResetLAMatrixAfterDiscontinuity	= cfg.Get<bool>  ("daetools.core.resetLAMatrixAfterDiscontinuity", true);
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -608,10 +609,13 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 		m_pBlock->CopyTimeDerivativesToSolver(m_arrTimeDerivatives);
 	}
 	
-// I should reset LA solver, since (the most likely) 
-// sparse matrix pattern has been changed after the discontinuity
+// Call the LA solver Reinitialize, if needed.
+// (the sparse matrix pattern has been changed after the discontinuity
 	if(m_eLASolver == eThirdParty)
-		m_pLASolver->Reinitialize(m_pIDA);
+	{
+		if(m_bResetLAMatrixAfterDiscontinuity)
+			m_pLASolver->Reinitialize(m_pIDA);
+	}
 	
 // ReInit IDA
 	retval = IDAReInit(m_pIDA,

@@ -142,6 +142,162 @@ std::string daeConfig__str__(daeConfig& self)
 	return self.toString();
 }
 
+boost::python::object daeConfig__contains__(daeConfig& self, boost::python::object key)
+{
+	extract<string>  str_key(key);
+	if(!str_key.check())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key in daeConfig must be a string" ;
+		throw e;
+	}
+	return boost::python::object(self.HasKey(str_key()));
+}
+
+boost::python::object daeConfig_has_key(daeConfig& self, boost::python::object key)
+{
+	extract<string>  str_key(key);
+	if(!str_key.check())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key in daeConfig must be a string" ;
+		throw e;
+	}
+	return boost::python::object(self.HasKey(str_key()));
+}
+
+boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::object key)
+{
+	extract<string>  str_key(key);
+	if(!str_key.check())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key in daeConfig must be a string" ;
+		throw e;
+	}
+	if(!self.HasKey(str_key()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key " << str_key() << " does not exist in daeConfig";
+		throw e;
+	}
+
+	try
+	{
+		return boost::python::object(self.Get<bool>(str_key()));
+	}
+	catch(boost::property_tree::ptree_error& e)
+	{
+	}
+	
+	try
+	{
+		return boost::python::object(self.Get<int>(str_key()));
+	}
+	catch(boost::property_tree::ptree_error& e)
+	{
+	}
+	
+	try
+	{
+		return boost::python::object(self.Get<double>(str_key()));
+	}
+	catch(boost::property_tree::ptree_error& e)
+	{
+	}
+	
+	try
+	{
+		return boost::python::object(self.Get<string>(str_key()));
+	}
+	catch(boost::property_tree::ptree_error& e)
+	{
+	}
+	
+	daeDeclareException(exInvalidCall);
+	e << "The value in daeConfig is none of: string | boolean | integer | float" ;
+	throw e;
+	
+	return boost::python::object();
+}
+
+void daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::python::object value)
+{
+	extract<string>  str_key(key);
+	extract<string>  string_(value);
+	extract<bool>    bool_(value);
+	extract<int>     int_(value);
+	extract<double>  float_(value);
+
+	if(!str_key.check())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key in daeConfig must be a string" ;
+		throw e;
+	}
+	if(!self.HasKey(str_key()))
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The key " << str_key() << " does not exist in daeConfig";
+		throw e;
+	}
+
+	if(bool_.check())
+	{
+		boost::optional<bool> v = self.GetPropertyTree().get_optional<bool>(str_key());
+		if(!v.is_initialized())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Failed to set the value of the key: the wrong data type" << str_key();
+			throw e;
+		}
+			
+		self.Set<bool>(str_key(), bool_());
+	}
+	else if(int_.check())
+	{
+		boost::optional<int> v = self.GetPropertyTree().get_optional<int>(str_key());
+		if(!v.is_initialized())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Failed to set the value of the key: the wrong data type" << str_key();
+			throw e;
+		}
+			
+		self.Set<int>(str_key(), int_());
+	}
+	else if(float_.check())
+	{
+		boost::optional<double> v = self.GetPropertyTree().get_optional<double>(str_key());
+		if(!v.is_initialized())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Failed to set the value of the key: the wrong data type" << str_key();
+			throw e;
+		}
+			
+		self.Set<double>(str_key(), float_());
+	}
+	else if(string_.check())
+	{
+		boost::optional<string> v = self.GetPropertyTree().get_optional<string>(str_key());
+		if(!v.is_initialized())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Failed to set the value of the key: the wrong data type" << str_key();
+			throw e;
+		}
+			
+		self.Set<string>(str_key(), string_());
+	}
+	else
+	{
+		daeDeclareException(exInvalidCall);
+		e << "The value in daeConfig can only be one of: string|boolean|integer|float" ;
+		throw e;
+	}
+}
+
 /*******************************************************
 	__str__ funkcije
 *******************************************************/

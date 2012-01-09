@@ -60,7 +60,6 @@ CONFIG(release, debug|release):message(release){
 
 DESTDIR = $${DAE_DEST_DIR}
 
-
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
 # Necessary to pass lintian test in debian  

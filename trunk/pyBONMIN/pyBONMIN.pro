@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core \
 	gui
-TARGET = pyBIMINLP
+TARGET = pyBONMIN
 TEMPLATE = lib
 
 ###############################
@@ -93,13 +93,13 @@ HEADERS += stdafx.h \
 win32{
 BONMIN { 
 QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyBIMINLP1.dll \
+	$${DAE_DEST_DIR}/pyBONMIN1.dll \
 	$${DAE_DEST_DIR}/pyBONMIN.pyd
 }
 
 IPOPT { 
 QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyBIMINLP1.dll \
+	$${DAE_DEST_DIR}/pyBONMIN1.dll \
 	$${DAE_DEST_DIR}/pyIPOPT.pyd
 }
 }

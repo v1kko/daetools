@@ -50,7 +50,7 @@ void daeEventPort::SendEvent(real_t data)
 	if(m_ePortType != eOutletPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	std::cout << "    Event sent from the outlet port: " << GetCanonicalName() << ", data = " << data << std::endl;
+	//std::cout << "    Event sent from the outlet port: " << GetCanonicalName() << ", data = " << data << std::endl;
 	
 // Observers in this case are inlet event ports
 	Notify(&data);
@@ -63,7 +63,7 @@ void daeEventPort::Update(daeEventPort_t* pSubject, void* data)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 	m_dEventData = *((real_t*)data);
-	std::cout << "    Update received in inlet port: " << GetCanonicalName() << ", dEventData = " << m_dEventData << std::endl;
+	//std::cout << "    Update received in inlet port: " << GetCanonicalName() << ", dEventData = " << m_dEventData << std::endl;
 	
 // Observers in this case are OnEventActions
 	Notify(data);
