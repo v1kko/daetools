@@ -2847,7 +2847,6 @@ public:
 	
 	void CalcNonZeroElements(int& NNZ);
 	void FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
-	void GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes);
 	void ConnectOnEventActions(void);
 	void DisconnectOnEventActions(void);
 
@@ -2863,6 +2862,7 @@ protected:
 	void	SetSTN(daeSTN* pSTN);
 
 	void	SetModelAndCanonicalName(daeObject* pObject);
+	void	AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton);
 
 protected:
 	daeSTN*									m_pSTN;
@@ -2970,7 +2970,6 @@ public:
 	void			SetActiveState(daeState* pState);
 	void			CalcNonZeroElements(int& NNZ);
 	void			FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
-	void			GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes);
 
 	daeState*		GetParentState(void) const;
 	void			SetParentState(daeState* pParentState);
@@ -2999,6 +2998,7 @@ protected:
 	size_t			GetNumberOfEquationsInState(daeState* pState) const;
 
 	void			ReconnectStateTransitionsAndStates(void);
+	void			AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton);
 
 protected:
 	daeState*				m_pParentState;

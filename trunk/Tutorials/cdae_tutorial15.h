@@ -116,14 +116,14 @@ public:
             eq->SetResidual(Q_in() - 1500);
 
             SWITCH_TO("Cooling", 340 < T());
-            SWITCH_TO("HeaterOff", 350 < time());
+            SWITCH_TO("HeaterOff", 350 < Time());
 
         STATE("Cooling");
             eq = CreateEquation("Q_in", "The heater is off");
             eq->SetResidual(Q_in());
 
             SWITCH_TO("Heating", 320 > T());
-            SWITCH_TO("HeaterOff", 350 < time());
+            SWITCH_TO("HeaterOff", 350 < Time());
 
         STATE("HeaterOff");
             eq = CreateEquation("Q_in", "The heater is off");

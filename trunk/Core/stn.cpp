@@ -1015,6 +1015,7 @@ void daeSTN::CalcNonZeroElements(int& NNZ)
 
 void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 {
+	std::cout << "m_bResetLAMatrixAfterDiscontinuity = " << m_bResetLAMatrixAfterDiscontinuity << std::endl;
 	if(m_bResetLAMatrixAfterDiscontinuity)
 	{
 		m_pActiveState->FillSparseMatrix(pMatrix);	
@@ -1022,47 +1023,53 @@ void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 	else
 	{
 		daeState* pState;	
-		size_t i, k;
-		size_t neq = GetNumberOfEquations();
-		vector< map<size_t, size_t> > arrIndexes;
-		vector< map<size_t, size_t> > arrTemp;
-		vector< map<size_t, size_t> >::const_iterator citer;
+		size_t i, nCurrentEquaton, neq;
+		daePtrVector< map<size_t, size_t>* > arrIndexes;
 		
-		arrTemp.reserve(neq);
+		neq = GetNumberOfEquations();
 		arrIndexes.reserve(neq);
-		
+		for(i = 0; i < neq; i++)
+			arrIndexes.push_back(new map<size_t, size_t>());
+			
 		for(i = 0; i < m_ptrarrStates.size(); i++)
 		{
 			pState = m_ptrarrStates[i];
-		
-		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
-			pState->GetSparseMatrixIndexes(arrTemp);
+			if(pState->GetNumberOfEquations() != arrIndexes.size())
+				daeDeclareAndThrowException(exInvalidCall);
 			
-		// arrTemp contains variable indexes in the following format: <OverallIndex, BlockIndex>
-//			std::cout << (boost::format("arrTemp[%1%]:\n  ") % i).str();
-//			for(k = 0; k < neq; k++)
-//				std::cout << toString(arrTemp[k]) << " ";
-//			std::cout << std::endl;
+		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
+			nCurrentEquaton = 0;
+			pState->AddIndexesFromAllEquations(arrIndexes, nCurrentEquaton);
+		}
 
-			for(k = 0; k < neq; k++)
-				arrIndexes[k].insert(arrTemp[k].begin(), arrTemp[k].end());
+		for(i = 0; i < neq; i++)
+		{
+			std::map<size_t, size_t>* m = arrIndexes[i];
+			std::cout << toString(*m) << std::endl;
+			pMatrix->AddRow(*m);
 		}
 		
-//		std::cout << "arrIndexes:\n  ";
-//		for(k = 0; k < neq; k++)
-//			std::cout << toString(arrIndexes[k]) << " ";
-//		std::cout << std::endl;
+		std::cout << GetCanonicalName() << " arrIndexes:  " << std::endl;
+		for(i = 0; i < neq; i++)
+		{
+			for(std::map<size_t, size_t>::const_iterator citer = arrIndexes[i]->begin(); citer!= arrIndexes[i]->end(); citer++)
+				std::cout << "(" + toString(citer->first) + ", " + toString(citer->second) + ") ";
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+		
+		arrIndexes.EmptyAndFreeMemory();
 	}
 }
 
-void daeSTN::GetSparseMatrixIndexes(std::vector< std::map<size_t, size_t> >& arrIndexes)
+void daeSTN::AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t>* >& arrIndexes, size_t& nCurrentEquaton)
 {
 	daeState* pState;	
 	
-	for(i = 0; i < m_ptrarrStates.size(); i++)
+	for(size_t i = 0; i < m_ptrarrStates.size(); i++)
 	{
 		pState = m_ptrarrStates[i];
-		pState->GetSparseMatrixIndexes(arrIndexes);
+		pState->AddIndexesFromAllEquations(arrIndexes, nCurrentEquaton);
 	}
 }
 

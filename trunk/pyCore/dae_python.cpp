@@ -628,7 +628,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReAssignValues",			&daepython::qReAssignValues)
 		.def("SetInitialGuesses",		&daepython::qSetInitialGuesses)
         .def("SetInitialConditions",	&daepython::qSetInitialConditions)
-        .def("ReSetInitialConditions",	&daepython::qReSetInitialConditions)
+        .def("ReSetInitialConditions",	&daepython::qReSetInitialConditions) 
 		
 	    .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
 

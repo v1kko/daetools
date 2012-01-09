@@ -40,7 +40,7 @@ public:
     daeParameter alpha;
     daeParameter A;
     daeParameter T_surr;
-    daeVariable Q_in;
+    daeVariable Q_in, Q1, Q2;
     daeVariable T;
 	daeSTN* stnRegulator;
 
@@ -52,6 +52,8 @@ public:
         A("A", m^2, this, "Area of the plate"),
         T_surr("T_surr", K, this, "Temperature of the surroundings"),
         Q_in("Q_in", power_t, this, "Power of the heater"),
+        Q1("Q1", power_t, this, "Power of the heater"),
+        Q2("Q2", power_t, this, "Power of the heater"),
         T("T", temperature_t, this, "Temperature of the plate")
     {
     }
@@ -86,21 +88,39 @@ public:
             eq = CreateEquation("Q_in", "The heater is on");
             eq->SetResidual(Q_in() - 1500);
 
+            eq = CreateEquation("Q1");
+            eq->SetResidual(Q1() - T());
+
+            eq = CreateEquation("Q2");
+            eq->SetResidual(Q2() - Q_in());
+			
             ON_CONDITION(T()    > 340, "Cooling",   arrSetVariables, arrTriggerEvents, ptrarrUserDefinedOnEventActions);
-			ON_CONDITION(time() > 350, "HeaterOff", arrSetVariables, arrTriggerEvents, ptrarrUserDefinedOnEventActions);
+			ON_CONDITION(Time() > 350, "HeaterOff", arrSetVariables, arrTriggerEvents, ptrarrUserDefinedOnEventActions);
 
         STATE("Cooling");
             eq = CreateEquation("Q_in", "The heater is off");
             eq->SetResidual(Q_in());
 
+            eq = CreateEquation("Q1");
+            eq->SetResidual(Q1() - Q_in());
+
+            eq = CreateEquation("Q2");
+            eq->SetResidual(Q2() - T());
+
             SWITCH_TO("Heating", 320 > T());
-            SWITCH_TO("HeaterOff", 350 < time());
+            SWITCH_TO("HeaterOff", 350 < Time());
 
         STATE("HeaterOff");
             eq = CreateEquation("Q_in", "The heater is off");
             eq->SetResidual(Q_in());
 
-        END_STN();
+            eq = CreateEquation("Q1");
+            eq->SetResidual(Q1() - Q_in());
+
+            eq = CreateEquation("Q2");
+            eq->SetResidual(Q2() - Q_in());
+
+		END_STN();
     }
 };
 
@@ -147,6 +167,7 @@ void runTutorial5(void)
     boost::scoped_ptr<daeDataReporter_t>    pDataReporter(daeCreateTCPIPDataReporter());
     boost::scoped_ptr<daeIDASolver>         pDAESolver(new daeIDASolver());
     boost::scoped_ptr<daeLog_t>             pLog(daeCreateStdOutLog());
+	boost::scoped_ptr<daeIDALASolver_t>		pLASolver(daeCreateSuperLUSolver());
     
     if(!pSimulation)
         daeDeclareAndThrowException(exInvalidPointer); 
@@ -156,6 +177,8 @@ void runTutorial5(void)
         daeDeclareAndThrowException(exInvalidPointer); 
     if(!pLog)
         daeDeclareAndThrowException(exInvalidPointer); 
+
+	pDAESolver->SetLASolver(pLASolver.get());
 
     time_t rawtime;
     struct tm* timeinfo;
