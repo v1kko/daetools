@@ -221,7 +221,7 @@ IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
 win32::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
-unix::IPOPT_LIBS  = -ldl -lblas -llapack -lipopt
+unix::IPOPT_LIBS  = -lipopt -ldl -lblas -llapack
 
 
 #####################################################################################
