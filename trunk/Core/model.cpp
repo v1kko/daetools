@@ -1224,12 +1224,18 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 
 	if(!pTriggerEventPort)
 		daeDeclareAndThrowException(exInvalidPointer);
-	if(pTriggerEventPort->GetType() != eInletPort)
+
+/*  ACHTUNG, ACHTUNG!!!
+    We SHOULD be able to have OnEvent actions EVEN on the OUTLET event ports!!
+	Therefore, the type check below is commented out.
+	
+    if(pTriggerEventPort->GetType() != eInletPort)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "ON_EVENT actions can only be set for inlet event ports, in model " << GetCanonicalName();
 		throw e;
 	}
+*/
 	
 // ChangeState	
 	for(i = 0; i < arrSwitchToStates.size(); i++)
@@ -1280,6 +1286,7 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	else
 	{
 		pOnEventAction = new daeOnEventActions(pTriggerEventPort, this, ptrarrOnEventActions, ptrarrUserDefinedActions, string(""));
+		
 	// Attach ONLY those OnEventActions that belong to the model; others will be set during the active state changes
 		pTriggerEventPort->Attach(pOnEventAction);
 	}

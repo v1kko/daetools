@@ -675,6 +675,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 		
 		if(retval == IDA_ROOT_RETURN) 
 		{
+            /*
 			nNoRoots = m_pBlock->GetNumberOfRoots();
 			rootsfound = new int[nNoRoots];		
 			retvalr = IDAGetRootInfo(m_pIDA, rootsfound);
@@ -685,7 +686,8 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 				throw e;
 			}
 			delete[] rootsfound;
-
+            */
+            
 			if(m_pBlock->CheckForDiscontinuities())
 			{
 			// Data will be reported only if there is a discontinuity
