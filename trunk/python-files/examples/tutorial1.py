@@ -258,11 +258,11 @@ def consoleRun():
     simulation   = simTutorial()
 
     # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
+    simulation.m.SetReportingOn(False)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
+    simulation.ReportingInterval = 0.0001
+    simulation.TimeHorizon = 10
 
     #simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
     #print simulation.ReportingTimes

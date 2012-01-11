@@ -228,7 +228,7 @@ void runTutorial1(void)
 
 	pSimulation->SetReportingInterval(10);
 	pSimulation->SetTimeHorizon(1000);
-	pSimulation->GetModel()->SetReportingOn(true);
+	pSimulation->GetModel()->SetReportingOn(false);
 	
 	pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
 	pSimulation->SolveInitial();
