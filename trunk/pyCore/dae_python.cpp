@@ -140,7 +140,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	    .def("Reload",		   &daeConfig::Reload)
         
-        .def("has_key",		   &daepython::daeConfig_has_key) 
+        .def("has_key",		   &daepython::daeConfig_has_key)
 	    .def("__contains__",   &daepython::daeConfig__contains__)
         .def("__getitem__",	   &daepython::daeConfig__getitem__)
         .def("__setitem__",	   &daepython::daeConfig__setitem__)

@@ -144,8 +144,12 @@ void daeAction::Initialize(void)
 		{
 			daeObject_t* pObject = m_pModel->FindObjectFromRelativeName(m_strSTN);
 			if(!pObject)
-				daeDeclareAndThrowException(exInvalidPointer);
-	
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Cannot find the state transition network [" << m_strSTN << "] in the model [" << m_pModel->GetCanonicalName() << "]";
+				throw e;
+			}
+			
 			m_pSTN = dynamic_cast<daeSTN*>(pObject);
 			if(!m_pSTN)
 				daeDeclareAndThrowException(exInvalidPointer);
@@ -153,7 +157,13 @@ void daeAction::Initialize(void)
 	
 		m_pStateTo = m_pSTN->FindState(m_strStateTo);
 		if(!m_pStateTo)
-			daeDeclareAndThrowException(exInvalidPointer);
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot find the state [" << m_strStateTo 
+			  << "] in the state transition network [" << m_pSTN->GetCanonicalName() 
+			  << "] in the model [" << m_pModel->GetCanonicalName() << "]";
+			throw e;
+		}
 	}
 	else if(m_eActionType == eSendEvent)
 	{

@@ -142,7 +142,7 @@ class modTutorial(daeModel):
         OnEvent handlers can be also specified as a part of the state definition
         and then they are active only when that particular state is active.
         Arguments:
-          - Inlet event port
+          - Event port (could be either inlet or outlet)
           - 'switchToStates' is a list of python tuples (STN-name, State-name)
           - 'triggerEvents' is a list of python tuples (outlet-event-port, expression)
           - 'setVariableValues' is a list of python tuples (variable, expression)
