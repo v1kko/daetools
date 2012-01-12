@@ -11,6 +11,7 @@ namespace solver
 enum daeeIDALASolverType
 {
 	eSundialsLU = 0,
+	eSundialsLapack,
 	eSundialsGMRES,
 	eThirdParty
 };

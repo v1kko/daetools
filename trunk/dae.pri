@@ -194,7 +194,7 @@ SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 win32::SUNDIALS_LIBS = sundials_idas.lib \
                        sundials_nvecserial.lib
 unix::SUNDIALS_LIBS = -lsundials_idas \
-                      -lsundials_nvecserial
+                      -lsundials_nvecserial -lblas -llapack
 
 
 #####################################################################################
