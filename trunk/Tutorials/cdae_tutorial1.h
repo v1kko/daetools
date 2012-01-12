@@ -202,7 +202,7 @@ void runTutorial1(void)
 	boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
 	boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
 	boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
-	//boost::scoped_ptr<daeIDALASolver_t>		pLASolver(daeCreateSuperLUSolver());
+	boost::scoped_ptr<daeIDALASolver_t>		pLASolver(daeCreateSuperLUSolver());
 	
 	if(!pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer); 
@@ -214,7 +214,7 @@ void runTutorial1(void)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
 	//pDAESolver->SetLASolver(eSundialsGMRES);
-	//pDAESolver->SetLASolver(pLASolver.get());
+	pDAESolver->SetLASolver(pLASolver.get());
 	
 	time_t rawtime;
 	struct tm* timeinfo;
@@ -226,7 +226,7 @@ void runTutorial1(void)
 	if(!pDataReporter->Connect(string(""), simName))
 		daeDeclareAndThrowException(exInvalidCall); 
 
-	pSimulation->SetReportingInterval(10);
+	pSimulation->SetReportingInterval(0.1);
 	pSimulation->SetTimeHorizon(1000);
 	pSimulation->GetModel()->SetReportingOn(false);
 	

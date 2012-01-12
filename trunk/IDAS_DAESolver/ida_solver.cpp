@@ -656,13 +656,14 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
 	for(;;)
 	{
-		retval = IDASetStopTime(m_pIDA, m_dTargetTime);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Sundials IDAS solver cravenly refused to set the stop time at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+	// We should not use the 'tstop' time as the 'tout' time!! That limits the step size and affects the integration speed!!
+//		retval = IDASetStopTime(m_pIDA, m_dTargetTime);
+//		if(!CheckFlag(retval)) 
+//		{
+//			daeDeclareException(exMiscellanous);
+//			e << "Sundials IDAS solver cravenly refused to set the stop time at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+//			throw e;
+//		}
 
 		retval = IDASolve(m_pIDA, m_dTargetTime, &m_dCurrentTime, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives, IDA_TSTOP_RETURN);
 		if(!CheckFlag(retval)) 
@@ -673,21 +674,19 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 			throw e;
 		}
 		
+	// Now we have to copy the values *from* the solver *to* the block
+		realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
+		realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
+	
+		m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+		m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+	
+		m_pBlock->CopyValuesFromSolver(m_arrValues); 
+		m_pBlock->CopyTimeDerivativesFromSolver(m_arrTimeDerivatives);
+		
+	// If a root has been found, check if some of the conditions is satisfied and do what is necessary   
 		if(retval == IDA_ROOT_RETURN) 
 		{
-            /*
-			nNoRoots = m_pBlock->GetNumberOfRoots();
-			rootsfound = new int[nNoRoots];		
-			retvalr = IDAGetRootInfo(m_pIDA, rootsfound);
-			if(!CheckFlag(retval)) 
-			{
-				daeDeclareException(exMiscellanous);
-				e << "Sundials IDAS solver cravenly failed to get roots' info; " << CreateIDAErrorMessage(retval);
-				throw e;
-			}
-			delete[] rootsfound;
-            */
-            
 			if(m_pBlock->CheckForDiscontinuities())
 			{
 			// Data will be reported only if there is a discontinuity

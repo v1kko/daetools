@@ -432,6 +432,7 @@ void daeBlock::CopyValuesToSolver(daeArray<real_t>& arrValues)
 		nOverallIndex = iter->first;
 		nBlockIndex   = iter->second;
 		dValue = *m_pDataProxy->GetValue(nOverallIndex);
+//		std::cout << "nOverallIndex = " << nOverallIndex << " nBlockIndex = " << nBlockIndex << "" << std::endl;
 		arrValues.SetItem(nBlockIndex, dValue);
 	} 
 #endif
@@ -462,6 +463,7 @@ void daeBlock::CopyTimeDerivativesFromSolver(daeArray<real_t>& arrTimeDerivative
 		nOverallIndex = iter->first;
 		nBlockIndex   = iter->second;
 		dValue = arrTimeDerivatives.GetItem(nBlockIndex);
+//		std::cout << "nOverallIndex = " << nOverallIndex << " nBlockIndex = " << nBlockIndex << "" << std::endl;
 
 		m_pDataProxy->SetTimeDerivative(nOverallIndex, dValue);
 	} 

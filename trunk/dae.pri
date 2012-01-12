@@ -69,12 +69,19 @@ DESTDIR = $${DAE_DEST_DIR}
 #}
 
 ####################################################################################
-#                       Suppress some warnings
+#                       Compiler flags
 ####################################################################################
 win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS
+
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CXXFLAGS  += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-unix::QMAKE_CFLAGS    += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+
+QMAKE_CFLAGS_RELEASE   -= -O2
+QMAKE_CXXFLAGS_RELEASE -= -O2
+
+QMAKE_CFLAGS_RELEASE   += -O3
+QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines pyCore cannot compile; set the following flags:
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192

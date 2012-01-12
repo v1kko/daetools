@@ -15,7 +15,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 	enum_<daeeIDALASolverType>("daeeIDALASolverType")
 		.value("eSundialsLU",		dae::solver::eSundialsLU)
 		.value("eSundialsGMRES",	dae::solver::eSundialsGMRES)
-		.value("eThirdParty",		dae::solver::eThirdParty)
+		.value("eThirdParty",		dae::solver::eThirdParty) 
 		.export_values()
 	;
     

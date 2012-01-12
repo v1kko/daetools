@@ -224,11 +224,12 @@ void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDe
 	std::copy(arrSource.begin(), arrSource.end(), arrDestination.begin());
 }
 
-#define dae_capacity_check(Vector) ;
+#define dae_capacity_check(Vector) 
 
-//#define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
-//    std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
-
+/*
+#define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
+    std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
+*/
 
 /*********************************************************************************************
 	daeCreateObjectDelegate
