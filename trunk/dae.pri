@@ -73,6 +73,9 @@ DESTDIR = $${DAE_DEST_DIR}
 ####################################################################################
 win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS
 
+QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
+QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
+
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
 unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable

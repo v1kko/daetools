@@ -373,13 +373,52 @@ template<typename REAL = real_t>
 class daeArray
 {
 public:
-	virtual ~daeArray(void){}
+	daeArray(void)
+	{
+		N    = 0;
+		data = NULL;
+	}
+	virtual ~daeArray(void)
+	{
+	}
 
 public:
-	virtual REAL	GetItem(size_t i) const			= 0;
-	virtual void	SetItem(size_t i, REAL value)	= 0;
-	virtual size_t	GetSize(void) const				= 0;
-	virtual void	Print(void) const				= 0;
+	REAL& operator [](size_t i)
+	{
+#ifdef DAE_DEBUG
+		if(!data || i >= N) 
+			daeDeclareAndThrowException(exOutOfBounds);
+#endif
+		return data[i];
+	}
+	
+	size_t GetSize(void) const
+	{
+		return N;
+	}
+
+	void InitArray(size_t n, REAL* pData)
+	{
+		N    = n;
+		data = pData;
+	}
+	
+	void Print(void) const
+	{
+		std::cout << "vector[" << N << "] = {";
+		for(size_t i = 0; i < N; i++)
+		{
+			if(i != 0)
+				std::cout << ", ";
+			std::cout << data[i];
+		}
+		std::cout << "};" << std::endl;
+		std::cout.flush();
+	}
+
+protected:
+	size_t 	N;
+	REAL* data;
 };
 
 /*********************************************************************************************

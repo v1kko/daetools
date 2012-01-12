@@ -6,7 +6,7 @@ using namespace std;
 #include <idas/idas.h>
 #include <idas/idas_impl.h>
 #include <idas/idas_dense.h>
-#include <idas/idas_lapack.h>
+//#include <idas/idas_lapack.h>
 #include <idas/idas_spgmr.h>
 
 #define JACOBIAN(A) (A->cols)
@@ -231,7 +231,7 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
    To do so first I set arrays into which I have to copy and then actually copy values,
    by the function SetInitialConditionsAndInitialGuesses().
 */
-	daeDenseArray arrInitialConditionsTypes;
+	daeArray<real_t> arrInitialConditionsTypes;
 	arrInitialConditionsTypes.InitArray(m_nNumberOfEquations, pInitialConditionsTypes);
 	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
 
@@ -243,7 +243,7 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 	pAbsoluteTolerances = NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
 	memset(pAbsoluteTolerances, 0, sizeof(real_t) * m_nNumberOfEquations);
 
-	daeDenseArray arrAbsoluteTolerances;
+	daeArray<real_t> arrAbsoluteTolerances;
 	arrAbsoluteTolerances.InitArray(m_nNumberOfEquations, pAbsoluteTolerances);
 	m_pBlock->FillAbsoluteTolerancesArray(arrAbsoluteTolerances);
 }
@@ -419,21 +419,21 @@ void daeIDASolver::CreateLinearSolver(void)
 	else if(m_eLASolver == eSundialsLapack)
 	{
 	// Lapack dense LU LA Solver	
-		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exRuntimeCheck);
-			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+//		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
+//		if(!CheckFlag(retval)) 
+//		{
+//			daeDeclareException(exRuntimeCheck);
+//			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+//			throw e;
+//		}
 	
-		retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exRuntimeCheck);
-			e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+//		retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
+//		if(!CheckFlag(retval)) 
+//		{
+//			daeDeclareException(exRuntimeCheck);
+//			e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+//			throw e;
+//		}
 	}
 	else if(m_eLASolver == eSundialsGMRES)
 	{
@@ -624,8 +624,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 		m_arrValues.InitArray(N, pdValues);
 		m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	
-		m_pBlock->CopyValuesToSolver(m_arrValues);
-		m_pBlock->CopyTimeDerivativesToSolver(m_arrTimeDerivatives);
+		m_pBlock->CopyDataToSolver(m_arrValues, m_arrTimeDerivatives);
 	}
 	
 // Call the LA solver Reinitialize, if needed.
@@ -700,8 +699,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 		m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
 		m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
 	
-		m_pBlock->CopyValuesFromSolver(m_arrValues); 
-		m_pBlock->CopyTimeDerivativesFromSolver(m_arrTimeDerivatives);
+		m_pBlock->CopyDataFromSolver(m_arrValues, m_arrTimeDerivatives);
 		
 	// If a root has been found, check if some of the conditions is satisfied and do what is necessary   
 		if(retval == IDA_ROOT_RETURN) 
@@ -917,6 +915,7 @@ void daeIDASolver::CalculateGradients(void)
 	
 	m_pBlock->CalculateSensitivityParametersGradients(m_narrParametersIndexes,
 													  m_arrValues, 
+	                                                  m_arrTimeDerivatives,
 													  m_matSValues);
 	
 	if(m_bPrintInfo)
@@ -985,7 +984,6 @@ int roots(realtype	time,
 		  void*		pUserData)
 {
 	realtype *pdValues, *pdTimeDerivatives;
-	vector<real_t> arrResults;
 	
 	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
 	if(!pSolver || !pSolver->m_pIDASolverData)
@@ -996,23 +994,19 @@ int roots(realtype	time,
 		return -1;
 
 	size_t Nroots = pBlock->GetNumberOfRoots();
-	arrResults.resize(Nroots);
-
-	size_t N = pBlock->GetNumberOfEquations();
+	size_t N      = pBlock->GetNumberOfEquations();
 
 	pdValues			= NV_DATA_S(vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
 
 	pSolver->m_arrValues.InitArray(N, pdValues);
 	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
+	pSolver->m_arrRoots.InitArray(Nroots, gout);
 
 	pBlock->CalculateConditions(time, 
 								pSolver->m_arrValues, 
 								pSolver->m_arrTimeDerivatives, 
-								arrResults);
-
-	for(size_t i = 0; i < Nroots; i++)
-		gout[i] = arrResults[i];
+								pSolver->m_arrRoots);
 
 	return 0;
 }
@@ -1260,7 +1254,7 @@ int setup_preconditioner(realtype	time,
 	pSolver->m_pIDASolverData->SetMaxElements();
 	//pSolver->m_matJacobian.Print();
 
-	daeDenseArray arr;
+	daeArray<real_t> arr;
 	arr.InitArray(Neq, pSolver->m_pIDASolverData->m_vectorInvMaxElements);
 	std::cout << "setup_preconditioner" << std::endl;
 	arr.Print();
@@ -1294,7 +1288,7 @@ int solve_preconditioner(realtype	time,
 //	pdR			= NV_DATA_S(vectorR); 
 //	pdZ			= NV_DATA_S(vectorZ);
 
-//	daeDenseArray r, z;
+//	daeArray<real_t> r, z;
 //	r.InitArray(Neq, pdR);
 
 //	for(size_t i = 0; i < Neq; i++)
@@ -1326,7 +1320,7 @@ int solve_preconditioner(realtype	time,
 	pdR			= NV_DATA_S(vectorR); 
 	pdZ			= NV_DATA_S(vectorZ);
 
-	daeDenseArray r, z;
+	daeArray<real_t> r, z;
 	r.InitArray(Neq, pdR);
 	std::cout << "r" << std::endl;
 	r.Print();
@@ -1392,7 +1386,7 @@ int jac_times_vector(realtype time,
 							  dInverseTimeStep);
 	//pSolver->m_matJacobian.Print();
 	
-	daeDenseArray arr;
+	daeArray<real_t> arr;
 	arr.InitArray(Neq, pV);
 	std::cout << "V vector:" << std::endl;
 	arr.Print();

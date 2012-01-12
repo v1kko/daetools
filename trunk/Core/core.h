@@ -768,12 +768,13 @@ public:
 	
 	virtual void	CalculateSensitivityParametersGradients(const std::vector<size_t>& narrParameterIndexes,
 															daeArray<real_t>&		   arrValues, 
+	                                                        daeArray<real_t>&		   arrTimeDerivatives, 
 															daeMatrix<real_t>&		   matSResiduals) = 0;
 	
 	virtual void	CalculateConditions(real_t				 dTime, 
 									    daeArray<real_t>&	 arrValues, 
 									    daeArray<real_t>&	 arrTimeDerivatives, 
-									    std::vector<real_t>& arrResults) = 0;
+									    daeArray<real_t>&    arrResults) = 0;
 
 	virtual void	SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
 		                                                  daeArray<real_t>& arrTimeDerivatives, 
@@ -783,10 +784,8 @@ public:
 	virtual size_t	GetNumberOfEquations(void) const = 0;
 	virtual size_t	GetNumberOfRoots(void) const = 0;
 
-	virtual void	CopyValuesFromSolver(daeArray<real_t>& arrValues) = 0;
-	virtual void	CopyTimeDerivativesFromSolver(daeArray<real_t>& arrTimeDerivatives) = 0;
-	virtual void	CopyValuesToSolver(daeArray<real_t>& arrValues) = 0;
-	virtual void	CopyTimeDerivativesToSolver(daeArray<real_t>& arrTimeDerivatives) = 0;
+	virtual void	CopyDataFromSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)     = 0;
+	virtual void	CopyDataToSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) const = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;

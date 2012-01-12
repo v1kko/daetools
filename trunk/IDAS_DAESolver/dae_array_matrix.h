@@ -17,65 +17,6 @@ namespace dae
 namespace solver
 {
 /*********************************************************************************************
-	daeDenseArray
-**********************************************************************************************/
-class DAE_SOLVER_API daeDenseArray : public daeArray<real_t>
-{
-public:
-	daeDenseArray(void)
-	{
-		N = 0;
-		data = NULL;
-	}
-	virtual ~daeDenseArray(void)
-	{
-	}
-
-public:
-	virtual real_t GetItem(size_t i) const
-	{
-		if(!data || i >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-		return data[i];
-	}
-
-	virtual void SetItem(size_t i, real_t value)
-	{
-		if(!data || i >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-		data[i] = value;
-	}
-
-	virtual size_t GetSize(void) const
-	{
-		return N;
-	}
-
-	void InitArray(size_t n, real_t* pData)
-	{
-		N = n;
-		data = pData;
-	}
-	
-	void Print(void) const
-	{
-		std::cout << "vector[" << N << "] = {";
-		for(size_t i = 0; i < N; i++)
-		{
-			if(i != 0)
-				std::cout << ", ";
-			std::cout << dae::toStringFormatted(GetItem(i), 15, 8, true);
-		}
-		std::cout << "};" << std::endl;
-		std::cout.flush();
-	}
-
-protected:
-	size_t 	N;
-	real_t* data;
-};
-
-/*********************************************************************************************
 	daeDenseMatrix
 **********************************************************************************************/
 class DAE_SOLVER_API daeDenseMatrix : public daeMatrix<real_t>
