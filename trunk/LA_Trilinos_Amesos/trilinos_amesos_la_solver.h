@@ -290,9 +290,9 @@ public:
 	daeeTrilinosSolverType	m_eTrilinosSolver;
 	int						m_nNoEquations;
 	daeDAESolver_t*			m_pDAESolver;
-	daeDenseArray			m_arrValues;
-	daeDenseArray			m_arrTimeDerivatives;
-	daeDenseArray			m_arrResiduals;
+	daeArray<real_t>		m_arrValues;
+	daeArray<real_t>        m_arrTimeDerivatives;
+	daeArray<real_t>        m_arrResiduals;
 	daeEpetraCSRMatrix		m_matJacobian;	
 	size_t					m_nJacobianEvaluations;
 	bool					m_bMatrixStructureChanged;
