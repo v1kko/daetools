@@ -108,8 +108,11 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
 	Global functions
 ***************************************************************/
-	def("daeGetConfig", &daepython::daeGetConfig); 
-	def("daeVersion",   &dae::daeVersion);
+	def("daeGetConfig",		&daepython::daeGetConfig); 
+	def("daeVersion",		&dae::daeVersion);
+	def("daeVersionMajor",  &dae::daeVersionMajor);
+	def("daeVersionMinor",  &dae::daeVersionMinor);
+	def("daeVersionBuild",  &dae::daeVersionBuild);
 
 /**************************************************************
 	Classes

@@ -80,6 +80,22 @@ inline string daeVersion(bool bIncludeBuild = false)
 	return string(dae__version);
 }
 
+inline size_t daeVersionMajor()
+{
+	return size_t(DAE_MAJOR);
+}
+
+inline size_t daeVersionMinor()
+{
+	return size_t(DAE_MINOR);
+}
+
+inline size_t daeVersionBuild()
+{
+	return size_t(DAE_BUILD);
+}
+
+
 /*********************************************************************************************
 	daePtrVector
 **********************************************************************************************/

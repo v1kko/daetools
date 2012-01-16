@@ -12,19 +12,9 @@ case $1 in
         ;;
 esac
 
-if [ ! -n "$1" ]; then
-  return
-fi
-if [ ! -n "$2" ]; then
-  return
-fi
-if [ ! -n "$3" ]; then
-  return
-fi
-
-VER_MAJOR=$1
-VER_MINOR=$2
-VER_BUILD=$3
+VER_MAJOR=
+VER_MINOR=
+VER_BUILD=
 PACKAGE_NAME=daetools
 PCKG_TYPE=
 ARCH=
@@ -32,11 +22,15 @@ LIB=
 ARCH_RPM=
 SITE_PACK=
 INSTALLATIONS_DIR=`pwd`
+RELEASE_DIR=${INSTALLATIONS_DIR}/../release
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
 DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
 CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
 PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
+VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
+VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
+VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
 IDAS=../idas/build
 BONMIN=../bonmin/build
 NLOPT=../nlopt
@@ -47,6 +41,19 @@ TRILINOS=../trilinos/build
 
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+
+if [ ! -n ${VER_MAJOR} ]; then
+  echo "Invalid daetools version major number"
+  return
+fi
+if [ ! -n ${VER_MINOR} ]; then
+  echo "Invalid daetools version minor number"
+  return
+fi
+if [ ! -n ${VER_BUILD} ]; then
+  echo "Invalid daetools version build number"
+  return
+fi
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
   LIB=lib64
@@ -70,8 +77,7 @@ else
 fi
 USRLIB=/usr/${LIB}
 
-echo $4
-if [ "$4" = "cdae" ]; then
+if [ "$1" = "cdae" ]; then
   PCKG_TYPE="tgz"
 elif [ ${DISTRIBUTOR_ID} = "debian" ]; then
   PCKG_TYPE="deb"
