@@ -220,8 +220,8 @@ b) dae_add_vector, dae_set_vector
 template<class Storage, class Item>
 void dae_push_back(std::vector<Storage>& arrVector, Item item)
 {
-// Turn this off; for large vectors reallocation takes too much time
-//	arrVector.reserve(arrVector.size()+1);
+// Should we turn this off - since for the large vectors reallocation takes too much time? [tamba/lamba]
+	arrVector.reserve(arrVector.size()+1);
 	arrVector.push_back(item);
 }
 
@@ -240,12 +240,9 @@ void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDe
 	std::copy(arrSource.begin(), arrSource.end(), arrDestination.begin());
 }
 
-#define dae_capacity_check(Vector) 
-
-/*
 #define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
     std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
-*/
+
 
 /*********************************************************************************************
 	daeCreateObjectDelegate
