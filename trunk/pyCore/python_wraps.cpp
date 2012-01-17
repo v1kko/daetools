@@ -364,7 +364,18 @@ string daeDEDI_str(const daeDEDI& self)
 
 string adouble_repr(const adouble& self)
 {
-    return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % string(typeid(*self.node.get()).name())).str();
+	string strNode;
+	daeModelExportContext c;
+	
+	c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;
+	if(self.node)
+		self.node->Export(strNode, eCDAE, c);
+	else
+		strNode = "NULL";
+	
+    return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % strNode).str();
 }
 
 /*******************************************************

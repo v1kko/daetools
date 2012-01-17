@@ -175,7 +175,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<adouble>("adouble")
 		.add_property("Value",		&adouble::getValue,      &adouble::setValue)
-		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative)   
+		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative) 
 
         .def("__repr__",     &daepython::adouble_repr)
 
@@ -361,7 +361,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__str__",		&daepython::daeDEDI_str)
 		.def("__call__",	&daeDEDI::operator())
 		.def(self + size_t())
-		.def(self - size_t())
+		.def(self - size_t())  
 		;
 
 	class_<daeDomain, bases<daeObject> >("daeDomain")

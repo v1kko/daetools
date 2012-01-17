@@ -82,7 +82,12 @@ size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 		if(!pDomain)
 			daeDeclareAndThrowException(exInvalidPointer); 
 		if(indexes[i] >= pDomain->GetNumberOfPoints())
-			daeDeclareAndThrowException(exOutOfBounds); 
+		{
+			daeDeclareException(exOutOfBounds); 
+			e << "Invalid index in variable " << GetCanonicalName() << "; index = " << indexes[i] 
+			  << " while number of points in domain " << pDomain->GetCanonicalName() << " is " << pDomain->GetNumberOfPoints();
+			throw e;
+		}
 	}
 
 // Calculate the index

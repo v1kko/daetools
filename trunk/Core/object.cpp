@@ -188,10 +188,8 @@ string daeObject::GetNameRelativeToParentModel(void) const
 
 string daeGetRelativeName(const daeObject* parent, const daeObject* child)
 {
-	if(!parent || !child)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	string strParent = parent->GetCanonicalName();
-	string strChild  = child->GetCanonicalName();
+	string strParent = (parent ? parent->GetCanonicalName() : string("")); 
+	string strChild  = (child ? child->GetCanonicalName() : string(""));
 	return dae::core::daeGetRelativeName(strParent, strChild);
 }
 
