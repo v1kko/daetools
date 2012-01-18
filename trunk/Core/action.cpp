@@ -23,8 +23,6 @@ daeAction::daeAction(void)
 	m_pSendEventPort = NULL;
 	
 // For eReAssignOrReInitializeVariable:
-	m_pVariable      = NULL;
-	m_nIndex         = (size_t)-1;
 }
 
 daeAction::daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription)
@@ -45,8 +43,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, const string& strS
 	m_pSendEventPort = NULL;
 	
 // For eReAssignOrReInitializeVariable:
-	m_pVariable      = NULL;
-	m_nIndex         = (size_t)-1;
 }
 
 daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription)
@@ -66,8 +62,6 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, cons
 	m_pSendEventPort = NULL;
 	
 // For eReAssignOrReInitializeVariable:
-	m_pVariable      = NULL;
-	m_nIndex         = (size_t)-1;
 }
 
 daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, adouble data, const string& strDescription)
@@ -90,11 +84,9 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 		m_pSetupNode = boost::shared_ptr<adNode>(new adConstantNode(data.getValue()));
 	
 // For eReAssignOrReInitializeVariable:
-	m_pVariable      = NULL;
-	m_nIndex         = (size_t)-1;
 }
 
-daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription)
+daeAction::daeAction(const string& strName, daeModel* pModel, const daeVariableWrapper& variable, const adouble value, const string& strDescription)
 {
 	m_pModel = pModel;
 	SetName(strName);
@@ -110,8 +102,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeVariable* pVari
 	m_pSendEventPort = NULL;
 	
 // For eReAssignOrReInitializeVariable:
-	m_pVariable	= pVariable;
-	m_nIndex    = (size_t)-1;
+	m_pVariableWrapper = boost::shared_ptr<daeVariableWrapper>(new daeVariableWrapper(variable));
 	if(value.node)
 		m_pSetupNode = value.node;
 	else
@@ -178,13 +169,6 @@ void daeAction::Initialize(void)
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
-		if(!m_pVariable)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-	// Here we do not have variable types yet (SetUpVariables has not been called yet) so we cannot check the variable type.
-	// Therefore, we just get the variable index and will decide later which function to call (ReAssign or ReInitialize)
-		m_nIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(NULL, 0);
-		
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
 		EC.m_eEquationCalculationMode	= eCalculate;
@@ -246,12 +230,7 @@ void daeAction::Execute(void)
 		real_t value = m_pNode->Evaluate(&EC).getValue();
 		//std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
 		
-		if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnFixed)
-			m_pVariable->ReAssignValue(value);
-		else if(m_pModel->m_pDataProxy->GetVariableType(m_nIndex) == cnDifferential)
-			m_pVariable->ReSetInitialCondition(value);
-		else
-			daeDeclareAndThrowException(exInvalidCall);
+		m_pVariableWrapper->SetValue(value);
 		
 	// Set the reinitialization flag to true to mark the system ready for re-initialization
 		m_pModel->m_pDataProxy->SetReinitializationFlag(true);
@@ -331,19 +310,14 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 	}
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
-		if(!m_pVariable)
-		{
-			strarrErrors.push_back(string("Invalid variable in action: ") + GetName());
-			return false;
-		}
 		if(!m_pSetupNode)
 		{
 			strarrErrors.push_back(string("Invalid set value expression in action: ") + GetName());
 			return false;
 		}
-		if(m_nIndex == size_t(-1))
+		if(!m_pVariableWrapper->m_pVariable)
 		{
-			strarrErrors.push_back(string("Invalid variable index, in action: ") + GetName());
+			strarrErrors.push_back(string("Invalid variable in action: ") + GetName());
 			return false;
 		}
 		
@@ -373,7 +347,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			}
 
 		// Check if the expression units match those of the variable
-			unit var_units   = m_pVariable->GetVariableType()->GetUnits();
+			unit var_units   = m_pVariableWrapper->m_pVariable->GetVariableType()->GetUnits();
 			unit value_units = m_pSetupNode->GetQuantity().getUnits();
 			if(var_units != value_units)
 			{
@@ -438,7 +412,7 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 	else if(m_eActionType == eReAssignOrReInitializeVariable)
 	{
 		strName = "Variable";
-		pTag->SaveObjectRef(strName, m_pVariable);
+		pTag->Save(strName, m_pVariableWrapper->GetName());
 
 		strName = "Expression";
 		adNode::SaveNode(pTag, strName, m_pSetupNode.get());
@@ -481,8 +455,7 @@ void daeAction::SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string&
 			daeDeclareAndThrowException(exXMLIOError);
 	
 		strName  = "mi";
-		strValue = daeGetRelativeName(m_pModel, m_pVariable);
-		pChildTag = mrow->AddTag(strName, strValue);
+		pChildTag = mrow->AddTag(strName, m_pVariableWrapper->GetName());
 		pChildTag->AddAttribute(string("mathvariant"), string("italic"));
 	
 		strName  = "mo";

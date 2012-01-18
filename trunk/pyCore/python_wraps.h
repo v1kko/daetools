@@ -842,8 +842,7 @@ public:
     {
 		daeAction* pAction;
         daeEventPort* pEventPort;
-        daeVariable* pVariable;
-        vector< pair<daeVariable*, adouble> > arrSetVariables;
+        vector< pair<daeVariableWrapper, adouble> > arrSetVariables;
         vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
 		vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
@@ -856,15 +855,33 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pVariable               = boost::python::extract<daeVariable*>(t[0]);
-            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+            boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
+            boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
+			
+			boost::python::extract<daeVariable*> pvar(var);
+			boost::python::extract<adouble>      avar(var);
 			
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
             
-            pair<daeVariable*, adouble> p;
+            pair<daeVariableWrapper, adouble> p;
 
-			p.first = pVariable;
+			if(pvar.check())
+			{
+				p.first = daeVariableWrapper(*pvar());
+			}
+			else if(avar.check())
+			{
+				adouble a = avar();
+				p.first = daeVariableWrapper(a);
+			}
+			else
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Invalid setVariableValues argument in ON_CONDITION function";
+				throw e;
+			}
+
 			if(aValue.check())
 			{
 				p.second = aValue();
@@ -945,9 +962,8 @@ public:
         daeEventPort* pEventPort;
         string strSTN;
         string strStateTo;
-        daeVariable* pVariable;
         vector< pair<string, string> > arrSwitchToStates;
-        vector< pair<daeVariable*, adouble> > arrSetVariables;
+        vector< pair<daeVariableWrapper, adouble> > arrSetVariables;
         vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
 		vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
@@ -974,15 +990,33 @@ public:
             if(boost::python::len(t) != 2)
                 daeDeclareAndThrowException(exInvalidCall);
 
-            pVariable               = boost::python::extract<daeVariable*>(t[0]);
-            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+			boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
+            boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
 			
+			boost::python::extract<daeVariable*> pvar(var);
+			boost::python::extract<adouble>      avar(var);
+
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
             
-			pair<daeVariable*, adouble> p;
+			pair<daeVariableWrapper, adouble> p;
 
-			p.first = pVariable;
+			if(pvar.check())
+			{
+				p.first = daeVariableWrapper(*pvar());
+			}
+			else if(avar.check())
+			{
+				adouble a = avar();
+				p.first = daeVariableWrapper(a);
+			}
+			else
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Invalid setVariableValues argument in ON_CONDITION function";
+				throw e;
+			}
+
 			if(aValue.check())
 			{
 				p.second = aValue();

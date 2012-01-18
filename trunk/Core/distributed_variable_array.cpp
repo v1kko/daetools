@@ -71,7 +71,7 @@ size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal number of domains, parameter " << GetCanonicalName();
+		e << "Illegal number of domains (" << N << ") in variable " << GetCanonicalName() << " (must be " << m_ptrDomains.size() << ")";
 		throw e;
 	}
 

@@ -1132,19 +1132,19 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 	_pST->Create_SWITCH_TO(pCurrentState, strState, rCondition, dEventTolerance);
 }
 
-void daeModel::ON_CONDITION(const daeCondition& rCondition, 
-							const string& strStateTo, 
-							vector< pair<daeVariable*, adouble> >& arrSetVariables,
-							vector< pair<daeEventPort*, adouble> >& arrTriggerEvents, 
-							vector<daeAction*>& ptrarrUserDefinedActions, 
-							real_t dEventTolerance)
+void daeModel::ON_CONDITION(const daeCondition&								rCondition, 
+							const string&									strStateTo, 
+							vector< pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+							vector< pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
+							vector<daeAction*>&								ptrarrUserDefinedActions, 
+							real_t											dEventTolerance)
 {
 	size_t i;
 	daeAction* pAction;
 	daeEventPort* pEventPort;
-	pair<daeVariable*, adouble> p;
+	pair<daeVariableWrapper, adouble> p;
 	pair<daeEventPort*, adouble> p3;
-	daeVariable* pVariable;
+	daeVariableWrapper variable;
 	adouble value;
 	vector<daeAction*> ptrarrActions;
 
@@ -1191,12 +1191,10 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 	for(i = 0; i < arrSetVariables.size(); i++)
 	{
 		p = arrSetVariables[i];
-		pVariable = p.first;
-		value     = p.second;
-		if(!pVariable)
-			daeDeclareAndThrowException(exInvalidPointer);
+		variable = p.first;
+		value    = p.second;
 			
-		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
+		pAction = new daeAction(string("actionSetVariable_") + variable.GetName(), this, variable, value, string(""));
 
 		ptrarrActions.push_back(pAction);
 	}
@@ -1204,11 +1202,11 @@ void daeModel::ON_CONDITION(const daeCondition& rCondition,
 	_pST->Create_ON_CONDITION(pCurrentState, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
 }
 
-void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort, 
-						vector< pair<string, string> >&		    arrSwitchToStates, 
-						vector< pair<daeVariable*, adouble> >&	arrSetVariables,
-						vector< pair<daeEventPort*, adouble> >&	arrTriggerEvents,
-						vector<daeAction*>&						ptrarrUserDefinedActions)
+void daeModel::ON_EVENT(daeEventPort*									pTriggerEventPort, 
+						vector< pair<string, string> >&					arrSwitchToStates, 
+						vector< pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+						vector< pair<daeEventPort*, adouble> >&			arrTriggerEvents,
+						vector<daeAction*>&								ptrarrUserDefinedActions)
 {
 	size_t i;
 	daeAction* pAction;
@@ -1216,10 +1214,10 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	string strStateTo;
 	daeEventPort* pEventPort;
 	pair<string, string> p1;
-	pair<daeVariable*, adouble> p2;
+	pair<daeVariableWrapper, adouble> p2;
 	pair<daeEventPort*, adouble> p3;
 	adouble value;
-	daeVariable* pVariable;
+	daeVariableWrapper variable;
 	std::vector<daeAction*> ptrarrOnEventActions;
 
 	if(!pTriggerEventPort)
@@ -1267,12 +1265,10 @@ void daeModel::ON_EVENT(daeEventPort*							pTriggerEventPort,
 	for(i = 0; i < arrSetVariables.size(); i++)
 	{
 		p2 = arrSetVariables[i];
-		pVariable = p2.first;
-		value     = p2.second;
-		if(!pVariable)
-			daeDeclareAndThrowException(exInvalidPointer);
+		variable = p2.first;
+		value    = p2.second;
 			
-		pAction = new daeAction(string("actionSetVariable_") + pVariable->GetName(), this, pVariable, value, string(""));
+		pAction = new daeAction(string("actionSetVariable_") + variable.GetName(), this, variable, value, string(""));
 		ptrarrOnEventActions.push_back(pAction);
 	}
 	

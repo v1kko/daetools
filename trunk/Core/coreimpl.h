@@ -1972,6 +1972,7 @@ protected:
 	daeAction
 *******************************************************************/
 class daeState;
+class daeVariableWrapper;
 class daeAction : virtual public daeObject,
                   virtual public daeAction_t
 {
@@ -1981,7 +1982,7 @@ public:
 	daeAction(const string& strName, daeModel* pModel, daeSTN* pSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, const string& strSTN, const string& strStateTo, const string& strDescription);
 	daeAction(const string& strName, daeModel* pModel, daeEventPort* pPort, adouble data, const string& strDescription);
-	daeAction(const string& strname, daeModel* pModel, daeVariable* pVariable, const adouble value, const string& strDescription);
+	daeAction(const string& strname, daeModel* pModel, const daeVariableWrapper& variable, const adouble value, const string& strDescription);
 	virtual ~daeAction(void);
 
 public:
@@ -2010,11 +2011,10 @@ protected:
 	daeState*	m_pStateTo;
 	
 // For eSendEvent:
-	daeEventPort*				m_pSendEventPort;
+	daeEventPort* m_pSendEventPort;
 
 // For eReAssignOrReInitializeVariable:
-	daeVariable*				m_pVariable;
-	size_t						m_nIndex;
+	boost::shared_ptr<daeVariableWrapper> m_pVariableWrapper;
 
 // Common for eSendEvent and eReAssignOrReInitializeVariable:
 	boost::shared_ptr<adNode>	m_pSetupNode;
@@ -2310,18 +2310,18 @@ protected:
 	void      END_STN(void);
 	void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
 	
-	void ON_CONDITION(const daeCondition&                               rCondition, 
-					  const string&                                     strStateTo, 
-					  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
-					  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents, 
-					  std::vector<daeAction*>&							ptrarrUserDefinedOnEventActions, 
-					  real_t                                            dEventTolerance = 0);
+	void ON_CONDITION(const daeCondition&										rCondition, 
+					  const string&												strStateTo, 
+					  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+					  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
+					  std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions, 
+					  real_t													dEventTolerance = 0);
 	
-	void ON_EVENT(daeEventPort*                                     pTriggerEventPort, 
-				  std::vector< std::pair<string, string> >&         arrSwitchToStates, 
-				  std::vector< std::pair<daeVariable*, adouble> >&  arrSetVariables,
-				  std::vector< std::pair<daeEventPort*, adouble> >& arrTriggerEvents,
-			      std::vector<daeAction*>&							ptrarrUserDefinedOnEventActions);
+	void ON_EVENT(daeEventPort*												pTriggerEventPort, 
+				  std::vector< std::pair<string, string> >&					arrSwitchToStates, 
+				  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+				  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents,
+			      std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions);
 	
 	template<typename Model>
 		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));
@@ -2541,6 +2541,11 @@ void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::v
 class DAE_CORE_API daeVariableWrapper : public daeVariableWrapper_t
 {
 public:
+	daeVariableWrapper() 
+	{
+		m_pVariable = NULL;
+	}
+	
 	daeVariableWrapper(daeVariable& variable, std::string strName = "") 
 	{
 		Initialize(&variable, strName);
@@ -2565,17 +2570,13 @@ public:
 		m_pVariable = pVariable;
 
 		if(strName.empty())
-			m_strName = m_pVariable->GetCanonicalName();
+		{
+			m_strName = m_pVariable->GetName();
+			if(!m_narrDomainIndexes.empty())
+				m_strName += "(" + toString(m_narrDomainIndexes, string(",")) + ")";
+		}
 		else
 			m_strName = strName;
-		
-//		if(!m_pVariable->m_pModel)
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		m_pDataProxy = m_pVariable->m_pModel->m_pDataProxy;
-//		if(!m_pDataProxy)
-//			daeDeclareAndThrowException(exInvalidPointer);
-//
-//		m_nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
 	}
 
 	virtual ~daeVariableWrapper(void)
@@ -2589,8 +2590,6 @@ public:
 
     real_t GetValue(void) const
 	{
-		//return *m_pDataProxy->GetValue(m_nOverallIndex);
-		
 		if(!m_pVariable)
 			daeDeclareAndThrowException(exInvalidPointer)
 		
@@ -2650,83 +2649,150 @@ public:
 
     void SetValue(real_t value)
 	{
-//		if(m_pDataProxy->GetVariableType(m_nOverallIndex) != cnFixed)
-//		{	
-//			daeDeclareException(exInvalidCall); 
-//			e << "Cannot set the variable value for [" << m_strName << "]; it is a state variable";
-//			throw e;
-//		}
-//		m_pDataProxy->SetValue(m_nOverallIndex, value);
-		
 		if(!m_pVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(!m_pVariable->m_pModel)
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(!m_pVariable->m_pModel->m_pDataProxy)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		size_t nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
+		const int varType    = m_pVariable->m_pModel->m_pDataProxy->GetVariableType(nOverallIndex);
+		if(varType == cnNormal)
+		{	
+			daeDeclareException(exInvalidCall); 
+			e << "Cannot set the variable value for [" << m_strName << "]; it is not state nor assigned variable";
+			throw e;
+		}
+		
 			
 		size_t n = m_narrDomainIndexes.size();
-		
-		if(n == 0)
-			m_pVariable->ReAssignValue(value);
-		else if(n == 1)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   value);
-		else if(n == 2)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   value);
-		else if(n == 3)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   value);
-		else if(n == 4)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   m_narrDomainIndexes[3],
-									   value);
-		else if(n == 5)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   m_narrDomainIndexes[3],
-									   m_narrDomainIndexes[4],
-									   value);
-		else if(n == 6)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   m_narrDomainIndexes[3],
-									   m_narrDomainIndexes[4],
-									   m_narrDomainIndexes[5],
-									   value);
-		else if(n == 7)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   m_narrDomainIndexes[3],
-									   m_narrDomainIndexes[4],
-									   m_narrDomainIndexes[5],
-									   m_narrDomainIndexes[6],
-									   value);
-		else if(n == 8)
-			m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-									   m_narrDomainIndexes[1],
-									   m_narrDomainIndexes[2],
-									   m_narrDomainIndexes[3],
-									   m_narrDomainIndexes[4],
-									   m_narrDomainIndexes[5],
-									   m_narrDomainIndexes[6],
-									   m_narrDomainIndexes[7],
-									   value);
+		if(varType == cnFixed)
+		{
+			if(n == 0)
+				m_pVariable->ReAssignValue(value);
+			else if(n == 1)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   value);
+			else if(n == 2)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   value);
+			else if(n == 3)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   value);
+			else if(n == 4)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   m_narrDomainIndexes[3],
+										   value);
+			else if(n == 5)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   m_narrDomainIndexes[3],
+										   m_narrDomainIndexes[4],
+										   value);
+			else if(n == 6)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   m_narrDomainIndexes[3],
+										   m_narrDomainIndexes[4],
+										   m_narrDomainIndexes[5],
+										   value);
+			else if(n == 7)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   m_narrDomainIndexes[3],
+										   m_narrDomainIndexes[4],
+										   m_narrDomainIndexes[5],
+										   m_narrDomainIndexes[6],
+										   value);
+			else if(n == 8)
+				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+										   m_narrDomainIndexes[1],
+										   m_narrDomainIndexes[2],
+										   m_narrDomainIndexes[3],
+										   m_narrDomainIndexes[4],
+										   m_narrDomainIndexes[5],
+										   m_narrDomainIndexes[6],
+										   m_narrDomainIndexes[7],
+										   value);
+			else
+				daeDeclareAndThrowException(exInvalidCall);
+		}
+		else if(varType == cnDifferential)
+		{
+			if(n == 0)
+				m_pVariable->ReSetInitialCondition(value);
+			else if(n == 1)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   value);
+			else if(n == 2)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   value);
+			else if(n == 3)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   value);
+			else if(n == 4)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   m_narrDomainIndexes[3],
+												   value);
+			else if(n == 5)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   m_narrDomainIndexes[3],
+												   m_narrDomainIndexes[4],
+												   value);
+			else if(n == 6)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   m_narrDomainIndexes[3],
+												   m_narrDomainIndexes[4],
+												   m_narrDomainIndexes[5],
+												   value);
+			else if(n == 7)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   m_narrDomainIndexes[3],
+												   m_narrDomainIndexes[4],
+												   m_narrDomainIndexes[5],
+												   m_narrDomainIndexes[6],
+												   value);
+			else if(n == 8)
+				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
+												   m_narrDomainIndexes[1],
+												   m_narrDomainIndexes[2],
+												   m_narrDomainIndexes[3],
+												   m_narrDomainIndexes[4],
+												   m_narrDomainIndexes[5],
+												   m_narrDomainIndexes[6],
+												   m_narrDomainIndexes[7],
+												   value);
+			else
+				daeDeclareAndThrowException(exInvalidCall);
+		}
 		else
-			daeDeclareAndThrowException(exInvalidCall)
+			daeDeclareAndThrowException(exInvalidCall);				        
 	}
 
 public:
 	daeVariable*						m_pVariable;
 	std::vector<size_t>					m_narrDomainIndexes;
 	std::string							m_strName;
-//	size_t								m_nOverallIndex;
-//	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
 };
 
 /******************************************************************

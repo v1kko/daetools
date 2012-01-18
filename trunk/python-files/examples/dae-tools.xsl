@@ -76,7 +76,12 @@
                 <h2><a name="Equations"></a>Equations</h2>
                 <xsl:apply-templates select="Model/Equations"/>
             </xsl:if>
-            <xsl:apply-templates select="Model/STNs"/>
+
+            <xsl:if test="count(Model/STNs/Object) > 0">
+                <h2> <a name="STNs"></a>State Transition Networks</h2>
+                <xsl:apply-templates select="Model/STNs"/>
+            </xsl:if>
+
             <xsl:if test="count(Model/OnEventActions/Object) > 0">
                 <h2><a name="OnEventActions"></a>OnEventActions</h2>
                 <xsl:apply-templates select="Model/OnEventActions"/>
@@ -570,8 +575,6 @@
   <xsl:template match="STNs">
     <div>
       <xsl:for-each select="Object">
-
-      <h2> <a name="STNs"></a>State Transition Networks</h2>
 
         <xsl:if test="Type = 'eIF'">
 

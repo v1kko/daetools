@@ -364,7 +364,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(self - size_t())  
 		;
 
-	class_<daeDomain, bases<daeObject> >("daeDomain")
+	class_<daeDomain, bases<daeObject> , boost::noncopyable>("daeDomain")
 		.def(init<string, daeModel*, const unit&, optional<string> >())
 		.def(init<string, daePort*, const unit&, optional<string> >())
 
@@ -388,7 +388,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		//.def("array",							&daepython::DomainArray1)
 		//.def("array",							&daepython::DomainArray2)
 		.def("GetPoint",						&daeDomain::GetPoint)
-		;
+		; 
 
 	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter")
 		.def(init<string, const unit&, daePort*, optional<string, boost::python::list> >())
