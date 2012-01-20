@@ -354,7 +354,8 @@ void daeIF::ExecuteOnConditionActions(void)
 			{
 				if(m_pActiveState != pState)
 				{
-					LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+					if(m_pModel->m_pDataProxy->PrintInfo())
+						LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
 					SetActiveState(pState);
 				}
 				break;

@@ -419,7 +419,7 @@ bool daeBlock::CheckForDiscontinuities(void)
 	size_t i;
 	daeSTN* pSTN;
 
-	if(m_dCurrentTime > 0)
+	if(m_dCurrentTime > 0 && m_pDataProxy->PrintInfo())
 		m_pDataProxy->LogMessage(string("Checking state transitions at time [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("]..."), 0);
 
 // First check the global stopping condition from the DataProxy (Simulation)

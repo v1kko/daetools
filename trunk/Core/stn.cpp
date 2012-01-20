@@ -15,9 +15,6 @@ daeSTN::daeSTN()
 	m_pActiveState	= NULL;
 	m_eSTNType		= eSTN;
 	m_bInitialized  = false;
-	
-	daeConfig& cfg = daeConfig::GetConfig();
-	m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
 }
 
 daeSTN::~daeSTN()
@@ -617,7 +614,8 @@ void daeSTN::ExecuteOnConditionActions(void)
 		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
 		if(pStateTransition->m_Condition.Evaluate(&EC))
 		{
-			LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+			if(m_pModel->m_pDataProxy->PrintInfo())
+				LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
 			
 			pStateTransition->ExecuteActions();
 			break;
@@ -845,7 +843,8 @@ void daeSTN::SetActiveState(daeState* pState)
 	if(!pState)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	
-	LogMessage(string("The state: ") + pState->GetCanonicalName() + string(" is active now"), 0);
+	if(m_pModel->m_pDataProxy->PrintInfo())
+		LogMessage(string("The state: ") + pState->GetCanonicalName() + string(" is active now"), 0);
 	
 	m_pModel->m_pDataProxy->SetReinitializationFlag(true);
 	
@@ -987,7 +986,7 @@ void daeSTN::CalculateSensitivityParametersGradients(daeExecutionContext& EC, co
 
 void daeSTN::CalcNonZeroElements(int& NNZ)
 {
-	if(m_bResetLAMatrixAfterDiscontinuity)
+	if(m_pModel->m_pDataProxy->ResetLAMatrixAfterDiscontinuity())
 	{
 		m_pActiveState->CalcNonZeroElements(NNZ);
 	}
@@ -1020,7 +1019,7 @@ void daeSTN::CalcNonZeroElements(int& NNZ)
 
 void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 {
-	if(m_bResetLAMatrixAfterDiscontinuity)
+	if(m_pModel->m_pDataProxy->ResetLAMatrixAfterDiscontinuity())
 	{
 		m_pActiveState->FillSparseMatrix(pMatrix);	
 	}

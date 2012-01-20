@@ -607,6 +607,10 @@ public:
 		m_dCurrentTime				= 0;
 		m_bReinitializationFlag		= false;
 		m_bCopyDataFromBlock		= false;
+		
+		daeConfig& cfg = daeConfig::GetConfig();
+		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
+		m_bPrintInfo                       = cfg.Get<bool>("daetools.core.printInfo", false);
 	}
 
 	
@@ -674,7 +678,6 @@ public:
 		m_pLog           = pLog;
 
 		m_bGatherInfo	 = false;
-
 	}
 
 	void Load(const std::string& strFileName)
@@ -1124,6 +1127,16 @@ public:
 		return false;		
 	}
 	
+	bool ResetLAMatrixAfterDiscontinuity() const
+	{
+		return m_bResetLAMatrixAfterDiscontinuity;
+	}
+	
+	bool PrintInfo() const
+	{
+		return m_bPrintInfo;
+	}
+	
 protected:
 //	daeCondition*					m_pCondition;
 	daeLog_t*						m_pLog;
@@ -1139,6 +1152,9 @@ protected:
 	real_t							m_dCurrentTime;
 	bool							m_bReinitializationFlag;
 	bool							m_bCopyDataFromBlock;
+	bool							m_bResetLAMatrixAfterDiscontinuity;
+	bool							m_bPrintInfo;
+
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
 	daeeModelType					m_eLanguage;
@@ -3070,7 +3086,6 @@ protected:
 	daeState*				m_pActiveState;
 	daeeSTNType				m_eSTNType;
 	bool					m_bInitialized;
-	bool					m_bResetLAMatrixAfterDiscontinuity;
 	friend class daeIF;
 	friend class daeModel;
 	friend class daeState;

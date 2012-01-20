@@ -202,10 +202,6 @@ void daeAction::Execute(void)
 		// Just in case; it is also set in the SetActiveState() function
 			m_pModel->m_pDataProxy->SetReinitializationFlag(true);
 		}
-		else
-		{
-			m_pSTN->LogMessage(string("Current state unchanged"), 0);
-		}			
 	}
 	else if(m_eActionType == eSendEvent)
 	{
