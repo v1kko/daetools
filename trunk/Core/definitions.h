@@ -228,6 +228,7 @@ void dae_push_back(std::vector<Storage>& arrVector, Item item)
 template<class itemSource, class itemDestination>
 void dae_add_vector(const std::vector<itemSource>& arrSource, std::vector<itemDestination>& arrDestination)
 {
+	arrDestination.reserve(arrDestination.size() + arrSource.size());
 	arrDestination.insert(arrDestination.end(), arrSource.begin(), arrSource.end());
 }
 
