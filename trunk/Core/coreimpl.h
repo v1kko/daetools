@@ -607,6 +607,7 @@ public:
 		m_dCurrentTime				= 0;
 		m_bReinitializationFlag		= false;
 		m_bCopyDataFromBlock		= false;
+		m_bThereAreFixedVariables   = false;
 		
 		daeConfig& cfg = daeConfig::GetConfig();
 		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
@@ -924,11 +925,19 @@ public:
 		m_pdInitialConditions[nIndex] = Value;
 	}
 
+	bool AreThereAssignedVariables(void) const
+	{
+		if(m_bThereAreFixedVariables)
+			return true;
+		else
+			return false;
+	}
+	
 	int GetVariableType(size_t nIndex) const
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return m_pnVariablesTypes[nIndex];
 	}
@@ -937,8 +946,10 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
+		if(Value == cnFixed)
+			m_bThereAreFixedVariables = true;
 		m_pnVariablesTypes[nIndex] = Value;
 	}
 
@@ -946,7 +957,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return m_pnVariablesTypesGathered[nIndex];
 	}
@@ -955,8 +966,10 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
+		if(Value == cnFixed)
+			m_bThereAreFixedVariables = true;
 		m_pnVariablesTypesGathered[nIndex] = Value;
 	}
 
@@ -964,7 +977,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return &(m_pdAbsoluteTolerances[nIndex]);
 	}
@@ -973,7 +986,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		m_pdAbsoluteTolerances[nIndex] = Value;
 	}
@@ -1151,6 +1164,7 @@ protected:
 	bool							m_bGatherInfo;
 	real_t							m_dCurrentTime;
 	bool							m_bReinitializationFlag;
+	bool							m_bThereAreFixedVariables;
 	bool							m_bCopyDataFromBlock;
 	bool							m_bResetLAMatrixAfterDiscontinuity;
 	bool							m_bPrintInfo;

@@ -323,9 +323,6 @@ void daeSTN::CollectEquationExecutionInfos(vector<daeEquationExecutionInfo*>& pt
 	for(i = 0; i < m_pActiveState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_pActiveState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pSTN->CollectEquationExecutionInfos(ptrarrEquationExecutionInfo);
 	}
 }
@@ -350,8 +347,6 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 		for(k = 0; k < pState->m_ptrarrEquationExecutionInfos.size(); k++)
 		{
 			pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[k];
-			if(!pEquationExecutionInfo)
-				daeDeclareAndThrowException(exInvalidPointer); 
 
 			for(iter = pEquationExecutionInfo->m_mapIndexes.begin(); iter != pEquationExecutionInfo->m_mapIndexes.end(); iter++)
 			{
@@ -365,9 +360,6 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 		for(m = 0; m < pState->m_ptrarrSTNs.size(); m++)
 		{
 			pSTN = pState->m_ptrarrSTNs[m];
-			if(!pSTN)
-				daeDeclareAndThrowException(exInvalidPointer); 
-
 			pSTN->CollectVariableIndexes(mapVariableIndexes);
 		}
 	}
@@ -376,15 +368,9 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 	for(k = 0; k < m_ptrarrStates.size(); k++)
 	{
 		pState = m_ptrarrStates[k];
-		if(!pState)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		for(m = 0; m < pState->m_ptrarrStateTransitions.size(); m++)
 		{
 			pStateTransition = pState->m_ptrarrStateTransitions[m];
-			if(!pStateTransition)
-				daeDeclareAndThrowException(exInvalidPointer); 
-
 			pStateTransition->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes, false);
 		}
 	}
@@ -398,11 +384,11 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 	map<size_t, size_t>::iterator iter, iterIndexInBlock;
 
+	bool bThereAreAssignedVariables = m_pModel->m_pDataProxy->AreThereAssignedVariables();
+	
 	for(i = 0; i < m_ptrarrStates.size(); i++)
 	{
 		pState = m_ptrarrStates[i];
-		if(!pState)
-			daeDeclareAndThrowException(exInvalidPointer); 
 
 		// Indexes are the same in each state;
 		// State1: 15, 16, 17
@@ -412,8 +398,6 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 		for(k = 0; k < pState->m_ptrarrEquationExecutionInfos.size(); k++)
 		{
 			pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[k];
-			if(!pEquationExecutionInfo)
-				daeDeclareAndThrowException(exInvalidPointer); 
 
 			pEquationExecutionInfo->m_nEquationIndexInBlock = nTempEquationIndex;
 			pEquationExecutionInfo->m_pBlock = pBlock;
@@ -422,15 +406,22 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 		// m_mapIndexes<OverallIndex, BlockIndex>
 			for(iter = pEquationExecutionInfo->m_mapIndexes.begin(); iter != pEquationExecutionInfo->m_mapIndexes.end(); iter++)
 			{
-			// Try to find OverallIndex in the map of BlockIndexes
-				iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
-				if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
+				if(!bThereAreAssignedVariables)
 				{
-					daeDeclareException(exInvalidCall);
-					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->GetCanonicalName();
-					throw e;
+					(*iter).second = (*iter).first;
 				}
-				(*iter).second = (*iterIndexInBlock).second;
+				else
+				{
+				// Try to find OverallIndex in the map of BlockIndexes
+					iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
+					if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
+					{
+						daeDeclareException(exInvalidCall);
+						e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->GetCanonicalName();
+						throw e;
+					}
+					(*iter).second = (*iterIndexInBlock).second;
+				}
 			}
 //------------------->
 			nTempEquationIndex++;

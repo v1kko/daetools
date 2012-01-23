@@ -173,7 +173,7 @@ public:
 		daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
 		daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
 	}
-
+	
 	boost::python::object GetModel_(void) const
 	{
 		return model;
