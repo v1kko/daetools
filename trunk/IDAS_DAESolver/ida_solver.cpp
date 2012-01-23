@@ -173,8 +173,28 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
 
 // Create data IDA vectors etc
-	CreateArrays();
+	m_pIDASolverData->CreateSerialArrays(m_nNumberOfEquations, true);
 
+/*	
+// First probe to check if it is possible to fast copy the data back and forth from/to the block.
+// If it is, then use the data pointers from the block/DataProxy and DO NOT allocate memory for them!!
+	if(m_pBlock->ThereAreAssignedVariables())
+	{
+		realtype* pVariableValues     = m_pBlock->GetValuesPointer();
+		realtype* pTimeDerivatives    = m_pBlock->GetTimeDerivativesPointer();
+		realtype* pAbsoluteTolerances = m_pBlock->GetAbsoluteTolerancesPointer();
+		realtype* pIDs                = m_pBlock->GetVariableTypesPointer();
+	
+		std::cout << "daeIDASolver->Initialize() SafeToFastCopyData" << std::endl;
+		m_pIDASolverData->CreateSerialArrays(m_nNumberOfEquations, false, pVariableValues, pTimeDerivatives, pAbsoluteTolerances, pIDs);
+	}
+	else
+	{
+	// Here the memory allocation for the data must be done!
+		m_pIDASolverData->CreateSerialArrays(m_nNumberOfEquations, true);
+	}
+*/
+	
 // Setting initial conditions and initial values, and set rel. and abs. tolerances
 // and determine if the model is dynamic or steady-state
 	Set_InitialConditions_InitialGuesses_AbsRelTolerances();
@@ -203,30 +223,23 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 	RefreshRootFunctions();
 }
 
-void daeIDASolver::CreateArrays(void)
-{
-	m_pIDASolverData->CreateSerialArrays(m_nNumberOfEquations);
-}
-
 void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 {
 	realtype *pVariableValues, *pTimeDerivatives, *pInitialConditionsTypes, *pAbsoluteTolerances;
 
+// ACHTUNG!! Do not memset these vectors to zero!!!
 	pVariableValues         = NV_DATA_S(m_pIDASolverData->m_vectorVariables);
 	pTimeDerivatives        = NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
 	pInitialConditionsTypes = NV_DATA_S(m_pIDASolverData->m_vectorInitialConditionsTypes);
-
-	memset(pVariableValues,         0, sizeof(real_t) * m_nNumberOfEquations);
-	memset(pTimeDerivatives,        0, sizeof(real_t) * m_nNumberOfEquations);
-	memset(pInitialConditionsTypes, 0, sizeof(real_t) * m_nNumberOfEquations);
+	pAbsoluteTolerances     = NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
 
 	m_arrValues.InitArray(m_nNumberOfEquations, pVariableValues);
 	m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pTimeDerivatives);
 
 /* I have to fill initial values of:
-             - Variables
-			 - Time derivatives
-			 - Variable IC types (that is whether the initial conditions are algebraic or differential)
+	 - Variables
+	 - Time derivatives
+	 - Variable IC types (that is whether the initial conditions are algebraic or differential)
    from the model.
    To do so first I set arrays into which I have to copy and then actually copy values,
    by the function SetInitialConditionsAndInitialGuesses().
@@ -238,11 +251,8 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 // Determine if the model is dynamic or steady-state
 	m_bIsModelDynamic = m_pBlock->IsModelDynamic();
 	m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
-
+	
 // Absolute tolerances
-	pAbsoluteTolerances = NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
-	memset(pAbsoluteTolerances, 0, sizeof(real_t) * m_nNumberOfEquations);
-
 	daeArray<real_t> arrAbsoluteTolerances;
 	arrAbsoluteTolerances.InitArray(m_nNumberOfEquations, pAbsoluteTolerances);
 	m_pBlock->FillAbsoluteTolerancesArray(arrAbsoluteTolerances);
@@ -287,7 +297,7 @@ void daeIDASolver::CreateIDA(void)
 		e << "Sundials IDAS solver cowardly refused to set tolerances; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
-
+	
 	retval = IDASetUserData(m_pIDA, this);
 	if(!CheckFlag(retval)) 
 	{
@@ -540,10 +550,10 @@ void daeIDASolver::SolveInitial(void)
 		throw e;
 	}
 
-// Here I have a problem. If the model is steady-state then IDACalcIC does nothing!
-// The system is not solved!! I have to do something?
-// I can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
-// But what if IDASolve fails?
+// Here we have a problem. If the model is steady-state then IDACalcIC does nothing!
+// The system is not solved!! Something has to be done...
+// We can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
+// But what if IDASolve fails? No much help it seems...
 	if(!m_bIsModelDynamic)
 	{
 		retval = IDASolve(m_pIDA, 
@@ -559,6 +569,16 @@ void daeIDASolver::SolveInitial(void)
 			throw e;
 		}
 	}
+
+// After a successful solve we do not need some data; therefore free whatever is possible	
+// 1. Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
+//    Here it does not matter who owns the data in the vectors; IDA keeps track of it and wont free the data it does not own
+//	N_VDestroy_Serial(m_pIDASolverData->m_vectorInitialConditionsTypes);
+//	N_VDestroy_Serial(m_pIDASolverData->m_vectorAbsTolerances);
+
+//// 2. Clear vectors of abs. tolerances and variable ids in the Block/DataProxy
+//	if(m_pBlock->SafeToFastCopyData())
+//		m_pBlock->ClearAbsoluteTolerancesAndIDs();	
 }
 
 void daeIDASolver::Reset(void)
@@ -616,15 +636,30 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 // Copy data from the block if requested
 	if(bCopyDataFromBlock)
 	{
-		N = m_pBlock->GetNumberOfEquations();
-	
+	// If true then the pointers point to the same data and no copy is needed.
+	// Therefore copy ONLY if it is false.
 		pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
 		pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
 	
-		m_arrValues.InitArray(N, pdValues);
-		m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
+		m_arrValues.InitArray(m_nNumberOfEquations, pdValues);
+		m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
 	
 		m_pBlock->CopyDataToSolver(m_arrValues, m_arrTimeDerivatives);
+
+/*
+		if(!m_pBlock->SafeToFastCopyData())
+		{
+			N = m_pBlock->GetNumberOfEquations();
+		
+			pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
+			pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
+		
+			m_arrValues.InitArray(N, pdValues);
+			m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
+		
+			m_pBlock->CopyDataToSolver(m_arrValues, m_arrTimeDerivatives);
+		}
+*/
 	}
 	
 // Call the LA solver Reinitialize, if needed.
@@ -692,7 +727,20 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 			throw e;
 		}
 		
-	// Now we have to copy the values *from* the solver *to* the block
+	// If it is safe to fast copy the data then here we do not need to copy anything (since the pointers point to the same vectors)
+	// Otherwise, we have to copy the values *from* the solver *to* the block
+/*
+		if(!m_pBlock->SafeToFastCopyData())
+		{
+			realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
+			realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
+		
+			m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+			m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+		
+			m_pBlock->CopyDataFromSolver(m_arrValues, m_arrTimeDerivatives);
+		}
+*/
 		realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
 		realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
 	
@@ -942,7 +990,7 @@ int residuals(realtype	time,
 	if(!pBlock)
 		return -1;
 
-	size_t N = pBlock->GetNumberOfEquations();
+	size_t N = pSolver->m_nNumberOfEquations;
 
 	pdValues			= NV_DATA_S(vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
@@ -994,7 +1042,7 @@ int roots(realtype	time,
 		return -1;
 
 	size_t Nroots = pBlock->GetNumberOfRoots();
-	size_t N      = pBlock->GetNumberOfEquations();
+	size_t N      = pSolver->m_nNumberOfEquations;
 
 	pdValues			= NV_DATA_S(vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
@@ -1033,7 +1081,7 @@ int jacobian(int	    Neq,
 	if(!pBlock)
 		return -1;
 
-	size_t N = pBlock->GetNumberOfEquations();
+	size_t N = pSolver->m_nNumberOfEquations;
 
 	pdValues			= NV_DATA_S(vectorVariables); 
 	pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives); 
@@ -1087,7 +1135,7 @@ int sens_residuals(int		 Ns,
 	if(!pBlock)
 		return -1;
 
-	size_t N  = pBlock->GetNumberOfEquations();
+	size_t N  = pSolver->m_nNumberOfEquations;
 	if(N == 0 || Ns == 0)
 		return -1;
 	
@@ -1157,7 +1205,7 @@ int setup_preconditioner(realtype	time,
 //	if(!pBlock)
 //		return -1;
 
-//	size_t Neq = pBlock->GetNumberOfEquations();
+//	size_t Neq = pSolver->m_nNumberOfEquations;
 //	int nnz = 0;
 //	pBlock->CalcNonZeroElements(nnz);
 
@@ -1283,7 +1331,7 @@ int solve_preconditioner(realtype	time,
 //	if(!pBlock)
 //		return -1;
 
-//	size_t Neq = pBlock->GetNumberOfEquations();
+//	size_t Neq = pSolver->m_nNumberOfEquations;
 
 //	pdR			= NV_DATA_S(vectorR); 
 //	pdZ			= NV_DATA_S(vectorZ);
@@ -1315,7 +1363,7 @@ int solve_preconditioner(realtype	time,
 	if(!pBlock)
 		return -1;
 
-	size_t Neq = pBlock->GetNumberOfEquations();
+	size_t Neq = pSolver->m_nNumberOfEquations;
 
 	pdR			= NV_DATA_S(vectorR); 
 	pdZ			= NV_DATA_S(vectorZ);
@@ -1361,7 +1409,7 @@ int jac_times_vector(realtype time,
 	if(!pBlock)
 		return -1;
 
-	size_t Neq = pBlock->GetNumberOfEquations();
+	size_t Neq = pSolver->m_nNumberOfEquations;
 	
 	pV	= NV_DATA_S(vectorV); 
 	pJV	= NV_DATA_S(vectorJV);

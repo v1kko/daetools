@@ -1641,7 +1641,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}			
 		}
 		else if(nNoDomains == 2)
@@ -1672,7 +1672,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 3)
@@ -1707,7 +1707,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 4)
@@ -1746,7 +1746,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 5)
@@ -1789,7 +1789,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 6)
@@ -1837,7 +1837,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 7)
@@ -1889,7 +1889,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else if(nNoDomains == 8)
@@ -1945,7 +1945,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
-				dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+				pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 			}
 		}
 		else
@@ -1966,7 +1966,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 
 		// This vector is redundant - all EquationExecutionInfos already exist in models and states
 		// However, it is useful when saving RuntimeReport
-		dae_push_back(pEquation->m_ptrarrEquationExecutionInfos, pEquationExecutionInfo);
+		pEquation->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 	}
 }
 
@@ -2520,8 +2520,6 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 	dae_capacity_check(ptrarrAllEquationExecutionInfosInModel);
 	dae_capacity_check(ptrarrEEIfromSTNs);
 	dae_capacity_check(ptrarrEEIfromModels);
-//	std::cout << "ptrarrEEIfromSTNs: " << ptrarrEEIfromSTNs.size() << std::endl;
-//	std::cout << "ptrarrEEIfromModels: " << ptrarrEEIfromModels.size() << std::endl;
 
 //	size_t nVar = m_pDataProxy->GetTotalNumberOfVariables();
 //	size_t nEq  = ptrarrAllEquationExecutionInfosInModel.size();
@@ -2591,8 +2589,6 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 // 31.07.2009 I corrected the code and now I use ALL STNs
 ////////////////////////////////////////////////////////////////////////
 		
-	/* What is the purpose of the code below? Just to eat the cpu time?
-	  
 		vector<daeSTN*> ptrarrAllSTNs;
 		
 		CollectAllSTNs(ptrarrAllSTNs);
@@ -2603,53 +2599,44 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 			pSTN = ptrarrAllSTNs[i];
 			pSTN->CollectVariableIndexes(mapVariableIndexes);
 		}
-	*/
+	
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 		
 		map<size_t, size_t>::iterator iter, iterIndexInBlock;
 
-		bool bThereAreAssignedVariables = m_pDataProxy->AreThereAssignedVariables();
+//		bool bSafeToAvoidCopy = m_pDataProxy->ThereAreAssignedVariables();
+//		if(bSafeToAvoidCopy)
+//		{
+//			for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
+//				(*iter).second = (*iter).first;
+//		}
 		
 	// If true then indexes can be continuous and there is no need to copy data from the solver
-		if(m_pDataProxy->AreThereAssignedVariables())
+		nEquationIndex = 0;
+		for(k = 0; k < ptrarrEEIfromModels.size(); k++)
 		{
-			for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
-		}
-		else
-		{
-			nEquationIndex = 0;
-			for(k = 0; k < ptrarrEEIfromModels.size(); k++)
+			pEquationExec = ptrarrEEIfromModels[k];
+			pEquationExec->m_nEquationIndexInBlock = nEquationIndex;
+			pEquationExec->m_pBlock = pBlock;
+			pBlock->AddEquationExecutionInfo(pEquationExec);
+//----------------->
+		// Here I have to associate overall variable indexes in equation to corresponding indexes in the block
+		// m_mapIndexes<OverallIndex, BlockIndex>
+			for(iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
 			{
-				pEquationExec = ptrarrEEIfromModels[k];
-				pEquationExec->m_nEquationIndexInBlock = nEquationIndex;
-				pEquationExec->m_pBlock = pBlock;
-				pBlock->AddEquationExecutionInfo(pEquationExec);
-	//----------------->
-			// Here I have to associate overall variable indexes in equation to corresponding indexes in the block
-			// m_mapIndexes<OverallIndex, BlockIndex>
-				for(iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
-				{
-					if(!bThereAreAssignedVariables)
+				// Try to find OverallIndex in the map of BlockIndexes
+					iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
+					if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
 					{
-						(*iter).second = (*iter).first;
+						daeDeclareException(exInvalidCall);
+						e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExec->m_pEquation->GetCanonicalName();
+						throw e;
 					}
-					else
-					{
-					// Try to find OverallIndex in the map of BlockIndexes
-						iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
-						if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
-						{
-							daeDeclareException(exInvalidCall);
-							e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExec->m_pEquation->GetCanonicalName();
-							throw e;
-						}
-						(*iter).second = (*iterIndexInBlock).second;
-					}
-				}
-	//------------------->
-				nEquationIndex++;
+					(*iter).second = (*iterIndexInBlock).second;
 			}
+//------------------->
+			nEquationIndex++;
 	
 			pBlock->m_ptrarrSTNs = ptrarrAllSTNs;
 			for(i = 0; i < ptrarrAllSTNs.size(); i++)

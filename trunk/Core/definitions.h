@@ -417,6 +417,15 @@ public:
 		data = pData;
 	}
 	
+	REAL* Data()
+	{
+#ifdef DAE_DEBUG
+		if(!data) 
+			daeDeclareAndThrowException(exInvalidPointer);
+#endif
+		return data;
+	}
+	
 	void Print(void) const
 	{
 		std::cout << "vector[" << N << "] = {";

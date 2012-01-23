@@ -811,7 +811,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetReportingOn",	 &daeModel::SetReportingOn)
 
 		.def("sum",				&daeModel::sum)
-		.def("product",         &daeModel::product)
+		.def("product",         &daeModel::product) 
 		.def("integral",		&daeModel::integral)
 		.def("min",				&daeModel::min)
 		.def("max",				&daeModel::max)

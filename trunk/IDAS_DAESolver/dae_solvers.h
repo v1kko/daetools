@@ -33,6 +33,8 @@ public:
 		ppdSValues						= NULL;
 		ppdSDValues						= NULL;
 		ppdSensResiduals				= NULL;
+		
+		m_bValuesAndTimeDerivativesOwnedByTheSolver = true;
 	}
 	
 	~daeIDASolverData(void)
@@ -70,7 +72,10 @@ public:
 //			DestroyMat(m_matKrylov);
 	}
 
-	void CreateSerialArrays(size_t N)
+	void CreateSerialArrays(size_t N, bool bAllocateVectors, realtype* pVariableValues = NULL, 
+															 realtype* pTimeDerivatives = NULL, 
+															 realtype* pAbsoluteTolerances = NULL, 
+															 realtype* pIDs = NULL)
 	{
 		if(N == 0) 
 		{
@@ -80,36 +85,88 @@ public:
 		}
 
 		m_N = N;
-		m_vectorVariables = N_VNew_Serial(N);
-		if(!m_vectorVariables) 
+		
+	// If bAllocateVectors == false then wrap the data into the IDA vector data structures;
+	// otherwise create new IDA arrays.
+		if(bAllocateVectors == false)
 		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate vectorVariables array";
-			throw e;
+			if(!pVariableValues || !pTimeDerivatives || !pAbsoluteTolerances || !pIDs) 
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Invalid data arrays specified";
+				throw e;
+			}
+			
+			m_vectorVariables = N_VMake_Serial(N, pVariableValues);
+			if(!m_vectorVariables) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorVariables array";
+				throw e;
+			}
+		
+			m_vectorTimeDerivatives = N_VMake_Serial(N, pTimeDerivatives);
+			if(!m_vectorTimeDerivatives) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorTimeDerivatives array";
+				throw e;
+			}
+			
+			m_vectorInitialConditionsTypes = N_VMake_Serial(N, pIDs);
+			if(!m_vectorInitialConditionsTypes) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorInitialConditionsTypes array";
+				throw e;
+			}
+		
+			m_vectorAbsTolerances = N_VMake_Serial(N, pAbsoluteTolerances);
+			if(!m_vectorAbsTolerances) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorAbsTolerances array";
+				throw e;
+			}
 		}
-	
-		m_vectorTimeDerivatives = N_VNew_Serial(N);
-		if(!m_vectorTimeDerivatives) 
+		else
 		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate vectorTimeDerivatives array";
-			throw e;
-		}
-	
-		m_vectorInitialConditionsTypes = N_VNew_Serial(N);
-		if(!m_vectorInitialConditionsTypes) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate vectorInitialConditionsTypes array";
-			throw e;
-		}
-	
-		m_vectorAbsTolerances = N_VNew_Serial(N);
-		if(!m_vectorAbsTolerances) 
-		{
-			daeDeclareException(exMiscellanous);
-			e << "Unable to allocate vectorAbsTolerances array";
-			throw e;
+			m_vectorVariables = N_VNew_Serial(N);
+			if(!m_vectorVariables) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorVariables array";
+				throw e;
+			}
+		
+			m_vectorTimeDerivatives = N_VNew_Serial(N);
+			if(!m_vectorTimeDerivatives) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorTimeDerivatives array";
+				throw e;
+			}
+			
+			m_vectorInitialConditionsTypes = N_VNew_Serial(N);
+			if(!m_vectorInitialConditionsTypes) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorInitialConditionsTypes array";
+				throw e;
+			}
+		
+			m_vectorAbsTolerances = N_VNew_Serial(N);
+			if(!m_vectorAbsTolerances) 
+			{
+				daeDeclareException(exMiscellanous);
+				e << "Unable to allocate vectorAbsTolerances array";
+				throw e;
+			}
+			
+			N_VConst(0.0, m_vectorVariables);
+			N_VConst(0.0, m_vectorTimeDerivatives);
+			N_VConst(0.0, m_vectorInitialConditionsTypes);
+			N_VConst(0.0, m_vectorAbsTolerances);
 		}
 	}
 
@@ -191,6 +248,8 @@ public:
 
 	daeCSRMatrix<real_t, int> matJacobian;
 	
+	bool					m_bValuesAndTimeDerivativesOwnedByTheSolver;
+
 //	int*					m_vectorPivot;
 //	real_t*					m_vectorInvMaxElements;
 //	DlsMat					m_matKrylov;

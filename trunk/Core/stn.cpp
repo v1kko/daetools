@@ -384,8 +384,6 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 	map<size_t, size_t>::iterator iter, iterIndexInBlock;
 
-	bool bThereAreAssignedVariables = m_pModel->m_pDataProxy->AreThereAssignedVariables();
-	
 	for(i = 0; i < m_ptrarrStates.size(); i++)
 	{
 		pState = m_ptrarrStates[i];
@@ -406,22 +404,15 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 		// m_mapIndexes<OverallIndex, BlockIndex>
 			for(iter = pEquationExecutionInfo->m_mapIndexes.begin(); iter != pEquationExecutionInfo->m_mapIndexes.end(); iter++)
 			{
-				if(!bThereAreAssignedVariables)
+			// Try to find OverallIndex in the map of BlockIndexes
+				iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
+				if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
 				{
-					(*iter).second = (*iter).first;
+					daeDeclareException(exInvalidCall);
+					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->GetCanonicalName();
+					throw e;
 				}
-				else
-				{
-				// Try to find OverallIndex in the map of BlockIndexes
-					iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
-					if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
-					{
-						daeDeclareException(exInvalidCall);
-						e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExecutionInfo->m_pEquation->GetCanonicalName();
-						throw e;
-					}
-					(*iter).second = (*iterIndexInBlock).second;
-				}
+				(*iter).second = (*iterIndexInBlock).second;
 			}
 //------------------->
 			nTempEquationIndex++;

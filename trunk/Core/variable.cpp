@@ -206,17 +206,6 @@ string daeVariable::GetCanonicalName(void) const
 		return daeObject::GetCanonicalName();
 }
 
-real_t daeVariable::GetInitialCondition(const size_t* indexes, const size_t N)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, N);
-	return *m_pModel->m_pDataProxy->GetInitialCondition(nIndex);
-}
-
 void daeVariable::SetAbsoluteTolerances(real_t dAbsTolerances)
 {
 	if(!m_pModel)
