@@ -3014,7 +3014,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 	adnode = n.get();
 	if( dynamic_cast<adUnaryNode*>(adnode) )
 	{
-		daeDeclareAndThrowException(exNotImplemented)
+		daeDeclareAndThrowException(exNotImplemented);
 	}
 	else if( dynamic_cast<adBinaryNode*>(adnode) )
 	{
@@ -3063,12 +3063,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 	//	devnode->m_narrDomains      = rtnode->m_narrDomains;
 
 	// Here I check for it regularly
-		size_t N = rtnode->m_narrDomains.size();
-		size_t* indexes = new size_t[N];
-		for(size_t i = 0; i < N; i++)
-			indexes[i] = rtnode->m_narrDomains[i];
-		adouble adres = rtnode->m_pVariable->Calculate_dt(indexes, N);
-		delete[] indexes;
+		adouble adres = rtnode->m_pVariable->Calculate_dt(&rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
 		tmp = adres.node;
 	}
 	else if( dynamic_cast<adRuntimeParameterNode*>(adnode)  || 
@@ -3339,12 +3334,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 		}
 		else
 		{
-			size_t* indexes = new size_t[N];
-			for(size_t i = 0; i < N; i++)
-				indexes[i] = rtnode->m_narrDomains[i];
-	
-			adouble adres = rtnode->m_pVariable->partial(1, *pDomain, indexes, N);
-			delete[] indexes;
+			adouble adres = rtnode->m_pVariable->partial(1, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
 			tmp = adres.node;
 		}
 	}
@@ -3359,20 +3349,19 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 				e << "The function d() cannot create partial derivatives of order higher than 2, in model [" << m_pModel->GetCanonicalName() << "]";
 				throw e;
 			}
-			else // It is permitted - retrun 0
+			else // It is permitted (calculate the derivative of the expression node)
 			{
-				tmp = shared_ptr<adNode>(new adConstantNode(0));
+				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 			
 			}
 		}
 		else // m_nDegree == 1
 		{
 			if(rtnode->m_pDomain == pDomain) // Clone it and increase the order to 2
 			{
-				adRuntimePartialDerivativeNode* devnode = dynamic_cast<adRuntimePartialDerivativeNode*>(rtnode->Clone());
-				devnode->m_nDegree = 2;
-				tmp = shared_ptr<adNode>(devnode);
+				adouble adres = rtnode->m_pVariable->partial(2, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
+				tmp = adres.node;
 			}
-			else // call calc_d again on its node
+			else // // It is permitted (calculate the derivative of the expression node)
 			{
 				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 
 			}

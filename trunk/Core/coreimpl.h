@@ -1487,6 +1487,7 @@ protected:
 	unit							m_Unit;
 	std::vector<daeDomain*>			m_ptrDomains;
 	daePort*						m_pParentPort;
+	std::vector< boost::shared_ptr<adNode> > m_ptrarrRuntimeNodes;
 	friend class daePort;
 	friend class daeModel;
 	friend class adSetupParameterNode;

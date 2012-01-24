@@ -72,7 +72,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         
 		.add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_)
 		.add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_)
-		.add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_)   
+		.add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_)  
 
         .add_property("CurrentTime",			&daeSimulation::GetCurrentTime)  
         .add_property("TimeHorizon",			&daeSimulation::GetTimeHorizon,			&daeSimulation::SetTimeHorizon)

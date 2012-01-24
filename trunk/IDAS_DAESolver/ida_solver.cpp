@@ -171,7 +171,6 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 	m_eInitialConditionMode = eMode;
 	
 	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
-	std::cout << "daeIDASolver::m_nNumberOfEquations = " << m_nNumberOfEquations << std::endl;
 
 // Create data IDA vectors etc
 	CreateArrays();

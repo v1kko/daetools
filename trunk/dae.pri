@@ -183,6 +183,21 @@ unix::BOOST_PYTHON_LIB = -lboost_python
 unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
 }
 
+
+#####################################################################################
+#                                 BLAS/LAPACK
+#####################################################################################
+win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
+unix::BLAS_LAPACK_LIBDIR  = ../GotoBLAS2
+
+win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
+                          $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
+                          $${BLAS_LAPACK_LIBDIR}/libf2c.lib
+
+unix::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lblas -llapack -lm
+#unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/libgoto2.a -lm
+
+
 #####################################################################################
 #                                 SUNDIALS IDAS
 #####################################################################################
@@ -197,7 +212,8 @@ SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 win32::SUNDIALS_LIBS = sundials_idas.lib \
                        sundials_nvecserial.lib
 unix::SUNDIALS_LIBS = -lsundials_idas \
-                      -lsundials_nvecserial -lblas -llapack
+                      -lsundials_nvecserial \
+                       $${BLAS_LAPACK_LIBS}
 
 
 #####################################################################################
@@ -219,7 +235,7 @@ win32::MUMPS_LIBS = blas.lib \
 					libpord.lib \
 					libf95.a \
 					libgcc.a
-unix::MUMPS_LIBS = -lcoinmumps -lpthread -lblas -lgfortran -lm
+unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS}
 
 
 #####################################################################################
@@ -231,7 +247,7 @@ IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
 win32::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
-unix::IPOPT_LIBS  = -lipopt -ldl -lblas -llapack
+unix::IPOPT_LIBS  = -lipopt -ldl $${BLAS_LAPACK_LIBS}
 
 
 #####################################################################################
@@ -252,7 +268,7 @@ win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 					  libOsiCbc.lib \
 					  libOsiClp.lib \
 					  libOsi.lib
-unix::BONMIN_LIBS  =    -ldl -lblas -llapack -lm -lz \
+unix::BONMIN_LIBS  =    -ldl $${BLAS_LAPACK_LIBS} -lz \
 						-lbonmin \
 						-lCbc \
 						-lCbcSolver \
@@ -283,11 +299,9 @@ SUPERLU_PATH    = ../superlu
 SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib \
-					                              ../clapack/LIB/Win32/BLAS_nowrap.lib \
-					                              ../clapack/LIB/Win32/libf2c.lib
-linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread -lblas -lgfortran -lm
+win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
+linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
@@ -298,8 +312,8 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32::SUPERLU_MT_LIBS          = 
-linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
-linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread -lblas -lgfortran -lm
+linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
@@ -328,26 +342,22 @@ win32::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
                           $${TRILINOS_DIR}/../commonTools/WinInterface/include
 unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
 
-win32::BLAS_LAPACK_LIBDIR        = ../clapack/LIB/Win32
-linux-g++-32::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
-linux-g++-64::BLAS_LAPACK_LIBDIR = /usr/lib/atlas
-
-win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
-                        BLAS_nowrap.lib clapack_nowrap.lib libf2c.lib \
+win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
+                        $${BLAS_LAPACK_LIBS} \
                         $${SUPERLU_LIBS} \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
-linux-g++-32::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+linux-g++-32::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
 							   -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
 							   -lumfpack -lamd \
 							    $${SUPERLU_LIBS} \
-							   -lblas -llapack
+							    $${BLAS_LAPACK_LIBS}
 
-linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${BLAS_LAPACK_LIBDIR} -L$${SUPERLU_PATH}/lib \
+linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
 							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
 							  -lumfpack -lamd \
 							   $${SUPERLU_LIBS} \
-							  -lblas -llapack
+							   $${BLAS_LAPACK_LIBS}
 
 
 #####################################################################################

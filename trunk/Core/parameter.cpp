@@ -221,6 +221,15 @@ void daeParameter::Initialize(void)
 	//SetIndexes(indexes, ND, 0);
 }
 
+//adouble daeParameter::PreCreateRuntimeNodes()
+//{
+//	size_t nTotalNumberOfPoints = m_darrValues.size();
+	
+//	m_ptrarrRuntimeNodes.resize(nTotalNumberOfPoints);
+//	for(size_t i = 0; i < nTotalNumberOfPoints; i++)
+//		m_ptrarrRuntimeNodes[i] = boost::shared_ptr<adNode>(new adRuntimeParameterNode(m_darrValues[i]));
+//}
+
 adouble daeParameter::Create_adouble(const size_t* indexes, const size_t N) const
 {
 	adouble tmp;

@@ -26,6 +26,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 	daeSolver
 ***************************************************************/
 	class_<daepython::daeDAESolverWrapper, boost::noncopyable>("daeDAESolver_t", no_init)
+	    .add_property("NumberOfVariables",		&daeDAESolver_t::GetNumberOfVariables)
 		.add_property("Log",					make_function(&daeDAESolver_t::GetLog, return_internal_reference<>()))
 		.add_property("RelativeTolerance",		&daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
 		.add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
