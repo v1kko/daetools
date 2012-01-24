@@ -12,9 +12,9 @@ namespace core
 *******************************************************************/
 daeEquationExecutionInfo::daeEquationExecutionInfo()
 {
-	m_pEquation = NULL;
-	m_pModel	= NULL;
-	m_pBlock	= NULL;
+//	m_pEquation = NULL;
+//	m_pModel	= NULL;
+//	m_pBlock	= NULL;
 }
 
 daeEquationExecutionInfo::~daeEquationExecutionInfo()
@@ -38,11 +38,11 @@ void daeEquationExecutionInfo::Open(io::xmlTag_t* pTag)
 //	strName = "Block";
 //	m_pBlock = pTag->OpenObjectRef<daeBlock>(strName, &blockdel);
 
-	strName = "Model";
-	m_pModel = pTag->OpenObjectRef<daeModel>(strName, &modeldel);
+//	strName = "Model";
+//	m_pModel = pTag->OpenObjectRef<daeModel>(strName, &modeldel);
 
-	strName = "Equation";
-	m_pEquation = pTag->OpenObjectRef<daeEquation>(strName, &eqndel);
+//	strName = "Equation";
+//	m_pEquation = pTag->OpenObjectRef<daeEquation>(strName, &eqndel);
 
 	strName = "EquationIndexInBlock";
 	pTag->Open(strName, m_nEquationIndexInBlock);
@@ -53,8 +53,8 @@ void daeEquationExecutionInfo::Open(io::xmlTag_t* pTag)
 	strName = "mapIndexes";
 	pTag->OpenMap(strName, m_mapIndexes);
 
-	strName = "m_ptrarrDomains";
-	pTag->OpenObjectRefArray(strName, m_ptrarrDomains, &domaindel);
+//	strName = "m_ptrarrDomains";
+//	pTag->OpenObjectRefArray(strName, m_ptrarrDomains, &domaindel);
 
 	strName = "EquationEvaluationNode";
 	adNode* node = adNode::OpenNode(pTag, strName);
@@ -70,11 +70,11 @@ void daeEquationExecutionInfo::Save(io::xmlTag_t* pTag) const
 //	strName = "Block";
 //	pTag->SaveObjectRef(strName, m_pBlock);
 
-	strName = "Model";
-	pTag->SaveObjectRef(strName, m_pModel);
+//	strName = "Model";
+//	pTag->SaveObjectRef(strName, m_pModel);
 
-	strName = "Equation";
-	pTag->SaveObjectRef(strName, m_pEquation);
+//	strName = "Equation";
+//	pTag->SaveObjectRef(strName, m_pEquation);
 
 	strName = "EquationIndexInBlock";
 	pTag->Save(strName, m_nEquationIndexInBlock);
@@ -85,8 +85,8 @@ void daeEquationExecutionInfo::Save(io::xmlTag_t* pTag) const
 	strName = "mapIndexes";
 	pTag->SaveMap(strName, m_mapIndexes);
 
-	strName = "m_ptrarrDomains";
-	pTag->SaveObjectRefArray(strName, m_ptrarrDomains);
+//	strName = "m_ptrarrDomains";
+//	pTag->SaveObjectRefArray(strName, m_ptrarrDomains);
 
 	strName = "EquationEvaluationNode";
 	pTag->SaveObject(strName, m_EquationEvaluationNode.get());
@@ -120,7 +120,7 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 //	strName = "m_ptrarrDomains";
 //	pTag->SaveObjectRefArray(strName, m_ptrarrDomains);
 
-	daeSaveAsMathMLContext c(m_pModel);
+	daeSaveAsMathMLContext c(NULL); //m_pModel);
 
 	strName = "EquationEvaluationNode";
 	adNode::SaveNodeAsMathML(pTag, string("MathML"), m_EquationEvaluationNode.get(), &c, true);
@@ -129,158 +129,76 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
 }
 
-void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC)
+void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pEquation)
-		daeDeclareAndThrowException(exInvalidPointer);
-
 	EC.m_pEquationExecutionInfo = this;
-
-	m_pModel->PropagateGlobalExecutionContext(&EC);
-		m_pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
-	m_pModel->PropagateGlobalExecutionContext(NULL);
-
-//	if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-//		daeFPU::CreateCommandStack(m_EquationEvaluationNode.get(), m_ptrarrEquationCommands);
+	pModel->PropagateGlobalExecutionContext(&EC);
+	pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
+	pModel->PropagateGlobalExecutionContext(NULL);
 }
 
 void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pEquation)
+	if(!EC.m_pBlock)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	EC.m_pEquationExecutionInfo = this;
 
-	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
-	{
-		adouble __ad = m_EquationEvaluationNode->Evaluate(&EC);
-		m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
+	adouble __ad = m_EquationEvaluationNode->Evaluate(&EC);
+	EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
 }
 
 void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pEquation)
+	if(!EC.m_pBlock)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	EC.m_pEquationExecutionInfo = this;
 
-	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
-	{
-		adouble __ad;
-		map<size_t, size_t>::iterator iter;
-		size_t nVariableindexInBlock;
+	adouble __ad;
+	map<size_t, size_t>::iterator iter;
 
-		for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
-		{
-			EC.m_nCurrentVariableIndexForJacobianEvaluation = (*iter).first;
-			nVariableindexInBlock = (*iter).second;
-			__ad = m_EquationEvaluationNode->Evaluate(&EC);
-			m_pBlock->SetJacobian(m_nEquationIndexInBlock, nVariableindexInBlock, __ad.getDerivative());
-		}
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
+// m_mapIndexes<OverallIndex, IndexInBlock>
+	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
 	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
+		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
+		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
 	}
 }
 
 void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pEquation)
+	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	EC.m_pEquationExecutionInfo = this;
 
-	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
+	adouble __ad;
+	for(size_t i = 0; i < narrParameterIndexes.size(); i++)
 	{
-		adouble __ad;
-		for(size_t i = 0; i < narrParameterIndexes.size(); i++)
-		{
-			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
-			//Used to get the S/SD values 
-			EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
-			__ad = m_EquationEvaluationNode->Evaluate(&EC);
-			m_pModel->m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
-		}
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
+		EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
+		//Used to get the S/SD values 
+		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
+		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
 }
 
 // Should not be used anymore, but double-check
 void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pEquation)
+	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	EC.m_pEquationExecutionInfo = this;
 
-	if(m_pEquation->m_eEquationEvaluationMode == eResidualNodeEvaluation)
+	adouble __ad;
+	for(size_t i = 0; i < narrParameterIndexes.size(); i++)
 	{
-		adouble __ad;
-		for(size_t i = 0; i < narrParameterIndexes.size(); i++)
-		{
-			EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
-			__ad = m_EquationEvaluationNode->Evaluate(&EC);
-			m_pModel->m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
-		}
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eFunctionEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else if(m_pEquation->m_eEquationEvaluationMode == eCommandStackEvaluation)
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
+		EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
+		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
 }
 
@@ -1331,7 +1249,7 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
 			node = m_pResidualNode->Evaluate(&EC).node;
 		else
-			daeDeclareAndThrowException(exInvalidCall)
+			daeDeclareAndThrowException(exInvalidCall);
 	}
 	else if(m_eEquationDefinitionMode == eMemberFunctionPointer)
 	{

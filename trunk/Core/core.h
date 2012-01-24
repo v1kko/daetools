@@ -23,7 +23,7 @@ namespace dae
 {
 namespace core 
 {
-// cnNormal must be equal to zero!
+// cnNormal must be zero!!
 const int cnNormal		 = 0;
 const int cnDifferential = 1;
 const int cnFixed		 = 2;
@@ -802,13 +802,11 @@ public:
 	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const = 0;
 	
 	virtual bool	IsModelDynamic() const = 0;
-	
-	virtual void	ClearAbsoluteTolerancesAndIDs() = 0;
-	virtual bool	ThereAreAssignedVariables() const = 0;
 	virtual real_t* GetValuesPointer() = 0;
 	virtual real_t* GetTimeDerivativesPointer() = 0;
 	virtual real_t* GetAbsoluteTolerancesPointer() = 0;
 	virtual real_t* GetVariableTypesPointer() = 0;
+	virtual void	ClearAbsoluteTolerancesAndIDs() = 0;
 };
 
 

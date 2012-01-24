@@ -1628,16 +1628,20 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(1);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+				
 				if(bAddToTheModel)
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1655,12 +1659,13 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(2);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 
@@ -1668,7 +1673,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1688,13 +1694,14 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(3);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1703,7 +1710,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1725,14 +1733,15 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(4);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1742,7 +1751,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1766,15 +1776,16 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(5);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1785,7 +1796,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1812,16 +1824,17 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(6);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1833,7 +1846,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1862,17 +1876,18 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d7 = 0; d7 < pDistrEqnDomainInfo7->m_narrDomainPoints.size(); d7++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo7->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo7->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(7);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1885,7 +1900,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1916,18 +1932,19 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d8 = 0; d8 < pDistrEqnDomainInfo8->m_narrDomainPoints.size(); d8++)
 			{
 				pEquationExecutionInfo = new daeEquationExecutionInfo;
-				pEquationExecutionInfo->m_pEquation = pEquation;
-				pEquationExecutionInfo->m_pModel    = this;
+				//pEquationExecutionInfo->m_pEquation = pEquation;
+				//pEquationExecutionInfo->m_pModel    = this;
 
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo7->m_pDomain);
-				pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo8->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo1->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo2->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo3->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo4->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo5->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo6->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo7->m_pDomain);
+				//pEquationExecutionInfo->m_ptrarrDomains.push_back(pDistrEqnDomainInfo8->m_pDomain);
 
+				pEquationExecutionInfo->m_narrDomainIndexes.reserve(8);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
 				pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
@@ -1941,7 +1958,8 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 					AddEquationExecutionInfo(pEquationExecutionInfo);
 				else
 					ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-				pEquationExecutionInfo->GatherInfo(EC);
+				
+				pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 				
 				// This vector is redundant - all EquationExecutionInfos already exist in models and states
 				// However, it is useful when saving RuntimeReport
@@ -1956,13 +1974,14 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 	else
 	{
 		pEquationExecutionInfo = new daeEquationExecutionInfo;
-		pEquationExecutionInfo->m_pEquation = pEquation;
-		pEquationExecutionInfo->m_pModel = this;
+		//pEquationExecutionInfo->m_pEquation = pEquation;
+		//pEquationExecutionInfo->m_pModel = this;
 		if(bAddToTheModel)
 			AddEquationExecutionInfo(pEquationExecutionInfo);
 		else
 			ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
-		pEquationExecutionInfo->GatherInfo(EC);
+		
+		pEquationExecutionInfo->GatherInfo(EC, pEquation, this);
 
 		// This vector is redundant - all EquationExecutionInfos already exist in models and states
 		// However, it is useful when saving RuntimeReport
@@ -1981,18 +2000,12 @@ void daeModel::PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)
 	for(i = 0; i < m_ptrarrModels.size(); i++)
 	{
 		pModel = m_ptrarrModels[i];
-		if(!pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pModel->PropagateDataProxy(pDataProxy);
 	}
 	
 	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
 	{
 		pModelArray = m_ptrarrModelArrays[i];
-		if(!pModelArray)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pModelArray->PropagateDataProxy(pDataProxy);
 	}
 }
@@ -2008,18 +2021,12 @@ void daeModel::PropagateGlobalExecutionContext(daeExecutionContext* pExecutionCo
 	for(i = 0; i < m_ptrarrModels.size(); i++)
 	{
 		pModel = m_ptrarrModels[i];
-		if(!pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pModel->PropagateGlobalExecutionContext(pExecutionContext);
 	}
 	
 	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
 	{
 		pModelArray = m_ptrarrModelArrays[i];
-		if(!pModelArray)
-			daeDeclareAndThrowException(exInvalidPointer);
-
 		pModelArray->PropagateGlobalExecutionContext(pExecutionContext);
 	}
 }
@@ -2520,6 +2527,8 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 	dae_capacity_check(ptrarrAllEquationExecutionInfosInModel);
 	dae_capacity_check(ptrarrEEIfromSTNs);
 	dae_capacity_check(ptrarrEEIfromModels);
+//	std::cout << "ptrarrEEIfromSTNs: " << ptrarrEEIfromSTNs.size() << std::endl;
+//	std::cout << "ptrarrEEIfromModels: " << ptrarrEEIfromModels.size() << std::endl;
 
 //	size_t nVar = m_pDataProxy->GetTotalNumberOfVariables();
 //	size_t nEq  = ptrarrAllEquationExecutionInfosInModel.size();
@@ -2588,7 +2597,6 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 // A sta sa STNovima iz child modela i modelarrays????
 // 31.07.2009 I corrected the code and now I use ALL STNs
 ////////////////////////////////////////////////////////////////////////
-		
 		vector<daeSTN*> ptrarrAllSTNs;
 		
 		CollectAllSTNs(ptrarrAllSTNs);
@@ -2597,66 +2605,65 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 		for(i = 0; i < ptrarrAllSTNs.size(); i++)
 		{
 			pSTN = ptrarrAllSTNs[i];
+			if(!pSTN)
+				daeDeclareAndThrowException(exInvalidPointer);
+
 			pSTN->CollectVariableIndexes(mapVariableIndexes);
 		}
-	
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 		
 		map<size_t, size_t>::iterator iter, iterIndexInBlock;
 
-//		bool bSafeToAvoidCopy = m_pDataProxy->ThereAreAssignedVariables();
-//		if(bSafeToAvoidCopy)
-//		{
-//			for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
-//				(*iter).second = (*iter).first;
-//		}
-		
-	// If true then indexes can be continuous and there is no need to copy data from the solver
 		nEquationIndex = 0;
 		for(k = 0; k < ptrarrEEIfromModels.size(); k++)
 		{
 			pEquationExec = ptrarrEEIfromModels[k];
+			if(!pEquationExec)
+				daeDeclareAndThrowException(exInvalidPointer);
+
 			pEquationExec->m_nEquationIndexInBlock = nEquationIndex;
-			pEquationExec->m_pBlock = pBlock;
+			//pEquationExec->m_pBlock = pBlock;
 			pBlock->AddEquationExecutionInfo(pEquationExec);
 //----------------->
 		// Here I have to associate overall variable indexes in equation to corresponding indexes in the block
 		// m_mapIndexes<OverallIndex, BlockIndex>
 			for(iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
 			{
-				// Try to find OverallIndex in the map of BlockIndexes
-					iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
-					if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
-					{
-						daeDeclareException(exInvalidCall);
-						e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in equation " << pEquationExec->m_pEquation->GetCanonicalName();
-						throw e;
-					}
-					(*iter).second = (*iterIndexInBlock).second;
+			// Try to find OverallIndex in the map of BlockIndexes
+				iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
+				if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
+				{
+					daeDeclareException(exInvalidCall);
+					e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in model " << GetCanonicalName();
+					throw e;
+				}
+				(*iter).second = (*iterIndexInBlock).second;
 			}
 //------------------->
 			nEquationIndex++;
-	
-			pBlock->m_ptrarrSTNs = ptrarrAllSTNs;
-			for(i = 0; i < ptrarrAllSTNs.size(); i++)
-			{
-				pSTN = ptrarrAllSTNs[i];
-				if(!pSTN)
-					daeDeclareAndThrowException(exInvalidPointer);
-	
-				if(pSTN->m_ptrarrStates.size() == 0)
-				{
-					daeDeclareException(exInvalidCall);
-					e << "Number of states is 0 in STN " << pSTN->GetCanonicalName();
-					throw e;
-				}
-	
-				pSTN->SetIndexesWithinBlockToEquationExecutionInfos(pBlock, nEquationIndex);
-			}
 		}
-	
+
+		pBlock->m_ptrarrSTNs = ptrarrAllSTNs;
+		for(i = 0; i < ptrarrAllSTNs.size(); i++)
+		{
+			pSTN = ptrarrAllSTNs[i];
+			if(!pSTN)
+				daeDeclareAndThrowException(exInvalidPointer);
+
+			if(pSTN->m_ptrarrStates.size() == 0)
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Number of states is 0 in STN " << pSTN->GetCanonicalName();
+				throw e;
+			}
+
+			pSTN->SetIndexesWithinBlockToEquationExecutionInfos(pBlock, nEquationIndex);
+
+		}
+
 	// Initialize the block
+		pBlock->m_nNumberOfEquations = nNoEquations;
 		pBlock->Initialize();
 
 	// Finaly, check the block
