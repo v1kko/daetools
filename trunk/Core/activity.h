@@ -85,6 +85,7 @@ public:
 										   daeLog_t* pLog,
 										   bool bCalculateSensitivities = false)	   	= 0;
 	virtual void				Reinitialize(void)										= 0;
+	virtual void				CleanUpSetupData(void)									= 0;
 	virtual void				SolveInitial(void)										= 0;
 	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;
 	

@@ -561,6 +561,12 @@ void daeSimulation::Run(void)
 	}
 }
 
+void daeSimulation::CleanUpSetupData(void)
+{
+// Clean up what can be cleaned up in the Models/DataProxy
+	m_pModel->GetDataProxy()->CleanUpSetupData();
+}
+
 void daeSimulation::Finalize(void)
 {
 // Notify the receiver that there is no more data, and disconnect it
@@ -1251,7 +1257,7 @@ void daeSimulation::RegisterDomain(daeDomain_t* pDomain)
 	
 	domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
 	for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
-		domain.m_pPoints[i] = pDomain->GetPoint(i);
+		domain.m_pPoints[i] = *pDomain->GetPoint(i);
 
 	if(!m_pDataReporter->RegisterDomain(&domain))
 	{

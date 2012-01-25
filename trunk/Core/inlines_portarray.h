@@ -32,6 +32,12 @@ public:
 			it->DetectVariableTypesForExport(ptrarrVariableTypes);
 	}
 	
+	virtual void CleanUpSetupData(void)
+	{
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->CleanUpSetupData();
+	}
+	
 protected:
 	virtual void InitializeParameters(void)
 	{

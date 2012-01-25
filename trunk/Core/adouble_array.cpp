@@ -693,31 +693,37 @@ const adouble daeModel::integral(const adouble_array& a) const
 	return tmp;
 }
 
-const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain, const vector<size_t>& narrPoints) const
+const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain, const vector<const real_t*>& pdarrPoints) const
 {
 	adouble tmp;
-	size_t i, i1, i2;
+	size_t i;
+	real_t d1, d2;
 	
 	if(a.getGatherInfo())
 	{
+		if(!pDomain)
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(pdarrPoints.empty())
+			daeDeclareAndThrowException(exInvalidCall);
+		
 		tmp.setGatherInfo(true);
 		adRuntimeIntegralNode* node = new adRuntimeIntegralNode(eSingleIntegral,
 																const_cast<daeModel*>(this),
 																CLONE_NODE_ARRAY(a.node),
 																pDomain,
-																narrPoints);
+																pdarrPoints);
 		tmp.node = shared_ptr<adNode>(node);
 		return tmp;
 	}
 	
-	for(i = 0; i < narrPoints.size() - 1; i++)
+	for(i = 0; i < pdarrPoints.size() - 1; i++)
 	{
-		i1 = narrPoints[i];
-		i2 = narrPoints[i+1];
+		d1 = *pdarrPoints[i];
+		d2 = *pdarrPoints[i+1];
 	
 	// In daeDomain operator[] I always return node, not the value
 	// Therefore I cannot call here operator[] but function GetPoint
-		tmp = tmp + (a[i1] + a[i2]) * ( pDomain->GetPoint(i2) - pDomain->GetPoint(i1) ) / 2;
+		tmp = tmp + (a[i] + a[i+1]) * (d2 - d1) / 2;
 
 	// Old code:
 	//	tmp = tmp + (a[i1] + a[i2]) * ( (*pDomain)[i2] - (*pDomain)[i1] ) / 2;

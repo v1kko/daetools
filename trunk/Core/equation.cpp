@@ -139,8 +139,10 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* 
 
 void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 {
+#ifdef DAE_DEBUG
 	if(!EC.m_pBlock)
 		daeDeclareAndThrowException(exInvalidPointer);
+#endif
 
 	EC.m_pEquationExecutionInfo = this;
 
@@ -150,8 +152,10 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
 void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 {
+#ifdef DAE_DEBUG
 	if(!EC.m_pBlock)
 		daeDeclareAndThrowException(exInvalidPointer);
+#endif
 
 	EC.m_pEquationExecutionInfo = this;
 
@@ -162,6 +166,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
 	{
 		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
+		
 		__ad = m_EquationEvaluationNode->Evaluate(&EC);
 		EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
 	}
@@ -169,17 +174,19 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 
 void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
+#ifdef DAE_DEBUG
 	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
+#endif
 
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad;
 	for(size_t i = 0; i < narrParameterIndexes.size(); i++)
 	{
-		EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
-		//Used to get the S/SD values 
+		EC.m_nCurrentParameterIndexForSensitivityEvaluation             = narrParameterIndexes[i];
 		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
+		
 		__ad = m_EquationEvaluationNode->Evaluate(&EC);
 		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
@@ -188,15 +195,18 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 // Should not be used anymore, but double-check
 void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
 {
+#ifdef DAE_DEBUG
 	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
-
+#endif
+	
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad;
 	for(size_t i = 0; i < narrParameterIndexes.size(); i++)
 	{
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
+		
 		__ad = m_EquationEvaluationNode->Evaluate(&EC);
 		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}

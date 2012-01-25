@@ -79,9 +79,9 @@ public:
         Finally call the function END_STN() to finalize the state transition network.
         Again, there is an optional argument EventTolerance of the function SWITCH_TO, as explained in tutorial 4.
     */
-		std::vector< std::pair<daeVariable*, adouble> >  arrSetVariables;
-	    std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
-	    std::vector<daeAction*>							 ptrarrUserDefinedOnEventActions;
+		std::vector< std::pair<daeVariableWrapper, adouble> >	arrSetVariables;
+	    std::vector< std::pair<daeEventPort*, adouble> >		arrTriggerEvents;
+	    std::vector<daeAction*>									ptrarrUserDefinedOnEventActions;
 
 		stnRegulator = STN("Regulator");
         STATE("Heating");

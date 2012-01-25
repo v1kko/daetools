@@ -593,7 +593,7 @@ python::numeric::array GetNumPyArrayDomain(daeDomain& domain)
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	for(size_t k = 0; k < (size_t)dimensions; k++)
-		values[k] = domain.GetPoint(k);
+		values[k] = *domain.GetPoint(k);
 
 	return numpy_array;
 }
@@ -603,7 +603,7 @@ boost::python::list GetDomainPoints(daeDomain& domain)
 	boost::python::list l;
 
 	for(size_t i = 0; i < domain.GetNumberOfPoints(); i++)
-		l.append(domain.GetPoint(i));
+		l.append(*domain.GetPoint(i));
 
 	return l;
 }

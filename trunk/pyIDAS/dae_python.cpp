@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDAS")
 		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
 		//.def("Solve",						&daeIDASolver::Solve)
-		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver1) 
+		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver1)
 		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver2) 
 		.def("SaveMatrixAsXPM",				&daeIDASolver::SaveMatrixAsXPM)
 		;

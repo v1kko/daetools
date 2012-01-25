@@ -311,11 +311,20 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			strarrErrors.push_back(string("Invalid set value expression in action: ") + GetName());
 			return false;
 		}
-		if(!m_pVariableWrapper->m_pVariable)
+		if(!m_pVariableWrapper->m_pVariable || m_pVariableWrapper->m_nOverallIndex == ULONG_MAX)
 		{
 			strarrErrors.push_back(string("Invalid variable in action: ") + GetName());
 			return false;
 		}
+		
+		// Achtung!! At this point the VariableTypeGathered has not been set yet, so we cannot check the type!!!
+		//const int iVarType = m_pVariableWrapper->m_pDataProxy->GetVariableTypeGathered(m_pVariableWrapper->m_nOverallIndex);
+		//if(iVarType == cnNormal)
+		//{
+		//	daeDeclareException(exInvalidCall);
+		//	e << "Cannot set the variable value for [" << m_pVariableWrapper->GetName() << "]; it is not a state nor an assigned variable";
+		//	throw e;
+		//}
 		
 		daeConfig& cfg = daeConfig::GetConfig();
 		if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))

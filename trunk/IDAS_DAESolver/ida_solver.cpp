@@ -289,6 +289,11 @@ void daeIDASolver::CreateIDA(void)
 		e << "Sundials IDAS solver cowardly refused to set residual data; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+	
+// After a successful initialization we do not need some data; therefore free whatever is possible
+// Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
+// Here it does not matter who owns the data in the vectors; IDA keeps track of it and wont free the data it does not own
+	m_pIDASolverData->CleanUpSetupData();
 }
 
 void daeIDASolver::SetupSensitivityCalculation(void)
@@ -553,14 +558,6 @@ void daeIDASolver::SolveInitial(void)
 			throw e;
 		}
 	}
-// After a successful solve we do not need some data; therefore free whatever is possible
-// 1. Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
-//    Here it does not matter who owns the data in the vectors; IDA keeps track of it and wont free the data it does not own
-//		N_VDestroy_Serial(m_pIDASolverData->m_vectorInitialConditionsTypes);
-//		N_VDestroy_Serial(m_pIDASolverData->m_vectorAbsTolerances);
-
-//// 2. Clear vectors of abs. tolerances and variable ids in the Block/DataProxy
-//		m_pBlock->ClearAbsoluteTolerancesAndIDs();
 }
 
 void daeIDASolver::Reset(void)

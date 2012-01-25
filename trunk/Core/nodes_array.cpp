@@ -784,9 +784,11 @@ adRuntimeSpecialFunctionNode::~adRuntimeSpecialFunctionNode()
 
 adouble adRuntimeSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+#ifdef DAE_DEBUG
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-
+#endif
+	
 	adouble tmp;
 	adouble_array ad;
 	
@@ -1068,18 +1070,26 @@ bool adRuntimeSpecialFunctionNode::IsFunctionOfVariables(void) const
 adRuntimeIntegralNode::adRuntimeIntegralNode(daeeIntegralFunctions eFun,
 											 daeModel* pModel,
 											 boost::shared_ptr<adNodeArray> n,
-											 daeDomain* pDomain,
-											 const vector<size_t>& narrPoints)
+                                             daeDomain* pDomain,
+											 const vector<const real_t*>& pdarrPoints)
 {
-	m_pModel     = pModel;
-	m_pDomain    = pDomain;
-	node         = n;
-	eFunction    = eFun;
-	m_narrPoints = narrPoints;
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDomain)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(pdarrPoints.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	
+	m_pModel      = pModel;
+	m_pDomain     = pDomain;
+	node          = n;
+	eFunction     = eFun;
+	m_pdarrPoints = pdarrPoints;
 }
 
 adRuntimeIntegralNode::adRuntimeIntegralNode()
 {
+	m_pModel  = NULL;
 	m_pDomain = NULL;
 	eFunction = eIFUnknown;
 }
@@ -1090,18 +1100,18 @@ adRuntimeIntegralNode::~adRuntimeIntegralNode()
 
 adouble adRuntimeIntegralNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+#ifdef DAE_DEBUG
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pDomain)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(m_narrPoints.empty())
+	if(m_pdarrPoints.empty())
 		daeDeclareAndThrowException(exInvalidCall);
-
+#endif
+	
 	adouble tmp;
 	adouble_array a;
 	
 	a   = node->Evaluate(pExecutionContext);
-	tmp = m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), m_narrPoints);
+	tmp = m_pModel->__integral__(a, NULL, m_pdarrPoints);
 	
 	return tmp;
 }
@@ -2635,6 +2645,9 @@ adSetupSpecialFunctionNode::adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions
 													   daeModel* pModel,
 													   shared_ptr<adNodeArray> n)
 {
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+
 	m_pModel  = pModel;
 	node      = n;
 	eFunction = eFun;
@@ -2652,9 +2665,11 @@ adSetupSpecialFunctionNode::~adSetupSpecialFunctionNode()
 
 adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+#ifdef DAE_DEBUG
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-
+#endif
+	
 	switch(eFunction)
 	{
 	case eSum:
@@ -2970,6 +2985,9 @@ bool adSetupSpecialFunctionNode::IsFunctionOfVariables(void) const
 adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(daeModel* pModel,
 													             shared_ptr<adNode> n)
 {
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+
 	m_pModel  = pModel;
 	node      = n;
 	m_nDegree = 1;
@@ -2988,9 +3006,6 @@ adSetupExpressionDerivativeNode::~adSetupExpressionDerivativeNode()
 adouble adSetupExpressionDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
 	adouble a, tmp;
-
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
 
 	a = node->Evaluate(pExecutionContext);
 	tmp.setGatherInfo(true);
@@ -3046,7 +3061,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 			break;
 		default:
 			daeDeclareException(exInvalidCall);
-			e << "The function dt() does not accept expressions containing pow, min and max, in model [" << m_pModel->GetCanonicalName() << "]";
+			e << "The function dt() does not accept expressions containing pow, min and max";
 			throw e;
 		}
 	}
@@ -3075,7 +3090,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 	else
 	{
 		daeDeclareException(exInvalidCall);
-		e << "The function dt() does not accept expressions containing special functions or time/partial derivatives, in model [" << m_pModel->GetCanonicalName() << "]";
+		e << "The function dt() does not accept expressions containing special functions or time/partial derivatives";
 		throw e;
 	}
 	return tmp;
@@ -3256,13 +3271,13 @@ adSetupExpressionPartialDerivativeNode::~adSetupExpressionPartialDerivativeNode(
 
 adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble a, tmp;
-
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
+#ifdef DAE_DEBUG
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
-
+#endif
+	
+	adouble a, tmp;
+	
 	a = node->Evaluate(pExecutionContext);
 	tmp.setGatherInfo(true);
 	tmp.node = calc_d(a.node, m_pDomain, pExecutionContext);
@@ -3320,7 +3335,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 			break;
 		default:
 			daeDeclareException(exInvalidCall);
-			e << "The function d() does not accept expressions containing pow, min and max, in model [" << m_pModel->GetCanonicalName() << "]";
+			e << "The function d() does not accept expressions containing pow, min and max";
 			throw e;
 		}
 	}
@@ -3346,7 +3361,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 			if(rtnode->m_pDomain == pDomain)
 			{
 				daeDeclareException(exInvalidCall);
-				e << "The function d() cannot create partial derivatives of order higher than 2, in model [" << m_pModel->GetCanonicalName() << "]";
+				e << "The function d() cannot create partial derivatives of order higher than 2";
 				throw e;
 			}
 			else // It is permitted (calculate the derivative of the expression node)
@@ -3376,7 +3391,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 	else
 	{
 		daeDeclareException(exInvalidCall);
-		e << "The function d() does not accept expressions containing special functions, time derivatives, etc, in model [" << m_pModel->GetCanonicalName() << "]";
+		e << "The function d() does not accept expressions containing special functions, time derivatives, etc";
 		throw e;
 	}
 	return tmp;
@@ -3548,6 +3563,11 @@ adSetupIntegralNode::adSetupIntegralNode(daeeIntegralFunctions eFun,
 										 daeDomain* pDomain,
 										 const daeArrayRange& arrayRange)
 {
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pDomain)
+		daeDeclareAndThrowException(exInvalidPointer);
+
 	m_pModel     = pModel;
 	m_pDomain    = pDomain;
 	node         = n;
@@ -3568,15 +3588,16 @@ adSetupIntegralNode::~adSetupIntegralNode()
 
 adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble_array a;
-	vector<size_t> narrPoints;
-
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
+	
+	adouble_array a;
+	vector<size_t> narrPoints;
+	vector<const real_t*> pdarrPoints;
 
 	switch(eFunction)
 	{
@@ -3585,9 +3606,15 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 			daeDeclareAndThrowException(exInvalidCall);
 		
 		m_ArrayRange.m_Range.GetPoints(narrPoints);
+		
+		pdarrPoints.resize(narrPoints.size(), NULL);
+		for(size_t i = 0; i < narrPoints.size(); i++)
+			pdarrPoints[i] = m_pDomain->GetPoint(i);
+		
 		a = node->Evaluate(pExecutionContext);
 		
-		return m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), narrPoints);
+		return m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), pdarrPoints);
+	
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();

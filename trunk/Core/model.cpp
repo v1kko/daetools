@@ -129,6 +129,22 @@ void daeModel::Clone(const daeModel& rObject)
 	}
 }
 
+void daeModel::CleanUpSetupData()
+{
+	m_ptrarrParameters.EmptyAndFreeMemory();
+	m_ptrarrVariables.EmptyAndFreeMemory();
+	m_ptrarrEquations.EmptyAndFreeMemory();
+	m_ptrarrPortConnections.EmptyAndFreeMemory();
+	m_ptrarrEventPortConnections.EmptyAndFreeMemory();
+	
+	for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
+		m_ptrarrModelArrays[i]->CleanUpSetupData();
+	
+	for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
+		m_ptrarrPorts[i]->CleanUpSetupData();
+	
+}
+
 void daeModel::Open(io::xmlTag_t* pTag)
 {
 	string strName;

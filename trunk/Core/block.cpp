@@ -378,13 +378,13 @@ real_t* daeBlock::GetVariableTypesPointer()
 	return m_pDataProxy->GetVariableTypes();
 }
 
-void daeBlock::ClearAbsoluteTolerancesAndIDs()
+void daeBlock::CleanUpSetupData()
 {
 #ifdef DAE_DEBUG
 	if(!m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	m_pDataProxy->ClearAbsoluteTolerancesAndIDs();
+	m_pDataProxy->CleanUpSetupData();
 }
 
 void daeBlock::CopyDataFromSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)

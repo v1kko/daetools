@@ -30,6 +30,12 @@ void daeSTN::Clone(const daeSTN& rObject)
 	}
 }
 
+void daeSTN::CleanUpSetupData()
+{
+	for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+		m_ptrarrStates[i]->CleanUpSetupData();
+}
+
 void daeSTN::Open(io::xmlTag_t* pTag)
 {
 	string strName;
@@ -761,17 +767,12 @@ size_t daeSTN::GetNumberOfEquationsInState(daeState* pState) const
 	for(i = 0; i < pState->m_ptrarrEquations.size(); i++)
 	{
 		pEquation = pState->m_ptrarrEquations[i];
-		if(!pEquation)
-			daeDeclareAndThrowException(exInvalidPointer); 
 		nNoEqns += pEquation->GetNumberOfEquations();
 	}
 
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		nNoEqns += pSTN->GetNumberOfEquations();
 	}
 
@@ -878,18 +879,12 @@ void daeSTN::CalculateResiduals(daeExecutionContext& EC)
 	for(i = 0; i < pState->m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pEquationExecutionInfo->Residual(EC);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pSTN->CalculateResiduals(EC);
 	}
 }
@@ -908,18 +903,12 @@ void daeSTN::CalculateJacobian(daeExecutionContext& EC)
 	for(i = 0; i < pState->m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pEquationExecutionInfo->Jacobian(EC);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pSTN->CalculateJacobian(EC);
 	}
 }
@@ -938,18 +927,12 @@ void daeSTN::CalculateSensitivityResiduals(daeExecutionContext& EC, const std::v
 	for(i = 0; i < pState->m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pSTN->CalculateSensitivityResiduals(EC, narrParameterIndexes);
 	}
 }
@@ -968,18 +951,12 @@ void daeSTN::CalculateSensitivityParametersGradients(daeExecutionContext& EC, co
 	for(i = 0; i < pState->m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[i];
-		if(!pEquationExecutionInfo)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pEquationExecutionInfo->SensitivityParametersGradients(EC, narrParameterIndexes);
 	}
 // Nested STNs
 	for(i = 0; i < pState->m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = pState->m_ptrarrSTNs[i];
-		if(!pSTN)
-			daeDeclareAndThrowException(exInvalidPointer); 
-
 		pSTN->CalculateSensitivityParametersGradients(EC, narrParameterIndexes);
 	}
 }

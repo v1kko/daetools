@@ -160,6 +160,21 @@ public:
 			N_VConst(0, m_pvectorSTimeDerivatives[i]);
 	}
 	
+	void CleanUpSetupData()
+	{
+		if(m_vectorInitialConditionsTypes)
+		{
+			N_VDestroy_Serial(m_vectorInitialConditionsTypes);
+			m_vectorInitialConditionsTypes = NULL;
+		}
+		
+		if(m_vectorAbsTolerances)
+		{
+			N_VDestroy_Serial(m_vectorAbsTolerances);
+			m_vectorAbsTolerances = NULL;
+		}
+	}
+	
 	void SetMaxElements()
 	{
 //		real_t** m = m_matKrylov->cols;

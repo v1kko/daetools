@@ -235,7 +235,7 @@ win32::MUMPS_LIBS = blas.lib \
 					libpord.lib \
 					libf95.a \
 					libgcc.a
-unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS}
+unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS} -lgfortran
 
 
 #####################################################################################

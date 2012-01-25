@@ -310,7 +310,7 @@ public:
 	virtual daeeDomainType				GetType(void) const;
 	virtual size_t						GetNumberOfIntervals(void) const;
 	virtual size_t						GetNumberOfPoints(void) const;
-	virtual real_t						GetPoint(size_t nIndex) const;
+	virtual const real_t*				GetPoint(size_t nIndex) const;
 	virtual unit						GetUnits(void) const;
 
 // Only for Distributed domains
@@ -606,6 +606,7 @@ public:
 		m_dCurrentTime				= 0;
 		m_bReinitializationFlag		= false;
 		m_bCopyDataFromBlock		= false;
+		m_bIsModelDynamic			= false;
 		
 		daeConfig& cfg = daeConfig::GetConfig();
 		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
@@ -925,14 +926,14 @@ public:
 
 	real_t* GetVariableTypes() const
 	{
-		return m_pdVariablesTypes;
+		return m_pdVariablesTypesGathered;
 	}
 
 	int GetVariableType(size_t nIndex) const
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return static_cast<int>(m_pdVariablesTypes[nIndex]);
 	}
@@ -941,7 +942,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		m_pdVariablesTypes[nIndex] = static_cast<real_t>(Value);
 	}
@@ -950,7 +951,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return static_cast<int>(m_pdVariablesTypesGathered[nIndex]);
 	}
@@ -959,8 +960,10 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
+		if(Value == cnDifferential)
+			m_bIsModelDynamic = true;
 		m_pdVariablesTypesGathered[nIndex] = static_cast<real_t>(Value);
 	}
 
@@ -968,7 +971,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		return &(m_pdAbsoluteTolerances[nIndex]);
 	}
@@ -977,7 +980,7 @@ public:
 	{
 #ifdef DAE_DEBUG
 		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds)
+			daeDeclareAndThrowException(exOutOfBounds);
 #endif
 		m_pdAbsoluteTolerances[nIndex] = Value;
 	}
@@ -1020,25 +1023,10 @@ public:
 	
 	daeeModelType GetModelType(void)
 	{
-		if(m_eLanguage == eMTUnknown)
-		{
-			if(!m_pdVariablesTypesGathered || m_nTotalNumberOfVariables == 0)
-				daeDeclareAndThrowException(exInvalidCall)
-			
-			bool bFoundDiffVariables = false;
-			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
-			{
-				if(m_pdVariablesTypesGathered[i] == cnDifferential)
-				{
-					bFoundDiffVariables = true;
-					break;
-				}
-			}
-			if(bFoundDiffVariables)
-				m_eLanguage = eDynamicModel;
-			else
-				m_eLanguage = eSteadyStateModel;
-		}
+		if(m_bIsModelDynamic)
+			m_eLanguage = eDynamicModel;
+		else
+			m_eLanguage = eSteadyStateModel;
 		
 		return m_eLanguage;
 	}
@@ -1073,7 +1061,7 @@ public:
 		m_bCopyDataFromBlock = bCopyDataFromBlock;
 	}
 
-	void ClearAbsoluteTolerancesAndIDs()
+	void CleanUpSetupData()
 	{
 		if(m_pdVariablesTypes)
 		{
@@ -1090,6 +1078,8 @@ public:
 			delete[] m_pdAbsoluteTolerances;
 			m_pdAbsoluteTolerances = NULL;
 		}
+		
+		m_pTopLevelModel->CleanUpSetupData();
 	}
 	
 //	void SetGlobalCondition(daeCondition condition)
@@ -1141,13 +1131,7 @@ public:
 	
 	bool IsModelDynamic() const
 	{
-		if(!m_pdVariablesTypesGathered)
-			daeDeclareAndThrowException(exInvalidPointer)
-			
-		for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
-			if(m_pdVariablesTypesGathered[i] == cnDifferential)
-				return true;
-		return false;		
+		return m_bIsModelDynamic;		
 	}
 	
 	bool ResetLAMatrixAfterDiscontinuity() const
@@ -1177,6 +1161,7 @@ protected:
 	bool							m_bCopyDataFromBlock;
 	bool							m_bResetLAMatrixAfterDiscontinuity;
 	bool							m_bPrintInfo;
+	bool							m_bIsModelDynamic;
 
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
@@ -1268,7 +1253,7 @@ public:
 	virtual real_t* GetTimeDerivativesPointer();
 	virtual real_t* GetAbsoluteTolerancesPointer();
 	virtual real_t* GetVariableTypesPointer();
-	virtual void	ClearAbsoluteTolerancesAndIDs();
+	virtual void	CleanUpSetupData();
 	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;
@@ -1934,6 +1919,8 @@ public:
 	void CreateDefinition(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void Clone(const daePort& rObject);
+	
+	void CleanUpSetupData(void);
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
@@ -2230,6 +2217,8 @@ public:
 	virtual void	InitializeStage3(daeLog_t* pLog);
 	virtual void	InitializeStage4(void);
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
+	
+	virtual void	CleanUpSetupData(void);
 
 	virtual void	SaveModelReport(const string& strFileName) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
@@ -2303,7 +2292,7 @@ public:
 	const adouble __min__(const adouble_array& a) const;
 	const adouble __max__(const adouble_array& a) const;
 	const adouble __average__(const adouble_array& a) const;
-	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<size_t>& narrPoints) const;
+	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<const real_t*>& pdarrPoints) const;
 
 	daeEquation* CreateEquation(const string& strName, string strDescription = "");
 
@@ -2477,8 +2466,6 @@ protected:
 
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 
-	boost::shared_array<daeExecutionContext>	m_pExecutionContexts;
-
 // Used to nest STNS
 	std::vector<daeState*> m_ptrarrStackStates;
 
@@ -2587,258 +2574,22 @@ void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::v
 class DAE_CORE_API daeVariableWrapper : public daeVariableWrapper_t
 {
 public:
-	daeVariableWrapper() 
-	{
-		m_pVariable = NULL;
-	}
-	
-	daeVariableWrapper(daeVariable& variable, std::string strName = "") 
-	{
-		Initialize(&variable, strName);
-	}
-	
-	daeVariableWrapper(adouble& a, std::string strName = "") 
-	{
-		daeVariable* pVariable;
-		daeGetVariableAndIndexesFromNode(a, &pVariable, m_narrDomainIndexes);
-		if(!pVariable)
-		{
-			daeDeclareException(exInvalidCall);
-			e << "Invalid expression for daeVariableWrapper (cannot get variable)";
-			throw e;
-		}
-		
-		Initialize(pVariable, strName);
-	}
-
-	void Initialize(daeVariable* pVariable, std::string strName)
-	{
-		m_pVariable = pVariable;
-
-		if(strName.empty())
-		{
-			m_strName = m_pVariable->GetName();
-			if(!m_narrDomainIndexes.empty())
-				m_strName += "(" + toString(m_narrDomainIndexes, string(",")) + ")";
-		}
-		else
-			m_strName = strName;
-	}
-
-	virtual ~daeVariableWrapper(void)
-	{
-	}
-	
-    string GetName(void) const
-	{
-		return m_strName;
-	}
-
-    real_t GetValue(void) const
-	{
-		if(!m_pVariable)
-			daeDeclareAndThrowException(exInvalidPointer)
-		
-		size_t n = m_narrDomainIndexes.size();
-		
-		if(n == 0)
-			return m_pVariable->GetValue();
-		else if(n == 1)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0]);
-		else if(n == 2)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1]);
-		else if(n == 3)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2]);
-		else if(n == 4)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2],
-										 m_narrDomainIndexes[3]);
-		else if(n == 5)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2],
-										 m_narrDomainIndexes[3],
-										 m_narrDomainIndexes[4]);
-		else if(n == 6)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2],
-										 m_narrDomainIndexes[3],
-										 m_narrDomainIndexes[4],
-										 m_narrDomainIndexes[5]);
-		else if(n == 7)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2],
-										 m_narrDomainIndexes[3],
-										 m_narrDomainIndexes[4],
-										 m_narrDomainIndexes[5],
-										 m_narrDomainIndexes[6]);
-		else if(n == 8)
-			return m_pVariable->GetValue(m_narrDomainIndexes[0],
-										 m_narrDomainIndexes[1],
-										 m_narrDomainIndexes[2],
-										 m_narrDomainIndexes[3],
-										 m_narrDomainIndexes[4],
-										 m_narrDomainIndexes[5],
-										 m_narrDomainIndexes[6],
-										 m_narrDomainIndexes[7]);
-		else
-			daeDeclareAndThrowException(exInvalidCall)
-					
-		return 0;
-	}
-
-    void SetValue(real_t value)
-	{
-		if(!m_pVariable)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pVariable->m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pVariable->m_pModel->m_pDataProxy)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		size_t nOverallIndex = m_pVariable->m_nOverallIndex + m_pVariable->CalculateIndex(m_narrDomainIndexes);
-		const int varType    = m_pVariable->m_pModel->m_pDataProxy->GetVariableType(nOverallIndex);
-		if(varType == cnNormal)
-		{	
-			daeDeclareException(exInvalidCall); 
-			e << "Cannot set the variable value for [" << m_strName << "]; it is not state nor assigned variable";
-			throw e;
-		}
-		
-			
-		size_t n = m_narrDomainIndexes.size();
-		if(varType == cnFixed)
-		{
-			if(n == 0)
-				m_pVariable->ReAssignValue(value);
-			else if(n == 1)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   value);
-			else if(n == 2)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   value);
-			else if(n == 3)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   value);
-			else if(n == 4)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   m_narrDomainIndexes[3],
-										   value);
-			else if(n == 5)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   m_narrDomainIndexes[3],
-										   m_narrDomainIndexes[4],
-										   value);
-			else if(n == 6)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   m_narrDomainIndexes[3],
-										   m_narrDomainIndexes[4],
-										   m_narrDomainIndexes[5],
-										   value);
-			else if(n == 7)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   m_narrDomainIndexes[3],
-										   m_narrDomainIndexes[4],
-										   m_narrDomainIndexes[5],
-										   m_narrDomainIndexes[6],
-										   value);
-			else if(n == 8)
-				m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-										   m_narrDomainIndexes[1],
-										   m_narrDomainIndexes[2],
-										   m_narrDomainIndexes[3],
-										   m_narrDomainIndexes[4],
-										   m_narrDomainIndexes[5],
-										   m_narrDomainIndexes[6],
-										   m_narrDomainIndexes[7],
-										   value);
-			else
-				daeDeclareAndThrowException(exInvalidCall);
-		}
-		else if(varType == cnDifferential)
-		{
-			if(n == 0)
-				m_pVariable->ReSetInitialCondition(value);
-			else if(n == 1)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   value);
-			else if(n == 2)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   value);
-			else if(n == 3)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   value);
-			else if(n == 4)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   m_narrDomainIndexes[3],
-												   value);
-			else if(n == 5)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   m_narrDomainIndexes[3],
-												   m_narrDomainIndexes[4],
-												   value);
-			else if(n == 6)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   m_narrDomainIndexes[3],
-												   m_narrDomainIndexes[4],
-												   m_narrDomainIndexes[5],
-												   value);
-			else if(n == 7)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   m_narrDomainIndexes[3],
-												   m_narrDomainIndexes[4],
-												   m_narrDomainIndexes[5],
-												   m_narrDomainIndexes[6],
-												   value);
-			else if(n == 8)
-				m_pVariable->ReSetInitialCondition(m_narrDomainIndexes[0],
-												   m_narrDomainIndexes[1],
-												   m_narrDomainIndexes[2],
-												   m_narrDomainIndexes[3],
-												   m_narrDomainIndexes[4],
-												   m_narrDomainIndexes[5],
-												   m_narrDomainIndexes[6],
-												   m_narrDomainIndexes[7],
-												   value);
-			else
-				daeDeclareAndThrowException(exInvalidCall);
-		}
-		else
-			daeDeclareAndThrowException(exInvalidCall);				        
-	}
+	daeVariableWrapper();
+	daeVariableWrapper(daeVariable& variable, std::string strName = "");
+	daeVariableWrapper(adouble& a, std::string strName = "");
+	virtual ~daeVariableWrapper(void);
 
 public:
-	daeVariable*						m_pVariable;
-	std::vector<size_t>					m_narrDomainIndexes;
+	void Initialize(daeVariable* pVariable, std::string strName, const std::vector<size_t>& narrDomainIndexes);	
+    string GetName(void) const;
+    real_t GetValue(void) const;
+    void SetValue(real_t value);
+
+public:
+	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
 	std::string							m_strName;
+	size_t								m_nOverallIndex;
+	daeVariable*						m_pVariable;
 };
 
 /******************************************************************
@@ -2926,6 +2677,7 @@ public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	void Clone(const daeState& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	void CleanUpSetupData();
 	
 	void AddEquation(daeEquation* pEquation);
 	//daeEquation* AddEquation(const string& strEquationExpression);
@@ -3010,6 +2762,7 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
+	void CleanUpSetupData();
 	void Clone(const daeStateTransition& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
@@ -3064,8 +2817,10 @@ public:
 	void OpenRuntime(io::xmlTag_t* pTag);
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
+	void CleanUpSetupData();
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	virtual void Clone(const daeSTN& rObject);
+	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	virtual void		FinalizeDeclaration(void);

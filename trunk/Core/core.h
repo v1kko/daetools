@@ -323,7 +323,7 @@ public:
 	virtual daeeDomainType				GetType(void) const						= 0;
 	virtual size_t						GetNumberOfIntervals(void) const		= 0;
 	virtual size_t						GetNumberOfPoints(void) const			= 0;
-	virtual real_t						GetPoint(size_t nIndex) const			= 0;
+	virtual const real_t*				GetPoint(size_t nIndex) const			= 0;
 	virtual unit						GetUnits(void) const					= 0;
 
 // Only for Distributed domains
@@ -676,6 +676,7 @@ public:
 	virtual void	GetStateTransitions(std::vector<daeStateTransition_t*>& ptrarrStateTransitions)	= 0;
 	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)						= 0;
 	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)								= 0;
+	virtual void	CleanUpSetupData()																= 0;
 };
 
 /******************************************************************
@@ -688,6 +689,7 @@ public:
 //	virtual daeState_t*		GetStateFrom(void) const = 0;
 	virtual void GetActions(std::vector<daeAction_t*>& ptrarrActions) const	= 0;
 	virtual void ExecuteActions(void)										= 0;
+	virtual void CleanUpSetupData()											= 0;
 };
 
 /******************************************************************
@@ -698,6 +700,7 @@ class daeSTN_t : virtual public daeObject_t
 public:
 	virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates)	= 0;
 	virtual daeState_t*	GetActiveState(void)								= 0;
+	virtual void		CleanUpSetupData()									= 0;
 };
 
 /******************************************************************
@@ -716,6 +719,8 @@ public:
 	virtual daePort_t* GetPort(size_t n1, size_t n2, size_t n3)							= 0;
 	virtual daePort_t* GetPort(size_t n1, size_t n2, size_t n3, size_t n4)				= 0;
 	virtual daePort_t* GetPort(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)	= 0;
+	
+	virtual void CleanUpSetupData(void) = 0;
 };
 
 /******************************************************************
@@ -734,6 +739,8 @@ public:
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3)						= 0;
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4)			= 0;
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5) = 0;
+	
+	virtual void CleanUpSetupData(void) = 0;
 };
 
 /*********************************************************************************************
@@ -806,7 +813,7 @@ public:
 	virtual real_t* GetTimeDerivativesPointer() = 0;
 	virtual real_t* GetAbsoluteTolerancesPointer() = 0;
 	virtual real_t* GetVariableTypesPointer() = 0;
-	virtual void	ClearAbsoluteTolerancesAndIDs() = 0;
+	virtual void	CleanUpSetupData() = 0;
 };
 
 
@@ -941,7 +948,9 @@ public:
 	virtual void	InitializeStage3(daeLog_t* pLog)															= 0;
 	virtual void	InitializeStage4(void)																		= 0;
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, 
-									 std::vector<daeBlock_t*>& ptrarrBlocks)					= 0;
+									 std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
+	
+	virtual void	CleanUpSetupData(void) = 0;
 
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;

@@ -28,7 +28,7 @@ is finished, save the results into a plain text file. Obviously, the data can be
 any format. Also some numpy functions that operate on numpy arrays can be used as well.
 In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It
 has the same interface and the functionality like all data reporters. However, it does not do
-any data processing by itself but calls the corresponding functions of data reporters which
+any data processing itself but calls the corresponding functions of data reporters which
 are added to it by using the function AddDataReporter. This way it is possible, at the same
 time, to send the results to the daePlotter and save them into a file (or process them in
 some other ways).

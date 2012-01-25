@@ -57,6 +57,7 @@ public:
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog, 
 										   bool bCalculateSensitivities = false);
+	virtual void				CleanUpSetupData(void);
 	
 	virtual void				Reinitialize(void);
 	virtual void				SolveInitial(void);

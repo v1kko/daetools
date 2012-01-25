@@ -167,7 +167,7 @@ bool FillOperandInfo(adNode* node, daeFPUCommand* cmd, bool isLeft)
 	{
 		adDomainIndexNode* n = dynamic_cast<adDomainIndexNode*>(node);
 		SetOperand(cmd, isLeft, eDomain);
-		SetValue(cmd, isLeft, n->m_pDomain->GetPoint(n->m_nIndex));
+		SetValue(cmd, isLeft, *n->m_pDomain->GetPoint(n->m_nIndex));
 		return true;
 	}
 	else if(infoNode == typeid(adRuntimeVariableNode))

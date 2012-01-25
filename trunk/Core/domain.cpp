@@ -548,21 +548,19 @@ adouble daeDomain::operator[](size_t nIndex) const
 		daeDeclareAndThrowException(exInvalidPointer); 
 
 	adouble tmp;
-	adDomainIndexNode* node = new adDomainIndexNode();
-	node->m_pDomain = const_cast<daeDomain*>(this);
-	node->m_nIndex = nIndex;
+	adDomainIndexNode* node = new adDomainIndexNode(const_cast<daeDomain*>(this), nIndex, const_cast<real_t*>(&(m_darrPoints[nIndex])));
 	tmp.node = boost::shared_ptr<adNode>(node);
 	tmp.setGatherInfo(true);
 
 	return tmp;
 }
 
-real_t daeDomain::GetPoint(size_t nIndex) const
+const real_t* daeDomain::GetPoint(size_t nIndex) const
 {
 	if(nIndex >= m_darrPoints.size())
 		daeDeclareAndThrowException(exOutOfBounds); 
 
-	return m_darrPoints[nIndex];
+	return &m_darrPoints[nIndex];
 }
 
 bool daeDomain::CheckObject(vector<string>& strarrErrors) const

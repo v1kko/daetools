@@ -22,6 +22,11 @@ void daeStateTransition::Clone(const daeStateTransition& rObject)
 {
 }
 
+void daeStateTransition::CleanUpSetupData()
+{
+	m_Condition.m_pSetupConditionNode.reset();
+}
+
 void daeStateTransition::Open(io::xmlTag_t* pTag)
 {
 	string strName;

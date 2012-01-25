@@ -163,7 +163,7 @@ class DAE_CORE_API adDomainIndexNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adDomainIndexNode)
 	adDomainIndexNode(void);
-	adDomainIndexNode(daeDomain* pDomain, size_t nIndex);
+	adDomainIndexNode(daeDomain* pDomain, size_t nIndex, real_t* pdPointValue);
 	virtual ~adDomainIndexNode(void);
 
 public:
@@ -183,6 +183,7 @@ public:
 // Report/GUI part
 	daeDomain*	m_pDomain;
 	size_t		m_nIndex;
+	real_t*		m_pdPointValue;
 };
 
 /*********************************************************************************************

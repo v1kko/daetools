@@ -1768,6 +1768,87 @@ bool daeVariable::CheckObject(vector<string>& strarrErrors) const
 	return bCheck;
 }
 
+/*********************************************************************************************
+	daeVariableWrapper
+**********************************************************************************************/
+daeVariableWrapper::daeVariableWrapper() 
+{
+	m_nOverallIndex = ULONG_MAX;
+	m_pVariable     = NULL;
+}
+
+daeVariableWrapper::daeVariableWrapper(daeVariable& variable, std::string strName) 
+{
+	std::vector<size_t>	narrDomainIndexes;
+	Initialize(&variable, strName, narrDomainIndexes);
+}
+
+daeVariableWrapper::daeVariableWrapper(adouble& a, std::string strName) 
+{
+	daeVariable* pVariable;
+	std::vector<size_t>	narrDomainIndexes;
+	
+	daeGetVariableAndIndexesFromNode(a, &pVariable, narrDomainIndexes);
+	if(!pVariable)
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid expression for daeVariableWrapper (cannot get variable)";
+		throw e;
+	}
+	
+	Initialize(pVariable, strName, narrDomainIndexes);
+}
+
+daeVariableWrapper::~daeVariableWrapper(void)
+{
+}
+
+void daeVariableWrapper::Initialize(daeVariable* pVariable, std::string strName, const std::vector<size_t>& narrDomainIndexes)
+{
+	if(!pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pVariable->m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pVariable->m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	m_pVariable     = pVariable;
+	m_pDataProxy    = pVariable->m_pModel->m_pDataProxy;
+	m_nOverallIndex = pVariable->m_nOverallIndex + pVariable->CalculateIndex(narrDomainIndexes);
+	
+	//std::cout << "daeVariableWrapper::m_nOverallIndex = " << m_nOverallIndex << std::endl;
+	
+	if(strName.empty())
+	{
+		m_strName = pVariable->GetName();
+		if(!narrDomainIndexes.empty())
+			m_strName += "(" + toString(narrDomainIndexes, string(",")) + ")";
+	}
+	else
+		m_strName = strName;
+}
+
+string daeVariableWrapper::GetName(void) const
+{
+	return m_strName;
+}
+
+real_t daeVariableWrapper::GetValue(void) const
+{
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	return *m_pDataProxy->GetValue(m_nOverallIndex);
+}
+
+void daeVariableWrapper::SetValue(real_t value)
+{
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	m_pDataProxy->SetValue(m_nOverallIndex, value);
+}
+
 
 }
 }

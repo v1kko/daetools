@@ -793,16 +793,18 @@ bool adRuntimeParameterNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adDomainIndexNode
 **********************************************************************************************/
-adDomainIndexNode::adDomainIndexNode(daeDomain* pDomain, size_t nIndex)
+adDomainIndexNode::adDomainIndexNode(daeDomain* pDomain, size_t nIndex, real_t* pdPointValue)
 			     : m_pDomain(pDomain), 
-				   m_nIndex(nIndex)				   
+				   m_nIndex(nIndex),
+                   m_pdPointValue(pdPointValue)
 {
 }
 
 adDomainIndexNode::adDomainIndexNode()
 {
-	m_pDomain = NULL;
-	m_nIndex  = ULONG_MAX;
+	m_pDomain      = NULL;
+	m_nIndex       = ULONG_MAX;
+	m_pdPointValue = NULL;
 }
 
 adDomainIndexNode::~adDomainIndexNode()
@@ -817,7 +819,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 // Here I check if I am inside of the GatherInfo mode and if I am
 // I clone the node (which is an equivalent for creation of a runtime node)
 // If I am not - I return the value of the point for the given index.
-	if(!m_pDomain)
+	if(!m_pdPointValue)
 		daeDeclareAndThrowException(exInvalidCall);
 
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
@@ -827,8 +829,8 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 		tmp.node = shared_ptr<adNode>( Clone() );
 		return tmp;
 	}
-	
-	return adouble(m_pDomain->GetPoint(m_nIndex));
+
+	return adouble(*m_pdPointValue);
 }
 
 const quantity adDomainIndexNode::GetQuantity(void) const
@@ -976,7 +978,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 					if(m_nBlockIndex == ULONG_MAX)
 					{
 						daeDeclareException(exInvalidCall);
-						e << "Cannot obtain block index for the variable [" << m_pVariable->GetCanonicalName() << "]";
+						e << "Cannot obtain block index for the variable index [" << m_nOverallIndex << "]";
 						throw e;
 					}
 				}
@@ -1182,7 +1184,7 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 			if(m_nBlockIndex == ULONG_MAX)
 			{
 				daeDeclareException(exInvalidCall);
-				e << "Cannot obtain block index for the (dt) variable [" << m_pVariable->GetCanonicalName() << "]";
+				e << "Cannot obtain block index for the (dt) variable index [" << m_nOverallIndex << "]";
 				throw e;
 			}
 		}
@@ -1204,7 +1206,6 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 	{
 		return adouble(*m_pdTimeDerivative, 
 					  (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? pExecutionContext->m_dInverseTimeStep : 0) );
-
 	}
 }
 

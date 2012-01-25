@@ -261,8 +261,8 @@ public:
 	adRuntimeIntegralNode(daeeIntegralFunctions eFun,
 						  daeModel* pModel,
 						  boost::shared_ptr<adNodeArray> n,
-		                  daeDomain* pDomain,
-						  const vector<size_t>& narrPoints);
+	                      daeDomain* pDomain,
+						  const vector<const real_t*>& pdarrPoints);
 	virtual ~adRuntimeIntegralNode(void);
 
 public:
@@ -281,9 +281,9 @@ public:
 public:
 	boost::shared_ptr<adNodeArray>	node;
 	daeModel*						m_pModel;
-	daeDomain*						m_pDomain;
 	daeeIntegralFunctions			eFunction;
-	vector<size_t>					m_narrPoints;
+	daeDomain*						m_pDomain;
+	vector<const real_t*>			m_pdarrPoints;
 };
 
 /*********************************************************************************************
