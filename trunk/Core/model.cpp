@@ -1935,6 +1935,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			pDistrEqnDomainInfo7 = pEquation->m_ptrarrDistributedEquationDomainInfos[6];
 			pDistrEqnDomainInfo8 = pEquation->m_ptrarrDistributedEquationDomainInfos[7];
 			if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 || 
+
 			   !pDistrEqnDomainInfo5 || !pDistrEqnDomainInfo6 || !pDistrEqnDomainInfo7 || !pDistrEqnDomainInfo8)
 				daeDeclareAndThrowException(exInvalidPointer);
 
@@ -3321,9 +3322,9 @@ bool daeModel::DetectObject(string& strShortName, vector<size_t>& narrDomains, d
 	
 void daeModel::InitializeStage1(void)
 {
-// Create domains, parameters, variables, ports etc
-//	DeclareData();
-//	DeclareDataBase();
+// Create DataProxy and propagate it to all child models
+	m_pDataProxy.reset(new daeDataProxy_t);
+	PropagateDataProxy(m_pDataProxy);
 }
 
 void daeModel::InitializeStage2(void)
@@ -3338,13 +3339,11 @@ void daeModel::InitializeStage2(void)
 
 void daeModel::InitializeStage3(daeLog_t* pLog)
 {
-// Create DataProxy, initialize its arrays and propagate it to all child models
 	if(m_nTotalNumberOfVariables == 0)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	m_pDataProxy.reset(new daeDataProxy_t);
+// Initialize DataProxy
 	m_pDataProxy->Initialize(this, pLog, m_nTotalNumberOfVariables);
-	PropagateDataProxy(m_pDataProxy);
 
 // Create equations
 	BuildUpSTNsAndEquations();

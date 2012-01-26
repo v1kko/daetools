@@ -160,7 +160,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
 	m_pLog->Message(string("Creating the system... "), 0);
 	
-// Create params, domains, vars, ports, child models
+// Create data proxy and propagate it
 	m_pModel->InitializeStage1();
 
 // Initialize params and domains
@@ -210,7 +210,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		}
 	}
 	
-// Create params, domains, vars, ports
+// Create model/port arrays and initialize variable indexes
 	m_pModel->InitializeStage2();
 
 // Create data storage for variables, derivatives, var. types, tolerances, etc

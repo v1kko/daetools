@@ -1816,7 +1816,10 @@ void daeVariableWrapper::Initialize(daeVariable* pVariable, std::string strName,
 	m_pDataProxy    = pVariable->m_pModel->m_pDataProxy;
 	m_nOverallIndex = pVariable->m_nOverallIndex + pVariable->CalculateIndex(narrDomainIndexes);
 	
-	//std::cout << "daeVariableWrapper::m_nOverallIndex = " << m_nOverallIndex << std::endl;
+	std::cout << "daeVariableWrapper::m_nOverallIndex = " << m_nOverallIndex << std::endl;
+	
+	if(m_nOverallIndex == ULONG_MAX)
+		daeDeclareAndThrowException(exInvalidCall);
 	
 	if(strName.empty())
 	{
