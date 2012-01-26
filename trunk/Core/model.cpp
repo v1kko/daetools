@@ -131,18 +131,38 @@ void daeModel::Clone(const daeModel& rObject)
 
 void daeModel::CleanUpSetupData()
 {
-	m_ptrarrParameters.EmptyAndFreeMemory();
-	m_ptrarrVariables.EmptyAndFreeMemory();
-	m_ptrarrEquations.EmptyAndFreeMemory();
-	m_ptrarrPortConnections.EmptyAndFreeMemory();
-	m_ptrarrEventPortConnections.EmptyAndFreeMemory();
+/*	
+	Domains, Parameters, Variables, Ports, EventPorts, Models and ExternalFunctions 
+    are created and owned by the user; here we just hold references on these objects.
+	Equations, PortConnections and EventPortConnections are internally owned by models. 
+	
+	In general, we may not destroy:
+	 - Domains (some nodes hold pointers to their data-points)
+	 - Models
+	 - STNS/IFs/States/StateTransitions
+*/	
+	//std::cout << "daeModel::CleanUpSetupData" << std::endl;
+
+	clean_vector(m_ptrarrDomains);
+	clean_vector(m_ptrarrParameters);
+	clean_vector(m_ptrarrVariables);
+	clean_vector(m_ptrarrPorts);
+	clean_vector(m_ptrarrEventPorts);
+	clean_vector(m_ptrarrExternalFunctions);
+	
+	clean_vector(m_ptrarrEquations);
+	clean_vector(m_ptrarrPortConnections);
+	clean_vector(m_ptrarrEventPortConnections);
+
+	for(size_t i = 0; i < m_ptrarrModels.size(); i++)
+		m_ptrarrModels[i]->CleanUpSetupData();
 	
 	for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
 		m_ptrarrModelArrays[i]->CleanUpSetupData();
-	
+
 	for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
 		m_ptrarrPorts[i]->CleanUpSetupData();
-	
+	clean_vector(m_ptrarrPortArrays);
 }
 
 void daeModel::Open(io::xmlTag_t* pTag)
@@ -1935,6 +1955,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			pDistrEqnDomainInfo7 = pEquation->m_ptrarrDistributedEquationDomainInfos[6];
 			pDistrEqnDomainInfo8 = pEquation->m_ptrarrDistributedEquationDomainInfos[7];
 			if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 || 
+
 
 			   !pDistrEqnDomainInfo5 || !pDistrEqnDomainInfo6 || !pDistrEqnDomainInfo7 || !pDistrEqnDomainInfo8)
 				daeDeclareAndThrowException(exInvalidPointer);

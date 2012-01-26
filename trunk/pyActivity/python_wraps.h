@@ -218,6 +218,18 @@ public:
 		this->daeSimulation::SetUpVariables();
 	}
 
+	void CleanUpSetupData(void)
+	{
+        if(boost::python::override f = this->get_override("CleanUpSetupData"))
+			f();
+		else
+			this->daeSimulation::CleanUpSetupData();
+	}
+	void def_CleanUpSetupData(void)
+	{
+		this->daeSimulation::CleanUpSetupData();
+	}
+
 	void Run(void)
 	{
         if(boost::python::override f = this->get_override("Run"))

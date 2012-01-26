@@ -51,9 +51,7 @@ void daeState::Clone(const daeState& rObject)
 
 void daeState::CleanUpSetupData()
 {
-	daePtrVector<daeStateTransition*>		m_ptrarrStateTransitions;
-
-	m_ptrarrEquations.EmptyAndFreeMemory();
+	clean_vector(m_ptrarrEquations);
 	
 	for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
 		m_ptrarrSTNs[i]->CleanUpSetupData();

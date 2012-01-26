@@ -157,6 +157,14 @@ protected:
 	bool m_bOwnershipOnPointers;
 };
 
+template <class T> 
+void clean_vector(daePtrVector<T>& ptrarrVector)
+{
+	ptrarrVector.EmptyAndFreeMemory();
+	daePtrVector<T>().swap(ptrarrVector);
+	//std::cout << "after clean_vector capacity = " << ptrarrVector.capacity() << std::endl;
+}
+
 /*********************************************************************************************
 	daePtrMap
 **********************************************************************************************/

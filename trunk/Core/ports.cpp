@@ -73,8 +73,8 @@ void daePort::Clone(const daePort& rObject)
 
 void daePort::CleanUpSetupData(void)
 {
-	m_ptrarrParameters.EmptyAndFreeMemory();
-	m_ptrarrVariables.EmptyAndFreeMemory();
+	clean_vector(m_ptrarrParameters);
+	clean_vector(m_ptrarrVariables);
 }
 
 void daePort::Open(io::xmlTag_t* pTag)

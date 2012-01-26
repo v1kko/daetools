@@ -563,6 +563,8 @@ void daeSimulation::Run(void)
 
 void daeSimulation::CleanUpSetupData(void)
 {
+//std::cout << "daeSimulation::CleanUpSetupData" << std::endl;
+
 // Clean up what can be cleaned up in the Models/DataProxy
 	m_pModel->GetDataProxy()->CleanUpSetupData();
 }

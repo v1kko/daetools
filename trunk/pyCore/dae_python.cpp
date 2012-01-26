@@ -384,7 +384,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__getitem__",						&daeDomain::operator [])
 		.def("__call__",						&daepython::FunctionCallDomain1)
 		.def("__call__",						&daepython::FunctionCallDomain2)
-		.def("__call__",						&daepython::FunctionCallDomain3) 
+		.def("__call__",						&daepython::FunctionCallDomain3)  
 		//.def("array",							&daepython::DomainArray1)
 		//.def("array",							&daepython::DomainArray2)
 		; 
