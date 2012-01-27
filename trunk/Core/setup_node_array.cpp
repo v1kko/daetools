@@ -675,6 +675,7 @@ void adVectorExternalFunctionNode::Export(std::string& strContent, daeeModelLang
 
 string adVectorExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
+	return string();
 }
 
 void adVectorExternalFunctionNode::Open(io::xmlTag_t* pTag)

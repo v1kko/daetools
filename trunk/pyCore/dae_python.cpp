@@ -726,8 +726,10 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeEventPort, bases<daeObject>, boost::noncopyable>("daeEventPort")
         .def(init<string, daeePortType, daeModel*, optional<string> >())
 
-        .add_property("Type",		&daeEventPort::GetType)
-        .add_property("EventData",	&daeEventPort::GetEventData)
+        .add_property("Type",			&daeEventPort::GetType)
+        .add_property("EventData",		&daeEventPort::GetEventData)
+	    .add_property("RecordEvents",	&daeEventPort::GetRecordEvents, &daeEventPort::SetRecordEvents)
+        .add_property("Events",			&daepython::GetEventPortEventsList)  
 		
 		.def("__call__",		&daeEventPort::operator())
 		.def("SendEvent",		&daeEventPort::SendEvent)  

@@ -224,6 +224,14 @@ def consoleRun():
 
     # Run
     simulation.Run()
+
+    # Print the list of events
+    log.Message('Events occured at the {0} event port:'.format(simulation.m.epOut.CanonicalName), 0)
+    log.Message(str(simulation.m.epOut.Events), 0)
+
+    log.Message('Events occured at the {0} event port:'.format(simulation.m.epIn.CanonicalName), 0)
+    log.Message(str(simulation.m.epIn.Events), 0)
+    
     simulation.Finalize()
 
 if __name__ == "__main__":

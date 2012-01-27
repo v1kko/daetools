@@ -772,6 +772,11 @@ public:
 };
 
 /*******************************************************
+	daeEventPort
+*******************************************************/
+boost::python::list GetEventPortEventsList(daeEventPort& self);
+
+/*******************************************************
 	daeEquation
 *******************************************************/
 //daeEquation* __init__daeEquation(const string& strName, daeModel& model);

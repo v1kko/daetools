@@ -1850,6 +1850,21 @@ void qSetInitialGuesses(daeVariable& var, const quantity& q)
 }
 
 /*******************************************************
+	daeEventPort
+*******************************************************/
+boost::python::list GetEventPortEventsList(daeEventPort& self)
+{
+	boost::python::list events;
+	std::list< std::pair<real_t, real_t> >::const_iterator citer;
+	const std::list< std::pair<real_t, real_t> >& listEvents = self.GetListOfEvents();
+	
+	for(citer = listEvents.begin(); citer != listEvents.end(); citer++)
+		events.append(boost::python::make_tuple(citer->first, citer->second));
+	
+	return events;
+}
+
+/*******************************************************
 	daeEquation
 *******************************************************/
 daeDEDI* DistributeOnDomain1(daeEquation& eq, daeDomain& rDomain, daeeDomainBounds eDomainBounds)

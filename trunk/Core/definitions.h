@@ -29,6 +29,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <list>
 #include <bitset>
 #include <map>
 #include <algorithm>

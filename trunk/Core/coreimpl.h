@@ -1992,13 +1992,20 @@ public:
 	void Initialize(void);
 	
 	real_t GetEventData(void);
+	
+	bool GetRecordEvents() const;
+	void SetRecordEvents(bool bRecordEvents);
+	const std::list< std::pair<real_t, real_t> >& GetListOfEvents(void) const;
+	
 	adouble operator()(void);
 	
 	void ReceiveEvent(real_t data);
 	
 protected:
-	real_t       m_dEventData;
-	daeePortType m_ePortType;
+	real_t									m_dEventData;
+	daeePortType							m_ePortType;
+	bool									m_bRecordEvents;
+	std::list< std::pair<real_t, real_t> >	m_listEvents;
 };
 
 /******************************************************************

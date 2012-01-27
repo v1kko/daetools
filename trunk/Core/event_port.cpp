@@ -13,7 +13,8 @@ namespace core
 **********************************************************************************************/
 daeEventPort::daeEventPort(void)
 {
-	m_dEventData = 0;
+	m_bRecordEvents = true;
+	m_dEventData    = 0;
 }
 
 daeEventPort::daeEventPort(string strName, daeePortType eType, daeModel* pModel, const string& strDescription)
@@ -21,7 +22,9 @@ daeEventPort::daeEventPort(string strName, daeePortType eType, daeModel* pModel,
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 	pModel->AddEventPort(*this, strName, eType, strDescription);
-	m_dEventData = 0;
+	
+	m_bRecordEvents = true;
+	m_dEventData    = 0;
 }
 
 daeEventPort::~daeEventPort(void)
@@ -51,6 +54,13 @@ void daeEventPort::SendEvent(real_t data)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 	m_dEventData = data;
+	
+	if(m_bRecordEvents)
+	{
+		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+		m_listEvents.push_back(std::make_pair(time, m_dEventData));
+	}
+	
 	//std::cout << "    Event sent from the outlet port: " << GetCanonicalName() << ", data = " << data << std::endl;
 	
 // Observers in this case are inlet event ports
@@ -64,6 +74,13 @@ void daeEventPort::Update(daeEventPort_t* pSubject, void* data)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 	m_dEventData = *((real_t*)data);
+	
+	if(m_bRecordEvents)
+	{
+		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+		m_listEvents.push_back(std::make_pair(time, m_dEventData));
+	}
+	
 	//std::cout << "    Update received in inlet port: " << GetCanonicalName() << ", dEventData = " << m_dEventData << std::endl;
 	
 // Observers in this case are OnEventActions
@@ -76,7 +93,13 @@ void daeEventPort::ReceiveEvent(real_t data)
 		daeDeclareAndThrowException(exInvalidPointer);
 
     m_dEventData = data;
-    
+	
+	if(m_bRecordEvents)
+	{
+		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+		m_listEvents.push_back(std::make_pair(time, m_dEventData));
+	}
+	
 // Observers in this case are OnEventActions
 	Notify(&data);
 }
@@ -88,6 +111,21 @@ void daeEventPort::Initialize(void)
 real_t daeEventPort::GetEventData(void)
 {
 	return m_dEventData;
+}
+
+bool daeEventPort::GetRecordEvents() const
+{
+	return m_bRecordEvents;
+}
+
+void daeEventPort::SetRecordEvents(bool bRecordEvents)
+{
+	m_bRecordEvents = bRecordEvents;
+}
+
+const std::list< std::pair<real_t, real_t> >& daeEventPort::GetListOfEvents(void) const
+{
+	return m_listEvents;
 }
 
 adouble daeEventPort::operator()(void)
