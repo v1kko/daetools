@@ -19,6 +19,7 @@ class daePythonStdOutLog(daeStdOutLog):
         daeStdOutLog.__init__(self)
 
     def Message(self, message, severity):
-        print '{0:30s}'.format(self.IndentString + message)
-        print ' {0} {1}'.format(self.PercentageDone, self.ETA), "\r",
-        sys.stdout.flush()
+        if self.Enabled:
+            print '{0:30s}'.format(self.IndentString + message)
+            print ' {0} {1}'.format(self.PercentageDone, self.ETA), "\r",
+            sys.stdout.flush()

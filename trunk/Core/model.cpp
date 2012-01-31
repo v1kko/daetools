@@ -136,17 +136,17 @@ void daeModel::CleanUpSetupData()
     are created and owned by the user; here we just hold references on these objects.
 	Equations, PortConnections and EventPortConnections are internally owned by models. 
 	
-	In general, we may not destroy:
+	In general, we may not clean the following vectors:
 	 - Domains (some nodes hold pointers to their data-points)
+	 - Variables (needed for data reporting)
 	 - Models
+	 - Ports
 	 - STNS/IFs/States/StateTransitions
 */	
 	//std::cout << "daeModel::CleanUpSetupData" << std::endl;
 
 	clean_vector(m_ptrarrDomains);
 	clean_vector(m_ptrarrParameters);
-	clean_vector(m_ptrarrVariables);
-	clean_vector(m_ptrarrPorts);
 	clean_vector(m_ptrarrEventPorts);
 	clean_vector(m_ptrarrExternalFunctions);
 	
