@@ -1823,12 +1823,14 @@ void daeVariableWrapper::Initialize(daeVariable* pVariable, std::string strName,
 	
 	if(strName.empty())
 	{
-		m_strName = pVariable->GetName();
+		m_strName = pVariable->GetCanonicalName();
 		if(!narrDomainIndexes.empty())
 			m_strName += "(" + toString(narrDomainIndexes, string(",")) + ")";
 	}
 	else
+	{
 		m_strName = strName;
+	}
 }
 
 string daeVariableWrapper::GetName(void) const

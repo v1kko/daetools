@@ -11,16 +11,18 @@ namespace core
 *******************************************************************/
 daeParameter::daeParameter(void)
 {
-	m_pModel      = NULL;
-	m_pParentPort = NULL;
+	m_bReportingOn = false;
+	m_pModel       = NULL;
+	m_pParentPort  = NULL;
 }
 	
 daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit        = units;
-	m_pModel      = pModel;
-	m_pParentPort = NULL;
+	m_bReportingOn = false;
+	m_Unit         = units;
+	m_pModel       = pModel;
+	m_pParentPort  = NULL;
 
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -32,9 +34,10 @@ daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, 
 daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 
 						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
-	m_Unit        = units;
-	m_pModel      = NULL;
-	m_pParentPort = pPort;
+	m_bReportingOn = false;
+	m_Unit         = units;
+	m_pModel       = NULL;
+	m_pParentPort  = pPort;
 
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -190,6 +193,16 @@ string daeParameter::GetCanonicalName(void) const
 		return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
 	else
 		return daeObject::GetCanonicalName();
+}
+
+bool daeParameter::GetReportingOn(void) const
+{
+	return m_bReportingOn;
+}
+
+void daeParameter::SetReportingOn(bool bOn)
+{
+	m_bReportingOn = bOn;
 }
 
 void daeParameter::Initialize(void)
@@ -449,6 +462,17 @@ void daeParameter::DistributeOnDomain(daeDomain& rDomain)
 real_t* daeParameter::GetValuePointer(void)
 {
 	return &m_darrValues[0];
+}
+
+size_t daeParameter::GetNumberOfPoints(void) const
+{
+	if(m_darrValues.empty())
+	{	
+		daeDeclareException(exInvalidCall); 
+		e << "Number of points in the parameter [" << GetCanonicalName() << "] must not be zero; did you forget to initialize it?";
+		throw e;
+	}
+	return m_darrValues.size();
 }
 
 size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const

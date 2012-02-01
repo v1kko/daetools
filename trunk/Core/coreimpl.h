@@ -1362,6 +1362,11 @@ public:
 	virtual string	GetCanonicalName(void) const;
 	virtual unit	GetUnits(void) const;
 	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
+	
+	virtual bool	GetReportingOn(void) const;
+	virtual void	SetReportingOn(bool bOn);
+
+	virtual size_t	GetNumberOfPoints(void)	const;
 	virtual real_t*	GetValuePointer(void);
 
 	virtual void	SetValue(real_t value);
@@ -1468,6 +1473,7 @@ protected:
 	size_t  CalculateIndex(const size_t* indexes, const size_t N) const;
 
 protected:
+	bool							m_bReportingOn;
 	std::vector<real_t>				m_darrValues;
 	unit							m_Unit;
 	std::vector<daeDomain*>			m_ptrDomains;
@@ -1929,6 +1935,10 @@ public:
 	void AddVariable(daeVariable& rVariable, const string& strName, const daeVariableType& rVariableType, string strDescription = "");
 	void AddParameter(daeParameter& rParameter, const string& strName, const unit& units, string strDescription = "");
 	
+	const std::vector<daeDomain*>& Domains() const;
+	const std::vector<daeParameter*>& Parameters() const;
+	const std::vector<daeVariable*>& Variables() const;
+	
 protected:
 	void			InitializeParameters(void);
 	void			InitializeVariables(void);
@@ -2319,6 +2329,14 @@ public:
 
 	void ConnectPorts(daePort* pPortFrom, daePort* pPortTo);
 	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
+
+	const std::vector<daePort*>& Ports() const;
+	const std::vector<daeModel*>& Models() const;
+	const std::vector<daeDomain*>& Domains() const;
+	const std::vector<daeParameter*>& Parameters() const;
+	const std::vector<daeVariable*>& Variables() const;
+	const std::vector<daePortArray*>& PortArrays() const;
+	const std::vector<daeModelArray*>& ModelArrays() const;
 	
 // Overridables		
 public:

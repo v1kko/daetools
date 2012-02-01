@@ -102,6 +102,17 @@ public:
 	size_t GetNumberOfObjectiveFunctions(void) const;
 	void   SetNumberOfObjectiveFunctions(size_t n);
 	
+	void	Register(daeModel* pModel);
+	void	Register(daePort* pPort);
+	void	Register(daeVariable* pVariable);
+	void	Register(daeParameter* pParameter);
+	void	Register(daeDomain* pDomain);
+	
+	void	Report(daeModel* pModel, real_t time);
+	void	Report(daePort* pPort, real_t time);
+	void	Report(daeVariable* pVariable, real_t time);
+	void	Report(daeParameter* pParameter, real_t time);
+	
 protected:
 //	void	SetInitialConditionsToZero(void);
 	void	CheckSystem(void) const;
@@ -111,14 +122,6 @@ protected:
 
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
-	
-	void	RegisterModel(daeModel_t* pModel);
-	void	RegisterPort(daePort_t* pPort);
-	void	RegisterVariable(daeVariable_t* pVariable);
-	void	RegisterDomain(daeDomain_t* pDomain);
-	void	ReportModel(daeModel_t* pModel, real_t time);
-	void	ReportPort(daePort_t* pPort, real_t time);
-	void	ReportVariable(daeVariable_t* pVariable, real_t time);
 	
 protected:
 	real_t						m_dCurrentTime;

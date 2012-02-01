@@ -1230,7 +1230,8 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 		variable = p.first;
 		value    = p.second;
 			
-		pAction = new daeAction(string("actionSetVariable_") + variable.GetName(), this, variable, value, string(""));
+		string name = ReplaceAll(string("actionSetVariable_") + variable.GetName(), '.', '_');
+		pAction = new daeAction(name, this, variable, value, string(""));
 
 		ptrarrActions.push_back(pAction);
 	}
@@ -1514,36 +1515,44 @@ void daeModel::SetReportingOn(bool bOn)
 	daePortArray* pPortArray;
 	daeModelArray* pModelArray;
 	daeVariable* pVariable;
+	daeParameter* pParameter;
 
-// Set reporting in all variables
+// Set reporting on for all variables
 	for(i = 0; i < m_ptrarrVariables.size(); i++)
 	{
 		pVariable = m_ptrarrVariables[i];
 		pVariable->SetReportingOn(bOn);
 	}
+
+// Set reporting on for all parameters
+	for(i = 0; i < m_ptrarrParameters.size(); i++)
+	{
+		pParameter = m_ptrarrParameters[i];
+		pParameter->SetReportingOn(bOn);
+	}
 	
-// Set reporting in ports
+// Set reporting on for ports
 	for(i = 0; i < m_ptrarrPorts.size(); i++)
 	{
 		pPort = m_ptrarrPorts[i];
 		pPort->SetReportingOn(bOn);
 	}
 
-// Set reporting in child models
+// Set reporting on for child models
 	for(i = 0; i < m_ptrarrModels.size(); i++)
 	{
 		pModel = m_ptrarrModels[i];
 		pModel->SetReportingOn(bOn);
 	}
 	
-// Set reporting in each portarray
+// Set reporting on for each portarray
 	for(i = 0; i < m_ptrarrPortArrays.size(); i++)
 	{
 		pPortArray = m_ptrarrPortArrays[i];
 		pPortArray->SetReportingOn(bOn);
 	}
 	
-// Set reporting in each modelarray
+// Set reporting on for each modelarray
 	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
 	{
 		pModelArray = m_ptrarrModelArrays[i];
@@ -3753,6 +3762,42 @@ void daeModel::SetModelAndCanonicalName(daeObject* pObject)
 	
 	pObject->m_pModel = this;
 }
+
+const std::vector<daePort*>& daeModel::Ports() const
+{
+	return m_ptrarrPorts;
+}
+
+const std::vector<daeModel*>& daeModel::Models() const
+{
+	return m_ptrarrModels;
+}
+
+const std::vector<daeDomain*>& daeModel::Domains() const
+{
+	return m_ptrarrDomains;
+}
+
+const std::vector<daeVariable*>& daeModel::Variables() const
+{
+	return m_ptrarrVariables;
+}
+
+const std::vector<daeParameter*>& daeModel::Parameters() const
+{
+	return m_ptrarrParameters;
+}
+
+const std::vector<daePortArray*>& daeModel::PortArrays() const
+{
+	return m_ptrarrPortArrays;
+}
+
+const std::vector<daeModelArray*>& daeModel::ModelArrays() const
+{
+	return m_ptrarrModelArrays;
+}
+
 
 void daeModel::GetSTNs(vector<daeSTN_t*>& ptrarrSTNs)
 {

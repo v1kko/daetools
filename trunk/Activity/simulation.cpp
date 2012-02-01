@@ -241,7 +241,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Register model
 	m_dCurrentTime = 0;
 	m_pDataReporter->StartRegistration();
-	RegisterModel(m_pModel);
+	Register(m_pModel);
 	m_pDataReporter->EndRegistration();
 	
 // Set the IsInitialized flag to true
@@ -1112,7 +1112,7 @@ void daeSimulation::EnterConditionalIntegrationMode(void)
 real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion)
 {
 /**************************************************************/
-	daeDeclareAndThrowException(exNotImplemented)
+	daeDeclareAndThrowException(exNotImplemented);
 /**************************************************************/
 
 	if(!m_bConditionalIntegrationMode)
@@ -1145,87 +1145,83 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 	return m_dCurrentTime;
 }
 
-void daeSimulation::RegisterModel(daeModel_t* pModel)
+template<class T>
+class daeRegisterArray : public std::unary_function<T, void> 
 {
-	size_t i;
-	daeVariable_t* pVariable;
-	daeDomain_t* pDomain;
-	daePort_t* pPort;
-	daeModel_t* pChildModel;
-	vector<daeVariable_t*> arrVars;
-	vector<daePort_t*> arrPorts;
-	vector<daeDomain_t*> arrDomains;
-	vector<daeModel_t*> arrModels;
+public:
+	daeRegisterArray(daeSimulation& rSimulation)
+	    : m_Simulation(rSimulation)
+	{
+	}
+	
+	void operator() (T obj) 
+	{
+		m_Simulation.Register(obj);
+	}
+	
+	daeSimulation& m_Simulation;
+};
 
+template<class T>
+class daeReportArray : public std::unary_function<T, void> 
+{
+public:
+	daeReportArray(daeSimulation& rSimulation, real_t time) 
+	    : m_time(time), m_Simulation(rSimulation)
+	{
+	}
+	
+	void operator() (T obj) 
+	{
+		m_Simulation.Report(obj, m_time);
+	}
+	
+	real_t         m_time;
+	daeSimulation& m_Simulation;
+};
+
+void daeSimulation::Register(daeModel* pModel)
+{
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	pModel->GetDomains(arrDomains);
-	for(i = 0; i < arrDomains.size(); i++)
-	{
-		pDomain = arrDomains[i];
-		RegisterDomain(pDomain);
-	}
-
-	pModel->GetVariables(arrVars);
-	for(i = 0; i < arrVars.size(); i++)
-	{
-		pVariable = arrVars[i];
-		RegisterVariable(pVariable);
-	}
-
-	pModel->GetPorts(arrPorts);
-	for(i = 0; i < arrPorts.size(); i++)
-	{
-		pPort = arrPorts[i];
-		RegisterPort(pPort);
-	}
-
-	pModel->GetModels(arrModels);
-	for(i = 0; i < arrModels.size(); i++)
-	{
-		pChildModel = arrModels[i];
-		RegisterModel(pChildModel);
-	}
+	daeRegisterArray<daeDomain*>	 regDomain(*this);
+	daeRegisterArray<daeParameter*>  regParameter(*this);
+	daeRegisterArray<daeVariable*>   regVariable(*this);
+	daeRegisterArray<daePort*>       regPort(*this);
+	daeRegisterArray<daeModel*>      regModel(*this);
+	
+	std::for_each(pModel->Domains().begin(),    pModel->Domains().end(),    regDomain);
+	std::for_each(pModel->Parameters().begin(), pModel->Parameters().end(), regParameter);
+	std::for_each(pModel->Variables().begin(),  pModel->Variables().end(),  regVariable);
+	std::for_each(pModel->Ports().begin(),      pModel->Ports().end(),      regPort);
+	std::for_each(pModel->Models().begin(),     pModel->Models().end(),     regModel);
 }
 
-void daeSimulation::RegisterPort(daePort_t* pPort)
+void daeSimulation::Register(daePort* pPort)
 {
-	size_t i;
-	daeVariable_t* pVariable;
-	daeDomain_t* pDomain;
-	vector<daeVariable_t*> arrVars;
-	vector<daeDomain_t*> arrDomains;
-
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	pPort->GetDomains(arrDomains);
-	for(i = 0; i < arrDomains.size(); i++)
-	{
-		pDomain = arrDomains[i];
-		RegisterDomain(pDomain);
-	}
-
-	pPort->GetVariables(arrVars);
-	for(i = 0; i < arrVars.size(); i++)
-	{
-		pVariable = arrVars[i];
-		RegisterVariable(pVariable);
-	}
+	daeRegisterArray<daeDomain*>	 regDomain(*this);
+	daeRegisterArray<daeParameter*>  regParameter(*this);
+	daeRegisterArray<daeVariable*>   regVariable(*this);
+	
+	std::for_each(pPort->Domains().begin(),    pPort->Domains().end(),    regDomain);
+	std::for_each(pPort->Parameters().begin(), pPort->Parameters().end(), regParameter);
+	std::for_each(pPort->Variables().begin(),  pPort->Variables().end(),  regVariable);
 }
 
-void daeSimulation::RegisterVariable(daeVariable_t* pVariable)
+void daeSimulation::Register(daeVariable* pVariable)
 {
+	if(!pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pVariable->GetReportingOn())
+		return;
+
 	size_t i; 
 	daeDomain_t* pDomain;
 	vector<daeDomain_t*> arrDomains;
-
-	if(!pVariable)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	if(!pVariable->GetReportingOn())
-		return;
 	
 	daeDataReporterVariable var;
 	var.m_strName = pVariable->GetCanonicalName();
@@ -1245,7 +1241,36 @@ void daeSimulation::RegisterVariable(daeVariable_t* pVariable)
 	}
 }
 
-void daeSimulation::RegisterDomain(daeDomain_t* pDomain)
+void daeSimulation::Register(daeParameter* pParameter)
+{
+	if(!pParameter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pParameter->GetReportingOn())
+		return;
+	
+	size_t i; 
+	daeDomain_t* pDomain;
+	vector<daeDomain_t*> arrDomains;
+
+	daeDataReporterVariable var;
+	var.m_strName = pParameter->GetCanonicalName();
+	var.m_nNumberOfPoints = pParameter->GetNumberOfPoints();
+	pParameter->GetDomains(arrDomains);
+	for(i = 0; i < arrDomains.size(); i++)
+	{
+		pDomain = arrDomains[i];
+		var.m_strarrDomains.push_back(pDomain->GetCanonicalName());
+	}
+
+	if(!m_pDataReporter->RegisterVariable(&var))
+	{
+		daeDeclareException(exDataReportingError);
+		e << "Simulation dastardly failed to register parameter [" << var.m_strName << "]";
+		throw e;
+	}
+}
+
+void daeSimulation::Register(daeDomain* pDomain)
 {
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -1281,72 +1306,49 @@ void daeSimulation::ReportData(real_t dCurrentTime)
 		throw e;
 	}
 
-	ReportModel(m_pModel, dCurrentTime);
+	Report(m_pModel, dCurrentTime);
 }
 
-void daeSimulation::ReportModel(daeModel_t* pModel, real_t time)
+void daeSimulation::Report(daeModel* pModel, real_t time)
 {
-	size_t i;
-	daeVariable_t* pVariable;
-	daePort_t* pPort;
-	daeModel_t* pChildModel;
-	vector<daeVariable_t*> arrVars;
-	vector<daePort_t*> arrPorts;
-	vector<daeModel_t*> arrModels;
-
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	pModel->GetVariables(arrVars);
-	for(i = 0; i < arrVars.size(); i++)
-	{
-		pVariable = arrVars[i];
-		ReportVariable(pVariable, time);
-	}
-
-	pModel->GetPorts(arrPorts);
-	for(i = 0; i < arrPorts.size(); i++)
-	{
-		pPort = arrPorts[i];
-		ReportPort(pPort, time);
-	}
-
-	pModel->GetModels(arrModels);
-	for(i = 0; i < arrModels.size(); i++)
-	{
-		pChildModel = arrModels[i];
-		ReportModel(pChildModel, time);
-	}
+	daeReportArray<daeParameter*>  repParameter(*this, time);
+	daeReportArray<daeVariable*>   repVariable(*this, time);
+	daeReportArray<daePort*>       repPort(*this, time);
+	daeReportArray<daeModel*>      repModel(*this, time);
+	
+	if(time == 0)
+		std::for_each(pModel->Parameters().begin(), pModel->Parameters().end(), repParameter);
+	std::for_each(pModel->Variables().begin(),  pModel->Variables().end(),  repVariable);
+	std::for_each(pModel->Ports().begin(),      pModel->Ports().end(),      repPort);
+	std::for_each(pModel->Models().begin(),     pModel->Models().end(),     repModel);
 }
 
-void daeSimulation::ReportPort(daePort_t* pPort, real_t time)
+void daeSimulation::Report(daePort* pPort, real_t time)
 {
-	size_t i;
-	daeVariable_t* pVariable;
-	vector<daeVariable_t*> arrVars;
-
 	if(!pPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	pPort->GetVariables(arrVars);
-	for(i = 0; i < arrVars.size(); i++)
-	{
-		pVariable = arrVars[i];
-		ReportVariable(pVariable, time);
-	}
+	daeReportArray<daeParameter*>  repParameter(*this, time);
+	daeReportArray<daeVariable*>   repVariable(*this, time);
+	
+	if(time == 0)
+		std::for_each(pPort->Parameters().begin(), pPort->Parameters().end(), repParameter);
+	std::for_each(pPort->Variables().begin(),  pPort->Variables().end(),  repVariable);
 }
 
-void daeSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
+void daeSimulation::Report(daeVariable* pVariable, real_t time)
 {
+	if(!pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pVariable->GetReportingOn())
+		return;
+
 	real_t* pd;
 	daeDataReporterVariableValue var;
 	size_t i, nSize;
-
-	if(!pVariable)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	if(!pVariable->GetReportingOn())
-		return;
 	
 	var.m_strName = pVariable->GetCanonicalName();
 	pd = pVariable->GetValuePointer();
@@ -1360,6 +1362,33 @@ void daeSimulation::ReportVariable(daeVariable_t* pVariable, real_t time)
 	{
 		daeDeclareException(exDataReportingError);
 		e << "Simulation dastardly failed to report variable [" << var.m_strName << "] at TIME: [" << time << "]";
+		throw e;
+	}
+}
+
+void daeSimulation::Report(daeParameter* pParameter, real_t time)
+{
+	if(!pParameter)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!pParameter->GetReportingOn())
+		return;
+
+	real_t* pd;
+	daeDataReporterVariableValue var;
+	size_t i, nSize;
+
+	var.m_strName = pParameter->GetCanonicalName();
+	pd = pParameter->GetValuePointer();
+	nSize = pParameter->GetNumberOfPoints();
+	var.m_nNumberOfPoints = nSize;
+	var.m_pValues = new real_t[nSize];
+	for(i = 0; i < nSize; i++)
+		var.m_pValues[i] = pd[i];
+
+	if(!m_pDataReporter->SendVariable(&var))
+	{
+		daeDeclareException(exDataReportingError);
+		e << "Simulation dastardly failed to report parameter [" << var.m_strName << "]";
 		throw e;
 	}
 }

@@ -351,11 +351,20 @@ void daePort::SetReportingOn(bool bOn)
 {
 	size_t i;
 	daeVariable* pVariable;
+	daeParameter* pParameter;
 
+// Set reporting on for all variables
 	for(i = 0; i < m_ptrarrVariables.size(); i++)
 	{
 		pVariable = m_ptrarrVariables[i];
 		pVariable->SetReportingOn(bOn);
+	}
+	
+// Set reporting on for all parameters
+	for(i = 0; i < m_ptrarrParameters.size(); i++)
+	{
+		pParameter = m_ptrarrParameters[i];
+		pParameter->SetReportingOn(bOn);
 	}
 }
 
@@ -741,6 +750,21 @@ daeVariable* daePort::FindVariable(string& strName)
 			return pObject;
 	}
 	return NULL;
+}
+
+const std::vector<daeDomain*>& daePort::Domains() const
+{
+	return m_ptrarrDomains;
+}
+
+const std::vector<daeVariable*>& daePort::Variables() const
+{
+	return m_ptrarrVariables;
+}
+
+const std::vector<daeParameter*>& daePort::Parameters() const
+{
+	return m_ptrarrParameters;
 }
 
 void daePort::SetModelAndCanonicalName(daeObject* pObject)

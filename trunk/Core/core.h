@@ -357,8 +357,13 @@ class daeParameter_t : virtual public daeObject_t
 public:
 	virtual unit	GetUnits(void) const									= 0;
 	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
+	
+	virtual size_t	GetNumberOfPoints(void)	const							= 0;
 	virtual real_t*	GetValuePointer(void)									= 0;
 
+	virtual bool	GetReportingOn(void) const								= 0;
+	virtual void	SetReportingOn(bool bOn)								= 0;
+	
 	virtual void	SetValue(real_t value)																									= 0;
 	virtual void	SetValue(size_t nD1, real_t value)																						= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, real_t value)																			= 0;

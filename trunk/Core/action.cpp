@@ -213,7 +213,8 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t data = m_pNode->Evaluate(&EC).getValue();
-		//std::cout << "    Event data : " << data << std::endl;
+		
+		//std::cout << "Send event to " << m_pSendEventPort->GetCanonicalName() << "; event data: " << data << std::endl;
 		
 		m_pSendEventPort->SendEvent(data);
 	}
@@ -224,9 +225,10 @@ void daeAction::Execute(void)
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t value = m_pNode->Evaluate(&EC).getValue();
-		//std::cout << "    Variable value: " << m_pVariable->GetValue() << " ; new value: " << value << std::endl;
+		//std::cout << m_pVariableWrapper->GetName() << " (old: " << m_pVariableWrapper->GetValue() << "; new: " << value << ")" << std::endl;
 		
 		m_pVariableWrapper->SetValue(value);
+		//std::cout << m_pVariableWrapper->GetName() << " have got a new value: " << m_pVariableWrapper->GetValue() << std::endl;
 		
 	// Set the reinitialization flag to true to mark the system ready for re-initialization
 		m_pModel->m_pDataProxy->SetReinitializationFlag(true);

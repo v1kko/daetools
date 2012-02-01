@@ -187,7 +187,8 @@ class dae2DPlot(QtGui.QDialog):
             y = line.get_ydata()
             datafile.write('\"' + xlabel + '\",\"' + ylabel + '\"\n' )
             for i in range(0, len(x)):
-                datafile.write(str(x[i]) + ',' + str(y[i]) + '\n')
+                datafile.write('%.14e,%.14e\n' % (x[i], y[i]))
+                #datafile.write(str(x[i]) + ',' + str(y[i]) + '\n')
             datafile.write('\n')
 
     #@QtCore.pyqtSlot()

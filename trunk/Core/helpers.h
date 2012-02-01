@@ -70,8 +70,8 @@ std::vector<std::string>  ParseString(const std::string& strSource, std::string 
 
 void		MakeUpper(std::string& strSource);
 void		MakeLower(std::string& strSource);
-std::string	Replace(std::string strSource,    char cFind = ' ', char cReplace = '_');
-std::string	ReplaceAll(std::string strSource, char cFind = ' ', char cReplace = '_');
+std::string	Replace(const std::string& strSource,    char cFind = ' ', char cReplace = '_');
+std::string	ReplaceAll(const std::string& strSource, char cFind = ' ', char cReplace = '_');
 void		RemoveAll(std::string& strSource, const std::string& strFind);
 void		RemoveAllNonAlphaNumericCharacters(std::string& strSource);
 inline void RemoveAllNonAlphaNumericCharacters(std::vector<std::string>& strarrSource);
@@ -501,7 +501,7 @@ inline void MakeLower(std::string& strSource)
 	strSource = strTemp;
 }
 
-inline std::string Replace(std::string strSource, char cFind /*=' '*/, char cReplace /*='_'*/)
+inline std::string Replace(const std::string& strSource, char cFind /*=' '*/, char cReplace /*='_'*/)
 {
 	std::string strReturn = strSource;
 
@@ -516,7 +516,7 @@ inline std::string Replace(std::string strSource, char cFind /*=' '*/, char cRep
 	return strReturn;
 }
 
-inline std::string ReplaceAll(std::string strSource, char cFind /*=' '*/, char cReplace /*='_'*/)
+inline std::string ReplaceAll(const std::string& strSource, char cFind /*=' '*/, char cReplace /*='_'*/)
 {
 	std::string strReturn = strSource;
 
