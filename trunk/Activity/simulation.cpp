@@ -539,7 +539,7 @@ void daeSimulation::Run(void)
 		
 		m_dCurrentTime = t;
 		ReportData(m_dCurrentTime);
-		size_t newProgress = ceil(100.0 * m_dCurrentTime/m_dTimeHorizon); 
+		real_t newProgress = ceil(100.0 * m_dCurrentTime/m_dTimeHorizon); 
 		if(newProgress > m_pLog->GetProgress())
 			m_pLog->SetProgress(newProgress);	
 	}

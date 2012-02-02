@@ -1567,17 +1567,17 @@ public:
         this->daeBaseLog::Message(strMessage, nSeverity);
 	}
 
-	void SetProgress(size_t nProgress)
+	void SetProgress(real_t dProgress)
 	{
         if(boost::python::override f = this->get_override("SetProgress"))
-            f(nProgress);
+            f(dProgress);
 		else
-			this->daeBaseLog::SetProgress(nProgress);
+			this->daeBaseLog::SetProgress(dProgress);
 	}
 
-	void def_SetProgress(size_t nProgress)
+	void def_SetProgress(real_t dProgress)
 	{
-        this->daeBaseLog::SetProgress(nProgress);
+        this->daeBaseLog::SetProgress(dProgress);
 	}
 };
 

@@ -38,7 +38,7 @@ public:
 	{
 		m_bEnabled  = true;
 		m_nIndent   = 0;
-		m_nProgress = 0;
+		m_dProgress = 0;
 		
 		daeConfig& cfg  = daeConfig::GetConfig();
 		m_strIndentUnit = cfg.Get<std::string>("daetools.core.logIndent", "\t");
@@ -99,14 +99,14 @@ public:
 		}
 	}
 	
-	virtual void SetProgress(size_t nProgress)
+	virtual void SetProgress(real_t nProgress)
 	{
-		m_nProgress = nProgress;
+		m_dProgress = nProgress;
 	}
 
-	virtual size_t GetProgress(void) const
+	virtual real_t GetProgress(void) const
 	{
-		return m_nProgress;
+		return m_dProgress;
 	}
 	
 	virtual string JoinMessages(const std::string& join = std::string("\n")) const
@@ -123,8 +123,8 @@ public:
 		int days, hours, mins;
 		
 		dt = start.elapsed();
-		if(m_nProgress < 100 && m_nProgress > 0)
-			left = 100.0 * dt / m_nProgress - dt;
+		if(m_dProgress < 100 && m_dProgress > 0)
+			left = 100.0 * dt / m_dProgress - dt;
 		else
 			left = 0.0;
 		
@@ -146,7 +146,7 @@ public:
 	
 	virtual string GetPercentageDone(void) const
 	{
-		return (boost::format("%3d%%") % m_nProgress).str();
+		return (boost::format("%.2f%%") % m_dProgress).str();
 	}
 
 	void UpdateIndent(void)
@@ -160,7 +160,7 @@ protected:
 	std::vector<string> m_strarrMessages;
 	bool				m_bEnabled;
 	size_t				m_nIndent;
-	size_t				m_nProgress;
+	real_t				m_dProgress;
 	std::string			m_strIndent;
 	std::string			m_strIndentUnit;
 	boost::timer        start;
