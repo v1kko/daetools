@@ -177,7 +177,7 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 
 // Setting initial conditions and initial values, and set rel. and abs. tolerances
 // and determine if the model is dynamic or steady-state
-	Set_InitialConditions_InitialGuesses_AbsRelTolerances();
+	SetInitialOptions();
 
 // Create IDA structure 
 	CreateIDA();
@@ -208,7 +208,7 @@ void daeIDASolver::CreateArrays(void)
 	m_pIDASolverData->CreateSerialArrays(m_nNumberOfEquations);
 }
 
-void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
+void daeIDASolver::SetInitialOptions(void)
 {
 	daeArray<real_t> arrAbsoluteTolerances;
 	daeArray<real_t> arrInitialConditionsTypes;
@@ -224,7 +224,14 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
 	arrInitialConditionsTypes.InitArray(m_nNumberOfEquations, pInitialConditionsTypes);
 	arrAbsoluteTolerances.InitArray(m_nNumberOfEquations,     pAbsoluteTolerances);
 
-/* I have to fill initial values of:
+/* 
+   Create values/derivatives mapping so that there is no need to explicitly copy the data from/to the solver.
+   The values will be shared between the daeDataProxy and the daeIDASolver
+*/
+	m_pBlock->CreateIndexMappings(m_arrValues, m_arrTimeDerivatives);
+	
+/* 
+   I have to fill initial values of:
              - Variables
 			 - Time derivatives
 			 - Variable IC types (that is whether the initial conditions are algebraic or differential)
@@ -232,6 +239,9 @@ void daeIDASolver::Set_InitialConditions_InitialGuesses_AbsRelTolerances(void)
    To do so first I set arrays into which I have to copy and then actually copy values,
    by the function SetInitialConditionsAndInitialGuesses().
 */
+	if(m_eInitialConditionMode == eQuasySteadyState)
+		m_pBlock->SetAllInitialConditions(0.0);
+
 	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
 
 // Determine if the model is dynamic or steady-state
@@ -520,9 +530,6 @@ void daeIDASolver::SolveInitial(void)
 		throw e;
 	}
 	
-	if(m_eInitialConditionMode == eQuasySteadyState)
-		m_pBlock->SetAllInitialConditions(0.0);
-
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
 	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
@@ -568,15 +575,15 @@ void daeIDASolver::Reset(void)
 void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 {
 	int retval;
-	string strMessage = "Reinitializing at time: " + toString<real_t>(m_dCurrentTime);
-	m_pLog->Message(strMessage, 0);
-
+	
+	if(m_bPrintInfo)
+	{
+		string strMessage = "Reinitializing at time: " + toString<real_t>(m_dCurrentTime);
+		m_pLog->Message(strMessage, 0);
+	}
+	
 	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
 	
-// Calculate initial conditions again
-	if(m_eInitialConditionMode == eQuasySteadyState)
-		m_pBlock->SetAllInitialConditions(0.0);
-
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
 	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
@@ -626,13 +633,13 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 		m_pBlock->CopyDataToSolver(m_arrValues, m_arrTimeDerivatives);
 	}
 	
-// Call the LA solver Reinitialize, if needed.
-// (the sparse matrix pattern has been changed after the discontinuity
-	if(m_eLASolver == eThirdParty)
-	{
-		if(m_bResetLAMatrixAfterDiscontinuity)
-			m_pLASolver->Reinitialize(m_pIDA);
-	}
+	// Call the LA solver Reinitialize, if needed.
+	// (the sparse matrix pattern has been changed after the discontinuity
+		if(m_eLASolver == eThirdParty)
+		{
+			if(m_bResetLAMatrixAfterDiscontinuity)
+				m_pLASolver->Reinitialize(m_pIDA);
+		}
 	
 // ReInit IDA
 	retval = IDAReInit(m_pIDA,
@@ -692,6 +699,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 		}
 		
 	// Now we have to copy the values *from* the solver *to* the block
+	// Achtung, Achtung: This might be avoided if there is no assigned variables!
 		realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
 		realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
 	

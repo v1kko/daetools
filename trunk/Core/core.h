@@ -799,6 +799,7 @@ public:
 
 	virtual void	CopyDataFromSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)     = 0;
 	virtual void	CopyDataToSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) const = 0;
+	virtual void	CreateIndexMappings(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)    = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;

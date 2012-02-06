@@ -2721,7 +2721,7 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 				e << *it << string("\n");
 			throw e;
 		}
-				
+		
 // Print the block
 //		cout << "Results of block decomposition:" << endl;
 //		barrVars.resize(nNoEquations, false);

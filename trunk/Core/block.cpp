@@ -421,6 +421,15 @@ void daeBlock::CopyDataToSolver(daeArray<real_t>& arrValues, daeArray<real_t>& a
 	}
 }
 
+void daeBlock::CreateIndexMappings(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)
+{
+#ifdef DAE_DEBUG
+	if(!m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+#endif
+	m_pDataProxy->CreateIndexMappings(m_mapVariableIndexes, arrValues.Data(), arrTimeDerivatives.Data());
+}
+
 void daeBlock::Initialize(void)
 {
 	size_t i;

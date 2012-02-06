@@ -55,7 +55,7 @@ public:
 
 protected:
 	virtual void CreateArrays(void);
-	virtual void Set_InitialConditions_InitialGuesses_AbsRelTolerances(void);
+	virtual void SetInitialOptions(void);
 	virtual void CreateIDA(void);
 	virtual void CreateLinearSolver(void);
 	virtual void SetupSensitivityCalculation(void);
