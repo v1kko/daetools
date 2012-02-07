@@ -104,6 +104,11 @@ public:
 	daeArray<real_t>	m_arrResiduals;
 	daeSuperLUMatrix	m_matJacobian;
 	bool				m_bFactorizationDone;
+	
+	bool				m_bReuseEverything;
+	bool				m_bUseUserSuppliedWorkSpace;
+	double				m_dWorkspaceMemoryIncrement;
+	double				m_dInitialWorkspaceSize;
 
 #ifdef daeSuperLU_MT
 	SuperMatrix			m_matA;

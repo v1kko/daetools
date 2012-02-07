@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
-
+#include "../config.h"
 
 namespace dae
 {
@@ -35,12 +35,23 @@ daeIDALASolver_t* daeCreateSuperLU_MTSolver(void)
 
 daeSuperLUSolver::daeSuperLUSolver(void)
 {
-	m_pBlock	= NULL;
-	m_vecB		= NULL;
-	m_vecX		= NULL;
-	m_bFactorizationDone = false;
-	m_solve     = 0;
-	m_factorize = 0;
+	m_pBlock					= NULL;
+	m_vecB						= NULL;
+	m_vecX						= NULL;
+	m_bFactorizationDone		= false;
+	m_solve						= 0;
+	m_factorize					= 0;
+	
+	daeConfig& cfg = daeConfig::GetConfig();
+	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
+	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.2);
+	m_dInitialWorkspaceSize     = cfg.Get<double>("daetools.superlu.initialWorkspaceSize",        1.3);
+	
+	string strReuse = cfg.Get<string>("daetools.superlu.Fact", string("SamePattern"));
+	if(strReuse == string("SamePattern_SameRowPerm"))
+		m_bReuseEverything = true;
+	else
+		m_bReuseEverything = false;
 	
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
@@ -242,7 +253,7 @@ void daeSuperLUSolver::FreeMemory(void)
 	StatFree(&m_Stats);
 
 	if(m_work && m_lwork > 0)
-		SUPERLU_FREE(m_work);
+		free(m_work);
     m_work	= NULL;
     m_lwork	= 0;
 
@@ -301,7 +312,7 @@ void daeSuperLUSolver::FreeMemory(void)
 	}
 
 	if(m_work && m_lwork > 0)
-		SUPERLU_FREE(m_work);
+		free(m_work);
     m_work	= NULL;
     m_lwork	= 0;
 	
@@ -640,29 +651,66 @@ int daeSuperLUSolver::Setup(void*		ida,
 // Therefore before each call to sp_preorder() destroy matrix AC with a call to Destroy_CompCol_Permuted(&AC)
 	sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
 
-// This will be disabled at the moment!!
 // Determine the amount of memory:
-/*
-	if(m_lwork == 0)
+	if(m_bUseUserSuppliedWorkSpace && m_lwork == 0)
 	{
+	// Get the memory requirements from SuperLU
 		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
-		m_lwork = 1.2 * info;
-		std::cout << "Predicted memory requirements = " << real_t(m_lwork)/1E6 << " MB" << std::endl;
 		
-		m_work = malloc(m_lwork);
-		if(!m_work)
+		info = info - m_nNoEquations; // Remove the ncol from the size (see dLUMemInit() function for more info)
+		m_lwork = (m_dInitialWorkspaceSize * info / 4) * 4; // word alligned
+		std::cout << "Predicted memory requirements = " << info << " bytes (initially allocated " << m_lwork << ")" << std::endl;
+		
+		info = -1;
+		while(info != 0)
 		{
-			std::cout << "Cannot allocate Work memory (size of " << real_t(m_lwork)/1E6 << " MB)" << std::endl;
-			return IDA_LSETUP_FAIL;		
+		// (Re-)Allocate the workspace memory 
+			m_work = realloc(m_work, m_lwork);
+			if(!m_work)
+			{
+				std::cout << "SuperLU failed to allocate the Workspace memory (" << real_t(m_lwork)/1E6 << " MB)" << std::endl;
+				return IDA_LSETUP_FAIL;		
+			}
+		
+		// Try to do the factorization; if it fails inspect why and if the workspace size is too low try to increase it  
+			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+			
+			if(info != 0)
+			{
+				if(info > m_nNoEquations)
+				{
+				// In this case we have a memory allocation problem: try to incrementally increase the workspace size for
+				// as long as the info > ncol (that is more memory is needed).
+				// (the memory size attempted to allocate is: info - ncol) 
+					info = info - m_nNoEquations; // Remove the ncol from the size (see dLUMemInit() function for more info)
+					std::cout << "SuperLU dgstrf attempted to allocate " << info << " bytes; current lwork = " << m_lwork << std::endl;
+					
+				// Set the new size to [attempted-to-alloc] * [WorkspaceMemoryIncrement]
+					m_lwork = (info * m_dWorkspaceMemoryIncrement / 4) * 4; // word alligned
+					std::cout << "SuperLU new Workspace size: " << m_lwork << " bytes" << std::endl;
+				}
+				else
+				{
+				// It is factorization failure; report the column where it ocurred and die miserably
+					std::cout << "SuperLU factorization failed; info = " << info << std::endl;
+					return IDA_LSETUP_FAIL;	
+				}				
+			}
+			else
+			{
+			// Just to be sure (it will break after the successful factorization even without this line)
+				break;
+			}
 		}
 	}
-*/
-	
-	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
-	if(info != 0)
+	else
 	{
-		std::cout << "SuperLU factorization failed = " << info << std::endl;
-		return IDA_LSETUP_FAIL;		
+		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+		if(info != 0)
+		{
+			std::cout << "SuperLU factorization failed; info = " << info << std::endl;
+			return IDA_LSETUP_FAIL;		
+		}
 	}
 	
 	PrintStats();
@@ -763,7 +811,7 @@ int daeSuperLUSolver::Solve(void*		ida,
     dgstrs(m_Options.Trans, &m_matL, &m_matU, m_perm_c, m_perm_r, &m_matB, &m_Stats, &info); 
 	if(info != 0)
 	{
-		std::cout << "SuperLU solve failed = " << info << std::endl;
+		std::cout << "SuperLU solve failed; info = " << info << std::endl;
 		return IDA_LSOLVE_FAIL;		
 	}
 	

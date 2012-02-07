@@ -587,8 +587,8 @@ public:
 	daeDataProxy_t(void)
 	{
 		m_eInitialConditionMode		= eAlgebraicValuesProvided;
-//		m_pdValues					= NULL;
-//		m_pdTimeDerivatives			= NULL;
+		m_pdValues					= NULL;
+		m_pdTimeDerivatives			= NULL;
 		m_pdVariablesTypes			= NULL;
 		m_pdVariablesTypesGathered	= NULL;
 		m_pdAbsoluteTolerances		= NULL;
@@ -615,16 +615,16 @@ public:
 	
 	virtual ~daeDataProxy_t(void)
 	{
-//		if(m_pdValues)
-//		{
-//			delete[] m_pdValues;
-//			m_pdValues = NULL;
-//		}
-//		if(m_pdTimeDerivatives)
-//		{
-//			delete[] m_pdTimeDerivatives;
-//			m_pdTimeDerivatives = NULL;
-//		}
+		if(m_pdValues)
+		{
+			delete[] m_pdValues;
+			m_pdValues = NULL;
+		}
+		if(m_pdTimeDerivatives)
+		{
+			delete[] m_pdTimeDerivatives;
+			m_pdTimeDerivatives = NULL;
+		}
 		if(m_pdVariablesTypes)
 		{
 			delete[] m_pdVariablesTypes;
@@ -651,13 +651,13 @@ public:
 	{
 		m_nTotalNumberOfVariables = nTotalNumberOfVariables;
 
-		m_pdValues.resize(m_nTotalNumberOfVariables, NULL);
-		//m_pdValues			= new daeValueReference[m_nTotalNumberOfVariables];
-		//memset(m_pdValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+		//m_pdValues.resize(m_nTotalNumberOfVariables, NULL);
+		m_pdValues			= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
-		m_pdTimeDerivatives.resize(m_nTotalNumberOfVariables, NULL);
-		//m_pdTimeDerivatives	= new daeValueReference[m_nTotalNumberOfVariables];
-		//memset(m_pdTimeDerivatives, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+		//m_pdTimeDerivatives.resize(m_nTotalNumberOfVariables, NULL);
+		m_pdTimeDerivatives	= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdTimeDerivatives, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
 		m_pdVariablesTypes			= new real_t[m_nTotalNumberOfVariables];
 		m_pdVariablesTypesGathered	= new real_t[m_nTotalNumberOfVariables];
@@ -685,7 +685,7 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0) // || (!m_pdValues))
+			if(m_nTotalNumberOfVariables == 0 || (!m_pdValues))
 			{
 				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
 				return;
@@ -726,7 +726,7 @@ public:
 			while(file.good() && counter < m_nTotalNumberOfVariables)
 			{
 				file.read((char*)(&dValue), sizeof(double));
-				m_pdValues[counter]->SetValue(static_cast<real_t>(dValue));
+				m_pdValues[counter] = static_cast<real_t>(dValue);
 				counter++;
 			}
 			
@@ -764,7 +764,7 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0) // || (!m_pdValues))
+			if(m_nTotalNumberOfVariables == 0 || (!m_pdValues))
 			{
 				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
 				return;
@@ -782,7 +782,7 @@ public:
 			
 			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
 			{
-				dValue = m_pdValues[i]->GetValue();
+				dValue = m_pdValues[i];
 				file.write((char*)(&dValue), sizeof(double));
 			}
 			
@@ -813,7 +813,7 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-		return m_pdValues[nIndex]->GetPointer();
+		return &m_pdValues[nIndex];
 	}
 	
 	void SetValue(size_t nIndex, real_t Value)
@@ -822,7 +822,7 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-		m_pdValues[nIndex]->SetValue(Value);
+		m_pdValues[nIndex] = Value;
 	}
 
 	void AssignValue(size_t nIndex, real_t Value)
@@ -831,13 +831,7 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-	// Delete the old value
-		if(m_pdValues[nIndex] != NULL)
-		{
-			delete m_pdValues[nIndex];
-			m_pdValues[nIndex] = NULL;
-		}
-		m_pdValues[nIndex] = new daeValueReference(Value, true);
+		m_pdValues[nIndex] = Value;
 	}
 	
 	real_t* GetTimeDerivative(size_t nIndex) const
@@ -846,7 +840,7 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-		return m_pdTimeDerivatives[nIndex]->GetPointer();
+		return &m_pdTimeDerivatives[nIndex];
 	}
 	
 	void SetTimeDerivative(size_t nIndex, real_t Value)
@@ -855,7 +849,7 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-		m_pdTimeDerivatives[nIndex]->SetValue(Value);
+		m_pdTimeDerivatives[nIndex] = Value;
 	}
 
 // S value: S[nParameterIndex][nVariableIndex]
@@ -920,7 +914,6 @@ public:
 		if(nIndex >= m_nTotalNumberOfVariables)
 			daeDeclareAndThrowException(exOutOfBounds);
 #endif
-	// If there is no assigned variables then there is no need to copy the data back and forth
 		if(Value == cnFixed)
 			m_bCopyDataFromBlock = true;
 		m_pdVariablesTypes[nIndex] = static_cast<real_t>(Value);
@@ -1039,7 +1032,7 @@ public:
 	{
 		m_bCopyDataFromBlock = bCopyDataFromBlock;
 	}
-
+	/*
 	void CreateIndexMappings(const std::map<size_t, size_t>& mapVariableIndexes, real_t* pdValues, real_t* pdTimeDerivatives)
 	{
 	// mapVariableIndexes<nOverallIndex, nBlockIndex>
@@ -1053,7 +1046,7 @@ public:
 			m_pdTimeDerivatives[iter->first] = new daeValueReference(pdTimeDerivatives[iter->second], false);
 		}
 	}
-	
+	*/
 	void CleanUpSetupData()
 	{
 		if(m_pdVariablesTypes)
@@ -1142,8 +1135,9 @@ protected:
 	daeLog_t*						m_pLog;
 	daeModel_t*						m_pTopLevelModel;
 	size_t							m_nTotalNumberOfVariables;
-	daePtrVector<daeValueReference*> m_pdValues;
-	daePtrVector<daeValueReference*> m_pdTimeDerivatives;
+	real_t*							m_pdValues;
+	//std::vector<real_t>				m_pdAssignedValues;
+	real_t*							m_pdTimeDerivatives;
 	real_t*							m_pdAbsoluteTolerances;
 	real_t*							m_pdVariablesTypes;
 	real_t*							m_pdVariablesTypesGathered;

@@ -427,7 +427,8 @@ void daeBlock::CreateIndexMappings(daeArray<real_t>& arrValues, daeArray<real_t>
 	if(!m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	m_pDataProxy->CreateIndexMappings(m_mapVariableIndexes, arrValues.Data(), arrTimeDerivatives.Data());
+	daeDeclareAndThrowException(exNotImplemented);
+	//m_pDataProxy->CreateIndexMappings(m_mapVariableIndexes, arrValues.Data(), arrTimeDerivatives.Data());
 }
 
 void daeBlock::Initialize(void)

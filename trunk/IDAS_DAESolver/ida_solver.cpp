@@ -228,7 +228,7 @@ void daeIDASolver::SetInitialOptions(void)
    Create values/derivatives mapping so that there is no need to explicitly copy the data from/to the solver.
    The values will be shared between the daeDataProxy and the daeIDASolver
 */
-	m_pBlock->CreateIndexMappings(m_arrValues, m_arrTimeDerivatives);
+	//m_pBlock->CreateIndexMappings(m_arrValues, m_arrTimeDerivatives);
 	
 /* 
    I have to fill initial values of:

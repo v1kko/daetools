@@ -213,67 +213,6 @@ protected:
 };
 
 /*********************************************************************************************
-	daeValueReference
-**********************************************************************************************/
-class daeValueReference
-{
-public:
-	daeValueReference(void)
-	{
-		m_pdValue                = NULL;
-		m_bOwnershipOnThePointer = true;
-	}
-	
-	daeValueReference(real_t* pdValue, bool bOwnershipOnThePointer)
-	{
-		if(!pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		m_pdValue                = pdValue;
-		m_bOwnershipOnThePointer = bOwnershipOnThePointer;
-	}
-
-	virtual ~daeValueReference(void)
-	{
-		if(m_bOwnershipOnThePointer)
-			delete m_pdValue;
-		m_pdValue = NULL;
-	}
-
-	real_t GetValue(void) const
-	{
-#ifdef DAE_DEBUG
-		if(!m_pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-#endif
-		return *m_pdValue;
-	}
-
-	real_t* GetPointer(void) const
-	{
-		return m_pdValue;
-	}
-	
-	void SetValue(real_t value)
-	{
-#ifdef DAE_DEBUG
-		if(!m_pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-#endif
-		*m_pdValue = value;
-	}
-	
-	bool GetOwnershipOnThePointer(void)
-	{
-		return m_bOwnershipOnThePointer;
-	}
-
-protected:
-	real_t* m_pdValue;
-	bool    m_bOwnershipOnThePointer;
-};
-
-/*********************************************************************************************
 	        Memory/speed aware vector operations
 **********************************************************************************************
 a) dae_push_back 
@@ -556,6 +495,71 @@ public:
 	virtual bool GetIndexing(void)		 = 0;
 	virtual void SetIndexing(bool index) = 0;	
 };
+
+
+/*********************************************************************************************
+	daeValueReference
+**********************************************************************************************/
+/*
+class daeValueReference
+{
+public:
+	daeValueReference(void)
+	{
+		m_pdValue                = NULL;
+		m_bOwnershipOnThePointer = true;
+	}
+	
+	daeValueReference(real_t* pdValue, bool bOwnershipOnThePointer)
+	{
+		if(!pdValue)
+			daeDeclareAndThrowException(exInvalidPointer);
+		
+		m_pdValue                = pdValue;
+		m_bOwnershipOnThePointer = bOwnershipOnThePointer;
+	}
+
+	virtual ~daeValueReference(void)
+	{
+		if(m_bOwnershipOnThePointer)
+			delete m_pdValue;
+		m_pdValue = NULL;
+	}
+
+	real_t GetValue(void) const
+	{
+#ifdef DAE_DEBUG
+		if(!m_pdValue)
+			daeDeclareAndThrowException(exInvalidPointer);
+#endif
+		return *m_pdValue;
+	}
+
+	real_t* GetPointer(void) const
+	{
+		return m_pdValue;
+	}
+	
+	void SetValue(real_t value)
+	{
+#ifdef DAE_DEBUG
+		if(!m_pdValue)
+			daeDeclareAndThrowException(exInvalidPointer);
+#endif
+		*m_pdValue = value;
+	}
+	
+	bool GetOwnershipOnThePointer(void)
+	{
+		return m_bOwnershipOnThePointer;
+	}
+
+protected:
+	real_t* m_pdValue;
+	bool    m_bOwnershipOnThePointer;
+};
+*/
+
 
 
 }

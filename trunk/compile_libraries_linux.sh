@@ -5,6 +5,20 @@ set -e
 TRUNK=`pwd`
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 Ncpu=$(($Ncpu+1))
+HOST_ARCH=`uname -m`
+
+# Set SSE flags for x86
+if [ ${HOST_ARCH} != "x86_64" ]; then
+  SSE_FLAGS="-mfpmath=sse"
+  SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
+  for SSE_TAG in ${SSE_TAGS}
+  do
+    SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
+  done
+  echo $SSE_FLAGS
+fi
+
+exit
 
 vBONMIN=1.5.1
 vSUPERLU=4.1
@@ -54,7 +68,7 @@ sh get.Mumps
 cd ../..
 mkdir build
 cd build
-../configure --enable-shared=no --enable-static=yes CFLAGS=-fPIC CXXFLAGS=-fPIC FFLAGS=-fPIC
+../configure --enable-shared=no --enable-static=yes CFLAGS="-fPIC ${SSE_FLAGS}" CXXFLAGS="-fPIC ${SSE_FLAGS}" FFLAGS="-fPIC ${SSE_FLAGS}"
 make -j${Ncpu}
 make test
 make install
@@ -80,7 +94,7 @@ mv nlopt-${vNLOPT} nlopt
 cd nlopt
 mkdir build
 cd build
-../configure -prefix=${TRUNK}/nlopt/build CFLAGS=-fPIC CXXFLAGS=-fPIC
+../configure -prefix=${TRUNK}/nlopt/build CFLAGS="-fPIC ${SSE_FLAGS}" CXXFLAGS="-fPIC ${SSE_FLAGS}"
 make
 make install
 make clean
@@ -90,7 +104,7 @@ tar -xzf idas-${vIDAS}.tar.gz
 mv idas-${vIDAS} idas
 cd idas
 mkdir build
-./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no CFLAGS=-O3
+./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no CFLAGS="-O3 ${SSE_FLAGS}"
 make
 make install
 make clean
