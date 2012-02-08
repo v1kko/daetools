@@ -8,17 +8,15 @@ Ncpu=$(($Ncpu+1))
 HOST_ARCH=`uname -m`
 
 # Set SSE flags for x86
-if [ ${HOST_ARCH} != "x86_64" ]; then
-  SSE_FLAGS="-mfpmath=sse"
-  SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
-  for SSE_TAG in ${SSE_TAGS}
-  do
-    SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
-  done
-  echo $SSE_FLAGS
-fi
-
-exit
+SSE_FLAGS=
+#if [ ${HOST_ARCH} != "x86_64" ]; then
+#  SSE_FLAGS="-mfpmath=sse"
+#  SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
+#  for SSE_TAG in ${SSE_TAGS}
+#  do
+#    SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
+#  done
+#fi
 
 vBONMIN=1.5.1
 vSUPERLU=4.1

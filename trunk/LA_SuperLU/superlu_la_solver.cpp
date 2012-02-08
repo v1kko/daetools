@@ -44,14 +44,14 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
-	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.2);
-	m_dInitialWorkspaceSize     = cfg.Get<double>("daetools.superlu.initialWorkspaceSize",        1.3);
+	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
+	m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",        2.0);
 	
-	string strReuse = cfg.Get<string>("daetools.superlu.Fact", string("SamePattern"));
+	string strReuse = cfg.Get<string>("daetools.superlu.factorizationMethod", string("SamePattern"));
 	if(strReuse == string("SamePattern_SameRowPerm"))
-		m_bReuseEverything = true;
+		m_iFactorization = SamePattern_SameRowPerm;
 	else
-		m_bReuseEverything = false;
+		m_iFactorization = SamePattern;
 	
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
@@ -164,8 +164,6 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	m_pBlock->FillSparseMatrix(&m_matJacobian);
 	m_matJacobian.Sort();
 
-	m_bFactorizationDone = false;
-	
 #ifdef daeSuperLU_MT
     pxgstrf_finalize(&m_Options, &m_matAC);	
 	
@@ -228,6 +226,8 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 	dCreate_CompCol_Matrix(&m_matA, m_matJacobian.N, m_matJacobian.N, m_matJacobian.NNZ, m_matJacobian.A, m_matJacobian.JA, m_matJacobian.IA, SLU_NC, SLU_D, SLU_GE);
 #endif
 
+	m_bFactorizationDone = false;
+	
 	return IDA_SUCCESS;
 }
 
@@ -459,6 +459,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 							N_Vector	vectorTemp3)
 {
 	int info;
+	int memSize;
     double rpg, rcond;
 	realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 		
@@ -482,7 +483,8 @@ int daeSuperLUSolver::Setup(void*		ida,
 	m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
 	m_arrResiduals.InitArray(Neq, pdResiduals);
 
-	m_matJacobian.ClearValues();
+// Do we need to clear the Jacobian matrix? It is sparse and all non-zero items will be overwritten.
+	//m_matJacobian.ClearValues();
 	
 	m_pBlock->CalculateJacobian(time, 
 		                        m_arrValues, 
@@ -529,8 +531,8 @@ int daeSuperLUSolver::Setup(void*		ida,
 	
 /* End of the BTF test */
 	
-	double start, end, memcopy;
-	start = dae::GetTimeInSeconds();
+//	double start, end, memcopy;
+//	start = dae::GetTimeInSeconds();
 	
 #ifdef daeSuperLU_MT
 	if(m_bFactorizationDone)
@@ -615,26 +617,45 @@ int daeSuperLUSolver::Setup(void*		ida,
 
 	if(m_bFactorizationDone)
 	{
-	// During the subsequent calls re-use Pc and recreate L and U
-	// It is a conservative approach - we could use SamePattern_SameRowPerm to re-use Pr, Pc, Dr, Dc and structures allocated for L and U,
-	// but we may run into a numerical instability. Therefore we will sacrify some speed for stability!
-		m_Options.Fact = SamePattern;
-		
-	// If memory was pre-allocated in m_work then destroy only SuperMatrix_Store
-	// Otherwise destroy the whole matrix
-		if(m_lwork > 0)
+	/*
+		During the subsequent calls we can:
+		  a) Re-use Pc and recreate L and U (SamePattern)
+ 			 A conservative approach - we could use SamePattern_SameRowPerm to re-use Pr, Pc, Dr, Dc and 
+             structures allocated for L and U, but we may run into a numerical instability. Here we sacrify 
+             some speed for stability!
+		  b) Re-use everything (SamePattern_SameRowPerm)
+		     A faster approach when the pattern is the same and numerical values similar.
+			 Some numerical instability may occur and superlu tries to handle that.
+	*/
+		if(m_iFactorization == SamePattern)
 		{
-			Destroy_SuperMatrix_Store(&m_matL);
-			Destroy_SuperMatrix_Store(&m_matU);
+			m_Options.Fact = SamePattern;
+			
+		// If memory was pre-allocated in m_work then destroy only SuperMatrix_Store
+		// Otherwise destroy the whole matrix
+			if(m_lwork > 0)
+			{
+				Destroy_SuperMatrix_Store(&m_matL);
+				Destroy_SuperMatrix_Store(&m_matU);
+			}
+			else
+			{
+				Destroy_SuperNode_Matrix(&m_matL);
+				Destroy_CompCol_Matrix(&m_matU);
+			}
+			
+		// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
+			Destroy_CompCol_Permuted(&m_matAC);
+		}
+		else if(m_iFactorization == SamePattern_SameRowPerm)
+		{
+			m_Options.Fact = SamePattern_SameRowPerm;
 		}
 		else
 		{
-			Destroy_SuperNode_Matrix(&m_matL);
-			Destroy_CompCol_Matrix(&m_matU);
+			std::cout << "SuperLU invalid factorization option" << std::endl;
+			return IDA_LSETUP_FAIL;		
 		}
-		
-	// Matrix AC has to be destroyed to avoid memory leaks in sp_colorder()
-		Destroy_CompCol_Permuted(&m_matAC);
 	}
 	else
 	{
@@ -646,32 +667,71 @@ int daeSuperLUSolver::Setup(void*		ida,
 
 	StatInit(&m_Stats);
 	
-// This will allocate memory for AC. 
-// If I call it repeatedly then I will have memory leaks! (double check it)
-// Therefore before each call to sp_preorder() destroy matrix AC with a call to Destroy_CompCol_Permuted(&AC)
-	sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
-
-// Determine the amount of memory:
-	if(m_bUseUserSuppliedWorkSpace && m_lwork == 0)
+/*
+	Allocate memory for AC (only if the Fact IS NOT SamePattern_SameRowPerm). 
+	If we call it repeatedly we will have memory leaks! (double check it)
+	Therefore before each call to sp_preorder() destroy matrix AC with a 
+	call to Destroy_CompCol_Permuted(&AC) (if it is not already empty)
+*/
+	if(m_Options.Fact != SamePattern_SameRowPerm)
+		sp_preorder(&m_Options, &m_matA, m_perm_c, m_etree, &m_matAC);
+	
+	if(m_bUseUserSuppliedWorkSpace)
 	{
-	// Get the memory requirements from SuperLU
-		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
-		
-		info = info - m_nNoEquations; // Remove the ncol from the size (see dLUMemInit() function for more info)
-		m_lwork = (m_dInitialWorkspaceSize * info / 4) * 4; // word alligned
-		std::cout << "Predicted memory requirements = " << info << " bytes (initially allocated " << m_lwork << ")" << std::endl;
-		
-		info = -1;
-		while(info != 0)
+	// Determine the initial amount of memory (if m_lwork is zero)
+		if(m_lwork == 0)
 		{
-		// (Re-)Allocate the workspace memory 
-			m_work = realloc(m_work, m_lwork);
+		// Get the memory requirements from SuperLU
+			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+		
+		// Remove the ncol from info
+			memSize = info - m_nNoEquations; 
+			m_lwork = (4 * m_dWorkspaceSizeMultiplier * memSize) / 4; // word alligned
+			
+		// Allocate the workspace memory 
+			m_work = malloc(m_lwork);
 			if(!m_work)
 			{
 				std::cout << "SuperLU failed to allocate the Workspace memory (" << real_t(m_lwork)/1E6 << " MB)" << std::endl;
 				return IDA_LSETUP_FAIL;		
 			}
+			std::cout << "Predicted memory requirements = " << info << " bytes (initially allocated " << m_lwork << ")" << std::endl;
+		}
+	}
+	
+	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+	if(info != 0)
+	{
+		std::cout << "SuperLU factorization failed; info = " << info << std::endl;
+		return IDA_LSETUP_FAIL;		
+	}
+	
+	/* Not working...
+	if(m_bUseUserSuppliedWorkSpace)
+	{
+	// Determine the initial amount of memory (if m_lwork is zero)
+		if(m_lwork == 0)
+		{
+		// Get the memory requirements from SuperLU
+			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 		
+		// Remove the ncol from info
+			memSize = info - m_nNoEquations; 
+			m_lwork = (4 * m_dInitialWorkspaceSize * memSize) / 4; // word alligned
+			
+		// Allocate the workspace memory 
+			m_work = malloc(m_lwork);
+			if(!m_work)
+			{
+				std::cout << "SuperLU failed to allocate the Workspace memory (" << real_t(m_lwork)/1E6 << " MB)" << std::endl;
+				return IDA_LSETUP_FAIL;		
+			}
+			std::cout << "Predicted memory requirements = " << info << " bytes (initially allocated " << m_lwork << ")" << std::endl;
+		}
+		
+		info = -1;
+		while(info != 0)
+		{
 		// Try to do the factorization; if it fails inspect why and if the workspace size is too low try to increase it  
 			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
 			
@@ -682,12 +742,27 @@ int daeSuperLUSolver::Setup(void*		ida,
 				// In this case we have a memory allocation problem: try to incrementally increase the workspace size for
 				// as long as the info > ncol (that is more memory is needed).
 				// (the memory size attempted to allocate is: info - ncol) 
-					info = info - m_nNoEquations; // Remove the ncol from the size (see dLUMemInit() function for more info)
+					
+				// First free
+					Destroy_SuperMatrix_Store(&m_matL);
+					Destroy_SuperMatrix_Store(&m_matU);
+					Destroy_CompCol_Permuted(&m_matAC);
+					
+				// Remove the ncol from info
+					memSize = info - m_nNoEquations; 
 					std::cout << "SuperLU dgstrf attempted to allocate " << info << " bytes; current lwork = " << m_lwork << std::endl;
 					
-				// Set the new size to [attempted-to-alloc] * [WorkspaceMemoryIncrement]
-					m_lwork = (info * m_dWorkspaceMemoryIncrement / 4) * 4; // word alligned
+				// Set the new size
+					m_lwork = (4 * m_dWorkspaceMemoryIncrement * memSize) / 4; // word alligned
 					std::cout << "SuperLU new Workspace size: " << m_lwork << " bytes" << std::endl;
+					
+				// (Re-)Allocate the workspace memory 
+					m_work = realloc(m_work, m_lwork);
+					if(!m_work)
+					{
+						std::cout << "SuperLU failed to allocate the Workspace memory (" << real_t(m_lwork)/1E6 << " MB)" << std::endl;
+						return IDA_LSETUP_FAIL;		
+					}
 				}
 				else
 				{
@@ -712,17 +787,18 @@ int daeSuperLUSolver::Setup(void*		ida,
 			return IDA_LSETUP_FAIL;		
 		}
 	}
+	*/
 	
-	PrintStats();
+	//PrintStats();
 	StatFree(&m_Stats);
 
 #endif
 
-	end = dae::GetTimeInSeconds();
-	double timeMemcopy = memcopy - start;
-	double timeFactor  = end     - memcopy;
-	double timeElapsed = end     - start;
-	m_factorize += timeElapsed;
+//	end = dae::GetTimeInSeconds();
+//	double timeMemcopy = memcopy - start;
+//	double timeFactor  = end     - memcopy;
+//	double timeElapsed = end     - start;
+//	m_factorize += timeElapsed;
 	
 #ifdef daeSuperLU_CUDA
 	std::cout << "  Memcopy time = "     << toStringFormatted(timeMemcopy, -1, 3) << " s" << std::endl

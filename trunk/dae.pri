@@ -91,8 +91,8 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 (32 bit machines)
-linux-g++-32::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
-linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
+#linux-g++-32::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
+#linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 
 ####################################################################################
 # Creating .vcproj under windows:

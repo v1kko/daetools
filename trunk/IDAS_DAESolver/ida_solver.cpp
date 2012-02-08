@@ -246,7 +246,8 @@ void daeIDASolver::SetInitialOptions(void)
 
 // Determine if the model is dynamic or steady-state
 	m_bIsModelDynamic = m_pBlock->IsModelDynamic();
-	m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
+	if(m_bPrintInfo)
+		m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
 
 // Absolute tolerances
 	m_pBlock->FillAbsoluteTolerancesArray(arrAbsoluteTolerances);

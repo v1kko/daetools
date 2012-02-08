@@ -105,10 +105,10 @@ public:
 	daeSuperLUMatrix	m_matJacobian;
 	bool				m_bFactorizationDone;
 	
-	bool				m_bReuseEverything;
+	int					m_iFactorization;
 	bool				m_bUseUserSuppliedWorkSpace;
 	double				m_dWorkspaceMemoryIncrement;
-	double				m_dInitialWorkspaceSize;
+	double				m_dWorkspaceSizeMultiplier;
 
 #ifdef daeSuperLU_MT
 	SuperMatrix			m_matA;

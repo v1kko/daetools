@@ -5,12 +5,13 @@ TRUNK=`cd ${BUILD}/../..; pwd`
 export TRILINOS_HOME=${TRUNK}/trilinos
 EXTRA_ARGS=$@
 
-SSE_FLAGS="-mfpmath=sse"
-SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
-for SSE_TAG in ${SSE_TAGS}
-do
-  SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
-done
+SSE_FLAGS=
+#SSE_FLAGS="-mfpmath=sse"
+#SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
+#for SSE_TAG in ${SSE_TAGS}
+#do
+#  SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
+#done
 
 echo $BUILD
 echo $TRUNK
