@@ -624,7 +624,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReSetInitialCondition", &daepython::qReSetInitialCondition4)
         .def("ReSetInitialCondition", &daepython::qReSetInitialCondition5)
         .def("ReSetInitialCondition", &daepython::qReSetInitialCondition6)
-        .def("ReSetInitialCondition", &daepython::qReSetInitialCondition7)
+        .def("ReSetInitialCondition", &daepython::qReSetInitialCondition7)  
         .def("ReSetInitialCondition", &daepython::qReSetInitialCondition8)
 
 	    .def("AssignValues",			&daepython::AssignValues)

@@ -634,7 +634,6 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 		adRuntimeVariableNode* node = new adRuntimeVariableNode();
 		node->m_pVariable     = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
-		node->m_pdValue       = m_pModel->m_pDataProxy->GetValue(nIndex);
 		if(N > 0)
 		{
 			node->m_narrDomains.resize(N);
@@ -823,7 +822,6 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
 		node->m_nDegree = 1;
-		node->m_pdTimeDerivative = m_pModel->m_pDataProxy->GetTimeDerivative(nIndex);
 		if(N > 0)
 		{
 			node->m_narrDomains.resize(N);

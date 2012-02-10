@@ -1208,11 +1208,10 @@ public:
 									    daeArray<real_t>&	arrTimeDerivatives, 
 									    daeArray<real_t>&	arrResults);
 
-	virtual void	SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
-		                                                  daeArray<real_t>& arrTimeDerivatives, 
-														  daeArray<real_t>& arrInitialConditionsTypes);
-
-	virtual void	FillAbsoluteTolerancesArray(daeArray<real_t>& arrAbsoluteTolerances);
+	virtual void	FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
+																			 daeArray<real_t>& arrTimeDerivatives, 
+																			 daeArray<real_t>& arrInitialConditionsTypes,
+	                                                                         daeArray<real_t>& arrAbsoluteTolerances);
 
 	virtual size_t	GetNumberOfEquations(void) const;
 
@@ -1226,9 +1225,7 @@ public:
 	virtual void	CalcNonZeroElements(int& NNZ);
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
-	virtual void	CopyDataFromSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
-	virtual void	CopyDataToSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) const;
-	virtual void	CreateIndexMappings(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
+	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
 
 	virtual real_t	GetTime(void) const;
 	virtual void	SetTime(real_t time);
@@ -1250,21 +1247,20 @@ public:
 	void			SetName(const string& strName);
 
 public:
-// Used by equations to set Residuals/Jacobian/Hesian values
-	real_t	GetResidual(size_t nIndex) const;
-	void	SetResidual(size_t nIndex, real_t dResidual);
+	real_t	GetValue(size_t nBlockIndex) const;
+	void	SetValue(size_t nBlockIndex, real_t dValue);
+	
+	real_t	GetTimeDerivative(size_t nBlockIndex) const;
+	void	SetTimeDerivative(size_t nBlockIndex, real_t dTimeDerivative);
+
+	real_t	GetResidual(size_t nEquationIndex) const;
+	void	SetResidual(size_t nEquationIndex, real_t dResidual);
 
 	real_t	GetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock) const;
 	void	SetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock, real_t dJacobianItem);
 
 	real_t	GetInverseTimeStep(void) const;
 	void	SetInverseTimeStep(real_t dInverseTimeStep);
-
-public:			
-// Used by adNode members during calculation
-//	real_t GetValue(size_t nOverallIndex) const;
-//	real_t GetADValue(size_t nOverallIndex) const;
-//	real_t GetTimeDerivative(size_t nOverallIndex) const;
 
 public:
 	void AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
@@ -1283,13 +1279,17 @@ public:
 
 protected:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian
+	void				SetValuesArray(daeArray<real_t>* pValues);
+	daeArray<real_t>*	GetValuesAray(void) const;
+	
+	void				SetTimeDerivativesArray(daeArray<real_t>* pTimeDerivatives);
+	daeArray<real_t>*	GetTimeDerivativesArray(void) const;
+
 	daeMatrix<real_t>*	GetJacobianMatrix(void) const;
 	void				SetJacobianMatrix(daeMatrix<real_t>* pJacobian);
 
 	daeArray<real_t>*	GetResidualArray(void) const;
 	void				SetResidualArray(daeArray<real_t>* pResidual);
-	
-	void				RebuildExpressionMap(void);
 	
 	void				SetSValuesMatrix(daeMatrix<real_t>* pSValues);
 	daeMatrix<real_t>*	GetSValuesMatrix(void) const;
@@ -1300,6 +1300,8 @@ protected:
 	void				SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals);
 	daeMatrix<real_t>*	GetSResidualsMatrix(void) const;
 
+	void				RebuildExpressionMap(void);
+	
 public:
 	bool	m_bInitializeMode;
 	string	m_strName;
@@ -1318,6 +1320,8 @@ public:
 // Given by a solver during Residual/Jacobian calculation
 	real_t				m_dCurrentTime;
 	real_t				m_dInverseTimeStep;
+	daeArray<real_t>*	m_parrValues; 
+	daeArray<real_t>*	m_parrTimeDerivatives; 
 	daeArray<real_t>*	m_parrResidual; 
 	daeMatrix<real_t>*	m_pmatJacobian; 
 

@@ -225,32 +225,27 @@ void daeIDASolver::SetInitialOptions(void)
 	arrAbsoluteTolerances.InitArray(m_nNumberOfEquations,     pAbsoluteTolerances);
 
 /* 
-   Create values/derivatives mapping so that there is no need to explicitly copy the data from/to the solver.
-   The values will be shared between the daeDataProxy and the daeIDASolver
-*/
-	//m_pBlock->CreateIndexMappings(m_arrValues, m_arrTimeDerivatives);
-	
-/* 
    I have to fill initial values of:
              - Variables
 			 - Time derivatives
 			 - Variable IC types (that is whether the initial conditions are algebraic or differential)
+			 - Absolute tolerances
    from the model.
    To do so first I set arrays into which I have to copy and then actually copy values,
-   by the function SetInitialConditionsAndInitialGuesses().
+   by the function FillAbsoluteTolerancesInitialConditionsAndInitialGuesses().
 */
 	if(m_eInitialConditionMode == eQuasySteadyState)
 		m_pBlock->SetAllInitialConditions(0.0);
 
-	m_pBlock->SetInitialConditionsAndInitialGuesses(m_arrValues, m_arrTimeDerivatives, arrInitialConditionsTypes);
+	m_pBlock->FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(m_arrValues, 
+	                                                                   m_arrTimeDerivatives, 
+	                                                                   arrInitialConditionsTypes, 
+	                                                                   arrAbsoluteTolerances);
 
 // Determine if the model is dynamic or steady-state
 	m_bIsModelDynamic = m_pBlock->IsModelDynamic();
 	if(m_bPrintInfo)
 		m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
-
-// Absolute tolerances
-	m_pBlock->FillAbsoluteTolerancesArray(arrAbsoluteTolerances);
 }
 
 void daeIDASolver::CreateIDA(void)
@@ -620,6 +615,11 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	m_dCurrentTime = t0;
 	m_pBlock->SetTime(t0);
 	
+/*
+******************************************************************************
+   This part is not needed now, since I directly access the solver's data; 
+   therefore there is no need to copy anything.
+******************************************************************************
 // Copy data from the block if requested
 	if(bCopyDataFromBlock)
 	{
@@ -633,14 +633,15 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 	
 		m_pBlock->CopyDataToSolver(m_arrValues, m_arrTimeDerivatives);
 	}
+*/
 	
-	// Call the LA solver Reinitialize, if needed.
-	// (the sparse matrix pattern has been changed after the discontinuity
-		if(m_eLASolver == eThirdParty)
-		{
-			if(m_bResetLAMatrixAfterDiscontinuity)
-				m_pLASolver->Reinitialize(m_pIDA);
-		}
+// Call the LA solver Reinitialize, if needed.
+// (the sparse matrix pattern has been changed after the discontinuity
+	if(m_eLASolver == eThirdParty)
+	{
+		if(m_bResetLAMatrixAfterDiscontinuity)
+			m_pLASolver->Reinitialize(m_pIDA);
+	}
 	
 // ReInit IDA
 	retval = IDAReInit(m_pIDA,
@@ -699,15 +700,17 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 			throw e;
 		}
 		
-	// Now we have to copy the values *from* the solver *to* the block
-	// Achtung, Achtung: This might be avoided if there is no assigned variables!
+	// Now we have to copy the values *from* the solver *to* the block.
+	// Achtung, Achtung: This is extremely import to do, for we must be able to re-set the
+	//                   variables' values or initial conditions after any IntegrateXXX function,
+	//                   and to evaluate conditional expressions in state transitions.
 		realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
 		realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
 	
 		m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
 		m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
 	
-		m_pBlock->CopyDataFromSolver(m_arrValues, m_arrTimeDerivatives);
+		m_pBlock->CopyDataToBlock(m_arrValues, m_arrTimeDerivatives);
 		
 	// If a root has been found, check if some of the conditions is satisfied and do what is necessary   
 		if(retval == IDA_ROOT_RETURN) 
@@ -1059,6 +1062,7 @@ int jacobian(int	    Neq,
 							  pSolver->m_arrTimeDerivatives, 
 							  pSolver->m_matJacobian, 
 							  dInverseTimeStep);
+	
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "---- Jacobian function ----" << endl;

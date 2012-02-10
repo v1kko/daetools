@@ -355,9 +355,8 @@ public:
 	
 	void StartRegistration(const string& strMessage, daeDataReporterProcess& drProcess)
 	{
-		boost::int32_t i, msgSize, curPos, nameSize;
+		boost::int32_t curPos, nameSize;
 		const char* data = strMessage.c_str();
-		msgSize = strMessage.size();
 		
 		char cFlag = data[0];
 		curPos = 1;
@@ -381,7 +380,7 @@ public:
 	
 	void EndRegistration(const string& strMessage, daeDataReporterProcess& drProcess)
 	{
-		boost::int32_t i, msgSize, curPos, nameSize;
+		boost::int32_t msgSize, curPos;
 		const char* data = strMessage.c_str();
 		msgSize = strMessage.size();
 		
@@ -392,9 +391,8 @@ public:
 	
 	void RegisterDomain(const string& strMessage, daeDataReporterProcess& drProcess)
 	{
-		boost::int32_t i, msgSize, curPos, nameSize;
+		boost::int32_t curPos, nameSize;
 		const char* data = strMessage.c_str();
-		msgSize = strMessage.size();
 		
 		char cFlag = data[0];
 		curPos = 1;

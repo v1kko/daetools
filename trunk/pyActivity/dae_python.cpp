@@ -106,7 +106,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Run",                         &daeSimulation::Run,                       &daepython::daeDefaultSimulationWrapper::def_Run)
 	    .def("CleanUpSetupData",            &daeSimulation::CleanUpSetupData,		   &daepython::daeDefaultSimulationWrapper::def_CleanUpSetupData)
 
-        .def("Reset",                       &daeSimulation::Reset)
+        .def("Reset",                       &daeSimulation::Reset)  
         .def("ReRun",                       &daeSimulation::ReRun)
         .def("Finalize",                    &daeSimulation::Finalize)
         .def("ReportData",                  &daeSimulation::ReportData)

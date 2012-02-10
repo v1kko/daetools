@@ -196,8 +196,7 @@ public:
 	adRuntimeVariableNode(void);
 	adRuntimeVariableNode(daeVariable* pVariable, 
 	                      size_t nOverallIndex, 
-						  vector<size_t>& narrDomains, 
-						  real_t* pdValue);
+						  vector<size_t>& narrDomains);
 	virtual ~adRuntimeVariableNode(void);
 
 public:
@@ -215,9 +214,9 @@ public:
 
 public:
 // Runtime part
-	real_t*			m_pdValue;
 	size_t			m_nOverallIndex;
 	size_t			m_nBlockIndex;
+	bool			m_bIsAssigned;
 // Report/GUI part
 	daeVariable*	m_pVariable;
 	vector<size_t>	m_narrDomains;
@@ -234,8 +233,7 @@ public:
 	adRuntimeTimeDerivativeNode(daeVariable* pVariable, 
 	                            size_t nOverallIndex, 
 								size_t nDegree, 
-								vector<size_t>& narrDomains, 
-								real_t* pdTimeDerivative);
+								vector<size_t>& narrDomains);
 	virtual ~adRuntimeTimeDerivativeNode(void);
 
 public:

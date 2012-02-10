@@ -789,17 +789,16 @@ public:
 									    daeArray<real_t>&	 arrTimeDerivatives, 
 									    daeArray<real_t>&    arrResults) = 0;
 
-	virtual void	SetInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
-		                                                  daeArray<real_t>& arrTimeDerivatives, 
-														  daeArray<real_t>& arrInitialConditionsTypes) = 0;
+	virtual void	FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues, 
+																			 daeArray<real_t>& arrTimeDerivatives, 
+																			 daeArray<real_t>& arrInitialConditionsTypes,
+	                                                                         daeArray<real_t>& arrAbsoluteTolerances) = 0;
 
-	virtual void	FillAbsoluteTolerancesArray(daeArray<real_t>& arrAbsoluteTolerances) = 0;
+
 	virtual size_t	GetNumberOfEquations(void) const = 0;
 	virtual size_t	GetNumberOfRoots(void) const = 0;
 
-	virtual void	CopyDataFromSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)     = 0;
-	virtual void	CopyDataToSolver(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) const = 0;
-	virtual void	CreateIndexMappings(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)    = 0;
+	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)     = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;

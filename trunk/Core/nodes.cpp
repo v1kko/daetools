@@ -906,23 +906,22 @@ bool adDomainIndexNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable, 
 											 size_t nOverallIndex, 
-											 vector<size_t>& narrDomains, 
-											 real_t* pdValue) 
-               : m_pdValue(pdValue),
-			     m_nOverallIndex(nOverallIndex), 
+											 vector<size_t>& narrDomains) 
+               : m_nOverallIndex(nOverallIndex), 
 				 m_pVariable(pVariable), 
 				 m_narrDomains(narrDomains)
 {
 // This will be calculated at runtime (if needed; it is used only for sensitivity calculation)
 	m_nBlockIndex = ULONG_MAX;
+	m_bIsAssigned = false;
 }
 
 adRuntimeVariableNode::adRuntimeVariableNode()
 {
 	m_pVariable     = NULL;
-	m_pdValue       = NULL;
 	m_nBlockIndex   = ULONG_MAX;
 	m_nOverallIndex = ULONG_MAX;
+	m_bIsAssigned   = false;
 }
 
 adRuntimeVariableNode::~adRuntimeVariableNode()
@@ -939,19 +938,51 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		tmp.node = shared_ptr<adNode>( Clone() );
 		return tmp;
 	}
+
+/*
+	Only for the first encounter:
+	  - Try to get the variable block index based on its overall index
+	  - If failed - throw an exception
+*/
+	if(m_nBlockIndex == ULONG_MAX)
+	{
+		if(!pExecutionContext || !pExecutionContext->m_pBlock)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		//This is a very ugly hack, but there is no other way (at the moment)
+		adRuntimeVariableNode* self = const_cast<adRuntimeVariableNode*>(this);
+		self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
+		
+		if(m_nBlockIndex == ULONG_MAX)
+		{
+			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
+			{
+				self->m_nBlockIndex = m_nOverallIndex;
+				self->m_bIsAssigned = true;
+			}
+			else
+			{
+				daeDeclareException(exInvalidCall);
+				e << "Cannot obtain block index for the variable index [" << m_nOverallIndex << "]";
+				throw e;
+			}
+		}
+	}
+	
+// Assigned variables' values are in DataProxy (they do not exist in the solver)
+	if(m_bIsAssigned)
+		return adouble(*pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex));
 	
 	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
 		// If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
 		// the variable is fixed and its sensitivity derivative per given parameter is 1.
 		// If it is not - it is a normal state variable and its sensitivity derivative is m_pdSValue
-		adouble value;
-		value.setValue(*m_pdValue);
 		
 		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
 		{
-			value.setDerivative(1);
+			return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 1);
 		}
 		else
 		{
@@ -959,44 +990,26 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 			//Otherwise take the value from the DataProxy
 			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
 			{
-				value.setDerivative(0);
+				return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 0);
 			}
 			else
 			{
-			//Only for the first encounter:
-			//  - Try to get the variable block index based on its overall index
-			//  - If failed - throw an exception
-				if(m_nBlockIndex == ULONG_MAX)
-				{
-					if(!pExecutionContext || !pExecutionContext->m_pBlock)
-						daeDeclareAndThrowException(exInvalidPointer)
-						
-					//This is a very ugly hack, but there is no other way (at the moment)
-					adRuntimeVariableNode* self = const_cast<adRuntimeVariableNode*>(this);
-					self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
-					
-					if(m_nBlockIndex == ULONG_MAX)
-					{
-						daeDeclareException(exInvalidCall);
-						e << "Cannot obtain block index for the variable index [" << m_nOverallIndex << "]";
-						throw e;
-					}
-				}
 			// Get the derivative value based on the m_nBlockIndex	
-				value.setDerivative(pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation,
-																			   m_nBlockIndex) );
+				return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex),
+				               pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, m_nBlockIndex) 
+				              );
 			}
 		}
-		
-		return value;
 	}
 	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
 	{
-		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
+		return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 
+		              (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
 	else
 	{
-		return adouble(*m_pdValue, (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
+		return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex),
+		              (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
 }
 
@@ -1064,8 +1077,8 @@ void adRuntimeVariableNode::Save(io::xmlTag_t* pTag) const
 	strName = "DomainIndexes";
 	pTag->SaveArray(strName, m_narrDomains);
 
-	strName = "Value";
-	pTag->Save(strName, *m_pdValue);
+	//strName = "Value";
+	//pTag->Save(strName, *m_pdValue);
 }
 
 void adRuntimeVariableNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
@@ -1125,10 +1138,8 @@ bool adRuntimeVariableNode::IsFunctionOfVariables(void) const
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable, 
 														 size_t nOverallIndex, 
 														 size_t nDegree, 
-														 vector<size_t>& narrDomains,
-														 real_t* pdTimeDerivative)
-               : m_pdTimeDerivative(pdTimeDerivative), 
-			     m_nOverallIndex(nOverallIndex), 
+														 vector<size_t>& narrDomains)
+               : m_nOverallIndex(nOverallIndex), 
 				 m_nDegree(nDegree), 
 				 m_pVariable(pVariable),
 				 m_narrDomains(narrDomains)
@@ -1161,6 +1172,28 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 		return tmp;
 	}
 
+/*
+	Only for the first encounter:
+	  - Try to get the variable block index based on its overall index
+	  - If failed - throw an exception
+*/
+	if(m_nBlockIndex == ULONG_MAX)
+	{
+		if(!pExecutionContext || !pExecutionContext->m_pBlock)
+			daeDeclareAndThrowException(exInvalidPointer)
+			
+		//This is a very ugly hack, but there is no other way (at the moment)
+		adRuntimeTimeDerivativeNode* self = const_cast<adRuntimeTimeDerivativeNode*>(this);
+		self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
+
+		if(m_nBlockIndex == ULONG_MAX)
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot obtain block index for the (dt) variable index [" << m_nOverallIndex << "]";
+			throw e;
+		}
+	}
+	
 	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
 		// Here m_nCurrentParameterIndexForSensitivityEvaluation MUST NOT be equal to m_nOverallIndex,
@@ -1169,43 +1202,22 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
 			daeDeclareAndThrowException(exInvalidCall)
 
-		//Only for the first encounter:
-		//  - Try to get the variable block index based on its overall index
-		//  - If failed - throw an exception
-		if(m_nBlockIndex == ULONG_MAX)
-		{
-			if(!pExecutionContext || !pExecutionContext->m_pBlock)
-				daeDeclareAndThrowException(exInvalidPointer)
-				
-			//This is a very ugly hack, but there is no other way (at the moment)
-			adRuntimeTimeDerivativeNode* self = const_cast<adRuntimeTimeDerivativeNode*>(this);
-			self->m_nBlockIndex = pExecutionContext->m_pBlock->FindVariableBlockIndex(m_nOverallIndex);
-
-			if(m_nBlockIndex == ULONG_MAX)
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Cannot obtain block index for the (dt) variable index [" << m_nOverallIndex << "]";
-				throw e;
-			}
-		}
-
 		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
-		adouble value;
-		value.setValue(*m_pdTimeDerivative);
-		value.setDerivative(pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation,
-																		m_nBlockIndex) );
-		return value;
+		return adouble(pExecutionContext->m_pBlock->GetTimeDerivative(m_nBlockIndex),
+		               pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, m_nBlockIndex) 
+		               );
 	}
 	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
 	{
 		//I can never rich this point, since the model must be steady-state to call CalculateGradients function
 		daeDeclareAndThrowException(exInvalidCall)
-		return adouble(*m_pdTimeDerivative, 0);
+		return adouble(0, 0);
 	}
 	else
 	{
-		return adouble(*m_pdTimeDerivative, 
-					  (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? pExecutionContext->m_dInverseTimeStep : 0) );
+		return adouble(pExecutionContext->m_pBlock->GetTimeDerivative(m_nBlockIndex), 
+					  (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? pExecutionContext->m_dInverseTimeStep : 0) 
+		              );
 	}
 }
 
@@ -1279,8 +1291,8 @@ void adRuntimeTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
 	strName = "DomainIndexes";
 	pTag->SaveArray(strName, m_narrDomains);
 
-	strName = "TimeDerivative";
-	pTag->Save(strName, *m_pdTimeDerivative);
+	//strName = "TimeDerivative";
+	//pTag->Save(strName, *m_pdTimeDerivative);
 }
 
 void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
