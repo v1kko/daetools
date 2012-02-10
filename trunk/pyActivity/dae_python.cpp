@@ -93,7 +93,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         
 		.add_property("MeasuredVariables",				&daepython::daeDefaultSimulationWrapper::GetMeasuredVariables)
         .add_property("InputVariables",					&daepython::daeDefaultSimulationWrapper::GetInputVariables)
-        .add_property("ModelParameters",				&daepython::daeDefaultSimulationWrapper::GetModelParameters)  
+        .add_property("ModelParameters",				&daepython::daeDefaultSimulationWrapper::GetModelParameters)
 
         //.def("GetModel",                    &daeSimulation::GetModel, return_internal_reference<>())
         //.def("SetModel",                    &daeSimulation::SetModel)  

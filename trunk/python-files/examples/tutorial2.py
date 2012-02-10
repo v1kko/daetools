@@ -113,7 +113,7 @@ class simTutorial(daeSimulation):
                              "and how to fix it, and how to set initial guesses of the variables."
 
     def SetUpParametersAndDomains(self):
-        n = 40
+        n = 25
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)

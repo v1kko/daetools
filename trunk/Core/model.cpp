@@ -2626,9 +2626,13 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 		size_t i, k;
 		daeSTN* pSTN;
 		size_t nNoEquations = ptrarrAllEquationExecutionInfosInModel.size();
+		
 		pBlock = new daeBlock;
 		pBlock->SetName(string("Block N-1"));
 		pBlock->SetDataProxy(m_pDataProxy.get());
+		pBlock->m_nNumberOfEquations      = nNoEquations;
+		pBlock->m_nTotalNumberOfVariables = m_pDataProxy->GetTotalNumberOfVariables(); 
+		
 	// Here I reserve memory for m_ptrarrEquationExecutionInfos vector
 		pBlock->m_ptrarrEquationExecutionInfos.reserve(ptrarrEEIfromModels.size());
 		ptrarrBlocks.push_back(pBlock);
@@ -2710,7 +2714,6 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 		}
 
 	// Initialize the block
-		pBlock->m_nNumberOfEquations = nNoEquations;
 		pBlock->Initialize();
 
 	// Finaly, check the block

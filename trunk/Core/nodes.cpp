@@ -971,7 +971,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 	
 // Assigned variables' values are in DataProxy (they do not exist in the solver)
 	if(m_bIsAssigned)
-		return adouble(*pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex));
+		return adouble(pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex));
 	
 	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{

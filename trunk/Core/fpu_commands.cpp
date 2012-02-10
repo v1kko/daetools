@@ -246,11 +246,11 @@ inline TYPE GetOperand(const daeDataProxy_t* pDataProxy, const size_t operand, c
 	}
 	else if(operand == eValue)
 	{
-		return *pDataProxy->GetValue((size_t)value);
+		return pDataProxy->GetValue((size_t)value);
 	}
 	else if(operand == eTimeDerivative)
 	{
-		return *pDataProxy->GetTimeDerivative((size_t)value);
+		return pDataProxy->GetTimeDerivative((size_t)value);
 	}
 	else if(operand == eFromStack)
 	{
@@ -353,11 +353,11 @@ inline TYPE GetJacobianOperand(const daeDataProxy_t* pDataProxy, const size_t op
 	}
 	else if(operand == eValue)
 	{
-		return adouble(*pDataProxy->GetValue((size_t)value), ((size_t)value == nCurrentVariableIndex ? 1 : 0) );
+		return adouble(pDataProxy->GetValue((size_t)value), ((size_t)value == nCurrentVariableIndex ? 1 : 0) );
 	}
 	else if(operand == eTimeDerivative)
 	{
-		return adouble(*pDataProxy->GetTimeDerivative((size_t)value), ((size_t)value == nCurrentVariableIndex ? dInverseTimeStep : 0) );
+		return adouble(pDataProxy->GetTimeDerivative((size_t)value), ((size_t)value == nCurrentVariableIndex ? dInverseTimeStep : 0) );
 	}
 	else if(operand == eFromStack)
 	{

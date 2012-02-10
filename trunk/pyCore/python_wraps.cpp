@@ -900,27 +900,24 @@ adouble_array ParameterArray8(daeParameter& param, object o1, object o2, object 
 *******************************************************/
 python::numeric::array GetNumPyArrayVariable(daeVariable& var)
 {
-	size_t nType, nDomains, nTotalSize;
-	real_t* data;
+	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
 	vector<daeDomain_t*> ptrarrDomains;
 
 	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
-	data = var.GetValuePointer();
 	var.GetDomains(ptrarrDomains);
 	nDomains = ptrarrDomains.size();
 	dimensions = new npy_intp[nDomains];
-	nTotalSize = 1;
-	for(size_t i = 0; i < nDomains; i++)
-	{
-		dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
-		nTotalSize *= dimensions[i];
-	}
+	nStart = var.GetOverallIndex();
+	nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
 
+	daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
+	boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
-	for(size_t k = 0; k < nTotalSize; k++)
-		values[k] = data[k];
+	
+	for(k = 0, i = nStart; i < nEnd; i++, k++)
+		values[k] = pDataProxy->GetValue(i);
 
 	delete[] dimensions;
 	return numpy_array;

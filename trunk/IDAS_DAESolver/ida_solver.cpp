@@ -246,6 +246,12 @@ void daeIDASolver::SetInitialOptions(void)
 	m_bIsModelDynamic = m_pBlock->IsModelDynamic();
 	if(m_bPrintInfo)
 		m_pLog->Message(string("The model is ") + string(m_bIsModelDynamic ? "dynamic" : "steady-state"), 0);
+
+/*
+   Now we have all the initial data copied to the DAESolver vectors so we can
+   set the pointers mapping between the data in DAESolver and DataProxy 
+*/
+	m_pBlock->CreateIndexMappings(pVariableValues, pTimeDerivatives);
 }
 
 void daeIDASolver::CreateIDA(void)

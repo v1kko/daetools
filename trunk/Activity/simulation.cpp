@@ -1346,17 +1346,18 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
 	if(!pVariable->GetReportingOn())
 		return;
 
-	real_t* pd;
 	daeDataReporterVariableValue var;
-	size_t i, nSize;
+	size_t i, k, nEnd, nStart, nPoints;
 	
 	var.m_strName = pVariable->GetCanonicalName();
-	pd = pVariable->GetValuePointer();
-	nSize = pVariable->GetNumberOfPoints();
-	var.m_nNumberOfPoints = nSize;
-	var.m_pValues = new real_t[nSize];
-	for(i = 0; i < nSize; i++)
-		var.m_pValues[i] = pd[i];
+	nPoints = pVariable->GetNumberOfPoints();
+	nStart  = pVariable->GetOverallIndex();
+	nEnd    = pVariable->GetOverallIndex() + nPoints;
+	var.m_nNumberOfPoints = nPoints;
+	var.m_pValues = new real_t[nPoints];
+	boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+	for(k = 0, i = nStart; i < nEnd; i++, k++)
+		var.m_pValues[k] = pDataProxy->GetValue(i);
 
 	if(!m_pDataReporter->SendVariable(&var))
 	{

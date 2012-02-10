@@ -63,6 +63,11 @@ size_t daeVariable::CalculateIndex(const std::vector<size_t>& narrDomainIndexes)
 	return index;
 }
 
+size_t daeVariable::GetOverallIndex(void) const
+{
+	return m_nOverallIndex;
+}
+
 size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 {
 	size_t		i, j, nIndex, temp;

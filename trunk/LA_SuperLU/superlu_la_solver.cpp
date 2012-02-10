@@ -42,17 +42,6 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_solve						= 0;
 	m_factorize					= 0;
 	
-	daeConfig& cfg = daeConfig::GetConfig();
-	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
-	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
-	m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",        2.0);
-	
-	string strReuse = cfg.Get<string>("daetools.superlu.factorizationMethod", string("SamePattern"));
-	if(strReuse == string("SamePattern_SameRowPerm"))
-		m_iFactorization = SamePattern_SameRowPerm;
-	else
-		m_iFactorization = SamePattern;
-	
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
 	m_perm_c	= NULL;
@@ -83,6 +72,17 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 #endif
 	
 #ifdef daeSuperLU
+	daeConfig& cfg = daeConfig::GetConfig();
+	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
+	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
+	m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",        2.0);
+
+	string strReuse = cfg.Get<string>("daetools.superlu.factorizationMethod", string("SamePattern"));
+	if(strReuse == string("SamePattern_SameRowPerm"))
+		m_iFactorization = SamePattern_SameRowPerm;
+	else
+		m_iFactorization = SamePattern;
+
 	m_etree		= NULL;
 	m_R			= NULL;
 	m_C			= NULL;

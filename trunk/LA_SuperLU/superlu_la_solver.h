@@ -105,11 +105,6 @@ public:
 	daeSuperLUMatrix	m_matJacobian;
 	bool				m_bFactorizationDone;
 	
-	int					m_iFactorization;
-	bool				m_bUseUserSuppliedWorkSpace;
-	double				m_dWorkspaceMemoryIncrement;
-	double				m_dWorkspaceSizeMultiplier;
-
 #ifdef daeSuperLU_MT
 	SuperMatrix			m_matA;
 	SuperMatrix			m_matB;
@@ -152,6 +147,11 @@ public:
 	void*				m_work;
     int*				m_perm_c;
     int*				m_perm_r;
+	
+	int					m_iFactorization;
+	bool				m_bUseUserSuppliedWorkSpace;
+	double				m_dWorkspaceMemoryIncrement;
+	double				m_dWorkspaceSizeMultiplier;
 #endif
 	
 	double m_solve, m_factorize;

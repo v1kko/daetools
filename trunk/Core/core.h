@@ -415,7 +415,6 @@ public:
 	virtual void					GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
 
 	virtual size_t					GetNumberOfPoints(void)	const		= 0;
-	virtual real_t*					GetValuePointer(void) const			= 0;
 
 	virtual bool					GetReportingOn(void) const			= 0;
 	virtual void					SetReportingOn(bool bOn)			= 0;
@@ -798,7 +797,8 @@ public:
 	virtual size_t	GetNumberOfEquations(void) const = 0;
 	virtual size_t	GetNumberOfRoots(void) const = 0;
 
-	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)     = 0;
+	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) = 0;
+	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives) = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;
@@ -814,11 +814,11 @@ public:
 	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const = 0;
 	
 	virtual bool	IsModelDynamic() const = 0;
-	virtual real_t* GetValuesPointer() = 0;
-	virtual real_t* GetTimeDerivativesPointer() = 0;
-	virtual real_t* GetAbsoluteTolerancesPointer() = 0;
-	virtual real_t* GetVariableTypesPointer() = 0;
 	virtual void	CleanUpSetupData() = 0;
+//	virtual real_t* GetValuesPointer() = 0;
+//	virtual real_t* GetTimeDerivativesPointer() = 0;
+//	virtual real_t* GetAbsoluteTolerancesPointer() = 0;
+//	virtual real_t* GetVariableTypesPointer() = 0;
 };
 
 

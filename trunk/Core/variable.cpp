@@ -230,7 +230,7 @@ void daeVariable::SetInitialGuesses(real_t dInitialGuesses)
 	size_t nTotalNumberOfVariables = GetNumberOfPoints();
 	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
 	{
-		m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dInitialGuesses);
+		m_pModel->m_pDataProxy->SetInitialGuess(m_nOverallIndex + i, dInitialGuesses);
 	}	
 }
 
@@ -242,7 +242,7 @@ void daeVariable::SetInitialGuess(real_t dInitialGuess)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, real_t dInitialGuess)
@@ -254,7 +254,7 @@ void daeVariable::SetInitialGuess(size_t nD1, real_t dInitialGuess)
 
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, real_t dInitialGuess)
@@ -266,7 +266,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, real_t dInitialGuess)
 
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, real_t dInitialGuess)
@@ -278,7 +278,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, real_t dIn
 
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dInitialGuess)
@@ -290,7 +290,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dInitialGuess)
@@ -302,7 +302,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialGuess)
@@ -314,7 +314,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialGuess)
@@ -326,7 +326,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialGuess)
@@ -338,7 +338,7 @@ void daeVariable::SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4
 
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
-	m_pModel->m_pDataProxy->SetValue(nIndex, dInitialGuess);
+	m_pModel->m_pDataProxy->SetInitialGuess(nIndex, dInitialGuess);
 }
 
 void daeVariable::SetInitialGuess(const quantity& q)
@@ -716,7 +716,7 @@ void daeVariable::ReAssignValues(real_t dValues)
 			e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 			throw e;
 		}		
-		m_pModel->m_pDataProxy->AssignValue(m_nOverallIndex + i, dValues);
+		m_pModel->m_pDataProxy->ReAssignValue(m_nOverallIndex + i, dValues);
 	}
 }
 
@@ -734,7 +734,7 @@ void daeVariable::ReAssignValue(real_t dValue)
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, real_t dValue)
@@ -752,7 +752,7 @@ void daeVariable::ReAssignValue(size_t nD1, real_t dValue)
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, real_t dValue)
@@ -770,7 +770,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, real_t dValue)
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValue)
@@ -788,7 +788,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValu
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dValue)
@@ -806,7 +806,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dValue)
@@ -824,7 +824,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dValue)
@@ -842,7 +842,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dValue)
@@ -860,7 +860,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dValue)
@@ -878,7 +878,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
 		throw e;
 	}		
-	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
+	m_pModel->m_pDataProxy->ReAssignValue(nIndex, dValue);
 }
 
 void daeVariable::ReAssignValues(const quantity& q)
@@ -949,7 +949,7 @@ real_t daeVariable::GetValue(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1)
@@ -961,7 +961,7 @@ real_t daeVariable::GetValue(size_t nD1)
 
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2)
@@ -973,7 +973,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2)
 
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3)
@@ -985,7 +985,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3)
 
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
@@ -997,7 +997,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
 
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
@@ -1009,7 +1009,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, siz
 
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
@@ -1021,7 +1021,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, siz
 
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
@@ -1033,7 +1033,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, siz
 
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
@@ -1045,7 +1045,7 @@ real_t daeVariable::GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, siz
 
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
-	return (*m_pModel->m_pDataProxy->GetValue(nIndex));
+	return m_pModel->m_pDataProxy->GetValue(nIndex);
 }
 
 void daeVariable::SetValue(real_t dValue)
@@ -1165,11 +1165,7 @@ void daeVariable::SetInitialConditions(real_t dInitialConditions)
 	size_t nTotalNumberOfVariables = GetNumberOfPoints();
 	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
 	{
-		if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-			m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dInitialConditions);
-		else
-			m_pModel->m_pDataProxy->SetTimeDerivative(m_nOverallIndex + i, dInitialConditions);
-		
+		m_pModel->m_pDataProxy->SetInitialCondition(m_nOverallIndex + i, dInitialConditions, m_pModel->GetInitialConditionMode());
 		m_pModel->m_pDataProxy->SetVariableType(m_nOverallIndex + i, cnDifferential);
 	}
 }
@@ -1183,10 +1179,7 @@ void daeVariable::SetInitialCondition(real_t dInitialCondition)
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1200,10 +1193,7 @@ void daeVariable::SetInitialCondition(size_t nD1, real_t dInitialCondition)
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1217,10 +1207,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, real_t dInitialCon
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1234,10 +1221,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, real_t
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1251,10 +1235,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1268,10 +1249,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1285,10 +1263,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1302,10 +1277,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1319,10 +1291,7 @@ void daeVariable::SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->SetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnDifferential);
 }
 
@@ -1403,10 +1372,7 @@ void daeVariable::ReSetInitialConditions(real_t dInitialConditions)
 			throw e;
 		}		
 
-		if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-			m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, dInitialConditions);
-		else
-			m_pModel->m_pDataProxy->SetTimeDerivative(m_nOverallIndex + i, dInitialConditions);
+		m_pModel->m_pDataProxy->ReSetInitialCondition(m_nOverallIndex + i, dInitialConditions, m_pModel->GetInitialConditionMode());
 	}
 }
 
@@ -1425,10 +1391,7 @@ void daeVariable::ReSetInitialCondition(real_t dInitialCondition)
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, real_t dInitialCondition)
@@ -1447,10 +1410,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, real_t dInitialCondition)
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, real_t dInitialCondition)
@@ -1469,10 +1429,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, real_t dInitialC
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, real_t dInitialCondition)
@@ -1491,10 +1448,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, real
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dInitialCondition)
@@ -1513,10 +1467,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dInitialCondition)
@@ -1535,10 +1486,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialCondition)
@@ -1557,10 +1505,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition)
@@ -1579,10 +1524,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition)
@@ -1601,10 +1543,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 		throw e;
 	}		
 
-	if(m_pModel->GetInitialConditionMode() == eAlgebraicValuesProvided)
-		m_pModel->m_pDataProxy->SetValue(nIndex, dInitialCondition);
-	else
-		m_pModel->m_pDataProxy->SetTimeDerivative(nIndex, dInitialCondition);
+	m_pModel->m_pDataProxy->ReSetInitialCondition(nIndex, dInitialCondition, m_pModel->GetInitialConditionMode());
 }
 
 void daeVariable::ReSetInitialConditions(const quantity& q)
@@ -1689,14 +1628,14 @@ void daeVariable::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 		ptrarrDomains.push_back(m_ptrDomains[i]);
 }
 
-real_t* daeVariable::GetValuePointer() const
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-	return m_pModel->m_pDataProxy->GetValue(m_nOverallIndex);
-}
+//real_t* daeVariable::GetValuePointer() const
+//{
+//	if(!m_pModel)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	if(!m_pModel->m_pDataProxy)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	return m_pModel->m_pDataProxy->GetValue(m_nOverallIndex);
+//}
 
 bool daeVariable::GetReportingOn(void) const
 {
@@ -1832,7 +1771,8 @@ real_t daeVariableWrapper::GetValue(void) const
 	if(!m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	return *m_pDataProxy->GetValue(m_nOverallIndex);
+// This accesses the ValuesReference; therefore the system must be initialized before using it!
+	return m_pDataProxy->GetValue(m_nOverallIndex);
 }
 
 void daeVariableWrapper::SetValue(real_t value)
@@ -1840,6 +1780,7 @@ void daeVariableWrapper::SetValue(real_t value)
 	if(!m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
+// This accesses the ValuesReference; therefore the system must be initialized before using it!
 	m_pDataProxy->SetValue(m_nOverallIndex, value);
 }
 

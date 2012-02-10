@@ -587,8 +587,8 @@ public:
 	daeDataProxy_t(void)
 	{
 		m_eInitialConditionMode		= eAlgebraicValuesProvided;
-		m_pdValues					= NULL;
-		m_pdTimeDerivatives			= NULL;
+		m_pdInitialValues			= NULL;
+		m_pdInitialConditions		= NULL;
 		m_pdVariablesTypes			= NULL;
 		m_pdVariablesTypesGathered	= NULL;
 		m_pdAbsoluteTolerances		= NULL;
@@ -604,8 +604,8 @@ public:
 		m_pmatSResiduals			= NULL;
 		m_dCurrentTime				= 0;
 		m_bReinitializationFlag		= false;
-		m_bCopyDataFromBlock		= false;
 		m_bIsModelDynamic			= false;
+		m_bCopyDataFromBlock        = false;
 		
 		daeConfig& cfg = daeConfig::GetConfig();
 		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
@@ -615,15 +615,15 @@ public:
 	
 	virtual ~daeDataProxy_t(void)
 	{
-		if(m_pdValues)
+		if(m_pdInitialValues)
 		{
-			delete[] m_pdValues;
-			m_pdValues = NULL;
+			delete[] m_pdInitialValues;
+			m_pdInitialValues = NULL;
 		}
-		if(m_pdTimeDerivatives)
+		if(m_pdInitialConditions)
 		{
-			delete[] m_pdTimeDerivatives;
-			m_pdTimeDerivatives = NULL;
+			delete[] m_pdInitialConditions;
+			m_pdInitialConditions = NULL;
 		}
 		if(m_pdVariablesTypes)
 		{
@@ -651,13 +651,11 @@ public:
 	{
 		m_nTotalNumberOfVariables = nTotalNumberOfVariables;
 
-		//m_pdValues.resize(m_nTotalNumberOfVariables, NULL);
-		m_pdValues			= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+		m_pdInitialValues = new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdInitialValues, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
-		//m_pdTimeDerivatives.resize(m_nTotalNumberOfVariables, NULL);
-		m_pdTimeDerivatives	= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdTimeDerivatives, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+		m_pdInitialConditions	= new real_t[m_nTotalNumberOfVariables];
+		memset(m_pdInitialConditions, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
 		m_pdVariablesTypes			= new real_t[m_nTotalNumberOfVariables];
 		m_pdVariablesTypesGathered	= new real_t[m_nTotalNumberOfVariables];
@@ -685,7 +683,7 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0 || (!m_pdValues))
+			if(m_nTotalNumberOfVariables == 0 || (!m_pdInitialValues))
 			{
 				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
 				return;
@@ -726,7 +724,7 @@ public:
 			while(file.good() && counter < m_nTotalNumberOfVariables)
 			{
 				file.read((char*)(&dValue), sizeof(double));
-				m_pdValues[counter] = static_cast<real_t>(dValue);
+				m_pdInitialValues[counter] = static_cast<real_t>(dValue);
 				counter++;
 			}
 			
@@ -764,7 +762,7 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0 || (!m_pdValues))
+			if(m_nTotalNumberOfVariables == 0 || (!m_pdInitialValues))
 			{
 				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
 				return;
@@ -782,7 +780,7 @@ public:
 			
 			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
 			{
-				dValue = m_pdValues[i];
+				dValue = m_pdInitialValues[i];
 				file.write((char*)(&dValue), sizeof(double));
 			}
 			
@@ -807,51 +805,186 @@ public:
 		return m_nTotalNumberOfVariables;
 	}
 
-	real_t* GetValue(size_t nIndex) const
+/* 
+  ACHTUNG!! Initialization phase functions only!
+  Used only to set an initial guesses/initial conditions/abs. tolerances/assigned values during the initialization phase.
+  The following arrays will be deleted after the successful SolveInitial:
+	- m_pdInitialValues
+    - m_pdInitialConditions
+	- m_pdVariablesTypes
+	- m_pdVariablesTypesGathered
+	- m_pdAbsoluteTolerances
+*/
+	void SetInitialGuess(size_t nOverallIndex, real_t Value)
 	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return &m_pdValues[nIndex];
+		if(!m_pdInitialValues)
+			daeDeclareAndThrowException(exInvalidPointer);
+		m_pdInitialValues[nOverallIndex] = Value;
 	}
 	
-	void SetValue(size_t nIndex, real_t Value)
+	void AssignValue(size_t nOverallIndex, real_t Value)
 	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		m_pdValues[nIndex] = Value;
+		m_mapAssignedValues[nOverallIndex] = Value;
+	}
+	
+	void SetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
+	{
+		if(eMode == eAlgebraicValuesProvided)
+		{
+			if(!m_pdInitialValues)
+				daeDeclareAndThrowException(exInvalidPointer);
+			m_pdInitialValues[nOverallIndex] = Value;
+		}
+		else if(eMode == eDifferentialValuesProvided)
+		{
+			if(!m_pdInitialConditions)
+				daeDeclareAndThrowException(exInvalidPointer);
+			m_pdInitialValues[nOverallIndex] = Value;
+		}
+	}
+	
+	int GetVariableType(size_t nOverallIndex) const
+	{
+		if(!m_pdVariablesTypes)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return static_cast<int>(m_pdVariablesTypes[nOverallIndex]);
+	}
+	
+	void SetVariableType(size_t nOverallIndex, int Value)
+	{
+		if(!m_pdVariablesTypes)
+			daeDeclareAndThrowException(exInvalidPointer);
+		m_pdVariablesTypes[nOverallIndex] = static_cast<real_t>(Value);
 	}
 
-	void AssignValue(size_t nIndex, real_t Value)
+	int GetVariableTypeGathered(size_t nOverallIndex) const
 	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		m_pdValues[nIndex] = Value;
+		if(!m_pdVariablesTypesGathered)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return static_cast<int>(m_pdVariablesTypesGathered[nOverallIndex]);
 	}
 	
-	real_t* GetTimeDerivative(size_t nIndex) const
+	void SetVariableTypeGathered(size_t nOverallIndex, int Value)
 	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return &m_pdTimeDerivatives[nIndex];
-	}
-	
-	void SetTimeDerivative(size_t nIndex, real_t Value)
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		m_pdTimeDerivatives[nIndex] = Value;
+		if(!m_pdVariablesTypesGathered)
+			daeDeclareAndThrowException(exInvalidPointer);
+		if(Value == cnDifferential)
+			m_bIsModelDynamic = true;
+		m_pdVariablesTypesGathered[nOverallIndex] = static_cast<real_t>(Value);
 	}
 
+	real_t GetAbsoluteTolerance(size_t nOverallIndex) const
+	{
+		if(!m_pdAbsoluteTolerances)
+			daeDeclareAndThrowException(exInvalidPointer);
+		return m_pdAbsoluteTolerances[nOverallIndex];
+	}
+	
+	void SetAbsoluteTolerance(size_t nOverallIndex, real_t Value)
+	{
+		if(!m_pdAbsoluteTolerances)
+			daeDeclareAndThrowException(exInvalidPointer);
+		m_pdAbsoluteTolerances[nOverallIndex] = Value;
+	}
+	
+	real_t* GetInitialValuesPointer(void) const
+	{
+		return m_pdInitialValues;
+	}
+	
+	real_t* GetInitialConditionsPointer(void) const
+	{
+		return m_pdInitialConditions;
+	}
+	
+	real_t* GetVariableTypesPointer(void) const
+	{
+	// It is not a mistake, it should be VariablesTypesGathered
+		return m_pdVariablesTypesGathered;
+	}
+	
+	real_t* GetAbsoluteTolerancesPointer(void) const
+	{
+		return m_pdAbsoluteTolerances;
+	}
+/* End of initialization phase functions */
+	
+/* 
+  Functions that can be used ONLY during the INTEGRATION!
+  Values/TimeDerivatives references point to:
+    - DAESolver's data (for state variables)
+    - Internal map of assigned variables (for assigned variables)	
+  
+  ACHTUNG!! Get/Set Value/TimeDerivative must not be used in adNode derived classes to calculate residualS/jacobian/...
+            They MUST access the data through the functions in daeBlock (using block indexes).
+			After each successful call to IDASolver (any daeSimulation::Integrate_XXX function) the new Values and
+			TimeDerivatives are set (also the new values are used before any check for discontinuities).
+*/
+	real_t GetValue(size_t nOverallIndex) const
+	{
+		if(m_pdarrValuesReferences.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot get the variable value for the system has not been initialized yet"; 
+			throw e;
+		}
+		return *(m_pdarrValuesReferences[nOverallIndex]);
+	}
+	
+	void SetValue(size_t nOverallIndex, real_t Value)
+	{
+		if(m_pdarrValuesReferences.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot set the variable value for the system has not been initialized yet"; 
+			throw e;
+		}
+		*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+	}
+
+	real_t GetTimeDerivative(size_t nOverallIndex) const
+	{
+		if(m_pdarrTimeDerivativesReferences.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot get the time derivative for the system has not been initialized yet"; 
+			throw e;
+		}
+		return *(m_pdarrTimeDerivativesReferences[nOverallIndex]);
+	}
+	
+	void SetTimeDerivative(size_t nOverallIndex, real_t Value)
+	{
+		if(m_pdarrTimeDerivativesReferences.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot set the time derivative for the system has not been initialized yet"; 
+			throw e;
+		}
+		*(m_pdarrTimeDerivativesReferences[nOverallIndex]) = Value;
+	}
+
+	void ReSetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
+	{
+		if(m_pdarrValuesReferences.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot re-set the initial condition for the system has not been initialized yet"; 
+			throw e;
+		}
+		*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+	}
+	
+	void ReAssignValue(size_t nOverallIndex, real_t Value)
+	{
+		m_mapAssignedValues[nOverallIndex] = Value;
+	}
+	
+	real_t GetReAssignedValue(size_t nOverallIndex) const
+	{
+		return m_mapAssignedValues.find(nOverallIndex)->second;
+	}
+	
 // S value: S[nParameterIndex][nVariableIndex]
 	real_t GetSValue(size_t nParameterIndex, size_t nVariableIndex) const
 	{
@@ -893,69 +1026,7 @@ public:
 #endif
 		return m_pmatSResiduals->SetItem(nParameterIndex, nEquationIndex, value);
 	}	
-
-	real_t* GetVariableTypes() const
-	{
-		return m_pdVariablesTypesGathered;
-	}
-
-	int GetVariableType(size_t nIndex) const
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return static_cast<int>(m_pdVariablesTypes[nIndex]);
-	}
-	
-	void SetVariableType(size_t nIndex, int Value)
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		if(Value == cnFixed)
-			m_bCopyDataFromBlock = true;
-		m_pdVariablesTypes[nIndex] = static_cast<real_t>(Value);
-	}
-
-	int GetVariableTypeGathered(size_t nIndex) const
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return static_cast<int>(m_pdVariablesTypesGathered[nIndex]);
-	}
-	
-	void SetVariableTypeGathered(size_t nIndex, int Value)
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		if(Value == cnDifferential)
-			m_bIsModelDynamic = true;
-		m_pdVariablesTypesGathered[nIndex] = static_cast<real_t>(Value);
-	}
-
-	real_t* GetAbsoluteTolerance(size_t nIndex) const
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return &(m_pdAbsoluteTolerances[nIndex]);
-	}
-	
-	void SetAbsoluteTolerance(size_t nIndex, real_t Value)
-	{
-#ifdef DAE_DEBUG
-		if(nIndex >= m_nTotalNumberOfVariables)
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		m_pdAbsoluteTolerances[nIndex] = Value;
-	}
+/* End of integration phase functions */
 
 	void LogMessage(const string& strMessage, size_t nSeverity) const
 	{
@@ -1023,32 +1094,50 @@ public:
 		m_bReinitializationFlag = bReinitializationFlag;
 	}
 	
-	bool GetCopyDataFromBlock(void) const
-	{
-		return m_bCopyDataFromBlock;
-	}
-	
-	void SetCopyDataFromBlock(bool bCopyDataFromBlock)
-	{
-		m_bCopyDataFromBlock = bCopyDataFromBlock;
-	}
-	/*
+/*
+  The mappings sets the pointers to actual data so there is no need to copy the data back and forth from/to the DAE solver.
+  ACHTUNG! These pointers cannot be used for calculating residuals/jacobian/sensitivities. Therefore, adNode_XXX classes
+           MUST access the data through functions from daeBlock (using block indexes).
+*/
 	void CreateIndexMappings(const std::map<size_t, size_t>& mapVariableIndexes, real_t* pdValues, real_t* pdTimeDerivatives)
 	{
+		m_pdarrValuesReferences.resize(m_nTotalNumberOfVariables, NULL);
+		m_pdarrTimeDerivativesReferences.resize(m_nTotalNumberOfVariables, NULL);
+		
 	// mapVariableIndexes<nOverallIndex, nBlockIndex>
 		for(std::map<size_t, size_t>::const_iterator iter = mapVariableIndexes.begin(); iter != mapVariableIndexes.end(); iter++)
 		{
 		// Achtung: They must not be previously set!
-			if(m_pdValues[iter->first] || m_pdTimeDerivatives[iter->first])
+			if(m_pdarrValuesReferences[iter->first] || m_pdarrTimeDerivativesReferences[iter->first])
 				daeDeclareAndThrowException(exInvalidCall);
 			
-			m_pdValues[iter->first]          = new daeValueReference(pdValues[iter->second],          false);
-			m_pdTimeDerivatives[iter->first] = new daeValueReference(pdTimeDerivatives[iter->second], false);
+			m_pdarrValuesReferences[iter->first]          = &pdValues[iter->second];
+			m_pdarrTimeDerivativesReferences[iter->first] = &pdTimeDerivatives[iter->second];
+		}
+		
+	// m_mapAssignedValues<nOverallIndex, dValue>
+		for(std::map<size_t, real_t>::iterator iter = m_mapAssignedValues.begin(); iter != m_mapAssignedValues.end(); iter++)
+		{
+		// Achtung: They must not be previously set!
+			if(m_pdarrValuesReferences[iter->first])
+				daeDeclareAndThrowException(exInvalidCall);
+			
+			m_pdarrValuesReferences[iter->first] = &(iter->second);
 		}
 	}
-	*/
+	
 	void CleanUpSetupData()
 	{
+		if(m_pdInitialValues)
+		{
+			delete[] m_pdInitialValues;
+			m_pdInitialValues = NULL;
+		}
+		if(m_pdInitialConditions)
+		{
+			delete[] m_pdInitialConditions;
+			m_pdInitialConditions = NULL;
+		}
 		if(m_pdVariablesTypes)
 		{
 			delete[] m_pdVariablesTypes;
@@ -1095,6 +1184,16 @@ public:
 //		return m_pCondition;	
 //	}
 	
+	bool GetCopyDataFromBlock(void) const
+	{
+		return m_bCopyDataFromBlock;
+	}
+
+	void SetCopyDataFromBlock(bool bCopyDataFromBlock)
+	{
+		m_bCopyDataFromBlock = bCopyDataFromBlock;
+	}
+	
 	void SetSensitivityMatrixes(daeMatrix<real_t>* pSValues,
 			 				    daeMatrix<real_t>* pSTimeDerivatives,
 								daeMatrix<real_t>* pSResiduals)
@@ -1135,19 +1234,25 @@ protected:
 	daeLog_t*						m_pLog;
 	daeModel_t*						m_pTopLevelModel;
 	size_t							m_nTotalNumberOfVariables;
-	real_t*							m_pdValues;
-	//std::vector<real_t>				m_pdAssignedValues;
-	real_t*							m_pdTimeDerivatives;
+	
+	std::vector<real_t*>			m_pdarrValuesReferences;
+	std::vector<real_t*>			m_pdarrTimeDerivativesReferences;
+	std::map<size_t, real_t>		m_mapAssignedValues;
+
+// These are just temporary arrays used during the initialization phase
+	real_t*							m_pdInitialValues;
+	real_t*							m_pdInitialConditions;
 	real_t*							m_pdAbsoluteTolerances;
 	real_t*							m_pdVariablesTypes;
 	real_t*							m_pdVariablesTypesGathered;
+	
 	bool							m_bGatherInfo;
 	real_t							m_dCurrentTime;
 	bool							m_bReinitializationFlag;
-	bool							m_bCopyDataFromBlock;
 	bool							m_bResetLAMatrixAfterDiscontinuity;
 	bool							m_bPrintInfo;
 	bool							m_bIsModelDynamic;
+	bool							m_bCopyDataFromBlock;
 
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
@@ -1226,6 +1331,7 @@ public:
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
 	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
+	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives);
 
 	virtual real_t	GetTime(void) const;
 	virtual void	SetTime(real_t time);
@@ -1233,11 +1339,11 @@ public:
 	virtual size_t	FindVariableBlockIndex(size_t nVariableOverallIndex) const;
 	
 	virtual bool	IsModelDynamic() const;
-	virtual real_t* GetValuesPointer();
-	virtual real_t* GetTimeDerivativesPointer();
-	virtual real_t* GetAbsoluteTolerancesPointer();
-	virtual real_t* GetVariableTypesPointer();
 	virtual void	CleanUpSetupData();
+//	virtual real_t* GetValuesPointer();
+//	virtual real_t* GetTimeDerivativesPointer();
+//	virtual real_t* GetAbsoluteTolerancesPointer();
+//	virtual real_t* GetVariableTypesPointer();
 	
 public:
 	daeDataProxy_t*	GetDataProxy(void) const;
@@ -1306,6 +1412,7 @@ public:
 	bool	m_bInitializeMode;
 	string	m_strName;
 	size_t	m_nNumberOfEquations;
+	size_t  m_nTotalNumberOfVariables;
 
 	std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos;
 	std::vector<daeSTN*>					m_ptrarrSTNs;
@@ -1498,7 +1605,6 @@ public:
 	virtual void				GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 
 	virtual size_t	GetNumberOfPoints(void) const;
-	virtual real_t*	GetValuePointer(void) const;
 
 	virtual bool	GetReportingOn(void) const;
 	virtual void	SetReportingOn(bool bOn);
@@ -1668,6 +1774,8 @@ public:
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
 	void DistributeOnDomain(daeDomain& rDomain);
+	
+	size_t GetOverallIndex(void) const;
 
 public:
 	adouble	operator()(void);
