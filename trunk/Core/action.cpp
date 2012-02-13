@@ -163,6 +163,7 @@ void daeAction::Initialize(void)
 		
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		m_pNode = m_pSetupNode->Evaluate(&EC).node;
@@ -171,6 +172,7 @@ void daeAction::Initialize(void)
 	{
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		m_pNode = m_pSetupNode->Evaluate(&EC).node;
@@ -210,6 +212,7 @@ void daeAction::Execute(void)
 		
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t data = m_pNode->Evaluate(&EC).getValue();
@@ -222,6 +225,7 @@ void daeAction::Execute(void)
 	{
 		daeExecutionContext EC;
 		EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+		EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 		EC.m_eEquationCalculationMode	= eCalculate;
 		
 		real_t value = m_pNode->Evaluate(&EC).getValue();

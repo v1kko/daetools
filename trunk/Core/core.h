@@ -797,7 +797,7 @@ public:
 	virtual size_t	GetNumberOfEquations(void) const = 0;
 	virtual size_t	GetNumberOfRoots(void) const = 0;
 
-	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) = 0;
+	virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) = 0;
 	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives) = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;

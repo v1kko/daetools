@@ -252,6 +252,7 @@ void daeIDASolver::SetInitialOptions(void)
    set the pointers mapping between the data in DAESolver and DataProxy 
 */
 	m_pBlock->CreateIndexMappings(pVariableValues, pTimeDerivatives);
+	m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 }
 
 void daeIDASolver::CreateIDA(void)
@@ -716,7 +717,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 		m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
 		m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
 	
-		m_pBlock->CopyDataToBlock(m_arrValues, m_arrTimeDerivatives);
+		m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 		
 	// If a root has been found, check if some of the conditions is satisfied and do what is necessary   
 		if(retval == IDA_ROOT_RETURN) 

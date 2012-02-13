@@ -382,7 +382,7 @@ void daeBlock::CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives)
 	m_pDataProxy->CreateIndexMappings(m_mapVariableIndexes, pdValues, pdTimeDerivatives);
 }
 
-void daeBlock::CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)
+void daeBlock::SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives)
 {
 // Now we use block indexes to directly access the solvers arrays and therefore no need to actually copy anything
 	m_parrValues          = &arrValues;
@@ -434,6 +434,8 @@ void daeBlock::Initialize(void)
 	if(!m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+	m_pDataProxy->SetBlock(this);
+	
 	if(GetNumberOfEquations() != m_mapVariableIndexes.size())
 	{	
 		daeDeclareException(exInvalidCall);
@@ -449,7 +451,11 @@ void daeBlock::Initialize(void)
 
 		pSTN->BuildExpressions(this);
 	}
-
+	
+/* We do not have to check for discontinuities here - it will be done during the initialization
+   And, btw, this does not affect anything, it just checks for discontinuities. Properly done,
+   it should call ExecuteOnConditionActions() if CheckDiscontinuities() returns true.
+	
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
@@ -458,6 +464,7 @@ void daeBlock::Initialize(void)
 
 		pSTN->CheckDiscontinuities();
 	}
+*/
 	RebuildExpressionMap();
 }
 
@@ -478,6 +485,7 @@ bool daeBlock::CheckForDiscontinuities(void)
 	if(pCondition)
 	{
 		daeExecutionContext EC;
+		EC.m_pBlock						= this;
 		EC.m_pDataProxy					= m_pDataProxy;
 		EC.m_eEquationCalculationMode	= eCalculate;
 	

@@ -594,6 +594,7 @@ public:
 		m_pdAbsoluteTolerances		= NULL;
 		m_pTopLevelModel			= NULL;
 		m_pLog						= NULL;
+		m_pBlock					= NULL;
 		m_bGatherInfo				= false;
 		m_nTotalNumberOfVariables	= 0;
 		m_nNumberOfParameters		= 0;
@@ -1126,7 +1127,7 @@ public:
 		}
 	}
 	
-	void CleanUpSetupData()
+	void CleanUpSetupData(void)
 	{
 		if(m_pdInitialValues)
 		{
@@ -1161,6 +1162,7 @@ public:
 //	{
 //		daeExecutionContext EC;
 //		EC.m_pDataProxy					= this;
+//		EC.m_pBlock						= m_pBlock;
 //		EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
 //
 //		if(m_pCondition)
@@ -1214,19 +1216,29 @@ public:
 		m_pmatSResiduals       = NULL;
 	}
 	
-	bool IsModelDynamic() const
+	bool IsModelDynamic(void) const
 	{
 		return m_bIsModelDynamic;		
 	}
 	
-	bool ResetLAMatrixAfterDiscontinuity() const
+	bool ResetLAMatrixAfterDiscontinuity(void) const
 	{
 		return m_bResetLAMatrixAfterDiscontinuity;
 	}
 	
-	bool PrintInfo() const
+	bool PrintInfo(void) const
 	{
 		return m_bPrintInfo;
+	}
+	
+	daeBlock* GetBlock(void) const
+	{
+		return m_pBlock;
+	}
+	
+	void SetBlock(daeBlock* pBlock)
+	{
+		m_pBlock = pBlock;
 	}
 	
 protected:
@@ -1234,6 +1246,7 @@ protected:
 	daeLog_t*						m_pLog;
 	daeModel_t*						m_pTopLevelModel;
 	size_t							m_nTotalNumberOfVariables;
+	daeBlock*						m_pBlock;
 	
 	std::vector<real_t*>			m_pdarrValuesReferences;
 	std::vector<real_t*>			m_pdarrTimeDerivativesReferences;
@@ -1330,7 +1343,7 @@ public:
 	virtual void	CalcNonZeroElements(int& NNZ);
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
-	virtual void	CopyDataToBlock(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
+	virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
 	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives);
 
 	virtual real_t	GetTime(void) const;

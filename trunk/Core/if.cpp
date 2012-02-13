@@ -234,6 +234,7 @@ bool daeIF::CheckDiscontinuities()
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+  EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	bResult = false;
@@ -285,6 +286,7 @@ bool daeIF::CheckDiscontinuities(void)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	for(i = 0; i < m_ptrarrStates.size(); i++)
@@ -340,6 +342,7 @@ void daeIF::ExecuteOnConditionActions(void)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	for(i = 0; i < m_ptrarrStates.size(); i++) // For all states in the STN

@@ -510,6 +510,7 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_pBlock						= pBlock;
 	EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
 
 // I have to set this since Create_adouble called from adSetup nodes needs it
@@ -578,6 +579,7 @@ bool daeSTN::CheckDiscontinuities(void)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
@@ -613,6 +615,7 @@ void daeSTN::ExecuteOnConditionActions(void)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
@@ -653,6 +656,7 @@ bool daeSTN::CheckDiscontinuities(void)
 
 	daeExecutionContext EC;
 	EC.m_pDataProxy					= m_pModel->m_pDataProxy.get();
+  EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
 	// Save the current active state to check if it has been changed by one of the actions
