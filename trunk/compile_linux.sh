@@ -8,7 +8,7 @@ if [ "$1" = "-help" ]; then
   return
 fi
 
-if [ $1 = "" ]; then
+if [ "$1" = "" ]; then
   PROJECTS=all
 else
   PROJECTS=$1
