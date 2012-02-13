@@ -60,11 +60,12 @@ fi
 
 # Unpack and compile libraries
 unzip Bonmin-${vBONMIN}.zip
+rm -rf bonmin/Bonmin-${vBONMIN}
 mv Bonmin-${vBONMIN} bonmin
 cd bonmin/ThirdParty/Mumps
 sh get.Mumps
 cd ../..
-mkdir build
+mkdir -p build
 cd build
 ../configure --enable-shared=no --enable-static=yes CFLAGS="-fPIC ${SSE_FLAGS}" CXXFLAGS="-fPIC ${SSE_FLAGS}" FFLAGS="-fPIC ${SSE_FLAGS}"
 make -j${Ncpu}
@@ -73,15 +74,19 @@ make install
 make clean
 cd ${TRUNK}
 
-tar -xzf superlu_${vSUPERLU}.tar.gz
-mv SuperLU_${vSUPERLU} superlu
+if [ ! -e superlu ]; then
+  tar -xzf superlu_${vSUPERLU}.tar.gz
+  mv SuperLU_${vSUPERLU} superlu
+fi
 cd superlu
 tar -xzf ../superlu_makefiles.tar.gz
 make superlulib
 cd ${TRUNK}
 
-tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
-mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
+if [ ! -e superlu_mt ]; then
+  tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
+  mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
+fi
 cd superlu_mt
 tar -xzf ../superlu_mt_makefiles.tar.gz
 make lib
