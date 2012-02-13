@@ -2907,8 +2907,8 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 		std::string               strName  = iter->first;
 		daeExternalFunctionNode_t argument = iter->second;
 		
-		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
-		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
+		adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);
 		
 		if(ad)
 			value = (*ad)->Evaluate(pExecutionContext);

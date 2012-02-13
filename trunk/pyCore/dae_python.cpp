@@ -904,7 +904,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("DecreaseIndent",	pure_virtual(&daeLog_t::DecreaseIndent))
 		;
 
-	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog") 
+	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog")
 		.def("Message",				&daeLog_t::Message, &daepython::daeBaseLogWrapper::def_Message)
 	    .def("SetProgress",			&daeLog_t::SetProgress, &daepython::daeBaseLogWrapper::def_SetProgress)
 		.def("IncreaseIndent",		&daeBaseLog::IncreaseIndent)

@@ -422,14 +422,10 @@ public:
 	adNodePtr GetEquationEvaluationNode(void) const;
 	
 protected:
-//	daeBlock*						m_pBlock;
-//	daeModel*						m_pModel;
-//	daeEquation*					m_pEquation;
-	size_t							m_nEquationIndexInBlock;
-	std::vector<size_t>				m_narrDomainIndexes;
-	std::map<size_t, size_t> 		m_mapIndexes;
-//	std::vector<daeDomain*>			m_ptrarrDomains;
-	adNodePtr		m_EquationEvaluationNode;
+	size_t					 m_nEquationIndexInBlock;
+	std::vector<size_t>		 m_narrDomainIndexes;
+	std::map<size_t, size_t> m_mapIndexes;
+	adNodePtr				 m_EquationEvaluationNode;
 	friend class daeEquation;
 	friend class daeSTN;
 	friend class daeIF;
@@ -2628,6 +2624,7 @@ protected:
 	friend class daeEquation;
 	friend class daeEquationExecutionInfo;
 	friend class daeDistributedEquationDomainInfo;
+	friend class daeFunctionWithGradients;
 	friend class daeOptimizationVariable;
 	friend class daeVariableWrapper;
 	friend class daeExternalFunction_t;

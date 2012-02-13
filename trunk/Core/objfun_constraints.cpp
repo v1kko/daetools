@@ -58,7 +58,7 @@ daeFunctionWithGradients::~daeFunctionWithGradients(void)
 void daeFunctionWithGradients::SetResidual(adouble res)
 {
 	if(!m_pEquation)
-		daeDeclareAndThrowException(exInvalidPointer)
+		daeDeclareAndThrowException(exInvalidPointer);
 		
 	m_pEquation->SetResidual( res - (*m_pVariable )() );
 }
@@ -66,7 +66,7 @@ void daeFunctionWithGradients::SetResidual(adouble res)
 adouble daeFunctionWithGradients::GetResidual(void) const
 {
 	if(!m_pEquation)
-		daeDeclareAndThrowException(exInvalidPointer)
+		daeDeclareAndThrowException(exInvalidPointer);
 		
 	return m_pEquation->GetResidual();
 }
@@ -74,7 +74,7 @@ adouble daeFunctionWithGradients::GetResidual(void) const
 std::string daeFunctionWithGradients::GetName(void) const
 {
 	if(!m_pVariable)
-		daeDeclareAndThrowException(exInvalidPointer)
+		daeDeclareAndThrowException(exInvalidPointer);
 		
 	return m_pVariable->GetName();
 }
@@ -82,10 +82,13 @@ std::string daeFunctionWithGradients::GetName(void) const
 real_t daeFunctionWithGradients::GetValue(void) const
 {
 	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel || !m_pModel->m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
-	return m_pVariable->GetValue();
+	return m_pModel->m_pDataProxy->GetValue( m_pVariable->GetOverallIndex() );
 }
+
 /*
  This function DOES NOT set gradients for ALL optimization variables but only for those that the obj.function depends on!!! 
  Anyway, the array 'gradients' is Nparams long, and the indexes in m_narrOptimizationVariablesIndexes are in the range (0, Nparams-1)

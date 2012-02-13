@@ -483,8 +483,11 @@ int daeSuperLUSolver::Setup(void*		ida,
 	m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
 	m_arrResiduals.InitArray(Neq, pdResiduals);
 
-// Do we need to clear the Jacobian matrix? It is sparse and all non-zero items will be overwritten.
-	//m_matJacobian.ClearValues();
+/* ACHTUNG!
+   Do we need to clear the Jacobian matrix? It is sparse and all non-zero items will be overwritten.
+   13.02.2012: YES we have for equations set only jacobian items that the equation depends on! 
+*/
+	m_matJacobian.ClearValues();
 	
 	m_pBlock->CalculateJacobian(time, 
 		                        m_arrValues, 
