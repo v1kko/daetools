@@ -132,7 +132,7 @@ adouble daeEventPort::operator()(void)
 {
 	adouble a;
 	a.setGatherInfo(true);
-	a.node = boost::shared_ptr<adNode>(new adEventPortDataNode(this));
+	a.node = adNodePtr(new adEventPortDataNode(this));
 	return a;
 }
 

@@ -258,7 +258,7 @@ adouble_array daeVariable::Create_adouble_array(const daeArrayRange* ranges, con
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimeVariableNodeArray* node = new adRuntimeVariableNodeArray();
-		varArray.node = shared_ptr<adNodeArray>(node);
+		varArray.node = adNodeArrayPtr(node);
 		varArray.setGatherInfo(true);
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		
@@ -292,7 +292,7 @@ adouble_array daeVariable::Calculate_dt_array(const daeArrayRange* ranges, const
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimeTimeDerivativeNodeArray* node = new adRuntimeTimeDerivativeNodeArray();
-		varArray.node = shared_ptr<adNodeArray>(node);
+		varArray.node = adNodeArrayPtr(node);
 		varArray.setGatherInfo(true);
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		node->m_nDegree   = 1;
@@ -326,7 +326,7 @@ adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t&
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimePartialDerivativeNodeArray* node = new adRuntimePartialDerivativeNodeArray();
-		varArray.node = shared_ptr<adNodeArray>(node);
+		varArray.node = adNodeArrayPtr(node);
 		varArray.setGatherInfo(true);
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&rDomain);
@@ -395,7 +395,7 @@ adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges,
 	}
 
 	adSetupVariableNodeArray* node = new adSetupVariableNodeArray();
-	varArray.node = shared_ptr<adNodeArray>(node);
+	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
 	node->m_pVariable = const_cast<daeVariable*>(this);
@@ -454,7 +454,7 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 	}
 
 	adSetupTimeDerivativeNodeArray* node = new adSetupTimeDerivativeNodeArray();
-	varArray.node = shared_ptr<adNodeArray>(node);
+	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
 	node->m_nDegree = 1;
@@ -514,7 +514,7 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 	}
 
 	adSetupPartialDerivativeNodeArray* node = new adSetupPartialDerivativeNodeArray();
-	varArray.node = shared_ptr<adNodeArray>(node);
+	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
 	node->m_nDegree = nOrder;
@@ -645,7 +645,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 			for(size_t i = 0; i < N; i++)
 				node->m_narrDomains[i] = indexes[i];
 		}
-		tmp.node = shared_ptr<adNode>(node);
+		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
 	}
 	return tmp;
@@ -692,7 +692,7 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
 		for(size_t i = 0; i < N; i++)
 			node->m_arrDomains[i] = indexes[i];
 	}
-	tmp.node = shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -833,7 +833,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 			for(size_t i = 0; i < N; i++)
 				node->m_narrDomains[i] = indexes[i];
 		}
-		tmp.node = shared_ptr<adNode>(node);
+		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
 	}
 	return tmp;
@@ -881,7 +881,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 		for(size_t i = 0; i < N; i++)
 			node->m_arrDomains[i] = indexes[i];
 	}
-	tmp.node = shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -955,7 +955,7 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 			for(size_t i = 0; i < N; i++)
 				node->m_narrDomains[i] = indexes[i];
 		}
-		tmp.node = shared_ptr<adNode>(node);
+		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
 	}
 	return tmp;
@@ -1005,7 +1005,7 @@ adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const dae
 		for(size_t i = 0; i < N; i++)
 			node->m_arrDomains[i] = indexes[i];
 	}
-	tmp.node = shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 	return tmp;
 }

@@ -64,13 +64,18 @@ class adNode;
 class adNodeArray;
 class daeModel;
 class daeExecutionContext;
+
+typedef boost::intrusive_ptr<adNode>      adNodePtr;
+typedef boost::intrusive_ptr<adNodeArray> adNodeArrayPtr;
+typedef boost::intrusive_ptr<condNode>    condNodePtr;
+
 class DAE_CORE_API daeCondition : public io::daeSerializable,
 							      public daeExportable_t
 {
 public:
 	daeDeclareDynamicClass(daeCondition)
 	daeCondition(void);
-	daeCondition(boost::shared_ptr<condNode> condition);
+	daeCondition(condNodePtr condition);
 	virtual ~daeCondition(void);
 
 public:
@@ -100,11 +105,11 @@ protected:
 	void   SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
 
 public:
-	daeModel*									m_pModel;
-	boost::shared_ptr<condNode>					m_pConditionNode;
-	boost::shared_ptr<condNode>					m_pSetupConditionNode;
-	std::vector< boost::shared_ptr<adNode> >	m_ptrarrExpressions;
-	real_t										m_dEventTolerance;
+	daeModel*				m_pModel;
+	condNodePtr				m_pConditionNode;
+	condNodePtr				m_pSetupConditionNode;
+	std::vector<adNodePtr>	m_ptrarrExpressions;
+	real_t					m_dEventTolerance;
 };
 
 /*********************************************************************************************
@@ -230,8 +235,7 @@ public:
 		m_bGatherInfo = bGatherInfo;
 	}
 
-	boost::shared_ptr<adNode>	node;
-	//static bool bIsParsing;
+	adNodePtr node;
 
 private:
     real_t m_dValue;
@@ -297,9 +301,9 @@ public:
 	void setGatherInfo(bool bGatherInfo);
 	
 public:
-	bool							m_bGatherInfo;
-	boost::shared_ptr<adNodeArray>	node;
-	std::vector<adouble>			m_arrValues;
+	bool					m_bGatherInfo;
+	adNodeArrayPtr			node;
+	std::vector<adouble>	m_arrValues;
 };
 
 DAE_CORE_API const adouble_array operator +(const real_t v, const adouble_array& a);
@@ -383,7 +387,8 @@ static const string strarrUnaryFns[12]={"minus",
 										};
 
 class daeSaveAsMathMLContext;
-class DAE_CORE_API adNode : public daeExportable_t
+class DAE_CORE_API adNode : public daeReferenceCountable,
+                            public daeExportable_t
 
 {
 public:
@@ -408,7 +413,7 @@ public:
 											bool bAddFixed)							= 0;
 	virtual bool	IsLinear(void) const											= 0;
 	virtual bool	IsFunctionOfVariables(void) const								= 0;
-
+	
 	static adNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
 	static adNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNode>* ood = NULL);
@@ -419,7 +424,7 @@ public:
 									 bool bAppendEqualToZero = false);
 };
 
-#define CLONE_NODE(NODE, VALUE) (  boost::shared_ptr<adNode>(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
+#define CLONE_NODE(NODE, VALUE) (  adNodePtr(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
 
 // UNITS is used to create adConstantNone/adConstantNoneArray; they should be dimensionless if created on simple float numbers!!
 // #define UNITS(NODE) ( NODE ? NODE->GetQuantity().getUnits() : unit() )
@@ -428,7 +433,8 @@ public:
 /*********************************************************************************************
 	adNodeArray
 **********************************************************************************************/
-class DAE_CORE_API adNodeArray : public daeExportable_t
+class DAE_CORE_API adNodeArray : public daeReferenceCountable,
+                                 public daeExportable_t
 {
 public:
 	virtual ~adNodeArray(void){}
@@ -460,18 +466,19 @@ public:
 	static adNodeArray*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNodeArray>* ood = NULL);
 	
 	static void			SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag, 
-														         const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+														         const std::vector< adNodePtr >& arrNodes, 
 														         const daeSaveAsMathMLContext* c);
-	static string		SaveRuntimeNodeArrayAsLatex(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+	static string		SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes, 
 											        const daeSaveAsMathMLContext* c);
-//	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+//	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes, 
 //												        const daeSaveAsMathMLContext* c);
 };
 
 /*********************************************************************************************
 	condNode
 **********************************************************************************************/
-class DAE_CORE_API condNode : public daeExportable_t
+class DAE_CORE_API condNode : public daeReferenceCountable,
+                              public daeExportable_t
 {
 public:
 	virtual ~condNode(void){}
@@ -490,7 +497,7 @@ public:
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const		= 0;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const = 0;
 
-	virtual void		BuildExpressionsArray(std::vector<boost::shared_ptr<adNode> >& ptrarrExpressions, 
+	virtual void		BuildExpressionsArray(std::vector<adNodePtr>& ptrarrExpressions, 
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance)										= 0;
 	virtual void		AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes, bool bAddFixed)		= 0;

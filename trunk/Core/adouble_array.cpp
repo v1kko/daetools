@@ -133,7 +133,7 @@ const adouble_array adouble_array::operator -(void) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eSign, 
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSign, 
 			                                                    CLONE_NODE_ARRAY(node) ));
 	    return tmp;
 	}
@@ -151,7 +151,7 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
 	if(getGatherInfo() || a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 			                                                     CLONE_NODE_ARRAY(node), 
 									                             CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
@@ -172,9 +172,9 @@ const adouble_array adouble_array::operator +(const real_t v) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -191,9 +191,9 @@ const adouble_array adouble_array::operator +(const adouble& a) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -210,8 +210,8 @@ const adouble_array operator +(const adouble& a, const adouble_array& arr)
 	if(arr.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -230,8 +230,8 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(ePlus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -249,7 +249,7 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
 	if(getGatherInfo() || a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 			                                                     CLONE_NODE_ARRAY(node), 
 									                             CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
@@ -270,9 +270,9 @@ const adouble_array adouble_array::operator -(const real_t v) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -289,9 +289,9 @@ const adouble_array adouble_array::operator -(const adouble& a) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -308,8 +308,8 @@ const adouble_array operator -(const adouble& a, const adouble_array& arr)
 	if(arr.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -328,8 +328,8 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMinus, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -347,7 +347,7 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
 	if(getGatherInfo() || a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 			                                                     CLONE_NODE_ARRAY(node), 
 									                             CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
@@ -368,9 +368,9 @@ const adouble_array adouble_array::operator *(const real_t v) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -387,9 +387,9 @@ const adouble_array adouble_array::operator *(const adouble& a) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -406,8 +406,8 @@ const adouble_array operator *(const adouble& a, const adouble_array& arr)
 	if(arr.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -426,8 +426,8 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eMulti, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -445,7 +445,7 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 	if(getGatherInfo() || a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 			                                                     CLONE_NODE_ARRAY(node), 
 									                             CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
@@ -466,9 +466,9 @@ const adouble_array adouble_array::operator /(const real_t v) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(node))) ));
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
 	    return tmp;
 	}
 	
@@ -485,9 +485,9 @@ const adouble_array adouble_array::operator /(const adouble& a) const
 	if(getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 														         CLONE_NODE_ARRAY(node), 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
 	    return tmp;
 	}
 	
@@ -504,8 +504,8 @@ const adouble_array operator /(const adouble& a, const adouble_array& arr)
 	if(arr.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
-														         shared_ptr<adNodeArray>(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
+														         adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 														         CLONE_NODE_ARRAY(arr.node)
 																 ));
 	    return tmp;
@@ -524,8 +524,8 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adBinaryNodeArray(eDivide, 
-														         shared_ptr<adNodeArray>(new adConstantNodeArray(v, UNITS(a.node))),
+		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
+														         adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 															     CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
@@ -544,7 +544,7 @@ const adouble daeModel::dt(const adouble& a) const
 {
 	adouble tmp;
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupExpressionDerivativeNode(const_cast<daeModel*>(this),
+	tmp.node = adNodePtr(new adSetupExpressionDerivativeNode(const_cast<daeModel*>(this),
 																	  CLONE_NODE(a.node, a.getValue()) ));
 	return tmp;
 }
@@ -553,7 +553,7 @@ const adouble daeModel::d(const adouble& a, daeDomain& domain) const
 {
 	adouble tmp;
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupExpressionPartialDerivativeNode(const_cast<daeModel*>(this),
+	tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(const_cast<daeModel*>(this),
 																			 &domain,
 																			 CLONE_NODE(a.node, a.getValue()) ));
 	return tmp;
@@ -565,7 +565,7 @@ const adouble daeModel::average(const adouble_array& a) const
 	adouble tmp;
 
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupSpecialFunctionNode(eAverage, 
+	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eAverage, 
 																 const_cast<daeModel*>(this),
 																 CLONE_NODE_ARRAY(a.node) ));
 	return tmp;
@@ -578,7 +578,7 @@ const adouble daeModel::__average__(const adouble_array& a) const
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>(new adRuntimeSpecialFunctionNode(eAverage,
+		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eAverage,
 																	   const_cast<daeModel*>(this),
 																	   CLONE_NODE_ARRAY(a.node) ));
 		return tmp;
@@ -592,7 +592,7 @@ const adouble daeModel::sum(const adouble_array& a) const
 {
 	adouble tmp;
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>( new adSetupSpecialFunctionNode(eSum, 
+	tmp.node = adNodePtr( new adSetupSpecialFunctionNode(eSum, 
 																  const_cast<daeModel*>(this),
 																  CLONE_NODE_ARRAY(a.node) ) );
 	return tmp;
@@ -605,7 +605,7 @@ const adouble daeModel::__sum__(const adouble_array& a) const
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>(new adRuntimeSpecialFunctionNode(eSum,
+		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eSum,
 																	   const_cast<daeModel*>(this),
 																	   CLONE_NODE_ARRAY(a.node) ));
 		return tmp;
@@ -623,7 +623,7 @@ const adouble daeModel::product(const adouble_array& a) const
 	adouble tmp;
 
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupSpecialFunctionNode(eProduct,
+	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eProduct,
 																 const_cast<daeModel*>(this),
 																 CLONE_NODE_ARRAY(a.node) ));
 	return tmp;
@@ -636,7 +636,7 @@ const adouble daeModel::__product__(const adouble_array& a) const
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>(new adRuntimeSpecialFunctionNode(eProduct,
+		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eProduct,
 																	   const_cast<daeModel*>(this),
 																	   CLONE_NODE_ARRAY(a.node) ));
 		return tmp;
@@ -689,7 +689,7 @@ const adouble daeModel::integral(const adouble_array& a) const
 														CLONE_NODE_ARRAY(a.node),
 														pDomain,
 														range);
-	tmp.node = shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	return tmp;
 }
 
@@ -712,7 +712,7 @@ const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain,
 																CLONE_NODE_ARRAY(a.node),
 																pDomain,
 																pdarrPoints);
-		tmp.node = shared_ptr<adNode>(node);
+		tmp.node = adNodePtr(node);
 		return tmp;
 	}
 	
@@ -735,11 +735,11 @@ const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain,
 const adouble daeModel::min(const adouble_array& a) const
 {
 	adouble tmp;
-
+	
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupSpecialFunctionNode(eMinInArray, 
-																 const_cast<daeModel*>(this),
-																 CLONE_NODE_ARRAY(a.node) ));
+	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMinInArray, 
+	                                                    const_cast<daeModel*>(this),
+	                                                    CLONE_NODE_ARRAY(a.node) ));
 	return tmp;
 }
 
@@ -749,18 +749,18 @@ const adouble daeModel::__min__(const adouble_array& a) const
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>(new adRuntimeSpecialFunctionNode(eMinInArray,
-																	   const_cast<daeModel*>(this),
-																	   CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMinInArray,
+		                                                      const_cast<daeModel*>(this),
+		                                                      CLONE_NODE_ARRAY(a.node) ));
 		return tmp;
 	}
-		
-//	tmp = a[0];
-//	for(size_t i = 1; i < a.GetSize(); i++)
-//		if(a[i].getValue() < tmp.getValue())
-//			tmp = a[i];
-//	return tmp;
-
+	
+	//	tmp = a[0];
+	//	for(size_t i = 1; i < a.GetSize(); i++)
+	//		if(a[i].getValue() < tmp.getValue())
+	//			tmp = a[i];
+	//	return tmp;
+	
 	tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__min__(tmp, a[i]);		
@@ -770,33 +770,33 @@ const adouble daeModel::__min__(const adouble_array& a) const
 const adouble daeModel::max(const adouble_array& a) const
 {
 	adouble tmp;
-
+	
 	tmp.setGatherInfo(true);
-	tmp.node = shared_ptr<adNode>(new adSetupSpecialFunctionNode(eMaxInArray, 
-																 const_cast<daeModel*>(this),
-																 CLONE_NODE_ARRAY(a.node) ));
+	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMaxInArray, 
+	                                                    const_cast<daeModel*>(this),
+	                                                    CLONE_NODE_ARRAY(a.node) ));
 	return tmp;
 }
 
 const adouble daeModel::__max__(const adouble_array& a) const
 {
 	adouble tmp;
-
+	
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>(new adRuntimeSpecialFunctionNode(eMaxInArray,
-																	   const_cast<daeModel*>(this),
-																	   CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMaxInArray,
+		                                                      const_cast<daeModel*>(this),
+		                                                      CLONE_NODE_ARRAY(a.node) ));
 		return tmp;
 	}
 	
-//	tmp = a[0];
-//	for(size_t i = 1; i < a.GetSize(); i++)
-//		if(a[i].getValue() > tmp.getValue())
-//			tmp = a[i];
-//	return tmp;
-
+	//	tmp = a[0];
+	//	for(size_t i = 1; i < a.GetSize(); i++)
+	//		if(a[i].getValue() > tmp.getValue())
+	//			tmp = a[i];
+	//	return tmp;
+	
 	tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__max__(tmp, a[i]);
@@ -809,8 +809,8 @@ const adouble_array exp(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eExp, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eExp, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -827,8 +827,8 @@ const adouble_array sqrt(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eSqrt, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSqrt, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -845,8 +845,8 @@ const adouble_array log(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eLn, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eLn, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -863,8 +863,8 @@ const adouble_array log10(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eLog, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eLog, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -881,8 +881,8 @@ const adouble_array abs(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eAbs, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eAbs, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -899,8 +899,8 @@ const adouble_array floor(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eFloor, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eFloor, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -917,8 +917,8 @@ const adouble_array ceil(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eCeil, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eCeil, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -935,8 +935,8 @@ const adouble_array sin(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eSin, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSin, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -953,8 +953,8 @@ const adouble_array cos(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eCos, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eCos, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -971,8 +971,8 @@ const adouble_array tan(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eTan, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eTan, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -989,8 +989,8 @@ const adouble_array asin(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eArcSin, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcSin, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -1007,8 +1007,8 @@ const adouble_array acos(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eArcCos, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcCos, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	
@@ -1025,8 +1025,8 @@ const adouble_array atan(const adouble_array& a)
 	if(a.getGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>(new adUnaryNodeArray(eArcTan, 
-			                                                    CLONE_NODE_ARRAY(a.node) ));
+		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcTan, 
+		                                               CLONE_NODE_ARRAY(a.node) ));
 	    return tmp;
 	}
 	

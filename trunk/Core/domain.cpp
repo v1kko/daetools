@@ -496,7 +496,7 @@ adouble_array daeDomain::array(int start, int end, int step)
 //	if(m_pModel->m_pDataProxy->GetGatherInfo())
 //	{
 //		adRuntimeVariableNodeArray* node = new adRuntimeVariableNodeArray();
-//		varArray.node = shared_ptr<adNodeArray>(node);
+//		varArray.node = adNodeArrayPtr(node);
 //		varArray.setGatherInfo(true);
 //		node->m_pVariable = const_cast<daeVariable*>(this);
 //		
@@ -549,7 +549,7 @@ adouble daeDomain::operator[](size_t nIndex) const
 
 	adouble tmp;
 	adDomainIndexNode* node = new adDomainIndexNode(const_cast<daeDomain*>(this), nIndex, const_cast<real_t*>(&(m_darrPoints[nIndex])));
-	tmp.node = boost::shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 
 	return tmp;

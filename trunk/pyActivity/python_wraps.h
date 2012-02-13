@@ -11,7 +11,7 @@
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"

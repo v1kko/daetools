@@ -167,7 +167,7 @@ bool daeFunctionWithGradients::IsLinear(void) const
 {
 	if(!m_pEquationExecutionInfo)
 		daeDeclareAndThrowException(exInvalidPointer)
-	boost::shared_ptr<adNode> node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
+	adNodePtr node = m_pEquationExecutionInfo->GetEquationEvaluationNode();
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer)
 		

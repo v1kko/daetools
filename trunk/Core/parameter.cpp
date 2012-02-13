@@ -240,7 +240,7 @@ void daeParameter::Initialize(void)
 	
 //	m_ptrarrRuntimeNodes.resize(nTotalNumberOfPoints);
 //	for(size_t i = 0; i < nTotalNumberOfPoints; i++)
-//		m_ptrarrRuntimeNodes[i] = boost::shared_ptr<adNode>(new adRuntimeParameterNode(m_darrValues[i]));
+//		m_ptrarrRuntimeNodes[i] = adNodePtr(new adRuntimeParameterNode(m_darrValues[i]));
 //}
 
 adouble daeParameter::Create_adouble(const size_t* indexes, const size_t N) const
@@ -267,7 +267,7 @@ adouble daeParameter::Create_adouble(const size_t* indexes, const size_t N) cons
 			for(size_t i = 0; i < N; i++)
 				node->m_narrDomains[i] = indexes[i];
 		}
-		tmp.node = boost::shared_ptr<adNode>(node);
+		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
 	}
 	return tmp;
@@ -302,7 +302,7 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
 		for(size_t i = 0; i < N; i++)
 			node->m_arrDomains[i] = indexes[i];
 	}
-	tmp.node = boost::shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -372,7 +372,7 @@ adouble_array daeParameter::Create_adouble_array(const daeArrayRange* ranges, co
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
 		adRuntimeParameterNodeArray* node = new adRuntimeParameterNodeArray();
-		varArray.node = boost::shared_ptr<adNodeArray>(node);
+		varArray.node = adNodeArrayPtr(node);
 		varArray.setGatherInfo(true);
 		node->m_pParameter = const_cast<daeParameter*>(this);
 		
@@ -426,7 +426,7 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 	}
 
 	adSetupParameterNodeArray* node = new adSetupParameterNodeArray();
-	varArray.node = boost::shared_ptr<adNodeArray>(node);
+	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
 	node->m_pParameter = const_cast<daeParameter*>(this);

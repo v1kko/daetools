@@ -129,27 +129,27 @@ condExpressionNode::condExpressionNode(const adouble& left, daeeConditionType ty
 		daeDeclareAndThrowException(exInvalidPointer);  
 	if(!right.node)
 		daeDeclareAndThrowException(exInvalidPointer);  
-	m_pLeft				= shared_ptr<adNode>(left.node->Clone());
+	m_pLeft				= adNodePtr(left.node->Clone());
 	m_eConditionType	= type;
-	m_pRight			= shared_ptr<adNode>(right.node->Clone());
+	m_pRight			= adNodePtr(right.node->Clone());
 }
 
 condExpressionNode::condExpressionNode(const adouble& left, daeeConditionType type, real_t right)
 {
 	if(!left.node)
 		daeDeclareAndThrowException(exInvalidPointer);  
-	m_pLeft				= shared_ptr<adNode>(left.node->Clone());
+	m_pLeft				= adNodePtr(left.node->Clone());
 	m_eConditionType	= type;
-	m_pRight			= shared_ptr<adNode>(new adConstantNode(right, UNITS(left.node)));
+	m_pRight			= adNodePtr(new adConstantNode(right, UNITS(left.node)));
 }
 
 condExpressionNode::condExpressionNode(real_t left, daeeConditionType type, const adouble& right)
 {
 	if(!right.node)
 		daeDeclareAndThrowException(exInvalidPointer);  
-	m_pLeft				= shared_ptr<adNode>(new adConstantNode(left, UNITS(right.node)));
+	m_pLeft				= adNodePtr(new adConstantNode(left, UNITS(right.node)));
 	m_eConditionType	= type;
-	m_pRight			= shared_ptr<adNode>(right.node->Clone());
+	m_pRight			= adNodePtr(right.node->Clone());
 }
 
 condExpressionNode::condExpressionNode()
@@ -167,9 +167,9 @@ condExpressionNode::~condExpressionNode()
 //		daeDeclareAndThrowException(exInvalidPointer);  
 //	if(!right.node)
 //		daeDeclareAndThrowException(exInvalidPointer);  
-//	node->m_pLeft			= shared_ptr<adNode>(left.node->Clone());
+//	node->m_pLeft			= adNodePtr(left.node->Clone());
 //	node->m_eConditionType	= type;
-//	node->m_pRight			= shared_ptr<adNode>(right.node->Clone());
+//	node->m_pRight			= adNodePtr(right.node->Clone());
 //	return node;
 //}
 //
@@ -178,9 +178,9 @@ condExpressionNode::~condExpressionNode()
 //	condExpressionNode* node = new condExpressionNode();
 //	if(!left.node)
 //		daeDeclareAndThrowException(exInvalidPointer);  
-//	node->m_pLeft			= shared_ptr<adNode>(left.node->Clone());
+//	node->m_pLeft			= adNodePtr(left.node->Clone());
 //	node->m_eConditionType	= type;
-//	node->m_pRight			= shared_ptr<adNode>(new adConstantNode(right));
+//	node->m_pRight			= adNodePtr(new adConstantNode(right));
 //	return node;
 //}
 //
@@ -189,9 +189,9 @@ condExpressionNode::~condExpressionNode()
 //	condExpressionNode* node = new condExpressionNode();
 //	if(!right.node)
 //		daeDeclareAndThrowException(exInvalidPointer);  
-//	node->m_pLeft			= shared_ptr<adNode>(new adConstantNode(left));
+//	node->m_pLeft			= adNodePtr(new adConstantNode(left));
 //	node->m_eConditionType	= type;
-//	node->m_pRight			= shared_ptr<adNode>(right.node->Clone());
+//	node->m_pRight			= adNodePtr(right.node->Clone());
 //	return node;
 //}
 
@@ -433,7 +433,7 @@ condNode* condExpressionNode::Clone(void) const
 	return new condExpressionNode(*this);
 }
 
-void condExpressionNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & ptrarrExpressions,
+void condExpressionNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpressions,
 											   const daeExecutionContext* pExecutionContext,
 											   real_t dEventTolerance)
 {
@@ -519,7 +519,7 @@ void condExpressionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes
 /*********************************************************************************************
 	condUnaryNode
 **********************************************************************************************/
-condUnaryNode::condUnaryNode(shared_ptr<condNode> node, daeeLogicalUnaryOperator op)
+condUnaryNode::condUnaryNode(condNodePtr node, daeeLogicalUnaryOperator op)
 {
 	m_pNode				= node;
 	m_eLogicalOperator	= op;
@@ -639,7 +639,7 @@ daeCondition condUnaryNode::CreateRuntimeNode(const daeExecutionContext* pExecut
 	//	break;
 	//default:
 	//	daeDeclareAndThrowException(exNotImplemented); 
-	//	return shared_ptr<condNode>();
+	//	return condNodePtr();
 	//}
 }
 
@@ -672,7 +672,7 @@ condNode* condUnaryNode::Clone(void) const
 	return new condUnaryNode(*this);
 }
 
-void condUnaryNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & ptrarrExpressions,
+void condUnaryNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpressions,
 										  const daeExecutionContext* pExecutionContext,
 										  real_t dEventTolerance)
 {
@@ -691,7 +691,7 @@ void condUnaryNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, boo
 /*********************************************************************************************
 	condBinaryNode
 **********************************************************************************************/
-condBinaryNode::condBinaryNode(shared_ptr<condNode> left, daeeLogicalBinaryOperator op, shared_ptr<condNode> right)
+condBinaryNode::condBinaryNode(condNodePtr left, daeeLogicalBinaryOperator op, condNodePtr right)
 {
 	m_pLeft				= left;
 	m_eLogicalOperator	= op;
@@ -905,7 +905,7 @@ condNode* condBinaryNode::Clone(void) const
 	return new condBinaryNode(*this);
 }
 
-void condBinaryNode::BuildExpressionsArray(vector< shared_ptr<adNode> > & ptrarrExpressions,
+void condBinaryNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpressions,
 										   const daeExecutionContext* pExecutionContext,
 										   real_t dEventTolerance)
 {

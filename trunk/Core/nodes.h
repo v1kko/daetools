@@ -271,7 +271,7 @@ public:
 								   size_t nDegree, 
 								   vector<size_t>& narrDomains, 
 								   daeDomain* pDomain, 
-								   boost::shared_ptr<adNode> pdnode);
+								   adNodePtr pdnode);
 	virtual ~adRuntimePartialDerivativeNode(void);
 
 public:
@@ -289,7 +289,7 @@ public:
 
 public:
 // Runtime part
-	boost::shared_ptr<adNode>	pardevnode;
+	adNodePtr	pardevnode;
 	size_t						m_nOverallIndex;
 	size_t						m_nDegree;
 // Report/GUI part
@@ -306,7 +306,7 @@ class DAE_CORE_API adUnaryNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adUnaryNode)
 	adUnaryNode(void);
-	adUnaryNode(daeeUnaryFunctions eFun, boost::shared_ptr<adNode> n);
+	adUnaryNode(daeeUnaryFunctions eFun, adNodePtr n);
 	virtual ~adUnaryNode(void);
 
 public:
@@ -324,7 +324,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNode>	node;
+	adNodePtr	node;
 	daeeUnaryFunctions			eFunction;
 };
 
@@ -336,7 +336,7 @@ class DAE_CORE_API adBinaryNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adBinaryNode)
 	adBinaryNode(void);
-	adBinaryNode(daeeBinaryFunctions eFun, boost::shared_ptr<adNode> l, boost::shared_ptr<adNode> r);
+	adBinaryNode(daeeBinaryFunctions eFun, adNodePtr l, adNodePtr r);
 	virtual ~adBinaryNode(void);
 
 public:
@@ -354,8 +354,8 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNode>	left;
-	boost::shared_ptr<adNode>	right;
+	adNodePtr	left;
+	adNodePtr	right;
 	daeeBinaryFunctions			eFunction;
 };
 
@@ -382,7 +382,7 @@ public:
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
+	virtual void		BuildExpressionsArray(vector< adNodePtr > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext, 
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -390,9 +390,9 @@ public:
 	virtual bool		GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNode>	m_pLeft;
+	adNodePtr	m_pLeft;
 	daeeConditionType			m_eConditionType;
-	boost::shared_ptr<adNode>	m_pRight;
+	adNodePtr	m_pRight;
 };
 
 /*********************************************************************************************
@@ -403,7 +403,7 @@ class DAE_CORE_API condUnaryNode : public condNode
 public:
 	daeDeclareDynamicClass(condUnaryNode)
 	condUnaryNode(void);
-    condUnaryNode(boost::shared_ptr<condNode> node, daeeLogicalUnaryOperator op);
+    condUnaryNode(condNodePtr node, daeeLogicalUnaryOperator op);
 	virtual ~condUnaryNode(void);
 
 public:
@@ -416,7 +416,7 @@ public:
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
+	virtual void		BuildExpressionsArray(vector< adNodePtr > & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -424,7 +424,7 @@ public:
 	virtual bool		GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<condNode>		m_pNode;
+	condNodePtr		m_pNode;
 	daeeLogicalUnaryOperator		m_eLogicalOperator;
 };
 
@@ -436,7 +436,7 @@ class DAE_CORE_API condBinaryNode : public condNode
 public:
 	daeDeclareDynamicClass(condBinaryNode)
 	condBinaryNode(void);
-    condBinaryNode(boost::shared_ptr<condNode> left, daeeLogicalBinaryOperator op, boost::shared_ptr<condNode> right);
+    condBinaryNode(condNodePtr left, daeeLogicalBinaryOperator op, condNodePtr right);
 	virtual ~condBinaryNode(void);
 
 public:
@@ -449,7 +449,7 @@ public:
 	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
 	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void		BuildExpressionsArray(vector< boost::shared_ptr<adNode> > & ptrarrExpressions,
+	virtual void		BuildExpressionsArray(vector<adNodePtr> & ptrarrExpressions,
 		                                      const daeExecutionContext* pExecutionContext,
 											  real_t dEventTolerance);
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
@@ -457,9 +457,9 @@ public:
 	virtual bool		GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<condNode>		m_pLeft;
-	boost::shared_ptr<condNode>		m_pRight;
-	daeeLogicalBinaryOperator		m_eLogicalOperator;
+	condNodePtr					m_pLeft;
+	condNodePtr					m_pRight;
+	daeeLogicalBinaryOperator	m_eLogicalOperator;
 };
 
 

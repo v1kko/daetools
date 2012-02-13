@@ -419,7 +419,7 @@ public:
 	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
 
 	size_t GetEquationIndexInBlock(void) const;
-	boost::shared_ptr<adNode> GetEquationEvaluationNode(void) const;
+	adNodePtr GetEquationEvaluationNode(void) const;
 	
 protected:
 //	daeBlock*						m_pBlock;
@@ -429,7 +429,7 @@ protected:
 	std::vector<size_t>				m_narrDomainIndexes;
 	std::map<size_t, size_t> 		m_mapIndexes;
 //	std::vector<daeDomain*>			m_ptrarrDomains;
-	boost::shared_ptr<adNode>		m_EquationEvaluationNode;
+	adNodePtr		m_EquationEvaluationNode;
 	friend class daeEquation;
 	friend class daeSTN;
 	friend class daeIF;
@@ -553,7 +553,7 @@ public:
 		m_pStateTransition = NULL;
 	};
 
-	boost::shared_ptr<adNode>	m_pExpression;
+	adNodePtr	m_pExpression;
 	daeStateTransition* m_pStateTransition;
 };
 
@@ -1589,7 +1589,7 @@ protected:
 	unit							m_Unit;
 	std::vector<daeDomain*>			m_ptrDomains;
 	daePort*						m_pParentPort;
-	std::vector< boost::shared_ptr<adNode> > m_ptrarrRuntimeNodes;
+	std::vector< adNodePtr > m_ptrarrRuntimeNodes;
 	friend class daePort;
 	friend class daeModel;
 	friend class adSetupParameterNode;
@@ -2178,8 +2178,8 @@ protected:
 	boost::shared_ptr<daeVariableWrapper> m_pVariableWrapper;
 
 // Common for eSendEvent and eReAssignOrReInitializeVariable:
-	boost::shared_ptr<adNode>	m_pSetupNode;
-	boost::shared_ptr<adNode>	m_pNode;
+	adNodePtr	m_pSetupNode;
+	adNodePtr	m_pNode;
 };
 
 /******************************************************************
@@ -3098,7 +3098,7 @@ protected:
 //  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7);
 //  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8);
 
-	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, boost::shared_ptr<adNode>& node);
+	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node);
 //	void Residual  (const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC);
 //	void Jacobian  (const std::vector<size_t>& narrDomainIndexes, const std::map<size_t, size_t>& mapVariableIndexesInEquation, daeExecutionContext& EC);
 
@@ -3112,7 +3112,7 @@ protected:
 	daeState*											m_pParentState;
 	daeeEquationDefinitionMode							m_eEquationDefinitionMode;
 	daeeEquationEvaluationMode							m_eEquationEvaluationMode;
-	boost::shared_ptr<adNode>							m_pResidualNode;
+	adNodePtr							m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
 // This vector is redundant - all EquationExecutionInfos already exist in models and states
 // However, it is useful when saving RuntimeReport
@@ -3349,7 +3349,7 @@ typedef boost::variant<adouble, adouble_array>										daeExternalFunctionArgum
 typedef std::map<std::string, daeExternalFunctionArgument_t>						daeExternalFunctionArgumentMap_t;
 typedef boost::variant<adouble, std::vector<adouble> >								daeExternalFunctionArgumentValue_t;
 typedef std::map<std::string, daeExternalFunctionArgumentValue_t>					daeExternalFunctionArgumentValueMap_t;
-typedef boost::variant<boost::shared_ptr<adNode>, boost::shared_ptr<adNodeArray> >	daeExternalFunctionNode_t;
+typedef boost::variant<adNodePtr, adNodeArrayPtr >	daeExternalFunctionNode_t;
 typedef std::map<std::string, daeExternalFunctionNode_t>							daeExternalFunctionNodeMap_t;
 
 class DAE_CORE_API daeExternalFunction_t : public daeObject

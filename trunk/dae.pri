@@ -77,8 +77,10 @@ QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
 QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
-unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable
+unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter \
+                                -Wno-unused-variable -Wno-unused-but-set-variable
+unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter \
+                                -Wno-unused-variable -Wno-unused-but-set-variable
 
 QMAKE_CFLAGS_RELEASE   -= -O2
 QMAKE_CXXFLAGS_RELEASE -= -O2

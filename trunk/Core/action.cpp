@@ -81,7 +81,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, daeEventPort* pPor
 	if(data.node)
 		m_pSetupNode = data.node;
 	else
-		m_pSetupNode = boost::shared_ptr<adNode>(new adConstantNode(data.getValue()));
+		m_pSetupNode = adNodePtr(new adConstantNode(data.getValue()));
 	
 // For eReAssignOrReInitializeVariable:
 }
@@ -106,7 +106,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, const daeVariableW
 	if(value.node)
 		m_pSetupNode = value.node;
 	else
-		m_pSetupNode = boost::shared_ptr<adNode>(new adConstantNode(value.getValue()));
+		m_pSetupNode = adNodePtr(new adConstantNode(value.getValue()));
 }
 
 daeAction::~daeAction()

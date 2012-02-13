@@ -230,7 +230,7 @@ size_t daeEquationExecutionInfo::GetEquationIndexInBlock(void) const
 	return m_nEquationIndexInBlock;	
 }
 
-boost::shared_ptr<adNode> daeEquationExecutionInfo::GetEquationEvaluationNode(void) const
+adNodePtr daeEquationExecutionInfo::GetEquationEvaluationNode(void) const
 {
 	return m_EquationEvaluationNode;	
 }
@@ -383,7 +383,7 @@ adouble daeDistributedEquationDomainInfo::operator()(void) const
 	adouble tmp;
 	daeDistributedEquationDomainInfo* pDEDI = const_cast<daeDistributedEquationDomainInfo*>(this);
 	adSetupDomainIteratorNode* node = new adSetupDomainIteratorNode(pDEDI);
-	tmp.node = boost::shared_ptr<adNode>(node);
+	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -1237,7 +1237,7 @@ void daeEquation::InitializeDEDIs(void)
 	}
 }
 
-void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, boost::shared_ptr<adNode>& node)
+void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);

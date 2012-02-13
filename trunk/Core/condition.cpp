@@ -17,7 +17,7 @@ daeCondition::daeCondition()
 	m_dEventTolerance = cfg.Get<real_t>("daetools.core.eventTolerance", 1E-7);
 }
 
-daeCondition::daeCondition(shared_ptr<condNode> condition)
+daeCondition::daeCondition(condNodePtr condition)
 {
 	if(!condition)
 		daeDeclareAndThrowException(exInvalidPointer); 
@@ -139,43 +139,43 @@ real_t daeCondition::GetEventTolerance(void)
 daeCondition daeCondition::operator || (const daeCondition& rCondition) const
 {
 	daeCondition tmp;
-	tmp.m_pConditionNode = shared_ptr<condNode>(new condBinaryNode(shared_ptr<condNode>(m_pConditionNode->Clone()), 
-						  									       eOr, 
-																   shared_ptr<condNode>(rCondition.m_pConditionNode->Clone())));
+	tmp.m_pConditionNode = condNodePtr(new condBinaryNode(condNodePtr(m_pConditionNode->Clone()), 
+	                                                      eOr, 
+	                                                      condNodePtr(rCondition.m_pConditionNode->Clone())));
 	return tmp;
 }
 
 daeCondition daeCondition::operator && (const daeCondition& rCondition) const
 {
 	daeCondition tmp;
-	tmp.m_pConditionNode = shared_ptr<condNode>(new condBinaryNode(shared_ptr<condNode>(m_pConditionNode->Clone()), 
-						  								           eAnd, 
-																   shared_ptr<condNode>(rCondition.m_pConditionNode->Clone())));
+	tmp.m_pConditionNode = condNodePtr(new condBinaryNode(condNodePtr(m_pConditionNode->Clone()), 
+	                                                      eAnd, 
+	                                                      condNodePtr(rCondition.m_pConditionNode->Clone())));
 	return tmp;
 }
 
 daeCondition daeCondition::operator | (const daeCondition& rCondition) const
 {
 	daeCondition tmp;
-	tmp.m_pConditionNode = shared_ptr<condNode>(new condBinaryNode(shared_ptr<condNode>(m_pConditionNode->Clone()), 
-						  									       eOr, 
-																   shared_ptr<condNode>(rCondition.m_pConditionNode->Clone())));
+	tmp.m_pConditionNode = condNodePtr(new condBinaryNode(condNodePtr(m_pConditionNode->Clone()), 
+	                                                      eOr, 
+	                                                      condNodePtr(rCondition.m_pConditionNode->Clone())));
 	return tmp;
 }
 
 daeCondition daeCondition::operator & (const daeCondition& rCondition) const
 {
 	daeCondition tmp;
-	tmp.m_pConditionNode = shared_ptr<condNode>(new condBinaryNode(shared_ptr<condNode>(m_pConditionNode->Clone()), 
-						  								           eAnd, 
-																   shared_ptr<condNode>(rCondition.m_pConditionNode->Clone())));
+	tmp.m_pConditionNode = condNodePtr(new condBinaryNode(condNodePtr(m_pConditionNode->Clone()), 
+	                                                      eAnd, 
+	                                                      condNodePtr(rCondition.m_pConditionNode->Clone())));
 	return tmp;
 }
 daeCondition daeCondition::operator ! () const
 {
 	daeCondition tmp;
-	tmp.m_pConditionNode = shared_ptr<condNode>(new condUnaryNode(shared_ptr<condNode>(m_pConditionNode->Clone()), 
-		                                                          eNot));
+	tmp.m_pConditionNode = condNodePtr(new condUnaryNode(condNodePtr(m_pConditionNode->Clone()), 
+	                                                     eNot));
 	return tmp;
 }
 

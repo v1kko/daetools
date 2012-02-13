@@ -20,14 +20,14 @@ namespace dae
 {
 namespace core 
 {
-inline boost::shared_ptr<adNodeArray> CLONE_NODE_ARRAY(boost::shared_ptr<adNodeArray> n)
+inline adNodeArrayPtr CLONE_NODE_ARRAY(adNodeArrayPtr n)
 {
 	if(n)
-		return boost::shared_ptr<adNodeArray>(n->Clone());
+		return adNodeArrayPtr(n->Clone());
 	else
 	{
 		daeDeclareAndThrowException(exInvalidCall);
-		return boost::shared_ptr<adNodeArray>();
+		return adNodeArrayPtr();
 	}
 }
 
@@ -110,10 +110,10 @@ public:
 
 public:
 // Runtime part
-	vector<boost::shared_ptr<adNode> >		m_ptrarrParameterNodes;
+	vector<adNodePtr>		m_ptrarrParameterNodes;
 // Report/GUI part
-	daeParameter*							m_pParameter;
-	vector<daeArrayRange>					m_arrRanges;
+	daeParameter*			m_pParameter;
+	vector<daeArrayRange>	m_arrRanges;
 };
 
 /*********************************************************************************************
@@ -143,7 +143,7 @@ public:
 
 public:
 // Runtime part
-	vector< boost::shared_ptr<adNode> >		m_ptrarrVariableNodes;
+	vector< adNodePtr >		m_ptrarrVariableNodes;
 // Report/GUI part
 	daeVariable*							m_pVariable;
 	vector<daeArrayRange>					m_arrRanges;
@@ -174,7 +174,7 @@ public:
 
 public:
 // Runtime part
-	vector< boost::shared_ptr<adNode> >	m_ptrarrTimeDerivativeNodes;
+	vector< adNodePtr >	m_ptrarrTimeDerivativeNodes;
 	size_t								m_nDegree;
 // Report/GUI part
 	daeVariable*						m_pVariable;
@@ -208,7 +208,7 @@ public:
 
 public:
 // Runtime part
-	vector< boost::shared_ptr<adNode> >	m_ptrarrPartialDerivativeNodes;
+	vector< adNodePtr >	m_ptrarrPartialDerivativeNodes;
 	size_t								m_nDegree;
 // Report/GUI part
 	daeVariable*						m_pVariable;
@@ -226,7 +226,7 @@ public:
 	adRuntimeSpecialFunctionNode(void);
 	adRuntimeSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
 					             daeModel* pModel,
-								 boost::shared_ptr<adNodeArray> n);
+								 adNodeArrayPtr n);
 	virtual ~adRuntimeSpecialFunctionNode(void);
 
 public:
@@ -245,7 +245,7 @@ public:
 public:
 // Runtime part
 	daeModel*						m_pModel;
-	boost::shared_ptr<adNodeArray>	node;
+	adNodeArrayPtr	node;
 // Report/GUI part
 	daeeSpecialUnaryFunctions		eFunction;
 };
@@ -260,7 +260,7 @@ public:
 	adRuntimeIntegralNode(void);
 	adRuntimeIntegralNode(daeeIntegralFunctions eFun,
 						  daeModel* pModel,
-						  boost::shared_ptr<adNodeArray> n,
+						  adNodeArrayPtr n,
 	                      daeDomain* pDomain,
 						  const vector<const real_t*>& pdarrPoints);
 	virtual ~adRuntimeIntegralNode(void);
@@ -279,7 +279,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNodeArray>	node;
+	adNodeArrayPtr	node;
 	daeModel*						m_pModel;
 	daeeIntegralFunctions			eFunction;
 	daeDomain*						m_pDomain;
@@ -294,7 +294,7 @@ class DAE_CORE_API adUnaryNodeArray : public adNodeArrayImpl
 public:
 	daeDeclareDynamicClass(adUnaryNodeArray)
 	adUnaryNodeArray(void);
-	adUnaryNodeArray(daeeUnaryFunctions eFun, boost::shared_ptr<adNodeArray> n);
+	adUnaryNodeArray(daeeUnaryFunctions eFun, adNodeArrayPtr n);
 	virtual ~adUnaryNodeArray(void);
 
 public:
@@ -314,7 +314,7 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNodeArray>	node;
+	adNodeArrayPtr	node;
 	daeeUnaryFunctions				eFunction;
 };
 
@@ -326,7 +326,7 @@ class DAE_CORE_API adBinaryNodeArray : public adNodeArrayImpl
 public:
 	daeDeclareDynamicClass(adBinaryNodeArray)
 	adBinaryNodeArray(void);
-	adBinaryNodeArray(daeeBinaryFunctions eFun, boost::shared_ptr<adNodeArray> l, boost::shared_ptr<adNodeArray> r);
+	adBinaryNodeArray(daeeBinaryFunctions eFun, adNodeArrayPtr l, adNodeArrayPtr r);
 	virtual ~adBinaryNodeArray(void);
 
 public:
@@ -346,8 +346,8 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNodeArray>	left;
-	boost::shared_ptr<adNodeArray>	right;
+	adNodeArrayPtr	left;
+	adNodeArrayPtr	right;
 	daeeBinaryFunctions				eFunction;
 };
 
@@ -361,7 +361,7 @@ public:
 	adSetupSpecialFunctionNode(void);
 	adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
 					           daeModel* pModel,
-							   boost::shared_ptr<adNodeArray> n);
+							   adNodeArrayPtr n);
 	virtual ~adSetupSpecialFunctionNode(void);
 
 public:
@@ -380,7 +380,7 @@ public:
 
 public:
 	daeModel*						m_pModel;
-	boost::shared_ptr<adNodeArray>	node;
+	adNodeArrayPtr	node;
 	daeeSpecialUnaryFunctions		eFunction;
 };
 
@@ -392,7 +392,7 @@ class DAE_CORE_API adSetupExpressionDerivativeNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adSetupExpressionDerivativeNode)
 	adSetupExpressionDerivativeNode(void);
-	adSetupExpressionDerivativeNode(daeModel* pModel, boost::shared_ptr<adNode> n);
+	adSetupExpressionDerivativeNode(daeModel* pModel, adNodePtr n);
 	virtual ~adSetupExpressionDerivativeNode(void);
 
 public:
@@ -408,11 +408,11 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 protected:
-	boost::shared_ptr<adNode> calc_dt(boost::shared_ptr<adNode> n, const daeExecutionContext* pExecutionContext) const;
+	adNodePtr calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
 	
 public:
 	daeModel*					m_pModel;
-	boost::shared_ptr<adNode>	node;
+	adNodePtr	node;
 	size_t						m_nDegree;
 };
 
@@ -424,7 +424,7 @@ class DAE_CORE_API adSetupExpressionPartialDerivativeNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adSetupExpressionPartialDerivativeNode)
 	adSetupExpressionPartialDerivativeNode(void);
-	adSetupExpressionPartialDerivativeNode(daeModel* pModel, daeDomain* pDomain, boost::shared_ptr<adNode> n);
+	adSetupExpressionPartialDerivativeNode(daeModel* pModel, daeDomain* pDomain, adNodePtr n);
 	virtual ~adSetupExpressionPartialDerivativeNode(void);
 
 public:
@@ -440,12 +440,12 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 protected:
-	boost::shared_ptr<adNode> calc_d(boost::shared_ptr<adNode> n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const;
+	adNodePtr calc_d(adNodePtr n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const;
 	
 public:
 	daeModel*					m_pModel;
 	daeDomain*					m_pDomain;
-	boost::shared_ptr<adNode>	node;
+	adNodePtr	node;
 	size_t						m_nDegree;
 };
 
@@ -459,7 +459,7 @@ public:
 	adSetupIntegralNode(void);
 	adSetupIntegralNode(daeeIntegralFunctions eFun,
 					    daeModel* pModel,
-						boost::shared_ptr<adNodeArray> n,
+						adNodeArrayPtr n,
 		                daeDomain* pDomain,
 						const daeArrayRange& arrayRange);
 	virtual ~adSetupIntegralNode(void);
@@ -478,7 +478,7 @@ public:
 
 public:
 	daeModel*						m_pModel;
-	boost::shared_ptr<adNodeArray>	node;
+	adNodeArrayPtr	node;
 	daeDomain*						m_pDomain;
 	daeeIntegralFunctions			eFunction;
 	daeArrayRange					m_ArrayRange;
@@ -492,7 +492,7 @@ class DAE_CORE_API adSingleNodeArray : public adNodeArrayImpl
 public:
 	daeDeclareDynamicClass(adSingleNodeArray)
 	adSingleNodeArray(void);
-	adSingleNodeArray(boost::shared_ptr<adNode> n);
+	adSingleNodeArray(adNodePtr n);
 	virtual ~adSingleNodeArray(void);
 
 public:
@@ -510,7 +510,7 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	boost::shared_ptr<adNode>	node;
+	adNodePtr	node;
 };
 
 /*********************************************************************************************

@@ -622,7 +622,7 @@ adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* 
 		pExtFun->InitializeArguments(pExecutionContext);
 		
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 	
@@ -636,8 +636,8 @@ adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* 
 		std::string               strName  = iter->first;
 		daeExternalFunctionNode_t argument = iter->second;
 		
-		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
-		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
 		
 		if(ad)
 			value = (*ad)->Evaluate(pExecutionContext);
@@ -707,8 +707,8 @@ void adVectorExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& 
 	{
 		daeExternalFunctionNode_t argument = iter->second;
 		
-		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
-		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
 		
 		if(ad)
 			(*ad)->AddVariableIndexToArray(mapIndexes, bAddFixed);

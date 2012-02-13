@@ -118,7 +118,7 @@ adNodeArray* adNodeArray::OpenNode(io::xmlTag_t* pTag, const string& strObjectNa
 }
 
 void adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag, 
-													       const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+													       const std::vector< adNodePtr >& arrNodes, 
 													       const daeSaveAsMathMLContext* c)
 {
 	size_t i, n;
@@ -142,7 +142,7 @@ void adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag,
 	}
 }
  
-string adNodeArray::SaveRuntimeNodeArrayAsLatex(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+string adNodeArray::SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes, 
 										        const daeSaveAsMathMLContext* c)
 {
 	size_t i, n;
@@ -158,7 +158,7 @@ string adNodeArray::SaveRuntimeNodeArrayAsLatex(const std::vector< boost::shared
 	return strResult;
 }
 
-//string adNodeArray::SaveRuntimeNodeArrayAsPlainText(const std::vector< boost::shared_ptr<adNode> >& arrNodes, 
+//string adNodeArray::SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes, 
 //											        const daeSaveAsMathMLContext* c)
 //{
 //	size_t i, n;
@@ -250,7 +250,7 @@ adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutio
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 	
@@ -351,7 +351,7 @@ adouble_array adRuntimeParameterNodeArray::Evaluate(const daeExecutionContext* p
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 	
@@ -454,7 +454,7 @@ adouble_array adRuntimeVariableNodeArray::Evaluate(const daeExecutionContext* pE
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 	
@@ -559,7 +559,7 @@ adouble_array adRuntimeTimeDerivativeNodeArray::Evaluate(const daeExecutionConte
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 
@@ -659,7 +659,7 @@ adouble_array adRuntimePartialDerivativeNodeArray::Evaluate(const daeExecutionCo
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( Clone() );
+		tmp.node = adNodeArrayPtr( Clone() );
 		return tmp;
 	}
 
@@ -765,7 +765,7 @@ bool adRuntimePartialDerivativeNodeArray::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeSpecialFunctionNode::adRuntimeSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
 													       daeModel* pModel,
-														   boost::shared_ptr<adNodeArray> n)
+														   adNodeArrayPtr n)
 {
 	eFunction = eFun;
 	m_pModel  = pModel;
@@ -1069,7 +1069,7 @@ bool adRuntimeSpecialFunctionNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeIntegralNode::adRuntimeIntegralNode(daeeIntegralFunctions eFun,
 											 daeModel* pModel,
-											 boost::shared_ptr<adNodeArray> n,
+											 adNodeArrayPtr n,
                                              daeDomain* pDomain,
 											 const vector<const real_t*>& pdarrPoints)
 {
@@ -1260,7 +1260,7 @@ bool adRuntimeIntegralNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adUnaryNodeArray
 **********************************************************************************************/
-adUnaryNodeArray::adUnaryNodeArray(daeeUnaryFunctions eFun, shared_ptr<adNodeArray> n)
+adUnaryNodeArray::adUnaryNodeArray(daeeUnaryFunctions eFun, adNodeArrayPtr n)
 {
 	node = n;
 	eFunction = eFun;
@@ -1396,7 +1396,7 @@ const quantity adUnaryNodeArray::GetQuantity(void) const
 
 adNodeArray* adUnaryNodeArray::Clone(void) const
 {
-	shared_ptr<adNodeArray> n = shared_ptr<adNodeArray>( (node ? node->Clone() : NULL) );
+	adNodeArrayPtr n = adNodeArrayPtr( (node ? node->Clone() : NULL) );
 	return new adUnaryNodeArray(eFunction, n);
 }
 
@@ -2015,7 +2015,7 @@ bool adUnaryNodeArray::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adBinaryNodeArray
 **********************************************************************************************/
-adBinaryNodeArray::adBinaryNodeArray(daeeBinaryFunctions eFun, shared_ptr<adNodeArray> l, shared_ptr<adNodeArray> r)
+adBinaryNodeArray::adBinaryNodeArray(daeeBinaryFunctions eFun, adNodeArrayPtr l, adNodeArrayPtr r)
 {
 	left  = l;
 	right = r;
@@ -2123,8 +2123,8 @@ const quantity adBinaryNodeArray::GetQuantity(void) const
 
 adNodeArray* adBinaryNodeArray::Clone(void) const
 {
-	shared_ptr<adNodeArray> l = shared_ptr<adNodeArray>( (left  ? left->Clone()  : NULL) );
-	shared_ptr<adNodeArray> r = shared_ptr<adNodeArray>( (right ? right->Clone() : NULL) );
+	adNodeArrayPtr l = adNodeArrayPtr( (left  ? left->Clone()  : NULL) );
+	adNodeArrayPtr r = adNodeArrayPtr( (right ? right->Clone() : NULL) );
 	return new adBinaryNodeArray(eFunction, l, r);
 }
 
@@ -2643,7 +2643,7 @@ bool adBinaryNodeArray::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adSetupSpecialFunctionNode::adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
 													   daeModel* pModel,
-													   shared_ptr<adNodeArray> n)
+													   adNodeArrayPtr n)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -2713,7 +2713,7 @@ const quantity adSetupSpecialFunctionNode::GetQuantity(void) const
 
 adNode* adSetupSpecialFunctionNode::Clone(void) const
 {
-	shared_ptr<adNodeArray> n = shared_ptr<adNodeArray>( (node ? node->Clone() : NULL) );
+	adNodeArrayPtr n = adNodeArrayPtr( (node ? node->Clone() : NULL) );
 	return new adSetupSpecialFunctionNode(eFunction, m_pModel, n);
 }
 
@@ -2983,7 +2983,7 @@ bool adSetupSpecialFunctionNode::IsFunctionOfVariables(void) const
 	adSetupExpressionDerivativeNode
 **********************************************************************************************/
 adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(daeModel* pModel,
-													             shared_ptr<adNode> n)
+													             adNodePtr n)
 {
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -3019,12 +3019,12 @@ const quantity adSetupExpressionDerivativeNode::GetQuantity(void) const
 	return quantity(0.0, q.getUnits() / unit("s", 1));
 }
 
-// Here I work on runtime nodes!!
-boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared_ptr<adNode> n, const daeExecutionContext* pExecutionContext) const
+// Here I work on runtime nodes!!	
+adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const
 {
 	adNode* adnode;
 	adouble l, r, dl, dr;
-	boost::shared_ptr<adNode> tmp;
+	adNodePtr tmp;
 		
 	adnode = n.get();
 	if( dynamic_cast<adUnaryNode*>(adnode) )
@@ -3070,7 +3070,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 		adRuntimeVariableNode* rtnode = dynamic_cast<adRuntimeVariableNode*>(adnode);
 	// Here I do not check if the variable is fixed (cnFixed) and do not add it to list of derivative variables !!!
 	//	adRuntimeTimeDerivativeNode* devnode = new adRuntimeTimeDerivativeNode();
-	//	tmp = shared_ptr<adNode>(devnode);
+	//	tmp = adNodePtr(devnode);
 	//	devnode->m_pVariable        = rtnode->m_pVariable;
 	//	devnode->m_nOverallIndex    = rtnode->m_nOverallIndex;
 	//	devnode->m_nDegree          = 1;
@@ -3085,7 +3085,7 @@ boost::shared_ptr<adNode> adSetupExpressionDerivativeNode::calc_dt(boost::shared
 			 dynamic_cast<adDomainIndexNode*>(adnode)       ||
 			 dynamic_cast<adConstantNode*>(adnode)           )
 	{
-		tmp = shared_ptr<adNode>(new adConstantNode(0));
+		tmp = adNodePtr(new adConstantNode(0));
 	}
 	else
 	{
@@ -3250,7 +3250,7 @@ void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t
 **********************************************************************************************/
 adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeModel*  pModel,
 																			   daeDomain* pDomain,
-													                           shared_ptr<adNode> n)
+													                           adNodePtr n)
 {
 	m_pModel  = pModel;
 	m_pDomain = pDomain;
@@ -3294,11 +3294,11 @@ const quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
 }
 
 // Here I work on runtime nodes!!
-boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::shared_ptr<adNode> n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const
+adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const
 {
 	adNode* adnode;
 	adouble l, r, dl, dr;
-	boost::shared_ptr<adNode> tmp;
+	adNodePtr tmp;
 		
 	adnode = n.get();
 	if( dynamic_cast<adUnaryNode*>(adnode) )
@@ -3345,7 +3345,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 		size_t N = rtnode->m_narrDomains.size();
 		if(N == 0)
 		{
-			tmp = shared_ptr<adNode>(new adConstantNode(0));
+			tmp = adNodePtr(new adConstantNode(0));
 		}
 		else
 		{
@@ -3386,7 +3386,7 @@ boost::shared_ptr<adNode> adSetupExpressionPartialDerivativeNode::calc_d(boost::
 			 dynamic_cast<adDomainIndexNode*>(adnode)	   ||
 			 dynamic_cast<adConstantNode*>(adnode)          )
 	{
-		tmp = shared_ptr<adNode>(new adConstantNode(0));
+		tmp = adNodePtr(new adConstantNode(0));
 	}
 	else
 	{
@@ -3559,7 +3559,7 @@ void adSetupExpressionPartialDerivativeNode::AddVariableIndexToArray(map<size_t,
 **********************************************************************************************/
 adSetupIntegralNode::adSetupIntegralNode(daeeIntegralFunctions eFun,
 										 daeModel* pModel,
-										 shared_ptr<adNodeArray> n,
+										 adNodeArrayPtr n,
 										 daeDomain* pDomain,
 										 const daeArrayRange& arrayRange)
 {
@@ -3792,7 +3792,7 @@ void adSetupIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexe
 /*********************************************************************************************
 	adSingleNodeArray
 **********************************************************************************************/
-adSingleNodeArray::adSingleNodeArray(boost::shared_ptr<adNode> n) : node(n)
+adSingleNodeArray::adSingleNodeArray(adNodePtr n) : node(n)
 {
 }
 
@@ -3828,7 +3828,7 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	{
 		adSingleNodeArray* clone = new adSingleNodeArray(*this);
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNodeArray>( clone );
+		tmp.node = adNodeArrayPtr( clone );
 
 		clone->node = node->Evaluate(pExecutionContext).node;
 

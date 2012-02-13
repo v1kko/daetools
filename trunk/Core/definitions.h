@@ -253,6 +253,45 @@ void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDe
 #define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
     std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
 
+/*********************************************************************************************
+	daeReferenceCountable
+**********************************************************************************************/
+class daeReferenceCountable
+{
+public:
+	daeReferenceCountable(void) : ref_count(0)
+	{
+	}
+	
+	void IncreaseRefCount(void)
+	{
+		++ref_count;		
+	}
+	
+	int DecreaseRefCount(void)
+	{
+		return (--ref_count);		
+	}
+
+protected:
+	int ref_count;
+};
+
+template<typename T>
+inline void intrusive_ptr_add_ref(T* pobj)
+{
+    pobj->IncreaseRefCount();
+}
+ 
+template<typename T>
+inline void intrusive_ptr_release(T* pobj)
+{
+    if(pobj->DecreaseRefCount() == 0)
+    {
+		delete pobj;
+		pobj = NULL;
+	}
+}
 
 /*********************************************************************************************
 	daeCreateObjectDelegate

@@ -397,7 +397,7 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 	}
 	return tmp;
 }
@@ -491,7 +491,7 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 	}
 	return tmp;
 }
@@ -587,7 +587,7 @@ adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionConte
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 	}
 	return tmp;
 }
@@ -688,7 +688,7 @@ adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionCo
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 	return adouble(m_dValue);
@@ -826,7 +826,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 
@@ -935,7 +935,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 
@@ -1168,7 +1168,7 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 
@@ -1330,7 +1330,7 @@ adRuntimePartialDerivativeNode::adRuntimePartialDerivativeNode(daeVariable* pVar
 															   size_t nDegree, 
 															   vector<size_t>& narrDomains, 
 															   daeDomain* pDomain, 
-															   shared_ptr<adNode> pdnode)
+															   adNodePtr pdnode)
                : pardevnode(pdnode),  
 			     m_nOverallIndex(nOverallIndex), 
 				 m_nDegree(nDegree), 
@@ -1359,7 +1359,7 @@ adouble adRuntimePartialDerivativeNode::Evaluate(const daeExecutionContext* pExe
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 
@@ -1484,7 +1484,7 @@ bool adRuntimePartialDerivativeNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adUnaryNode
 **********************************************************************************************/
-adUnaryNode::adUnaryNode(daeeUnaryFunctions eFun, shared_ptr<adNode> n)
+adUnaryNode::adUnaryNode(daeeUnaryFunctions eFun, adNodePtr n)
 {
 	node = n;
 	eFunction = eFun;
@@ -1577,7 +1577,7 @@ const quantity adUnaryNode::GetQuantity(void) const
 
 adNode* adUnaryNode::Clone(void) const
 {
-	shared_ptr<adNode> n = shared_ptr<adNode>( (node ? node->Clone() : NULL) );
+	adNodePtr n = adNodePtr( (node ? node->Clone() : NULL) );
 	return new adUnaryNode(eFunction, n);
 }
 
@@ -2252,7 +2252,7 @@ bool adUnaryNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adBinaryNode
 **********************************************************************************************/
-adBinaryNode::adBinaryNode(daeeBinaryFunctions eFun, shared_ptr<adNode> l, shared_ptr<adNode> r)
+adBinaryNode::adBinaryNode(daeeBinaryFunctions eFun, adNodePtr l, adNodePtr r)
 {
 	left  = l;
 	right = r;
@@ -2318,8 +2318,8 @@ const quantity adBinaryNode::GetQuantity(void) const
 
 adNode* adBinaryNode::Clone(void) const
 {
-	shared_ptr<adNode> l = shared_ptr<adNode>( (left  ? left->Clone()  : NULL) );
-	shared_ptr<adNode> r = shared_ptr<adNode>( (right ? right->Clone() : NULL) );
+	adNodePtr l = adNodePtr( (left  ? left->Clone()  : NULL) );
+	adNodePtr r = adNodePtr( (right ? right->Clone() : NULL) );
 	return new adBinaryNode(eFunction, l, r);
 }
 
@@ -2893,7 +2893,7 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 		pExtFun->InitializeArguments(pExecutionContext);
 		
 		tmp.setGatherInfo(true);
-		tmp.node = shared_ptr<adNode>( Clone() );
+		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
 	
@@ -2907,8 +2907,8 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
 		std::string               strName  = iter->first;
 		daeExternalFunctionNode_t argument = iter->second;
 		
-		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
-		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
 		
 		if(ad)
 			value = (*ad)->Evaluate(pExecutionContext);
@@ -2978,8 +2978,8 @@ void adScalarExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& 
 	{
 		daeExternalFunctionNode_t argument = iter->second;
 		
-		boost::shared_ptr<adNode>*      ad    = boost::get<boost::shared_ptr<adNode> >     (&argument);
-		boost::shared_ptr<adNodeArray>* adarr = boost::get<boost::shared_ptr<adNodeArray> >(&argument);
+		adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);
 		
 		if(ad)
 			(*ad)->AddVariableIndexToArray(mapIndexes, bAddFixed);

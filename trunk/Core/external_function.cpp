@@ -82,8 +82,8 @@ void daeExternalFunction_t::InitializeArguments(const daeExecutionContext* pExec
 		strName    = iter->first;
 		setup_node = iter->second;
 		
-		shared_ptr<adNode>*      ad    = boost::get<shared_ptr<adNode> >     (&setup_node);
-		shared_ptr<adNodeArray>* adarr = boost::get<shared_ptr<adNodeArray> >(&setup_node);
+		adNodePtr*      ad    = boost::get<adNodePtr >     (&setup_node);
+		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&setup_node);
 		
 		if(ad)
 		{
@@ -126,7 +126,7 @@ adouble daeScalarExternalFunction::Calculate(daeExternalFunctionArgumentValueMap
 adouble daeScalarExternalFunction::operator() (void)
 {
 	adouble tmp;
-	tmp.node = boost::shared_ptr<adNode>(new adScalarExternalFunctionNode(this));
+	tmp.node = adNodePtr(new adScalarExternalFunctionNode(this));
 	tmp.setGatherInfo(true);
 	return tmp;
 }
@@ -152,7 +152,7 @@ std::vector<adouble> daeVectorExternalFunction::Calculate(daeExternalFunctionArg
 adouble_array daeVectorExternalFunction::operator() (void)
 {
 	adouble_array tmp;
-	tmp.node = boost::shared_ptr<adNodeArray>(new adVectorExternalFunctionNode(this));
+	tmp.node = adNodeArrayPtr(new adVectorExternalFunctionNode(this));
 	tmp.setGatherInfo(true);
 	return tmp;
 }
