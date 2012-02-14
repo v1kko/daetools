@@ -762,7 +762,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("StartingPoint",  &daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint)
         ;
 
-    class_<daeObjectiveFunction, bases<daeObjectiveFunction_t> >("daeObjectiveFunction")
+    class_<daeObjectiveFunction, bases<daeObjectiveFunction_t> >("daeObjectiveFunction")  
         .add_property("Name",           &daeObjectiveFunction::GetName)
         .add_property("Residual",       &daeObjectiveFunction::GetResidual,     &daeObjectiveFunction::SetResidual)
         .add_property("Value",          &daeObjectiveFunction::GetValue)

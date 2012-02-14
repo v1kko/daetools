@@ -131,6 +131,8 @@ void daeFunctionWithGradients::GetGradients(const daeMatrix<real_t>& matSensitiv
 		daeDeclareAndThrowException(exInvalidCall);
 	if(m_nNumberOfOptimizationVariables != Nparams)
 		daeDeclareAndThrowException(exInvalidCall);
+	
+	m_pVariable->m_pModel->GetDataProxy()->PrintAssignedVariables();
 
 // Since all sensitivities are now calculated by IDAS (SS and dynamic models) I always take
 // the items from IDAS arrays and therefore I always use m_nVariableIndexInBlock index

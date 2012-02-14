@@ -1237,6 +1237,14 @@ public:
 		m_pBlock = pBlock;
 	}
 	
+	void PrintAssignedVariables() const
+	{
+		std::cout << "PrintAssignedVariables" << std::endl;
+		for(std::map<size_t, real_t>::const_iterator iter = m_mapAssignedValues.begin(); iter != m_mapAssignedValues.end(); iter++)
+			std::cout << iter->first << iter->second;
+		std::cout << std::endl;
+	}
+	
 protected:
 //	daeCondition*					m_pCondition;
 	daeLog_t*						m_pLog;

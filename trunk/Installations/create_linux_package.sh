@@ -13,6 +13,7 @@ case $1 in
 esac
 
 INSTALLATIONS_DIR="$( cd "$( dirname "$0" )" && pwd )"
+# ACHTUNG! cd to INSTALLATIONS_DIR (in case the script is called from some other folder)
 cd ${INSTALLATIONS_DIR}
 
 VER_MAJOR=

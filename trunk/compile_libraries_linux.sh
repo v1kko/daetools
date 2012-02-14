@@ -47,7 +47,7 @@ if [ ! -e idas ]; then
   mv idas-${vIDAS} idas
   cd idas
   mkdir build
-  ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no CFLAGS="-O3 ${SSE_FLAGS}"
+  ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no F77=gfortran CFLAGS="-O3 ${SSE_FLAGS}"
   cd ${TRUNK}
 fi
 cd idas

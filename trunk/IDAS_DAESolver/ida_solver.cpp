@@ -6,7 +6,7 @@ using namespace std;
 #include <idas/idas.h>
 #include <idas/idas_impl.h>
 #include <idas/idas_dense.h>
-//#include <idas/idas_lapack.h>
+#include <idas/idas_lapack.h>
 #include <idas/idas_spgmr.h>
 
 #define JACOBIAN(A) (A->cols)
@@ -387,7 +387,6 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 	
 	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
 
-/*	
 	realtype* pdSValues;
 	std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
 		
@@ -401,7 +400,7 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 			std::cout << toStringFormatted<real_t>(pdSValues[k], 14, 4, true);
 		std::cout << std::endl;
 	}
-*/	
+	
 	return m_matSValues;
 }
 
@@ -431,26 +430,26 @@ void daeIDASolver::CreateLinearSolver(void)
 	else if(m_eLASolver == eSundialsLapack)
 	{
 	// Lapack dense LU LA Solver	
-//		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
-//		if(!CheckFlag(retval)) 
-//		{
-//			daeDeclareException(exRuntimeCheck);
-//			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-//			throw e;
-//		}
+		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
 	
-//		retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
-//		if(!CheckFlag(retval)) 
-//		{
-//			daeDeclareException(exRuntimeCheck);
-//			e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-//			throw e;
-//		}
+		retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
+		if(!CheckFlag(retval)) 
+		{
+			daeDeclareException(exRuntimeCheck);
+			e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+			throw e;
+		}
 	}
 	else if(m_eLASolver == eSundialsGMRES)
 	{
-//		daeDeclareAndThrowException(exNotImplemented);
-		
+		daeDeclareAndThrowException(exNotImplemented);
+/*	
 	// Sundials dense GMRES LA Solver	
 		retval = IDASpgmr(m_pIDA, 20);
 		if(!CheckFlag(retval)) 
@@ -477,6 +476,7 @@ void daeIDASolver::CreateLinearSolver(void)
 		}
 
 //		m_pIDASolverData->CreatePreconditionerArrays(m_nNumberOfEquations);
+*/
 	}
 	else if(m_eLASolver == eThirdParty)
 	{
@@ -486,6 +486,7 @@ void daeIDASolver::CreateLinearSolver(void)
 			e << "Sundials IDAS solver ignobly refused to set the third party linear solver: the solver object is null";
 			throw e;
 		}
+		
 	// Third party LA Solver	
 		retval = m_pLASolver->Create(m_pIDA, m_nNumberOfEquations, this);
 		if(!CheckFlag(retval)) 
