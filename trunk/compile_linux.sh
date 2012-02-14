@@ -14,9 +14,11 @@ else
   PROJECTS=$1
 fi
 HOST_ARCH=`uname -m`
-TRUNK=`pwd`
+TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 Ncpu=$(($Ncpu+1))
+
+cd ${TRUNK}
 
 compile () {
   DIR=$1
@@ -54,7 +56,6 @@ compile () {
   cd ${TRUNK}
   echo 
 }
-
 
 case ${PROJECTS} in
   all)  echo Compile ALL projects

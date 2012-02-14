@@ -12,6 +12,9 @@ case $1 in
         ;;
 esac
 
+INSTALLATIONS_DIR="$( cd "$( dirname "$0" )" && pwd )"
+cd ${INSTALLATIONS_DIR}
+
 VER_MAJOR=
 VER_MINOR=
 VER_BUILD=
@@ -21,16 +24,17 @@ ARCH=
 LIB=
 ARCH_RPM=
 SITE_PACK=
-INSTALLATIONS_DIR=`pwd`
 RELEASE_DIR=${INSTALLATIONS_DIR}/../release
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
 DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
 CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
+DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
 VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
 VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
 VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
+VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 IDAS=../idas/build
 BONMIN=../bonmin/build
 NLOPT=../nlopt
@@ -38,9 +42,6 @@ SUPERLU=../superlu
 SUPERLU_MT=../superlu_mt
 MAGMA=../magma
 TRILINOS=../trilinos/build
-
-VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
-DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 
 if [ ! -n ${VER_MAJOR} ]; then
   echo "Invalid daetools version major number"
@@ -52,7 +53,8 @@ if [ ! -n ${VER_MINOR} ]; then
 fi
 if [ ! -n ${VER_BUILD} ]; then
   echo "Invalid daetools version build number"
-  return
+  returncd ${TRUNK}
+
 fi
 
 if [ ${HOST_ARCH} = "x86_64" ]; then
