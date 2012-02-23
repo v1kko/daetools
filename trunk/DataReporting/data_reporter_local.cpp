@@ -5,6 +5,9 @@ namespace dae
 {
 namespace datareporting
 {
+/*********************************************************************
+	daeDataReporterLocal
+*********************************************************************/
 daeDataReporterLocal::daeDataReporterLocal()
 {
 	m_dCurrentTime = -1;
@@ -123,6 +126,34 @@ daeDataReporterProcess* daeDataReporterLocal::GetProcess(void)
 {
 	return &m_drProcess;
 }
+
+
+/*********************************************************************
+	daeNoOpDataReporter
+*********************************************************************/
+daeNoOpDataReporter::daeNoOpDataReporter()
+{
+}
+
+daeNoOpDataReporter::~daeNoOpDataReporter()
+{
+}
+
+bool daeNoOpDataReporter::Connect(const string& /*strConnectString*/, const string& /*strProcessName*/)
+{
+	return true;
+}
+
+bool daeNoOpDataReporter::IsConnected()
+{
+	return true;
+}
+
+bool daeNoOpDataReporter::Disconnect()
+{
+	return true;
+}
+
 
 }
 }

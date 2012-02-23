@@ -82,6 +82,21 @@ public:
 };
 
 /*********************************************************************
+	daeNoOpDataReporter
+*********************************************************************/
+class DAE_DATAREPORTERS_API daeNoOpDataReporter : public daeDataReporterLocal
+{
+public:
+	daeNoOpDataReporter(void);
+	virtual ~daeNoOpDataReporter(void);
+
+public:
+	virtual bool Connect(const string& strConnectString, const string& strProcessName);
+	virtual bool Disconnect(void);
+	virtual bool IsConnected(void);
+};
+
+/*********************************************************************
 	daeTEXTFileDataReporter
 *********************************************************************/
 class DAE_DATAREPORTERS_API daeTEXTFileDataReporter : public daeFileDataReporter

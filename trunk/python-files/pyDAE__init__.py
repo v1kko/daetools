@@ -3,6 +3,10 @@ from pyCore import *
 from pyActivity import *
 from pyDataReporting import *
 from pyIDAS import *
-from daetools.daeSimulator import *
 from daeLogs import daePythonStdOutLog
 from daeVariableTypes import *
+
+try:
+    from daetools.daeSimulator import *
+except ImportError as e:
+    print('Cannot import daeSimulator module. Error: {0}'.format(str(e)))

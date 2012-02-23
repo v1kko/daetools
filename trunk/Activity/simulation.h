@@ -108,8 +108,8 @@ public:
 	void	Register(daeParameter* pParameter);
 	void	Register(daeDomain* pDomain);
 	
-	void	Report(daeModel* pModel, real_t time);
-	void	Report(daePort* pPort, real_t time);
+	//void	Report(daeModel* pModel, real_t time);
+	//void	Report(daePort* pPort, real_t time);
 	void	Report(daeVariable* pVariable, real_t time);
 	void	Report(daeParameter* pParameter, real_t time);
 	
@@ -144,6 +144,9 @@ protected:
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
+	
+	std::vector<daeVariable*>	m_ptrarrReportVariables;
+	std::vector<daeParameter*>	m_ptrarrReportParameters;
 
 // Optimization related data	
 	bool														m_bCalculateSensitivities;

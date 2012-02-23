@@ -75,7 +75,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("EndOfData",	    	&daeBlackHoleDataReporter::EndOfData)
 		.def("SendVariable",	  	&daeBlackHoleDataReporter::SendVariable)  
 		;
-
+	
 	class_<daepython::daeDelegateDataReporterWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDelegateDataReporter")
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDelegateDataReporterWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDelegateDataReporterWrapper::def_Disconnect)
@@ -102,6 +102,19 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDataReporterLocalWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDataReporterLocalWrapper::def_SendVariable)
 		.add_property("Process",	make_function(&daeDataReporterLocal::GetProcess, return_internal_reference<>()) )
+		;
+	
+	class_<daeNoOpDataReporter, bases<daeDataReporterLocal>, boost::noncopyable>("daeNoOpDataReporter")
+		.def("Connect",				&daeNoOpDataReporter::Connect)
+		.def("Disconnect",			&daeNoOpDataReporter::Disconnect)
+		.def("IsConnected",			&daeNoOpDataReporter::IsConnected)
+		.def("StartRegistration",	&daeNoOpDataReporter::StartRegistration)
+		.def("RegisterDomain",		&daeNoOpDataReporter::RegisterDomain)
+		.def("RegisterVariable",	&daeNoOpDataReporter::RegisterVariable)
+		.def("EndRegistration",		&daeNoOpDataReporter::EndRegistration)
+		.def("StartNewResultSet",	&daeNoOpDataReporter::StartNewResultSet)
+		.def("EndOfData",	    	&daeNoOpDataReporter::EndOfData)
+		.def("SendVariable",	  	&daeNoOpDataReporter::SendVariable)  
 		;
 
 	class_<daepython::daeDataReporterFileWrapper, bases<daeDataReporterLocal>, boost::noncopyable>("daeDataReporterFile")
