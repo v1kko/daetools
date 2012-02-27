@@ -24,7 +24,7 @@ HEADERS += stdafx.h \
 
 win32{
 QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyUnits.dll \
+	$${DAE_DEST_DIR}/pyUnits1.dll \
 	$${DAE_DEST_DIR}/pyUnits.pyd
 }
 

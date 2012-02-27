@@ -448,7 +448,7 @@ int daeSuperLUSolver::Init(void* ida)
 	return IDA_SUCCESS;
 }
 
-#include <suitesparse/btf.h>
+//#include <suitesparse/btf.h>
 
 int daeSuperLUSolver::Setup(void*		ida,
 							N_Vector	vectorVariables, 

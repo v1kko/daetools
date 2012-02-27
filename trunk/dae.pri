@@ -71,7 +71,7 @@ DESTDIR = $${DAE_DEST_DIR}
 ####################################################################################
 #                       Compiler flags
 ####################################################################################
-win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS
+win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 
 QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
 QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
@@ -82,11 +82,11 @@ unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter 
 unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter \
                                 -Wno-unused-variable -Wno-unused-but-set-variable
 
-QMAKE_CFLAGS_RELEASE   -= -O2
-QMAKE_CXXFLAGS_RELEASE -= -O2
+unix::QMAKE_CFLAGS_RELEASE   -= -O2
+unix::QMAKE_CXXFLAGS_RELEASE -= -O2
 
-QMAKE_CFLAGS_RELEASE   += -O3
-QMAKE_CXXFLAGS_RELEASE += -O3
+unix::QMAKE_CFLAGS_RELEASE   += -O3
+unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines pyCore cannot compile
 # The workaround is to set the following flags:
@@ -210,14 +210,15 @@ unix::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lblas -llapack -lm
 #####################################################################################
 # ./configure --prefix=${HOME}/Data/daetools/trunk/idas/build --disable-mpi
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
-#             CFLAGS=-O3
+#             --enable-lapack CFLAGS=-O3
 #####################################################################################
 SUNDIALS = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
 win32::SUNDIALS_LIBS = sundials_idas.lib \
-                       sundials_nvecserial.lib
+                       sundials_nvecserial.lib \
+                       $${BLAS_LAPACK_LIBS}
 unix::SUNDIALS_LIBS = -lsundials_idas \
                       -lsundials_nvecserial \
                        $${BLAS_LAPACK_LIBS}
