@@ -75,7 +75,7 @@ public:
 	virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const;
 	virtual void GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const;
 	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
-	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const;
+	virtual daeObjectiveFunction* GetObjectiveFunction(void) const;
 
 	daeeInitialConditionMode	GetInitialConditionMode(void) const;
 	void						SetInitialConditionMode(daeeInitialConditionMode eMode);

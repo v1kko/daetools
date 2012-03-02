@@ -37,5 +37,6 @@ using namespace dae::logging;
 
 #include "BONMIN_MINLPSolver/base_solvers.h"
 #include "LA_SuperLU/superlu_solvers.h"
+using namespace dae::nlpsolver;
 
 #endif

@@ -985,6 +985,8 @@ int residuals(realtype	time,
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "---- Residuals function ----" << endl;
+		cout << "Values pointer: " << pdValues << endl;
+		cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
 		cout << "Variables:" << endl;
 		pSolver->m_arrValues.Print();
 		cout << "Time derivatives:" << endl;
@@ -1074,6 +1076,8 @@ int jacobian(int	    Neq,
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "---- Jacobian function ----" << endl;
+		cout << "Values pointer: " << pdValues << endl;
+		cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
 		cout << "Variables:" << endl;
 		pSolver->m_arrValues.Print();
 		cout << "Time derivatives:" << endl;
@@ -1141,9 +1145,16 @@ int sens_residuals(int		 Ns,
 										  pSolver->m_matSTimeDerivatives,
 										  pSolver->m_matSResiduals);
 	
+	
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "Sensitivity residuals function:" << endl;
+		cout << "Values pointer: " << pdValues << endl;
+		cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
+		cout << "Values:" << endl;
+		pSolver->m_arrValues.Print();
+		cout << "TimeDerivatives:" << endl;
+		pSolver->m_arrTimeDerivatives.Print();
 		cout << "S values:" << endl;
 		pSolver->m_matSValues.Print();
 		cout << "SD values:" << endl;

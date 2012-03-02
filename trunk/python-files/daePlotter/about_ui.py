@@ -2,224 +2,220 @@
 
 # Form implementation generated from reading ui file 'about.ui'
 #
-# Created: Fri Jun 17 01:11:25 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Fri Mar  2 15:46:04 2012
+#      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
-
 class Ui_About(object):
     def setupUi(self, About):
-        About.setObjectName(_fromUtf8("About"))
+        About.setObjectName("About")
         About.resize(750, 450)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8("images/app.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("images/app.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         About.setWindowIcon(icon)
         self.verticalLayout_9 = QtGui.QVBoxLayout(About)
         self.verticalLayout_9.setSpacing(3)
         self.verticalLayout_9.setMargin(5)
-        self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
+        self.verticalLayout_9.setObjectName("verticalLayout_9")
         self.tabWidget = QtGui.QTabWidget(About)
         self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
         self.tabWidget.setTabShape(QtGui.QTabWidget.Rounded)
         self.tabWidget.setDocumentMode(True)
-        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        self.tabWidget.setObjectName("tabWidget")
         self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("tab"))
+        self.tab.setObjectName("tab")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.tab)
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout = QtGui.QVBoxLayout()
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.verticalLayout.setObjectName("verticalLayout")
         self.textDAETools = QtGui.QTextEdit(self.tab)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textDAETools.setFont(font)
         self.textDAETools.setFrameShape(QtGui.QFrame.NoFrame)
         self.textDAETools.setFrameShadow(QtGui.QFrame.Plain)
         self.textDAETools.setUndoRedoEnabled(False)
         self.textDAETools.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
         self.textDAETools.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textDAETools.setObjectName(_fromUtf8("textDAETools"))
+        self.textDAETools.setObjectName("textDAETools")
         self.verticalLayout.addWidget(self.textDAETools)
         self.verticalLayout_2.addLayout(self.verticalLayout)
-        self.tabWidget.addTab(self.tab, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab, "")
         self.tab_4 = QtGui.QWidget()
-        self.tab_4.setObjectName(_fromUtf8("tab_4"))
+        self.tab_4.setObjectName("tab_4")
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.tab_4)
-        self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.verticalLayout_5 = QtGui.QVBoxLayout()
-        self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.textSundials_2 = QtGui.QTextEdit(self.tab_4)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_2.setFont(font)
         self.textSundials_2.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_2.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_2.setUndoRedoEnabled(False)
         self.textSundials_2.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.textSundials_2.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_2.setObjectName(_fromUtf8("textSundials_2"))
+        self.textSundials_2.setObjectName("textSundials_2")
         self.verticalLayout_5.addWidget(self.textSundials_2)
         self.verticalLayout_6.addLayout(self.verticalLayout_5)
-        self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_4, "")
         self.tab_9 = QtGui.QWidget()
-        self.tab_9.setObjectName(_fromUtf8("tab_9"))
+        self.tab_9.setObjectName("tab_9")
         self.verticalLayout_19 = QtGui.QVBoxLayout(self.tab_9)
-        self.verticalLayout_19.setObjectName(_fromUtf8("verticalLayout_19"))
+        self.verticalLayout_19.setObjectName("verticalLayout_19")
         self.verticalLayout_18 = QtGui.QVBoxLayout()
-        self.verticalLayout_18.setObjectName(_fromUtf8("verticalLayout_18"))
+        self.verticalLayout_18.setObjectName("verticalLayout_18")
         self.textSundials_7 = QtGui.QTextEdit(self.tab_9)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_7.setFont(font)
         self.textSundials_7.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_7.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_7.setUndoRedoEnabled(False)
         self.textSundials_7.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.textSundials_7.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_7.setObjectName(_fromUtf8("textSundials_7"))
+        self.textSundials_7.setObjectName("textSundials_7")
         self.verticalLayout_18.addWidget(self.textSundials_7)
         self.verticalLayout_19.addLayout(self.verticalLayout_18)
-        self.tabWidget.addTab(self.tab_9, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_9, "")
         self.tab_3 = QtGui.QWidget()
-        self.tab_3.setObjectName(_fromUtf8("tab_3"))
+        self.tab_3.setObjectName("tab_3")
         self.verticalLayout_8 = QtGui.QVBoxLayout(self.tab_3)
-        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
+        self.verticalLayout_8.setObjectName("verticalLayout_8")
         self.verticalLayout_7 = QtGui.QVBoxLayout()
-        self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
         self.textDAETools_2 = QtGui.QTextEdit(self.tab_3)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textDAETools_2.setFont(font)
         self.textDAETools_2.setFrameShape(QtGui.QFrame.NoFrame)
         self.textDAETools_2.setFrameShadow(QtGui.QFrame.Plain)
         self.textDAETools_2.setUndoRedoEnabled(False)
         self.textDAETools_2.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
         self.textDAETools_2.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textDAETools_2.setObjectName(_fromUtf8("textDAETools_2"))
+        self.textDAETools_2.setObjectName("textDAETools_2")
         self.verticalLayout_7.addWidget(self.textDAETools_2)
         self.verticalLayout_8.addLayout(self.verticalLayout_7)
-        self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_3, "")
         self.tab_2 = QtGui.QWidget()
-        self.tab_2.setObjectName(_fromUtf8("tab_2"))
+        self.tab_2.setObjectName("tab_2")
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_2)
-        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.verticalLayout_3 = QtGui.QVBoxLayout()
-        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.textSundials = QtGui.QTextEdit(self.tab_2)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials.setFont(font)
         self.textSundials.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials.setUndoRedoEnabled(False)
         self.textSundials.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.textSundials.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials.setObjectName(_fromUtf8("textSundials"))
+        self.textSundials.setObjectName("textSundials")
         self.verticalLayout_3.addWidget(self.textSundials)
         self.verticalLayout_4.addLayout(self.verticalLayout_3)
-        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_2, "")
         self.tab_5 = QtGui.QWidget()
-        self.tab_5.setObjectName(_fromUtf8("tab_5"))
+        self.tab_5.setObjectName("tab_5")
         self.verticalLayout_15 = QtGui.QVBoxLayout(self.tab_5)
-        self.verticalLayout_15.setObjectName(_fromUtf8("verticalLayout_15"))
+        self.verticalLayout_15.setObjectName("verticalLayout_15")
         self.verticalLayout_10 = QtGui.QVBoxLayout()
-        self.verticalLayout_10.setObjectName(_fromUtf8("verticalLayout_10"))
+        self.verticalLayout_10.setObjectName("verticalLayout_10")
         self.textSundials_3 = QtGui.QTextEdit(self.tab_5)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_3.setFont(font)
         self.textSundials_3.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_3.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_3.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.textSundials_3.setUndoRedoEnabled(False)
-        self.textSundials_3.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials_3.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
         self.textSundials_3.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_3.setObjectName(_fromUtf8("textSundials_3"))
+        self.textSundials_3.setObjectName("textSundials_3")
         self.verticalLayout_10.addWidget(self.textSundials_3)
         self.verticalLayout_15.addLayout(self.verticalLayout_10)
-        self.tabWidget.addTab(self.tab_5, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_5, "")
         self.tab_6 = QtGui.QWidget()
-        self.tab_6.setObjectName(_fromUtf8("tab_6"))
+        self.tab_6.setObjectName("tab_6")
         self.verticalLayout_14 = QtGui.QVBoxLayout(self.tab_6)
-        self.verticalLayout_14.setObjectName(_fromUtf8("verticalLayout_14"))
+        self.verticalLayout_14.setObjectName("verticalLayout_14")
         self.verticalLayout_11 = QtGui.QVBoxLayout()
-        self.verticalLayout_11.setObjectName(_fromUtf8("verticalLayout_11"))
+        self.verticalLayout_11.setObjectName("verticalLayout_11")
         self.textSundials_4 = QtGui.QTextEdit(self.tab_6)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_4.setFont(font)
         self.textSundials_4.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_4.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_4.setUndoRedoEnabled(False)
         self.textSundials_4.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.textSundials_4.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_4.setObjectName(_fromUtf8("textSundials_4"))
+        self.textSundials_4.setObjectName("textSundials_4")
         self.verticalLayout_11.addWidget(self.textSundials_4)
         self.verticalLayout_14.addLayout(self.verticalLayout_11)
-        self.tabWidget.addTab(self.tab_6, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_6, "")
         self.tab_7 = QtGui.QWidget()
-        self.tab_7.setObjectName(_fromUtf8("tab_7"))
+        self.tab_7.setObjectName("tab_7")
         self.verticalLayout_13 = QtGui.QVBoxLayout(self.tab_7)
-        self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
+        self.verticalLayout_13.setObjectName("verticalLayout_13")
         self.verticalLayout_12 = QtGui.QVBoxLayout()
-        self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
+        self.verticalLayout_12.setObjectName("verticalLayout_12")
         self.textSundials_5 = QtGui.QTextEdit(self.tab_7)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_5.setFont(font)
         self.textSundials_5.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_5.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_5.setUndoRedoEnabled(False)
         self.textSundials_5.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.textSundials_5.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_5.setObjectName(_fromUtf8("textSundials_5"))
+        self.textSundials_5.setObjectName("textSundials_5")
         self.verticalLayout_12.addWidget(self.textSundials_5)
         self.verticalLayout_13.addLayout(self.verticalLayout_12)
-        self.tabWidget.addTab(self.tab_7, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_7, "")
         self.tab_10 = QtGui.QWidget()
-        self.tab_10.setObjectName(_fromUtf8("tab_10"))
+        self.tab_10.setObjectName("tab_10")
         self.verticalLayout_21 = QtGui.QVBoxLayout(self.tab_10)
-        self.verticalLayout_21.setObjectName(_fromUtf8("verticalLayout_21"))
+        self.verticalLayout_21.setObjectName("verticalLayout_21")
         self.verticalLayout_20 = QtGui.QVBoxLayout()
-        self.verticalLayout_20.setObjectName(_fromUtf8("verticalLayout_20"))
+        self.verticalLayout_20.setObjectName("verticalLayout_20")
         self.textSundials_8 = QtGui.QTextEdit(self.tab_10)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_8.setFont(font)
         self.textSundials_8.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_8.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_8.setUndoRedoEnabled(False)
         self.textSundials_8.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
         self.textSundials_8.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_8.setObjectName(_fromUtf8("textSundials_8"))
+        self.textSundials_8.setObjectName("textSundials_8")
         self.verticalLayout_20.addWidget(self.textSundials_8)
         self.verticalLayout_21.addLayout(self.verticalLayout_20)
-        self.tabWidget.addTab(self.tab_10, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_10, "")
         self.tab_8 = QtGui.QWidget()
-        self.tab_8.setObjectName(_fromUtf8("tab_8"))
+        self.tab_8.setObjectName("tab_8")
         self.verticalLayout_16 = QtGui.QVBoxLayout(self.tab_8)
-        self.verticalLayout_16.setObjectName(_fromUtf8("verticalLayout_16"))
+        self.verticalLayout_16.setObjectName("verticalLayout_16")
         self.verticalLayout_22 = QtGui.QVBoxLayout()
-        self.verticalLayout_22.setObjectName(_fromUtf8("verticalLayout_22"))
+        self.verticalLayout_22.setObjectName("verticalLayout_22")
         self.textSundials_9 = QtGui.QTextEdit(self.tab_8)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_9.setFont(font)
         self.textSundials_9.setFrameShape(QtGui.QFrame.NoFrame)
         self.textSundials_9.setFrameShadow(QtGui.QFrame.Plain)
         self.textSundials_9.setUndoRedoEnabled(False)
         self.textSundials_9.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
         self.textSundials_9.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_9.setObjectName(_fromUtf8("textSundials_9"))
+        self.textSundials_9.setObjectName("textSundials_9")
         self.verticalLayout_22.addWidget(self.textSundials_9)
         self.verticalLayout_16.addLayout(self.verticalLayout_22)
-        self.tabWidget.addTab(self.tab_8, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_8, "")
         self.verticalLayout_9.addWidget(self.tabWidget)
 
         self.retranslateUi(About)
@@ -231,7 +227,7 @@ class Ui_About(object):
         self.textDAETools.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">DAE Tools Project</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">Copyright:</span><span style=\" font-size:9pt;\"> Dragan Nikolic, 2010</span></p>\n"
@@ -257,7 +253,7 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Umfpack (GNU GPL 2+) </span><a href=\"http://www.cise.ufl.edu/research/sparse/umfpack\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://www.cise.ufl.edu/research/sparse/umfpack</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - MUMPS (public domain) </span><a href=\"http://graal.ens-lyon.fr/MUMPS\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://graal.ens-lyon.fr/MUMPS</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - PORD (Juergen Schulze, University of Paderborn)</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - IPOPT (CPL) </span><a href=\"https://projects.coin-or.org/Ipopt\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">https://projects.coin-or.org/Ipopt</span></a></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - IPOPT (EPL) </span><a href=\"https://projects.coin-or.org/Ipopt\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">https://projects.coin-or.org/Ipopt</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Bonmin (CPL) </span><a href=\"https://projects.coin-or.org/Bonmin\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">https://projects.coin-or.org/Bonmin</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - NLOPT (GNU LGPL 2.1+) </span><a href=\"http://ab-initio.mit.edu/wiki/index.php/NLopt\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://ab-initio.mit.edu/wiki/index.php/NLopt</span></a></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
@@ -274,7 +270,7 @@ class Ui_About(object):
         self.textSundials_2.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">                    GNU GENERAL PUBLIC LICENSE</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">                       Version 3, 29 June 2007</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
@@ -954,7 +950,7 @@ class Ui_About(object):
         self.textSundials_7.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">                  GNU LESSER GENERAL PUBLIC LICENSE</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">                       Version 2.1, February 1999</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
@@ -1408,7 +1404,7 @@ class Ui_About(object):
         self.textDAETools_2.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Common Public License Version 1.0</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS COMMON PUBLIC</span></p>\n"
@@ -1627,7 +1623,7 @@ class Ui_About(object):
         self.textSundials.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Copyright (c) 2002, The Regents of the University of California. </span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Produced at the Lawrence Livermore National Laboratory.</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Written by S.D. Cohen, A.C. Hindmarsh, R. Serban, </span></p>\n"
@@ -1696,49 +1692,56 @@ class Ui_About(object):
         self.textSundials_3.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  This version of MUMPS is provided to you free of charge. It is public</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  domain, based on public domain software developed during the Esprit IV</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  European project PARASOL (1996-1999) by CERFACS, ENSEEIHT-IRIT and RAL.</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  Since this first public domain version in 1999, the developments are</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  supported by the following institutions: CERFACS, CNRS, INPT(ENSEEIHT)-</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  IRIT, and INRIA.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  Current development team includes Patrick Amestoy, Alfredo Buttari,</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  Abdou Guermouche, Jean-Yves L\'Excellent, Bora Ucar.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  Up-to-date copies of the MUMPS package can be obtained</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  from the Web pages:</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  http://mumps.enseeiht.fr/  or  http://graal.ens-lyon.fr/MUMPS</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   EXPRESSED OR IMPLIED. ANY USE IS AT YOUR OWN RISK.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  User documentation of any code that uses this software can</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  include this complete notice. You can acknowledge (using</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  references [1] and [2]) the contribution of this package</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  in any scientific publication dependent upon the use of the</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  package. You shall use reasonable endeavours to notify</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">  the authors of the package of this publication.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   [1] P. R. Amestoy, I. S. Duff, J. Koster and  J.-Y. L\'Excellent,</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   A fully asynchronous multifrontal solver using distributed dynamic</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   scheduling, SIAM Journal of Matrix Analysis and Applications,</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   Vol 23, No 1, pp 15-41 (2001).</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   [2] P. R. Amestoy and A. Guermouche and J.-Y. L\'Excellent and</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   S. Pralet, Hybrid scheduling for the parallel solution of linear</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">   systems. Parallel Computing Vol 32 (2), pp 136-156 (2006).</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtGui.QApplication.translate("About", "Mumps", None, QtGui.QApplication.UnicodeUTF8))
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:16px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">Eclipse Public License - v 1.0</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (&quot;AGREEMENT&quot;). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT\'S ACCEPTANCE OF THIS AGREEMENT. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">1. DEFINITIONS</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&quot;Contribution&quot; means: </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">a) in the case of the initial Contributor, the initial code and documentation distributed under this Agreement, and</span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">b) in the case of each subsequent Contributor:</span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">i) changes to the Program, and</span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">ii) additions to the Program;</span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">where such changes and/or additions to the Program originate from and are distributed by that particular Contributor. A Contribution \'originates\' from a Contributor if it was added to the Program by such Contributor itself or anyone acting on such Contributor\'s behalf. Contributions do not include additions to the Program which: (i) are separate modules of software distributed in conjunction with the Program under their own license agreement, and (ii) are not derivative works of the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&quot;Contributor&quot; means any person or entity that distributes the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&quot;Licensed Patents&quot; mean patent claims licensable by a Contributor which are necessarily infringed by the use or sale of its Contribution alone or when combined with the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&quot;Program&quot; means the Contributions distributed in accordance with this Agreement. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&quot;Recipient&quot; means anyone who receives the Program under this Agreement, including all Contributors. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">2. GRANT OF RIGHTS</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">a) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, distribute and sublicense the Contribution of such Contributor, if any, and such derivative works, in source code and object code form. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">b) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free patent license under Licensed Patents to make, use, sell, offer to sell, import and otherwise transfer the Contribution of such Contributor, if any, in source code and object code form. This patent license shall apply to the combination of the Contribution and the Program if, at the time the Contribution is added by the Contributor, such addition of the Contribution causes such combination to be covered by the Licensed Patents. The patent license shall not apply to any other combinations which include the Contribution. No hardware per se is licensed hereunder. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">c) Recipient understands that although each Contributor grants the licenses to its Contributions set forth herein, no assurances are provided by any Contributor that the Program does not infringe the patent or other intellectual property rights of any other entity. Each Contributor disclaims any liability to Recipient for claims brought by any other entity based on infringement of intellectual property rights or otherwise. As a condition to exercising the rights and licenses granted hereunder, each Recipient hereby assumes sole responsibility to secure any other intellectual property rights needed, if any. For example, if a third party patent license is required to allow Recipient to distribute the Program, it is Recipient\'s responsibility to acquire that license before distributing the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">d) Each Contributor represents that to its knowledge it has sufficient copyright rights in its Contribution, if any, to grant the copyright license set forth in this Agreement. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">3. REQUIREMENTS</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">A Contributor may choose to distribute the Program in object code form under its own license agreement, provided that: </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">a) it complies with the terms and conditions of this Agreement; and </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">b) its license agreement: </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">i) effectively disclaims on behalf of all Contributors all warranties and conditions, express and implied, including warranties or conditions of title and non-infringement, and implied warranties or conditions of merchantability and fitness for a particular purpose; </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">ii) effectively excludes on behalf of all Contributors all liability for damages, including direct, indirect, special, incidental and consequential damages, such as lost profits; </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">iii) states that any provisions which differ from this Agreement are offered by that Contributor alone and not by any other party; and </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">iv) states that source code for the Program is available from such Contributor, and informs licensees how to obtain it in a reasonable manner on or through a medium customarily used for software exchange. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">When the Program is made available in source code form: </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">a) it must be made available under this Agreement; and </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">b) a copy of this Agreement must be included with each copy of the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Contributors may not remove or alter any copyright notices contained within the Program. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Each Contributor must identify itself as the originator of its Contribution, if any, in a manner that reasonably allows subsequent Recipients to identify the originator of the Contribution. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">4. COMMERCIAL DISTRIBUTION</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Commercial distributors of software may accept certain responsibilities with respect to end users, business partners and the like. While this license is intended to facilitate the commercial use of the Program, the Contributor who includes the Program in a commercial product offering should do so in a manner which does not create potential liability for other Contributors. Therefore, if a Contributor includes the Program in a commercial product offering, such Contributor (&quot;Commercial Contributor&quot;) hereby agrees to defend and indemnify every other Contributor (&quot;Indemnified Contributor&quot;) against any losses, damages and costs (collectively &quot;Losses&quot;) arising from claims, lawsuits and other legal actions brought by a third party against the Indemnified Contributor to the extent caused by the acts or omissions of such Commercial Contributor in connection with its distribution of the Program in a commercial product offering. The obligations in this section do not apply to any claims or Losses relating to any actual or alleged intellectual property infringement. In order to qualify, an Indemnified Contributor must: a) promptly notify the Commercial Contributor in writing of such claim, and b) allow the Commercial Contributor to control, and cooperate with the Commercial Contributor in, the defense and any related settlement negotiations. The Indemnified Contributor may participate in any such claim at its own expense. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">For example, a Contributor might include the Program in a commercial product offering, Product X. That Contributor is then a Commercial Contributor. If that Commercial Contributor then makes performance claims, or offers warranties related to Product X, those performance claims and warranties are such Commercial Contributor\'s responsibility alone. Under this section, the Commercial Contributor would have to defend claims against the other Contributors related to those performance claims and warranties, and if a court requires any other Contributor to pay any damages as a result, the Commercial Contributor must pay those damages. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">5. NO WARRANTY</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, THE PROGRAM IS PROVIDED ON AN &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Each Recipient is solely responsible for determining the appropriateness of using and distributing the Program and assumes all risks associated with its exercise of rights under this Agreement , including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and unavailability or interruption of operations. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">6. DISCLAIMER OF LIABILITY</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER RECIPIENT NOR ANY CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OR DISTRIBUTION OF THE PROGRAM OR THE EXERCISE OF ANY RIGHTS GRANTED HEREUNDER, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">7. GENERAL</span><span style=\" font-size:9pt;\"> </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">If any provision of this Agreement is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this Agreement, and without further action by the parties hereto, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">If Recipient institutes patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Program itself (excluding combinations of the Program with other software or hardware) infringes such Recipient\'s patent(s), then such Recipient\'s rights granted under Section 2(b) shall terminate as of the date such litigation is filed. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">All Recipient\'s rights under this Agreement shall terminate if it fails to comply with any of the material terms or conditions of this Agreement and does not cure such failure in a reasonable period of time after becoming aware of such noncompliance. If all Recipient\'s rights under this Agreement terminate, Recipient agrees to cease use and distribution of the Program as soon as reasonably practicable. However, Recipient\'s obligations under this Agreement and any licenses granted by Recipient relating to the Program shall continue and survive. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Everyone is permitted to copy and distribute copies of this Agreement, but in order to avoid inconsistency the Agreement is copyrighted and may only be modified in the following manner. The Agreement Steward reserves the right to publish new versions (including revisions) of this Agreement from time to time. No one other than the Agreement Steward has the right to modify this Agreement. The Eclipse Foundation is the initial Agreement Steward. The Eclipse Foundation may assign the responsibility to serve as the Agreement Steward to a suitable separate entity. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved. </span></p>\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation. </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtGui.QApplication.translate("About", "EPL 1.0", None, QtGui.QApplication.UnicodeUTF8))
         self.textSundials_4.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Boost Software License - Version 1.0 - August 17th, 2003</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Permission is hereby granted, free of charge, to any person or organization</span></p>\n"
@@ -1767,7 +1770,7 @@ class Ui_About(object):
         self.textSundials_5.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">Copyright (c) 2003, The Regents of the University of California, through</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">Lawrence Berkeley National Laboratory (subject to receipt of any required </span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">approvals from U.S. Dept. of Energy) </span></p>\n"
@@ -1801,7 +1804,7 @@ class Ui_About(object):
         self.textSundials_8.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Copyright (c) 2005, NumPy Developers</span></p>\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">All rights reserved.</span></p>\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span></p>\n"
@@ -1813,7 +1816,7 @@ class Ui_About(object):
         self.textSundials_9.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Courier New,courier\'; font-size:9pt;\"></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">$COPYRIGHT$</span></p>\n"

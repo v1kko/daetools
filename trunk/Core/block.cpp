@@ -169,7 +169,7 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
-	EC.m_dInverseTimeStep			= GetInverseTimeStep();
+	EC.m_dInverseTimeStep			= GetInverseTimeStep(); // ??????
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
 

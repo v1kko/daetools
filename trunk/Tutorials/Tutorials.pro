@@ -11,20 +11,21 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${IPOPT_LIBDIR} \
+                $${BONMIN_LIBDIR} \
                 $${MUMPS_LIBDIR}
 
 LIBS += $${DAE_ACTIVITY_LIB} \
         $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
         $${DAE_IDAS_SOLVER_LIB} \
-		#$${DAE_IPOPT_SOLVER_LIB} \
+		$${DAE_IPOPT_SOLVER_LIB} \
         $${DAE_SUPERLU_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
-        #$${IPOPT_LIBS} \
+        $${IPOPT_LIBS} \
         $${DAE_UNITS_LIB} \
         $${MPI_LIBS} \
-        $${MUMPS_LIBS} -lrt -lgfortran \
+        $${MUMPS_LIBS} \
         $${SUPERLU_LIBS}
 
 SOURCES += main.cpp \
@@ -43,6 +44,6 @@ HEADERS += stdafx.h \
 #    cdae_tutorial9.h \
     cdae_tutorial13.h \
     cdae_tutorial15.h \
-#    cdae_opt_tutorial1.h \
+    cdae_opt_tutorial1.h \
 #    cdae_opt_tutorial2.h \
 #    cdae_opt_tutorial3.h \
