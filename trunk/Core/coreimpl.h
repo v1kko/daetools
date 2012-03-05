@@ -803,20 +803,36 @@ public:
 	}
 
 /* 
-  ACHTUNG!! Initialization phase functions only!
-  Used only to set an initial guesses/initial conditions/abs. tolerances/assigned values during the initialization phase.
+  ACHTUNG!! Normally, the initialization phase functions only!
+  Used only to set initial guesses/initial conditions/abs. tolerances/assigned values during the initialization phase.
   The following arrays will be deleted after the successful SolveInitial:
 	- m_pdInitialValues
     - m_pdInitialConditions
 	- m_pdVariablesTypes
 	- m_pdVariablesTypesGathered
 	- m_pdAbsoluteTolerances
+  
+  However, these function may be called even after the Initialization. For instance, during an optimization 
+  the function SetUpVariables is called before each iteration which may set initial guesses, absolute
+  tolerances, initial conditions and assign the varoable values. Therefore, these functions must be safe 
+  frim exceptions if called 
 */
 	void SetInitialGuess(size_t nOverallIndex, real_t Value)
 	{
-		if(!m_pdInitialValues)
-			daeDeclareAndThrowException(exInvalidPointer);
-		m_pdInitialValues[nOverallIndex] = Value;
+		if(m_pdInitialValues)
+		{
+			m_pdInitialValues[nOverallIndex] = Value;
+		}
+		else if(!m_pdarrValuesReferences.empty())
+		{
+			*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+		}
+		else
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot set the initial guess"; 
+			throw e;
+		}
 	}
 	
 	void AssignValue(size_t nOverallIndex, real_t Value)
@@ -826,17 +842,41 @@ public:
 	
 	void SetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
 	{
-		if(eMode == eAlgebraicValuesProvided)
+		if(m_pdInitialValues)
 		{
-			if(!m_pdInitialValues)
-				daeDeclareAndThrowException(exInvalidPointer);
-			m_pdInitialValues[nOverallIndex] = Value;
+			if(eMode == eAlgebraicValuesProvided)
+			{
+				m_pdInitialValues[nOverallIndex] = Value;
+			}
+			else if(eMode == eDifferentialValuesProvided)
+			{
+				m_pdInitialValues[nOverallIndex] = Value;
+			}
+			else
+			{
+				daeDeclareAndThrowException(exNotImplemented);
+			}
 		}
-		else if(eMode == eDifferentialValuesProvided)
+		else if(!m_pdarrValuesReferences.empty())
 		{
-			if(!m_pdInitialConditions)
-				daeDeclareAndThrowException(exInvalidPointer);
-			m_pdInitialValues[nOverallIndex] = Value;
+			if(eMode == eAlgebraicValuesProvided)
+			{
+				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+			}
+			else if(eMode == eDifferentialValuesProvided)
+			{
+				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+			}
+			else
+			{
+				daeDeclareAndThrowException(exNotImplemented);
+			}
+		}
+		else
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Cannot set the initial condition"; 
+			throw e;
 		}
 	}
 	
@@ -879,9 +919,8 @@ public:
 	
 	void SetAbsoluteTolerance(size_t nOverallIndex, real_t Value)
 	{
-		if(!m_pdAbsoluteTolerances)
-			daeDeclareAndThrowException(exInvalidPointer);
-		m_pdAbsoluteTolerances[nOverallIndex] = Value;
+		if(m_pdAbsoluteTolerances)
+			m_pdAbsoluteTolerances[nOverallIndex] = Value;
 	}
 	
 	real_t* GetInitialValuesPointer(void) const
@@ -907,15 +946,21 @@ public:
 /* End of initialization phase functions */
 	
 /* 
-  Functions that can be used ONLY during the INTEGRATION!
+  Functions that can be used ONLY when changing some value; for intance:
+    - During integration in an operating procedure to re-assign or reinitialize some variable
+	- In daeActions after an event to re-assign or reinitialize some variable
+	- During optimization, before each iteration new values of opt. variables has to be set
+  ACHTUNG!! After any of these uses the solver has to be reinitialized with the new values!!
+  
   Values/TimeDerivatives references point to:
     - DAESolver's data (for state variables)
     - Internal map of assigned variables (for assigned variables)	
   
   ACHTUNG!! Get/Set Value/TimeDerivative must not be used in adNode derived classes to calculate residualS/jacobian/...
             They MUST access the data through the functions in daeBlock (using block indexes).
-			After each successful call to IDASolver (any daeSimulation::Integrate_XXX function) the new Values and
-			TimeDerivatives are set (also the new values are used before any check for discontinuities).
+  
+  NOTE: After each successful call to IDASolver (any daeSimulation::Integrate_XXX function) the new Values and
+  TimeDerivatives are set (also the new values are set before any check for discontinuities).
 */
 	real_t GetValue(size_t nOverallIndex) const
 	{
