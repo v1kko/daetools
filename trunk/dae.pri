@@ -73,6 +73,8 @@ DESTDIR = $${DAE_DEST_DIR}
 ####################################################################################
 win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 
+QMAKE_CXXFLAGS_DEBUG += -fno-default-inline
+
 QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
 QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 

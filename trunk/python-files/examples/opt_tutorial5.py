@@ -141,6 +141,10 @@ def run():
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
+    # Do no print progress
+    log.PrintProgress = False
+    
+    # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     simulation.ReportingInterval = 1

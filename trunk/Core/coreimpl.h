@@ -805,10 +805,9 @@ public:
 /* 
   ACHTUNG!! Normally, the initialization phase functions only!
   Used only to set initial guesses/initial conditions/abs. tolerances/assigned values during the initialization phase.
-  The following arrays will be deleted after the successful SolveInitial:
+  The following arrays will be deleted after a successful SolveInitial() call:
 	- m_pdInitialValues
     - m_pdInitialConditions
-	- m_pdVariablesTypes
 	- m_pdVariablesTypesGathered
 	- m_pdAbsoluteTolerances
   
@@ -946,7 +945,7 @@ public:
 /* End of initialization phase functions */
 	
 /* 
-  Functions that can be used ONLY when changing some value; for intance:
+  Functions that can be used ONLY when changing some value; for instance:
     - During integration in an operating procedure to re-assign or reinitialize some variable
 	- In daeActions after an event to re-assign or reinitialize some variable
 	- During optimization, before each iteration new values of opt. variables has to be set
@@ -1170,6 +1169,9 @@ public:
 	
 	void CleanUpSetupData(void)
 	{
+	/*	Achtung, Achtung!!
+		m_pdVariablesTypes should not be deleted for it might be used during an integration.
+	*/
 		if(m_pdInitialValues)
 		{
 			delete[] m_pdInitialValues;
@@ -1179,11 +1181,6 @@ public:
 		{
 			delete[] m_pdInitialConditions;
 			m_pdInitialConditions = NULL;
-		}
-		if(m_pdVariablesTypes)
-		{
-			delete[] m_pdVariablesTypes;
-			m_pdVariablesTypes = NULL;
 		}
 		if(m_pdVariablesTypesGathered)
 		{

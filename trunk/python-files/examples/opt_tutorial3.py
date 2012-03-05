@@ -119,6 +119,9 @@ def consoleRun():
     # NLOPT algorithm must be set in its constructor
     nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
 
+    # Do no print progress
+    log.PrintProgress = False
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 

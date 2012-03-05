@@ -122,6 +122,9 @@ def consoleRun():
     simulation   = simTutorial()
     optimization = daeOptimization()
 
+    # Do no print progress
+    log.PrintProgress = False
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 

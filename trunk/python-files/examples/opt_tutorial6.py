@@ -102,6 +102,9 @@ def run():
     simulation   = simTutorial()
     minpack      = daeMinpackLeastSq()
 
+    # Do no print progress
+    log.PrintProgress = False
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 

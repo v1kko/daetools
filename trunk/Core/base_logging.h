@@ -36,9 +36,10 @@ class daeBaseLog : public daeLog_t
 public:
 	daeBaseLog(void)
 	{
-		m_bEnabled  = true;
-		m_nIndent   = 0;
-		m_dProgress = 0;
+		m_bEnabled       = true;
+		m_bPrintProgress = true;
+		m_nIndent        = 0;
+		m_dProgress      = 0;
 		
 		daeConfig& cfg  = daeConfig::GetConfig();
 		m_strIndentUnit = cfg.Get<std::string>("daetools.core.logIndent", "\t");
@@ -71,6 +72,16 @@ public:
 	virtual bool GetEnabled(void) const
 	{
 		return m_bEnabled;
+	}
+
+	virtual void SetPrintProgress(bool bPrintProgress)
+	{
+		m_bPrintProgress = bPrintProgress;
+	}	
+
+	virtual bool GetPrintProgress(void) const
+	{
+		return m_bPrintProgress;
 	}
 	
 	virtual void SetIndent(size_t nIndent)
@@ -159,6 +170,7 @@ public:
 protected:
 	std::vector<string> m_strarrMessages;
 	bool				m_bEnabled;
+	bool				m_bPrintProgress;
 	size_t				m_nIndent;
 	real_t				m_dProgress;
 	std::string			m_strIndent;
@@ -188,9 +200,17 @@ public:
 		
 		if(m_bEnabled)
 		{
-	        string msg = (boost::format("%-30s") % (m_strIndent + strMessage)).str();
-			std::cout << msg << std::endl;
-	        std::cout << (boost::format(" %s %s\r") % GetPercentageDone() % GetETA()).str();
+			if(m_bPrintProgress)
+			{
+				string msg = (boost::format("%-30s") % (m_strIndent + strMessage)).str();
+				std::cout << msg << std::endl;
+				std::cout << (boost::format(" %s %s\r") % GetPercentageDone() % GetETA()).str();
+			}
+			else
+			{
+				std::cout << m_strIndent << strMessage << std::endl;
+			}
+			
 			std::cout.flush();
 		}
 	}

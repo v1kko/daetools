@@ -38,6 +38,8 @@ public:
 	virtual std::string	GetIndentString(void) const								= 0;
 	virtual void		SetEnabled(bool bEnabled)								= 0;
 	virtual bool		GetEnabled(void) const									= 0;
+	virtual void		SetPrintProgress(bool bPrintProgress)					= 0;
+	virtual bool		GetPrintProgress(void) const							= 0;
 	virtual void		SetIndent(size_t nIndent)								= 0;
 	virtual size_t		GetIndent(void) const									= 0;
 	virtual void		IncreaseIndent(size_t nOffset)							= 0;

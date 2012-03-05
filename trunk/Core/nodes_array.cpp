@@ -3068,7 +3068,7 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
 	else if( dynamic_cast<adRuntimeVariableNode*>(adnode) )
 	{
 		adRuntimeVariableNode* rtnode = dynamic_cast<adRuntimeVariableNode*>(adnode);
-	// Here I do not check if the variable is fixed (cnFixed) and do not add it to list of derivative variables !!!
+	// Here we do not check if the variable is fixed (cnFixed) and do not add it to list of derivative variables !!!
 	//	adRuntimeTimeDerivativeNode* devnode = new adRuntimeTimeDerivativeNode();
 	//	tmp = adNodePtr(devnode);
 	//	devnode->m_pVariable        = rtnode->m_pVariable;
@@ -3077,7 +3077,7 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
 	//	devnode->m_pdTimeDerivative = pExecutionContext->m_pDataProxy->GetTimeDerivative(rtnode->m_nOverallIndex);
 	//	devnode->m_narrDomains      = rtnode->m_narrDomains;
 
-	// Here I check for it regularly
+	// Here we check for it regularly
 		adouble adres = rtnode->m_pVariable->Calculate_dt(&rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
 		tmp = adres.node;
 	}
@@ -3821,9 +3821,9 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-// Achtung!! The node that I have is a setup node!!!
-// During GatherInfo I have to transform it into the runtime node.
-// Thus here I have to call node->Evaluate() and to store this value to cloned node
+// Achtung!! The node that we have is a setup node!!!
+// During the GatherInfo phase we have to transform it into the runtime node.
+// Thus, here we have to call node->Evaluate() and to store the returned node as a cloned node
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adSingleNodeArray* clone = new adSingleNodeArray(*this);

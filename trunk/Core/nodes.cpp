@@ -969,20 +969,27 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		}
 	}
 	
-// Assigned variables' values are in DataProxy (they do not exist in the solver)
+/* 
+	ACHTUNG, ACHTUNG!!
+	Assigned variables' values are in DataProxy (they do not exist in the solver)!!
+*/
+	real_t value;
 	if(m_bIsAssigned)
-		return adouble(pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex));
+		value = pExecutionContext->m_pDataProxy->GetValue(m_nOverallIndex);
+	else
+		value = pExecutionContext->m_pBlock->GetValue(m_nBlockIndex);
 	
 	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
-		// If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
-		// the variable is fixed and its sensitivity derivative per given parameter is 1.
-		// If it is not - it is a normal state variable and its sensitivity derivative is m_pdSValue
-		
+	/*
+		If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
+		the variable is fixed and its sensitivity derivative per given parameter is 1.
+		If it is not - it is a normal state variable and its sensitivity derivative is m_pdSValue
+	*/	
 		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
 		{
-			return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 1);
+			return adouble(value, 1);
 		}
 		else
 		{
@@ -990,26 +997,27 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 			//Otherwise take the value from the DataProxy
 			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
 			{
-				return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 0);
+				return adouble(value, 0);
 			}
 			else
 			{
 			// Get the derivative value based on the m_nBlockIndex	
-				return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex),
-				               pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, m_nBlockIndex) 
-				              );
+				return adouble(value, 
+				               pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, m_nBlockIndex) );
 			}
 		}
 	}
 	else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
 	{
-		return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex), 
-		              (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
+		return adouble(value, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
 	else
 	{
-		return adouble(pExecutionContext->m_pBlock->GetValue(m_nBlockIndex),
-		              (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
+	// Achtung!! If a variable is assigned its derivative must always be zero!
+		if(m_bIsAssigned)
+			return adouble(value);
+		else
+			return adouble(value, (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == m_nOverallIndex ? 1 : 0) );
 	}
 }
 
@@ -1196,11 +1204,13 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
 	
 	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
-		// Here m_nCurrentParameterIndexForSensitivityEvaluation MUST NOT be equal to m_nOverallIndex,
-		// because it would mean a time derivative for the assigned variable (that is a sensitivity parameter)
-		// which value is fixed!! 
+	/*	ACHTUNG, ACHTUNG!!
+		Here m_nCurrentParameterIndexForSensitivityEvaluation MUST NOT be equal to m_nOverallIndex,
+		because it would mean a time derivative of an assigned variable (that is a sensitivity parameter)
+		which value is fixed!! 
+	*/
 		if(pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex)
-			daeDeclareAndThrowException(exInvalidCall)
+			daeDeclareAndThrowException(exInvalidCall);
 
 		//m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation is used to get the S/SD values
 		return adouble(pExecutionContext->m_pBlock->GetTimeDerivative(m_nBlockIndex),

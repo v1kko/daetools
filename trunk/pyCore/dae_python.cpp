@@ -891,9 +891,10 @@ BOOST_PYTHON_MODULE(pyCore)
 	daeLog
 ***************************************************************/
 	class_<daepython::daeLogWrapper, boost::noncopyable>("daeLog_t", no_init)
-		.add_property("Enabled",		&daeLog_t::GetEnabled,  &daeLog_t::SetEnabled)
-		.add_property("Indent",			&daeLog_t::GetIndent,   &daeLog_t::SetIndent)
-		.add_property("Progress",		&daeLog_t::GetProgress, &daeLog_t::SetProgress)
+        .add_property("Enabled",		&daeLog_t::GetEnabled,		 &daeLog_t::SetEnabled)
+		.add_property("PrintProgress",	&daeLog_t::GetPrintProgress, &daeLog_t::SetPrintProgress)
+		.add_property("Indent",			&daeLog_t::GetIndent,		 &daeLog_t::SetIndent)
+		.add_property("Progress",		&daeLog_t::GetProgress,		 &daeLog_t::SetProgress)
 		.add_property("IndentString",	&daeLog_t::GetIndentString)
         .add_property("PercentageDone",	&daeLog_t::GetPercentageDone)
         .add_property("ETA",			&daeLog_t::GetETA)
@@ -905,7 +906,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog")
-		.def("Message",				&daeLog_t::Message, &daepython::daeBaseLogWrapper::def_Message)
+		.def("Message",				&daeLog_t::Message,     &daepython::daeBaseLogWrapper::def_Message)
 	    .def("SetProgress",			&daeLog_t::SetProgress, &daepython::daeBaseLogWrapper::def_SetProgress)
 		.def("IncreaseIndent",		&daeBaseLog::IncreaseIndent)
 		.def("DecreaseIndent",		&daeBaseLog::DecreaseIndent)
