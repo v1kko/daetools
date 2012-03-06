@@ -386,21 +386,6 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
 		m_pIDASolverData->ppdSValues[i] = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
 	
 	m_matSValues.InitMatrix(Ns, N, m_pIDASolverData->ppdSValues, eRowWise);
-
-	realtype* pdSValues;
-	std::cout << "Sensitivities at the time: " << m_dCurrentTime << std::endl;
-		
-	for(size_t i = 0; i < Ns; i++)
-	{
-		pdSValues = NV_DATA_S(m_pIDASolverData->m_pvectorSVariables[i]);
-		if(!pdSValues)
-			daeDeclareAndThrowException(exInvalidCall);
-		
-		for(size_t k = 0; k < m_nNumberOfEquations; k++)
-			std::cout << toStringFormatted<real_t>(pdSValues[k], 14, 4, true);
-		std::cout << std::endl;
-	}
-	
 	return m_matSValues;
 }
 
