@@ -540,13 +540,13 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "%endif"                     >> ${SPEC}
 
   echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling, simulation and optimization software." >> ${SPEC}
-  echo "Name: ${PACKAGE_NAME}"                                                      >> ${SPEC}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                         >> ${SPEC}
-  echo "Release: ${VER_BUILD}"                                                      >> ${SPEC}
-  echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                            >> ${SPEC}
-  echo "License: GNU GPL v3"                                                        >> ${SPEC}
-  echo "URL: www.daetools.com"                                                      >> ${SPEC}
-  echo "Requires: boost-devel >= 1.41, PyQt4, numpy, scipy, python-matplotlib"      >> ${SPEC}
+  echo "Name: ${PACKAGE_NAME}"                                                              >> ${SPEC}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                                 >> ${SPEC}
+  echo "Release: ${VER_BUILD}"                                                              >> ${SPEC}
+  echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                                    >> ${SPEC}
+  echo "License: GNU GPL v3"                                                                >> ${SPEC}
+  echo "URL: www.daetools.com"                                                              >> ${SPEC}
+  echo "Requires: boost-devel >= 1.41, PyQt4, numpy, scipy, python-matplotlib, blas, lapack">> ${SPEC}
   echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
   echo "Group: Development/Tools"                                                   >> ${SPEC}
 

@@ -43,11 +43,52 @@ except Exception, e:
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
-    import opt_tutorial1, opt_tutorial2, opt_tutorial3, opt_tutorial4, opt_tutorial5, opt_tutorial6
 except Exception, e:
     exc_traceback = sys.exc_info()[2]
     print '\n'.join(traceback.format_tb(exc_traceback))
     print '[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e)
+
+try:
+    import opt_tutorial1
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial1 module\n Error: ', str(e)
+
+try:
+    import opt_tutorial2
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial2 module\n Error: ', str(e)
+
+try:
+    import opt_tutorial3
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial3 module\n Error: ', str(e)
+
+try:
+    import opt_tutorial4
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial4 module\n Error: ', str(e)
+
+try:
+    import opt_tutorial5
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial5 module\n Error: ', str(e)
+
+try:
+    import opt_tutorial6
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial6 module\n Error: ', str(e)
 
 
 class daeTextEditLog(daeStdOutLog):
