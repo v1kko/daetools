@@ -24,14 +24,15 @@ namespace datareporting
 /*********************************************************************
 	daeDataReporterDomain
 *********************************************************************/
-const char cStartRegistration = 0;
-const char cEndRegistration   = 1;
-const char cRegisterDomain    = 2;
-const char cRegisterParameter = 3;
-const char cRegisterVariable  = 4;
-const char cStartNewTime      = 5;
-const char cSendVariable      = 6;
-const char cEndOfData         = 7;
+const char cSendProcessName   = 0;
+const char cStartRegistration = 1;
+const char cEndRegistration   = 2;
+const char cRegisterDomain    = 3;
+const char cRegisterParameter = 4;
+const char cRegisterVariable  = 5;
+const char cStartNewTime      = 6;
+const char cSendVariable      = 7;
+const char cEndOfData         = 8;
 
 class daeDataReporterDomain
 {

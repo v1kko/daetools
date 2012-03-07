@@ -128,7 +128,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 	char cFlag = data[0];
 	curPos = 1;
 	
-	if(cFlag == cStartRegistration)
+	if(cFlag == cSendProcessName)
 	{
 		char* szName;
 
@@ -142,7 +142,9 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 		memcpy(szName, &data[curPos], nameSize);
 		m_drProcess.m_strName.assign(szName);
 		delete[] szName;
-
+	}
+	else if(cFlag == cStartRegistration)
+	{
 	}
 	else if(cFlag == cEndRegistration)
 	{
@@ -331,7 +333,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 		memcpy(pValue->m_pValues, &data[curPos], sizeof(real_t)*noPoints);
 		
 	// Finally add the value to the array
-		pVariable->m_ptrarrValues.push_back(pValue);
+		dae_push_back(pVariable->m_ptrarrValues, pValue);
 	}
 	else if(cFlag == cEndOfData)
 	{

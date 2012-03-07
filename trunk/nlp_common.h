@@ -75,6 +75,8 @@ public:
 	
 		if(!m_pObjectiveFunction || m_ptrarrOptVariables.empty())
 			daeDeclareAndThrowException(exInvalidPointer);
+		
+		m_strModelName = m_pSimulation->GetModel()->GetName();
 	}
 	
 	void Calculate_fobj(double& fobj)
@@ -241,6 +243,8 @@ protected:
 		m_pLog->IncreaseIndent(1);
 		m_pLog->Message(string("Starting the run No. ") + toString(m_iRunCounter + 1) + string(" ..."), 0);
 		
+		m_pSimulation->RegisterData((boost::format("Iter_%05d") % m_iRunCounter).str());
+
 		if(m_iRunCounter == 0)
 		{
 		// 1. Re-assign the optimization variables
@@ -461,6 +465,7 @@ protected:
 	}
 	
 public:
+	std::string			m_strModelName;
 	daeSimulation_t*	m_pSimulation;
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;

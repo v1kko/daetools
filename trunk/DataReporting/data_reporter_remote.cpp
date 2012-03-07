@@ -14,6 +14,15 @@ daeDataReporterRemote::~daeDataReporterRemote()
 	Disconnect();
 }
 
+bool daeDataReporterRemote::SendProcessName(const string& strProcessName)
+{
+	m_strProcessName = strProcessName;
+	
+	return SendMessage(
+						m_msgFormatter.SendProcessName(strProcessName)
+					  );
+}
+
 bool daeDataReporterRemote::Connect(const string& strConnectString, const string& strProcessName)
 {
 	return true;
@@ -35,7 +44,7 @@ bool daeDataReporterRemote::StartRegistration(void)
 		return false;
 
 	return SendMessage(
-						m_msgFormatter.StartRegistration(m_strProcessName)
+						m_msgFormatter.StartRegistration()
 					  );
 }
 	

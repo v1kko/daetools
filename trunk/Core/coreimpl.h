@@ -422,6 +422,7 @@ public:
 	adNodePtr GetEquationEvaluationNode(void) const;
 	
 protected:
+	real_t					 m_dScaling;
 	size_t					 m_nEquationIndexInBlock;
 	std::vector<size_t>		 m_narrDomainIndexes;
 	std::map<size_t, size_t> m_mapIndexes;
@@ -2468,7 +2469,7 @@ public:
 	const adouble __average__(const adouble_array& a) const;
 	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<const real_t*>& pdarrPoints) const;
 
-	daeEquation* CreateEquation(const string& strName, string strDescription = "");
+	daeEquation* CreateEquation(const string& strName, string strDescription = "", real_t dScaling = 1.0);
 
 	void AddEquation(daeEquation* pEquation);
 	void AddDomain(daeDomain* pDomain);
@@ -3109,8 +3110,12 @@ public:
 	virtual void   GetDomainDefinitions(std::vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo);
 
 public:	
-	void	 SetResidual(adouble res);
-	adouble	 GetResidual(void) const;
+	void	SetResidual(adouble res);
+	adouble	GetResidual(void) const;
+	
+	real_t	GetScaling(void) const;
+	void	SetScaling(real_t dScaling);
+
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds);
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes);
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n);
@@ -3156,10 +3161,11 @@ protected:
 	void SetModelAndCanonicalName(daeObject* pObject);
 
 protected:
+	real_t												m_dScaling;
 	daeState*											m_pParentState;
 	daeeEquationDefinitionMode							m_eEquationDefinitionMode;
 	daeeEquationEvaluationMode							m_eEquationEvaluationMode;
-	adNodePtr							m_pResidualNode;
+	adNodePtr											m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
 // This vector is redundant - all EquationExecutionInfos already exist in models and states
 // However, it is useful when saving RuntimeReport

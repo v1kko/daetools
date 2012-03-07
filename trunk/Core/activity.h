@@ -60,6 +60,7 @@ public:
 	virtual void				Finalize(void)													= 0;
 	virtual void				ReRun(void)													    = 0;
 	virtual void				Reset(void)														= 0;
+	virtual void				RegisterData(const std::string& strIteration)					= 0;
 	virtual void				ReportData(real_t dCurrentTime)									= 0;
 	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const	= 0;

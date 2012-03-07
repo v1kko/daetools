@@ -238,11 +238,11 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Setup DAE solver and sensitivities
 	SetupSolver();
 	
-// Register model
+// Register model if in simulation mode; otherwise it will be done later by the optimization/param.estimation
 	m_dCurrentTime = 0;
-	m_pDataReporter->StartRegistration();
-	Register(m_pModel);
-	m_pDataReporter->EndRegistration();
+	CollectVariables(m_pModel);
+	if(m_eSimulationMode == eSimulation)
+		RegisterData("");
 	
 // Set the IsInitialized flag to true
 	m_bIsInitialized = true;
@@ -1146,6 +1146,23 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 }
 
 template<class T>
+class daeCollectObject : public std::unary_function<T, void> 
+{
+public:
+	daeCollectObject(daeSimulation& rSimulation) 
+	    : m_Simulation(rSimulation)
+	{
+	}
+	
+	void operator() (T obj) 
+	{
+		m_Simulation.CollectVariables(obj);
+	}
+	
+	daeSimulation& m_Simulation;
+};
+
+template<class T>
 class daeRegisterObject : public std::unary_function<T, void> 
 {
 public:
@@ -1179,6 +1196,58 @@ public:
 	real_t         m_time;
 	daeSimulation& m_Simulation;
 };
+
+void daeSimulation::RegisterData(const std::string& strIteration)
+{
+	if(strIteration.empty())
+		m_strIteration = strIteration;
+	else
+		m_strIteration = strIteration + ".";
+	
+	m_pDataReporter->StartRegistration();
+	Register(m_pModel);
+	m_pDataReporter->EndRegistration();
+}
+
+void daeSimulation::CollectVariables(daeModel* pModel)
+{
+	if(!pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeCollectObject<daeParameter*> regParameter(*this);
+	daeCollectObject<daeVariable*>  regVariable(*this);
+	daeCollectObject<daePort*>      regPort(*this);
+	daeCollectObject<daeModel*>     regModel(*this);
+	
+	std::for_each(pModel->Parameters().begin(), pModel->Parameters().end(), regParameter);
+	std::for_each(pModel->Variables().begin(),  pModel->Variables().end(),  regVariable);
+	std::for_each(pModel->Ports().begin(),      pModel->Ports().end(),      regPort);
+	std::for_each(pModel->Models().begin(),     pModel->Models().end(),     regModel);
+}
+
+void daeSimulation::CollectVariables(daePort* pPort)
+{
+	if(!pPort)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	daeCollectObject<daeParameter*> regParameter(*this);
+	daeCollectObject<daeVariable*>  regVariable(*this);
+	
+	std::for_each(pPort->Parameters().begin(), pPort->Parameters().end(), regParameter);
+	std::for_each(pPort->Variables().begin(),  pPort->Variables().end(),  regVariable);
+}
+
+void daeSimulation::CollectVariables(daeParameter* pParameter)
+{
+	if(pParameter->GetReportingOn())
+		dae_push_back(m_ptrarrReportParameters, pParameter);
+}
+
+void daeSimulation::CollectVariables(daeVariable* pVariable)
+{
+	if(pVariable->GetReportingOn())
+		dae_push_back(m_ptrarrReportVariables, pVariable);
+}
 
 void daeSimulation::Register(daeModel* pModel)
 {
@@ -1219,20 +1288,19 @@ void daeSimulation::Register(daeVariable* pVariable)
 	if(!pVariable->GetReportingOn())
 		return;
 
-	dae_push_back(m_ptrarrReportVariables, pVariable);
-	
 	size_t i; 
 	daeDomain_t* pDomain;
 	vector<daeDomain_t*> arrDomains;
 	
 	daeDataReporterVariable var;
-	var.m_strName = pVariable->GetCanonicalName();
+	var.m_strName = m_strIteration + pVariable->GetCanonicalName();
+		
 	var.m_nNumberOfPoints = pVariable->GetNumberOfPoints();
 	pVariable->GetDomains(arrDomains);
 	for(i = 0; i < arrDomains.size(); i++)
 	{
 		pDomain = arrDomains[i];
-		var.m_strarrDomains.push_back(pDomain->GetCanonicalName());
+		var.m_strarrDomains.push_back(m_strIteration + pDomain->GetCanonicalName());
 	}
 
 	if(!m_pDataReporter->RegisterVariable(&var))
@@ -1249,21 +1317,19 @@ void daeSimulation::Register(daeParameter* pParameter)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pParameter->GetReportingOn())
 		return;
-	
-	dae_push_back(m_ptrarrReportParameters, pParameter);
 
 	size_t i; 
 	daeDomain_t* pDomain;
 	vector<daeDomain_t*> arrDomains;
 
 	daeDataReporterVariable var;
-	var.m_strName = pParameter->GetCanonicalName();
+	var.m_strName         = m_strIteration + pParameter->GetCanonicalName();
 	var.m_nNumberOfPoints = pParameter->GetNumberOfPoints();
 	pParameter->GetDomains(arrDomains);
 	for(i = 0; i < arrDomains.size(); i++)
 	{
 		pDomain = arrDomains[i];
-		var.m_strarrDomains.push_back(pDomain->GetCanonicalName());
+		var.m_strarrDomains.push_back(m_strIteration + pDomain->GetCanonicalName());
 	}
 
 	if(!m_pDataReporter->RegisterVariable(&var))
@@ -1280,7 +1346,7 @@ void daeSimulation::Register(daeDomain* pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	daeDataReporterDomain domain;
-	domain.m_strName			= pDomain->GetCanonicalName();
+	domain.m_strName            = m_strIteration + pDomain->GetCanonicalName();
 	domain.m_eType				= pDomain->GetType();
 	domain.m_nNumberOfPoints	= pDomain->GetNumberOfPoints();
 	if(pDomain->GetNumberOfPoints() == 0)
@@ -1361,7 +1427,7 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
 	daeDataReporterVariableValue var;
 	size_t i, k, nEnd, nStart, nPoints;
 	
-	var.m_strName = pVariable->GetCanonicalName();
+	var.m_strName = m_strIteration + pVariable->GetCanonicalName();
 	nPoints = pVariable->GetNumberOfPoints();
 	nStart  = pVariable->GetOverallIndex();
 	nEnd    = pVariable->GetOverallIndex() + nPoints;
@@ -1390,7 +1456,7 @@ void daeSimulation::Report(daeParameter* pParameter, real_t time)
 	daeDataReporterVariableValue var;
 	size_t i, nSize;
 
-	var.m_strName = pParameter->GetCanonicalName();
+	var.m_strName = m_strIteration + pParameter->GetCanonicalName();
 	pd = pParameter->GetValuePointer();
 	nSize = pParameter->GetNumberOfPoints();
 	var.m_nNumberOfPoints = nSize;

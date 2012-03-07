@@ -31,7 +31,8 @@ void daeState::Clone(const daeState& rObject)
 	for(size_t i = 0; i < rObject.m_ptrarrEquations.size(); i++)
 	{
 		daeEquation* pEquation = m_pModel->CreateEquation(rObject.m_ptrarrEquations[i]->m_strShortName,
-														  rObject.m_ptrarrEquations[i]->m_strDescription);
+														  rObject.m_ptrarrEquations[i]->m_strDescription,
+		                                                  rObject.m_ptrarrEquations[i]->m_dScaling);
 		pEquation->Clone(*rObject.m_ptrarrEquations[i]);
 	}
 

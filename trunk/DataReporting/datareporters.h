@@ -204,13 +204,13 @@ public:
 	
 public:
 // Message formatting routines
-	string StartRegistration(const string& strProcessName)
+	string SendProcessName(const string& strProcessName)
 	{
 		boost::int32_t nameSize;
 		std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 		
 	// Send cStartRegistration flag
-		s.write((const char*)(void*)&cStartRegistration, sizeof(char));
+		s.write((const char*)(void*)&cSendProcessName, sizeof(char));
 		
 	// Send the size of the ProcessName, and the ProcessName itself
 		nameSize = strProcessName.size();
@@ -222,7 +222,24 @@ public:
 		
 		return s.str();
 	}
+
+	string StartRegistration(void)
+	{
+		std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 		
+	// Send cStartRegistration flag
+		s.write((const char*)(void*)&cStartRegistration, sizeof(char));
+		
+	// Send the dummy byte
+		char nothing = 0;
+		s.write((const char*)(void*)&nothing, sizeof(nothing));
+	
+	// Flush the buffer
+		s.flush();
+		
+		return s.str();
+	}
+	
 	string EndRegistration(void)
 	{
 		std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
@@ -647,6 +664,8 @@ public:
 	bool EndOfData(void);
 	bool SendVariable(const daeDataReporterVariableValue* pVariableValue);
 
+	bool SendProcessName(const string& strProcessName);
+	
 // By default does nothing; has to be overridden in derived classes
 	virtual bool SendMessage(const string& strMessage);
 	

@@ -34,6 +34,7 @@ public:
 	virtual void				Finalize(void);
 	virtual void				Reset(void);
 	virtual void				ReRun(void);
+	virtual void				RegisterData(const std::string& strIteration);
 	virtual void				ReportData(real_t dCurrentTime);
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
@@ -107,6 +108,11 @@ public:
 	void	Register(daeVariable* pVariable);
 	void	Register(daeParameter* pParameter);
 	void	Register(daeDomain* pDomain);
+
+	void	CollectVariables(daeModel* pModel);
+	void	CollectVariables(daePort* pPort);
+	void	CollectVariables(daeVariable* pVariable);
+	void	CollectVariables(daeParameter* pParameter);
 	
 	//void	Report(daeModel* pModel, real_t time);
 	//void	Report(daePort* pPort, real_t time);
@@ -124,6 +130,7 @@ protected:
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
 	
 protected:
+	std::string					m_strIteration;
 	real_t						m_dCurrentTime;
 	real_t						m_dTimeHorizon;
 	real_t						m_dReportingInterval;

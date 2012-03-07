@@ -12,9 +12,7 @@ namespace core
 *******************************************************************/
 daeEquationExecutionInfo::daeEquationExecutionInfo()
 {
-//	m_pEquation = NULL;
-//	m_pModel	= NULL;
-//	m_pBlock	= NULL;
+	m_dScaling = 1.0;
 }
 
 daeEquationExecutionInfo::~daeEquationExecutionInfo()
@@ -146,7 +144,7 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
 	EC.m_pEquationExecutionInfo = this;
 
-	adouble __ad = m_EquationEvaluationNode->Evaluate(&EC);
+	adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 	EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
 }
 
@@ -167,7 +165,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 	{
 		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
 		
-		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 		EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
 	}
 }
@@ -187,7 +185,7 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation             = narrParameterIndexes[i];
 		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
 		
-		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
 }
@@ -207,7 +205,7 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 	{
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation = narrParameterIndexes[i];
 		
-		__ad = m_EquationEvaluationNode->Evaluate(&EC);
+		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
 }
@@ -631,6 +629,7 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 *******************************************************************/
 daeEquation::daeEquation()
 {
+	m_dScaling                = 1.0;
 	m_pParentState			  = NULL;
 	m_pModel			      = NULL;
 	m_eEquationDefinitionMode = eEDMUnknown;
@@ -1620,6 +1619,16 @@ adouble daeEquation::GetResidual(void) const
 	adouble ad;
 	ad.node = m_pResidualNode;
 	return ad;
+}
+
+real_t daeEquation::GetScaling(void) const
+{
+	return m_dScaling;
+}
+
+void daeEquation::SetScaling(real_t dScaling)
+{
+	m_dScaling = dScaling;
 }
 
 bool daeEquation::CheckObject(vector<string>& strarrErrors) const

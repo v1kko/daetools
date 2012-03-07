@@ -78,6 +78,12 @@ else
   echo "ERROR: undefined architecture"
   exit
 fi
+
+# Correct architecture for kFreeBSD
+if [ ${PLATFORM} = "gnu/kfreebsd" ]; then
+  ARCH=kfreebsd-${ARCH}
+fi
+
 USRLIB=/usr/${LIB}
 
 if [ "$1" = "cdae" ]; then
@@ -446,17 +452,17 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
 
   CONTROL=${BUILD_DIR}/DEBIAN/control
-  echo "Package: ${PACKAGE_NAME} "                                                                                             > ${CONTROL}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD} "                                                                     >> ${CONTROL}
-  echo "Architecture: ${ARCH} "                                                                                               >> ${CONTROL}
-  echo "Section: math "                                                                                                       >> ${CONTROL}
-  echo "Priority: optional "                                                                                                  >> ${CONTROL}
-  echo "Installed-Size: 11,700 "                                                                                              >> ${CONTROL}
-  echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                                                  >> ${CONTROL}
-  echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, libc6" >> ${CONTROL}
-  echo "Description: A cross-platform equation-oriented process modelling, simulation and optimization software."             >> ${CONTROL}
-  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                                                     >> ${CONTROL}
-  echo "Homepage: http://www.daetools.com "                                                                                   >> ${CONTROL}
+  echo "Package: ${PACKAGE_NAME} "                                                                                                   > ${CONTROL}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}.${VER_BUILD} "                                                                           >> ${CONTROL}
+  echo "Architecture: ${ARCH} "                                                                                                     >> ${CONTROL}
+  echo "Section: math "                                                                                                             >> ${CONTROL}
+  echo "Priority: optional "                                                                                                        >> ${CONTROL}
+  echo "Installed-Size: 11,700 "                                                                                                    >> ${CONTROL}
+  echo "Maintainer: Dragan Nikolic <dnikolic@daetools.com> "                                                                        >> ${CONTROL}
+  echo "Depends: python${PYTHON_VERSION}, libboost-all-dev, python-qt4, python-numpy, python-scipy, python-matplotlib, python-tk"   >> ${CONTROL}
+  echo "Description: A cross-platform equation-oriented process modelling, simulation and optimization software."                   >> ${CONTROL}
+  echo "Suggests: mayavi2, libumfpack, libamd, libblas3gf, liblapack3gf "                                                           >> ${CONTROL}
+  echo "Homepage: http://www.daetools.com "                                                                                         >> ${CONTROL}
 
   CONFFILES=${BUILD_DIR}/DEBIAN/conffiles
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
