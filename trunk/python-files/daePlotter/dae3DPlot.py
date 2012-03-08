@@ -102,7 +102,7 @@ class dae3DPlot(QtGui.QDialog):
         if cv.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        domainIndexes, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
 
         nx = len(xPoints) # no of points in x domain
         ny = len(yPoints) # no of points in y domain
@@ -197,7 +197,7 @@ class dae3DPlot(QtGui.QDialog):
         #print "xAxisLabel ", xAxisLabel
         #print "yAxisLabel ", yAxisLabel
         #print "zAxisLabel ", zAxisLabel
-        #print zAxisLabel, str(domainIndexes)
+        #print zAxisLabel, str(domainPoints)
         #print "xPoints "
         #print xPoints
         #print "yPoints "
@@ -206,10 +206,10 @@ class dae3DPlot(QtGui.QDialog):
         #print zPoints
 
         title = "("
-        for i in range(0, len(domainIndexes)):
+        for i in range(0, len(domainPoints)):
             if i != 0:
                 title += ", "
-            title += domainIndexes[i]
+            title += domainPoints[i]
         title += ")"
             
         self.setWindowTitle(zAxisLabel + title)

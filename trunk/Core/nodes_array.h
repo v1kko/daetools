@@ -84,6 +84,38 @@ public:
 };
 
 /*********************************************************************************************
+	adVectorNodeArray
+**********************************************************************************************/
+class DAE_CORE_API adVectorNodeArray : public adNodeArrayImpl
+{
+public:
+	daeDeclareDynamicClass(adVectorNodeArray)
+	adVectorNodeArray(void);
+	adVectorNodeArray(const std::vector<real_t>& darrValues);
+	adVectorNodeArray(const std::vector<quantity>& qarrValues);
+	virtual ~adVectorNodeArray(void);
+
+public:
+	virtual size_t			GetSize(void) const;
+	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNodeArray*	Clone(void) const;
+	virtual void			Open(io::xmlTag_t* pTag);
+	virtual void			Save(io::xmlTag_t* pTag) const;
+	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual bool			IsLinear(void) const;
+	virtual bool			IsFunctionOfVariables(void) const;
+	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity	GetQuantity(void) const;
+
+public:
+	std::vector<quantity> m_qarrValues;
+};
+
+/*********************************************************************************************
 	adRuntimeParameterNodeArray
 **********************************************************************************************/
 class DAE_CORE_API adRuntimeParameterNodeArray : public adNodeArrayImpl

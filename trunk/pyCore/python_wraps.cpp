@@ -391,6 +391,34 @@ const adouble ad_Constant_c(real_t c)
 	return Constant(c);
 }
 
+const adouble_array adarr_Vector(boost::python::list Values)
+{
+	std::vector<quantity> qarrValues;
+	boost::python::ssize_t i, n;
+
+	n = boost::python::len(Values);
+	
+	qarrValues.resize(n);
+	for(i = 0; i < n; i++)
+	{
+		boost::python::extract<real_t>   get_real_t(Values[i]);
+		boost::python::extract<quantity> get_quantity(Values[1]);
+		
+		if(get_real_t.check())
+			qarrValues[i] = quantity(get_real_t(), unit());
+		else if(get_quantity.check())
+			qarrValues[i] = get_quantity();
+		else
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Invalid item for Vector function";
+			throw e;
+		}
+	}
+	
+	return Vector(qarrValues);
+}
+
 const adouble ad_exp(const adouble &a)
 {
 	return exp(a);

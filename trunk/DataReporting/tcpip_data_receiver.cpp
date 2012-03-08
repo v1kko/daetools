@@ -128,221 +128,232 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 	char cFlag = data[0];
 	curPos = 1;
 	
-	if(cFlag == cSendProcessName)
+	try
 	{
-		char* szName;
-
-	// Read size of the name and move the pointer
-		memcpy(&nameSize, &data[curPos], sizeof(nameSize));
-		curPos += sizeof(nameSize);
-
-	// Read the name and move the pointer
-		szName = new char[nameSize+1];
-		szName[nameSize] = '\0';
-		memcpy(szName, &data[curPos], nameSize);
-		m_drProcess.m_strName.assign(szName);
-		delete[] szName;
-	}
-	else if(cFlag == cStartRegistration)
-	{
-	}
-	else if(cFlag == cEndRegistration)
-	{
-	}
-	else if(cFlag == cRegisterDomain)
-	{
-		boost::int32_t noPoints, type;
-		
-		daeDataReceiverDomain* pDomain = new daeDataReceiverDomain;
-		m_drProcess.m_ptrarrRegisteredDomains.push_back(pDomain);
-
-	// Read size of the name and move the pointer
-		memcpy(&nameSize, &data[curPos], sizeof(nameSize));
-		curPos += sizeof(nameSize);
-
-	// Read the name and move the pointer
-		char* szName = new char[nameSize+1];
-		szName[nameSize] = '\0';
-		memcpy(szName, &data[curPos], nameSize);
-		pDomain->m_strName.assign(szName);
-		delete[] szName;
-		curPos += nameSize;
-
-	// Read the domain type and move the pointer
-		memcpy(&type, &data[curPos], sizeof(type));
-		pDomain->m_eType = (daeeDomainType)type;
-		curPos += sizeof(type);
-		
-	// Read the number of points and move the pointer
-		memcpy(&noPoints, &data[curPos], sizeof(noPoints));
-		pDomain->m_nNumberOfPoints = (size_t)noPoints;
-		curPos += sizeof(noPoints);
-		if(pDomain->m_nNumberOfPoints <= 0)
-			return;
-
-	// Read the points
-		pDomain->m_pPoints = new real_t[pDomain->m_nNumberOfPoints];
-		memcpy(pDomain->m_pPoints, &data[curPos], sizeof(real_t)*pDomain->m_nNumberOfPoints);
-	}
-	else if(cFlag == cRegisterParameter)
-	{
-	}
-	else if(cFlag == cRegisterVariable)
-	{
-		char* szName;
-		size_t j, k;
-		string strDomainName;
-		boost::int32_t noPoints;
-		boost::int32_t domainsSize;
-		daeDataReceiverDomain* pDomain;
-		daeDataReceiverVariable* pVariable = new daeDataReceiverVariable;
-
-	// Read size of the name and move the pointer
-		memcpy(&nameSize, &data[curPos], sizeof(nameSize));
-		curPos += sizeof(nameSize);
-
-	// Read the name and move the pointer
-		szName = new char[nameSize+1];
-		szName[nameSize] = '\0';
-		memcpy(szName, &data[curPos], nameSize);
-		pVariable->m_strName.assign(szName);
-		delete[] szName;
-		curPos += nameSize;
-
-	// Read the number of points and move the pointer
-		memcpy(&noPoints, &data[curPos], sizeof(noPoints));
-		pVariable->m_nNumberOfPoints = (size_t)noPoints;
-		curPos += sizeof(noPoints);
-		if(pVariable->m_nNumberOfPoints <= 0)
-			return;
-
-	// Read the domains
-		memcpy(&domainsSize, &data[curPos], sizeof(domainsSize));
-		curPos += sizeof(domainsSize);
-		
-		for(i = 0; i < domainsSize; i++)
+		if(cFlag == cSendProcessName)
 		{
+			char* szName;
+	
+		// Read size of the name and move the pointer
 			memcpy(&nameSize, &data[curPos], sizeof(nameSize));
 			curPos += sizeof(nameSize);
-
+	
+		// Read the name and move the pointer
 			szName = new char[nameSize+1];
 			szName[nameSize] = '\0';
 			memcpy(szName, &data[curPos], nameSize);
-			strDomainName.assign(szName);
+			m_drProcess.m_strName.assign(szName);
+			delete[] szName;
+		}
+		else if(cFlag == cStartRegistration)
+		{
+		}
+		else if(cFlag == cEndRegistration)
+		{
+		}
+		else if(cFlag == cRegisterDomain)
+		{
+			boost::int32_t noPoints, type;
+			
+			daeDataReceiverDomain* pDomain = new daeDataReceiverDomain;
+			m_drProcess.m_ptrarrRegisteredDomains.push_back(pDomain);
+	
+		// Read size of the name and move the pointer
+			memcpy(&nameSize, &data[curPos], sizeof(nameSize));
+			curPos += sizeof(nameSize);
+	
+		// Read the name and move the pointer
+			char* szName = new char[nameSize+1];
+			szName[nameSize] = '\0';
+			memcpy(szName, &data[curPos], nameSize);
+			pDomain->m_strName.assign(szName);
 			delete[] szName;
 			curPos += nameSize;
-
-			bool bFound = false;
-			for(j = 0; j < m_drProcess.m_ptrarrRegisteredDomains.size(); j++)
+	
+		// Read the domain type and move the pointer
+			memcpy(&type, &data[curPos], sizeof(type));
+			pDomain->m_eType = (daeeDomainType)type;
+			curPos += sizeof(type);
+			
+		// Read the number of points and move the pointer
+			memcpy(&noPoints, &data[curPos], sizeof(noPoints));
+			pDomain->m_nNumberOfPoints = (size_t)noPoints;
+			curPos += sizeof(noPoints);
+			if(pDomain->m_nNumberOfPoints <= 0)
+				return;
+	
+		// Read the points
+			pDomain->m_pPoints = new real_t[pDomain->m_nNumberOfPoints];
+			memcpy(pDomain->m_pPoints, &data[curPos], sizeof(real_t)*pDomain->m_nNumberOfPoints);
+		}
+		else if(cFlag == cRegisterParameter)
+		{
+		}
+		else if(cFlag == cRegisterVariable)
+		{
+			char* szName;
+			size_t j, k;
+			string strDomainName;
+			boost::int32_t noPoints;
+			boost::int32_t domainsSize;
+			daeDataReceiverDomain* pDomain;
+			daeDataReceiverVariable* pVariable = new daeDataReceiverVariable;
+	
+		// Read size of the name and move the pointer
+			memcpy(&nameSize, &data[curPos], sizeof(nameSize));
+			curPos += sizeof(nameSize);
+	
+		// Read the name and move the pointer
+			szName = new char[nameSize+1];
+			szName[nameSize] = '\0';
+			memcpy(szName, &data[curPos], nameSize);
+			pVariable->m_strName.assign(szName);
+			delete[] szName;
+			curPos += nameSize;
+	
+		// Read the number of points and move the pointer
+			memcpy(&noPoints, &data[curPos], sizeof(noPoints));
+			pVariable->m_nNumberOfPoints = (size_t)noPoints;
+			curPos += sizeof(noPoints);
+			if(pVariable->m_nNumberOfPoints <= 0)
+				return;
+	
+		// Read the domains
+			memcpy(&domainsSize, &data[curPos], sizeof(domainsSize));
+			curPos += sizeof(domainsSize);
+			
+			for(i = 0; i < domainsSize; i++)
 			{
-				pDomain = m_drProcess.m_ptrarrRegisteredDomains[j];
-				if(pDomain->m_strName == strDomainName)
+				memcpy(&nameSize, &data[curPos], sizeof(nameSize));
+				curPos += sizeof(nameSize);
+	
+				szName = new char[nameSize+1];
+				szName[nameSize] = '\0';
+				memcpy(szName, &data[curPos], nameSize);
+				strDomainName.assign(szName);
+				delete[] szName;
+				curPos += nameSize;
+	
+				bool bFound = false;
+				for(j = 0; j < m_drProcess.m_ptrarrRegisteredDomains.size(); j++)
 				{
-					pVariable->m_ptrarrDomains.push_back(pDomain);
-					bFound = true;
-					break;
+					pDomain = m_drProcess.m_ptrarrRegisteredDomains[j];
+					if(pDomain->m_strName == strDomainName)
+					{
+						pVariable->m_ptrarrDomains.push_back(pDomain);
+						bFound = true;
+						break;
+					}
+				}
+				if(!bFound)
+				{
+					delete pVariable;
+					daeDeclareException(exRuntimeCheck);
+					e << "Cannot register variable: [" << pVariable->m_strName 
+					  << "]; cannot find the following domain: [" << strDomainName << "]";
+					throw e;
+					return;
 				}
 			}
-			if(!bFound)
+			
+		// Check if number of points match	
+			noPoints = 1;
+			for(k = 0; k < pVariable->m_ptrarrDomains.size(); k++)
+				noPoints *= pVariable->m_ptrarrDomains[k]->m_nNumberOfPoints;
+		
+			if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
 			{
 				delete pVariable;
 				daeDeclareException(exRuntimeCheck);
-				e << "Cannot register variable: [" << pVariable->m_strName 
-				  << "]; cannot find the following domain: [" << strDomainName << "]";
+				e << "Number of points in variable: [" << pVariable->m_strName << "] does not match the expected one "
+				  << "(" << noPoints << " vs. " << pVariable->m_nNumberOfPoints << ")";
 				throw e;
 				return;
 			}
+			
+		// Finally add the variable to the map
+			std::pair<string, daeDataReceiverVariable*> p(pVariable->m_strName, pVariable);
+			m_drProcess.m_ptrmapRegisteredVariables.insert(p);
 		}
-		
-	// Check if number of points match	
-		noPoints = 1;
-		for(k = 0; k < pVariable->m_ptrarrDomains.size(); k++)
-			noPoints *= pVariable->m_ptrarrDomains[k]->m_nNumberOfPoints;
+		else if(cFlag == cStartNewTime)
+		{
+			m_dCurrentTime = *((real_t*)&data[1]);
+		}
+		else if(cFlag == cSendVariable)
+		{
+			char* szName;
+			string strVariableName;
+			boost::int32_t noPoints;
 	
-		if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
-		{
-			delete pVariable;
-			daeDeclareException(exRuntimeCheck);
-			e << "Number of points in variable: [" << pVariable->m_strName << "] does not match the expected one "
-			  << "(" << noPoints << " vs. " << pVariable->m_nNumberOfPoints << ")";
-			throw e;
-			return;
+		// Read size of the name and move the pointer
+			memcpy(&nameSize, &data[curPos], sizeof(nameSize));
+			curPos += sizeof(nameSize);
+	
+		// Read the name and move the pointer
+			szName = new char[nameSize+1];
+			szName[nameSize] = '\0';
+			memcpy(szName, &data[curPos], nameSize);
+			strVariableName.assign(szName);
+			delete[] szName;
+			curPos += nameSize;
+	
+		// Find the variable by its name
+			std::map<string, daeDataReceiverVariable*>::iterator iter = m_drProcess.m_ptrmapRegisteredVariables.find(strVariableName);
+			if(iter == m_drProcess.m_ptrmapRegisteredVariables.end())
+			{
+				daeDeclareException(exRuntimeCheck);
+				e << "Cannot find variable: [" << strVariableName << "] among the registered ones";
+				throw e;
+				return;
+			}
+			daeDataReceiverVariable* pVariable = (*iter).second;
+			if(!pVariable)
+				return;
+	
+		// Create value
+			daeDataReceiverVariableValue* pValue = new daeDataReceiverVariableValue;
+	
+		// Set the time
+			pValue->m_dTime = m_dCurrentTime;
+			
+		// Read the number of points
+			memcpy(&noPoints, &data[curPos], sizeof(noPoints));
+			curPos += sizeof(noPoints);
+			
+			if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
+			{
+				delete pValue;
+				daeDeclareException(exRuntimeCheck);
+				e << "Number of points in variable: [" << pVariable->m_strName << "] does not match the expected one "
+				  << "(" << noPoints << " vs. " << pVariable->m_nNumberOfPoints << ")";
+				throw e;
+				return;
+			}
+			
+		// Read the points
+			pValue->m_pValues = new real_t[noPoints];
+			memcpy(pValue->m_pValues, &data[curPos], sizeof(real_t)*noPoints);
+			
+		// Finally add the value to the array
+			dae_push_back(pVariable->m_ptrarrValues, pValue);
 		}
-		
-	// Finally add the variable to the map
-		std::pair<string, daeDataReceiverVariable*> p(pVariable->m_strName, pVariable);
-		m_drProcess.m_ptrmapRegisteredVariables.insert(p);
-	}
-	else if(cFlag == cStartNewTime)
-	{
-		m_dCurrentTime = *((real_t*)&data[1]);
-	}
-	else if(cFlag == cSendVariable)
-	{
-		char* szName;
-		string strVariableName;
-		boost::int32_t noPoints;
-
-	// Read size of the name and move the pointer
-		memcpy(&nameSize, &data[curPos], sizeof(nameSize));
-		curPos += sizeof(nameSize);
-
-	// Read the name and move the pointer
-		szName = new char[nameSize+1];
-		szName[nameSize] = '\0';
-		memcpy(szName, &data[curPos], nameSize);
-		strVariableName.assign(szName);
-		delete[] szName;
-		curPos += nameSize;
-
-	// Find the variable by its name
-		std::map<string, daeDataReceiverVariable*>::iterator iter = m_drProcess.m_ptrmapRegisteredVariables.find(strVariableName);
-		if(iter == m_drProcess.m_ptrmapRegisteredVariables.end())
+		else if(cFlag == cEndOfData)
+		{
+		}
+		else
 		{
 			daeDeclareException(exRuntimeCheck);
-			e << "Cannot find variable: [" << strVariableName << "] among the registered ones";
+			e << "Error parsing the message; Unexpected flag: [" << cFlag << "] found";
 			throw e;
-			return;
 		}
-		daeDataReceiverVariable* pVariable = (*iter).second;
-		if(!pVariable)
-			return;
-
-	// Create value
-		daeDataReceiverVariableValue* pValue = new daeDataReceiverVariableValue;
-
-	// Set the time
-		pValue->m_dTime = m_dCurrentTime;
-		
-	// Read the number of points
-		memcpy(&noPoints, &data[curPos], sizeof(noPoints));
-		curPos += sizeof(noPoints);
-		
-		if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
-		{
-			delete pValue;
-			daeDeclareException(exRuntimeCheck);
-			e << "Number of points in variable: [" << pVariable->m_strName << "] does not match the expected one "
-			  << "(" << noPoints << " vs. " << pVariable->m_nNumberOfPoints << ")";
-			throw e;
-			return;
-		}
-		
-	// Read the points
-		pValue->m_pValues = new real_t[noPoints];
-		memcpy(pValue->m_pValues, &data[curPos], sizeof(real_t)*noPoints);
-		
-	// Finally add the value to the array
-		dae_push_back(pVariable->m_ptrarrValues, pValue);
 	}
-	else if(cFlag == cEndOfData)
+	catch(std::exception& e)
 	{
+		std::cout << e.what() << std::endl;
 	}
-	else
+	catch(...)
 	{
-		daeDeclareException(exRuntimeCheck);
-		e << "Error parsing the message; Unexpected flag: [" << cFlag << "] found";
-		throw e;
+		std::cout << "Unexpected error in daeTCPIPDataReceiver" << std::endl;
 	}
 }
 		

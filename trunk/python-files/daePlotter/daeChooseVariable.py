@@ -172,18 +172,22 @@ class daeChooseVariable(QtGui.QDialog):
             self.ui.buttonOk.setEnabled(False)        
 
     def getPlot2DData(self):
+        return daeChooseVariable.get2DData(self.variable, self.domainIndexes, self.domainPoints)
+    
+    @staticmethod
+    def get2DData(variable, domainIndexes, domainPoints):
         # Achtung, achtung!!
         # It is important to get TimeValues first since the reporter
         # might add more values to the data receiver (in the meantime)
         # and the size of the xPoints and yPoints arrays will not match
-        times   = self.variable.TimeValues
-        values  = self.variable.Values
-        domains = self.variable.Domains
+        times   = variable.TimeValues
+        values  = variable.Values
+        domains = variable.Domains
 
         xAxisLabel = ""
         
         # Remove html code marks ('&' and ';')
-        yname = self.variable.Name
+        yname = variable.Name
         yAxisLabel = yname.replace("&", "").replace(";", "");
         xPoints = []
 
@@ -191,13 +195,14 @@ class daeChooseVariable(QtGui.QDialog):
 
         # x axis points
         # Only one domain is free
-        for i in range(0, len(self.domainIndexes)):
-            if self.domainIndexes[i] == 0:
+        for i in range(0, len(domainIndexes)):
+            if domainIndexes[i] == 0:
                 if i == 0: # Time domain
                     xAxisLabel = "Time"
 
-                    for k in range(0, noTimePoints):
-                        xPoints.append(times[k])        
+                    xPoints.extend(times[0 : noTimePoints])
+                    #for k in range(0, noTimePoints):
+                    #    xPoints.append(times[k])        
 
                 else: # Some other domain
                     d = domains[i-1] # because Time is not in a domain list
@@ -207,33 +212,38 @@ class daeChooseVariable(QtGui.QDialog):
                     xname = names[len(names)-1]
                     xAxisLabel = xname.replace("&", "").replace(";", "");
 
-                    for k in range(0, d.NumberOfPoints):
-                        xPoints.append(d[k]) 
+                    xPoints.extend(d.Points[0 : d.NumberOfPoints])
+                    #for k in range(0, d.NumberOfPoints):
+                    #    xPoints.append(d[k]) 
                 break       
         
         # y axis points
         t = []
-        for i in self.domainIndexes:
+        for i in domainIndexes:
             if i == 0:
                 t.append(slice(0, noTimePoints))
             else:
                 t.append(i-1)
 
-        yPoints = values[t].copy()
+        yPoints = values[t] #.copy()
 
         #print 'Number of x points = {0}'.format(len(xPoints))
         #print 'Number of y points = {0}'.format(len(yPoints))
 
-        return self.domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints
+        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints
 
     def getPlot3DData(self):
+        return daeChooseVariable.get3DData(self.variable, self.domainIndexes, self.domainPoints)
+    
+    @staticmethod
+    def get3DData(variable, domainIndexes, domainPoints):
         # Achtung, achtung!!
         # It is important to get TimeValues first since the reporter
         # might add more values to the data receiver (in the meantime)
         # and the size of xPoints, yPoints and zPoints arrays will not match
-        times   = self.variable.TimeValues
-        values  = self.variable.Values
-        domains = self.variable.Domains
+        times   = variable.TimeValues
+        values  = variable.Values
+        domains = variable.Domains
 
         xPoints = []
         yPoints = []
@@ -241,13 +251,13 @@ class daeChooseVariable(QtGui.QDialog):
         yAxisLabel = ""
 
         # Remove html code marks ('&' and ';')
-        zname = self.variable.Name
+        zname = variable.Name
         zAxisLabel = zname.replace("&", "").replace(";", "");
         
         # Find 2 domains that are FREE
         freeDomainIndexes = []
-        for i in range(0, len(self.domainIndexes)):
-            if self.domainIndexes[i] == 0: 
+        for i in range(0, len(domainIndexes)):
+            if domainIndexes[i] == 0: 
                 freeDomainIndexes.append(i)
         if len(freeDomainIndexes) != 2:
             return
@@ -292,7 +302,7 @@ class daeChooseVariable(QtGui.QDialog):
 
         # z axis
         t = []
-        for i in self.domainIndexes:
+        for i in domainIndexes:
             if i == 0:
                 t.append(slice(0, noTimePoints))
             else:
@@ -303,7 +313,7 @@ class daeChooseVariable(QtGui.QDialog):
         #print values
         #print zPoints
         
-        return self.domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints
+        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints
 
     #@QtCore.pyqtSlot()
     def slotSelectionChanged(self):

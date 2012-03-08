@@ -25,6 +25,22 @@ void adDoEnclose(const adNodeArray* parent, const adNodeArray* left, bool& bEncl
 		return;
 }
 
+const adouble_array Vector(const std::vector<quantity>& qarrValues)
+{
+	adouble_array tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = adNodeArrayPtr(new adVectorNodeArray(qarrValues));
+	return tmp;
+}
+
+const adouble_array Vector(const std::vector<real_t>& darrValues)
+{
+	adouble_array tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = adNodeArrayPtr(new adVectorNodeArray(darrValues));
+	return tmp;
+}
+
 /*********************************************************************************************
 	adNodeArray
 **********************************************************************************************/
@@ -321,6 +337,121 @@ bool adConstantNodeArray::IsLinear(void) const
 bool adConstantNodeArray::IsFunctionOfVariables(void) const
 {
 	return false;
+}
+
+/*********************************************************************************************
+    adVectorNodeArray
+**********************************************************************************************/
+adVectorNodeArray::adVectorNodeArray()
+{
+}
+
+adVectorNodeArray::adVectorNodeArray(const std::vector<real_t>& darrValues)
+{
+	m_qarrValues.resize(darrValues.size());
+	for(size_t i = 0; i < darrValues.size(); i++)
+		m_qarrValues[i] = quantity(darrValues[i], unit());
+}
+
+adVectorNodeArray::adVectorNodeArray(const std::vector<quantity>& qarrValues) 
+                   : m_qarrValues(qarrValues)
+{
+}
+
+adVectorNodeArray::~adVectorNodeArray()
+{
+}
+
+size_t adVectorNodeArray::GetSize(void) const
+{
+    return m_qarrValues.size();
+}
+
+void adVectorNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+{   
+}
+
+adouble_array adVectorNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    adouble_array tmp;
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr( Clone() );
+        return tmp;
+    }
+    
+    tmp.Resize(m_qarrValues.size());
+	for(size_t i = 0; i < m_qarrValues.size(); i++)
+	    tmp[i] = adouble(m_qarrValues[i].getValue());
+    return tmp;
+}
+
+const quantity adVectorNodeArray::GetQuantity(void) const
+{
+	if(m_qarrValues.size() == 0)
+		daeDeclareAndThrowException(exInvalidCall);
+	
+    return quantity(0.0, m_qarrValues[0].getUnits());
+}
+
+adNodeArray* adVectorNodeArray::Clone(void) const
+{
+    return new adVectorNodeArray(*this);
+}
+
+void adVectorNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{   
+	daeDeclareAndThrowException(exNotImplemented);
+}
+
+//string adVectorNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//{
+//  return textCreator::Constant(m_dValue);
+//}
+
+string adVectorNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+    return "";
+}
+
+void adVectorNodeArray::Open(io::xmlTag_t* pTag)
+{
+	daeDeclareAndThrowException(exNotImplemented);
+//    string strName = "Values";
+//    pTag->OpenArray(strName, m_qarrValues);
+}
+
+void adVectorNodeArray::Save(io::xmlTag_t* pTag) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+//    string strName = "Values";
+//    pTag->SaveArray(strName, m_qarrValues);
+}
+
+void adVectorNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+}
+
+void adVectorNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+{
+	daeDeclareAndThrowException(exNotImplemented);
+}
+
+void adVectorNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+}
+
+bool adVectorNodeArray::IsLinear(void) const
+{
+    return true;
+}
+
+bool adVectorNodeArray::IsFunctionOfVariables(void) const
+{
+    return false;
 }
 
 /*********************************************************************************************
@@ -2033,9 +2164,22 @@ adBinaryNodeArray::~adBinaryNodeArray()
 
 size_t adBinaryNodeArray::GetSize(void) const
 {
-	if(left->GetSize() != right->GetSize())
-		daeDeclareAndThrowException(exNotImplemented);
-	return left->GetSize();
+	if(left->GetSize() == 1)
+		return right->GetSize();
+	else if(right->GetSize() == 1)
+		return left->GetSize();
+	else if(left->GetSize() == 1 && right->GetSize() == 1)
+		return 1;
+	else
+	{
+		if(left->GetSize() != right->GetSize())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "The size of node arrays does not match";
+			throw e;
+		}
+		return left->GetSize();
+	}
 }
 
 void adBinaryNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const

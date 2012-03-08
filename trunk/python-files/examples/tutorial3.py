@@ -107,6 +107,9 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
         eq.Residual = self.Qsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
+        # Test Vector function
+        #values = [1 * (W / m**2) for i in xrange(self.x.NumberOfPoints * self.y.NumberOfPoints)]
+        #eq.Residual = self.Qsum() - self.sum( Vector(values) - Vector(values) )
 
 class simTutorial(daeSimulation):
     def __init__(self):

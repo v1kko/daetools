@@ -253,6 +253,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Time",			&Time);
 	def("Constant",		&daepython::ad_Constant_c);
 	def("Constant",		&daepython::ad_Constant_q);
+	def("Vector",		&daepython::adarr_Vector);
 	
 	class_<adouble_array>("adouble_array")
 		.def("__getitem__", &adouble_array::GetItem)

@@ -20,7 +20,7 @@ import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+#import matplotlib.animation as animation
 
 class daePlot2dDefaults:
     def __init__(self, color='black', linewidth=0.5, linestyle='solid', marker='o', markersize=6, markerfacecolor='black', markeredgecolor='black'):
@@ -67,6 +67,7 @@ class dae2DPlot(QtGui.QDialog):
         
         self.legendOn = True
         self.gridOn   = True
+        self.curves   = []
         
         self.setWindowTitle("2D plot")
         self.setWindowIcon(QtGui.QIcon('images/line-chart.png'))
@@ -152,7 +153,24 @@ class dae2DPlot(QtGui.QDialog):
         layoutToolbar.addWidget(self.mpl_toolbar)
         layoutPlot.addWidget(self.canvas)
         layoutPlot.addWidget(self.toolbar_widget)
-
+        
+        self._timer = QtCore.QTimer()
+        QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
+        self._timer.start(1000)
+        
+    def updateCurves(self):
+        try:
+            for line, variable, domainIndexes, domainPoints, fun in self.curves:
+                results = fun(variable, domainIndexes, domainPoints)
+                xPoints = results[5]
+                yPoints = results[6]
+                line.set_xdata(xPoints)
+                line.set_ydata(yPoints)
+            
+            self.reformatPlot()
+        except Exception as e:
+            print(str(e))
+        
     #@QtCore.pyqtSlot()
     def slotProperties(self):
         figure_edit(self.canvas, self)
@@ -255,18 +273,20 @@ class dae2DPlot(QtGui.QDialog):
         if cv.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        domainIndexes, xAxisLabel, yAxisLabel, xPoints, yPoints = cv.getPlot2DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints = cv.getPlot2DData()
 
         domains = "("
-        for i in range(0, len(domainIndexes)):
+        for i in range(0, len(domainPoints)):
             if i != 0:
                 domains += ", "
-            domains += domainIndexes[i]
+            domains += domainPoints[i]
         domains += ")"
 
-        self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, domains)
+        line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, domains)
         self.setWindowTitle(yAxisLabel + domains)
 
+        self.curves.append( (line, variable, domainIndexes, domainPoints, daeChooseVariable.get2DData) )
+        
         return True
         
     def addLine(self, xAxisLabel, yAxisLabel, xPoints, yPoints, domains):
@@ -274,14 +294,15 @@ class dae2DPlot(QtGui.QDialog):
         n = no_lines % len(dae2DPlot.plotDefaults)
         pd = dae2DPlot.plotDefaults[n]
         
-        self.canvas.axes.plot(xPoints, yPoints, label=yAxisLabel+domains, color=pd.color, linewidth=pd.linewidth, \
+        line, = self.canvas.axes.plot(xPoints, yPoints, label=yAxisLabel+domains, color=pd.color, linewidth=pd.linewidth, \
                               linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
         if no_lines == 0:
             self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
             self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp11)
         
-        self.reformatPlot()    
+        self.reformatPlot()  
+        return line
 
     def reformatPlot(self):
         lines = self.canvas.axes.get_lines()

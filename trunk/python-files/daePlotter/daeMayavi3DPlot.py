@@ -16,8 +16,11 @@ import numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 from daeChooseVariable import daeChooseVariable, daeTableDialog
-from enthought.mayavi import mlab
-
+try:
+    from enthought.mayavi import mlab
+except ImportError:
+    from mayavi import mlab
+    
 class daeMayavi3DPlot:
     def __init__(self, tcpipServer):
         self.tcpipServer = tcpipServer        
@@ -32,7 +35,7 @@ class daeMayavi3DPlot:
         if cv.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        domainIndexes, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
         xPoints = numpy.array(xPoints)
         yPoints = numpy.array(yPoints)
 

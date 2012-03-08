@@ -243,10 +243,6 @@ private:
 	bool   m_bGatherInfo;
 };
 
-DAE_CORE_API const adouble Time(void);
-DAE_CORE_API const adouble Constant(const quantity& q);
-DAE_CORE_API const adouble Constant(real_t c);
-
 // Issues with daeModel::min/max
 inline const adouble __max__(const adouble &a, const adouble &b)
 {
@@ -331,6 +327,14 @@ DAE_CORE_API const adouble_array acos(const adouble_array& a);
 DAE_CORE_API const adouble_array atan(const adouble_array& a);
 
 //DAE_CORE_API const adouble_array pow(const adouble_array& a, real_t v);
+
+
+DAE_CORE_API const adouble Time(void);
+DAE_CORE_API const adouble Constant(const quantity& q);
+DAE_CORE_API const adouble Constant(real_t c);
+DAE_CORE_API const adouble_array Vector(const std::vector<quantity>& arrq);
+DAE_CORE_API const adouble_array Vector(const std::vector<real_t>& darrValues);
+
 
 /*********************************************************************************************
 	daeFPUCommand

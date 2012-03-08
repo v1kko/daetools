@@ -157,9 +157,11 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
 		return tmp;
 	}
 	
-	adCheckArrays(*this, a)
+	adCheckArrays(*this, a);
 	        
-	        size_t n = GetSize();
+	size_t n = (GetSize() > a.GetSize() ? GetSize() : a.GetSize());
+	//std::cout << "+ n = " << n << "; lsize = " << GetSize() << "; rsize = " << a.GetSize() << std::endl;
+
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
 		tmp[i] = (*this)[i] + a[i];
@@ -255,9 +257,11 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
 		return tmp;
 	}
 	
-	adCheckArrays(*this, a)
+	adCheckArrays(*this, a);
 	        
-	        size_t n = GetSize();
+	size_t n = (GetSize() > a.GetSize() ? GetSize() : a.GetSize());
+	//std::cout << "- n = " << n << "; lsize = " << GetSize() << "; rsize = " << a.GetSize() << std::endl;
+	
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
 		tmp[i] = (*this)[i] - a[i];
@@ -353,9 +357,11 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
 		return tmp;
 	}
 	
-	adCheckArrays(*this, a)
+	adCheckArrays(*this, a);
 	        
-	        size_t n = GetSize();
+	size_t n = (GetSize() > a.GetSize() ? GetSize() : a.GetSize());
+	//std::cout << "* n = " << n << "; lsize = " << GetSize() << "; rsize = " << a.GetSize() << std::endl;
+	
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
 		tmp[i] = (*this)[i] * a[i];
@@ -452,8 +458,10 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 	}
 	
 	adCheckArrays(*this, a);
+	        
+	size_t n = (GetSize() > a.GetSize() ? GetSize() : a.GetSize());
+	//std::cout << "/ n = " << n << "; lsize = " << GetSize() << "; rsize = " << a.GetSize() << std::endl;
 	
-	size_t n = GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
 		tmp[i] = (*this)[i] / a[i];
