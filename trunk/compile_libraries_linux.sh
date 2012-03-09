@@ -8,10 +8,18 @@ Ncpu=$(($Ncpu+1))
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
-if [ ${PLATFORM} != "Darwin" ]; then
-  WGET=curl -O
-else
-  WGET=wget
+if [ ${PLATFORM} = "Linux" ]; then
+  if type "wget1" > /dev/null ; then
+    echo "wget found"
+  else
+    echo "cURL have problems to get files from Source Forge: geting wget instead..."
+    curl -O ftp://ftp.gnu.org/gnu/wget/wget-1.13.tar.gz
+    tar -xvzf wget-1.13.tar.gz
+    cd wget-1.13
+    ./configure --with-ssl=openssl
+    make
+    sudo make install
+  fi
 fi
 
 # Set SSE flags for x86
@@ -48,7 +56,7 @@ cd ${TRUNK}
 if [ ! -e idas ]; then
   echo "Setting-up idas..."
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
-    ${WGET} ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
+    wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
   fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
@@ -74,10 +82,10 @@ cd ${TRUNK}
 if [ ! -e superlu ]; then
   echo "Setting-up superlu..."
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
-    ${WGET} ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
+    wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
   if [ ! -e superlu_makefiles.tar.gz ]; then
-    ${WGET} ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
+    wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
   fi
   tar -xzf superlu_${vSUPERLU}.tar.gz
   mv SuperLU_${vSUPERLU} superlu
@@ -100,10 +108,10 @@ cd ${TRUNK}
 if [ ! -e superlu_mt ]; then
   echo "Setting-up superlu_mt..."
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
-    ${WGET} ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
+    wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
   if [ ! -e superlu_mt_makefiles.tar.gz ]; then
-    ${WGET} ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
+    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
   fi
   tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
   mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
@@ -126,7 +134,7 @@ cd ${TRUNK}
 if [ ! -e bonmin ]; then
   echo "Setting-up bonmin..."
   if [ ! -e Bonmin-${vBONMIN}.zip ]; then
-    ${WGET} ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
+    wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
   fi
   unzip Bonmin-${vBONMIN}.zip
   rm -rf bonmin/Bonmin-${vBONMIN}
@@ -157,7 +165,7 @@ cd ${TRUNK}
 if [ ! -e nlopt ]; then
   echo "Setting-up nlopt..."
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
-    ${WGET} ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
+    wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
   tar -xzf nlopt-${vNLOPT}.tar.gz
   mv nlopt-${vNLOPT} nlopt
@@ -184,7 +192,7 @@ cd ${TRUNK}
 if [ ! -e trilinos ]; then
   echo "Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
-    ${WGET} ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
+    wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
   tar -xzf trilinos-${vTRILINOS}-Source.tar.gz
   mv trilinos-${vTRILINOS}-Source trilinos
