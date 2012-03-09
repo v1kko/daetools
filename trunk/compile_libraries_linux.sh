@@ -6,6 +6,13 @@ TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 Ncpu=$(($Ncpu+1))
 HOST_ARCH=`uname -m`
+PLATFORM=`uname -s`
+
+if [ ${PLATFORM} != "Darwin" ]; then
+  WGET=curl -O
+else
+  WGET=wget
+fi
 
 # Set SSE flags for x86
 SSE_FLAGS=
@@ -41,7 +48,7 @@ cd ${TRUNK}
 if [ ! -e idas ]; then
   echo "Setting-up idas..."
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
-    wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
+    ${WGET} ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
   fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
@@ -67,10 +74,10 @@ cd ${TRUNK}
 if [ ! -e superlu ]; then
   echo "Setting-up superlu..."
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
-    wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
+    ${WGET} ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
   if [ ! -e superlu_makefiles.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
+    ${WGET} ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
   fi
   tar -xzf superlu_${vSUPERLU}.tar.gz
   mv SuperLU_${vSUPERLU} superlu
@@ -93,10 +100,10 @@ cd ${TRUNK}
 if [ ! -e superlu_mt ]; then
   echo "Setting-up superlu_mt..."
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
-    wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
+    ${WGET} ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
   if [ ! -e superlu_mt_makefiles.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
+    ${WGET} ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
   fi
   tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
   mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
@@ -119,7 +126,7 @@ cd ${TRUNK}
 if [ ! -e bonmin ]; then
   echo "Setting-up bonmin..."
   if [ ! -e Bonmin-${vBONMIN}.zip ]; then
-    wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
+    ${WGET} ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
   fi
   unzip Bonmin-${vBONMIN}.zip
   rm -rf bonmin/Bonmin-${vBONMIN}
@@ -150,7 +157,7 @@ cd ${TRUNK}
 if [ ! -e nlopt ]; then
   echo "Setting-up nlopt..."
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
-    wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
+    ${WGET} ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
   tar -xzf nlopt-${vNLOPT}.tar.gz
   mv nlopt-${vNLOPT} nlopt
@@ -177,7 +184,7 @@ cd ${TRUNK}
 if [ ! -e trilinos ]; then
   echo "Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
-    wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
+    ${WGET} ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
   tar -xzf trilinos-${vTRILINOS}-Source.tar.gz
   mv trilinos-${vTRILINOS}-Source trilinos
