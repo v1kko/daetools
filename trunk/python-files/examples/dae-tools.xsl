@@ -141,7 +141,7 @@
                 </td>
 
                 <td>
-                    <xsl:value-of select="Units"/>
+                    <xsl:copy-of select="MathMLUnits"/> 
                 </td>
                 
                 <td>
@@ -202,7 +202,7 @@
               </td>
 
               <td align="left">
-                 <xsl:value-of select="Units"/>
+                 <xsl:copy-of select="MathMLUnits"/>
               </td>
 
               <td align="left">

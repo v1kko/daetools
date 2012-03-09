@@ -429,6 +429,22 @@ std::string unit::toString(void) const
 	return "[" + strUnits + "]"; 
 }
 
+std::string unit::toLatex(void) const
+{
+	std::string strResult;
+	
+	for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
+	{
+		std::string name = (*iter).first;
+		double      exp  = (*iter).second;
+		if(exp == 1)
+			strResult += (boost::format("{%1%}") % name).str();
+		else
+			strResult += (boost::format("{%1% ^ %2%}") % name % exp).str();
+	}
+	return "{" + strResult + "}"; 
+}
+
 std::ostream& operator<<(std::ostream& out, const unit& u)
 {
 	out << u.toString();
@@ -484,6 +500,5 @@ const unit pow(const unit& self, double exponent)
 {
 	return self ^ exponent;
 }
-
 
 }

@@ -1,12 +1,15 @@
 #!/bin/sh
+# -*- coding: utf-8 -*-
 
 set -e
 
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
-Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-Ncpu=$(($Ncpu+1))
+Ncpu=1
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
+
+# Set SSE flags for x86
+SSE_FLAGS=
 
 if [ ${PLATFORM} = "Darwin" ]; then
   if type "wget" > /dev/null ; then
@@ -20,17 +23,18 @@ if [ ${PLATFORM} = "Darwin" ]; then
     make
     sudo make install
   fi
-fi
-
-# Set SSE flags for x86
-SSE_FLAGS=
-if [ ${HOST_ARCH} != "x86_64" ]; then
-  SSE_FLAGS="-mfpmath=sse"
-  SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
-  for SSE_TAG in ${SSE_TAGS}
-  do
-    SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
-  done
+else
+  Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
+  Ncpu=$(($Ncpu+1))
+  
+  if [ ${HOST_ARCH} != "x86_64" ]; then
+    SSE_FLAGS="-mfpmath=sse"
+    SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
+    for SSE_TAG in ${SSE_TAGS}
+    do
+      SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
+    done
+  fi
 fi
 
 vBONMIN=1.5.1

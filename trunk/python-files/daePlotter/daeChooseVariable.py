@@ -201,8 +201,6 @@ class daeChooseVariable(QtGui.QDialog):
                     xAxisLabel = "Time"
 
                     xPoints.extend(times[0 : noTimePoints])
-                    #for k in range(0, noTimePoints):
-                    #    xPoints.append(times[k])        
 
                 else: # Some other domain
                     d = domains[i-1] # because Time is not in a domain list
@@ -213,8 +211,7 @@ class daeChooseVariable(QtGui.QDialog):
                     xAxisLabel = xname.replace("&", "").replace(";", "");
 
                     xPoints.extend(d.Points[0 : d.NumberOfPoints])
-                    #for k in range(0, d.NumberOfPoints):
-                    #    xPoints.append(d[k]) 
+
                 break       
         
         # y axis points

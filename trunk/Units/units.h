@@ -116,11 +116,25 @@ public:
 	const unit operator-(void) const;
 
 	std::string toString(void) const;
+	std::string toLatex(void) const;
 	friend std::ostream& operator<<(std::ostream& out, const unit& u);
 	
 public:
 	std::map<std::string, double> units;
 };
+
+inline std::string toString(const std::vector<unit>& uarray, const std::string& strDelimiter = std::string(", "))
+{
+	std::string result;
+	for(size_t i = 0; i < uarray.size(); i++)
+	{
+		if(i != 0)
+			result += strDelimiter;
+		result += uarray[i].toString();
+	}
+	return result;
+}
+
 const quantity operator*(double value, const unit& self);
 const quantity operator/(double value, const unit& self);
 const unit     operator+(double value, const unit& self);
@@ -142,13 +156,14 @@ public:
 	void setValue(const quantity& other);
     double getValueInSIUnits(void) const;
 	
-	const unit getUnits(void) const;
+	unit getUnits(void) const;
 	void setUnits(const unit& u);
     
 	const quantity scaleTo(const quantity& referrer) const;
     const quantity scaleTo(const unit& referrer) const;
 	
 	std::string toString(void) const;
+	std::string toLatex(void) const;
 	friend std::ostream& operator<<(std::ostream& out, const quantity& q);
 	
 	bool operator==(const quantity& other) const;
@@ -184,6 +199,18 @@ protected:
 	unit   _units;
 	double _value;
 };
+
+inline std::string toString(const std::vector<quantity>& qarray, const std::string& strDelimiter = std::string(", "))
+{
+	std::string result;
+	for(size_t i = 0; i < qarray.size(); i++)
+	{
+		if(i != 0)
+			result += strDelimiter;
+		result += qarray[i].toString();
+	}
+	return result;
+}
 
 const quantity operator*(double value, const quantity& self);
 const quantity operator/(double value, const quantity& self);

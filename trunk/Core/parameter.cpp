@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include "nodes_array.h"
+#include "units_io.h"
 
 namespace dae 
 {
@@ -79,12 +80,24 @@ void daeParameter::Open(io::xmlTag_t* pTag)
 
 void daeParameter::Save(io::xmlTag_t* pTag) const
 {
-	string strName;
+	string strName, strValue;
 
 	daeObject::Save(pTag);
 
 	strName = "Units";
-	pTag->Save(strName, m_Unit.toString());
+	units::Save(pTag, strName, m_Unit);
+	
+	strName = "MathMLUnits";
+	io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+
+	strName = "math";
+	io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
+
+	strName = "xmlns";
+	strValue = "http://www.w3.org/1998/Math/MathML";
+	pMathMLTag->AddAttribute(strName, strValue);
+	
+	units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);
@@ -173,12 +186,24 @@ void daeParameter::OpenRuntime(io::xmlTag_t* pTag)
 
 void daeParameter::SaveRuntime(io::xmlTag_t* pTag) const
 {
-	string strName;
+	string strName, strValue;
 
 	daeObject::SaveRuntime(pTag);
 
 	strName = "Units";
-	pTag->Save(strName, m_Unit.toString());
+	units::Save(pTag, strName, m_Unit);
+	
+	strName = "MathMLUnits";
+	io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+
+	strName = "math";
+	io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
+
+	strName = "xmlns";
+	strValue = "http://www.w3.org/1998/Math/MathML";
+	pMathMLTag->AddAttribute(strName, strValue);
+	
+	units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
 
 	strName = "DomainRefs";
 	pTag->SaveObjectRefArray(strName, m_ptrDomains);

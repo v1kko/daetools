@@ -375,7 +375,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod)
 		.add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder)
 		.add_property("LowerBound",				&daeDomain::GetLowerBound)
-		.add_property("UpperBound",				&daeDomain::GetUpperBound)
+		.add_property("UpperBound",				&daeDomain::GetUpperBound)    
 		.add_property("Points",					&daepython::GetDomainPoints, &daepython::SetDomainPoints)
 
 		.def("__str__",							&daepython::daeDomain_str)

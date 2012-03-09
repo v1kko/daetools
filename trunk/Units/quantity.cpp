@@ -202,7 +202,7 @@ void quantity::setValue(const quantity& other)
 	_value = other.scaleTo(*this).getValue();
 }
 
-const unit quantity::getUnits(void) const
+unit quantity::getUnits(void) const
 {
 	return _units;
 }
@@ -236,6 +236,11 @@ const quantity quantity::scaleTo(const unit& referrer) const
 std::string quantity::toString(void) const
 {
 	return (boost::format("%.10g %s") % _value % _units.toString()).str();
+}
+
+std::string quantity::toLatex(void) const
+{
+	return (boost::format("{%.10g %s}") % _value % _units.toLatex()).str();
 }
 
 std::ostream& operator<<(std::ostream& out, const quantity& q)
@@ -717,4 +722,6 @@ const quantity min(const quantity &q, double v)
 		throw units_error((boost::format("Invalid units in function: min(%1%, %2%)") % v % q).str());
 	return quantity(std::min(v, q.getValue()), unit());
 }
+
+
 }

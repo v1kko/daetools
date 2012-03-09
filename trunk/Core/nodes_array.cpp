@@ -3,6 +3,7 @@
 #include "nodes_array.h"
 using namespace dae;
 #include "xmlfunctions.h"
+#include "units_io.h"
 #include <typeinfo>
 using namespace dae::xml;
 using namespace boost;
@@ -233,18 +234,18 @@ void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 /*********************************************************************************************
 	adConstantNodeArray
 **********************************************************************************************/
-adConstantNodeArray::adConstantNodeArray(const real_t d) : m_dValue(d)
+adConstantNodeArray::adConstantNodeArray()
+{
+}
+
+adConstantNodeArray::adConstantNodeArray(const real_t d)
+                   : m_quantity(d, unit())
 {
 }
 
 adConstantNodeArray::adConstantNodeArray(const real_t d, const unit& units) 
-	               : m_dValue(d), m_Unit(units)
+	               : m_quantity(d, units)
 {
-}
-
-adConstantNodeArray::adConstantNodeArray()
-{
-	m_dValue = 0;
 }
 
 adConstantNodeArray::~adConstantNodeArray()
@@ -271,13 +272,13 @@ adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutio
 	}
 	
 	tmp.Resize(1);
-	tmp[0] = adouble(m_dValue);
+	tmp[0] = adouble(m_quantity.getValue());
 	return tmp;
 }
 
 const quantity adConstantNodeArray::GetQuantity(void) const
 {
-	return quantity(0.0, m_Unit);
+	return m_quantity;
 }
 
 adNodeArray* adConstantNodeArray::Clone(void) const
@@ -287,10 +288,7 @@ adNodeArray* adConstantNodeArray::Clone(void) const
 
 void adConstantNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {	
-	if(m_dValue < 0)
-		strContent += "(" + toStringFormatted<real_t>(m_dValue, -1, 12, false, true) + ")";
-	else
-		strContent += toStringFormatted<real_t>(m_dValue, -1, 12, false, true);
+	strContent += units::Export(eLanguage, c, m_quantity);
 }
 
 //string adConstantNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
@@ -300,29 +298,28 @@ void adConstantNodeArray::Export(std::string& strContent, daeeModelLanguage eLan
 
 string adConstantNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
-	return latexCreator::Constant(m_dValue);
+	return m_quantity.toLatex();
 }
 
 void adConstantNodeArray::Open(io::xmlTag_t* pTag)
 {
 	string strName = "Value";
-	pTag->Open(strName, m_dValue);
+	units::Open(pTag, strName, m_quantity);
 }
 
 void adConstantNodeArray::Save(io::xmlTag_t* pTag) const
 {
 	string strName = "Value";
-	pTag->Save(strName, m_dValue);
+	units::Save(pTag, strName, m_quantity);
 }
 
 void adConstantNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	xmlContentCreator::Constant(pTag, m_dValue);
 }
 
 void adConstantNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	xmlPresentationCreator::Constant(pTag, m_dValue);
+	units::SaveAsPresentationMathML(pTag, m_quantity);
 }
 
 void adConstantNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
@@ -392,7 +389,7 @@ const quantity adVectorNodeArray::GetQuantity(void) const
 	if(m_qarrValues.size() == 0)
 		daeDeclareAndThrowException(exInvalidCall);
 	
-    return quantity(0.0, m_qarrValues[0].getUnits());
+    return quantity(m_qarrValues[0]);
 }
 
 adNodeArray* adVectorNodeArray::Clone(void) const
@@ -402,7 +399,12 @@ adNodeArray* adVectorNodeArray::Clone(void) const
 
 void adVectorNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {   
-	daeDeclareAndThrowException(exNotImplemented);
+	if(eLanguage == eCDAE)
+		strContent += "Vector({" + toString(m_qarrValues) + "})";
+	else if(eLanguage == ePYDAE)
+		strContent += "Vector([" + toString(m_qarrValues) + "])";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 
 //string adVectorNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
@@ -412,32 +414,28 @@ void adVectorNodeArray::Export(std::string& strContent, daeeModelLanguage eLangu
 
 string adVectorNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
-	daeDeclareAndThrowException(exNotImplemented);
-    return "";
+    return "Vector \\left( \\left[" + toString(m_qarrValues) + "\\right] )";
 }
 
 void adVectorNodeArray::Open(io::xmlTag_t* pTag)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-//    string strName = "Values";
-//    pTag->OpenArray(strName, m_qarrValues);
+	//string strName = "Values";
+	//units::Open(pTag, strName, m_qarrValues);
 }
 
 void adVectorNodeArray::Save(io::xmlTag_t* pTag) const
 {
-	daeDeclareAndThrowException(exNotImplemented);
-//    string strName = "Values";
-//    pTag->SaveArray(strName, m_qarrValues);
+	string strName = "Values";
+	units::Save(pTag, strName, m_qarrValues);
 }
 
 void adVectorNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	daeDeclareAndThrowException(exNotImplemented);
 }
 
 void adVectorNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	daeDeclareAndThrowException(exNotImplemented);
+	units::SaveAsPresentationMathML(pTag, m_qarrValues);
 }
 
 void adVectorNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)

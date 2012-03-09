@@ -60,7 +60,7 @@ class dae2DPlot(QtGui.QDialog):
                     daePlot2dDefaults('k',     0.5, 'dotted', 'd', 6, 'k',     'black'),
                     daePlot2dDefaults('y',     0.5, 'dotted', 'x', 6, 'y',     'black') ]
                     
-    def __init__(self, parent, tcpipServer):
+    def __init__(self, parent, tcpipServer, updateInterval = 0):
         QtGui.QDialog.__init__(self, parent, QtCore.Qt.Window)
         
         self.tcpipServer = tcpipServer
@@ -154,9 +154,10 @@ class dae2DPlot(QtGui.QDialog):
         layoutPlot.addWidget(self.canvas)
         layoutPlot.addWidget(self.toolbar_widget)
         
-        self._timer = QtCore.QTimer()
-        QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
-        self._timer.start(1000)
+        if int(updateInterval) > 0:
+            self._timer = QtCore.QTimer()
+            QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
+            self._timer.start(int(updateInterval))
         
     def updateCurves(self):
         try:

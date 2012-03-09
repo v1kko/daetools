@@ -93,28 +93,7 @@
     </html>
   </xsl:template>
 
-
-    strName = "NumberOfIntervals";
-    pTag->Save(strName, m_nNumberOfIntervals);
-
-    strName = "NumberOfPoints";
-    pTag->Save(strName, m_nNumberOfPoints);
-
-    strName = "Points";
-    pTag->SaveArray(strName, m_darrPoints);
-
-    strName = "LowerBound";
-    pTag->Save(strName, m_dLowerBound);
-
-    strName = "UpperBound";
-    pTag->Save(strName, m_dUpperBound);
-
-    strName = "DiscretizationMethod";
-    SaveEnum(pTag, strName, m_eDiscretizationMethod);
-
-    strName = "DiscretizationOrder";
-    pTag->Save(strName, m_nDiscretizationOrder);
-
+  
   <xsl:template match="Domains">
     <div>
       <xsl:if test="count(Object) > 0">
@@ -161,7 +140,7 @@
                 </td>
 
                 <td>
-                  <xsl:value-of select="Units"/>
+                  <xsl:copy-of select="MathMLUnits"/>
                 </td>
                 
                 <td>
@@ -243,7 +222,7 @@
               </td>
 
               <td align="left">
-                 <xsl:value-of select="Units"/>
+                 <xsl:copy-of select="MathMLUnits"/>
               </td>
 
               <td align="left">

@@ -60,6 +60,11 @@ class daeMainWindow(QtGui.QMainWindow):
         plot2D.setStatusTip('New 2D plot')
         self.connect(plot2D, QtCore.SIGNAL('triggered()'), self.slotPlot2D)
 
+        animatedPlot2D = QtGui.QAction(QtGui.QIcon('images/add-ani-2d.png'), 'New animated 2D plot', self)
+        animatedPlot2D.setShortcut('Ctrl+4')
+        animatedPlot2D.setStatusTip('New animated 2D plot')
+        self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.slotAnimatedPlot2D)
+
         plot3D = QtGui.QAction(QtGui.QIcon('images/add-3d.png'), 'New 3D plot', self)
         plot3D.setShortcut('Ctrl+3')
         plot3D.setStatusTip('New 3D plot')
@@ -90,23 +95,31 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar('Main toolbar')
 
         self.toolbar.addAction(plot2D)
+        self.toolbar.addAction(animatedPlot2D)
         self.toolbar.addAction(plot3D)
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
+        self.plot2D()
+
+    #@QtCore.pyqtSlot()
+    def slotAnimatedPlot2D(self):
+        self.plot2D(1000) # 1000 ms
+
+    def plot2D(self, updateInterval = 0):
         try:
             from dae2DPlot import dae2DPlot
         except Exception, e:
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
             
-        plot2d = dae2DPlot(self, self.tcpipServer)
+        plot2d = dae2DPlot(self, self.tcpipServer, updateInterval)
         if plot2d.newCurve() == False:
             plot2d.close()
             del plot2d
         else:
             plot2d.show()
-        
+
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
         try:
