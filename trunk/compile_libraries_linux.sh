@@ -8,8 +8,8 @@ Ncpu=$(($Ncpu+1))
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
-if [ ${PLATFORM} = "Linux" ]; then
-  if type "wget1" > /dev/null ; then
+if [ ${PLATFORM} = "Darwin" ]; then
+  if type "wget" > /dev/null ; then
     echo "wget found"
   else
     echo "cURL have problems to get files from Source Forge: geting wget instead..."
