@@ -20,6 +20,7 @@ In this example we use the same conduction problem as in the tutorial 1.
 Here we introduce:
  - Arrays of variable values
  - Functions that operate on arrays of values
+ - Functions that create constants and arrays of constant values (Constant and Array)
  - Non-uniform domain grids
 """
 
@@ -46,6 +47,7 @@ class modTutorial(daeModel):
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
         self.Tave = daeVariable("T_ave", temperature_t, self, "The average temperature")
         self.Qsum = daeVariable("Q_sum", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
+        self.Qmul = daeVariable("Q_mul", heat_flux_t,   self, "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
         self.T.DistributeOnDomain(self.x)
@@ -81,42 +83,75 @@ class modTutorial(daeModel):
         # There are several function that return arrays of values (or time- or partial-derivatives)
         # such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values
         # To obtain the array of values it is necessary to define points from all domains that the parameter
-        # or variable is distributed on. Functions that return array of values accept daeIndexRange objects as
-        # their arguments. daeIndexRange constructor has three variants:
+        # or variable is distributed on. Functions that return array of values accept the following arguments:
+        #  - daeIndexRange objects
+        #  - plain integers (to select a single index from a domain)
+        #  - python lists (to select a list of indexes from a domain)
+        #  - python slices (to select a range of indexes from a domain: start_index, end_index, step)
+        #  - character '*' (to select all points from a domain)
+        #  - integer -1 (to select all points from a domain)
+        #  - empty python list [] (to select all points from a domain)
+        #
+        # daeIndexRange constructor has three variants:
         #  1. The first one accepts a single argument: Domain
         #     in that case the array will contain all points from the domains
         #  2. The second one accepts 2 arguments: Domain and Indexes
-        #     the argument indexes is a list of indexes within the domain and the array will contain the values
-        #     of the variable at those points
+        #     the argument indexes is a list of indexes within the domain and the array will contain the values 
+        #     at those points
         #  3. The third one accepts 4 arguments: Domain, StartIndex, EndIndex, Step
         #     Basically this defines a slice on the array of points in the domain
         #     StartIndex is the starting index, EndIndex is the last index and Step is used to iterate over
         #     this sub-domain [StartIndex, EndIndex). For example if we want values at even indexes in the domain
         #     we can write: xr = daeDomainIndex(self.x, 0, -1, 2)
-        # In this example we want to calculate:
+        #
+        # In this example we calculate:
         #  a) the average temperature of the plate
         #  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)
-        # Thus we use the first version of the above daeIndexRange constructor.
+        #
         # To calculate the average and the sum of heat fluxes we can use functions 'average' and 'sum' from daeModel class.
         # For the list of all available functions please have a look on pyDAE API Reference, module Core.
-        xr = daeIndexRange(self.x)
-        yr = daeIndexRange(self.y)
 
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
-        eq.Residual = self.Tave() - self.average(self.T.array(xr, yr))
+        eq.Residual = self.Tave() - self.average( self.T.array( '*', '*' ) )
+        # An equivalent to the equation above is:
+        #   a) xr = daeIndexRange(self.x)
+        #      yr = daeIndexRange(self.y)
+        #      eq.Residual = self.Tave() - self.average( self.T.array( xr, yr ) )
+        #   b) eq.Residual = self.Tave() - self.average( self.T.array( '*', -1 ) )
+        #   c) eq.Residual = self.Tave() - self.average( self.T.array( [], '*' ) )
+        #   d) eq.Residual = self.Tave() - self.average( self.T.array( -1, slice(0, -1) ) )
+        #
+        # To select only certain points from a domain we can use a list or a slice:
+        #   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1, 3, 7 from domain y 
+        #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y 
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
-        eq.Residual = self.Qsum() + self.k() * self.sum( self.T.d_array(self.y, xr, 0) )
-        # Test Vector function
-        #values = [1 * (W / m**2) for i in xrange(self.x.NumberOfPoints * self.y.NumberOfPoints)]
-        #eq.Residual = self.Qsum() - self.sum( Vector(values) - Vector(values) )
+        eq.Residual = self.Qsum() + self.k() * self.sum( self.T.d_array(self.y, '*', 0) )
+        
+        # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Vector)
+        #  - The function Constant() creates a constant quantity that contains a value and units 
+        #  - The function Array() creates an array of constant quantities that contain a value and units
+        # Both functions accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
+        #
+        # The equation below expands into the following:
+        #                                          ∂T(*, 0)
+        #             [2K, 2K, 2K, ..., 2K] * k * ----------
+        #                                             ∂y          2K         ∂T(0, 0)           2K         ∂T(xn, 0)
+        # Qmul = -∑ ------------------------------------------ = ---- * k * ---------- + ... + ---- * k * -----------
+        #                             2K                          2K           ∂y               2K            ∂y
+        #
+        # Achtung: the value of Qmul must be identical to Qsum!
+        eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
+        values = [2 * K for i in xrange(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
+        eq.Residual = self.Qmul() + self.sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial3")
         self.m.Description = "This tutorial explains how to define arrays of variable values and " \
-                             "functions that operate on these arrays, and how to define a non-uniform domain grid."
+                             "functions that operate on these arrays, constants and vectors, " \
+                             "and how to define a non-uniform domain grid."
 
     def SetUpParametersAndDomains(self):
         n = 10

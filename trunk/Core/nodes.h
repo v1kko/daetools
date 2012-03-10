@@ -64,8 +64,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	real_t m_dValue;
-	unit   m_Unit;
+	quantity m_quantity;
 };
 
 /*********************************************************************************************

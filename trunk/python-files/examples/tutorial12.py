@@ -18,12 +18,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 As of the version 1.1.1 the main linear algebraic equations solver is superLU.
 Originally it comes in three variates:
- - sequential (superlu)
- - multithreaded (OpenMP/posix threads) superlu_MT
- - MPI (superlu_MPI)
+ - sequential: superlu
+ - multithreaded (OpenMP/posix threads): superlu_MT
+ - MPI: superlu_MPI
 The first two are available in daetools with the addition of a new port: superlu_CUDA
 that works on computers with NVidia CUDA enabled video cards. However, the later is
-still in an early stage of the development and some help would be appreciated.
+still in an early stage of the development.
 
 In this example, usage and available options of superlu and superlu_MT are explored.
 """

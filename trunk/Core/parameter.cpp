@@ -462,6 +462,18 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 	return varArray;
 }
 
+daeDomain* daeParameter::GetDomain(size_t nIndex) const
+{
+	if(nIndex >= m_ptrDomains.size())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid domain index [" << nIndex << "] in parameter [" << GetCanonicalName() << "]";
+		throw e;
+	}
+	
+	return m_ptrDomains[nIndex];
+}
+
 unit daeParameter::GetUnits(void) const
 {
 	return m_Unit;

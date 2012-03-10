@@ -150,7 +150,7 @@ bool FillOperandInfo(adNode* node, daeFPUCommand* cmd, bool isLeft)
 	{
 		adConstantNode* n = dynamic_cast<adConstantNode*>(node);
 		SetOperand(cmd, isLeft, eConstant);
-		SetValue(cmd, isLeft, n->m_dValue);
+		SetValue(cmd, isLeft, n->m_quantity.getValue());
 		return true;
 	}
 	//else if(infoNode == typeid(adNoOperationNode))

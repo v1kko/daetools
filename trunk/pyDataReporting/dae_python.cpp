@@ -189,7 +189,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("__setitem__",					&daeDataReceiverDomain::SetPoint)
 		;
 
-	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue")
+	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue")  
 		.def(init<real_t, size_t>())
 		
 		.def_readonly("Time",				&daeDataReceiverVariableValue::m_dTime)

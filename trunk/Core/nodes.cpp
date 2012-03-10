@@ -4,6 +4,7 @@
 #include "nodes_array.h"
 using namespace dae;
 #include "xmlfunctions.h"
+#include "units_io.h"
 #include <typeinfo>
 using namespace dae::xml;
 using namespace boost;
@@ -367,24 +368,23 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adConstantNode
 **********************************************************************************************/
+adConstantNode::adConstantNode()
+{
+}
+
 adConstantNode::adConstantNode(const real_t d)
-	          : m_dValue(d)
+              : m_quantity(d, unit())
 {
 }
 
 adConstantNode::adConstantNode(const real_t d, const unit& units)
-	          : m_dValue(d), m_Unit(units)
+	          : m_quantity(d, units)
 {
 }
 
 adConstantNode::adConstantNode(const quantity& q)
-	          : m_dValue(q.getValue()), m_Unit(q.getUnits())
+	          : m_quantity(q)
 {
-}
-
-adConstantNode::adConstantNode()
-{
-	m_dValue = 0;
 }
 
 adConstantNode::~adConstantNode()
@@ -393,18 +393,21 @@ adConstantNode::~adConstantNode()
 
 adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble tmp(m_dValue, 0);
+	adouble tmp;
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
+		return tmp;
 	}
+	
+	tmp.setValue(m_quantity.getValue());
 	return tmp;
 }
 
 const quantity adConstantNode::GetQuantity(void) const
 {
-	return quantity(m_dValue, m_Unit);
+	return m_quantity;
 }
 
 adNode* adConstantNode::Clone(void) const
@@ -414,17 +417,9 @@ adNode* adConstantNode::Clone(void) const
 
 void adConstantNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strUnits;
-	if(m_Unit == unit())
-		strUnits = "";
-	else
-		strUnits = " " + m_Unit.toString();
-		
-	if(m_dValue < 0)
-		strContent += (boost::format("(%.12f%s)") % m_dValue % strUnits).str();
-	else
-		strContent += (boost::format("%.12f%s") % m_dValue % strUnits).str();
+	strContent += units::Export(eLanguage, c, m_quantity);
 }
+
 //string adConstantNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
 //{
 //	return textCreator::Constant(m_dValue);
@@ -432,32 +427,28 @@ void adConstantNode::Export(std::string& strContent, daeeModelLanguage eLanguage
 
 string adConstantNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
 {
-	return latexCreator::Constant(m_dValue);
+	return m_quantity.toLatex();
 }
 
 void adConstantNode::Open(io::xmlTag_t* pTag)
 {
 	string strName = "Value";
-	pTag->Open(strName, m_dValue);
+	units::Open(pTag, strName, m_quantity);
 }
 
 void adConstantNode::Save(io::xmlTag_t* pTag) const
 {
 	string strName  = "Value";
-	pTag->Save(strName, toStringFormatted<real_t>(m_dValue, -1, 12, false, true));
-	
-	strName  = "Units";
-	pTag->Save(strName, m_Unit.toString());
+	units::Save(pTag, strName, m_quantity);
 }
 
 void adConstantNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	xmlContentCreator::Constant(pTag, m_dValue);
 }
 
 void adConstantNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
-	xmlPresentationCreator::Constant(pTag, m_dValue);
+	units::SaveAsPresentationMathML(pTag, m_quantity);
 }
 
 void adConstantNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)

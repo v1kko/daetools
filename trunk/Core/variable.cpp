@@ -1696,6 +1696,18 @@ bool daeVariable::CheckObject(vector<string>& strarrErrors) const
 	return bCheck;
 }
 
+daeDomain* daeVariable::GetDomain(size_t nIndex) const
+{
+	if(nIndex >= m_ptrDomains.size())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "Invalid domain index [" << nIndex << "] in variable [" << GetCanonicalName() << "]";
+		throw e;
+	}
+	
+	return m_ptrDomains[nIndex];
+}
+
 /*********************************************************************************************
 	daeVariableWrapper
 **********************************************************************************************/

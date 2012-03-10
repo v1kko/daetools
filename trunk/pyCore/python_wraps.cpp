@@ -41,35 +41,107 @@ daeDomainIndex CreateDomainIndex(object& o)
 	}
 }
 
-daeArrayRange CreateArrayRange(object& o)
-{
-	extract<size_t>        get_size_t(o);
-	extract<daeDEDI*>      get_DEDI(o);
-	extract<daeIndexRange> get_IndexRange(o);
+#define parRANGE(I) CreateArrayRange(o##I, param.GetDomain(I-1))
+#define varRANGE(I) CreateArrayRange(o##I, var.GetDomain(I-1))
 
-// We have only the first number (start) so it must be integer or daeDEDI
+daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
+{
+	extract<int>				  get_int(o);
+	extract<daeDEDI*>			  get_DEDI(o);
+	extract<daeIndexRange>		  get_IndexRange(o);
+	extract<boost::python::list>  get_list(o);
+	extract<boost::python::slice> get_slice(o);
+	extract<char>                 get_char(o);
+
 	if(get_DEDI.check())
 	{
 		daeDEDI* pDEDI = get_DEDI();
 		return daeArrayRange(pDEDI);
 	}
-	else if(get_size_t.check())
+	else if(get_int.check())
 	{
-		size_t n = get_size_t();
-		return daeArrayRange(n);
+		int iIndex = get_int();
+		
+	// If < 0 get ALL points
+	// Otherwise take the point defined with iIndex
+		if(iIndex < 0)
+		{
+			daeIndexRange ir(pDomain);
+			return daeArrayRange(ir);
+		}
+		else
+		{
+			return daeArrayRange(size_t(iIndex));
+		}
 	}
 	else if(get_IndexRange.check())
 	{
 		daeIndexRange ir = get_IndexRange();
 		return daeArrayRange(ir);
 	}
+	else if(get_list.check())
+	{
+		std::vector<size_t> narrCustomPoints;
+		boost::python::list l = get_list();
+		boost::python::ssize_t n = boost::python::len(l);
+
+		// If list is empty get ALL points
+		if(n == 0)
+		{
+			daeIndexRange ir(pDomain);
+			return daeArrayRange(ir);
+		}
+		else
+		{
+			narrCustomPoints.resize(n);
+			for(boost::python::ssize_t i = 0; i < n; i++)
+				narrCustomPoints[i] = boost::python::extract<size_t>( l[i] );
+			
+			daeIndexRange ir(pDomain, narrCustomPoints);
+			return daeArrayRange(ir);
+		}
+	}
+	else if(get_slice.check())
+	{
+		boost::python::slice s = get_slice();
+		
+		extract<int> get_start(s.start());
+		extract<int> get_end(s.stop());
+		extract<int> get_step(s.step());
+
+		int start = get_start.check() ? get_start() : 0;
+		int end   = get_end.check()   ? get_end()   : pDomain->GetNumberOfPoints()-1;
+		int step  = get_step.check()  ? get_step()  : 1;
+		
+		std::cout << (boost::format("slice(%1%, %2%, %3%)") % start % end % step).str() << std::endl;
+		
+		daeIndexRange ir(pDomain, start, end, step);
+		return daeArrayRange(ir);
+	}
+	else if(get_char.check())
+	{
+		char cIndex = get_char();
+		
+	// If char is '* get ALL points
+		if(cIndex == '*')
+		{
+			daeIndexRange ir(pDomain);
+			return daeArrayRange(ir);
+		}
+		else
+		{
+			daeDeclareException(exInvalidCall);
+			e << "Invalid argument [" << cIndex << "] for Array function";
+			throw e;
+		}
+	}
 	else
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid argument" ;
 		throw e;
-		return daeArrayRange();
 	}
+	return daeArrayRange();
 }
 
 boost::python::object daeGetConfig(void)
@@ -391,7 +463,7 @@ const adouble ad_Constant_c(real_t c)
 	return Constant(c);
 }
 
-const adouble_array adarr_Vector(boost::python::list Values)
+const adouble_array adarr_Array(boost::python::list Values)
 {
 	std::vector<quantity> qarrValues;
 	boost::python::ssize_t i, n;
@@ -402,7 +474,7 @@ const adouble_array adarr_Vector(boost::python::list Values)
 	for(i = 0; i < n; i++)
 	{
 		boost::python::extract<real_t>   get_real_t(Values[i]);
-		boost::python::extract<quantity> get_quantity(Values[1]);
+		boost::python::extract<quantity> get_quantity(Values[i]);
 		
 		if(get_real_t.check())
 			qarrValues[i] = quantity(get_real_t(), unit());
@@ -416,7 +488,7 @@ const adouble_array adarr_Vector(boost::python::list Values)
 		}
 	}
 	
-	return Vector(qarrValues);
+	return Array(qarrValues);
 }
 
 const adouble ad_exp(const adouble &a)
@@ -885,42 +957,42 @@ void qSetParameterValues(daeParameter& param, const quantity& q)
 
 adouble_array ParameterArray1(daeParameter& param, object o1)
 {
-	return param.array(CreateArrayRange(o1));
+	return param.array(parRANGE(1));
 }
 
 adouble_array ParameterArray2(daeParameter& param, object o1, object o2)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2));
+	return param.array(parRANGE(1), parRANGE(2));
 }
 
 adouble_array ParameterArray3(daeParameter& param, object o1, object o2, object o3)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3));
 }
 
 adouble_array ParameterArray4(daeParameter& param, object o1, object o2, object o3, object o4)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3), parRANGE(4));
 }
 
 adouble_array ParameterArray5(daeParameter& param, object o1, object o2, object o3, object o4, object o5)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3), parRANGE(4), parRANGE(5));
 }
 
 adouble_array ParameterArray6(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3), parRANGE(4), parRANGE(5), parRANGE(6));
 }
 
 adouble_array ParameterArray7(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3), parRANGE(4), parRANGE(5), parRANGE(6), parRANGE(7));
 }
 
 adouble_array ParameterArray8(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-	return param.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7), CreateArrayRange(o8));
+	return param.array(parRANGE(1), parRANGE(2), parRANGE(3), parRANGE(4), parRANGE(5), parRANGE(6), parRANGE(7), parRANGE(8));
 }
 
 /*******************************************************
@@ -1303,163 +1375,163 @@ adouble Get_d28(daeVariable& var, daeDomain& d, object o1, object o2, object o3,
 
 adouble_array VariableArray1(daeVariable& var, object o1)
 {
-	return var.array(CreateArrayRange(o1));
+	return var.array(varRANGE(1));
 }
 
 adouble_array VariableArray2(daeVariable& var, object o1, object o2)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2));
+	return var.array(varRANGE(1), varRANGE(2));
 }
 
 adouble_array VariableArray3(daeVariable& var, object o1, object o2, object o3)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array VariableArray4(daeVariable& var, object o1, object o2, object o3, object o4)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array VariableArray5(daeVariable& var, object o1, object o2, object o3, object o4, object o5)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array VariableArray6(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array VariableArray7(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array VariableArray8(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-	return var.array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7), CreateArrayRange(o8));
+	return var.array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
 adouble_array Get_dt_array1(daeVariable& var, object o1)
 {
-	return var.dt_array(CreateArrayRange(o1));
+	return var.dt_array(varRANGE(1));
 }
 
 adouble_array Get_dt_array2(daeVariable& var, object o1, object o2)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2));
+	return var.dt_array(varRANGE(1), varRANGE(2));
 }
 
 adouble_array Get_dt_array3(daeVariable& var, object o1, object o2, object o3)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array Get_dt_array4(daeVariable& var, object o1, object o2, object o3, object o4)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array Get_dt_array5(daeVariable& var, object o1, object o2, object o3, object o4, object o5)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array Get_dt_array6(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array Get_dt_array7(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array Get_dt_array8(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-	return var.dt_array(CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7), CreateArrayRange(o8));
+	return var.dt_array(varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
 
 adouble_array Get_d_array1(daeVariable& var, daeDomain& d, object o1)
 {
-	return var.d_array(d, CreateArrayRange(o1));
+	return var.d_array(d, varRANGE(1));
 }
 
 adouble_array Get_d_array2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2));
+	return var.d_array(d, varRANGE(1), varRANGE(2));
 }
 
 adouble_array Get_d_array3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array Get_d_array4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array Get_d_array5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array Get_d_array6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array Get_d_array7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array Get_d_array8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-	return var.d_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7), CreateArrayRange(o8));
+	return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
 adouble_array Get_d2_array1(daeVariable& var, daeDomain& d, object o1)
 {
-	return var.d2_array(d, CreateArrayRange(o1));
+	return var.d2_array(d, varRANGE(1));
 }
 
 adouble_array Get_d2_array2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2));
+	return var.d2_array(d, varRANGE(1), varRANGE(2));
 }
 
 adouble_array Get_d2_array3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array Get_d2_array4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array Get_d2_array5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array Get_d2_array6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array Get_d2_array7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array Get_d2_array8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-	return var.d2_array(d, CreateArrayRange(o1), CreateArrayRange(o2), CreateArrayRange(o3), CreateArrayRange(o4), CreateArrayRange(o5), CreateArrayRange(o6), CreateArrayRange(o7), CreateArrayRange(o8));
+	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
 void SetVariableValue0(daeVariable& var, real_t value)

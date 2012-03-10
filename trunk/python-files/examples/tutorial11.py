@@ -19,6 +19,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
  This tutorial shows the use of Trilinos group of solvers: Amesos and AztecOO iterative
  linear equation solvers with different preconditioners (built-in AztecOO, Ifpack or ML)
  and corresponding linear solver options.
+ 
+ ACHTUNG, ACHTUNG!!
  Iterative solvers are not fully working yet and this example is given just as a showcase
  and for preconditioner options experimenting purposes.
 """
@@ -55,7 +57,7 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = 1e-6 * (  self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))  )
+                               (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))  )
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)

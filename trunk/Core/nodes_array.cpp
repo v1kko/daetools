@@ -26,7 +26,7 @@ void adDoEnclose(const adNodeArray* parent, const adNodeArray* left, bool& bEncl
 		return;
 }
 
-const adouble_array Vector(const std::vector<quantity>& qarrValues)
+const adouble_array Array(const std::vector<quantity>& qarrValues)
 {
 	adouble_array tmp;
 	tmp.setGatherInfo(true);
@@ -34,7 +34,7 @@ const adouble_array Vector(const std::vector<quantity>& qarrValues)
 	return tmp;
 }
 
-const adouble_array Vector(const std::vector<real_t>& darrValues)
+const adouble_array Array(const std::vector<real_t>& darrValues)
 {
 	adouble_array tmp;
 	tmp.setGatherInfo(true);

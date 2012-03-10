@@ -39,7 +39,7 @@ string adouble_repr(const adouble& self);
 	Common functions
 *******************************************************/
 daeDomainIndex CreateDomainIndex(boost::python::object& o);
-daeArrayRange  CreateArrayRange(boost::python::object& s);
+daeArrayRange  CreateArrayRange(boost::python::object& o, daeDomain* pDomain);
 
 //void daeSaveModel(daeModel& rModel, string strFileName);
 
@@ -102,7 +102,7 @@ const adouble ad_min3(const adouble &a, real_t v);
 
 const adouble ad_Constant_q(const quantity& q);
 const adouble ad_Constant_c(real_t c);
-const adouble_array adarr_Vector(boost::python::list Values);
+const adouble_array adarr_Array(boost::python::list Values);
 
 /*******************************************************
 	adouble_array

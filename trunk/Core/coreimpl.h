@@ -1618,6 +1618,8 @@ public:
 	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
 		adouble_array array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
+	daeDomain* GetDomain(size_t nIndex) const;
+	
 protected:
 	void SetUnits(const unit& units);
 	void Initialize(void);
@@ -1836,6 +1838,7 @@ public:
 	void DistributeOnDomain(daeDomain& rDomain);
 	
 	size_t GetOverallIndex(void) const;
+	daeDomain* GetDomain(size_t nIndex) const;
 
 public:
 	adouble	operator()(void);

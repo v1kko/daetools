@@ -334,8 +334,8 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 			pValue->m_pValues = new real_t[noPoints];
 			memcpy(pValue->m_pValues, &data[curPos], sizeof(real_t)*noPoints);
 			
-		// Finally add the value to the array
-			dae_push_back(pVariable->m_ptrarrValues, pValue);
+		// Finally add the value to the array (do not use dae_push_back)
+			pVariable->m_ptrarrValues.push_back(pValue);
 		}
 		else if(cFlag == cEndOfData)
 		{

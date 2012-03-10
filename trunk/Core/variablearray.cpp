@@ -134,7 +134,11 @@ daeIndexRange::daeIndexRange(daeDomain* pDomain, const vector<size_t>& narrCusto
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
 	if(narrCustomPoints.size() == 0)
-		daeDeclareAndThrowException(exInvalidCall);
+	{
+		daeDeclareException(exInvalidCall);
+		e << "daeIndexRange list of indexes is empty";
+		throw e;
+	}
 
 	m_eType				= eCustomRange;
 	m_pDomain			= pDomain;
@@ -157,6 +161,9 @@ daeIndexRange::daeIndexRange(daeDomain* pDomain,
 	m_iStartIndex = iStartIndex;
 	m_iEndIndex   = iEndIndex;
 	m_iStride     = iStride;
+	
+	if(m_iStartIndex == 0 && m_iEndIndex == 0)
+		m_iEndIndex = -1;
 }
 
 void daeIndexRange::Open(io::xmlTag_t* pTag)
@@ -231,6 +238,13 @@ void daeIndexRange::GetPoints(vector<size_t>& narrCustomPoints) const
 		narrCustomPoints.clear();
 		for(int i = m_iStartIndex; i < iEnd; i += m_iStride)
 			narrCustomPoints.push_back((size_t)i);
+		
+		if(narrCustomPoints.empty())
+		{
+			daeDeclareException(exInvalidCall);
+			e << "daeIndexRange slice size is zero";
+			throw e;
+		}
 	}
 	else if(m_eType == eCustomRange)
 	{
