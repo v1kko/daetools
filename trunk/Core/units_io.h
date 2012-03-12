@@ -57,6 +57,10 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 			strResult += (boost::format("(%1% ** (%2%))") % (*iter).first % (*iter).second).str();
 		}	
 	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
 	
 	return strResult;
 }
@@ -116,7 +120,12 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	else if(eLanguage == ePYDAE)
 	{
 		return (boost::format("%1% * (%2%)") % q.getValue() % Export(eLanguage, c, q.getUnits())).str();
-	}	
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+		return std::string("");
+	}
 }
 
 inline void SaveAsPresentationMathML(xmlTag_t* pTag, const quantity& q)

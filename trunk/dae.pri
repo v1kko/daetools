@@ -79,10 +79,11 @@ QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
 QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
-unix::QMAKE_CFLAGS_WARN_ON   += -Wextra -Wno-sign-compare -Wno-unused-parameter \
-                                -Wno-unused-variable -Wno-unused-but-set-variable
-unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare -Wno-unused-parameter \
-                                -Wno-unused-variable -Wno-unused-but-set-variable
+unix::QMAKE_CXXFLAGS_WARN_ON         += -Wextra -Wno-sign-compare \
+                                        -Wno-unused-parameter \
+                                        -Wno-unused-variable 
+linux-g++-32::QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-but-set-variable
+linux-g++-64::QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-but-set-variable
 
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
 unix::QMAKE_CXXFLAGS_RELEASE -= -O2
@@ -95,11 +96,8 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 (32 bit machines)
-linux-g++-32::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
 linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
-
-macx-g++::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
-macx-g++::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
+macx-g++::QMAKE_CXXFLAGS_RELEASE     += -mfpmath=sse -msse -msse2 -msse3
 
 ####################################################################################
 # Creating .vcproj under windows:
@@ -147,7 +145,6 @@ win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
 
 linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-
 macx-g++::PYTHONDIR             = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
 unix::PYTHON_INCLUDE_DIR        = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
@@ -169,7 +166,7 @@ macx-g++::RT     =
 win32::GFORTRAN        =
 linux-g++-32::GFORTRAN = -lgfortran
 linux-g++-64::GFORTRAN = -lgfortran
-macx-g++::GFORTRAN     =
+macx-g++::GFORTRAN     = -lgfortran
 
 
 #####################################################################################
@@ -202,6 +199,11 @@ unix::BOOSTDIR         = /usr/include/boost
 unix::BOOSTLIBPATH     = 
 unix::BOOST_PYTHON_LIB = -lboost_python
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
+
+macx-g++::BOOSTDIR         = /opt/local/include
+macx-g++::BOOSTLIBPATH     = /opt/local/lib
+macx-g++::BOOST_PYTHON_LIB = -lboost_python
+macx-g++::BOOST_LIBS       = -lboost_system -lboost_thread-mt $${RT}
 }
 
 use_custom_boost { 
@@ -223,7 +225,7 @@ win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
 unix::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lblas -llapack -lm
-#unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/libgoto2.a -lm
+#unix::BLAS_LAPACK_LIBS = ../GotoBLAS2/libgoto2.a -lm
 
 
 #####################################################################################

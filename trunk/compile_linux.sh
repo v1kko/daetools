@@ -30,8 +30,6 @@ else
     SPEC=linux-g++-32
   fi
 fi
-echo Ncpu=$Ncpu
-exit
 
 cd ${TRUNK}
 
@@ -48,9 +46,9 @@ compile () {
   fi
 
   echo 
-  echo "*** EXECUTE: qmake-qt4 $1.pro -r -spec ${SPEC} ${CONFIG}"
+  echo "*** EXECUTE: qmake $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
   echo 
-  qmake-qt4 $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}
+  qmake $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}
   
   echo 
   echo "*** EXECUTE: make clean -w"

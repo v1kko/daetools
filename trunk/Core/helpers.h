@@ -23,6 +23,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <time.h>
 
+#ifdef __MACH__
+#include <mach/mach_time.h>
+#endif
+
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 #ifndef _MSC_VER
@@ -737,10 +741,35 @@ inline double GetTimeInSeconds(void)
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
     DWORD time = GetTickCount();
     return (double)(time / 1.0E3);
-#else
+
+#elif defined(__MACH__) || defined(__APPLE__)
+	uint64_t time;
+	uint64_t timeNano;
+	static mach_timebase_info_data_t    sTimebaseInfo;
+
+	// Start the clock.
+
+	time = mach_absolute_time();
+
+	// If this is the first time we've run, get the timebase.
+	// We can use denom == 0 to indicate that sTimebaseInfo is 
+	// uninitialised because it makes no sense to have a zero 
+	// denominator is a fraction.
+
+	if(sTimebaseInfo.denom == 0) 
+		(void) mach_timebase_info(&sTimebaseInfo);
+
+	timeNano = time * sTimebaseInfo.numer / sTimebaseInfo.denom;
+	return (double)(elapsedNano / 1.0E9);
+
+#elif __linux__ == 1
 	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
+
+#else
+    #error Unknown Platform!!
+	return 0.0;
 #endif
 }
 
