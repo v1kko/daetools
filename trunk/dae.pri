@@ -98,6 +98,9 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 linux-g++-32::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
 linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 
+macx-g++::QMAKE_CFLAGS_RELEASE   += -mfpmath=sse -msse -msse2 -msse3
+macx-g++::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
+
 ####################################################################################
 # Creating .vcproj under windows:
 # cd trunk
@@ -145,12 +148,28 @@ win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
 linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
+macx-g++::PYTHONDIR             = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+
 unix::PYTHON_INCLUDE_DIR        = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
 							      /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
                                   /usr/share/pyshared
 unix::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages \
                                   $${PYTHONDIR}/site-packages
 unix::PYTHON_LIB_DIR            =
+
+
+#####################################################################################
+#                                  RT/GFORTRAN
+#####################################################################################
+win32::RT        =
+linux-g++-32::RT = -lrt
+linux-g++-64::RT = -lrt
+macx-g++::RT     =
+
+win32::GFORTRAN        =
+linux-g++-32::GFORTRAN = -lgfortran
+linux-g++-64::GFORTRAN = -lgfortran
+macx-g++::GFORTRAN     =
 
 
 #####################################################################################
@@ -182,14 +201,14 @@ use_system_boost {
 unix::BOOSTDIR         = /usr/include/boost
 unix::BOOSTLIBPATH     = 
 unix::BOOST_PYTHON_LIB = -lboost_python
-unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
+unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 }
 
 use_custom_boost { 
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB = -lboost_python
-unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
+unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 }
 
 
@@ -197,7 +216,7 @@ unix::BOOST_LIBS       = -lboost_system -lboost_thread -lrt
 #                                 BLAS/LAPACK
 #####################################################################################
 win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
-unix::BLAS_LAPACK_LIBDIR  = ../GotoBLAS2
+unix::BLAS_LAPACK_LIBDIR  =
 
 win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
@@ -245,7 +264,7 @@ win32::MUMPS_LIBS = blas.lib \
 					libpord.lib \
 					libf95.a \
 					libgcc.a
-unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS} -lrt -lgfortran
+unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS} $${RT} $${GFORTRAN}
 
 
 #####################################################################################
@@ -310,8 +329,8 @@ SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
 win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread $${BLAS_LAPACK_LIBS}
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 -lrt -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
@@ -322,8 +341,8 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32::SUPERLU_MT_LIBS          = 
-linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread $${BLAS_LAPACK_LIBS}
-linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 -lrt -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
