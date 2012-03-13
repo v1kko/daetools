@@ -200,10 +200,10 @@ unix::BOOSTLIBPATH     =
 unix::BOOST_PYTHON_LIB = -lboost_python
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 
-macx-g++::BOOSTDIR         = /opt/local/include
-macx-g++::BOOSTLIBPATH     = /opt/local/lib
+macx-g++::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
+macx-g++::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
 macx-g++::BOOST_PYTHON_LIB = -lboost_python
-macx-g++::BOOST_LIBS       = -lboost_system -lboost_thread-mt $${RT}
+macx-g++::BOOST_LIBS       = -lboost_system -lboost_thread-mt
 }
 
 use_custom_boost { 
