@@ -33,13 +33,14 @@ PYTHON_MINOR = 6
 # 2. On Windows: 
 #    BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_system_boost
+CONFIG += use_custom_boost
 BOOST_MAJOR = 1
-BOOST_MINOR = 42
+BOOST_MINOR = 49
 BOOST_BUILD = 0
 
 # Set CONFIG += enable_mpi to use MPI libraries
-#CONFIG += enable_mpi
+
+macx-g++::CONFIG += x86 ppc x86_64
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -48,8 +49,23 @@ QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
 QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
 QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
+linux-g++-32::SHARED_LIB_EXT = so
+linux-g++-64::SHARED_LIB_EXT = so
+macx-g++::SHARED_LIB_EXT     = dylib
+
+linux-g++-32::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
+linux-g++-64::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
+macx-g++::SHARED_LIB_APPEND     = $${VERSION}.$${SHARED_LIB_EXT}
+
+# Mac OSX-specific folders ???
+# macx-g++::MACOSX_SDK_DIR  = /Developer/SDKs/MacOSX10.6.sdk
+#macx-g++::QMAKE_CXXFLAGS += -I$${MACOSX_SDK_DIR}/usr/include \
+#                            -I$${MACOSX_SDK_DIR}/usr/include/c++
+#macx-g++::QMAKE_LIBDIR   += -L$${MACOSX_SDK_DIR}/usr/lib
+
+
 CONFIG(debug, debug|release):message(debug){
-	DAE_DEST_DIR = ../debug
+    DAE_DEST_DIR = ../debug
     OBJECTS_DIR = debug
 }
 
@@ -59,6 +75,7 @@ CONFIG(release, debug|release):message(release){
 }
 
 DESTDIR = $${DAE_DEST_DIR}
+
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -97,7 +114,6 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # Use SSE for x86 (32 bit machines)
 linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
-macx-g++::QMAKE_CXXFLAGS_RELEASE     += -mfpmath=sse -msse -msse2 -msse3
 
 ####################################################################################
 # Creating .vcproj under windows:
@@ -145,11 +161,14 @@ win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
 
 linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-macx-g++::PYTHONDIR             = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+macx-g++::PYTHONDIR             = /System/Library/Frameworks/Python.framework/Versions/$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
 unix::PYTHON_INCLUDE_DIR        = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
-							      /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                                  /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
                                   /usr/share/pyshared
+macx-g++::PYTHON_INCLUDE_DIR    = $${PYTHONDIR}/Extras/lib/python \
+                                  $${PYTHONDIR}/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+
 unix::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages \
                                   $${PYTHONDIR}/site-packages
 unix::PYTHON_LIB_DIR            =
@@ -195,8 +214,8 @@ win32::BOOST_PYTHON_LIB =
 win32::BOOST_LIBS       =
 
 use_system_boost {
-unix::BOOSTDIR         = /usr/include/boost
-unix::BOOSTLIBPATH     = 
+unix::BOOSTDIR         = /opt/local/include
+unix::BOOSTLIBPATH     = /opt/local/lib
 unix::BOOST_PYTHON_LIB = -lboost_python
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 

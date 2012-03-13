@@ -35,6 +35,6 @@ QMAKE_POST_LINK = move \
 unix{
 QMAKE_POST_LINK = cp \
     -f \
-    $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-    $${DAE_DEST_DIR}/pyTrilinos.so
+    $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+    $${DAE_DEST_DIR}/$${TARGET}.$${SHARED_LIB_EXT}
 }

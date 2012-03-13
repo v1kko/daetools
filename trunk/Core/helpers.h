@@ -762,9 +762,10 @@ inline double GetTimeInSeconds(void)
 	return (double)(timeNano / 1.0E9);
 
 #elif __linux__ == 1
-	struct timespec time;
-	clock_gettime(CLOCK_MONOTONIC, &time);
-	return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
+    //struct timespec time;
+    //clock_gettime(CLOCK_MONOTONIC, &time);
+    //return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
+    return 0.0;
 
 #else
     #error Unknown Platform!!
@@ -776,3 +777,4 @@ inline double GetTimeInSeconds(void)
 }
 
 #endif
+
