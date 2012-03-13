@@ -59,7 +59,7 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	}
 	else
 	{
-		daeDeclareAndThrowException(exNotImplemented);
+		daeDeclareAndThrowException(dae::exNotImplemented);
 	}
 	
 	return strResult;
@@ -123,7 +123,7 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	}
 	else
 	{
-		daeDeclareAndThrowException(exNotImplemented);
+		daeDeclareAndThrowException(dae::exNotImplemented);
 		return std::string("");
 	}
 }

@@ -22,6 +22,7 @@ DAE_TOOLS_BUILD = 0
 # 2. On Windows:
 #    Set CONFIG += use_custom_python and for instance PYTHON_MAJOR=2 and PYTHON_MINOR=7 
 #    to use Python located in c:\Python27
+# 3. On MacOS: use_system_python 
 CONFIG += use_system_python
 PYTHON_MAJOR = 2
 PYTHON_MINOR = 6
@@ -33,13 +34,20 @@ PYTHON_MINOR = 6
 # 2. On Windows: 
 #    BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_custom_boost
+# 3. On MacOS: 
+#    Depends where the Boost library is located. If the systems library is not used 
+#    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
+#    and Boost build must be located in ../boost_1_42_0 (for instance)
+CONFIG += use_system_boost
 BOOST_MAJOR = 1
-BOOST_MINOR = 49
+BOOST_MINOR = 42
 BOOST_BUILD = 0
 
 # Set CONFIG += enable_mpi to use MPI libraries
 
+# Build universal binaries for MAC OS-X
+# There is a problem with ppc64 under OSX 10.6 so it is excluded
+# Otherwise ppc64 should be added as well
 macx-g++::CONFIG += x86 ppc x86_64
 
 # DAE Tools version (major, minor, build)
@@ -57,13 +65,6 @@ linux-g++-32::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
 linux-g++-64::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
 macx-g++::SHARED_LIB_APPEND     = $${VERSION}.$${SHARED_LIB_EXT}
 
-# Mac OSX-specific folders ???
-# macx-g++::MACOSX_SDK_DIR  = /Developer/SDKs/MacOSX10.6.sdk
-#macx-g++::QMAKE_CXXFLAGS += -I$${MACOSX_SDK_DIR}/usr/include \
-#                            -I$${MACOSX_SDK_DIR}/usr/include/c++
-#macx-g++::QMAKE_LIBDIR   += -L$${MACOSX_SDK_DIR}/usr/lib
-
-
 CONFIG(debug, debug|release):message(debug){
     DAE_DEST_DIR = ../debug
     OBJECTS_DIR = debug
@@ -75,7 +76,6 @@ CONFIG(release, debug|release):message(release){
 }
 
 DESTDIR = $${DAE_DEST_DIR}
-
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -96,6 +96,8 @@ QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
 QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
+
+# Mac-OS 10.6 compiler complained about -Wno-unused-but-set-variable - thus removed
 unix::QMAKE_CXXFLAGS_WARN_ON         += -Wextra -Wno-sign-compare \
                                         -Wno-unused-parameter \
                                         -Wno-unused-variable 
@@ -113,6 +115,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 (32 bit machines)
+# When building for Mac-OS we build for all architectures - thus SSE flags are removed
 linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 
 ####################################################################################
@@ -177,6 +180,9 @@ unix::PYTHON_LIB_DIR            =
 #####################################################################################
 #                                  RT/GFORTRAN
 #####################################################################################
+# librt does not exist in Windows/MacOS
+# gfortran does not exist in MacOS XCode and must be installed separately
+#####################################################################################
 win32::RT        =
 linux-g++-32::RT = -lrt
 linux-g++-64::RT = -lrt
@@ -192,13 +198,13 @@ macx-g++::GFORTRAN     = -lgfortran
 #                                    BOOST
 #####################################################################################
 # Boost version installed must be 1.41+ (asio, system, python, thread, regex)
-# 1. Install bjam and Boost.Build
-#    a) On windows:
-#       - Go to the directory tools\build\v2\.
-#       - Run bootstrap.bat
-#       - Run bjam install --prefix=PREFIX where PREFIX is the directory where you 
-#         want Boost.Build to be installed
-#       - Add PREFIX\bin to your PATH environment variable.
+# Manual compilation:
+# 1. Compile/Install bjam and Boost.Build
+#     - Go to the directory tools\build\v2\.
+#     - Run bootstrap.bat/bootstrap.sh
+#     - Run bjam install --prefix=PREFIX where PREFIX is the directory where you 
+#       want Boost.Build to be installed (perhaps not needed for GNU/Linux and MacOS)
+#     - Add PREFIX\bin to your PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
 # 2) Build boost libraries (toolset=msvc or gcc; both static|shared)
 #      bjam --build-dir=./build  
 #      --with-date_time --with-python --with-system --with-regex --with-serialization --with-thread 
@@ -214,15 +220,10 @@ win32::BOOST_PYTHON_LIB =
 win32::BOOST_LIBS       =
 
 use_system_boost {
-unix::BOOSTDIR         = /opt/local/include
-unix::BOOSTLIBPATH     = /opt/local/lib
+unix::BOOSTDIR         = 
+unix::BOOSTLIBPATH     = 
 unix::BOOST_PYTHON_LIB = -lboost_python
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
-
-macx-g++::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
-macx-g++::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-macx-g++::BOOST_PYTHON_LIB = -lboost_python
-macx-g++::BOOST_LIBS       = -lboost_system -lboost_thread-mt
 }
 
 use_custom_boost { 
@@ -243,7 +244,7 @@ win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
-unix::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lblas -llapack -lm
+unix::BLAS_LAPACK_LIBS = -lblas -llapack -lm
 #unix::BLAS_LAPACK_LIBS = ../GotoBLAS2/libgoto2.a -lm
 
 

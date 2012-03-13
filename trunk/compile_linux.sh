@@ -22,7 +22,6 @@ if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   Ncpu=$(($Ncpu+1))
   SPEC=macx-g++
-  CONFIG_ARCH="CONFIG+=x86 CONFIG+=ppc CONFIG+=x86_64"
 else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
   Ncpu=$(($Ncpu+1))
@@ -31,7 +30,6 @@ else
   else
     SPEC=linux-g++-32
   fi
-  CONFIG_ARCH=
 fi
 
 cd ${TRUNK}
@@ -49,19 +47,19 @@ compile () {
   fi
 
   echo 
-  echo "*** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release CONFIG+=${CONFIG_ARCH} -spec ${SPEC} ${CONFIG}"
+  echo "*** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
   echo 
-  qmake -makefile $1.pro -r CONFIG+=release ${CONFIG_ARCH} -spec ${SPEC} ${CONFIG}
+  qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}
   
   echo 
   echo "*** EXECUTE: make clean -w"
   echo 
-  #make clean -w
+  make clean -w
   
   echo 
   echo "*** EXECUTE: make ${MAKEARG} -w"
   echo 
-  #make ${MAKEARG} -w
+  make ${MAKEARG} -w
   
   cd ${TRUNK}
   echo 
