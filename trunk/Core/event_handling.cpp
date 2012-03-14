@@ -10,18 +10,19 @@ namespace core
 *******************************************************************/
 daeRemoteEventReceiver::daeRemoteEventReceiver()
 {
-	m_pThread.reset();
-	m_pThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&daeRemoteEventReceiver::EventsReceiver, this)));
+//	m_pThread.reset();
+//	m_pThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&daeRemoteEventReceiver::EventsReceiver, this)));
 }
 
 daeRemoteEventReceiver::~daeRemoteEventReceiver()
 {
-	m_pThread->join();
-	m_pThread.reset();
+//	m_pThread->join();
+//	m_pThread.reset();
 }
 
 void daeRemoteEventReceiver::EventsReceiver()
 {
+/*
 	real_t data;
 	unsigned int priority;
     std::size_t recvd_size;
@@ -45,14 +46,15 @@ void daeRemoteEventReceiver::EventsReceiver()
 	{
 		std::cout << e.what() << std::endl;
 	}
+*/
 }
 
 void daeRemoteEventReceiver::Notify(void* data)
 {
-	real_t dEventData = *((real_t*)data);
-	std::cout << "    daeRemoteEventReceiver: Notify called with data = " << dEventData << std::endl;
+//	real_t dEventData = *((real_t*)data);
+//	std::cout << "    daeRemoteEventReceiver: Notify called with data = " << dEventData << std::endl;
 	
-	daeSubject<daeEventPort_t>::Notify(data);
+//	daeSubject<daeEventPort_t>::Notify(data);
 }
 
 /******************************************************************
@@ -60,6 +62,7 @@ void daeRemoteEventReceiver::Notify(void* data)
 *******************************************************************/
 daeRemoteEventSender::daeRemoteEventSender(/*daeRemoteEventReceiver* pReceiver*/)
 {
+/*
 	//m_pReceiver = pReceiver;
 	try
 	{
@@ -75,10 +78,12 @@ daeRemoteEventSender::daeRemoteEventSender(/*daeRemoteEventReceiver* pReceiver*/
 	{
 		std::cout << e.what() << std::endl;
 	}
+*/
 }
 
 daeRemoteEventSender::~daeRemoteEventSender()
 {
+/*
 	try
 	{
 		boost::interprocess::message_queue::remove("EventQueue");
@@ -90,10 +95,12 @@ daeRemoteEventSender::~daeRemoteEventSender()
 	{
 		std::cout << e.what() << std::endl;
 	}
+*/
 }
 
 void daeRemoteEventSender::Update(daeEventPort_t *pSubject, void* data)
 {
+/*
 	int iSuccess;
 	unsigned int priority;
     std::size_t recvd_size;
@@ -112,6 +119,7 @@ void daeRemoteEventSender::Update(daeEventPort_t *pSubject, void* data)
 	{
 		std::cout << e.what() << std::endl;
 	}
+*/
 }
 
 

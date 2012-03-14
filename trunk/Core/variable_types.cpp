@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include "units_io.h"
 
 namespace dae 
 {
@@ -164,7 +165,7 @@ void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguag
 		fmtFile.parse(strFile);
 		fmtFile % m_strName 
 				% m_strName 
-				% m_Units.toString()  
+		        % units::Export(eLanguage, c, m_Units)
 				% m_dLowerBound
 				% m_dUpperBound
 				% m_dInitialGuess
@@ -176,7 +177,7 @@ void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguag
 		fmtFile.parse(strFile);
 		fmtFile % m_strName 
 				% m_strName 
-				% m_Units.toString()  
+		        % units::Export(eLanguage, c, m_Units)
 				% m_dLowerBound
 				% m_dUpperBound
 				% m_dInitialGuess

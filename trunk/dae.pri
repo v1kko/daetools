@@ -209,6 +209,8 @@ macx-g++::GFORTRAN     = -lgfortran
 #      bjam --build-dir=./build  
 #      --with-date_time --with-python --with-system --with-regex --with-serialization --with-thread 
 #      variant=release link=static,shared threading=multi runtime-link=shared
+#    For MacOS the following C/C++ flags must be set:
+#      cflags="-arch i386 -arch ppc -arch x86_64" cxxflags="-arch i386 -arch ppc -arch x86_64"
 #    Python version could be set:
 #    a) --with-python-version=2.7
 #    b) in user-config.jam located in $BOOST_BUILD or $HOME directory

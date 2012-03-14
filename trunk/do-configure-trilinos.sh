@@ -7,17 +7,6 @@ EXTRA_ARGS=$@
 
 HOST_ARCH=`uname -m`
 
-if [ ${HOST_ARCH} = "x86_64" ]; then
-  SSE_FLAGS=
-else
-  SSE_FLAGS="-mfpmath=sse"
-  SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
-  for SSE_TAG in ${SSE_TAGS}
-  do
-    SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
-  done
-fi
-
 echo $BUILD
 echo $TRUNK
 echo $TRILINOS_HOME
@@ -41,9 +30,9 @@ cmake \
   -DTPL_ENABLE_MPI:BOOL=OFF \
   -DDART_TESTING_TIMEOUT:STRING=600 \
   -DCMAKE_INSTALL_PREFIX:PATH=. \
-  -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG -fPIC ${SSE_FLAGS}" \
-  -DCMAKE_C_FLAGS:STRING="-DNDEBUG -fPIC ${SSE_FLAGS}" \
-  -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG -fPIC ${SSE_FLAGS}" \
+  -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+  -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+  -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
   $EXTRA_ARGS \
   ${TRILINOS_HOME}
  

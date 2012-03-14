@@ -8,10 +8,12 @@ Ncpu=1
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
-# Set SSE flags for x86
-SSE_FLAGS=
+# daetools specific compiler flags
+DAE_COMPILER_FLAGS="-fPIC"
 
 if [ ${PLATFORM} = "Darwin" ]; then
+  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch ppc -arch x86_64"
+  
   if type "wget" > /dev/null ; then
     echo "wget found"
   else
@@ -23,19 +25,22 @@ if [ ${PLATFORM} = "Darwin" ]; then
     make
     sudo make install
   fi
+
 else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
   Ncpu=$(($Ncpu+1))
   
   if [ ${HOST_ARCH} != "x86_64" ]; then
-    SSE_FLAGS="-mfpmath=sse"
+    DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -mfpmath=sse"
     SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
     for SSE_TAG in ${SSE_TAGS}
     do
-      SSE_FLAGS="${SSE_FLAGS} -m${SSE_TAG}"
+      DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -m${SSE_TAG}"
     done
   fi
 fi
+
+export DAE_COMPILER_FLAGS
 
 vBONMIN=1.5.1
 vSUPERLU=4.1
@@ -66,7 +71,7 @@ if [ ! -e idas ]; then
   mv idas-${vIDAS} idas
   cd idas
   mkdir build
-  ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="-O3 ${SSE_FLAGS}"
+  ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd idas
@@ -148,7 +153,7 @@ if [ ! -e bonmin ]; then
   cd ../..
   mkdir -p build
   cd build
-  ../configure --enable-shared=no --enable-static=yes CFLAGS="-fPIC ${SSE_FLAGS}" CXXFLAGS="-fPIC ${SSE_FLAGS}" FFLAGS="-fPIC ${SSE_FLAGS}"
+  ../configure --enable-shared=no --enable-static=yes CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd bonmin/build
@@ -176,7 +181,7 @@ if [ ! -e nlopt ]; then
   cd nlopt
   mkdir build
   cd build
-  ../configure -prefix=${TRUNK}/nlopt/build CFLAGS="-fPIC ${SSE_FLAGS}" CXXFLAGS="-fPIC ${SSE_FLAGS}"
+  ../configure -prefix=${TRUNK}/nlopt/build CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd nlopt/build
@@ -202,11 +207,40 @@ if [ ! -e trilinos ]; then
   mv trilinos-${vTRILINOS}-Source trilinos
   cd trilinos
   mkdir build
-  cp ../do-configure-trilinos.sh build
   cd build
-  sh do-configure-trilinos.sh
+
+  export TRILINOS_HOME="${TRUNK}/trilinos"
+  EXTRA_ARGS=
+
+  echo $TRILINOS_HOME
+
+  cmake \
+    -DCMAKE_BUILD_TYPE:STRING=RELEASE \
+    -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DTrilinos_ENABLE_Amesos:BOOL=ON \
+    -DTrilinos_ENABLE_Epetra:BOOL=ON \
+    -DTrilinos_ENABLE_AztecOO:BOOL=ON \
+    -DTrilinos_ENABLE_ML:BOOL=ON \
+    -DTrilinos_ENABLE_Ifpack:BOOL=ON \
+    -DTrilinos_ENABLE_Teuchos:BOOL=ON \
+    -DAmesos_ENABLE_SuperLU:BOOL=ON \
+    -DIfpack_ENABLE_SuperLU:BOOL=ON \
+    -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
+    -DTPL_SuperLU_LIBRARIES:STRING=superlu_4.1 \
+    -DTPL_ENABLE_UMFPACK:BOOL=ON \
+    -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=/usr/include/suitesparse \
+    -DTPL_ENABLE_MPI:BOOL=OFF \
+    -DDART_TESTING_TIMEOUT:STRING=600 \
+    -DCMAKE_INSTALL_PREFIX:PATH=. \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    $EXTRA_ARGS \
+    ${TRILINOS_HOME}
+  
   cd ${TRUNK}
 fi
+
 cd trilinos/build
 if [ ! -e lib/libamesos.a ]; then
   echo "Building trilinos..."
