@@ -20,17 +20,20 @@ TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
-  Ncpu=$(($Ncpu+1))
   SPEC=macx-g++
 else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  Ncpu=$(($Ncpu+1))
   if [ ${HOST_ARCH} = "x86_64" ]; then
     SPEC=linux-g++-64
   else
     SPEC=linux-g++-32
   fi
 fi
+
+if [ ${Ncpu} -gt 1 ]; then
+  Ncpu=$(($Ncpu+1))
+fi
+echo "Number of threads: ${Ncpu}"
 
 cd ${TRUNK}
 

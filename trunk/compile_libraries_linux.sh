@@ -28,7 +28,6 @@ if [ ${PLATFORM} = "Darwin" ]; then
 
 else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  Ncpu=$(($Ncpu+1))
   
   if [ ${HOST_ARCH} != "x86_64" ]; then
     DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -mfpmath=sse"
@@ -38,6 +37,10 @@ else
       DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -m${SSE_TAG}"
     done
   fi
+fi
+
+if [ ${Ncpu} -gt 1 ]; then
+  Ncpu=$(($Ncpu+1))
 fi
 
 export DAE_COMPILER_FLAGS
