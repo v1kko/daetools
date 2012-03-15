@@ -1,11 +1,16 @@
 include(../dae.pri)
-QT -= core \
-    gui
+QT -= core gui
+
+# There is a problem compiling Units under MacOS X
+# All optimization flags should be removed!!
+macx-g++::QMAKE_CFLAGS_RELEASE   -= -O1 -O2 -O3
+macx-g++::QMAKE_CXXFLAGS_RELEASE -= -O1 -O2 -O3
 
 # TARGET = units
 # CONFIG += console
 # CONFIG -= app_bundle
 # TEMPLATE = app
+
 TARGET = cdaeUnits
 TEMPLATE = lib
 CONFIG += staticlib
@@ -20,7 +25,8 @@ SOURCES += dllmain.cpp \
     stdafx.cpp \
     quantity.cpp
 
-# main.cpp
+    # main.cpp
+
 HEADERS += units.h \
     stdafx.h \
     units_pool.h

@@ -209,9 +209,9 @@ macx-g++::GFORTRAN     = -lgfortran
 #      bjam --build-dir=./build  
 #      --with-date_time --with-python --with-system --with-regex --with-serialization --with-thread 
 #      variant=release link=static,shared threading=multi runtime-link=shared
-#    For MacOS the following C/C++ flags must be set:
-#      cflags="-arch i386 -arch ppc -arch x86_64" cxxflags="-arch i386 -arch ppc -arch x86_64"
-#    Python version could be set:
+#    For MacOS in order to build universal binaries (x86, x86_64, ppc, ppc64) this should be added:
+#      macosx-version-min=10.5 architecture=combined address-model=32_64
+#    The Python version could be set as well, if necessary (for any platform):
 #    a) --with-python-version=2.7
 #    b) in user-config.jam located in $BOOST_BUILD or $HOME directory
 #       Add line: using python : 2.7 ;
@@ -224,14 +224,14 @@ win32::BOOST_LIBS       =
 use_system_boost {
 unix::BOOSTDIR         = 
 unix::BOOSTLIBPATH     = 
-unix::BOOST_PYTHON_LIB = -lboost_python
+unix::BOOST_PYTHON_LIB = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 }
 
 use_custom_boost { 
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB = -lboost_python
+unix::BOOST_PYTHON_LIB = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 }
 
