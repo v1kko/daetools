@@ -346,8 +346,8 @@ cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 
 # Strip python extension modules
-#find ${PACKAGE_NAME}/pyDAE   -name \*.${SO_EXT}* | xargs strip
-#find ${PACKAGE_NAME}/solvers -name \*.${SO_EXT}* | xargs strip
+find ${PACKAGE_NAME}/pyDAE   -name \*.${SO_EXT}* | xargs strip -S
+find ${PACKAGE_NAME}/solvers -name \*.${SO_EXT}* | xargs strip -S
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
@@ -567,15 +567,15 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   echo "%endif"                     >> ${SPEC}
 
   echo "Summary: DAE Tools: A cross-platform equation-oriented process modelling, simulation and optimization software." >> ${SPEC}
-  echo "Name: ${PACKAGE_NAME}"                                                              >> ${SPEC}
-  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                                 >> ${SPEC}
-  echo "Release: ${VER_BUILD}"                                                              >> ${SPEC}
-  echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                                    >> ${SPEC}
-  echo "License: GNU GPL v3"                                                                >> ${SPEC}
-  echo "URL: www.daetools.com"                                                              >> ${SPEC}
-  echo "Requires: boost-devel >= 1.41, PyQt4, numpy, scipy, python-matplotlib, blas, lapack">> ${SPEC}
-  echo "ExclusiveArch: ${ARCH_RPM}"                                                 >> ${SPEC}
-  echo "Group: Development/Tools"                                                   >> ${SPEC}
+  echo "Name: ${PACKAGE_NAME}"                                                               >> ${SPEC}
+  echo "Version: ${VER_MAJOR}.${VER_MINOR}"                                                  >> ${SPEC}
+  echo "Release: ${VER_BUILD}"                                                               >> ${SPEC}
+  echo "Packager:  Dragan Nikolic dnikolic@daetools.com"                                     >> ${SPEC}
+  echo "License: GNU GPL v3"                                                                 >> ${SPEC}
+  echo "URL: www.daetools.com"                                                               >> ${SPEC}
+  echo "Requires: boost-devel >= 1.41, PyQt4, numpy, scipy, python-matplotlib, blas, lapack" >> ${SPEC}
+  echo "ExclusiveArch: ${ARCH_RPM}"                                                          >> ${SPEC}
+  echo "Group: Development/Tools"                                                            >> ${SPEC}
 
   echo "%description"                                                               >> ${SPEC}
   echo "DAE Tools: A cross-platform equation-oriented process modelling, simulation and optimization software." >> ${SPEC}

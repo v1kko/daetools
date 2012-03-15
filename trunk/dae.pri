@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_custom_boost
+CONFIG += use_system_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -112,7 +112,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines pyCore cannot compile
 # The workaround is to set the following flags:
-unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
+#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 (32 bit machines)
 # When building for Mac-OS we build for all architectures - thus SSE flags are removed
@@ -352,9 +352,8 @@ SUPERLU_PATH    = ../superlu
 SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32::SUPERLU_LIBS          = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-linux-g++-32::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
-linux-g++-64::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+win32::SUPERLU_LIBS  = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
+unix::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
@@ -364,9 +363,8 @@ SUPERLU_MT_PATH    = ../superlu_mt
 SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
-win32::SUPERLU_MT_LIBS          = 
-linux-g++-32::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
-linux-g++-64::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+win32::SUPERLU_MT_LIBS  = 
+unix::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
 
 
 ######################################################################################
@@ -400,17 +398,10 @@ win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                         $${SUPERLU_LIBS} \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
-linux-g++-32::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-							   -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-							   -lumfpack -lamd \
-							    $${SUPERLU_LIBS} \
-							    $${BLAS_LAPACK_LIBS}
-
-linux-g++-64::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-							  -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-							  -lumfpack -lamd \
-							   $${SUPERLU_LIBS} \
-							   $${BLAS_LAPACK_LIBS}
+unix::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
+                       -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos -lumfpack -lamd \
+                       $${SUPERLU_LIBS} \
+                       $${BLAS_LAPACK_LIBS}
 
 
 #####################################################################################
