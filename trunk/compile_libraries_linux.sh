@@ -44,6 +44,7 @@ if [ ${Ncpu} -gt 1 ]; then
 fi
 
 export DAE_COMPILER_FLAGS
+echo $DAE_COMPILER_FLAGS
 
 vBONMIN=1.5.1
 vSUPERLU=4.1

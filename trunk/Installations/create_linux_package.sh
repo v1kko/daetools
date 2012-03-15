@@ -4,10 +4,8 @@ set -e
 
 case $1 in
   -h* ) echo "Usage:"
-        echo "create_linux_package.sh major minor build"
+        echo "create_linux_package.sh"
         echo " "
-        echo "Examples:"
-        echo "sh create_linux_package.sh 1 1 2"
         return
         ;;
 esac
@@ -28,13 +26,60 @@ SITE_PACK=
 RELEASE_DIR=${INSTALLATIONS_DIR}/../release
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
-DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
-CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
-DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+
+if [ ${HOST_ARCH} = "x86_64" ]; then
+  LIB=lib64
+  ARCH=amd64
+  ARCH_RPM=x86_64
+elif [ ${HOST_ARCH} = "armv5tejl" ]; then
+  LIB=lib
+  ARCH=armel
+  ARCH_RPM=armel
+elif [ ${HOST_ARCH} = "i386" ]; then
+  LIB=lib
+  ARCH=i386
+  ARCH_RPM=i386
+elif [ ${HOST_ARCH} = "i586" ]; then
+  LIB=lib
+  ARCH=i386
+  ARCH_RPM=i386
+elif [ ${HOST_ARCH} = "i686" ]; then
+  LIB=lib
+  ARCH=i386
+  ARCH_RPM=i386
+else
+  echo "ERROR: undefined architecture"
+  exit
+fi
+
+if [ ${PLATFORM} = "linux" ]; then
+  SO_EXT="so"
+  DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
+  CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
+  DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+
+elif [ ${PLATFORM} = "gnu/kfreebsd" ]; then
+  SO_EXT="so"
+  ARCH=kfreebsd-${ARCH}
+  DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
+  CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
+  DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+
+elif [ ${PLATFORM} = "darwin" ]; then
+  SO_EXT="so"
+  DISTRIBUTOR_ID="macosx"
+  CODENAME=`echo $(sw_vers -productVersion) | tr "[:upper:]" "[:lower:]"`
+  DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+
+else
+  echo "ERROR: undefined platform: ${PLATFORM}"
+  exit
+fi
+ 
 PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
-VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
-VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
-VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
+VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionMajor())"`
+VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionMinor())"`
+VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionBuild())"`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 IDAS=../idas/build
 BONMIN=../bonmin/build
@@ -54,40 +99,14 @@ if [ ! -n ${VER_MINOR} ]; then
 fi
 if [ ! -n ${VER_BUILD} ]; then
   echo "Invalid daetools version build number"
-  returncd ${TRUNK}
-
-fi
-
-if [ ${HOST_ARCH} = "x86_64" ]; then
-  LIB=lib64
-  ARCH=amd64
-  ARCH_RPM=x86_64
-elif [ ${HOST_ARCH} = "armv5tejl" ]; then
-  LIB=lib
-  ARCH=armel
-  ARCH_RPM=armel
-elif [ ${HOST_ARCH} = "i386" ]; then
-  LIB=lib
-  ARCH=i386
-  ARCH_RPM=i386
-elif [ ${HOST_ARCH} = "i686" ]; then
-  LIB=lib
-  ARCH=i386
-  ARCH_RPM=i386
-else
-  echo "ERROR: undefined architecture"
-  exit
-fi
-
-# Correct architecture for kFreeBSD
-if [ ${PLATFORM} = "gnu/kfreebsd" ]; then
-  ARCH=kfreebsd-${ARCH}
+  return
 fi
 
 USRLIB=/usr/${LIB}
 
 if [ "$1" = "cdae" ]; then
   PCKG_TYPE="tgz"
+
 elif [ ${DISTRIBUTOR_ID} = "debian" ]; then
   PCKG_TYPE="deb"
   if [ ${CODENAME} = "lenny" ]; then
@@ -95,18 +114,27 @@ elif [ ${DISTRIBUTOR_ID} = "debian" ]; then
   else
     SITE_PACK="dist-packages"
   fi
+
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   PCKG_TYPE="deb"
   SITE_PACK="dist-packages"
+
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   PCKG_TYPE="deb"
   SITE_PACK="dist-packages"
+
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   PCKG_TYPE="rpm"
   SITE_PACK="site-packages"
+
 elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
   PCKG_TYPE="rpm"
   SITE_PACK="site-packages"
+
+elif [ ${DISTRIBUTOR_ID} = "macosx" ]; then
+  PCKG_TYPE="dmg"
+  SITE_PACK="site-packages"
+
 else
   echo "ERROR: undefined type of a package"
   exit
@@ -218,60 +246,60 @@ mkdir ${BUILD_DIR}/usr/bin
 mkdir ${BUILD_DIR}${USRLIB}
 
 # Python extension modules and LA solvers
-cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
-cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
-cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyUnits.so            ${PACKAGE_NAME}/pyDAE
+cp ../release/pyCore.${SO_EXT}             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyActivity.${SO_EXT}         ${PACKAGE_NAME}/pyDAE
+cp ../release/pyDataReporting.${SO_EXT}    ${PACKAGE_NAME}/pyDAE
+cp ../release/pyIDAS.${SO_EXT}             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyUnits.${SO_EXT}            ${PACKAGE_NAME}/pyDAE
 
-if [ -e ../release/pyBONMIN.so ]; then
-  cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyBONMIN.${SO_EXT} ]; then
+  cp ../release/pyBONMIN.${SO_EXT}          ${PACKAGE_NAME}/solvers
 fi
 
-if [ -e ../release/pyIPOPT.so ]; then
-  cp ../release/pyIPOPT.so          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyIPOPT.${SO_EXT} ]; then
+  cp ../release/pyIPOPT.${SO_EXT}          ${PACKAGE_NAME}/solvers
 fi
 
-if [ -e ../release/pyNLOPT.so ]; then
-  cp ../release/pyNLOPT.so          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyNLOPT.${SO_EXT} ]; then
+  cp ../release/pyNLOPT.${SO_EXT}          ${PACKAGE_NAME}/solvers
 fi
 
-#if [ -e ../release/pyAmdACML.so ]; then
-#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyAmdACML.${SO_EXT} ]; then
+#  cp ../release/pyAmdACML.${SO_EXT}          ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyIntelMKL.so ]; then
-#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyIntelMKL.${SO_EXT} ]; then
+#  cp ../release/pyIntelMKL.${SO_EXT}         ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyLapack.so ]; then
-#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyLapack.${SO_EXT} ]; then
+#  cp ../release/pyLapack.${SO_EXT}           ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyMagma.so ]; then
-#  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyMagma.${SO_EXT} ]; then
+#  cp ../release/pyMagma.${SO_EXT}             ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyCUSP.so ]; then
-#  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyCUSP.${SO_EXT} ]; then
+#  cp ../release/pyCUSP.${SO_EXT}              ${PACKAGE_NAME}/solvers
 #fi
 
-if [ -e ../release/pySuperLU.so ]; then
-  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU.${SO_EXT} ]; then
+  cp ../release/pySuperLU.${SO_EXT}           ${PACKAGE_NAME}/solvers
 fi
-if [ -e ../release/pySuperLU_MT.so ]; then
-  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU_MT.${SO_EXT} ]; then
+  cp ../release/pySuperLU_MT.${SO_EXT}        ${PACKAGE_NAME}/solvers
 fi
-if [ -e ../release/pySuperLU_CUDA.so ]; then
-  cp ../release/pySuperLU_CUDA.so      ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU_CUDA.${SO_EXT} ]; then
+  cp ../release/pySuperLU_CUDA.${SO_EXT}      ${PACKAGE_NAME}/solvers
 fi
 
-#if [ -e ../release/pyIntelPardiso.so ]; then
-#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyIntelPardiso.${SO_EXT} ]; then
+#  cp ../release/pyIntelPardiso.${SO_EXT}     ${PACKAGE_NAME}/solvers
 #fi
 
-if [ -e ../release/pyTrilinos.so ]; then
-  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyTrilinos.${SO_EXT} ]; then
+  cp ../release/pyTrilinos.${SO_EXT}   ${PACKAGE_NAME}/solvers
 fi
 
 # Licences
@@ -318,8 +346,8 @@ cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 
 # Strip python extension modules
-find ${PACKAGE_NAME}/pyDAE   -name \*.so* | xargs strip
-find ${PACKAGE_NAME}/solvers -name \*.so* | xargs strip
+#find ${PACKAGE_NAME}/pyDAE   -name \*.${SO_EXT}* | xargs strip
+#find ${PACKAGE_NAME}/solvers -name \*.${SO_EXT}* | xargs strip
 
 echo "#!/usr/bin/env python " > setup.py
 echo "import sys " >> setup.py
@@ -347,6 +375,10 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   else
     python setup.py install --install-layout=deb --root=${BUILD_DIR}
   fi
+
+elif [ ${PCKG_TYPE} = "dmg" ]; then
+  python setup.py install --root=${BUILD_DIR}
+
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
 fi
@@ -365,27 +397,9 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \*.py        | xargs chmod +x
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
-# Magma libraries
-#if [ -e ${MAGMA}/lib/libmagma.so ]; then
-#  cp -d ${MAGMA}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-#fi
-#if [ -e ${MAGMA}/quark/lib/libquark.so ]; then
-#  cp -d ${MAGMA}/quark/lib/*.so*  ${BUILD_DIR}${USRLIB}
-#fi
-
-# SuperLU libraries
-#if [ -e ${SUPERLU}/lib/libsuperlu.so.4 ]; then
-#  cp -d ${SUPERLU}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-#fi
-
-# SuperLU_MT libraries
-#if [ -e ${SUPERLU_MT}/lib/libsuperlu_mt.so.2 ]; then
-#  cp -d ${SUPERLU_MT}/lib/*.so*  ${BUILD_DIR}${USRLIB}
-#fi
-
 # Change permissions and strip libraries in /usr/lib(64) 
-#chmod -x ${BUILD_DIR}${USRLIB}/*.so*
-#find ${BUILD_DIR}${USRLIB} -name \*.so* | xargs strip
+#chmod -x ${BUILD_DIR}${USRLIB}/*.${SO_EXT}*
+#find ${BUILD_DIR}${USRLIB} -name \*.${SO_EXT}* | xargs strip
 
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
@@ -471,9 +485,6 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   #SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
   #echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
   #echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
-  #echo "libmagma 0 libmagma.so (>= 0:0)"                     >> ${SHLIBS}
-  #echo "libmagmablas 0 libmagmablas.so (>= 0:0)"             >> ${SHLIBS}
-  #echo "libquark 0 libquark.so (>= 0:0)"                     >> ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
@@ -520,6 +531,16 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   chmod 0755 ${POSTINST}
 
   fakeroot dpkg -b ${BUILD_DIR}
+
+elif [ ${PCKG_TYPE} = "dmg" ]; then
+  MAC_INSTALL_SCRIPT=${BUILD_DIR}/install
+  echo "#!/bin/sh"                                    > ${MAC_INSTALL_SCRIPT}
+  echo "set -e"                                      >> ${MAC_INSTALL_SCRIPT}
+  echo "echo Copying daetools installation filesÉ"   >> ${MAC_INSTALL_SCRIPT}
+  echo "sudo cp -vR /Volumes/${BUILD_DIR}/*  /"      >> ${MAC_INSTALL_SCRIPT}
+  chmod 0755 ${MAC_INSTALL_SCRIPT}
+  
+  hdiutil create ${BUILD_DIR}.dmg -srcfolder ./${BUILD_DIR} -ov
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   cd ${BUILD_DIR}

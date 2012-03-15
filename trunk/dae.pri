@@ -38,9 +38,9 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_system_boost
+CONFIG += use_custom_boost
 BOOST_MAJOR = 1
-BOOST_MINOR = 42
+BOOST_MINOR = 49
 BOOST_BUILD = 0
 
 # Set CONFIG += enable_mpi to use MPI libraries
@@ -59,11 +59,11 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
 linux-g++-32::SHARED_LIB_EXT = so
 linux-g++-64::SHARED_LIB_EXT = so
-macx-g++::SHARED_LIB_EXT     = dylib
+macx-g++::SHARED_LIB_EXT     = so
 
-linux-g++-32::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
-linux-g++-64::SHARED_LIB_APPEND = $${SHARED_LIB_EXT}.$${VERSION}
-macx-g++::SHARED_LIB_APPEND     = $${VERSION}.$${SHARED_LIB_EXT}
+linux-g++-32::SHARED_LIB_APPEND = so.$${VERSION}
+linux-g++-64::SHARED_LIB_APPEND = so.$${VERSION}
+macx-g++::SHARED_LIB_APPEND     = $${VERSION}.dylib
 
 CONFIG(debug, debug|release):message(debug){
     DAE_DEST_DIR = ../debug
@@ -112,7 +112,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines pyCore cannot compile
 # The workaround is to set the following flags:
-#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
+unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 (32 bit machines)
 # When building for Mac-OS we build for all architectures - thus SSE flags are removed
