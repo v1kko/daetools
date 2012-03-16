@@ -22,7 +22,6 @@ PCKG_TYPE=
 ARCH=
 LIB=
 ARCH_RPM=
-SITE_PACK=
 RELEASE_DIR=${INSTALLATIONS_DIR}/../release
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
@@ -81,6 +80,8 @@ VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE
 VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionMinor())"`
 VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionBuild())"`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
+SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
+
 IDAS=../idas/build
 BONMIN=../bonmin/build
 NLOPT=../nlopt
@@ -109,31 +110,21 @@ if [ "$1" = "cdae" ]; then
 
 elif [ ${DISTRIBUTOR_ID} = "debian" ]; then
   PCKG_TYPE="deb"
-  if [ ${CODENAME} = "lenny" ]; then
-    SITE_PACK="site-packages"
-  else
-    SITE_PACK="dist-packages"
-  fi
 
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   PCKG_TYPE="deb"
-  SITE_PACK="dist-packages"
 
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   PCKG_TYPE="deb"
-  SITE_PACK="dist-packages"
 
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   PCKG_TYPE="rpm"
-  SITE_PACK="site-packages"
 
 elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
   PCKG_TYPE="rpm"
-  SITE_PACK="site-packages"
 
 elif [ ${DISTRIBUTOR_ID} = "macosx" ]; then
   PCKG_TYPE="dmg"
-  SITE_PACK="site-packages"
 
 else
   echo "ERROR: undefined type of a package"
@@ -155,7 +146,7 @@ echo "    host architecture: " ${HOST_ARCH}
 echo "    architecture:      " ${ARCH}
 echo "    lib prefix:        " ${LIB}
 echo "    python version:    " ${PYTHON_VERSION}
-echo "    site-packages dir: " ${SITE_PACK}
+echo "    site-packages dir: " ${SITE_PACKAGES_DIR}
 echo "    /usr/lib dir:      " ${USRLIB}
 echo " " 
 read -p " Proceed [y/n]? " do_proceed
@@ -383,12 +374,15 @@ elif [ ${PCKG_TYPE} = "rpm" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
 fi
 
-if [ -d ${BUILD_DIR}/usr/lib ]; then
-  PYTHON_USRLIB=/usr/lib
-else
-  PYTHON_USRLIB=/usr/lib64
-fi
-DAE_TOOLS_DIR=${PYTHON_USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
+#if [ -d ${BUILD_DIR}/usr/lib ]; then
+#  PYTHON_USRLIB=/usr/lib
+#else
+#  PYTHON_USRLIB=/usr/lib64
+#fi
+#DAE_TOOLS_DIR=${PYTHON_USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
+
+DAE_TOOLS_DIR=${SITE_PACKAGES_DIR}/${PACKAGE_NAME}
+
 
 # Delete all .pyc files
 find ${BUILD_DIR} -name \*.pyc | xargs rm
@@ -427,13 +421,20 @@ cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
 gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
 
 # Config
-mkdir ${BUILD_DIR}/etc
-mkdir ${BUILD_DIR}/etc/daetools
+if [ ${PLATFORM} = "darwin" ]; then
+  CONFIG_DIR=${BUILD_DIR}/private
+  mkdir ${CONFIG_DIR}
+else
+  CONFIG_DIR=${BUILD_DIR}
+fi
 
-cp ../daetools.cfg  ${BUILD_DIR}/etc/daetools
-cp ../bonmin.cfg    ${BUILD_DIR}/etc/daetools
-chmod go-wx ${BUILD_DIR}/etc/daetools/daetools.cfg
-chmod go-wx ${BUILD_DIR}/etc/daetools/bonmin.cfg
+mkdir ${CONFIG_DIR}/etc
+mkdir ${CONFIG_DIR}/etc/daetools
+
+cp ../daetools.cfg  ${CONFIG_DIR}/etc/daetools
+cp ../bonmin.cfg    ${CONFIG_DIR}/etc/daetools
+chmod go-wx ${CONFIG_DIR}/etc/daetools/daetools.cfg
+chmod go-wx ${CONFIG_DIR}/etc/daetools/bonmin.cfg
 
 # Shortcuts
 mkdir ${BUILD_DIR}/usr/share/applications
@@ -533,14 +534,21 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   fakeroot dpkg -b ${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "dmg" ]; then
-  MAC_INSTALL_SCRIPT=${BUILD_DIR}/install
-  echo "#!/bin/sh"                                    > ${MAC_INSTALL_SCRIPT}
-  echo "set -e"                                      >> ${MAC_INSTALL_SCRIPT}
-  echo "echo Copying daetools installation filesÉ"   >> ${MAC_INSTALL_SCRIPT}
-  echo "sudo cp -vR /Volumes/${BUILD_DIR}/*  /"      >> ${MAC_INSTALL_SCRIPT}
-  chmod 0755 ${MAC_INSTALL_SCRIPT}
+  #MAC_INSTALL_SCRIPT=${BUILD_DIR}/install
+  #echo "#!/bin/sh"                                    > ${MAC_INSTALL_SCRIPT}
+  #echo "set -e"                                      >> ${MAC_INSTALL_SCRIPT}
+  #echo "echo Copying daetools installation filesÉ"   >> ${MAC_INSTALL_SCRIPT}
+  #echo "sudo cp -vR /Volumes/${BUILD_DIR}/*  /"      >> ${MAC_INSTALL_SCRIPT}
+  #chmod 0755 ${MAC_INSTALL_SCRIPT}
   
-  hdiutil create ${BUILD_DIR}.dmg -srcfolder ./${BUILD_DIR} -ov
+  mkdir ${BUILD_DIR}/Resources
+  cp ../licence.txt ${BUILD_DIR}/Resources/Licence.rtf
+  chmod a+rx ${BUILD_DIR}/Resources/*
+  
+  sudo chown -R root:staff ${BUILD_DIR}
+  sudo chmod -R 1775 ${BUILD_DIR}
+
+  # hdiutil create ${BUILD_DIR}.dmg -srcfolder ./${BUILD_DIR} -ov
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   cd ${BUILD_DIR}
@@ -612,6 +620,6 @@ fi
 
 # Clean up
 rm -r ${PACKAGE_NAME}
-rm -r ${BUILD_DIR}
+# rm -r ${BUILD_DIR}
 rm -r build
 rm setup.py

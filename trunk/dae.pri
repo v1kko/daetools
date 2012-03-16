@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_system_boost
+CONFIG += use_custom_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -321,17 +321,18 @@ win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 					  libOsiCbc.lib \
 					  libOsiClp.lib \
 					  libOsi.lib
-unix::BONMIN_LIBS  =    -ldl $${BLAS_LAPACK_LIBS} -lz \
-						-lbonmin \
-						-lCbc \
-						-lCbcSolver \
-						-lCgl \
-						-lClp \
-						-lCoinUtils \
-						-lipopt \
-						-lOsiCbc \
-						-lOsiClp \
-						-lOsi
+unix::BONMIN_LIBS  =  $${BLAS_LAPACK_LIBS} \
+                      -lbonmin \
+                      -lCbc \
+                      -lCbcSolver \
+                      -lCgl \
+                      -lClp \
+                      -lCoinUtils \
+                      -lipopt \
+                      -lOsiCbc \
+                      -lOsiClp \
+                      -lOsi \
+                      -ldl -lz -lbz2
 
 
 #####################################################################################

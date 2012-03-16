@@ -157,7 +157,7 @@ if [ ! -e bonmin ]; then
   cd ../..
   mkdir -p build
   cd build
-  ../configure --enable-shared=no --enable-static=yes CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
+  ../configure --disable-dependency-tracking --enable-shared=no --enable-static=yes ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd bonmin/build
@@ -185,7 +185,7 @@ if [ ! -e nlopt ]; then
   cd nlopt
   mkdir build
   cd build
-  ../configure -prefix=${TRUNK}/nlopt/build CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
+  ../configure --disable-dependency-tracking -prefix=${TRUNK}/nlopt/build CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd nlopt/build
@@ -218,6 +218,12 @@ if [ ! -e trilinos ]; then
 
   echo $TRILINOS_HOME
 
+  if [ ${PLATFORM} = "Darwin" ]; then
+    SUITE_SPARSE_DIR="/opt/local/include/ufsparse"
+  else
+    SUITE_SPARSE_DIR="/usr/include/suitesparse"
+  fi
+  
   cmake \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
@@ -232,7 +238,7 @@ if [ ! -e trilinos ]; then
     -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
     -DTPL_SuperLU_LIBRARIES:STRING=superlu_4.1 \
     -DTPL_ENABLE_UMFPACK:BOOL=ON \
-    -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=/usr/include/suitesparse \
+    -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${SUITE_SPARSE_DIR} \
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \

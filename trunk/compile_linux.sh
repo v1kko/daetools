@@ -41,27 +41,40 @@ compile () {
   DIR=$1
   MAKEARG=$2
   CONFIG=$3
-  echo "Compiling the project $DIR ..."
-
+  echo "****************************************************************"
+  echo "Compiling the project $DIR ... ($1, $2, $3)"
+  echo "****************************************************************"
+  
   if [ ${DIR} = "dae" ]; then
     cd ${TRUNK}
+  elif [ ${DIR} = "pyCore" ]; then
+    cd ${TRUNK}/pyCore
+  elif [ ${DIR} = "pyActivity" ]; then
+    cd ${TRUNK}/pyActivity
+  elif [ ${DIR} = "pyDataReporting" ]; then
+    cd ${TRUNK}/pyDataReporting
+  elif [ ${DIR} = "pyIDAS" ]; then
+    cd ${TRUNK}/pyIDAS
+  elif [ ${DIR} = "pyUnits" ]; then
+    cd ${TRUNK}/pyUnits
+  elif [ ${DIR} = "pySuperLU" ]; then
+    cd ${TRUNK}/pySuperLU
+  elif [ ${DIR} = "pyBonmin" ]; then
+    cd ${TRUNK}/pyBonmin
+  elif [ ${DIR} = "pyTrilinos" ]; then
+    cd ${TRUNK}/pyTrilinos
   else
     cd ${DIR}
   fi
 
-  echo 
-  echo "*** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
-  echo 
+  echo "***** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
   qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}
-  
-  echo 
-  echo "*** EXECUTE: make clean -w"
-  echo 
+  return 
+    
+  echo "***** EXECUTE: make clean -w"
   make clean -w
   
-  echo 
-  echo "*** EXECUTE: make ${MAKEARG} -w"
-  echo 
+  echo "***** EXECUTE: make ${MAKEARG} -w"
   make ${MAKEARG} -w
   
   cd ${TRUNK}
@@ -69,6 +82,14 @@ compile () {
 }
 
 case ${PROJECTS} in
+  py_dae) echo Compiling only DAE python wrappers...
+          compile pyCore           "-j1"
+          compile pyActivity       "-j1"
+          compile pyDataReporting  "-j1"
+          compile pyIDAS           "-j1"
+          compile pyUnits          "-j1"
+          ;;
+
   all)  echo Compile ALL projects
         if [ ! -d ${TRUNK}/release ]; then
           mkdir ${TRUNK}/release
