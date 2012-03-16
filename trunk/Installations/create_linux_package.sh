@@ -368,7 +368,12 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   fi
 
 elif [ ${PCKG_TYPE} = "dmg" ]; then
-  python setup.py install --root=${BUILD_DIR}
+  mkdir -p ${BUILD_DIR}/daetools
+  
+  cp ./setup.py ${BUILD_DIR}
+  cp -R ${PACKAGE_NAME}/* ${BUILD_DIR}/daetools
+  
+  # python setup.py install --root=${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   python setup.py install --prefix=/usr --root=${BUILD_DIR}
@@ -391,34 +396,76 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \*.py        | xargs chmod +x
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
-# Change permissions and strip libraries in /usr/lib(64) 
-#chmod -x ${BUILD_DIR}${USRLIB}/*.${SO_EXT}*
-#find ${BUILD_DIR}${USRLIB} -name \*.${SO_EXT}* | xargs strip
-
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
-echo "#!/bin/sh"                       > ${USRBIN}/daeplotter
-echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${USRBIN}/daeplotter
-echo "python daePlotter.py"           >> ${USRBIN}/daeplotter
-chmod +x ${USRBIN}/daeplotter
+if [ ${PLATFORM} = "darwin" ]; then
+  mkdir -p ${BUILD_DIR}/Applications/daePlotter.app/Contents/MacOS
+  mkdir -p ${BUILD_DIR}/Applications/daeExamples.app/Contents/MacOS
+  
+  DAE_PLOTTER=${BUILD_DIR}/Applications/daePlotter.app/Contents/MacOS/daeplotter
+  DAE_EXAMPLES=${BUILD_DIR}/Applications/daeExamples.app/Contents/MacOS/daeexamples
+  
+  echo "#!/bin/sh"                       > ${DAE_PLOTTER}
+  echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${DAE_PLOTTER}
+  echo "python daePlotter.py"           >> ${DAE_PLOTTER}
+  chmod +x ${DAE_PLOTTER}
 
-echo "#!/bin/sh"                     > ${USRBIN}/daeexamples
-echo "cd ${DAE_TOOLS_DIR}/examples" >> ${USRBIN}/daeexamples
-echo "python daeRunExamples.py"     >> ${USRBIN}/daeexamples
-chmod +x ${USRBIN}/daeexamples
+  echo "#!/bin/sh"                     > ${DAE_EXAMPLES}
+  echo "cd ${DAE_TOOLS_DIR}/examples" >> ${DAE_EXAMPLES}
+  echo "python daeRunExamples.py"     >> ${DAE_EXAMPLES}
+  chmod +x ${DAE_EXAMPLES}
 
-mkdir ${BUILD_DIR}/usr/share
+else
+  echo "#!/bin/sh"                       > ${USRBIN}/daeplotter
+  echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${USRBIN}/daeplotter
+  echo "python daePlotter.py"           >> ${USRBIN}/daeplotter
+  chmod +x ${USRBIN}/daeplotter
 
-# Man page
-mkdir ${BUILD_DIR}/usr/share/man
-mkdir ${BUILD_DIR}/usr/share/man/man1
-gzip -c -9 ../daetools.1 > ${BUILD_DIR}/usr/share/man/man1/daetools.1.gz
+  echo "#!/bin/sh"                     > ${USRBIN}/daeexamples
+  echo "cd ${DAE_TOOLS_DIR}/examples" >> ${USRBIN}/daeexamples
+  echo "python daeRunExamples.py"     >> ${USRBIN}/daeexamples
+  chmod +x ${USRBIN}/daeexamples
 
-# Changelog file
-mkdir ${BUILD_DIR}/usr/share/doc
-mkdir ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
-cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
-gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
+  mkdir ${BUILD_DIR}/usr/share
+
+  # Man page
+  mkdir ${BUILD_DIR}/usr/share/man
+  mkdir ${BUILD_DIR}/usr/share/man/man1
+  gzip -c -9 ../daetools.1 > ${BUILD_DIR}/usr/share/man/man1/daetools.1.gz
+
+  # Changelog file
+  mkdir ${BUILD_DIR}/usr/share/doc
+  mkdir ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
+  cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
+  gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
+
+  # Shortcuts
+  mkdir ${BUILD_DIR}/usr/share/applications
+
+  daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
+  echo "[Desktop Entry]"                                 > ${daePlotter_DESKTOP}
+  echo "Name=daePlotter"                                >> ${daePlotter_DESKTOP}
+  echo "GenericName=Equation-Oriented modelling tool"   >> ${daePlotter_DESKTOP}
+  echo "Comment=DAE Tools Plotter"                      >> ${daePlotter_DESKTOP}
+  echo "Categories=GNOME;Development;"                  >> ${daePlotter_DESKTOP}
+  echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
+  echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
+  echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
+  echo "Type=Application"                               >> ${daePlotter_DESKTOP}
+  echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
+
+  daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Examples.desktop
+  echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
+  echo "Name=DAE Tools Examples"                        >> ${daeExamples_DESKTOP}
+  echo "GenericName=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
+  echo "Comment=DAE Tools Examples"                     >> ${daeExamples_DESKTOP}
+  echo "Categories=GNOME;Development;"                  >> ${daeExamples_DESKTOP}
+  echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
+  echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
+  echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
+  echo "Type=Application"                               >> ${daeExamples_DESKTOP}
+  echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
+fi
 
 # Config
 if [ ${PLATFORM} = "darwin" ]; then
@@ -435,33 +482,6 @@ cp ../daetools.cfg  ${CONFIG_DIR}/etc/daetools
 cp ../bonmin.cfg    ${CONFIG_DIR}/etc/daetools
 chmod go-wx ${CONFIG_DIR}/etc/daetools/daetools.cfg
 chmod go-wx ${CONFIG_DIR}/etc/daetools/bonmin.cfg
-
-# Shortcuts
-mkdir ${BUILD_DIR}/usr/share/applications
-
-daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
-echo "[Desktop Entry]"                                 > ${daePlotter_DESKTOP}
-echo "Name=daePlotter"                                >> ${daePlotter_DESKTOP}
-echo "GenericName=Equation-Oriented modelling tool"   >> ${daePlotter_DESKTOP}
-echo "Comment=DAE Tools Plotter"                      >> ${daePlotter_DESKTOP}
-echo "Categories=GNOME;Development;"                  >> ${daePlotter_DESKTOP}
-echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
-echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
-echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
-echo "Type=Application"                               >> ${daePlotter_DESKTOP}
-echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
-
-daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Examples.desktop
-echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
-echo "Name=DAE Tools Examples"                        >> ${daeExamples_DESKTOP}
-echo "GenericName=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
-echo "Comment=DAE Tools Examples"                     >> ${daeExamples_DESKTOP}
-echo "Categories=GNOME;Development;"                  >> ${daeExamples_DESKTOP}
-echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
-echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
-echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
-echo "Type=Application"                               >> ${daeExamples_DESKTOP}
-echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
 
 if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
@@ -535,15 +555,14 @@ if [ ${PCKG_TYPE} = "deb" ]; then
 
 elif [ ${PCKG_TYPE} = "dmg" ]; then
   #MAC_INSTALL_SCRIPT=${BUILD_DIR}/install
-  #echo "#!/bin/sh"                                    > ${MAC_INSTALL_SCRIPT}
-  #echo "set -e"                                      >> ${MAC_INSTALL_SCRIPT}
-  #echo "echo Copying daetools installation filesÉ"   >> ${MAC_INSTALL_SCRIPT}
-  #echo "sudo cp -vR /Volumes/${BUILD_DIR}/*  /"      >> ${MAC_INSTALL_SCRIPT}
+  #echo "#!/bin/sh"                           > ${MAC_INSTALL_SCRIPT}
+  #echo "set -e"                             >> ${MAC_INSTALL_SCRIPT}
+  #echo "sudo python setup.py install"       >> ${MAC_INSTALL_SCRIPT}
   #chmod 0755 ${MAC_INSTALL_SCRIPT}
   
-  mkdir ${BUILD_DIR}/Resources
-  cp ../licence.txt ${BUILD_DIR}/Resources/Licence.rtf
-  chmod a+rx ${BUILD_DIR}/Resources/*
+  #mkdir ${BUILD_DIR}/Resources
+  #cp ../licence.txt ${BUILD_DIR}/Resources/Licence.rtf
+  #chmod a+rx ${BUILD_DIR}/Resources/*
   
   sudo chown -R root:staff ${BUILD_DIR}
   sudo chmod -R 1775 ${BUILD_DIR}
@@ -619,7 +638,12 @@ else
 fi
 
 # Clean up
+if [ ${PCKG_TYPE} = "dmg" ]; then
+  # Do not remove the build dir for we need it to create a mac os package 
+  echo "${BUILD_DIR} not removed"
+else
+  rm -r ${BUILD_DIR}
+fi
 rm -r ${PACKAGE_NAME}
-# rm -r ${BUILD_DIR}
 rm -r build
 rm setup.py
