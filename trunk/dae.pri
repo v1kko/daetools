@@ -166,15 +166,22 @@ linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINO
 linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 macx-g++::PYTHONDIR             = /System/Library/Frameworks/Python.framework/Versions/$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
-unix::PYTHON_INCLUDE_DIR        = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
-                                  /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                                  /usr/share/pyshared
-macx-g++::PYTHON_INCLUDE_DIR    = $${PYTHONDIR}/Extras/lib/python \
-                                  $${PYTHONDIR}/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+linux-g++-32::PYTHON_INCLUDE_DIR = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
+                                   /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                                   /usr/share/pyshared
+linux-g++-64::PYTHON_INCLUDE_DIR = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
+                                   /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                                   /usr/share/pyshared
+macx-g++::PYTHON_INCLUDE_DIR     = $${PYTHONDIR}/Extras/lib/python \
+                                   $${PYTHONDIR}/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 
-unix::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages \
-                                  $${PYTHONDIR}/site-packages
-unix::PYTHON_LIB_DIR            =
+linux-g++-32::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages $${PYTHONDIR}/site-packages
+linux-g++-64::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages $${PYTHONDIR}/site-packages
+macx-g++::PYTHON_SITE_PACKAGES_DIR      = 
+
+linux-g++-32::PYTHON_LIB_DIR = /usr/lib
+linux-g++-64::PYTHON_LIB_DIR = /usr/lib64
+macx-g++::PYTHON_LIB_DIR     = 
 
 
 #####################################################################################
@@ -206,15 +213,20 @@ macx-g++::GFORTRAN     = -lgfortran
 #       want Boost.Build to be installed (perhaps not needed for GNU/Linux and MacOS)
 #     - Add PREFIX\bin to your PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
 # 2) Build boost libraries (toolset=msvc or gcc; both static|shared)
-#      bjam --build-dir=./build  
-#      --with-date_time --with-python --with-system --with-regex --with-serialization --with-thread 
-#      variant=release link=static,shared threading=multi runtime-link=shared
+#      bjam --build-dir=./build --buildid=daetools 
+#           --with-date_time --with-system --with-regex --with-serialization --with-thread 
+#           variant=release link=static,shared threading=multi runtime-link=shared
 #    For MacOS in order to build universal binaries (x86, x86_64, ppc, ppc64) this should be added:
 #      macosx-version-min=10.5 architecture=combined address-model=32_64
-#    The Python version could be set as well, if necessary (for any platform):
-#    a) --with-python-version=2.7
-#    b) in user-config.jam located in $BOOST_BUILD or $HOME directory
-#       Add line: using python : 2.7 ;
+#    The Python library should be built separately:
+#      a) in user-config.jam located in $BOOST_BUILD or $HOME directory
+#           using python : 2.7 ;
+#           using python : 2.6 ;
+#      b)
+#           bjam --debug-building --build-dir=./build --buildid=daetools-py27 --with-python python=2.7 
+#                variant=release link=static,shared threading=multi runtime-link=shared
+#           bjam --debug-building --build-dir=./build --buildid=daetools-py26 --with-python python=2.6 
+#                variant=release link=static,shared threading=multi runtime-link=shared
 #####################################################################################
 win32::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 win32::BOOSTLIBPATH     = $${BOOSTDIR}/lib
@@ -231,8 +243,13 @@ unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 use_custom_boost { 
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
+unix::BOOST_PYTHON_LIB = -L$${BOOSTLIBPATH} \
+                         -lboost_python-daetools \
+                         -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+unix::BOOST_LIBS       = -L$${BOOSTLIBPATH} \
+                         -lboost_system-daetools \
+                         -lboost_thread-daetools \
+                         $${RT}
 }
 
 
@@ -312,27 +329,17 @@ BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 
 win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-					  libBonmin.lib \
-					  libIpopt.lib \
-					  libCbc.lib \
-					  libCgl.lib \
-					  libClp.lib \
-					  libCoinUtils.lib \
-					  libOsiCbc.lib \
-					  libOsiClp.lib \
-					  libOsi.lib
-unix::BONMIN_LIBS  =  $${BLAS_LAPACK_LIBS} \
-                      -lbonmin \
-                      -lCbc \
-                      -lCbcSolver \
-                      -lCgl \
-                      -lClp \
-                      -lCoinUtils \
-                      -lipopt \
-                      -lOsiCbc \
-                      -lOsiClp \
-                      -lOsi \
-                      -ldl -lz -lbz2
+					  libBonmin.lib libIpopt.lib libCbc.lib \
+					  libCgl.lib libClp.lib libCoinUtils.lib \
+					  libOsiCbc.lib libOsiClp.lib libOsi.lib
+linux-g++-*::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
+                           -lClp -lCoinUtils -lipopt -lOsiCbc \
+                           -lOsiClp -lOsi \
+                           $${BLAS_LAPACK_LIBS} -ldl -lz
+macx-g++::BONMIN_LIBS  =  -lbonmin -lCbc -lCbcSolver -lCgl \
+                           -lClp -lCoinUtils -lipopt -lOsiCbc \
+                           -lOsiClp -lOsi \
+                           $${BLAS_LAPACK_LIBS} -ldl -lz -lbz2
 
 
 #####################################################################################
