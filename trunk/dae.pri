@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_system_boost
+CONFIG += use_custom_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -48,7 +48,7 @@ BOOST_BUILD = 0
 # Build universal binaries for MAC OS-X
 # There is a problem with ppc64 under OSX 10.6 so it is excluded
 # Otherwise ppc64 should be added as well
-macx-g++::CONFIG += x86 ppc x86_64
+macx-g++::CONFIG += x86 x86_64
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -146,6 +146,7 @@ use_system_python {
 PYTHONDIR                = 
 PYTHON_INCLUDE_DIR       = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
 PYTHON_SITE_PACKAGES_DIR = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+PYTHON_LIB_DIR           = $$system(python -c \"import sys; print(sys.prefix)\")/lib
 PYTHON_MAJOR             = $$system(python -c \"import sys; print sys.version_info[0]\")
 PYTHON_MINOR             = $$system(python -c \"import sys; print sys.version_info[1]\")
 message(use_system_python: $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR} - $${PYTHON_MAJOR}.$${PYTHON_MINOR})
@@ -220,11 +221,11 @@ use_custom_boost {
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB = -L$${BOOSTLIBPATH} \
-                         -lboost_python-daetools \
-                         -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+                         -lboost_python \
+                         -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOST_LIBS       = -L$${BOOSTLIBPATH} \
-                         -lboost_system-daetools \
-                         -lboost_thread-daetools \
+                         -lboost_system \
+                         -lboost_thread \
                          $${RT}
 }
 

@@ -1,6 +1,7 @@
 #ifndef DAE_PYTHON_WRAPS_H
 #define DAE_PYTHON_WRAPS_H
 
+#include <python.h>
 #include <string>
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>

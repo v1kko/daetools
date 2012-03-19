@@ -1,6 +1,7 @@
 #ifndef PYTHON_WRAPS_H
 #define PYTHON_WRAPS_H
 
+#include <python.h>
 #include <string>
 #include <map>
 #include <vector>

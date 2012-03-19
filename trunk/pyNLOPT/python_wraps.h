@@ -7,6 +7,7 @@
 #pragma warning(disable: 4275)
 #endif
 
+#include <python.h>
 #include <string>
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>

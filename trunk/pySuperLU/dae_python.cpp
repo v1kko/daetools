@@ -1,3 +1,4 @@
+#include <python.h>
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
