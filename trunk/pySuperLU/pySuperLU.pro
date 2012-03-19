@@ -24,9 +24,10 @@ shellSuperLU_CUDA {
 }
 
 INCLUDEPATH += $${BOOSTDIR} \
-    $${PYTHON_INCLUDE_DIR} \
-    $${PYTHON_SITE_PACKAGES_DIR} \
-    $${SUNDIALS_INCLUDE}
+               $${PYTHON_INCLUDE_DIR} \
+               $${PYTHON_SITE_PACKAGES_DIR} \
+               $${NUMPY_INCLUDE_DIR} \
+               $${SUNDIALS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 

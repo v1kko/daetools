@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "python_wraps.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
-#include <numpy/core/include/numpy/noprefix.h>
+#include <noprefix.h>
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pyActivity)

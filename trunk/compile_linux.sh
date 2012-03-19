@@ -4,7 +4,7 @@ set -e
 
 if [ "$1" = "-help" ]; then
   echo "Usage:"
-  echo "compile_linux all | dae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt | cusp"
+  echo "compile_linux all | dae | pydae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt"
   return
 fi
 
@@ -81,13 +81,13 @@ compile () {
 }
 
 case ${PROJECTS} in
-  py_dae) echo Compiling only DAE python wrappers...
-          compile pyCore           "-j1"
-          compile pyActivity       "-j1"
-          compile pyDataReporting  "-j1"
-          compile pyIDAS           "-j1"
-          compile pyUnits          "-j1"
-          ;;
+  pydae) echo Compiling only DAE python wrappers...
+         compile pyCore           "-j1"
+         compile pyActivity       "-j1"
+         compile pyDataReporting  "-j1"
+         compile pyIDAS           "-j1"
+         compile pyUnits          "-j1"
+         ;;
 
   all)  echo Compile ALL projects
         if [ ! -d ${TRUNK}/release ]; then

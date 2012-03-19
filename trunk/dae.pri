@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_custom_boost
+CONFIG += use_system_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -140,48 +140,24 @@ linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 
 
 #####################################################################################
-#                                   PYTHON
-#####################################################################################
-# Numpy and Scipy must be installed
-# Debian Squeeze: sometimes there are problems with _numpyconfig.h
-# Add: /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy 
-# to:  PYTHON_INCLUDE_DIR 
+#                                PYTHON + NUMPY
 #####################################################################################
 use_system_python {
-PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
-PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
-message(use_system_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
+PYTHONDIR                = 
+PYTHON_INCLUDE_DIR       = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+PYTHON_SITE_PACKAGES_DIR = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+PYTHON_MAJOR             = $$system(python -c \"import sys; print sys.version_info[0]\")
+PYTHON_MINOR             = $$system(python -c \"import sys; print sys.version_info[1]\")
+message(use_system_python: $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR} - $${PYTHON_MAJOR}.$${PYTHON_MINOR})
 }
 
 use_custom_python { 
 message(use_custom_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
 }
 
-win32::PYTHONDIR                = C:\Python$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::PYTHON_INCLUDE_DIR       = $${PYTHONDIR}\include
-win32::PYTHON_SITE_PACKAGES_DIR = $${PYTHONDIR}\Lib\site-packages
-win32::PYTHON_LIB_DIR           = $${PYTHONDIR}\libs
-
-linux-g++-32::PYTHONDIR         = /usr/lib/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-linux-g++-64::PYTHONDIR         = /usr/lib64/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-macx-g++::PYTHONDIR             = /System/Library/Frameworks/Python.framework/Versions/$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-
-linux-g++-32::PYTHON_INCLUDE_DIR = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
-                                   /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                                   /usr/share/pyshared
-linux-g++-64::PYTHON_INCLUDE_DIR = /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
-                                   /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                                   /usr/share/pyshared
-macx-g++::PYTHON_INCLUDE_DIR     = $${PYTHONDIR}/Extras/lib/python \
-                                   $${PYTHONDIR}/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-
-linux-g++-32::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages $${PYTHONDIR}/site-packages
-linux-g++-64::PYTHON_SITE_PACKAGES_DIR  = $${PYTHONDIR}/dist-packages $${PYTHONDIR}/site-packages
-macx-g++::PYTHON_SITE_PACKAGES_DIR      = 
-
-linux-g++-32::PYTHON_LIB_DIR = /usr/lib
-linux-g++-64::PYTHON_LIB_DIR = /usr/lib64
-macx-g++::PYTHON_LIB_DIR     = 
+win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy
+linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_INCLUDE_DIR}/numpy
+macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy
 
 
 #####################################################################################

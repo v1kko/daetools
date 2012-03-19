@@ -6,6 +6,7 @@ TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
+               $${NUMPY_INCLUDE_DIR} \
                $${SUNDIALS_INCLUDE} \
 	           $${MPI_INCLUDE}
 
