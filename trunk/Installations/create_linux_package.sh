@@ -52,35 +52,45 @@ else
 fi
 
 if [ ${PLATFORM} = "linux" ]; then
-  SO_EXT="so"
+  SO="so"
   DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
   CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
   DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 
 elif [ ${PLATFORM} = "gnu/kfreebsd" ]; then
-  SO_EXT="so"
+  SO="so"
   ARCH=kfreebsd-${ARCH}
   DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
   CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
   DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
 
 elif [ ${PLATFORM} = "darwin" ]; then
-  SO_EXT="so"
+  SO="dylib"
   DISTRIBUTOR_ID="macosx"
   CODENAME=`echo $(sw_vers -productVersion) | tr "[:upper:]" "[:lower:]"`
-  DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+  DISTRO=${DISTRIBUTOR_ID}
 
 else
   echo "ERROR: undefined platform: ${PLATFORM}"
   exit
 fi
  
-PYTHON_VERSION=`python -c "import sys; print (\"%d.%d\" % (sys.version_info[0], sys.version_info[1]))"`
-VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionMajor())"`
-VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionMinor())"`
-VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.${SO_EXT}'); print (\"%d\" % pyCore.daeVersionBuild())"`
+PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
+PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
+VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
+VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
+VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
+
+# BOOST
+BOOST_MAJOR=1
+BOOST_MINOR=49
+BOOST_BUILD=0
+BOOST_PYTHON_LIB_NAME=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+BOOST_PYTHON_LIB=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}.${SO}
+BOOST_VERSION=${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_BUILD}
 
 IDAS=../idas/build
 BONMIN=../bonmin/build
@@ -124,7 +134,7 @@ elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
   PCKG_TYPE="rpm"
 
 elif [ ${DISTRIBUTOR_ID} = "macosx" ]; then
-  PCKG_TYPE="dmg"
+  PCKG_TYPE="distutils.tar.gz"
 
 else
   echo "ERROR: undefined type of a package"
@@ -133,7 +143,11 @@ fi
 
 TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
 RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
-BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
+if [ ${PLATFORM} = "darwin" ]; then
+  BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${DISTRO}
+else
+  BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
+fi
 USRBIN=${BUILD_DIR}/usr/bin
 
 echo " "
@@ -146,6 +160,7 @@ echo "    host architecture: " ${HOST_ARCH}
 echo "    architecture:      " ${ARCH}
 echo "    lib prefix:        " ${LIB}
 echo "    python version:    " ${PYTHON_VERSION}
+echo "    boost version:     " ${BOOST_VERSION}
 echo "    site-packages dir: " ${SITE_PACKAGES_DIR}
 echo "    /usr/lib dir:      " ${USRLIB}
 echo " " 
@@ -232,65 +247,65 @@ if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
 fi
 mkdir ${BUILD_DIR}
-mkdir ${BUILD_DIR}/usr
-mkdir ${BUILD_DIR}/usr/bin
-mkdir ${BUILD_DIR}${USRLIB}
+#mkdir ${BUILD_DIR}/usr
+#mkdir ${BUILD_DIR}/usr/bin
+#mkdir ${BUILD_DIR}${USRLIB}
 
 # Python extension modules and LA solvers
-cp ../release/pyCore.${SO_EXT}             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyActivity.${SO_EXT}         ${PACKAGE_NAME}/pyDAE
-cp ../release/pyDataReporting.${SO_EXT}    ${PACKAGE_NAME}/pyDAE
-cp ../release/pyIDAS.${SO_EXT}             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyUnits.${SO_EXT}            ${PACKAGE_NAME}/pyDAE
+cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
+cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
+cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
+cp ../release/pyUnits.so            ${PACKAGE_NAME}/pyDAE
 
-if [ -e ../release/pyBONMIN.${SO_EXT} ]; then
-  cp ../release/pyBONMIN.${SO_EXT}          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyBONMIN.so ]; then
+  cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers
 fi
 
-if [ -e ../release/pyIPOPT.${SO_EXT} ]; then
-  cp ../release/pyIPOPT.${SO_EXT}          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyIPOPT.so ]; then
+  cp ../release/pyIPOPT.so          ${PACKAGE_NAME}/solvers
 fi
 
-if [ -e ../release/pyNLOPT.${SO_EXT} ]; then
-  cp ../release/pyNLOPT.${SO_EXT}          ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyNLOPT.so ]; then
+  cp ../release/pyNLOPT.so          ${PACKAGE_NAME}/solvers
 fi
 
-#if [ -e ../release/pyAmdACML.${SO_EXT} ]; then
-#  cp ../release/pyAmdACML.${SO_EXT}          ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyAmdACML.so ]; then
+#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyIntelMKL.${SO_EXT} ]; then
-#  cp ../release/pyIntelMKL.${SO_EXT}         ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyIntelMKL.so ]; then
+#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyLapack.${SO_EXT} ]; then
-#  cp ../release/pyLapack.${SO_EXT}           ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyLapack.so ]; then
+#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyMagma.${SO_EXT} ]; then
-#  cp ../release/pyMagma.${SO_EXT}             ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyMagma.so ]; then
+#  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
 #fi
 
-#if [ -e ../release/pyCUSP.${SO_EXT} ]; then
-#  cp ../release/pyCUSP.${SO_EXT}              ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyCUSP.so ]; then
+#  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
 #fi
 
-if [ -e ../release/pySuperLU.${SO_EXT} ]; then
-  cp ../release/pySuperLU.${SO_EXT}           ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU.so ]; then
+  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers
 fi
-if [ -e ../release/pySuperLU_MT.${SO_EXT} ]; then
-  cp ../release/pySuperLU_MT.${SO_EXT}        ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU_MT.so ]; then
+  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/solvers
 fi
-if [ -e ../release/pySuperLU_CUDA.${SO_EXT} ]; then
-  cp ../release/pySuperLU_CUDA.${SO_EXT}      ${PACKAGE_NAME}/solvers
+if [ -e ../release/pySuperLU_CUDA.so ]; then
+  cp ../release/pySuperLU_CUDA.so      ${PACKAGE_NAME}/solvers
 fi
 
-#if [ -e ../release/pyIntelPardiso.${SO_EXT} ]; then
-#  cp ../release/pyIntelPardiso.${SO_EXT}     ${PACKAGE_NAME}/solvers
+#if [ -e ../release/pyIntelPardiso.so ]; then
+#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/solvers
 #fi
 
-if [ -e ../release/pyTrilinos.${SO_EXT} ]; then
-  cp ../release/pyTrilinos.${SO_EXT}   ${PACKAGE_NAME}/solvers
+if [ -e ../release/pyTrilinos.so ]; then
+  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/solvers
 fi
 
 # Licences
@@ -327,6 +342,7 @@ cp ../python-files/model_library/*.py            ${PACKAGE_NAME}/model_library
 # Examples and Tutorials
 cp ../python-files/examples/*.css                ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*.xsl                ${PACKAGE_NAME}/examples
+cp ../python-files/examples/__init__.py          ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*tutorial*.*         ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*RunExamples*.py     ${PACKAGE_NAME}/examples
 cp ../python-files/examples/*whats_the_time*.*   ${PACKAGE_NAME}/examples
@@ -337,46 +353,79 @@ cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
 cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
 
 # Strip python extension modules
-find ${PACKAGE_NAME}/pyDAE   -name \*.${SO_EXT}* | xargs strip -S
-find ${PACKAGE_NAME}/solvers -name \*.${SO_EXT}* | xargs strip -S
+find ${PACKAGE_NAME}/pyDAE   -name \*.so* | xargs strip -S
+find ${PACKAGE_NAME}/solvers -name \*.so* | xargs strip -S
 
-echo "#!/usr/bin/env python " > setup.py
-echo "import sys " >> setup.py
-echo "from distutils.core import setup " >> setup.py
-echo " " >> setup.py
-echo "setup(name='${PACKAGE_NAME}', " >> setup.py
-echo "      version='${VERSION}', " >> setup.py
-echo "      description='DAE Tools', " >> setup.py
-echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', " >> setup.py
-echo "      author='Dragan Nikolic', " >> setup.py
-echo "      author_email='dnikolic@daetools.com', " >> setup.py
-echo "      url='http://www.daetools.com', " >> setup.py
-echo "      license='GNU GPL v3', " >> setup.py
-echo "      platforms='${ARCH}', " >> setup.py
-echo "      packages=['${PACKAGE_NAME}'], " >> setup.py
-echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> setup.py
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']} " >> setup.py
-echo "      ) " >> setup.py
-echo " " >> setup.py
+# Config
+mkdir -p ${PACKAGE_NAME}/etc/daetools
+cp ../daetools.cfg  ${PACKAGE_NAME}/etc/daetools
+cp ../bonmin.cfg    ${PACKAGE_NAME}/etc/daetools
+chmod go-wx ${PACKAGE_NAME}/etc/daetools/daetools.cfg
+chmod go-wx ${PACKAGE_NAME}/etc/daetools/bonmin.cfg
+
+# BOOST
+mkdir -p ${PACKAGE_NAME}/usr/lib
+cp ../boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_BUILD}/stage/lib/${BOOST_PYTHON_LIB} ${PACKAGE_NAME}/usr/lib
+
+# daePlotter and daeRunExamples
+mkdir -p ${PACKAGE_NAME}/usr/bin
+echo "#!/usr/bin/env python"                            > ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "from daetools.daePlotter import daeStartPlotter" >> ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "daeStartPlotter()"                               >> ${PACKAGE_NAME}/usr/bin/daeplotter
+chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
+
+echo "#!/usr/bin/env python"                                        > ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "from daetools.examples.daeRunExamples import daeRunExamples" >> ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "daeRunExamples()"                                            >> ${PACKAGE_NAME}/usr/bin/daeexamples
+chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
+
+if [ ${PLATFORM} = "darwin" ]; then
+  DAE_PLOTTER=/Applications/daePlotter.app/Contents/MacOS
+  DAE_EXAMPLES=/Applications/daeExamples.app/Contents/MacOS
+else
+  DAE_PLOTTER=${USRBIN}
+  DAE_EXAMPLES=${USRBIN}
+fi
+
+SETUP_PY=setup.py
+echo "#!/usr/bin/env python " > ${SETUP_PY}
+echo "import sys " >> ${SETUP_PY}
+echo "from distutils.core import setup " >> ${SETUP_PY}
+echo " " >> ${SETUP_PY}
+echo "setup(name='${PACKAGE_NAME}', " >> ${SETUP_PY}
+echo "      version='${VERSION}', " >> ${SETUP_PY}
+echo "      description='DAE Tools', " >> ${SETUP_PY}
+echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', " >> ${SETUP_PY}
+echo "      author='Dragan Nikolic', " >> ${SETUP_PY}
+echo "      author_email='dnikolic@daetools.com', " >> ${SETUP_PY}
+echo "      url='http://www.daetools.com', " >> ${SETUP_PY}
+echo "      license='GNU GPL v3', " >> ${SETUP_PY}
+echo "      platforms='${ARCH}', " >> ${SETUP_PY}
+echo "      packages=['${PACKAGE_NAME}'], " >> ${SETUP_PY}
+echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> ${SETUP_PY}
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']}, " >> ${SETUP_PY}
+echo "      data_files=[('/etc/daetools', ['${PACKAGE_NAME}/etc/daetools/daetools.cfg', '${PACKAGE_NAME}/etc/daetools/bonmin.cfg']), " >> ${SETUP_PY}
+echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}']), "  >> ${SETUP_PY}
+echo "                  ('${DAE_EXAMPLES}', ['${PACKAGE_NAME}/usr/bin/daeexamples']), " >> ${SETUP_PY}
+echo "                  ('${DAE_PLOTTER}', ['${PACKAGE_NAME}/usr/bin/daeplotter']) ]"   >> ${SETUP_PY}
+echo "      ) " >> ${SETUP_PY}
+echo " " >> ${SETUP_PY}
 
 if [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
   if [ ${DISTRO} = "debian-lenny" ]; then
-    python setup.py install --root=${BUILD_DIR}
+    python ${SETUP_PY} install --root=${BUILD_DIR}
   else
-    python setup.py install --install-layout=deb --root=${BUILD_DIR}
+    python ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
   fi
 
-elif [ ${PCKG_TYPE} = "dmg" ]; then
-  mkdir -p ${BUILD_DIR}/daetools
-  
-  cp ./setup.py ${BUILD_DIR}
-  cp -R ${PACKAGE_NAME}/* ${BUILD_DIR}/daetools
-  
-  # python setup.py install --root=${BUILD_DIR}
+elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
+  mv ${PACKAGE_NAME} ${BUILD_DIR}
+  cp ${SETUP_PY} ${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
-  python setup.py install --prefix=/usr --root=${BUILD_DIR}
+  python ${SETUP_PY} install --prefix=/usr --root=${BUILD_DIR}
+
 fi
 
 #if [ -d ${BUILD_DIR}/usr/lib ]; then
@@ -398,34 +447,7 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 
 ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
 
-if [ ${PLATFORM} = "darwin" ]; then
-  mkdir -p ${BUILD_DIR}/Applications/daePlotter.app/Contents/MacOS
-  mkdir -p ${BUILD_DIR}/Applications/daeExamples.app/Contents/MacOS
-  
-  DAE_PLOTTER=${BUILD_DIR}/Applications/daePlotter.app/Contents/MacOS/daeplotter
-  DAE_EXAMPLES=${BUILD_DIR}/Applications/daeExamples.app/Contents/MacOS/daeexamples
-  
-  echo "#!/bin/sh"                       > ${DAE_PLOTTER}
-  echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${DAE_PLOTTER}
-  echo "python daePlotter.py"           >> ${DAE_PLOTTER}
-  chmod +x ${DAE_PLOTTER}
-
-  echo "#!/bin/sh"                     > ${DAE_EXAMPLES}
-  echo "cd ${DAE_TOOLS_DIR}/examples" >> ${DAE_EXAMPLES}
-  echo "python daeRunExamples.py"     >> ${DAE_EXAMPLES}
-  chmod +x ${DAE_EXAMPLES}
-
-else
-  echo "#!/bin/sh"                       > ${USRBIN}/daeplotter
-  echo "cd ${DAE_TOOLS_DIR}/daePlotter" >> ${USRBIN}/daeplotter
-  echo "python daePlotter.py"           >> ${USRBIN}/daeplotter
-  chmod +x ${USRBIN}/daeplotter
-
-  echo "#!/bin/sh"                     > ${USRBIN}/daeexamples
-  echo "cd ${DAE_TOOLS_DIR}/examples" >> ${USRBIN}/daeexamples
-  echo "python daeRunExamples.py"     >> ${USRBIN}/daeexamples
-  chmod +x ${USRBIN}/daeexamples
-
+if [ ! ${PLATFORM} = "darwin" ]; then
   mkdir ${BUILD_DIR}/usr/share
 
   # Man page
@@ -467,22 +489,6 @@ else
   echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
 fi
 
-# Config
-if [ ${PLATFORM} = "darwin" ]; then
-  CONFIG_DIR=${BUILD_DIR}/private
-  mkdir ${CONFIG_DIR}
-else
-  CONFIG_DIR=${BUILD_DIR}
-fi
-
-mkdir ${CONFIG_DIR}/etc
-mkdir ${CONFIG_DIR}/etc/daetools
-
-cp ../daetools.cfg  ${CONFIG_DIR}/etc/daetools
-cp ../bonmin.cfg    ${CONFIG_DIR}/etc/daetools
-chmod go-wx ${CONFIG_DIR}/etc/daetools/daetools.cfg
-chmod go-wx ${CONFIG_DIR}/etc/daetools/bonmin.cfg
-
 if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
 
@@ -503,9 +509,8 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
-  #SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  #echo "libsuperlu 4.1 libsuperlu.so.4.1 (>= 4:4.1)"          > ${SHLIBS}
-  #echo "libsuperlu_mt 2.0 libsuperlu_mt.so.2.0 (>= 2:2.0)"   >> ${SHLIBS}
+  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" > ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
@@ -553,21 +558,8 @@ if [ ${PCKG_TYPE} = "deb" ]; then
 
   fakeroot dpkg -b ${BUILD_DIR}
 
-elif [ ${PCKG_TYPE} = "dmg" ]; then
-  #MAC_INSTALL_SCRIPT=${BUILD_DIR}/install
-  #echo "#!/bin/sh"                           > ${MAC_INSTALL_SCRIPT}
-  #echo "set -e"                             >> ${MAC_INSTALL_SCRIPT}
-  #echo "sudo python setup.py install"       >> ${MAC_INSTALL_SCRIPT}
-  #chmod 0755 ${MAC_INSTALL_SCRIPT}
-  
-  #mkdir ${BUILD_DIR}/Resources
-  #cp ../licence.txt ${BUILD_DIR}/Resources/Licence.rtf
-  #chmod a+rx ${BUILD_DIR}/Resources/*
-  
-  sudo chown -R root:staff ${BUILD_DIR}
-  sudo chmod -R 1775 ${BUILD_DIR}
-
-  # hdiutil create ${BUILD_DIR}.dmg -srcfolder ./${BUILD_DIR} -ov
+elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
+  tar -czvf ${BUILD_DIR}.tar.gz ${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   cd ${BUILD_DIR}
@@ -638,12 +630,18 @@ else
 fi
 
 # Clean up
-if [ ${PCKG_TYPE} = "dmg" ]; then
-  # Do not remove the build dir for we need it to create a mac os package 
-  echo "${BUILD_DIR} not removed"
-else
+if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
 fi
-rm -r ${PACKAGE_NAME}
-rm -r build
-rm setup.py
+
+if [ -d ${PACKAGE_NAME} ]; then
+  rm -r ${PACKAGE_NAME}
+fi
+
+if [ -d build ]; then
+  rm -r build
+fi
+
+if [ -e ${SETUP_PY} ]; then
+  rm ${SETUP_PY}
+fi

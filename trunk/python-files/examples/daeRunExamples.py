@@ -254,8 +254,12 @@ class RunExamples(QtGui.QDialog):
         except:
             sys.stdout = saveout
 
-if __name__ == "__main__":
+def daeRunExamples():
     app = QtGui.QApplication(sys.argv)
     main = RunExamples(app)
     main.show()
     app.exec_()
+
+if __name__ == "__main__":
+    daeRunExamples()
+	

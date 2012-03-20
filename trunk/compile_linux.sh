@@ -69,7 +69,7 @@ compile () {
 
   echo "***** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
   qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG} 
-    
+  
   echo "***** EXECUTE: make clean -w"
   make clean -w
   

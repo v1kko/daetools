@@ -184,26 +184,22 @@ macx-g++::GFORTRAN     = -lgfortran
 # Boost version installed must be 1.41+ (asio, system, python, thread, regex)
 # Manual compilation:
 # 1. Compile/Install bjam and Boost.Build
-#     - Go to the directory tools\build\v2\.
+#     - Go to the directory tools/build/v2.
 #     - Run bootstrap.bat/bootstrap.sh
-#     - Run bjam install --prefix=PREFIX where PREFIX is the directory where you 
-#       want Boost.Build to be installed (perhaps not needed for GNU/Linux and MacOS)
-#     - Add PREFIX\bin to your PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
+#     - Run bjam install --prefix=PREFIX as ROOT where PREFIX is the directory where 
+#       Boost.Build is to be installed (prefix is usually /usr for GNU/Linux and MacOS)
+#     - Add PREFIX/bin to PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
 # 2) Build boost libraries (toolset=msvc or gcc; both static|shared)
-#      bjam --build-dir=./build --buildid=daetools 
-#           --with-date_time --with-system --with-regex --with-serialization --with-thread 
-#           variant=release link=static,shared threading=multi runtime-link=shared
-#    For MacOS in order to build universal binaries (x86, x86_64, ppc, ppc64) this should be added:
-#      macosx-version-min=10.5 architecture=combined address-model=32_64
-#    The Python library should be built separately:
-#      a) in user-config.jam located in $BOOST_BUILD or $HOME directory
-#           using python : 2.7 ;
-#           using python : 2.6 ;
-#      b)
-#           bjam --debug-building --build-dir=./build --buildid=daetools-py27 --with-python python=2.7 
-#                variant=release link=static,shared threading=multi runtime-link=shared
-#           bjam --debug-building --build-dir=./build --buildid=daetools-py26 --with-python python=2.6 
-#                variant=release link=static,shared threading=multi runtime-link=shared
+#      bjam --build-dir=./build --debug-building --buildid=daetools 
+#      --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=X.Y
+#      variant=release link=static,shared threading=multi runtime-link=shared
+#    For MacOS in order to build universal binaries (x86, x86_64) this should be added:
+#      macosx-version-min=10.5 architecture=x86 address-model=32_64
+#    If there is more than one Python version installed the non-default one can be selected by adding 
+#    the following lines to user-config.jam located in the $HOME directory:
+#           using python : X.Y ;
+#           using python : Z.W ;
+#    where X.Y is a desired one. The option python=X.Y should be added to the build options.
 #####################################################################################
 win32::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 win32::BOOSTLIBPATH     = $${BOOSTDIR}/lib
@@ -220,12 +216,10 @@ unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
 use_custom_boost { 
 unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB = -L$${BOOSTLIBPATH} \
-                         -lboost_python \
+unix::BOOST_PYTHON_LIB = -L$${BOOSTLIBPATH} -lboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
                          -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-unix::BOOST_LIBS       = -L$${BOOSTLIBPATH} \
-                         -lboost_system \
-                         -lboost_thread \
+unix::BOOST_LIBS       = $${BOOSTLIBPATH}/libboost_system.a \
+                         $${BOOSTLIBPATH}/libboost_thread.a \
                          $${RT}
 }
 
