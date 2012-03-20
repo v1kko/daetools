@@ -369,19 +369,17 @@ cp ../boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_BUILD}/stage/lib/${BOOST_PYTHO
 
 # daePlotter and daeRunExamples
 mkdir -p ${PACKAGE_NAME}/usr/bin
-echo "#!/usr/bin/env python"                            > ${PACKAGE_NAME}/usr/bin/daeplotter
-echo "from daetools.daePlotter import daeStartPlotter" >> ${PACKAGE_NAME}/usr/bin/daeplotter
-echo "daeStartPlotter()"                               >> ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "#!/bin/sh"                                                                         > ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "python -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
 chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
 
-echo "#!/usr/bin/env python"                                        > ${PACKAGE_NAME}/usr/bin/daeexamples
-echo "from daetools.examples.daeRunExamples import daeRunExamples" >> ${PACKAGE_NAME}/usr/bin/daeexamples
-echo "daeRunExamples()"                                            >> ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "#!/bin/sh"                                                                                    > ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "python -c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
 chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
 
 if [ ${PLATFORM} = "darwin" ]; then
-  DAE_PLOTTER=/Applications/daePlotter.app/Contents/MacOS
-  DAE_EXAMPLES=/Applications/daeExamples.app/Contents/MacOS
+  DAE_PLOTTER=/Applications/daetools/daePlotter.app/Contents/MacOS
+  DAE_EXAMPLES=/Applications/daetools/daeExamples.app/Contents/MacOS
 else
   DAE_PLOTTER=${USRBIN}
   DAE_EXAMPLES=${USRBIN}
