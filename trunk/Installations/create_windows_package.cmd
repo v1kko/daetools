@@ -123,6 +123,7 @@ cd examples
 REM copy *.*            %ROOT%\examples
 copy *.css              %ROOT%\examples
 copy *.xsl              %ROOT%\examples
+copy __init__.py        %ROOT%\examples
 copy *whats_the_time*.* %ROOT%\examples
 copy *tutorial*.*       %ROOT%\examples
 copy *.init             %ROOT%\examples

@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_custom_boost
+CONFIG += use_system_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -57,13 +57,13 @@ QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
 QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
 QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
-linux-g++-32::SHARED_LIB_EXT = so
-linux-g++-64::SHARED_LIB_EXT = so
-macx-g++::SHARED_LIB_EXT     = so
+win32::SHARED_LIB_EXT       = dll
+linux-g++-*::SHARED_LIB_EXT = so
+macx-g++::SHARED_LIB_EXT    = dylib
 
-linux-g++-32::SHARED_LIB_APPEND = so.$${VERSION}
-linux-g++-64::SHARED_LIB_APPEND = so.$${VERSION}
-macx-g++::SHARED_LIB_APPEND     = $${VERSION}.dylib
+win32::SHARED_LIB_APPEND       = pyd
+linux-g++-*::SHARED_LIB_APPEND = so.$${VERSION}
+macx-g++::SHARED_LIB_APPEND    = $${VERSION}.dylib
 
 CONFIG(debug, debug|release):message(debug){
     DAE_DEST_DIR = ../debug
@@ -201,26 +201,46 @@ macx-g++::GFORTRAN     = -lgfortran
 #           using python : Z.W ;
 #    where X.Y is a desired one. The option python=X.Y should be added to the build options.
 #####################################################################################
-win32::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
-win32::BOOSTLIBPATH     = $${BOOSTDIR}/lib
-win32::BOOST_PYTHON_LIB =
-win32::BOOST_LIBS       =
+win32::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
+win32::BOOSTLIBPATH          = $${BOOSTDIR}/lib
+win32::BOOST_PYTHON_LIB_NAME = libboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.$${SHARED_LIB_EXT}
+win32::BOOST_PYTHON_LIB      =
+win32::BOOST_LIBS            =
 
 use_system_boost {
-unix::BOOSTDIR         = 
-unix::BOOSTLIBPATH     = 
-unix::BOOST_PYTHON_LIB = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-unix::BOOST_LIBS       = -lboost_system -lboost_thread $${RT}
+unix::BOOSTDIR              = 
+unix::BOOSTLIBPATH          = 
+unix::BOOST_PYTHON_LIB_NAME = 
+unix::BOOST_PYTHON_LIB      = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+unix::BOOST_LIBS            = -lboost_system -lboost_thread $${RT}
 }
 
 use_custom_boost { 
-unix::BOOSTDIR         = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
-unix::BOOSTLIBPATH     = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB = -L$${BOOSTLIBPATH} -lboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
-                         -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-unix::BOOST_LIBS       = $${BOOSTLIBPATH}/libboost_system.a \
-                         $${BOOSTLIBPATH}/libboost_thread.a \
-                         $${RT}
+unix::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
+unix::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
+unix::BOOST_PYTHON_LIB_NAME = libboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.$${SHARED_LIB_EXT}
+unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -lboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
+                              -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+unix::BOOST_LIBS            = $${BOOSTLIBPATH}/libboost_system.a \
+                              $${BOOSTLIBPATH}/libboost_thread.a \
+                              $${RT}
+}
+
+use_system_boost {
+QMAKE_CXXFLAGS += -DDAE_BOOST_BUILD_SYSTEM_DEFAULT \
+                  -DDAE_BOOST_BUILD_DIR=" " \
+                  -DDAE_BOOST_PYTHON_LIB_NAME=" " \
+                  -DDAE_BOOST_MAJOR=0 \
+                  -DDAE_BOOST_MINOR=0 \
+                  -DDAE_BOOST_BUILD=0
+}
+use_custom_boost {
+QMAKE_CXXFLAGS += -DDAE_BOOST_BUILD_CUSTOM \
+                  -DDAE_BOOST_BUILD_DIR="$${BOOSTDIR}" \
+                  -DDAE_BOOST_PYTHON_LIB_NAME="$${BOOST_PYTHON_LIB_NAME}" \
+                  -DDAE_BOOST_MAJOR=$${BOOST_MAJOR} \
+                  -DDAE_BOOST_MINOR=$${BOOST_MINOR} \
+                  -DDAE_BOOST_BUILD=$${BOOST_BUILD}
 }
 
 

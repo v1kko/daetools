@@ -85,12 +85,26 @@ VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
 
 # BOOST
-BOOST_MAJOR=1
-BOOST_MINOR=49
-BOOST_BUILD=0
+BOOST_BUILD_TYPE=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildType())"`
+BOOST_BUILD_DIR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildDir())"`
+BOOST_PYTHON_LIB_NAME=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
+
+BOOST_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMajor())"`
+BOOST_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMinor())"`
+BOOST_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionBuild())"`
 BOOST_PYTHON_LIB_NAME=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
-BOOST_PYTHON_LIB=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}.${SO}
+BOOST_PYTHON_LIB=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
 BOOST_VERSION=${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_BUILD}
+
+echo $BOOST_BUILD_TYPE
+echo $BOOST_BUILD_DIR
+echo $BOOST_PYTHON_LIB_NAME
+echo $BOOST_MAJOR
+echo $BOOST_MINOR
+echo $BOOST_BUILD
+echo $BOOST_PYTHON_LIB_NAME
+echo $BOOST_PYTHON_LIB
+echo $BOOST_VERSION
 
 IDAS=../idas/build
 BONMIN=../bonmin/build
@@ -137,8 +151,7 @@ elif [ ${DISTRIBUTOR_ID} = "macosx" ]; then
   PCKG_TYPE="distutils.tar.gz"
 
 else
-  echo "ERROR: undefined type of a package"
-  exit
+  PCKG_TYPE="distutils.tar.gz"
 fi
 
 TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz

@@ -7,7 +7,9 @@
 #pragma warning(disable: 4275)
 #endif
 
+#if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
+#endif
 #include <string>
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>

@@ -7,7 +7,7 @@ CONFIG += staticlib
 ###############################
 # Could be: BONMIN, IPOPT
 ###############################
-CONFIG += IPOPT
+CONFIG += BONMIN
 
 #####################################################################
 # Small hack used when compiling from compile_linux.sh shell script

@@ -71,14 +71,14 @@ const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute 
 								"You should have received a copy of the GNU General Public License "
 								"along with this program. If not, see <http://www.gnu.org/licenses/>.";
 const size_t FREE = ULONG_MAX;
-inline string daeVersion(bool bIncludeBuild = false)
+inline std::string daeVersion(bool bIncludeBuild = false)
 {
 	char dae__version[20];
 	if(bIncludeBuild)
 		::sprintf(dae__version, "%d.%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
 	else
 		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR);
-	return string(dae__version);
+	return std::string(dae__version);
 }
 
 inline size_t daeVersionMajor()
@@ -94,6 +94,52 @@ inline size_t daeVersionMinor()
 inline size_t daeVersionBuild()
 {
 	return size_t(DAE_BUILD);
+}
+
+inline std::string daeBoostBuildType()
+{
+#ifdef DAE_BOOST_BUILD_SYSTEM_DEFAULT
+	return std::string("system");
+#elif DAE_BOOST_BUILD_CUSTOM
+	return std::string("custom");
+#else
+#error Boost build type has not been specifed; either DAE_BOOST_BUILD_SYSTEM_DEFAULT or DAE_BOOST_BUILD_CUSTOM must be defined.
+#endif	                   
+}
+
+#define STRINGIFY(x) XSTRINGIFY(x)
+#define XSTRINGIFY(x) #x
+
+inline std::string daeBoostBuildDir()
+{
+	return std::string(STRINGIFY(DAE_BOOST_BUILD_DIR));
+}
+
+inline std::string daeBoostPythonLibraryName()
+{
+	return std::string(STRINGIFY(DAE_BOOST_PYTHON_LIB_NAME));
+}
+
+inline std::string daeBoostVersion()
+{
+	char boost__version[20];
+	::sprintf(boost__version, "%d.%d.%d", DAE_BOOST_MAJOR, DAE_BOOST_MINOR, DAE_BOOST_BUILD);
+	return std::string(boost__version);
+}
+
+inline size_t daeBoostVersionMajor()
+{
+	return size_t(DAE_BOOST_MAJOR);
+}
+
+inline size_t daeBoostVersionMinor()
+{
+	return size_t(DAE_BOOST_MINOR);
+}
+
+inline size_t daeBoostVersionBuild()
+{
+	return size_t(DAE_BOOST_BUILD);
 }
 
 

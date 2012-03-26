@@ -1,4 +1,6 @@
+#if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
+#endif
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>

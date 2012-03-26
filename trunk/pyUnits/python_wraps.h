@@ -1,7 +1,9 @@
 #ifndef PYTHON_WRAPS_H
 #define PYTHON_WRAPS_H
 
+#if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
+#endif
 #include <string>
 #include <map>
 #include <vector>

@@ -108,5 +108,5 @@ unix{
 QMAKE_POST_LINK = cp \
     -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${DAE_DEST_DIR}/$${pyObject}.$${SHARED_LIB_EXT}
+    $${DAE_DEST_DIR}/$${pyObject}.so
 }
