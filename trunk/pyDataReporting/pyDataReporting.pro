@@ -13,7 +13,7 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS +=	$${DAE_DATAREPORTING_LIB} \
         $${DAE_UNITS_LIB} \
         $${BOOST_PYTHON_LIB} \
-        $${BOOST_LIBS} \
+        $${BOOST_LIBS}
         
 SOURCES += stdafx.cpp \
     dllmain.cpp \

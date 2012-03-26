@@ -23,9 +23,9 @@ DAE_TOOLS_BUILD = 0
 #    Set CONFIG += use_custom_python and for instance PYTHON_MAJOR=2 and PYTHON_MINOR=7 
 #    to use Python located in c:\Python27
 # 3. On MacOS: use_system_python 
-CONFIG += use_system_python
+CONFIG += use_custom_python
 PYTHON_MAJOR = 2
-PYTHON_MINOR = 6
+PYTHON_MINOR = 7
 
 # 1. On GNU/LINUX:
 #    a) Set CONFIG += use_system_boost to use the system's default version
@@ -38,7 +38,7 @@ PYTHON_MINOR = 6
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_system_boost
+CONFIG += use_custom_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -143,22 +143,30 @@ linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 #                                PYTHON + NUMPY
 #####################################################################################
 use_system_python {
-PYTHONDIR                = 
-PYTHON_INCLUDE_DIR       = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
-PYTHON_SITE_PACKAGES_DIR = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
-PYTHON_LIB_DIR           = $$system(python -c \"import sys; print(sys.prefix)\")/lib
-PYTHON_MAJOR             = $$system(python -c \"import sys; print sys.version_info[0]\")
-PYTHON_MINOR             = $$system(python -c \"import sys; print sys.version_info[1]\")
-message(use_system_python: $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR} - $${PYTHON_MAJOR}.$${PYTHON_MINOR})
+PYTHON = python
+message(use_system_python: Use python: $${PYTHON})
 }
 
 use_custom_python { 
-message(use_custom_python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
+PYTHON = python$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+message(use_custom_python: $${PYTHON})
 }
 
-win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy
-linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_INCLUDE_DIR}/numpy
-macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy
+PYTHONDIR                = 
+PYTHON_INCLUDE_DIR       = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+PYTHON_LIB_DIR           = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
+PYTHON_MAJOR             = $$system($${PYTHON} -c \"import sys; print sys.version_info[0]\")
+PYTHON_MINOR             = $$system($${PYTHON} -c \"import sys; print sys.version_info[1]\")
+
+message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR})
+
+win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
 
 #####################################################################################
@@ -190,7 +198,7 @@ macx-g++::GFORTRAN     = -lgfortran
 #       Boost.Build is to be installed (prefix is usually /usr for GNU/Linux and MacOS)
 #     - Add PREFIX/bin to PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
 # 2) Build boost libraries (toolset=msvc or gcc; both static|shared)
-#      bjam --build-dir=./build --debug-building --buildid=daetools 
+#      bjam --build-dir=./build --debug-building --buildid=daetools-pyXY
 #      --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=X.Y
 #      variant=release link=static,shared threading=multi runtime-link=shared
 #    For MacOS in order to build universal binaries (x86, x86_64) this should be added:
@@ -220,9 +228,11 @@ unix::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_
 unix::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB_NAME = libboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.$${SHARED_LIB_EXT}
 unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -lboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
-                              -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-unix::BOOST_LIBS            = $${BOOSTLIBPATH}/libboost_system.a \
-                              $${BOOSTLIBPATH}/libboost_thread.a \
+                              -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
+                              $${RT}
+unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} \
+                              -lboost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
+                              -lboost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
                               $${RT}
 }
 

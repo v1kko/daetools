@@ -14,6 +14,12 @@ INSTALLATIONS_DIR="$( cd "$( dirname "$0" )" && pwd )"
 # ACHTUNG! cd to INSTALLATIONS_DIR (in case the script is called from some other folder)
 cd ${INSTALLATIONS_DIR}
 
+if [ "$1" = "" ]; then
+  PYTHON="python"
+else
+  PYTHON="$1"
+fi
+
 VER_MAJOR=
 VER_MINOR=
 VER_BUILD=
@@ -75,25 +81,25 @@ else
   exit
 fi
  
-PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
-PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
+PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
-VER_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
-VER_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
-VER_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
+VER_MAJOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
+VER_MINOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
+VER_BUILD=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
-SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
+SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
 
 # BOOST
-BOOST_BUILD_TYPE=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildType())"`
-BOOST_BUILD_DIR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildDir())"`
-BOOST_PYTHON_LIB_NAME=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
+BOOST_BUILD_TYPE=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildType())"`
+BOOST_BUILD_DIR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildDir())"`
+BOOST_PYTHON_LIB_NAME=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
 
-BOOST_MAJOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMajor())"`
-BOOST_MINOR=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMinor())"`
-BOOST_BUILD=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionBuild())"`
+BOOST_MAJOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMajor())"`
+BOOST_MINOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMinor())"`
+BOOST_BUILD=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionBuild())"`
 BOOST_PYTHON_LIB_NAME=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
-BOOST_PYTHON_LIB=`python -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
+BOOST_PYTHON_LIB=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
 BOOST_VERSION=${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_BUILD}
 
 echo $BOOST_BUILD_TYPE
@@ -383,19 +389,19 @@ cp ../boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_BUILD}/stage/lib/${BOOST_PYTHO
 # daePlotter and daeRunExamples
 mkdir -p ${PACKAGE_NAME}/usr/bin
 echo "#!/bin/sh"                                                                         > ${PACKAGE_NAME}/usr/bin/daeplotter
-echo "python -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "${PYTHON} -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
 chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
 
 echo "#!/bin/sh"                                                                                    > ${PACKAGE_NAME}/usr/bin/daeexamples
-echo "python -c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "${PYTHON} -c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
 chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
 
 if [ ${PLATFORM} = "darwin" ]; then
   DAE_PLOTTER=/Applications/daetools/daePlotter.app/Contents/MacOS
   DAE_EXAMPLES=/Applications/daetools/daeExamples.app/Contents/MacOS
 else
-  DAE_PLOTTER=${USRBIN}
-  DAE_EXAMPLES=${USRBIN}
+  DAE_PLOTTER=/usr/bin
+  DAE_EXAMPLES=/usr/bin
 fi
 
 SETUP_PY=setup.py
@@ -425,9 +431,10 @@ echo " " >> ${SETUP_PY}
 if [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
   if [ ${DISTRO} = "debian-lenny" ]; then
-    python ${SETUP_PY} install --root=${BUILD_DIR}
+    ${PYTHON} ${SETUP_PY} install --root=${BUILD_DIR}
   else
-    python ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
+    #${PYTHON} ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
+    ${PYTHON} ${SETUP_PY} install --root=${BUILD_DIR}
   fi
 
 elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
@@ -435,7 +442,7 @@ elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
   cp ${SETUP_PY} ${BUILD_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
-  python ${SETUP_PY} install --prefix=/usr --root=${BUILD_DIR}
+  ${PYTHON} ${SETUP_PY} install --prefix=/usr --root=${BUILD_DIR}
 
 fi
 
