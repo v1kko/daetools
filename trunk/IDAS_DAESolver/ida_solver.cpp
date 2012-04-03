@@ -27,7 +27,7 @@ int roots(realtype	time,
 		  realtype*	gout, 
 		  void*		pUserData);
 
-int jacobian(int	    Neq, 
+int jacobian(long int    Neq, 
 			 realtype	time, 
 			 realtype	dInverseTimeStep, 
 			 N_Vector	vectorVariables, 
@@ -1017,7 +1017,7 @@ int roots(realtype	time,
 	return 0;
 }
 
-int jacobian(int	    Neq, 
+int jacobian(long int    Neq, 
 			 realtype	time, 
 			 realtype	dInverseTimeStep, 
 			 N_Vector	vectorVariables, 

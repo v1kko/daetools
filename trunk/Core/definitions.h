@@ -96,30 +96,6 @@ inline size_t daeVersionBuild()
 	return size_t(DAE_BUILD);
 }
 
-inline std::string daeBoostBuildType()
-{
-#ifdef DAE_BOOST_BUILD_SYSTEM_DEFAULT
-	return std::string("system");
-#elif DAE_BOOST_BUILD_CUSTOM
-	return std::string("custom");
-#else
-#error Boost build type has not been specifed; either DAE_BOOST_BUILD_SYSTEM_DEFAULT or DAE_BOOST_BUILD_CUSTOM must be defined.
-#endif	                   
-}
-
-#define STRINGIFY(x) XSTRINGIFY(x)
-#define XSTRINGIFY(x) #x
-
-inline std::string daeBoostBuildDir()
-{
-	return std::string(STRINGIFY(DAE_BOOST_BUILD_DIR));
-}
-
-inline std::string daeBoostPythonLibraryName()
-{
-	return std::string(STRINGIFY(DAE_BOOST_PYTHON_LIB_NAME));
-}
-
 inline std::string daeBoostVersion()
 {
 	char boost__version[20];

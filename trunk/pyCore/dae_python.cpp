@@ -114,9 +114,6 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("daeVersionMinor",  &dae::daeVersionMinor);
 	def("daeVersionBuild",  &dae::daeVersionBuild);
 
-	def("daeBoostBuildType",			&dae::daeBoostBuildType);
-	def("daeBoostBuildDir",				&dae::daeBoostBuildDir);
-	def("daeBoostPythonLibraryName",	&dae::daeBoostPythonLibraryName);
 	def("daeBoostVersion",				&dae::daeBoostVersion);
 	def("daeBoostVersionMajor",			&dae::daeBoostVersionMajor);
 	def("daeBoostVersionMinor",			&dae::daeBoostVersionMinor);

@@ -57,6 +57,7 @@ else
   exit
 fi
 
+echo uja
 if [ ${PLATFORM} = "linux" ]; then
   SO="so"
   DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
@@ -81,36 +82,44 @@ else
   exit
 fi
  
+COMPILER_SETTINGS_DIR="${INSTALLATIONS_DIR}/../compiler"
+
 PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
 PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
-VER_MAJOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMajor())"`
-VER_MINOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionMinor())"`
-VER_BUILD=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print (\"%d\" % pyCore.daeVersionBuild())"`
+VER_MAJOR=`cat ${COMPILER_SETTINGS_DIR}/dae_major`
+VER_MINOR=`cat ${COMPILER_SETTINGS_DIR}/dae_minor`
+VER_BUILD=`cat ${COMPILER_SETTINGS_DIR}/dae_build`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
 
 # BOOST
-BOOST_BUILD_TYPE=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildType())"`
-BOOST_BUILD_DIR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostBuildDir())"`
-BOOST_PYTHON_LIB_NAME=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
+BOOST_BUILD_TYPE=`cat ${COMPILER_SETTINGS_DIR}/boost`
+BOOST_LIB_DIR=`cat ${COMPILER_SETTINGS_DIR}/boost_lib_path`
+BOOST_PYTHON_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_python_lib_name`
 
-BOOST_MAJOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMajor())"`
-BOOST_MINOR=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionMinor())"`
-BOOST_BUILD=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostVersionBuild())"`
-BOOST_PYTHON_LIB_NAME=libboost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
-BOOST_PYTHON_LIB=`${PYTHON} -c "import imp; pyCore = imp.load_dynamic('pyCore', '${RELEASE_DIR}/pyCore.so'); print(pyCore.daeBoostPythonLibraryName())"`
+BOOST_MAJOR=`cat ${COMPILER_SETTINGS_DIR}/boost_major`
+BOOST_MINOR=`cat ${COMPILER_SETTINGS_DIR}/boost_minor`
+BOOST_BUILD=`cat ${COMPILER_SETTINGS_DIR}/boost_build`
 BOOST_VERSION=${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_BUILD}
 
+BOOST_PYTHON_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_python_lib_name`
+BOOST_PYTHON_LIB=lib${BOOST_PYTHON_LIB_NAME}.${SO}
+BOOST_SYSTEM_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_system_lib_name`
+BOOST_SYSTEM_LIB=lib${BOOST_SYSTEM_LIB_NAME}.${SO}
+BOOST_THREAD_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_thread_lib_name`
+BOOST_THREAD_LIB=lib${BOOST_THREAD_LIB_NAME}.${SO}
+
 echo $BOOST_BUILD_TYPE
-echo $BOOST_BUILD_DIR
+echo $BOOST_LIB_DIR
 echo $BOOST_PYTHON_LIB_NAME
 echo $BOOST_MAJOR
 echo $BOOST_MINOR
 echo $BOOST_BUILD
-echo $BOOST_PYTHON_LIB_NAME
-echo $BOOST_PYTHON_LIB
 echo $BOOST_VERSION
+echo $BOOST_PYTHON_LIB
+echo $BOOST_SYSTEM_LIB
+echo $BOOST_THREAD_LIB
 
 IDAS=../idas/build
 BONMIN=../bonmin/build
@@ -384,15 +393,17 @@ chmod go-wx ${PACKAGE_NAME}/etc/daetools/bonmin.cfg
 
 # BOOST
 mkdir -p ${PACKAGE_NAME}/usr/lib
-cp ../boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_BUILD}/stage/lib/${BOOST_PYTHON_LIB} ${PACKAGE_NAME}/usr/lib
+cp ${BOOST_LIB_DIR}/${BOOST_PYTHON_LIB} ${PACKAGE_NAME}/usr/lib
+cp ${BOOST_LIB_DIR}/${BOOST_SYSTEM_LIB} ${PACKAGE_NAME}/usr/lib
+cp ${BOOST_LIB_DIR}/${BOOST_THREAD_LIB} ${PACKAGE_NAME}/usr/lib
 
 # daePlotter and daeRunExamples
 mkdir -p ${PACKAGE_NAME}/usr/bin
-echo "#!/bin/sh"                                                                         > ${PACKAGE_NAME}/usr/bin/daeplotter
+echo "#!/bin/sh"                                                                            > ${PACKAGE_NAME}/usr/bin/daeplotter
 echo "${PYTHON} -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
 chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
 
-echo "#!/bin/sh"                                                                                    > ${PACKAGE_NAME}/usr/bin/daeexamples
+echo "#!/bin/sh"                                                                                       > ${PACKAGE_NAME}/usr/bin/daeexamples
 echo "${PYTHON} -c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
 chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
 
@@ -422,7 +433,7 @@ echo "      packages=['${PACKAGE_NAME}'], " >> ${SETUP_PY}
 echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> ${SETUP_PY}
 echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']}, " >> ${SETUP_PY}
 echo "      data_files=[('/etc/daetools', ['${PACKAGE_NAME}/etc/daetools/daetools.cfg', '${PACKAGE_NAME}/etc/daetools/bonmin.cfg']), " >> ${SETUP_PY}
-echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}']), "  >> ${SETUP_PY}
+echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_SYSTEM_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_THREAD_LIB}']), "  >> ${SETUP_PY}
 echo "                  ('${DAE_EXAMPLES}', ['${PACKAGE_NAME}/usr/bin/daeexamples']), " >> ${SETUP_PY}
 echo "                  ('${DAE_PLOTTER}', ['${PACKAGE_NAME}/usr/bin/daeplotter']) ]"   >> ${SETUP_PY}
 echo "      ) " >> ${SETUP_PY}
@@ -528,7 +539,9 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
   SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" > ${SHLIBS}
+  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})"  > ${SHLIBS}
+  echo "${BOOST_SYSTEM_LIB_NAME} ${BOOST_VERSION} ${BOOST_SYSTEM_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+  echo "${BOOST_THREAD_LIB_NAME} ${BOOST_VERSION} ${BOOST_THREAD_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
 
   mkdir ${BUILD_DIR}/usr/share/menu
   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
@@ -646,6 +659,8 @@ else
   echo "ERROR: undefined type of a package"
   return
 fi
+
+exit
 
 # Clean up
 if [ -d ${BUILD_DIR} ]; then

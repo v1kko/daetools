@@ -50,7 +50,7 @@ vBONMIN=1.5.1
 vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.2.4
-vIDAS=1.0.0
+vIDAS=1.1.0
 vTRILINOS=10.8.0
 
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
@@ -75,6 +75,7 @@ if [ ! -e idas ]; then
   mv idas-${vIDAS} idas
   cd idas
   mkdir build
+  echo "./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
   ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi

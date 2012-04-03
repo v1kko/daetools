@@ -10,7 +10,6 @@
 # You should have received a copy of the GNU General Public License along with the
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
-
 DAE_TOOLS_MAJOR = 1
 DAE_TOOLS_MINOR = 2
 DAE_TOOLS_BUILD = 0
@@ -23,7 +22,7 @@ DAE_TOOLS_BUILD = 0
 #    Set CONFIG += use_custom_python and for instance PYTHON_MAJOR=2 and PYTHON_MINOR=7 
 #    to use Python located in c:\Python27
 # 3. On MacOS: use_system_python 
-CONFIG += use_custom_python
+CONFIG += use_system_python
 PYTHON_MAJOR = 2
 PYTHON_MINOR = 7
 
@@ -143,8 +142,10 @@ linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 #                                PYTHON + NUMPY
 #####################################################################################
 use_system_python {
-PYTHON = python
-message(use_system_python: Use python: $${PYTHON})
+PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
+PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
+PYTHON       = python
+message(use_system_python: Use python: $${PYTHON_MAJOR}.$${PYTHON_MINOR})
 }
 
 use_custom_python { 
@@ -156,8 +157,6 @@ PYTHONDIR                =
 PYTHON_INCLUDE_DIR       = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
 PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
 PYTHON_LIB_DIR           = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
-PYTHON_MAJOR             = $$system($${PYTHON} -c \"import sys; print sys.version_info[0]\")
-PYTHON_MINOR             = $$system($${PYTHON} -c \"import sys; print sys.version_info[1]\")
 
 message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR})
 
@@ -211,7 +210,9 @@ macx-g++::GFORTRAN     = -lgfortran
 #####################################################################################
 win32::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 win32::BOOSTLIBPATH          = $${BOOSTDIR}/lib
-win32::BOOST_PYTHON_LIB_NAME = libboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.$${SHARED_LIB_EXT}
+win32::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32::BOOST_PYTHON_LIB      =
 win32::BOOST_LIBS            =
 
@@ -219,6 +220,8 @@ use_system_boost {
 unix::BOOSTDIR              = 
 unix::BOOSTLIBPATH          = 
 unix::BOOST_PYTHON_LIB_NAME = 
+unix::BOOST_SYSTEM_LIB_NAME = 
+unix::BOOST_THREAD_LIB_NAME = 
 unix::BOOST_PYTHON_LIB      = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOST_LIBS            = -lboost_system -lboost_thread $${RT}
 }
@@ -226,29 +229,25 @@ unix::BOOST_LIBS            = -lboost_system -lboost_thread $${RT}
 use_custom_boost { 
 unix::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB_NAME = libboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.$${SHARED_LIB_EXT}
-unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -lboost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
+unix::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                               -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
                               $${RT}
 unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} \
-                              -lboost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
-                              -lboost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR} \
+                              -l$${BOOST_SYSTEM_LIB_NAME} \
+                              -l$${BOOST_THREAD_LIB_NAME} \
                               $${RT}
 }
 
 use_system_boost {
-QMAKE_CXXFLAGS += -DDAE_BOOST_BUILD_SYSTEM_DEFAULT \
-                  -DDAE_BOOST_BUILD_DIR=" " \
-                  -DDAE_BOOST_PYTHON_LIB_NAME=" " \
-                  -DDAE_BOOST_MAJOR=0 \
+QMAKE_CXXFLAGS += -DDAE_BOOST_MAJOR=0 \
                   -DDAE_BOOST_MINOR=0 \
                   -DDAE_BOOST_BUILD=0
 }
 use_custom_boost {
-QMAKE_CXXFLAGS += -DDAE_BOOST_BUILD_CUSTOM \
-                  -DDAE_BOOST_BUILD_DIR="$${BOOSTDIR}" \
-                  -DDAE_BOOST_PYTHON_LIB_NAME="$${BOOST_PYTHON_LIB_NAME}" \
-                  -DDAE_BOOST_MAJOR=$${BOOST_MAJOR} \
+QMAKE_CXXFLAGS += -DDAE_BOOST_MAJOR=$${BOOST_MAJOR} \
                   -DDAE_BOOST_MINOR=$${BOOST_MINOR} \
                   -DDAE_BOOST_BUILD=$${BOOST_BUILD}
 }
@@ -466,3 +465,41 @@ HEADERS += \
     ../config.h \
     ../dae_develop.h \
     ../dae.h
+
+#####################################################################################
+#         Write compiler settings (needed to build installations packages)
+#####################################################################################
+# Python settings
+COMPILER = $$system(mkdir -p compiler)
+
+COMPILER = $$system(echo $${SHARED_LIB_EXT} > compiler/shared_lib_extension)
+
+COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > compiler/dae_major)
+COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > compiler/dae_minor)
+COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > compiler/dae_build)
+
+use_system_python {
+COMPILER = $$system(echo system > compiler/python)
+}
+use_custom_python {
+COMPILER = $$system(echo custom > compiler/python)
+}
+COMPILER = $$system(echo $${PYTHON_MAJOR} > compiler/python_major)
+COMPILER = $$system(echo $${PYTHON_MINOR} > compiler/python_minor)
+
+# BOOST settings
+use_system_boost {
+COMPILER = $$system(echo system > compiler/boost)
+}
+use_custom_boost {
+COMPILER = $$system(echo custom > compiler/boost)
+}
+COMPILER = $$system(echo $${BOOST_MAJOR} > compiler/boost_major)
+COMPILER = $$system(echo $${BOOST_MINOR} > compiler/boost_minor)
+COMPILER = $$system(echo $${BOOST_BUILD} > compiler/boost_build)
+
+COMPILER = $$system(echo $${BOOSTLIBPATH} > compiler/boost_lib_path)
+
+COMPILER = $$system(echo $${BOOST_PYTHON_LIB_NAME} > compiler/boost_python_lib_name)
+COMPILER = $$system(echo $${BOOST_SYSTEM_LIB_NAME} > compiler/boost_system_lib_name)
+COMPILER = $$system(echo $${BOOST_THREAD_LIB_NAME} > compiler/boost_thread_lib_name)
