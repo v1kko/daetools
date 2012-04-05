@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys
+from os.path import join, realpath, dirname
 
 try:
     import numpy
@@ -36,6 +37,8 @@ class daeTableDialog(QtGui.QDialog):
         self.ui = Ui_tableWidgetDialog()
         self.ui.setupUi(self)
 
+images_dir = join(dirname(__file__), 'images')
+
 class daeChooseVariable(QtGui.QDialog):
 
     (plot2D,plot3D) = range(0,2)
@@ -44,6 +47,8 @@ class daeChooseVariable(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_ChooseVariable()
         self.ui.setupUi(self)
+        
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'app.png')))
         
         self.variable = None
         self.domainIndexes   = []

@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, platform, sys, tempfile, traceback, webbrowser, math
+from os.path import join, realpath, dirname
 from daetools.pyDAE import *
 from time import ctime, time, localtime, strftime, struct_time
 from PyQt4 import QtCore, QtGui
@@ -21,6 +22,8 @@ try:
     from daetools.pyDAE.WebViewDialog import WebView
 except Exception as e:
     print 'Cannot load WebView module\n Error: ', str(e)
+
+images_dir = join(dirname(__file__), 'images')
 
 class daeTextEditLog(daeBaseLog):
     def __init__(self, TextEdit, ProgressBar, ProgressLabel, App):
@@ -68,6 +71,8 @@ class daeSimulator(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
+        
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'py.png')))
 
         font = QtGui.QFont()
         font.setPointSize(9)

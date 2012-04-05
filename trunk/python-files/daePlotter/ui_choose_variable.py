@@ -1,88 +1,234 @@
-import sys
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'choose_variable.ui'
+#
+# Created: Thu Apr  5 23:48:40 2012
+#      by: PyQt4 UI code generator 4.8.5
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt4 import QtCore, QtGui
-from choose_variable import Ui_ChooseVariable
 
-class ImageDialog(QtGui.QDialog):
-	def __init__(self, process):
-		QtGui.QDialog.__init__(self)
-		self.ui = Ui_ChooseVariable()
-		self.ui.setupUi(self)
-		self.process = process
-		#hideAndClearAll()
-		#enableButtons()
-		self.connect(self.ui.treeWidget, QtCore.SIGNAL("itemSelectionChanged()"), self, QtCore.SLOT("slotSelectionChanged()"))
-		self.connect(self.ui.timeComboBox,    QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
-		self.connect(self.ui.domain0ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
-		self.connect(self.ui.domain1ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
-		self.connect(self.ui.domain2ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
-		self.connect(self.ui.domain3ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
-		self.connect(self.ui.domain4ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self, QtCore.SLOT("slotCurrentIndexChanged(int)"))
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
 
-		rootItem = QtGui.QTreeWidgetItem(self.ui.treeWidget)
-		rootItem.setText(0, self.process.Name)
+class Ui_ChooseVariable(object):
+    def setupUi(self, ChooseVariable):
+        ChooseVariable.setObjectName(_fromUtf8("ChooseVariable"))
+        ChooseVariable.resize(660, 497)
+        ChooseVariable.setWindowTitle(QtGui.QApplication.translate("ChooseVariable", "Choose variable", None, QtGui.QApplication.UnicodeUTF8))
+        ChooseVariable.setSizeGripEnabled(True)
+        ChooseVariable.setModal(True)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(ChooseVariable)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.treeWidget = QtGui.QTreeWidget(ChooseVariable)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.treeWidget.sizePolicy().hasHeightForWidth())
+        self.treeWidget.setSizePolicy(sizePolicy)
+        self.treeWidget.setMinimumSize(QtCore.QSize(350, 300))
+        self.treeWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.treeWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.treeWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.treeWidget.setTabKeyNavigation(True)
+        self.treeWidget.setAlternatingRowColors(True)
+        self.treeWidget.setColumnCount(1)
+        self.treeWidget.setObjectName(_fromUtf8("treeWidget"))
+        self.treeWidget.headerItem().setText(0, _fromUtf8("1"))
+        self.treeWidget.header().setVisible(False)
+        self.treeWidget.header().setDefaultSectionSize(400)
+        self.horizontalLayout.addWidget(self.treeWidget)
+        self.widget = QtGui.QWidget(ChooseVariable)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
+        self.widget.setSizePolicy(sizePolicy)
+        self.widget.setMinimumSize(QtCore.QSize(200, 0))
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.formLayout = QtGui.QFormLayout()
+        self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout.setMargin(6)
+        self.formLayout.setVerticalSpacing(10)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
+        self.domain0Label = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain0Label.sizePolicy().hasHeightForWidth())
+        self.domain0Label.setSizePolicy(sizePolicy)
+        self.domain0Label.setMinimumSize(QtCore.QSize(100, 0))
+        self.domain0Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain0", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain0Label.setWordWrap(True)
+        self.domain0Label.setObjectName(_fromUtf8("domain0Label"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.domain0Label)
+        self.domain0ComboBox = QtGui.QComboBox(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain0ComboBox.sizePolicy().hasHeightForWidth())
+        self.domain0ComboBox.setSizePolicy(sizePolicy)
+        self.domain0ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain0ComboBox.setObjectName(_fromUtf8("domain0ComboBox"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.domain0ComboBox)
+        self.domain1Label = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain1Label.sizePolicy().hasHeightForWidth())
+        self.domain1Label.setSizePolicy(sizePolicy)
+        self.domain1Label.setMinimumSize(QtCore.QSize(100, 0))
+        self.domain1Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain1", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain1Label.setWordWrap(True)
+        self.domain1Label.setObjectName(_fromUtf8("domain1Label"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.domain1Label)
+        self.domain1ComboBox = QtGui.QComboBox(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain1ComboBox.sizePolicy().hasHeightForWidth())
+        self.domain1ComboBox.setSizePolicy(sizePolicy)
+        self.domain1ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain1ComboBox.setObjectName(_fromUtf8("domain1ComboBox"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.domain1ComboBox)
+        self.domain2Label = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain2Label.sizePolicy().hasHeightForWidth())
+        self.domain2Label.setSizePolicy(sizePolicy)
+        self.domain2Label.setMinimumSize(QtCore.QSize(100, 0))
+        self.domain2Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain2", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain2Label.setWordWrap(True)
+        self.domain2Label.setObjectName(_fromUtf8("domain2Label"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.domain2Label)
+        self.domain2ComboBox = QtGui.QComboBox(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain2ComboBox.sizePolicy().hasHeightForWidth())
+        self.domain2ComboBox.setSizePolicy(sizePolicy)
+        self.domain2ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain2ComboBox.setObjectName(_fromUtf8("domain2ComboBox"))
+        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.domain2ComboBox)
+        self.domain3Label = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain3Label.sizePolicy().hasHeightForWidth())
+        self.domain3Label.setSizePolicy(sizePolicy)
+        self.domain3Label.setMinimumSize(QtCore.QSize(100, 0))
+        self.domain3Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain3", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain3Label.setWordWrap(True)
+        self.domain3Label.setObjectName(_fromUtf8("domain3Label"))
+        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.domain3Label)
+        self.domain3ComboBox = QtGui.QComboBox(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain3ComboBox.sizePolicy().hasHeightForWidth())
+        self.domain3ComboBox.setSizePolicy(sizePolicy)
+        self.domain3ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain3ComboBox.setObjectName(_fromUtf8("domain3ComboBox"))
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.domain3ComboBox)
+        self.domain4Label = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain4Label.sizePolicy().hasHeightForWidth())
+        self.domain4Label.setSizePolicy(sizePolicy)
+        self.domain4Label.setMinimumSize(QtCore.QSize(100, 0))
+        self.domain4Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain4", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain4Label.setWordWrap(True)
+        self.domain4Label.setObjectName(_fromUtf8("domain4Label"))
+        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.domain4Label)
+        self.domain4ComboBox = QtGui.QComboBox(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.domain4ComboBox.sizePolicy().hasHeightForWidth())
+        self.domain4ComboBox.setSizePolicy(sizePolicy)
+        self.domain4ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain4ComboBox.setObjectName(_fromUtf8("domain4ComboBox"))
+        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.domain4ComboBox)
+        self.timeLabel = QtGui.QLabel(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.timeLabel.sizePolicy().hasHeightForWidth())
+        self.timeLabel.setSizePolicy(sizePolicy)
+        self.timeLabel.setMinimumSize(QtCore.QSize(100, 0))
+        self.timeLabel.setText(QtGui.QApplication.translate("ChooseVariable", "Time", None, QtGui.QApplication.UnicodeUTF8))
+        self.timeLabel.setObjectName(_fromUtf8("timeLabel"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.timeLabel)
+        self.timeComboBox = QtGui.QComboBox(self.widget)
+        self.timeComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.timeComboBox.setObjectName(_fromUtf8("timeComboBox"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.timeComboBox)
+        self.domain5Label = QtGui.QLabel(self.widget)
+        self.domain5Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain5", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain5Label.setObjectName(_fromUtf8("domain5Label"))
+        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.domain5Label)
+        self.domain5ComboBox = QtGui.QComboBox(self.widget)
+        self.domain5ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain5ComboBox.setObjectName(_fromUtf8("domain5ComboBox"))
+        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.domain5ComboBox)
+        self.domain6Label = QtGui.QLabel(self.widget)
+        self.domain6Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain6", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain6Label.setObjectName(_fromUtf8("domain6Label"))
+        self.formLayout.setWidget(7, QtGui.QFormLayout.LabelRole, self.domain6Label)
+        self.domain6ComboBox = QtGui.QComboBox(self.widget)
+        self.domain6ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain6ComboBox.setObjectName(_fromUtf8("domain6ComboBox"))
+        self.formLayout.setWidget(7, QtGui.QFormLayout.FieldRole, self.domain6ComboBox)
+        self.domain7Label = QtGui.QLabel(self.widget)
+        self.domain7Label.setText(QtGui.QApplication.translate("ChooseVariable", "Domain7", None, QtGui.QApplication.UnicodeUTF8))
+        self.domain7Label.setObjectName(_fromUtf8("domain7Label"))
+        self.formLayout.setWidget(8, QtGui.QFormLayout.LabelRole, self.domain7Label)
+        self.domain7ComboBox = QtGui.QComboBox(self.widget)
+        self.domain7ComboBox.setMinimumSize(QtCore.QSize(50, 0))
+        self.domain7ComboBox.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.domain7ComboBox.setObjectName(_fromUtf8("domain7ComboBox"))
+        self.formLayout.setWidget(8, QtGui.QFormLayout.FieldRole, self.domain7ComboBox)
+        self.verticalLayout.addLayout(self.formLayout)
+        self.horizontalLayout.addWidget(self.widget)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
+        self.buttonCancel = QtGui.QPushButton(ChooseVariable)
+        self.buttonCancel.setText(QtGui.QApplication.translate("ChooseVariable", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
+        self.horizontalLayout_2.addWidget(self.buttonCancel)
+        self.buttonOk = QtGui.QPushButton(ChooseVariable)
+        self.buttonOk.setText(QtGui.QApplication.translate("ChooseVariable", "Ok", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonOk.setDefault(True)
+        self.buttonOk.setObjectName(_fromUtf8("buttonOk"))
+        self.horizontalLayout_2.addWidget(self.buttonOk)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
-		variables = self.process.GetVariables()
-		for var in variables:
-			currentItem = rootItem
-			names = var.Name.split(".")
-			for name in names:
-				found = False
-				for c in range(0, currentItem.childCount()):
-					cname = currentItem.child[c].text(0)
-					if name == cname:
-						found = True
-						#print "found"
-						currentItem = currentItem.child[c]
-						break
+        self.retranslateUi(ChooseVariable)
+        self.domain0ComboBox.setCurrentIndex(-1)
+        self.domain1ComboBox.setCurrentIndex(-1)
+        QtCore.QObject.connect(self.buttonCancel, QtCore.SIGNAL(_fromUtf8("clicked()")), ChooseVariable.reject)
+        QtCore.QObject.connect(self.buttonOk, QtCore.SIGNAL(_fromUtf8("clicked()")), ChooseVariable.accept)
+        QtCore.QMetaObject.connectSlotsByName(ChooseVariable)
+        ChooseVariable.setTabOrder(self.treeWidget, self.domain0ComboBox)
+        ChooseVariable.setTabOrder(self.domain0ComboBox, self.domain1ComboBox)
+        ChooseVariable.setTabOrder(self.domain1ComboBox, self.domain2ComboBox)
+        ChooseVariable.setTabOrder(self.domain2ComboBox, self.domain3ComboBox)
+        ChooseVariable.setTabOrder(self.domain3ComboBox, self.domain4ComboBox)
 
-				if found == False:
-					#print "not found"
-					currentItem = QtGui.QTreeWidgetItem(currentItem)
-					currentItem.setText(0, name)
-
-			varData = QtCore.QVariant(var)
-			currentItem.setData(0, QtCore.Qt.UserRole, varData)
-
-	#@QtCore.pyqtSlot(int)
-	def slotCurrentIndexChanged(self, index):
-		pass
-
-	#@QtCore.pyqtSlot()
-	def slotSelectionChanged(self):
-		items = self.ui.treeWidget.selectedItems()
-		if len(items) != 1:
-			return
-		selItem = items[0]
-
-		varData = selItem.data(0, QtCore.Qt.UserRole)
-		if varData.isNull():
-			return
-		var = varData.toPyObject()
-		if var == None:
-			return
-		#print var.Name
-		domains = var.GetDomains()
-		times = var.GetTimeValues()
-		values = var.GetValues()
-		dims = values.shape
-                QtGui.QMessageBox.information(self, var.Name, str(values[:,0,0]))
-		if len(domains) == 0: # Only time
-			self.ui.timeLabel.setText("Time")
-
-		elif len(domains) == 2:
-			self.ui.timeLabel.setText("Time")
-			self.ui.domain0Label.setText(domains[0].Name)
-			self.ui.domain1Label.setText(domains[1].Name)
-			self.ui.timeComboBox.clear()
-			self.ui.domain0ComboBox.clear()
-			self.ui.domain1ComboBox.clear()
-			for i in range(0, len(times)):
-				self.ui.timeComboBox.addItem(str(times[i]))
-			for i in range(0, domains[0].NumberOfPoints):
-				self.ui.domain0ComboBox.addItem(str(domains[0][i]))
-			for i in range(0, domains[1].NumberOfPoints):
-				self.ui.domain1ComboBox.addItem(str(domains[1][i]))
-		else:
-			pass
-
+    def retranslateUi(self, ChooseVariable):
+        pass
 

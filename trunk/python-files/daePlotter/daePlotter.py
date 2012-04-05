@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, distutils.sysconfig, types
+from os.path import join, realpath, dirname
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -38,7 +39,12 @@ try:
 except Exception, e:
     print '[daePlotter]: Cannot load about/WebView module\n Error: ', str(e)
 
-
+try:
+    images_dir = join(dirname(__file__), 'images')
+except:
+    # In case we are running the module on its own (i.e. as __main__)
+    images_dir = join(realpath(dirname(sys.argv[0])), 'images')
+    
 class daeMainWindow(QtGui.QMainWindow):
     def __init__(self, tcpipServer):
         QtGui.QMainWindow.__init__(self)
@@ -47,25 +53,25 @@ class daeMainWindow(QtGui.QMainWindow):
 
         self.move(0, 0)
         self.resize(400, 200)
-        self.setWindowIcon(QtGui.QIcon('images/app.png'))
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'app.png')))
         self.setWindowTitle("DAE Plotter v" + daeVersion(True))
 
-        exit = QtGui.QAction(QtGui.QIcon('images/close.png'), 'Exit', self)
+        exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.close)
 
-        plot2D = QtGui.QAction(QtGui.QIcon('images/add-2d.png'), 'New 2D plot', self)
+        plot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-2d.png')), 'New 2D plot', self)
         plot2D.setShortcut('Ctrl+2')
         plot2D.setStatusTip('New 2D plot')
         self.connect(plot2D, QtCore.SIGNAL('triggered()'), self.slotPlot2D)
 
-        animatedPlot2D = QtGui.QAction(QtGui.QIcon('images/add-ani-2d.png'), 'New animated 2D plot', self)
+        animatedPlot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-ani-2d.png')), 'New animated 2D plot', self)
         animatedPlot2D.setShortcut('Ctrl+4')
         animatedPlot2D.setStatusTip('New animated 2D plot')
         self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.slotAnimatedPlot2D)
 
-        plot3D = QtGui.QAction(QtGui.QIcon('images/add-3d.png'), 'New 3D plot', self)
+        plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New 3D plot', self)
         plot3D.setShortcut('Ctrl+3')
         plot3D.setStatusTip('New 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)

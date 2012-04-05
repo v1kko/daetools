@@ -57,7 +57,6 @@ else
   exit
 fi
 
-echo uja
 if [ ${PLATFORM} = "linux" ]; then
   SO="so"
   DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
@@ -82,7 +81,7 @@ else
   exit
 fi
  
-COMPILER_SETTINGS_DIR="${INSTALLATIONS_DIR}/../compiler"
+COMPILER_SETTINGS_DIR="${INSTALLATIONS_DIR}/../_compiler_settings"
 
 PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
 PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
@@ -444,8 +443,7 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   if [ ${DISTRO} = "debian-lenny" ]; then
     ${PYTHON} ${SETUP_PY} install --root=${BUILD_DIR}
   else
-    #${PYTHON} ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
-    ${PYTHON} ${SETUP_PY} install --root=${BUILD_DIR}
+    ${PYTHON} ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
   fi
 
 elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
@@ -659,8 +657,6 @@ else
   echo "ERROR: undefined type of a package"
   return
 fi
-
-exit
 
 # Clean up
 if [ -d ${BUILD_DIR} ]; then

@@ -163,7 +163,8 @@ message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR}
 win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                  $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+                                 /usr/share/pyshared/numpy/core/include/numpy
 macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                  $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
@@ -470,36 +471,36 @@ HEADERS += \
 #         Write compiler settings (needed to build installations packages)
 #####################################################################################
 # Python settings
-COMPILER = $$system(mkdir -p compiler)
+COMPILER = $$system(mkdir -p _compiler_settings)
 
-COMPILER = $$system(echo $${SHARED_LIB_EXT} > compiler/shared_lib_extension)
+COMPILER = $$system(echo $${SHARED_LIB_EXT} > _compiler_settings/shared_lib_extension)
 
-COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > compiler/dae_major)
-COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > compiler/dae_minor)
-COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > compiler/dae_build)
+COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > _compiler_settings/dae_major)
+COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > _compiler_settings/dae_minor)
+COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > _compiler_settings/dae_build)
 
 use_system_python {
-COMPILER = $$system(echo system > compiler/python)
+COMPILER = $$system(echo system > _compiler_settings/python)
 }
 use_custom_python {
-COMPILER = $$system(echo custom > compiler/python)
+COMPILER = $$system(echo custom > _compiler_settings/python)
 }
-COMPILER = $$system(echo $${PYTHON_MAJOR} > compiler/python_major)
-COMPILER = $$system(echo $${PYTHON_MINOR} > compiler/python_minor)
+COMPILER = $$system(echo $${PYTHON_MAJOR} > _compiler_settings/python_major)
+COMPILER = $$system(echo $${PYTHON_MINOR} > _compiler_settings/python_minor)
 
 # BOOST settings
 use_system_boost {
-COMPILER = $$system(echo system > compiler/boost)
+COMPILER = $$system(echo system > _compiler_settings/boost)
 }
 use_custom_boost {
-COMPILER = $$system(echo custom > compiler/boost)
+COMPILER = $$system(echo custom > _compiler_settings/boost)
 }
-COMPILER = $$system(echo $${BOOST_MAJOR} > compiler/boost_major)
-COMPILER = $$system(echo $${BOOST_MINOR} > compiler/boost_minor)
-COMPILER = $$system(echo $${BOOST_BUILD} > compiler/boost_build)
+COMPILER = $$system(echo $${BOOST_MAJOR} > _compiler_settings/boost_major)
+COMPILER = $$system(echo $${BOOST_MINOR} > _compiler_settings/boost_minor)
+COMPILER = $$system(echo $${BOOST_BUILD} > _compiler_settings/boost_build)
 
-COMPILER = $$system(echo $${BOOSTLIBPATH} > compiler/boost_lib_path)
+COMPILER = $$system(echo $${BOOSTLIBPATH} > _compiler_settings/boost_lib_path)
 
-COMPILER = $$system(echo $${BOOST_PYTHON_LIB_NAME} > compiler/boost_python_lib_name)
-COMPILER = $$system(echo $${BOOST_SYSTEM_LIB_NAME} > compiler/boost_system_lib_name)
-COMPILER = $$system(echo $${BOOST_THREAD_LIB_NAME} > compiler/boost_thread_lib_name)
+COMPILER = $$system(echo $${BOOST_PYTHON_LIB_NAME} > _compiler_settings/boost_python_lib_name)
+COMPILER = $$system(echo $${BOOST_SYSTEM_LIB_NAME} > _compiler_settings/boost_system_lib_name)
+COMPILER = $$system(echo $${BOOST_THREAD_LIB_NAME} > _compiler_settings/boost_thread_lib_name)

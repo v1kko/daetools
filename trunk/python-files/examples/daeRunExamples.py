@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, subprocess, webbrowser, traceback
+from os.path import join, realpath, dirname
 from StringIO import StringIO
 from time import localtime, strftime
 
@@ -103,6 +104,12 @@ class daeTextEditLog(daeStdOutLog):
             self.TextEdit.update()
         self.App.processEvents()
 
+try:
+    images_dir = join(dirname(__file__), 'images')
+except:
+    # In case we are running the module on its own (i.e. as __main__)
+    images_dir = join(realpath(dirname(sys.argv[0])), 'images')
+
 class RunExamples(QtGui.QDialog):
     def __init__(self, app):
         QtGui.QDialog.__init__(self)
@@ -111,6 +118,7 @@ class RunExamples(QtGui.QDialog):
         self.app = app
 
         self.setWindowTitle("DAE Tools Tutorials v" + daeVersion(True))
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'py.png')))
 
         self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)
         self.connect(self.ui.toolButtonCode,               QtCore.SIGNAL('clicked()'), self.slotShowCode)

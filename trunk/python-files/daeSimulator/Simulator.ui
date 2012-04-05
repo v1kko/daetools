@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>DAE Tools Simulator</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>images/py.png</normaloff>images/py.png</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QFormLayout" name="formLayout">

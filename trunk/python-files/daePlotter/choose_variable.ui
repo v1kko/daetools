@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Choose variable</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>images/Gnome-Dialog-Question-32.png</normaloff>images/Gnome-Dialog-Question-32.png</iconset>
-  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
@@ -63,12 +59,6 @@
        </attribute>
        <attribute name="headerDefaultSectionSize">
         <number>400</number>
-       </attribute>
-       <attribute name="headerDefaultSectionSize">
-        <number>400</number>
-       </attribute>
-       <attribute name="headerVisible">
-        <bool>false</bool>
        </attribute>
        <column>
         <property name="text">
