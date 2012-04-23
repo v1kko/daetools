@@ -471,36 +471,37 @@ HEADERS += \
 #         Write compiler settings (needed to build installations packages)
 #####################################################################################
 # Python settings
-COMPILER = $$system(mkdir -p _compiler_settings)
+COMPILER_SETTINGS_FOLDER = .compiler_settings
+COMPILER = $$system(mkdir -p $${COMPILER_SETTINGS_FOLDER})
 
-COMPILER = $$system(echo $${SHARED_LIB_EXT} > _compiler_settings/shared_lib_extension)
+COMPILER = $$system(echo $${SHARED_LIB_EXT} > $${COMPILER_SETTINGS_FOLDER}/shared_lib_extension)
 
-COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > _compiler_settings/dae_major)
-COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > _compiler_settings/dae_minor)
-COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > _compiler_settings/dae_build)
+COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/dae_major)
+COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > $${COMPILER_SETTINGS_FOLDER}/dae_minor)
+COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > $${COMPILER_SETTINGS_FOLDER}/dae_build)
 
 use_system_python {
-COMPILER = $$system(echo system > _compiler_settings/python)
+COMPILER = $$system(echo system > $${COMPILER_SETTINGS_FOLDER}/python)
 }
 use_custom_python {
-COMPILER = $$system(echo custom > _compiler_settings/python)
+COMPILER = $$system(echo custom > $${COMPILER_SETTINGS_FOLDER}/python)
 }
-COMPILER = $$system(echo $${PYTHON_MAJOR} > _compiler_settings/python_major)
-COMPILER = $$system(echo $${PYTHON_MINOR} > _compiler_settings/python_minor)
+COMPILER = $$system(echo $${PYTHON_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/python_major)
+COMPILER = $$system(echo $${PYTHON_MINOR} > $${COMPILER_SETTINGS_FOLDER}/python_minor)
 
 # BOOST settings
 use_system_boost {
-COMPILER = $$system(echo system > _compiler_settings/boost)
+COMPILER = $$system(echo system > $${COMPILER_SETTINGS_FOLDER}/boost)
 }
 use_custom_boost {
-COMPILER = $$system(echo custom > _compiler_settings/boost)
+COMPILER = $$system(echo custom > $${COMPILER_SETTINGS_FOLDER}/boost)
 }
-COMPILER = $$system(echo $${BOOST_MAJOR} > _compiler_settings/boost_major)
-COMPILER = $$system(echo $${BOOST_MINOR} > _compiler_settings/boost_minor)
-COMPILER = $$system(echo $${BOOST_BUILD} > _compiler_settings/boost_build)
+COMPILER = $$system(echo $${BOOST_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/boost_major)
+COMPILER = $$system(echo $${BOOST_MINOR} > $${COMPILER_SETTINGS_FOLDER}/boost_minor)
+COMPILER = $$system(echo $${BOOST_BUILD} > $${COMPILER_SETTINGS_FOLDER}/boost_build)
 
-COMPILER = $$system(echo $${BOOSTLIBPATH} > _compiler_settings/boost_lib_path)
+COMPILER = $$system(echo $${BOOSTLIBPATH} > $${COMPILER_SETTINGS_FOLDER}/boost_lib_path)
 
-COMPILER = $$system(echo $${BOOST_PYTHON_LIB_NAME} > _compiler_settings/boost_python_lib_name)
-COMPILER = $$system(echo $${BOOST_SYSTEM_LIB_NAME} > _compiler_settings/boost_system_lib_name)
-COMPILER = $$system(echo $${BOOST_THREAD_LIB_NAME} > _compiler_settings/boost_thread_lib_name)
+COMPILER = $$system(echo $${BOOST_PYTHON_LIB_NAME} > $${COMPILER_SETTINGS_FOLDER}/boost_python_lib_name)
+COMPILER = $$system(echo $${BOOST_SYSTEM_LIB_NAME} > $${COMPILER_SETTINGS_FOLDER}/boost_system_lib_name)
+COMPILER = $$system(echo $${BOOST_THREAD_LIB_NAME} > $${COMPILER_SETTINGS_FOLDER}/boost_thread_lib_name)

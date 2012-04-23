@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys, math
+from os.path import join, realpath, dirname
 
 try:
     import numpy
@@ -40,6 +41,7 @@ try:
 except ImportError, e:
     print '[dae3DPlot]: Cannot load matplotlib modules', str(e)
 
+images_dir = join(dirname(__file__), 'images')
 
 class dae3DPlot(QtGui.QDialog):
     def __init__(self, parent, tcpipServer):
@@ -47,14 +49,14 @@ class dae3DPlot(QtGui.QDialog):
         
         self.tcpipServer = tcpipServer        
         self.setWindowTitle("3D plot")
-        self.setWindowIcon(QtGui.QIcon('images/line-chart.png'))
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'line-chart.png')))
 
-        exit = QtGui.QAction(QtGui.QIcon('images/close.png'), 'Exit', self)
+        exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self, QtCore.SLOT('close()'))
 
-        properties = QtGui.QAction(QtGui.QIcon('images/preferences.png'), 'Options', self)
+        properties = QtGui.QAction(QtGui.QIcon(join(images_dir, 'preferences.png')), 'Options', self)
         properties.setShortcut('Ctrl+P')
         properties.setStatusTip('Options')
         self.connect(properties, QtCore.SIGNAL('triggered()'), self, QtCore.SLOT('slotProperties()'))

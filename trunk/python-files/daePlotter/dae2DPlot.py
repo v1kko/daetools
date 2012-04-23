@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys, numpy
+from os.path import join, realpath, dirname
 from daetools.pyDAE import *
 from daeChooseVariable import daeChooseVariable, daeTableDialog
 from daePlotOptions import *
@@ -20,7 +21,8 @@ import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-#import matplotlib.animation as animation
+
+images_dir = join(dirname(__file__), 'images')
 
 class daePlot2dDefaults:
     def __init__(self, color='black', linewidth=0.5, linestyle='solid', marker='o', markersize=6, markerfacecolor='black', markeredgecolor='black'):
@@ -70,44 +72,44 @@ class dae2DPlot(QtGui.QDialog):
         self.curves   = []
         
         self.setWindowTitle("2D plot")
-        self.setWindowIcon(QtGui.QIcon('images/line-chart.png'))
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'line-chart.png')))
 
-        exit = QtGui.QAction(QtGui.QIcon('images/close.png'), 'Exit', self)
+        exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.close)
 
-        properties = QtGui.QAction(QtGui.QIcon('images/preferences.png'), 'Options', self)
+        properties = QtGui.QAction(QtGui.QIcon(join(images_dir, 'preferences.png')), 'Options', self)
         properties.setShortcut('Ctrl+P')
         properties.setStatusTip('Options')
         self.connect(properties, QtCore.SIGNAL('triggered()'), self.slotProperties)
 
-        grid = QtGui.QAction(QtGui.QIcon('images/grid.png'), 'Grid on/off', self)
+        grid = QtGui.QAction(QtGui.QIcon(join(images_dir, 'grid.png')), 'Grid on/off', self)
         grid.setShortcut('Ctrl+G')
         grid.setStatusTip('Grid on/off')
         self.connect(grid, QtCore.SIGNAL('triggered()'), self.slotToggleGrid)
 
-        legend = QtGui.QAction(QtGui.QIcon('images/legend.png'), 'Legend on/off', self)
+        legend = QtGui.QAction(QtGui.QIcon(join(images_dir, 'legend.png')), 'Legend on/off', self)
         legend.setShortcut('Ctrl+L')
         legend.setStatusTip('Legend on/off')
         self.connect(legend, QtCore.SIGNAL('triggered()'), self.slotToggleLegend)
 
-        viewdata = QtGui.QAction(QtGui.QIcon('images/data.png'), 'View tabular data', self)
+        viewdata = QtGui.QAction(QtGui.QIcon(join(images_dir, 'data.png')), 'View tabular data', self)
         viewdata.setShortcut('Ctrl+D')
         viewdata.setStatusTip('View tabular data')
         self.connect(viewdata, QtCore.SIGNAL('triggered()'), self.slotViewTabularData)
 
-        csv = QtGui.QAction(QtGui.QIcon('images/csv.png'), 'Export CSV', self)
+        csv = QtGui.QAction(QtGui.QIcon(join(images_dir, 'csv.png')), 'Export CSV', self)
         csv.setShortcut('Ctrl+S')
         csv.setStatusTip('Export CSV')
         self.connect(csv, QtCore.SIGNAL('triggered()'), self.slotExportCSV)
 
-        remove_line = QtGui.QAction(QtGui.QIcon('images/remove.png'), 'Remove line', self)
+        remove_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'remove.png')), 'Remove line', self)
         remove_line.setShortcut('Ctrl+R')
         remove_line.setStatusTip('Remove line')
         self.connect(remove_line, QtCore.SIGNAL('triggered()'), self.slotRemoveLine)
 
-        new_line = QtGui.QAction(QtGui.QIcon('images/add.png'), 'Add line', self)
+        new_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add.png')), 'Add line', self)
         new_line.setShortcut('Ctrl+A')
         new_line.setStatusTip('Add line')
         self.connect(new_line, QtCore.SIGNAL('triggered()'), self.newCurve)

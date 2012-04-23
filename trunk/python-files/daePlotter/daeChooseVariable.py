@@ -41,7 +41,9 @@ images_dir = join(dirname(__file__), 'images')
 
 class daeChooseVariable(QtGui.QDialog):
 
-    (plot2D,plot3D) = range(0,2)
+    (plot2D, plot2DAnimated, plot3D) = range(0, 3)
+    FREE_DOMAIN = -1
+    LAST_TIME   = -2
     
     def __init__(self, processes, plotType):
         QtGui.QDialog.__init__(self)
@@ -120,24 +122,50 @@ class daeChooseVariable(QtGui.QDialog):
     def slotCurrentIndexChanged(self, index):
         self.domainIndexes = []
         if(self.ui.timeComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.timeComboBox.currentIndex())
+            i                = self.ui.timeComboBox.currentIndex()
+            domain_index, ok = self.ui.timeComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+        
         if(self.ui.domain0ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain0ComboBox.currentIndex())
-        if(self.ui.domain1ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain1ComboBox.currentIndex())
-        if(self.ui.domain2ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain2ComboBox.currentIndex())
-        if(self.ui.domain3ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain3ComboBox.currentIndex())
-        if(self.ui.domain4ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain4ComboBox.currentIndex())
-        if(self.ui.domain5ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain5ComboBox.currentIndex())
-        if(self.ui.domain6ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain6ComboBox.currentIndex())
-        if(self.ui.domain7ComboBox.isVisible()):
-            self.domainIndexes.append(self.ui.domain7ComboBox.currentIndex())
+            i                = self.ui.domain0ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain0ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
 
+        if(self.ui.domain1ComboBox.isVisible()):
+            i                = self.ui.domain1ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain1ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain2ComboBox.isVisible()):
+            i                = self.ui.domain2ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain2ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain3ComboBox.isVisible()):
+            i                = self.ui.domain3ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain3ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain4ComboBox.isVisible()):
+            i                = self.ui.domain4ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain4ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain5ComboBox.isVisible()):
+            i                = self.ui.domain5ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain5ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain6ComboBox.isVisible()):
+            i                = self.ui.domain6ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain6ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+
+        if(self.ui.domain7ComboBox.isVisible()):
+            i                = self.ui.domain7ComboBox.currentIndex()
+            domain_index, ok = self.ui.domain7ComboBox.itemData(i).toInt()
+            self.domainIndexes.append(domain_index)
+        
         self.domainPoints = []
         if(self.ui.timeComboBox.isVisible()):
             self.domainPoints.append(str(self.ui.timeComboBox.currentText()))
@@ -158,9 +186,12 @@ class daeChooseVariable(QtGui.QDialog):
         if(self.ui.domain7ComboBox.isVisible()):
             self.domainPoints.append(str(self.ui.domain7ComboBox.currentText()))
 
+        #print 'domainIndexes = {0}'.format(self.domainIndexes)
+        #print 'domainPoints  = {0}'.format(self.domainPoints)
+        
         freeDomains = 0
-        for i in range(0, len(self.domainIndexes)):
-            if self.domainIndexes[i] == 0: # if it is FREE
+        for ind in self.domainIndexes:
+            if ind == daeChooseVariable.FREE_DOMAIN: # if it is FREE
                 freeDomains += 1
         
         if self.plotType == daeChooseVariable.plot2D:
@@ -168,11 +199,19 @@ class daeChooseVariable(QtGui.QDialog):
                 self.ui.buttonOk.setEnabled(True)
             else:
                 self.ui.buttonOk.setEnabled(False)
+        
+        elif self.plotType == daeChooseVariable.plot2DAnimated:
+            if freeDomains == 1:
+                self.ui.buttonOk.setEnabled(True)
+            else:
+                self.ui.buttonOk.setEnabled(False)
+        
         elif self.plotType == daeChooseVariable.plot3D:
             if freeDomains == 2:
                 self.ui.buttonOk.setEnabled(True)
             else:
                 self.ui.buttonOk.setEnabled(False)
+
         else:
             self.ui.buttonOk.setEnabled(False)        
 
@@ -201,11 +240,10 @@ class daeChooseVariable(QtGui.QDialog):
         # x axis points
         # Only one domain is free
         for i in range(0, len(domainIndexes)):
-            if domainIndexes[i] == 0:
+            if domainIndexes[i] == daeChooseVariable.FREE_DOMAIN:
                 if i == 0: # Time domain
                     xAxisLabel = "Time"
-
-                    xPoints.extend(times[0 : noTimePoints])
+                    xPoints.extend(times[0 : noTimePoints-1])
 
                 else: # Some other domain
                     d = domains[i-1] # because Time is not in a domain list
@@ -213,19 +251,33 @@ class daeChooseVariable(QtGui.QDialog):
                     
                     # Remove html code marks ('&' and ';')
                     xname = names[len(names)-1]
-                    xAxisLabel = xname.replace("&", "").replace(";", "");
-
+                    xAxisLabel = xname.replace("&", "").replace(";", "")
                     xPoints.extend(d.Points[0 : d.NumberOfPoints])
 
-                break       
-        
+                break
+                
         # y axis points
         t = []
-        for i in domainIndexes:
-            if i == 0:
-                t.append(slice(0, noTimePoints))
+        for i in range(0, len(domainIndexes)):
+            domainIndex = domainIndexes[i]
+            
+            if domainIndex == daeChooseVariable.FREE_DOMAIN:
+                if i == 0: # Time points
+                    t.append(slice(0, noTimePoints-1))
+                
+                else: # Other domain's points
+                    d = domains[i-1]
+                    t.append(slice(0, d.NumberOfPoints))
+                    
+            elif domainIndex == daeChooseVariable.LAST_TIME:
+                # Special case when time = "Last value" has been selected (animated plots)
+                t.append(noTimePoints-1)
+                
+                # Update domain points with the last time
+                domainPoints[i] = 'lt' #str(times[noTimePoints-1])
+                
             else:
-                t.append(i-1)
+                t.append(domainIndex)
 
         yPoints = values[t] #.copy()
 
@@ -304,13 +356,26 @@ class daeChooseVariable(QtGui.QDialog):
 
         # z axis
         t = []
-        for i in domainIndexes:
-            if i == 0:
-                t.append(slice(0, noTimePoints))
+        for i in range(0, len(domainIndexes)):
+            domainIndex = domainIndexes[i]
+            
+            if domainIndex == daeChooseVariable.FREE_DOMAIN:
+                if i == 0: # Time domain
+                    t.append(slice(0, noTimePoints))
+                else:
+                    d = domains[i-1] # because Time is not in a domain list
+                    t.append(domainIndex)
+            
+            elif domainIndex == daeChooseVariable.LAST_TIME:
+                t.append(noTimePoints - 1)
+                
+                # Update domain points with the last time
+                domainPoints[i] = 'lt' #str(times[noTimePoints-1])
+            
             else:
-                t.append(i-1)
+                t.append(domainIndex)
 
-        zPoints = values[t].copy()
+        zPoints = values[t] #.copy()
 
         #print values
         #print zPoints
@@ -409,17 +474,18 @@ class daeChooseVariable(QtGui.QDialog):
     def insertTimeValues(self, times):
         label, comboBox	= self.getComboBoxAndLabel(0)
         label.setText("Time")
-        comboBox.addItem("*")
+        comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
+        comboBox.addItem("Latest time", QtCore.QVariant(daeChooseVariable.LAST_TIME))
         for i in range(0, len(times)):
-            comboBox.addItem(str(times[i]))
+            comboBox.addItem(str(times[i]), QtCore.QVariant(i))
 
     def insertDomainValues(self, n, domain):
         label, comboBox	= self.getComboBoxAndLabel(n)
         names = domain.Name.split(".")
         label.setText(names[len(names)-1])
-        comboBox.addItem("*")
+        comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
         for i in range(0, domain.NumberOfPoints):
-            comboBox.addItem(str(domain[i]))
+            comboBox.addItem(str(domain[i]), QtCore.QVariant(i))
             
     def getComboBoxAndLabel(self, index):
         if(index == 0):

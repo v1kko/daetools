@@ -81,7 +81,7 @@ else
   exit
 fi
  
-COMPILER_SETTINGS_DIR="${INSTALLATIONS_DIR}/../_compiler_settings"
+COMPILER_SETTINGS_DIR="${INSTALLATIONS_DIR}/../.compiler_settings"
 
 PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
 PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
