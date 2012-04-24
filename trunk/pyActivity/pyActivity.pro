@@ -32,11 +32,11 @@ HEADERS += stdafx.h \
 win32{
 QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyActivity1.dll \
-	$${DAE_DEST_DIR}/pyActivity.pyd
+	$${PYDAE_DIR}/pyActivity.pyd
 }
 
 unix{
 QMAKE_POST_LINK = cp -f \
         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${DAE_DEST_DIR}/$${TARGET}.so
+        $${PYDAE_DIR}/$${TARGET}.so
 }

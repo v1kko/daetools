@@ -24,6 +24,7 @@ VER_MAJOR=
 VER_MINOR=
 VER_BUILD=
 PACKAGE_NAME=daetools
+SOURCE_FOLDER="${INSTALLATIONS_DIR}/../daetools"
 PCKG_TYPE=
 ARCH=
 LIB=
@@ -91,6 +92,9 @@ VER_MINOR=`cat ${COMPILER_SETTINGS_DIR}/dae_minor`
 VER_BUILD=`cat ${COMPILER_SETTINGS_DIR}/dae_build`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
 SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
+
+# PYTHON
+PYTHON_TYPE=`cat ${COMPILER_SETTINGS_DIR}/python`
 
 # BOOST
 BOOST_BUILD_TYPE=`cat ${COMPILER_SETTINGS_DIR}/boost`
@@ -253,22 +257,22 @@ if [ ${PCKG_TYPE} = "tgz" ]; then
   exit
 fi
 
-if [ -d ${PACKAGE_NAME} ]; then
-  rm -r ${PACKAGE_NAME}
-fi
-mkdir ${PACKAGE_NAME}
-mkdir ${PACKAGE_NAME}/docs
-mkdir ${PACKAGE_NAME}/docs/images
-mkdir ${PACKAGE_NAME}/docs/api_ref
-mkdir ${PACKAGE_NAME}/daePlotter
-mkdir ${PACKAGE_NAME}/daePlotter/images
-mkdir ${PACKAGE_NAME}/examples
-mkdir ${PACKAGE_NAME}/examples/images
-mkdir ${PACKAGE_NAME}/pyDAE
-mkdir ${PACKAGE_NAME}/daeSimulator
-mkdir ${PACKAGE_NAME}/daeSimulator/images
-mkdir ${PACKAGE_NAME}/solvers
-mkdir ${PACKAGE_NAME}/model_library
+# if [ -d ${PACKAGE_NAME} ]; then
+#   rm -r ${PACKAGE_NAME}
+# fi
+# mkdir ${PACKAGE_NAME}
+# mkdir ${PACKAGE_NAME}/docs
+# mkdir ${PACKAGE_NAME}/docs/images
+# mkdir ${PACKAGE_NAME}/docs/api_ref
+# mkdir ${PACKAGE_NAME}/daePlotter
+# mkdir ${PACKAGE_NAME}/daePlotter/images
+# mkdir ${PACKAGE_NAME}/examples
+# mkdir ${PACKAGE_NAME}/examples/images
+# mkdir ${PACKAGE_NAME}/pyDAE
+# mkdir ${PACKAGE_NAME}/daeSimulator
+# mkdir ${PACKAGE_NAME}/daeSimulator/images
+# mkdir ${PACKAGE_NAME}/solvers
+# mkdir ${PACKAGE_NAME}/model_library
 
 if [ -d ${BUILD_DIR} ]; then
   rm -r ${BUILD_DIR}
@@ -278,141 +282,144 @@ mkdir ${BUILD_DIR}
 #mkdir ${BUILD_DIR}/usr/bin
 #mkdir ${BUILD_DIR}${USRLIB}
 
-# Python extension modules and LA solvers
-cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
-cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
-cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
-cp ../release/pyUnits.so            ${PACKAGE_NAME}/pyDAE
-
-if [ -e ../release/pyBONMIN.so ]; then
-  cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers
-fi
-
-if [ -e ../release/pyIPOPT.so ]; then
-  cp ../release/pyIPOPT.so          ${PACKAGE_NAME}/solvers
-fi
-
-if [ -e ../release/pyNLOPT.so ]; then
-  cp ../release/pyNLOPT.so          ${PACKAGE_NAME}/solvers
-fi
-
-#if [ -e ../release/pyAmdACML.so ]; then
-#  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/solvers
-#fi
-
-#if [ -e ../release/pyIntelMKL.so ]; then
-#  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/solvers
-#fi
-
-#if [ -e ../release/pyLapack.so ]; then
-#  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
-#fi
-
-#if [ -e ../release/pyMagma.so ]; then
-#  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
-#fi
-
-#if [ -e ../release/pyCUSP.so ]; then
-#  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
-#fi
-
-if [ -e ../release/pySuperLU.so ]; then
-  cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers
-fi
-if [ -e ../release/pySuperLU_MT.so ]; then
-  cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/solvers
-fi
-if [ -e ../release/pySuperLU_CUDA.so ]; then
-  cp ../release/pySuperLU_CUDA.so      ${PACKAGE_NAME}/solvers
-fi
-
-#if [ -e ../release/pyIntelPardiso.so ]; then
-#  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/solvers
-#fi
-
-if [ -e ../release/pyTrilinos.so ]; then
-  cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/solvers
-fi
-
-# Licences
-cp ../licence*                                   ${PACKAGE_NAME}
-cp ../ReadMe.txt                                 ${PACKAGE_NAME}
-
-# Python files
-cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
-cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
-cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
-cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
-cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
-cp ../python-files/daeVariableTypes.py           ${PACKAGE_NAME}/pyDAE
-cp ../python-files/daeDataReporters.py           ${PACKAGE_NAME}/pyDAE
-cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
-cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
-cp ../python-files/aztecoo_options.py            ${PACKAGE_NAME}/solvers
-cp ../python-files/daeMinpackLeastSq.py          ${PACKAGE_NAME}/solvers
-cp ../python-files/model_library__init__.py      ${PACKAGE_NAME}/model_library/__init__.py
-
-# daeSimulator
-cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator
-cp ../python-files/daeSimulator/daeSimulator.py  ${PACKAGE_NAME}/daeSimulator
-cp ../python-files/daeSimulator/Simulator_ui.py  ${PACKAGE_NAME}/daeSimulator
-cp ../python-files/daeSimulator/images/*.*       ${PACKAGE_NAME}/daeSimulator/images
-
-# daePlotter
-cp ../python-files/daePlotter/*.py               ${PACKAGE_NAME}/daePlotter
-cp ../python-files/daePlotter/images/*.*         ${PACKAGE_NAME}/daePlotter/images
-
-# Model Library
-cp ../python-files/model_library/*.py            ${PACKAGE_NAME}/model_library
-
-# Examples and Tutorials
-cp ../python-files/examples/*.css                ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.xsl                ${PACKAGE_NAME}/examples
-cp ../python-files/examples/__init__.py          ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*tutorial*.*         ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*RunExamples*.py     ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*whats_the_time*.*   ${PACKAGE_NAME}/examples
-cp ../python-files/examples/*.init               ${PACKAGE_NAME}/examples
-cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
-
-# Documentation
-cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
-
-# Strip python extension modules
-find ${PACKAGE_NAME}/pyDAE   -name \*.so* | xargs strip -S
-find ${PACKAGE_NAME}/solvers -name \*.so* | xargs strip -S
-
-# Config
-mkdir -p ${PACKAGE_NAME}/etc/daetools
-cp ../daetools.cfg  ${PACKAGE_NAME}/etc/daetools
-cp ../bonmin.cfg    ${PACKAGE_NAME}/etc/daetools
-chmod go-wx ${PACKAGE_NAME}/etc/daetools/daetools.cfg
-chmod go-wx ${PACKAGE_NAME}/etc/daetools/bonmin.cfg
+# 
+# # Python extension modules and LA solvers
+# cp ../release/pyCore.so             ${PACKAGE_NAME}/pyDAE
+# cp ../release/pyActivity.so         ${PACKAGE_NAME}/pyDAE
+# cp ../release/pyDataReporting.so    ${PACKAGE_NAME}/pyDAE
+# cp ../release/pyIDAS.so             ${PACKAGE_NAME}/pyDAE
+# cp ../release/pyUnits.so            ${PACKAGE_NAME}/pyDAE
+# 
+# if [ -e ../release/pyBONMIN.so ]; then
+#   cp ../release/pyBONMIN.so          ${PACKAGE_NAME}/solvers
+# fi
+# 
+# if [ -e ../release/pyIPOPT.so ]; then
+#   cp ../release/pyIPOPT.so          ${PACKAGE_NAME}/solvers
+# fi
+# 
+# if [ -e ../release/pyNLOPT.so ]; then
+#   cp ../release/pyNLOPT.so          ${PACKAGE_NAME}/solvers
+# fi
+# 
+# #if [ -e ../release/pyAmdACML.so ]; then
+# #  cp ../release/pyAmdACML.so          ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# #if [ -e ../release/pyIntelMKL.so ]; then
+# #  cp ../release/pyIntelMKL.so         ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# #if [ -e ../release/pyLapack.so ]; then
+# #  cp ../release/pyLapack.so           ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# #if [ -e ../release/pyMagma.so ]; then
+# #  cp ../release/pyMagma.so             ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# #if [ -e ../release/pyCUSP.so ]; then
+# #  cp ../release/pyCUSP.so              ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# if [ -e ../release/pySuperLU.so ]; then
+#   cp ../release/pySuperLU.so           ${PACKAGE_NAME}/solvers
+# fi
+# if [ -e ../release/pySuperLU_MT.so ]; then
+#   cp ../release/pySuperLU_MT.so        ${PACKAGE_NAME}/solvers
+# fi
+# if [ -e ../release/pySuperLU_CUDA.so ]; then
+#   cp ../release/pySuperLU_CUDA.so      ${PACKAGE_NAME}/solvers
+# fi
+# 
+# #if [ -e ../release/pyIntelPardiso.so ]; then
+# #  cp ../release/pyIntelPardiso.so     ${PACKAGE_NAME}/solvers
+# #fi
+# 
+# if [ -e ../release/pyTrilinos.so ]; then
+#   cp ../release/pyTrilinos.so   ${PACKAGE_NAME}/solvers
+# fi
+# 
+# # Licences
+# cp ../licence*                                   ${PACKAGE_NAME}
+# cp ../ReadMe.txt                                 ${PACKAGE_NAME}
+# 
+# # Python files
+# cp ../python-files/daetools__init__.py           ${PACKAGE_NAME}/__init__.py
+# cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/WebView_ui.py                 ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/WebViewDialog.py              ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/daeLogs.py                    ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/daeVariableTypes.py           ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/daeDataReporters.py           ${PACKAGE_NAME}/pyDAE
+# cp ../python-files/pyDAE__init__.py              ${PACKAGE_NAME}/pyDAE/__init__.py
+# cp ../python-files/solvers__init__.py            ${PACKAGE_NAME}/solvers/__init__.py
+# cp ../python-files/aztecoo_options.py            ${PACKAGE_NAME}/solvers
+# cp ../python-files/daeMinpackLeastSq.py          ${PACKAGE_NAME}/solvers
+# cp ../python-files/model_library__init__.py      ${PACKAGE_NAME}/model_library/__init__.py
+# 
+# # daeSimulator
+# cp ../python-files/daeSimulator/__init__.py      ${PACKAGE_NAME}/daeSimulator
+# cp ../python-files/daeSimulator/daeSimulator.py  ${PACKAGE_NAME}/daeSimulator
+# cp ../python-files/daeSimulator/Simulator_ui.py  ${PACKAGE_NAME}/daeSimulator
+# cp ../python-files/daeSimulator/images/*.*       ${PACKAGE_NAME}/daeSimulator/images
+# 
+# # daePlotter
+# cp ../python-files/daePlotter/*.py               ${PACKAGE_NAME}/daePlotter
+# cp ../python-files/daePlotter/images/*.*         ${PACKAGE_NAME}/daePlotter/images
+# 
+# # Model Library
+# cp ../python-files/model_library/*.py            ${PACKAGE_NAME}/model_library
+# 
+# # Examples and Tutorials
+# cp ../python-files/examples/*.css                ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/*.xsl                ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/__init__.py          ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/*tutorial*.*         ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/*RunExamples*.py     ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/*whats_the_time*.*   ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/*.init               ${PACKAGE_NAME}/examples
+# cp ../python-files/examples/images/*.*           ${PACKAGE_NAME}/examples/images
+# 
+# # Documentation
+# cp ../python-files/api_ref/*.html  ${PACKAGE_NAME}/docs/api_ref
+# 
+# # Strip python extension modules
+# find ${PACKAGE_NAME}/pyDAE   -name \*.so* | xargs strip -S
+# find ${PACKAGE_NAME}/solvers -name \*.so* | xargs strip -S
+# 
+# # Config
+# mkdir -p ${PACKAGE_NAME}/etc/daetools
+# cp ../daetools.cfg  ${PACKAGE_NAME}/etc/daetools
+# cp ../bonmin.cfg    ${PACKAGE_NAME}/etc/daetools
+# chmod go-wx ${PACKAGE_NAME}/etc/daetools/daetools.cfg
+# chmod go-wx ${PACKAGE_NAME}/etc/daetools/bonmin.cfg
 
 # BOOST
-mkdir -p ${PACKAGE_NAME}/usr/lib
-cp ${BOOST_LIB_DIR}/${BOOST_PYTHON_LIB} ${PACKAGE_NAME}/usr/lib
-cp ${BOOST_LIB_DIR}/${BOOST_SYSTEM_LIB} ${PACKAGE_NAME}/usr/lib
-cp ${BOOST_LIB_DIR}/${BOOST_THREAD_LIB} ${PACKAGE_NAME}/usr/lib
+#if [${BOOST_BUILD_TYPE} = "custom" ]; then
+#  mkdir -p ${PACKAGE_NAME}/usr/lib
+#  cp ${BOOST_LIB_DIR}/${BOOST_PYTHON_LIB} ${PACKAGE_NAME}/usr/lib
+#  cp ${BOOST_LIB_DIR}/${BOOST_SYSTEM_LIB} ${PACKAGE_NAME}/usr/lib
+#  cp ${BOOST_LIB_DIR}/${BOOST_THREAD_LIB} ${PACKAGE_NAME}/usr/lib
+#fi
 
 # daePlotter and daeRunExamples
-mkdir -p ${PACKAGE_NAME}/usr/bin
-echo "#!/bin/sh"                                                                            > ${PACKAGE_NAME}/usr/bin/daeplotter
-echo "${PYTHON} -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
-chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
+# mkdir -p ${PACKAGE_NAME}/usr/bin
+# echo "#!/bin/sh"                                                                            > ${PACKAGE_NAME}/usr/bin/daeplotter
+# echo "${PYTHON} -c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"" >> ${PACKAGE_NAME}/usr/bin/daeplotter
+# chmod +x ${PACKAGE_NAME}/usr/bin/daeplotter
+# 
+# echo "#!/bin/sh"                                                                                              > ${PACKAGE_NAME}/usr/bin/daeexamples
+# echo "${PYTHON} -c \"from daetools.examples.python.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
+# chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
 
-echo "#!/bin/sh"                                                                                       > ${PACKAGE_NAME}/usr/bin/daeexamples
-echo "${PYTHON} -c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"" >> ${PACKAGE_NAME}/usr/bin/daeexamples
-chmod +x ${PACKAGE_NAME}/usr/bin/daeexamples
-
-if [ ${PLATFORM} = "darwin" ]; then
-  DAE_PLOTTER=/Applications/daetools/daePlotter.app/Contents/MacOS
-  DAE_EXAMPLES=/Applications/daetools/daeExamples.app/Contents/MacOS
-else
-  DAE_PLOTTER=/usr/bin
-  DAE_EXAMPLES=/usr/bin
-fi
+# if [ ${PLATFORM} = "darwin" ]; then
+#   DAE_PLOTTER=/Applications/daetools/daePlotter.app/Contents/MacOS
+#   DAE_EXAMPLES=/Applications/daetools/daeExamples.app/Contents/MacOS
+# else
+#   DAE_PLOTTER=/usr/bin
+#   DAE_EXAMPLES=/usr/bin
+# fi
 
 SETUP_PY=setup.py
 echo "#!/usr/bin/env python " > ${SETUP_PY}
@@ -429,12 +436,18 @@ echo "      url='http://www.daetools.com', " >> ${SETUP_PY}
 echo "      license='GNU GPL v3', " >> ${SETUP_PY}
 echo "      platforms='${ARCH}', " >> ${SETUP_PY}
 echo "      packages=['${PACKAGE_NAME}'], " >> ${SETUP_PY}
-echo "      package_dir={'${PACKAGE_NAME}': '${PACKAGE_NAME}'}, " >> ${SETUP_PY}
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.*', 'model_library/*.*', 'examples/*.*', 'examples/images/*.*', 'docs/*.*', 'docs/images/*.*', 'docs/api_ref/*.*', 'daeSimulator/*.*', 'daeSimulator/images/*.*', 'daePlotter/*.*', 'daePlotter/images/*.*', 'solvers/*.*']}, " >> ${SETUP_PY}
-echo "      data_files=[('/etc/daetools', ['${PACKAGE_NAME}/etc/daetools/daetools.cfg', '${PACKAGE_NAME}/etc/daetools/bonmin.cfg']), " >> ${SETUP_PY}
-echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_SYSTEM_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_THREAD_LIB}']), "  >> ${SETUP_PY}
-echo "                  ('${DAE_EXAMPLES}', ['${PACKAGE_NAME}/usr/bin/daeexamples']), " >> ${SETUP_PY}
-echo "                  ('${DAE_PLOTTER}', ['${PACKAGE_NAME}/usr/bin/daeplotter']) ]"   >> ${SETUP_PY}
+echo "      package_dir={'${PACKAGE_NAME}': '${SOURCE_FOLDER}'}, " >> ${SETUP_PY}
+echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, " >> ${SETUP_PY}
+echo "      data_files=[('/etc/daetools', ['${SOURCE_FOLDER}/etc/daetools/daetools.cfg', '${SOURCE_FOLDER}/etc/daetools/bonmin.cfg'] ), " >> ${SETUP_PY}
+#if [${BOOST_BUILD_TYPE} = "custom" ]; then
+#echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_SYSTEM_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_THREAD_LIB}']), "  >> ${SETUP_PY}
+#fi
+echo "                  ('/usr/share/applications', ['${SOURCE_FOLDER}/usr/share/applications/daetools-daeExamples.desktop', '${SOURCE_FOLDER}/usr/share/applications/daetools-daePlotter.desktop'] ), " >> ${SETUP_PY}
+echo "                  ('/usr/share/man/man1',     ['${SOURCE_FOLDER}/usr/share/man/man1/daetools.1.gz'] ), "                                                       >> ${SETUP_PY}
+echo "                  ('/usr/share/menu',         ['${SOURCE_FOLDER}/usr/share/menu/daetools-plotter', '${SOURCE_FOLDER}/usr/share/menu/daetools-examples'] ), "   >> ${SETUP_PY}
+echo "                  ('/usr/share/pixmaps',      ['${SOURCE_FOLDER}/usr/share/pixmaps/daetools_main.png'] ), "                                                    >> ${SETUP_PY}
+echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeexamples'] ), " >> ${SETUP_PY}
+echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeplotter'] ) ]"  >> ${SETUP_PY}
 echo "      ) " >> ${SETUP_PY}
 echo " " >> ${SETUP_PY}
 
@@ -472,49 +485,50 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \*.py        | xargs chmod +x
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
-ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
+#ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
+ICON="daetools_main"
 
-if [ ! ${PLATFORM} = "darwin" ]; then
-  mkdir ${BUILD_DIR}/usr/share
-
-  # Man page
-  mkdir ${BUILD_DIR}/usr/share/man
-  mkdir ${BUILD_DIR}/usr/share/man/man1
-  gzip -c -9 ../daetools.1 > ${BUILD_DIR}/usr/share/man/man1/daetools.1.gz
-
-  # Changelog file
-  mkdir ${BUILD_DIR}/usr/share/doc
-  mkdir ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
-  cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
-  gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
-
-  # Shortcuts
-  mkdir ${BUILD_DIR}/usr/share/applications
-
-  daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
-  echo "[Desktop Entry]"                                 > ${daePlotter_DESKTOP}
-  echo "Name=daePlotter"                                >> ${daePlotter_DESKTOP}
-  echo "GenericName=Equation-Oriented modelling tool"   >> ${daePlotter_DESKTOP}
-  echo "Comment=DAE Tools Plotter"                      >> ${daePlotter_DESKTOP}
-  echo "Categories=GNOME;Development;"                  >> ${daePlotter_DESKTOP}
-  echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
-  echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
-  echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
-  echo "Type=Application"                               >> ${daePlotter_DESKTOP}
-  echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
-
-  daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-Examples.desktop
-  echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
-  echo "Name=DAE Tools Examples"                        >> ${daeExamples_DESKTOP}
-  echo "GenericName=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
-  echo "Comment=DAE Tools Examples"                     >> ${daeExamples_DESKTOP}
-  echo "Categories=GNOME;Development;"                  >> ${daeExamples_DESKTOP}
-  echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
-  echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
-  echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
-  echo "Type=Application"                               >> ${daeExamples_DESKTOP}
-  echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
-fi
+#if [ ! ${PLATFORM} = "darwin" ]; then
+#   mkdir ${BUILD_DIR}/usr/share
+# 
+#   # Man page
+#   mkdir ${BUILD_DIR}/usr/share/man
+#   mkdir ${BUILD_DIR}/usr/share/man/man1
+#   gzip -c -9 ../daetools.1 > ${BUILD_DIR}/usr/share/man/man1/daetools.1.gz
+# 
+#   # Changelog file
+#   mkdir ${BUILD_DIR}/usr/share/doc
+#   mkdir ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
+#   cp ../copyright ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}
+#   gzip -c -9 ../Website/changelog > ${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/changelog.Debian.gz
+# 
+#   # Shortcuts
+#   mkdir ${BUILD_DIR}/usr/share/applications
+# 
+#   daePlotter_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daePlotter.desktop
+#   echo "[Desktop Entry]"                                 > ${daePlotter_DESKTOP}
+#   echo "Name=daePlotter"                                >> ${daePlotter_DESKTOP}
+#   echo "GenericName=Equation-Oriented modelling tool"   >> ${daePlotter_DESKTOP}
+#   echo "Comment=DAE Tools Plotter"                      >> ${daePlotter_DESKTOP}
+#   echo "Categories=GNOME;Development;"                  >> ${daePlotter_DESKTOP}
+#   echo "Exec=/usr/bin/daeplotter"                       >> ${daePlotter_DESKTOP}
+#   echo "Icon=${ICON}"                                   >> ${daePlotter_DESKTOP}
+#   echo "Terminal=false"                                 >> ${daePlotter_DESKTOP}
+#   echo "Type=Application"                               >> ${daePlotter_DESKTOP}
+#   echo "StartupNotify=true"                             >> ${daePlotter_DESKTOP}
+# 
+#   daeExamples_DESKTOP=${BUILD_DIR}/usr/share/applications/daetools-daeExamples.desktop
+#   echo "[Desktop Entry]"                                 > ${daeExamples_DESKTOP}
+#   echo "Name=DAE Tools Examples"                        >> ${daeExamples_DESKTOP}
+#   echo "GenericName=DAE Tools Examples"                 >> ${daeExamples_DESKTOP}
+#   echo "Comment=DAE Tools Examples"                     >> ${daeExamples_DESKTOP}
+#   echo "Categories=GNOME;Development;"                  >> ${daeExamples_DESKTOP}
+#   echo "Exec=/usr/bin/daeexamples"                      >> ${daeExamples_DESKTOP}
+#   echo "Icon=${ICON}"                                   >> ${daeExamples_DESKTOP}
+#   echo "Terminal=false"                                 >> ${daeExamples_DESKTOP}
+#   echo "Type=Application"                               >> ${daeExamples_DESKTOP}
+#   echo "StartupNotify=true"                             >> ${daeExamples_DESKTOP}
+#fi
 
 if [ ${PCKG_TYPE} = "deb" ]; then
   mkdir ${BUILD_DIR}/DEBIAN
@@ -536,27 +550,27 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
-  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})"  > ${SHLIBS}
-  echo "${BOOST_SYSTEM_LIB_NAME} ${BOOST_VERSION} ${BOOST_SYSTEM_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
-  echo "${BOOST_THREAD_LIB_NAME} ${BOOST_VERSION} ${BOOST_THREAD_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+#  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+#  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})"  > ${SHLIBS}
+#  echo "${BOOST_SYSTEM_LIB_NAME} ${BOOST_VERSION} ${BOOST_SYSTEM_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+#  echo "${BOOST_THREAD_LIB_NAME} ${BOOST_VERSION} ${BOOST_THREAD_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
 
-  mkdir ${BUILD_DIR}/usr/share/menu
-  MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
-  echo "?package(${PACKAGE_NAME}):\\"                         > ${MENU}
-  echo "    needs=\"x11\" \\"                                >> ${MENU}
-  echo "    section=\"Applications/Development\" \\"         >> ${MENU}
-  echo "    title=\"daePlotter\" \\"                         >> ${MENU}
-  echo "    icon=\"${ICON}\" \\"                             >> ${MENU}
-  echo "    command=\"/usr/bin/daeplotter\""                 >> ${MENU}
-
-  EXAMPLES=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}-examples
-  echo "?package(${PACKAGE_NAME}-examples):\\"                > ${MENU}
-  echo "    needs=\"x11\" \\"                                >> ${MENU}
-  echo "    section=\"Applications/Development\" \\"         >> ${MENU}
-  echo "    title=\"DAE Tools Examples\" \\"                 >> ${MENU}
-  echo "    icon=\"${ICON}\" \\"                             >> ${MENU}
-  echo "    command=\"/usr/bin/daeexamples\""                >> ${MENU}
+#   mkdir ${BUILD_DIR}/usr/share/menu
+#   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
+#   echo "?package(${PACKAGE_NAME}):\\"                         > ${MENU}
+#   echo "    needs=\"x11\" \\"                                >> ${MENU}
+#   echo "    section=\"Applications/Development\" \\"         >> ${MENU}
+#   echo "    title=\"daePlotter\" \\"                         >> ${MENU}
+#   echo "    icon=\"${ICON}\" \\"                             >> ${MENU}
+#   echo "    command=\"/usr/bin/daeplotter\""                 >> ${MENU}
+# 
+#   EXAMPLES=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}-examples
+#   echo "?package(${PACKAGE_NAME}-examples):\\"                > ${EXAMPLES}
+#   echo "    needs=\"x11\" \\"                                >> ${EXAMPLES}
+#   echo "    section=\"Applications/Development\" \\"         >> ${EXAMPLES}
+#   echo "    title=\"DAE Tools Examples\" \\"                 >> ${EXAMPLES}
+#   echo "    icon=\"${ICON}\" \\"                             >> ${EXAMPLES}
+#   echo "    command=\"/usr/bin/daeexamples\""                >> ${EXAMPLES}
 
   POSTRM=${BUILD_DIR}/DEBIAN/postrm
   echo "#!/bin/sh"                                                                               > ${POSTRM}
@@ -657,6 +671,8 @@ else
   echo "ERROR: undefined type of a package"
   return
 fi
+
+exit
 
 # Clean up
 if [ -d ${BUILD_DIR} ]; then

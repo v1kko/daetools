@@ -9,6 +9,11 @@ namespace dae
 {
 namespace nlpsolver
 {
+daeNLPSolver_t* daeCreateNLOPTSolver(const string& algorithm)
+{
+	return new daeNLOPTSolver(algorithm);
+}
+
 double function(unsigned n, const double* x, double* grad, void* data)
 {
 	double obj_value;

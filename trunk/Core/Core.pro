@@ -90,3 +90,36 @@ HEADERS += xmlfunctions.h \
     units_io.h \ 
     event_handling.h
 
+win32{
+QMAKE_POST_LINK = $${COPY_FILES} $${TARGET}.lib $${STATIC_LIBS_DIR}
+}
+
+unix{
+QMAKE_POST_LINK = $${COPY_FILES} lib$${TARGET}.a $${STATIC_LIBS_DIR}
+}
+
+INSTALL_HEADERS = $$system($${COPY_FILES} ../dae.h         $${HEADERS_DIR})
+INSTALL_HEADERS = $$system($${COPY_FILES} ../dae_develop.h $${HEADERS_DIR})
+INSTALL_HEADERS = $$system($${COPY_FILES} ../config.h      $${HEADERS_DIR})
+INSTALL_HEADERS = $$system($${COPY_FILES} ../nlp_common.h  $${HEADERS_DIR})
+INSTALL_HEADERS = $$system($${COPY_FILES} dae.pri          $${HEADERS_DIR})
+
+INSTALL_HEADERS = $$system($${COPY_FILES} definitions.h    $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} core.h           $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} log.h            $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} activity.h       $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} optimization.h   $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} solver.h         $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} datareporting.h  $${HEADERS_DIR}/Core)
+
+INSTALL_HEADERS = $$system($${COPY_FILES} coreimpl.h       $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} helpers.h        $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} class_factory.h  $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} base_logging.h   $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} adouble.h        $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} export.h         $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} io.h             $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} io_impl.h        $${HEADERS_DIR}/Core)
+INSTALL_HEADERS = $$system($${COPY_FILES} xmlfile.h        $${HEADERS_DIR}/Core)
+
+

@@ -37,7 +37,7 @@ PYTHON_MINOR = 7
 #    Depends where the Boost library is located. If the systems library is not used 
 #    then BOOST_MAJOR, BOOST_MINOR and BOOST_BUILD must always be set!!
 #    and Boost build must be located in ../boost_1_42_0 (for instance)
-CONFIG += use_custom_boost
+CONFIG += use_system_boost
 BOOST_MAJOR = 1
 BOOST_MINOR = 49
 BOOST_BUILD = 0
@@ -164,6 +164,7 @@ win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include
                                  $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                  $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+                                 /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
                                  /usr/share/pyshared/numpy/core/include/numpy
 macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                  $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
@@ -230,16 +231,24 @@ unix::BOOST_LIBS            = -lboost_system -lboost_thread $${RT}
 use_custom_boost { 
 unix::BOOSTDIR              = ../boost_$${BOOST_MAJOR}_$${BOOST_MINOR}_$${BOOST_BUILD}
 unix::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
+
+use_system_python{
+unix::BOOST_PYTHON_LIB      = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+}
+use_custom_python{
 unix::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                               -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} \
                               $${RT}
+}
+
+unix::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} \
                               -l$${BOOST_SYSTEM_LIB_NAME} \
                               -l$${BOOST_THREAD_LIB_NAME} \
                               $${RT}
+
 }
 
 use_system_boost {
@@ -466,6 +475,19 @@ HEADERS += \
     ../config.h \
     ../dae_develop.h \
     ../dae.h
+
+
+SOLVERS_DIR     = ../daetools/solvers
+PYDAE_DIR       = ../daetools/pyDAE
+STATIC_LIBS_DIR = ../daetools/lib
+HEADERS_DIR     = ../daetools/include
+
+win32{
+COPY_FILES = copy /y 
+}
+unix{
+COPY_FILES = cp -f 
+}
 
 #####################################################################################
 #         Write compiler settings (needed to build installations packages)

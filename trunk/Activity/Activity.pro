@@ -20,3 +20,14 @@ SOURCES += stdafx.cpp \
     class_factory.cpp \
     base_activities.cpp \
     optimization.cpp
+
+
+win32{
+QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+}
+
+unix{
+QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+}
+
+INSTALL_HEADERS = $$system($${COPY_FILES} simulation.h $${HEADERS_DIR}/Activity)

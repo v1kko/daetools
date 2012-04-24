@@ -18,9 +18,20 @@ LIBS += $${DAE_ACTIVITY_LIB} \
 
 HEADERS += stdafx.h \ 
     nlpsolver_class_factory.h \
-    nlpsolver.h\
+    nlpsolver.h \
+    base_solvers.h \
 	../nlp_common.h
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     nlpsolver.cpp
  
+
+win32{
+QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+}
+
+unix{
+QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+}
+
+INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/NLOPT_NLPSolver)

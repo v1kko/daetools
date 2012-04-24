@@ -85,7 +85,7 @@ SuperLU {
 QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${DAE_DEST_DIR}/pySuperLU.pyd
+    $${SOLVERS_DIR}/pySuperLU.pyd
 
 }
 
@@ -93,14 +93,14 @@ SuperLU_MT {
 QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${DAE_DEST_DIR}/pySuperLU_MT.pyd
+    $${SOLVERS_DIR}/pySuperLU_MT.pyd
 }
 
 SuperLU_CUDA {
 QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${DAE_DEST_DIR}/pySuperLU_CUDA.pyd
+    $${SOLVERS_DIR}/pySuperLU_CUDA.pyd
 }
 }
 
@@ -108,5 +108,5 @@ unix{
 QMAKE_POST_LINK = cp \
     -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${DAE_DEST_DIR}/$${pyObject}.so
+    $${SOLVERS_DIR}/$${pyObject}.so
 }

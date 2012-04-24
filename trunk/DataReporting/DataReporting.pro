@@ -23,3 +23,15 @@ HEADERS += stdafx.h \
     datareporting_class_factory.h \
     base_data_reporters_receivers.h \
     datareporters.h
+
+
+win32{
+QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+}
+
+unix{
+QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+}
+
+INSTALL_HEADERS = $$system($${COPY_FILES} datareporters.h                  $${HEADERS_DIR}/DataReporting)
+INSTALL_HEADERS = $$system($${COPY_FILES} base_data_reporters_receivers.h  $${HEADERS_DIR}/DataReporting)

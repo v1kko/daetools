@@ -96,18 +96,18 @@ win32{
 BONMIN { 
 QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
-	$${DAE_DEST_DIR}/pyBONMIN.pyd
+	$${SOLVERS_DIR}/pyBONMIN.pyd
 }
 
 IPOPT { 
 QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
-	$${DAE_DEST_DIR}/pyIPOPT.pyd
+	$${SOLVERS_DIR}/pyIPOPT.pyd
 }
 }
 
 unix{
 QMAKE_POST_LINK = cp -f \
         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${DAE_DEST_DIR}/$${pyObject}.so
+        $${SOLVERS_DIR}/$${pyObject}.so
 }

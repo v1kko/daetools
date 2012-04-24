@@ -29,12 +29,12 @@ win32{
 QMAKE_POST_LINK = move \
     /y \
     $${DAE_DEST_DIR}/Trilinos1.dll \
-    $${DAE_DEST_DIR}/pyTrilinos.pyd
+    $${SOLVERS_DIR}/pyTrilinos.pyd
 }
 
 unix{
 QMAKE_POST_LINK = cp \
     -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${DAE_DEST_DIR}/py$${TARGET}.$${SHARED_LIB_EXT}
+    $${SOLVERS_DIR}/py$${TARGET}.$${SHARED_LIB_EXT}
 }

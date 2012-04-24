@@ -30,3 +30,15 @@ SOURCES += dllmain.cpp \
 HEADERS += units.h \
     stdafx.h \
     units_pool.h
+
+
+win32{
+QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+}
+
+unix{
+QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+}
+
+INSTALL_HEADERS = $$system($${COPY_FILES} units.h       $${HEADERS_DIR}/Units)
+INSTALL_HEADERS = $$system($${COPY_FILES} units_pool.h  $${HEADERS_DIR}/Units)
