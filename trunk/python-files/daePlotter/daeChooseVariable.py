@@ -243,7 +243,7 @@ class daeChooseVariable(QtGui.QDialog):
             if domainIndexes[i] == daeChooseVariable.FREE_DOMAIN:
                 if i == 0: # Time domain
                     xAxisLabel = "Time"
-                    xPoints.extend(times[0 : noTimePoints-1])
+                    xPoints.extend(times[0 : noTimePoints])
 
                 else: # Some other domain
                     d = domains[i-1] # because Time is not in a domain list
@@ -263,7 +263,7 @@ class daeChooseVariable(QtGui.QDialog):
             
             if domainIndex == daeChooseVariable.FREE_DOMAIN:
                 if i == 0: # Time points
-                    t.append(slice(0, noTimePoints-1))
+                    t.append(slice(0, noTimePoints))
                 
                 else: # Other domain's points
                     d = domains[i-1]
@@ -274,17 +274,19 @@ class daeChooseVariable(QtGui.QDialog):
                 t.append(noTimePoints-1)
                 
                 # Update domain points with the last time
-                domainPoints[i] = 'lt' #str(times[noTimePoints-1])
+                domainPoints[i] = 'ct'
                 
             else:
                 t.append(domainIndex)
 
         yPoints = values[t] #.copy()
 
-        #print 'Number of x points = {0}'.format(len(xPoints))
-        #print 'Number of y points = {0}'.format(len(yPoints))
+        print noTimePoints
+        print 'Number of x points = {0}'.format(len(xPoints))
+        print 'Number of y points = {0}'.format(len(yPoints))
+        #print times[-1]
 
-        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints
+        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times[-1]
 
     def getPlot3DData(self):
         return daeChooseVariable.get3DData(self.variable, self.domainIndexes, self.domainPoints)
@@ -322,8 +324,9 @@ class daeChooseVariable(QtGui.QDialog):
         nd = freeDomainIndexes[0]
         if nd == 0: # Time domain
             xAxisLabel = "Time"
-            for k in range(0, noTimePoints):
-                xPoints.append(times[k])        
+            xPoints.extend(times[0 : noTimePoints])
+            #for k in range(0, noTimePoints):
+            #    xPoints.append(times[k])        
 
         else: # Some other domain
             d = domains[nd-1] # because Time is not in a domain list
@@ -333,15 +336,17 @@ class daeChooseVariable(QtGui.QDialog):
             xname = names[len(names)-1]
             xAxisLabel = xname.replace("&", "").replace(";", "");
             
-            for k in range(0, d.NumberOfPoints):
-                xPoints.append(d[k]) 
+            xPoints.extend(d.Points[0 : d.NumberOfPoints])
+            #for k in range(0, d.NumberOfPoints):
+            #    xPoints.append(d[k]) 
             
         # y axis
         nd = freeDomainIndexes[1]
         if nd == 0: # Time domain
             yAxisLabel = "Time"
-            for k in range(0, noTimePoints):
-                yPoints.append(times[k])        
+            yPoints.extend(times[0 : noTimePoints])
+            #for k in range(0, noTimePoints):
+            #    yPoints.append(times[k])        
 
         else: # Some other domain
             d = domains[nd-1] # because Time is not in a domain list
@@ -351,8 +356,9 @@ class daeChooseVariable(QtGui.QDialog):
             yname = names[len(names)-1]
             yAxisLabel = yname.replace("&", "").replace(";", "");
 
-            for k in range(0, d.NumberOfPoints):
-                yPoints.append(d[k]) 
+            yPoints.extend(d.Points[0 : d.NumberOfPoints])
+            #for k in range(0, d.NumberOfPoints):
+            #    yPoints.append(d[k]) 
 
         # z axis
         t = []
@@ -367,10 +373,10 @@ class daeChooseVariable(QtGui.QDialog):
                     t.append(domainIndex)
             
             elif domainIndex == daeChooseVariable.LAST_TIME:
-                t.append(noTimePoints - 1)
+                t.append(noTimePoints-1)
                 
                 # Update domain points with the last time
-                domainPoints[i] = 'lt' #str(times[noTimePoints-1])
+                domainPoints[i] = 'ct'
             
             else:
                 t.append(domainIndex)
@@ -380,7 +386,7 @@ class daeChooseVariable(QtGui.QDialog):
         #print values
         #print zPoints
         
-        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints
+        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints, times[-1]
 
     #@QtCore.pyqtSlot()
     def slotSelectionChanged(self):
@@ -475,7 +481,8 @@ class daeChooseVariable(QtGui.QDialog):
         label, comboBox	= self.getComboBoxAndLabel(0)
         label.setText("Time")
         comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
-        comboBox.addItem("Latest time", QtCore.QVariant(daeChooseVariable.LAST_TIME))
+        if self.plotType == daeChooseVariable.plot2DAnimated:
+            comboBox.addItem("Current time", QtCore.QVariant(daeChooseVariable.LAST_TIME))
         for i in range(0, len(times)):
             comboBox.addItem(str(times[i]), QtCore.QVariant(i))
 

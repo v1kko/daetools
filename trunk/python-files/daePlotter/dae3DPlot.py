@@ -104,7 +104,7 @@ class dae3DPlot(QtGui.QDialog):
         if cv.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints = cv.getPlot3DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints, currentTime = cv.getPlot3DData()
 
         nx = len(xPoints) # no of points in x domain
         ny = len(yPoints) # no of points in y domain

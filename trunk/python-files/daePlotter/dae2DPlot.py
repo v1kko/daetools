@@ -64,12 +64,19 @@ class dae2DPlot(QtGui.QDialog):
                     
     def __init__(self, parent, tcpipServer, updateInterval = 0):
         QtGui.QDialog.__init__(self, parent, QtCore.Qt.Window)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
         self.tcpipServer = tcpipServer
         
         self.legendOn = True
         self.gridOn   = True
         self.curves   = []
+        if updateInterval == 0:
+            self.updateInterval = 0
+            self.plotType = daeChooseVariable.plot2D
+        else:
+            self.updateInterval = int(updateInterval)
+            self.plotType = daeChooseVariable.plot2DAnimated
         
         self.setWindowTitle("2D plot")
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'line-chart.png')))
@@ -147,6 +154,8 @@ class dae2DPlot(QtGui.QDialog):
         self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
         self.fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
         
+        self.textTime = self.figure.text(0.01, 0.01, '', fontproperties = self.fp9)
+        
         for xlabel in self.canvas.axes.get_xticklabels():
             xlabel.set_fontproperties(self.fp9)
         for ylabel in self.canvas.axes.get_yticklabels():
@@ -156,21 +165,32 @@ class dae2DPlot(QtGui.QDialog):
         layoutPlot.addWidget(self.canvas)
         layoutPlot.addWidget(self.toolbar_widget)
         
-        if int(updateInterval) > 0:
+        if self.updateInterval > 0:
             self._timer = QtCore.QTimer()
             QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
-            self._timer.start(int(updateInterval))
+            self._timer.start(self.updateInterval)
         
+    def closeEvent(self, event):
+        print("dae2DPlot.closeEvent")
+        return QtGui.QDialog.closeEvent(self, event)
+    
     def updateCurves(self):
         try:
             for line, variable, domainIndexes, domainPoints, fun in self.curves:
                 results = fun(variable, domainIndexes, domainPoints)
-                xPoints = results[5]
-                yPoints = results[6]
+                xPoints     = results[5]
+                yPoints     = results[6]
+                currentTime = results[7]
+                
                 line.set_xdata(xPoints)
                 line.set_ydata(yPoints)
+                
+                if self.textTime:
+                    t = 'Time = {0} s'.format(currentTime)
+                    self.textTime.set_text(t) 
             
             self.reformatPlot()
+        
         except Exception as e:
             print(str(e))
         
@@ -271,12 +291,12 @@ class dae2DPlot(QtGui.QDialog):
         processes = []
         for i in range(0, NoOfProcesses):
             processes.append(self.tcpipServer.GetProcess(i))
-        cv = daeChooseVariable(processes, daeChooseVariable.plot2D)
+        cv = daeChooseVariable(processes, self.plotType)
         cv.setWindowTitle('Choose variable for 2D plot')
         if cv.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints = cv.getPlot2DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = cv.getPlot2DData()
 
         domains = "("
         for i in range(0, len(domainPoints)):
@@ -298,7 +318,7 @@ class dae2DPlot(QtGui.QDialog):
         pd = dae2DPlot.plotDefaults[n]
         
         line, = self.canvas.axes.plot(xPoints, yPoints, label=yAxisLabel+domains, color=pd.color, linewidth=pd.linewidth, \
-                              linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
+                                      linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
         if no_lines == 0:
             self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
@@ -330,10 +350,10 @@ class dae2DPlot(QtGui.QDialog):
         xmax += dx
         ymin -= dy
         ymax += dy
-
+        
         self.canvas.axes.set_xlim(xmin, xmax)
         self.canvas.axes.set_ylim(ymin, ymax)
-
+        
         self.canvas.axes.grid(self.gridOn)
             
         if self.legendOn:

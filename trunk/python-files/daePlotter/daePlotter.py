@@ -110,7 +110,9 @@ class daeMainWindow(QtGui.QMainWindow):
 
     #@QtCore.pyqtSlot()
     def slotAnimatedPlot2D(self):
-        self.plot2D(1000) # 1000 ms
+        msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
+        if ok:
+            self.plot2D(msecs) # 1000 ms
 
     def plot2D(self, updateInterval = 0):
         try:

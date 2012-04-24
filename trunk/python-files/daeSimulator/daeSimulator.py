@@ -71,6 +71,7 @@ class daeSimulator(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'py.png')))
 
@@ -141,9 +142,19 @@ class daeSimulator(QtGui.QDialog):
         port  = cfg.GetInteger("daetools.datareporting.tcpipDataReceiverPort", 50000)
         self.ui.DataReporterTCPIPAddressLineEdit.setText( tcpip + ':' + str(port) )
 
+    def done(self, status):
+        print('daeSimulator.done = {0}'.format(status))
+        if self.simulation:
+            self.simulation.Pause()
+        elif self.optimization:
+            pass
+        
+        return QtGui.QDialog.done(self, status)
+        
     def __del__(self):
         # Calling Finalize is not mandatory since it will be called
         # in a simulation/optimization destructor
+        print('daeSimulator.__del__')
         if self.simulation:
             self.simulation.Finalize()
         elif self.optimization:
