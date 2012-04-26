@@ -26,12 +26,24 @@ SOURCES += stdafx.cpp \
     nlpsolver.cpp
  
 
-win32{
-QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-}
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
 
-INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/NLOPT_NLPSolver)
+#INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/NLOPT_NLPSolver)
+
+#######################################################
+#                Install files
+#######################################################
+nlopt_headers.path  = $${HEADERS_DIR}/NLOPT_NLPSolver
+nlopt_headers.files = base_solvers.h
+
+nlopt_libs.path         = $${STATIC_LIBS_DIR}
+win32::nlopt_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::nlopt_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += nlopt_headers nlopt_libs

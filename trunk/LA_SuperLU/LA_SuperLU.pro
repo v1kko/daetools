@@ -86,12 +86,24 @@ LIBS += $${SUPERLU_CUDA_LIBS} $${CUDA_LIBS}
 OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
 
-win32{
-QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-}
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
 
-INSTALL_HEADERS = $$system($${COPY_FILES} superlu_solvers.h $${HEADERS_DIR}/LA_SuperLU)
+#INSTALL_HEADERS = $$system($${COPY_FILES} superlu_solvers.h $${HEADERS_DIR}/LA_SuperLU)
+
+#######################################################
+#                Install files
+#######################################################
+superlu_headers.path  = $${HEADERS_DIR}/LA_SuperLU
+superlu_headers.files = superlu_solvers.h
+
+superlu_libs.path         = $${STATIC_LIBS_DIR}
+win32::superlu_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::superlu_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += superlu_headers superlu_libs

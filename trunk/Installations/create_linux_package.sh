@@ -175,9 +175,9 @@ fi
 TGZ=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}.tar.gz
 RPM=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}-${VER_BUILD}.${ARCH_RPM}.rpm
 if [ ${PLATFORM} = "darwin" ]; then
-  BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${DISTRO}
+  BUILD_DIR=${INSTALLATIONS_DIR}/${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${DISTRO}
 else
-  BUILD_DIR=${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
+  BUILD_DIR=${INSTALLATIONS_DIR}/${PACKAGE_NAME}_${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}_${ARCH}_${DISTRO}
 fi
 USRBIN=${BUILD_DIR}/usr/bin
 
@@ -202,60 +202,60 @@ case ${do_proceed} in
       * ) break;;
 esac
 
-if [ ${PCKG_TYPE} = "tgz" ]; then
-  INSTALL_DIR=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
-  mkdir ${INSTALL_DIR}
-  mkdir ${INSTALL_DIR}/lib
-  mkdir ${INSTALL_DIR}/include
-  mkdir ${INSTALL_DIR}/include/Core
-  mkdir ${INSTALL_DIR}/include/Activity
-  mkdir ${INSTALL_DIR}/include/DataReporting
-  mkdir ${INSTALL_DIR}/include/IDAS_DAESolver
-  mkdir ${INSTALL_DIR}/include/BONMIN_MINLPSolver
-  mkdir ${INSTALL_DIR}/include/LA_SuperLU
-  mkdir ${INSTALL_DIR}/TestPrograms
-
-  cp ../compile_libraries_linux.sh            ${INSTALL_DIR}
-
-  cp ../release/libcdaeActivity.a             ${INSTALL_DIR}/lib
-  cp ../release/libcdaeBONMIN_MINLPSolver.a   ${INSTALL_DIR}/lib
-  cp ../release/libcdaeCore.a                 ${INSTALL_DIR}/lib
-  cp ../release/libcdaeDataReporting.a        ${INSTALL_DIR}/lib
-  cp ../release/libcdaeIDAS_DAESolver.a       ${INSTALL_DIR}/lib
-  cp ../release/libcdaeIPOPT_NLPSolver.a      ${INSTALL_DIR}/lib
-  cp ../release/libcdaeNLOPT_NLPSolver.a      ${INSTALL_DIR}/lib
-  cp ../release/libcdaeSuperLU_LASolver.a     ${INSTALL_DIR}/lib
-  cp ../release/libcdaeSuperLU_MT_LASolver.a  ${INSTALL_DIR}/lib
-
-  cp ../dae.h                                           ${INSTALL_DIR}/include
-  cp ../dae_develop.h                                   ${INSTALL_DIR}/include
-  cp ../config.h                                        ${INSTALL_DIR}/include
-  cp ../Core/definitions.h                              ${INSTALL_DIR}/include/Core
-  cp ../Core/xmlfile.h                                  ${INSTALL_DIR}/include/Core
-  cp ../Core/coreimpl.h                                 ${INSTALL_DIR}/include/Core
-  cp ../Core/helpers.h                                  ${INSTALL_DIR}/include/Core
-  cp ../Core/base_logging.h                             ${INSTALL_DIR}/include/Core
-  cp ../Core/class_factory.h                            ${INSTALL_DIR}/include/Core
-  cp ../Activity/base_activities.h                      ${INSTALL_DIR}/include/Activity
-  cp ../Activity/simulation.h                           ${INSTALL_DIR}/include/Activity
-  cp ../DataReporting/datareporters.h                   ${INSTALL_DIR}/include/DataReporting
-  cp ../DataReporting/base_data_reporters_receivers.h   ${INSTALL_DIR}/include/DataReporting
-  cp ../IDAS_DAESolver/base_solvers.h                   ${INSTALL_DIR}/include/IDAS_DAESolver
-  cp ../IDAS_DAESolver/ida_solver.h                     ${INSTALL_DIR}/include/IDAS_DAESolver
-  cp ../BONMIN_MINLPSolver/base_solvers.h               ${INSTALL_DIR}/include/BONMIN_MINLPSolver
-  cp ../LA_SuperLU/superlu_solvers.h                    ${INSTALL_DIR}/include/LA_SuperLU
-  
-  cp ../dae.pri                                         ${INSTALL_DIR}
-  cp ../TestPrograms/TestPrograms.pro                   ${INSTALL_DIR}/TestPrograms
-  cp ../TestPrograms/main.cpp                           ${INSTALL_DIR}/TestPrograms
-  cp ../TestPrograms/*tutorial*.h                       ${INSTALL_DIR}/TestPrograms
-  cp ../TestPrograms/whats_the_time.h                   ${INSTALL_DIR}/TestPrograms
-  cp ../TestPrograms/variable_types.h                   ${INSTALL_DIR}/TestPrograms
-
-  tar -czvf ${TGZ} ${INSTALL_DIR}
-  rm -r ${INSTALL_DIR}
-  exit
-fi
+# if [ ${PCKG_TYPE} = "tgz" ]; then
+#   INSTALL_DIR=${PACKAGE_NAME}-${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
+#   mkdir ${INSTALL_DIR}
+#   mkdir ${INSTALL_DIR}/lib
+#   mkdir ${INSTALL_DIR}/include
+#   mkdir ${INSTALL_DIR}/include/Core
+#   mkdir ${INSTALL_DIR}/include/Activity
+#   mkdir ${INSTALL_DIR}/include/DataReporting
+#   mkdir ${INSTALL_DIR}/include/IDAS_DAESolver
+#   mkdir ${INSTALL_DIR}/include/BONMIN_MINLPSolver
+#   mkdir ${INSTALL_DIR}/include/LA_SuperLU
+#   mkdir ${INSTALL_DIR}/TestPrograms
+# 
+#   cp ../compile_libraries_linux.sh            ${INSTALL_DIR}
+# 
+#   cp ../release/libcdaeActivity.a             ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeBONMIN_MINLPSolver.a   ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeCore.a                 ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeDataReporting.a        ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeIDAS_DAESolver.a       ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeIPOPT_NLPSolver.a      ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeNLOPT_NLPSolver.a      ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeSuperLU_LASolver.a     ${INSTALL_DIR}/lib
+#   cp ../release/libcdaeSuperLU_MT_LASolver.a  ${INSTALL_DIR}/lib
+# 
+#   cp ../dae.h                                           ${INSTALL_DIR}/include
+#   cp ../dae_develop.h                                   ${INSTALL_DIR}/include
+#   cp ../config.h                                        ${INSTALL_DIR}/include
+#   cp ../Core/definitions.h                              ${INSTALL_DIR}/include/Core
+#   cp ../Core/xmlfile.h                                  ${INSTALL_DIR}/include/Core
+#   cp ../Core/coreimpl.h                                 ${INSTALL_DIR}/include/Core
+#   cp ../Core/helpers.h                                  ${INSTALL_DIR}/include/Core
+#   cp ../Core/base_logging.h                             ${INSTALL_DIR}/include/Core
+#   cp ../Core/class_factory.h                            ${INSTALL_DIR}/include/Core
+#   cp ../Activity/base_activities.h                      ${INSTALL_DIR}/include/Activity
+#   cp ../Activity/simulation.h                           ${INSTALL_DIR}/include/Activity
+#   cp ../DataReporting/datareporters.h                   ${INSTALL_DIR}/include/DataReporting
+#   cp ../DataReporting/base_data_reporters_receivers.h   ${INSTALL_DIR}/include/DataReporting
+#   cp ../IDAS_DAESolver/base_solvers.h                   ${INSTALL_DIR}/include/IDAS_DAESolver
+#   cp ../IDAS_DAESolver/ida_solver.h                     ${INSTALL_DIR}/include/IDAS_DAESolver
+#   cp ../BONMIN_MINLPSolver/base_solvers.h               ${INSTALL_DIR}/include/BONMIN_MINLPSolver
+#   cp ../LA_SuperLU/superlu_solvers.h                    ${INSTALL_DIR}/include/LA_SuperLU
+#   
+#   cp ../dae.pri                                         ${INSTALL_DIR}
+#   cp ../TestPrograms/TestPrograms.pro                   ${INSTALL_DIR}/TestPrograms
+#   cp ../TestPrograms/main.cpp                           ${INSTALL_DIR}/TestPrograms
+#   cp ../TestPrograms/*tutorial*.h                       ${INSTALL_DIR}/TestPrograms
+#   cp ../TestPrograms/whats_the_time.h                   ${INSTALL_DIR}/TestPrograms
+#   cp ../TestPrograms/variable_types.h                   ${INSTALL_DIR}/TestPrograms
+# 
+#   tar -czvf ${TGZ} ${INSTALL_DIR}
+#   rm -r ${INSTALL_DIR}
+#   exit
+# fi
 
 # if [ -d ${PACKAGE_NAME} ]; then
 #   rm -r ${PACKAGE_NAME}
@@ -421,52 +421,76 @@ mkdir ${BUILD_DIR}
 #   DAE_EXAMPLES=/usr/bin
 # fi
 
-SETUP_PY=setup.py
-echo "#!/usr/bin/env python " > ${SETUP_PY}
-echo "import sys " >> ${SETUP_PY}
-echo "from distutils.core import setup " >> ${SETUP_PY}
-echo " " >> ${SETUP_PY}
-echo "setup(name='${PACKAGE_NAME}', " >> ${SETUP_PY}
-echo "      version='${VERSION}', " >> ${SETUP_PY}
-echo "      description='DAE Tools', " >> ${SETUP_PY}
-echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', " >> ${SETUP_PY}
-echo "      author='Dragan Nikolic', " >> ${SETUP_PY}
-echo "      author_email='dnikolic@daetools.com', " >> ${SETUP_PY}
-echo "      url='http://www.daetools.com', " >> ${SETUP_PY}
-echo "      license='GNU GPL v3', " >> ${SETUP_PY}
-echo "      platforms='${ARCH}', " >> ${SETUP_PY}
-echo "      packages=['${PACKAGE_NAME}'], " >> ${SETUP_PY}
-echo "      package_dir={'${PACKAGE_NAME}': '${SOURCE_FOLDER}'}, " >> ${SETUP_PY}
-echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, " >> ${SETUP_PY}
-echo "      data_files=[('/etc/daetools', ['${SOURCE_FOLDER}/etc/daetools/daetools.cfg', '${SOURCE_FOLDER}/etc/daetools/bonmin.cfg'] ), " >> ${SETUP_PY}
-#if [${BOOST_BUILD_TYPE} = "custom" ]; then
-#echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_SYSTEM_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_THREAD_LIB}']), "  >> ${SETUP_PY}
-#fi
-echo "                  ('/usr/share/applications', ['${SOURCE_FOLDER}/usr/share/applications/daetools-daeExamples.desktop', '${SOURCE_FOLDER}/usr/share/applications/daetools-daePlotter.desktop'] ), " >> ${SETUP_PY}
-echo "                  ('/usr/share/man/man1',     ['${SOURCE_FOLDER}/usr/share/man/man1/daetools.1.gz'] ), "                                                       >> ${SETUP_PY}
-echo "                  ('/usr/share/menu',         ['${SOURCE_FOLDER}/usr/share/menu/daetools-plotter', '${SOURCE_FOLDER}/usr/share/menu/daetools-examples'] ), "   >> ${SETUP_PY}
-echo "                  ('/usr/share/pixmaps',      ['${SOURCE_FOLDER}/usr/share/pixmaps/daetools_main.png'] ), "                                                    >> ${SETUP_PY}
-echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeexamples'] ), " >> ${SETUP_PY}
-echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeplotter'] ) ]"  >> ${SETUP_PY}
-echo "      ) " >> ${SETUP_PY}
-echo " " >> ${SETUP_PY}
+# SETUP_PY=setup.py
+# echo "#!/usr/bin/env python " > ${SETUP_PY}
+# echo "import sys " >> ${SETUP_PY}
+# echo "from distutils.core import setup " >> ${SETUP_PY}
+# echo " " >> ${SETUP_PY}
+# echo "setup(name='${PACKAGE_NAME}', " >> ${SETUP_PY}
+# echo "      version='${VERSION}', " >> ${SETUP_PY}
+# echo "      description='DAE Tools', " >> ${SETUP_PY}
+# echo "      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', " >> ${SETUP_PY}
+# echo "      author='Dragan Nikolic', " >> ${SETUP_PY}
+# echo "      author_email='dnikolic@daetools.com', " >> ${SETUP_PY}
+# echo "      url='http://www.daetools.com', " >> ${SETUP_PY}
+# echo "      license='GNU GPL v3', " >> ${SETUP_PY}
+# echo "      platforms='${ARCH}', " >> ${SETUP_PY}
+# echo "      packages=['${PACKAGE_NAME}'], " >> ${SETUP_PY}
+# echo "      package_dir={'${PACKAGE_NAME}': '${SOURCE_FOLDER}'}, " >> ${SETUP_PY}
+# echo "      package_data={'${PACKAGE_NAME}': ['*.*', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, " >> ${SETUP_PY}
+# echo "      data_files=[('/etc/daetools', ['${SOURCE_FOLDER}/etc/daetools/daetools.cfg', '${SOURCE_FOLDER}/etc/daetools/bonmin.cfg'] ), " >> ${SETUP_PY}
+# #if [${BOOST_BUILD_TYPE} = "custom" ]; then
+# #echo "                  ('${USRLIB}', ['${PACKAGE_NAME}/usr/lib/${BOOST_PYTHON_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_SYSTEM_LIB}', '${PACKAGE_NAME}/usr/lib/${BOOST_THREAD_LIB}']), "  >> ${SETUP_PY}
+# #fi
+# echo "                  ('/usr/share/applications', ['${SOURCE_FOLDER}/usr/share/applications/daetools-daeExamples.desktop', '${SOURCE_FOLDER}/usr/share/applications/daetools-daePlotter.desktop'] ), " >> ${SETUP_PY}
+# echo "                  ('/usr/share/man/man1',     ['${SOURCE_FOLDER}/usr/share/man/man1/daetools.1.gz'] ), "                                                       >> ${SETUP_PY}
+# echo "                  ('/usr/share/menu',         ['${SOURCE_FOLDER}/usr/share/menu/daetools-plotter', '${SOURCE_FOLDER}/usr/share/menu/daetools-examples'] ), "   >> ${SETUP_PY}
+# echo "                  ('/usr/share/pixmaps',      ['${SOURCE_FOLDER}/usr/share/pixmaps/daetools_main.png'] ), "                                                    >> ${SETUP_PY}
+# echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeexamples'] ), " >> ${SETUP_PY}
+# echo "                  ('/usr/bin',   ['${SOURCE_FOLDER}/usr/bin/daeplotter'] ) ]"  >> ${SETUP_PY}
+# echo "      ) " >> ${SETUP_PY}
+# echo " " >> ${SETUP_PY}
+
+echo "#!/usr/bin/env python 
+import sys 
+from distutils.core import setup 
+from distutils.util import get_platform
+
+setup(name='daetools', 
+      version='${VERSION}', 
+      description='DAE Tools', 
+      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', 
+      author='Dragan Nikolic', 
+      author_email='dnikolic@daetools.com', 
+      url='http://www.daetools.com', 
+      license='GNU GPL v3', 
+#     platforms = get_platform(),
+      packages=['daetools'], 
+      package_dir={'daetools': '.'}, 
+      package_data={'daetools': ['__init__.py', '*.txt', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, 
+      data_files=[('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'] ), 
+                  ('/usr/share/applications', ['usr/share/applications/daetools-daeExamples.desktop', 'usr/share/applications/daetools-daePlotter.desktop'] ), 
+                  ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz'] ), 
+                  ('/usr/share/menu',         ['usr/share/menu/daetools-plotter', 'usr/share/menu/daetools-examples'] ), 
+                  ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools_main.png'] ), 
+                  ('/usr/bin',                ['usr/bin/daeexamples'] ), 
+                  ('/usr/bin',                ['usr/bin/daeplotter'] ) ]
+      )" > setup.py
 
 if [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
   if [ ${DISTRO} = "debian-lenny" ]; then
-    ${PYTHON} ${SETUP_PY} install --root=${BUILD_DIR}
+    ${PYTHON} setup.py install --root=${BUILD_DIR}
   else
-    ${PYTHON} ${SETUP_PY} install --install-layout=deb --root=${BUILD_DIR}
+    ${PYTHON} setup.py install --install-layout=deb --root=${BUILD_DIR}
   fi
 
-elif [ ${PCKG_TYPE} = "distutils.tar.gz" ]; then
-  mv ${PACKAGE_NAME} ${BUILD_DIR}
-  cp ${SETUP_PY} ${BUILD_DIR}
-
 elif [ ${PCKG_TYPE} = "rpm" ]; then
-  ${PYTHON} ${SETUP_PY} install --prefix=/usr --root=${BUILD_DIR}
+  ${PYTHON} setup.py install --prefix=/usr --root=${BUILD_DIR}
 
 fi
+
+exit
 
 #if [ -d ${BUILD_DIR}/usr/lib ]; then
 #  PYTHON_USRLIB=/usr/lib
@@ -486,7 +510,7 @@ find ${BUILD_DIR} -name \*.pyc | xargs rm
 #find ${BUILD_DIR} -name \__init__.py | xargs chmod -x
 
 #ICON=${DAE_TOOLS_DIR}/daePlotter/images/app.xpm
-ICON="daetools_main"
+#ICON="daetools_main"
 
 #if [ ! ${PLATFORM} = "darwin" ]; then
 #   mkdir ${BUILD_DIR}/usr/share

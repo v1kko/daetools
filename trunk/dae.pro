@@ -11,5 +11,7 @@ SUBDIRS = Core \
 	pyIDAS \
 	pyUnits
  
-HEADERS += dae.h \
-    dae_develop.h
+HEADERS += config.h \
+           dae_develop.h \
+           variable_types.h \
+           dae.h

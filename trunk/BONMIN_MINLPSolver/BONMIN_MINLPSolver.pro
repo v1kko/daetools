@@ -78,12 +78,25 @@ SOURCES += stdafx.cpp \
     nlpsolver.cpp
 
 
-win32{
-QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-}
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
 
-INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/BONMIN_MINLPSolver)
+#INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/BONMIN_MINLPSolver)
+
+
+#######################################################
+#                Install files
+#######################################################
+bonmin_headers.path  = $${HEADERS_DIR}/BONMIN_MINLPSolver
+bonmin_headers.files = base_solvers.h
+
+bonmin_libs.path         = $${STATIC_LIBS_DIR}
+win32::bonmin_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::bonmin_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += bonmin_headers bonmin_libs

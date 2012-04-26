@@ -2773,10 +2773,11 @@ public:
     void SetValue(real_t value);
 
 public:
-	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
 	std::string							m_strName;
-	size_t								m_nOverallIndex;
 	daeVariable*						m_pVariable;
+	std::vector<size_t>					m_narrDomainIndexes;
+//	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
+//	size_t								m_nOverallIndex;
 };
 
 /******************************************************************

@@ -1,8 +1,8 @@
 include(../dae.pri)
-QT -= core \
-      gui
-TARGET  = Trilinos
+QT -= core gui
+TARGET  = cdaeTrilinos_LASolver
 TEMPLATE = lib
+CONFIG += staticlib
 
 INCLUDEPATH +=  $${BOOSTDIR} \
 				$${PYTHON_INCLUDE_DIR} \
@@ -12,29 +12,34 @@ INCLUDEPATH +=  $${BOOSTDIR} \
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
-LIBS += $${BOOST_PYTHON_LIB} \
-		$${BLAS_LIBS} \
+LIBS += $${BLAS_LIBS} \
 		$${LAPACK_LIBS} \
 		$${TRILINOS_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \
-    dae_python.cpp \
     trilinos_amesos_la_solver.cpp
 
 HEADERS += stdafx.h \
+    base_solvers.h \
     trilinos_amesos_la_solver.h
 
-win32{
-QMAKE_POST_LINK = move \
-    /y \
-    $${DAE_DEST_DIR}/Trilinos1.dll \
-    $${SOLVERS_DIR}/pyTrilinos.pyd
-}
+#######################################################
+#                Install files
+#######################################################
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp \
-    -f \
-    $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${SOLVERS_DIR}/py$${TARGET}.$${SHARED_LIB_EXT}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
+
+trilinos_headers.path  = $${HEADERS_DIR}/LA_SuperLU
+trilinos_headers.files = base_solvers.h
+
+trilinos_libs.path         = $${STATIC_LIBS_DIR}
+win32::trilinos_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::trilinos_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += trilinos_headers trilinos_libs

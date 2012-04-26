@@ -80,6 +80,9 @@ pyObject = pySuperLU_CUDA
 
 OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
+#######################################################
+#                Install files
+#######################################################
 win32{
 SuperLU {
 QMAKE_POST_LINK = move \

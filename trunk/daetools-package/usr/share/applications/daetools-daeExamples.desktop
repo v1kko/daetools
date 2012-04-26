@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DAETools Examples
+GenericName=DAE Tools Examples
+Comment=DAE Tools Examples
+Categories=GNOME;Development;
+Exec=/usr/bin/daeexamples
+Icon=daetools-48x48
+Terminal=false
+Type=Application
+StartupNotify=true

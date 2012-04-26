@@ -317,7 +317,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 			strarrErrors.push_back(string("Invalid set value expression in action: ") + GetName());
 			return false;
 		}
-		if(!m_pVariableWrapper->m_pVariable || m_pVariableWrapper->m_nOverallIndex == ULONG_MAX)
+		if(!m_pVariableWrapper->m_pVariable /*|| m_pVariableWrapper->m_nOverallIndex == ULONG_MAX*/)
 		{
 			strarrErrors.push_back(string("Invalid variable in action: ") + GetName());
 			return false;

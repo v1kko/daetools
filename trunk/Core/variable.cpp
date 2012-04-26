@@ -1713,7 +1713,7 @@ daeDomain* daeVariable::GetDomain(size_t nIndex) const
 **********************************************************************************************/
 daeVariableWrapper::daeVariableWrapper() 
 {
-	m_nOverallIndex = ULONG_MAX;
+//	m_nOverallIndex = ULONG_MAX;
 	m_pVariable     = NULL;
 }
 
@@ -1752,15 +1752,17 @@ void daeVariableWrapper::Initialize(daeVariable* pVariable, std::string strName,
 	if(!pVariable->m_pModel->m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	m_pVariable     = pVariable;
-	m_pDataProxy    = pVariable->m_pModel->m_pDataProxy;
-	m_nOverallIndex = pVariable->m_nOverallIndex + pVariable->CalculateIndex(narrDomainIndexes);
+	m_pVariable         = pVariable;
+	m_narrDomainIndexes = narrDomainIndexes;
+/*	
+	m_pDataProxy        = pVariable->m_pModel->m_pDataProxy;
+	m_nOverallIndex     = pVariable->m_nOverallIndex + pVariable->CalculateIndex(narrDomainIndexes);
 	
 	//std::cout << "daeVariableWrapper::m_nOverallIndex = " << m_nOverallIndex << std::endl;
 	
 	if(m_nOverallIndex == ULONG_MAX)
 		daeDeclareAndThrowException(exInvalidCall);
-	
+*/	
 	if(strName.empty())
 	{
 		m_strName = pVariable->GetCanonicalName();
@@ -1778,6 +1780,9 @@ string daeVariableWrapper::GetName(void) const
 	return m_strName;
 }
 
+/*
+  Old code that does not work when used as an InputVariable for parameter estimation.
+  
 real_t daeVariableWrapper::GetValue(void) const
 {
 	if(!m_pDataProxy)
@@ -1795,7 +1800,131 @@ void daeVariableWrapper::SetValue(real_t value)
 // This accesses the ValuesReference; therefore the system must be initialized before using it!
 	m_pDataProxy->SetValue(m_nOverallIndex, value);
 }
+*/
 
+real_t daeVariableWrapper::GetValue(void) const
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+	size_t n = m_narrDomainIndexes.size();
+	
+	if(n == 0)
+		return m_pVariable->GetValue();
+	else if(n == 1)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0]);
+	else if(n == 2)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1]);
+	else if(n == 3)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2]);
+	else if(n == 4)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3]);
+	else if(n == 5)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4]);
+	else if(n == 6)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5]);
+	else if(n == 7)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5],
+									 m_narrDomainIndexes[6]);
+	else if(n == 8)
+		return m_pVariable->GetValue(m_narrDomainIndexes[0],
+									 m_narrDomainIndexes[1],
+									 m_narrDomainIndexes[2],
+									 m_narrDomainIndexes[3],
+									 m_narrDomainIndexes[4],
+									 m_narrDomainIndexes[5],
+									 m_narrDomainIndexes[6],
+									 m_narrDomainIndexes[7]);
+	else
+		daeDeclareAndThrowException(exInvalidCall);
+				
+	return 0;
+}
+
+void daeVariableWrapper::SetValue(real_t value)
+{
+	if(!m_pVariable)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+	size_t n = m_narrDomainIndexes.size();
+	
+	if(n == 0)
+		m_pVariable->ReAssignValue(value);
+	else if(n == 1)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   value);
+	else if(n == 2)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   value);
+	else if(n == 3)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   value);
+	else if(n == 4)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   value);
+	else if(n == 5)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   value);
+	else if(n == 6)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   value);
+	else if(n == 7)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   m_narrDomainIndexes[6],
+								   value);
+	else if(n == 8)
+		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
+								   m_narrDomainIndexes[1],
+								   m_narrDomainIndexes[2],
+								   m_narrDomainIndexes[3],
+								   m_narrDomainIndexes[4],
+								   m_narrDomainIndexes[5],
+								   m_narrDomainIndexes[6],
+								   m_narrDomainIndexes[7],
+								   value);
+	else
+		daeDeclareAndThrowException(exInvalidCall)
+}
 
 }
 }

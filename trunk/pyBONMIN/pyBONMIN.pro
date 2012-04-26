@@ -92,6 +92,9 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
     python_wraps.h
 
+#######################################################
+#                Install files
+#######################################################
 win32{
 BONMIN { 
 QMAKE_POST_LINK = move /y \

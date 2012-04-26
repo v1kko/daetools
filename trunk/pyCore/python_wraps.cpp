@@ -443,11 +443,14 @@ string adouble_repr(const adouble& self)
 	c.m_bExportDefinition  = true;
 	c.m_pModel             = NULL;
 	if(self.node)
+	{
 		self.node->Export(strNode, eCDAE, c);
+		return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % strNode).str();
+	}
 	else
-		strNode = "NULL";
-	
-    return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % strNode).str();
+	{
+		return (boost::format("adouble(%1%, %2%)") % self.getValue() % self.getDerivative()).str();
+	}
 }
 
 /*******************************************************

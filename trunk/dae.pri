@@ -449,38 +449,37 @@ win32::DAE_CORE_LIB                = cdaeCore.lib
 win32::DAE_DATAREPORTING_LIB       = cdaeDataReporting.lib
 win32::DAE_ACTIVITY_LIB            = cdaeActivity.lib
 win32::DAE_IDAS_SOLVER_LIB         = cdaeIDAS_DAESolver.lib
+win32::DAE_UNITS_LIB               = cdaeUnits.lib
 win32::DAE_SUPERLU_SOLVER_LIB      = cdaeSuperLU_LASolver.lib
 win32::DAE_SUPERLU_MT_SOLVER_LIB   = cdaeSuperLU_MT_LASolver.lib
 win32::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
 win32::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
 win32::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
 win32::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
-win32::DAE_UNITS_LIB               = cdaeUnits.lib
+win32::DAE_TRILINOS_SOLVER_LIB     = cdaeTrilinos_LASolver.lib
 
 unix::DAE_CORE_LIB                = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB       = -lcdaeDataReporting
 unix::DAE_ACTIVITY_LIB            = -lcdaeActivity
 unix::DAE_IDAS_SOLVER_LIB         = -lcdaeIDAS_DAESolver
+unix::DAE_UNITS_LIB               = -lcdaeUnits
 unix::DAE_SUPERLU_SOLVER_LIB      = -lcdaeSuperLU_LASolver
 unix::DAE_SUPERLU_MT_SOLVER_LIB   = -lcdaeSuperLU_MT_LASolver
 unix::DAE_SUPERLU_CUDA_SOLVER_LIB = -lcdaeSuperLU_CUDA_LASolver
 unix::DAE_BONMIN_SOLVER_LIB       = -lcdaeBONMIN_MINLPSolver
 unix::DAE_IPOPT_SOLVER_LIB        = -lcdaeIPOPT_NLPSolver
 unix::DAE_NLOPT_SOLVER_LIB        = -lcdaeNLOPT_NLPSolver
-unix::DAE_UNITS_LIB               = -lcdaeUnits
+unix::DAE_TRILINOS_SOLVER_LIB     = -lcdaeTrilinos_LASolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 
-HEADERS += \
-    ../config.h \
-    ../dae_develop.h \
-    ../dae.h
-
-
-SOLVERS_DIR     = ../daetools/solvers
-PYDAE_DIR       = ../daetools/pyDAE
-STATIC_LIBS_DIR = ../daetools/lib
-HEADERS_DIR     = ../daetools/include
+#######################################################
+#            Settings for installing files
+#######################################################
+SOLVERS_DIR     = ../daetools-package/daetools/solvers
+PYDAE_DIR       = ../daetools-package/daetools/pyDAE
+STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
+HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
 
 win32{
 COPY_FILES = copy /y 

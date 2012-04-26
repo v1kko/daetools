@@ -40,14 +40,12 @@
 #include <Ifpack_BlockRelaxation.h>
 #include <ml_include.h>
 #include <ml_MultiLevelPreconditioner.h>
+#include "base_solvers.h"
 
 namespace dae
 {
 namespace solver
 {
-daeIDALASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
-std::vector<string> daeTrilinosSupportedSolvers(void);
-
 class daeEpetraCSRMatrix : public daeSparseMatrix<double>
 {
 public:

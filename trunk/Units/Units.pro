@@ -32,13 +32,26 @@ HEADERS += units.h \
     units_pool.h
 
 
-win32{
-QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-}
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
 
-INSTALL_HEADERS = $$system($${COPY_FILES} units.h       $${HEADERS_DIR}/Units)
-INSTALL_HEADERS = $$system($${COPY_FILES} units_pool.h  $${HEADERS_DIR}/Units)
+#INSTALL_HEADERS = $$system($${COPY_FILES} units.h       $${HEADERS_DIR}/Units)
+#INSTALL_HEADERS = $$system($${COPY_FILES} units_pool.h  $${HEADERS_DIR}/Units)
+
+#######################################################
+#                Install files
+#######################################################
+units_headers.path  = $${HEADERS_DIR}/Units
+units_headers.files = units.h \
+                      units_pool.h
+
+units_libs.path         = $${STATIC_LIBS_DIR}
+win32::units_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::units_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += units_headers units_libs

@@ -551,7 +551,7 @@ void daeOptimizationVariable::SetValue(real_t value)
 								   m_narrDomainIndexes[7],
 								   value);
 	else
-		daeDeclareAndThrowException(exInvalidCall)
+		daeDeclareAndThrowException(exInvalidCall);
 }
 
 real_t daeOptimizationVariable::GetValue(void) const
@@ -608,7 +608,7 @@ real_t daeOptimizationVariable::GetValue(void) const
 									 m_narrDomainIndexes[6],
 									 m_narrDomainIndexes[7]);
 	else
-		daeDeclareAndThrowException(exInvalidCall)
+		daeDeclareAndThrowException(exInvalidCall);
 				
 	return 0;
 }

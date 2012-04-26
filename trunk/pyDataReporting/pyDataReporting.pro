@@ -23,6 +23,9 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
     python_wraps.h
 
+#######################################################
+#                Install files
+#######################################################
 win32{
 QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyDataReporting1.dll \

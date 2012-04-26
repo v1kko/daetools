@@ -851,9 +851,9 @@ public:
     {
 		daeAction* pAction;
         daeEventPort* pEventPort;
-        vector< pair<daeVariableWrapper, adouble> > arrSetVariables;
-        vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
-		vector<daeAction*> ptrarrUserDefinedActions;
+        std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
+        std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
+		std::vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -873,7 +873,7 @@ public:
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
             
-            pair<daeVariableWrapper, adouble> p;
+            std::pair<daeVariableWrapper, adouble> p;
 
 			if(pvar.check())
 			{
@@ -922,7 +922,7 @@ public:
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
 
-            pair<daeEventPort*, adouble> p;
+            std::pair<daeEventPort*, adouble> p;
 			
 			p.first = pEventPort;
 			if(aValue.check())
@@ -971,10 +971,10 @@ public:
         daeEventPort* pEventPort;
         string strSTN;
         string strStateTo;
-        vector< pair<string, string> > arrSwitchToStates;
-        vector< pair<daeVariableWrapper, adouble> > arrSetVariables;
-        vector< pair<daeEventPort*, adouble> > arrTriggerEvents;
-		vector<daeAction*> ptrarrUserDefinedActions;
+        std::vector< std::pair<string, string> > arrSwitchToStates;
+        std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
+        std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
+		std::vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
 
@@ -988,7 +988,7 @@ public:
             strSTN     = boost::python::extract<string>(t[0]);
             strStateTo = boost::python::extract<string>(t[1]);
             
-			pair<string, string> p(strSTN, strStateTo);
+			std::pair<string, string> p(strSTN, strStateTo);
             arrSwitchToStates.push_back(p);
         }
 
@@ -1008,7 +1008,7 @@ public:
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
             
-			pair<daeVariableWrapper, adouble> p;
+			std::pair<daeVariableWrapper, adouble> p;
 
 			if(pvar.check())
 			{
@@ -1057,7 +1057,7 @@ public:
 			boost::python::extract<real_t>  dValue(o);
 			boost::python::extract<adouble> aValue(o);
 
-            pair<daeEventPort*, adouble> p;
+            std::pair<daeEventPort*, adouble> p;
 			
 			p.first = pEventPort;
 			if(aValue.check())
@@ -1413,7 +1413,7 @@ public:
 					daeDeclareAndThrowException(exInvalidCall);
 			}
 			
-			boost::python::object res = f(*arguments, **values);
+			boost::python::object res = f(values);
 			boost::python::extract<adouble> get_adouble(res);
 			if(get_adouble.check())
 			{
@@ -1427,7 +1427,7 @@ public:
 		}
 		else
 		{
-			return daeScalarExternalFunctionWrapper::Calculate(mapValues);
+			daeDeclareAndThrowException(exInvalidCall);
 		}
 	}
 };

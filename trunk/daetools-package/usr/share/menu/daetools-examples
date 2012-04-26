@@ -1,0 +1,6 @@
+?package(daetools-examples):\
+    needs="x11" \
+    section="Applications/Development" \
+    title="DAE Tools Examples" \
+    icon="daetools-48x48" \
+    command="/usr/bin/daeexamples"

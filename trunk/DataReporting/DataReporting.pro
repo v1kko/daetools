@@ -25,13 +25,26 @@ HEADERS += stdafx.h \
     datareporters.h
 
 
-win32{
-QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-}
+#win32{
+#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
+#}
 
-unix{
-QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-}
+#unix{
+#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
+#}
 
-INSTALL_HEADERS = $$system($${COPY_FILES} datareporters.h                  $${HEADERS_DIR}/DataReporting)
-INSTALL_HEADERS = $$system($${COPY_FILES} base_data_reporters_receivers.h  $${HEADERS_DIR}/DataReporting)
+#INSTALL_HEADERS = $$system($${COPY_FILES} datareporters.h                  $${HEADERS_DIR}/DataReporting)
+#INSTALL_HEADERS = $$system($${COPY_FILES} base_data_reporters_receivers.h  $${HEADERS_DIR}/DataReporting)
+
+#######################################################
+#                Install files
+#######################################################
+datareporting_headers.path   = $${HEADERS_DIR}/DataReporting
+datareporting_headers.files  = datareporters.h \
+                               base_data_reporters_receivers.h
+
+datareporting_libs.path         = $${STATIC_LIBS_DIR}
+win32::datareporting_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
+unix::datareporting_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+
+INSTALLS += datareporting_headers datareporting_libs
