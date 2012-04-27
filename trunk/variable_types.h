@@ -3,9 +3,16 @@
 
 #include "Units/units_pool.h"
 
-namespace
+namespace variable_types
 {
-using namespace units::units_pool;
+using units_pool::m;
+using units_pool::kg;
+using units_pool::s;
+using units_pool::mol;
+using units_pool::K;
+using units_pool::J;
+using units_pool::W;
+using units_pool::Pa;
 
 const daeVariableType length_t                    ("length_t",                     m,              0.0, 1.0e+05,     1.0, 1e-05);
 const daeVariableType area_t                      ("area_t",                       m^2,            0.0, 1.0e+05,     1.0, 1e-05);

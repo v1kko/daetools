@@ -13,6 +13,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+namespace vt = variable_types;
+
+using units_pool::s;
 
 daeVariableType gradient_function_t("gradient_function_t", unit(), -1e+100, 1e+100, 0.1, 1e-08);
 
@@ -28,11 +31,11 @@ public:
 
     modOptTutorial1(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        x1("x1", no_t, this, ""),
-        x2("x2", no_t, this, ""),
-        x3("x3", no_t, this, ""),
-        x4("x4", no_t, this, ""),
-        dummy("dummy", no_t, this, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
+        x1("x1", vt::no_t, this, ""),
+        x2("x2", vt::no_t, this, ""),
+        x3("x3", vt::no_t, this, ""),
+        x4("x4", vt::no_t, this, ""),
+        dummy("dummy", vt::no_t, this, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
     {
     }
 

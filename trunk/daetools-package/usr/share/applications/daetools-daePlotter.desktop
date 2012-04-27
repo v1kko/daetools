@@ -1,20 +1,12 @@
 [Desktop Entry]
 Categories=GNOME;Development;
-Comment[en_US]=DAE Tools Plotter
 Comment=DAE Tools Plotter
 Exec=/usr/bin/daeplotter
-GenericName[en_US]=Equation-Oriented modelling tool
 GenericName=Equation-Oriented modelling tool
 Icon=daetools-48x48
 MimeType=
-Name[en_US]=DAETools Plotter
-Name=DAETools Plotter
-Path=
+Name=daetools Plotter
 StartupNotify=true
 Terminal=false
 TerminalOptions=
 Type=Application
-X-DBUS-ServiceName=
-X-DBUS-StartupType=
-X-KDE-SubstituteUID=false
-X-KDE-Username=

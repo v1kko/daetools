@@ -102,7 +102,7 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
 
-    # daeDynamicSimulation class defines the function Run which is called after successful initialization
+    # daeSimulation class defines the function Run which is called after successful initialization
     # to run the simulation. By default it runs for time period defined by the TimeHorizon property,
     # stopping after each period of time defined by the ReportInterval property to send the data to
     # the data reporter. However, default behaviour can be changed by implementing a user defined

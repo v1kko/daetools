@@ -16,12 +16,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+namespace vt = variable_types;
 
 using units_pool::m;
 using units_pool::kg;
 using units_pool::K;
 using units_pool::J;
 using units_pool::W;
+using units_pool::s;
 
 class extfnPower : public daeScalarExternalFunction
 {
@@ -30,7 +32,6 @@ public:
 		: daeScalarExternalFunction(strName, pModel, units)
 	{
 		daeExternalFunctionArgumentMap_t mapArguments;
-	// Arguments can be variables, parameters
 		mapArguments["m"]  = m;
 		mapArguments["cp"] = cp;
 		mapArguments["dT"] = dT;
@@ -80,11 +81,11 @@ public:
         alpha("&alpha;", W/((m^2)*K), this, "Heat transfer coefficient"),
         A("A", m^2, this, "Area of the plate"),
         T_surr("T_surr", K, this, "Temperature of the surroundings"),
-        Q_in("Q_in", power_t, this, "Power of the heater"),
-        T("T", temperature_t, this, "Temperature of the plate"),
+        Q_in("Q_in", vt::power_t, this, "Power of the heater"),
+        T("T", vt::temperature_t, this, "Temperature of the plate"),
 		
-		Power("Power", power_t, this, "External function power"),
-		Power_ext("Power_ext", power_t, this, "External function power")
+		Power("Power", vt::power_t, this, "External function power"),
+		Power_ext("Power_ext", vt::power_t, this, "External function power")
     {
     }
 

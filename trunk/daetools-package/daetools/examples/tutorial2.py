@@ -65,7 +65,7 @@ class modTutorial(daeModel):
 
         # Domains that variables/parameters are distributed on can be specified in a constructor:
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate", [self.x, self.y])
-        # Another way would be by using DistributeOnDomain() function:
+        # Another way of distributing a variable would be by using DistributeOnDomain() function:
         #self.T.DistributeOnDomain(self.x)
         #self.T.DistributeOnDomain(self.y)
 

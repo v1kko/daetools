@@ -26,13 +26,14 @@ cools down slowly again to the ambient temperature.
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+namespace vt = variable_types;
 
 using units_pool::m;
-using units_pool::s;
 using units_pool::kg;
 using units_pool::K;
 using units_pool::J;
 using units_pool::W;
+using units_pool::s;
 
 class modTutorial5 : public daeModel
 {
@@ -54,8 +55,8 @@ public:
         alpha("&alpha;", W/((m^2)*K), this, "Heat transfer coefficient"),
         A("A", m^2, this, "Area of the plate"),
         T_surr("T_surr", K, this, "Temperature of the surroundings"),
-        Q_in("Q_in", power_t, this, "Power of the heater"),
-        T("T", temperature_t, this, "Temperature of the plate")
+        Q_in("Q_in", vt::power_t, this, "Power of the heater"),
+        T("T", vt::temperature_t, this, "Temperature of the plate")
     {
     }
 

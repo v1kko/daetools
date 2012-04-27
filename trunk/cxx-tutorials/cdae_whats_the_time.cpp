@@ -31,6 +31,8 @@ A typical simulation imcludes 8 basic tasks:
 #include "../dae_develop.h"
 #include "../variable_types.h"
 
+using units_pool::s;
+
 /* 2. Define variable types
    Variable types are typically declared outside of model classes since they define common, reusable types.
    Pre-defined variable types are declared in the 'variable_types.h' header.
@@ -43,7 +45,7 @@ A typical simulation imcludes 8 basic tasks:
     - AbsoluteTolerance: float
    Here, a very simple variable type is declared: 
 */
-daeVariableType typeNone("typeNone", s, 0, 1E10,   0, 1e-5);
+daeVariableType typeTime("typeTime", s, 0, 1E10, 0, 1e-5);
 
 /* 3. Define a model
     New models are derived from the base daeModel class. */
@@ -75,7 +77,7 @@ public:
 */
     modWhatsTheTime(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        tau("&tau;", typeNone, this, "Time elapsed in the process")
+        tau("&tau;", typeTime, this, "Time elapsed in the process")
     {
     }
 
@@ -100,7 +102,7 @@ public:
         daeEquation* eq;
 
         eq = CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.");
-        eq->SetResidual(tau.dt() - 1);
+        eq->SetResidual(tau.dt() - Constant(1));
     }
 };
 
@@ -152,7 +154,7 @@ public:
         In this example the only thing needed to be done is to set the initial condition for the variable tau to 0.
         That can be done by using SetInitialCondition function:
     */
-        M.tau.SetInitialCondition(0);
+        M.tau.SetInitialCondition(0 * s);
     }
 };
 

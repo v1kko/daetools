@@ -26,6 +26,7 @@ by connecting their ports.
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+namespace vt = variable_types;
 
 using units_pool::s;
 
@@ -44,7 +45,7 @@ public:
 
     portSimple(string strName, daeePortType portType, daeModel* parent, string strDescription = "")
       : daePort(strName, portType, parent, strDescription),
-        t("t", no_t, this, "Time elapsed in the process, s")
+        t("t", vt::no_t, this, "Time elapsed in the process, s")
     {
     }
 };
@@ -77,7 +78,7 @@ public:
 
     modPortOut(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),
-        Time("Time", no_t, this, "Time elapsed in the process, s"),
+        Time("Time", vt::no_t, this, "Time elapsed in the process, s"),
         P_out("P_out", eOutletPort, this, "The simple port")
     {
     }

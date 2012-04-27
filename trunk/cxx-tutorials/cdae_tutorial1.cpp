@@ -85,6 +85,14 @@ Also, we need to write the following 5 equations:
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+namespace vt = variable_types;
+
+using units_pool::m;
+using units_pool::kg;
+using units_pool::K;
+using units_pool::J;
+using units_pool::W;
+using units_pool::s;
 
 class modTutorial1 : public daeModel
 {
@@ -108,7 +116,7 @@ public:
         rho("&rho;",    kg/(m^3),      this, "Density of the plate, kg/m3"),
         c_p("c_p",      J/(kg*K),      this, "Specific heat capacity of the plate, J/kgK"),
         k("&lambda;_p", W/(m*K),       this, "Thermal conductivity of the plate, W/mK"),
-        T("T",          temperature_t, this, "Temperature of the plate, K", &x, &y)
+        T("T",          vt::temperature_t, this, "Temperature of the plate, K", &x, &y)
     {
     }
 
@@ -176,11 +184,11 @@ public:
 		M.y.CreateDistributed(eCFDM, 2, 25, 0, 0.1);
 		
 	// Parameters' value can be set by using a function SetValue.
-		M.k.SetValue(401);
-		M.c_p.SetValue(385);
-		M.rho.SetValue(8960);
-		M.Q_b.SetValue(1e6);
-		M.Q_t.SetValue(0);
+		M.k.SetValue(401 * W/(m*K));
+        M.c_p.SetValue(385 * J/(kg*K));
+        M.rho.SetValue(8960 * kg/(m^3));
+        M.Q_b.SetValue(1e6 * W/(m^2));
+        M.Q_t.SetValue(0 * W/(m^2));
 	}
 
 	void SetUpVariables(void)
@@ -192,7 +200,7 @@ public:
 	*/
 		for(size_t x = 1; x < M.x.GetNumberOfPoints()-1; x++)
 			for(size_t y = 1; y < M.y.GetNumberOfPoints()-1; y++)
-				M.T.SetInitialCondition(x, y, 300);
+				M.T.SetInitialCondition(x, y, 300 * K);
 	}
 };
 

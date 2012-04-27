@@ -806,26 +806,30 @@ public:
 /* 
   ACHTUNG!! Normally, the initialization phase functions only!
   Used only to set initial guesses/initial conditions/abs. tolerances/assigned values during the initialization phase.
-  The following arrays will be deleted after a successful SolveInitial() call:
+  The following arrays MIGHT be deleted after a successful SolveInitial() call:
 	- m_pdInitialValues
     - m_pdInitialConditions
 	- m_pdVariablesTypesGathered
 	- m_pdAbsoluteTolerances
   
-  However, these function may be called even after the Initialization. For instance, during an optimization 
+  However, some of the above functions may be called even after the Initialization. For instance, during an optimization 
   the function SetUpVariables is called before each iteration which may set initial guesses, absolute
   tolerances, initial conditions and assign the varoable values. Therefore, these functions must be safe 
-  frim exceptions if called 
+  from exceptions if called 
 */
 	void SetInitialGuess(size_t nOverallIndex, real_t Value)
 	{
-		if(m_pdInitialValues)
-		{
-			m_pdInitialValues[nOverallIndex] = Value;
-		}
-		else if(!m_pdarrValuesReferences.empty())
+	/*
+	  First check if m_pdarrValuesReferences has already been initialized. 
+      If so, use it. If not use m_pdInitialValues.
+	*/
+		if(!m_pdarrValuesReferences.empty())
 		{
 			*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+		}
+		else if(m_pdInitialValues)
+		{
+			m_pdInitialValues[nOverallIndex] = Value;
 		}
 		else
 		{
@@ -842,30 +846,36 @@ public:
 	
 	void SetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
 	{
-		if(m_pdInitialValues)
+	/*
+	  Here we have to be able to set initial conditions repeatedly (during optimization).
+	  However, after the first solve initial the initialization data might be deleted.
+	  Therefore, the first thing that has to be done is checking if m_pdarrValuesReferences
+	  has already been initialized. If so, use it. If not use m_pdInitialValues.
+	*/
+		if(!m_pdarrValuesReferences.empty())
 		{
 			if(eMode == eAlgebraicValuesProvided)
 			{
-				m_pdInitialValues[nOverallIndex] = Value;
+				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
 			}
 			else if(eMode == eDifferentialValuesProvided)
 			{
-				m_pdInitialValues[nOverallIndex] = Value;
+				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
 			}
 			else
 			{
 				daeDeclareAndThrowException(exNotImplemented);
 			}
 		}
-		else if(!m_pdarrValuesReferences.empty())
+		else if(m_pdInitialValues)
 		{
 			if(eMode == eAlgebraicValuesProvided)
 			{
-				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+				m_pdInitialValues[nOverallIndex] = Value;
 			}
 			else if(eMode == eDifferentialValuesProvided)
 			{
-				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+				m_pdInitialValues[nOverallIndex] = Value;
 			}
 			else
 			{
@@ -919,6 +929,7 @@ public:
 	
 	void SetAbsoluteTolerance(size_t nOverallIndex, real_t Value)
 	{
+	// If called repeatedly during optimization it has no effect
 		if(m_pdAbsoluteTolerances)
 			m_pdAbsoluteTolerances[nOverallIndex] = Value;
 	}

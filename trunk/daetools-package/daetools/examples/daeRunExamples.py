@@ -44,6 +44,7 @@ except Exception, e:
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
+    import tutorial14
 except Exception, e:
     exc_traceback = sys.exc_info()[2]
     print '\n'.join(traceback.format_tb(exc_traceback))
@@ -154,17 +155,19 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("")
         self.ui.comboBoxExample.setItemText(13, "tutorial13")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(14, "opt_tutorial1")
+        self.ui.comboBoxExample.setItemText(14, "tutorial14")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(15, "opt_tutorial2")
+        self.ui.comboBoxExample.setItemText(15, "opt_tutorial1")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(16, "opt_tutorial3")
+        self.ui.comboBoxExample.setItemText(16, "opt_tutorial2")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(17, "opt_tutorial4")
+        self.ui.comboBoxExample.setItemText(17, "opt_tutorial3")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(18, "opt_tutorial5")
+        self.ui.comboBoxExample.setItemText(18, "opt_tutorial4")
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(19, "opt_tutorial6")
+        self.ui.comboBoxExample.setItemText(19, "opt_tutorial5")
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(20, "opt_tutorial6")
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -221,6 +224,8 @@ class RunExamples(QtGui.QDialog):
                 tutorial12.guiRun(self.app)
             elif simName == "tutorial13":
                 tutorial13.guiRun(self.app)
+            elif simName == "tutorial14":
+                tutorial14.guiRun(self.app)
             elif simName == "whats_the_time":
                 whats_the_time.guiRun(self.app)
             elif simName == "opt_tutorial1":

@@ -1,6 +1,6 @@
 include(../dae.pri)
 QT -= gui core
-TARGET = cdae_whats_the_time
+TARGET = cdae_tutorial2
 CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
@@ -18,4 +18,4 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${DAE_UNITS_LIB} \
         $${RT}
 
-SOURCES += cdae_whats_the_time.cpp
+SOURCES += cdae_tutorial2.cpp
