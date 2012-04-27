@@ -25,7 +25,6 @@ from daetools.solvers import pyIPOPT
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -35,19 +34,13 @@ class modTutorial(daeModel):
         self.x2 = daeVariable("x2", no_t, self)
         self.x3 = daeVariable("x3", no_t, self)
         self.x4 = daeVariable("x4", no_t, self)
-        
-        self.foo = daeVariable("foo", no_t, self)
-        self.dfoo = daeVariable("dfoo", no_t, self)
 
         self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
         eq = self.CreateEquation("Dummy")
         eq.Residual = self.dummy()
-        
-        eq = self.CreateEquation("dfoo")
-        eq.Residual = self.dfoo.dt() - Constant(1 * s**-1)
-        
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
@@ -62,11 +55,6 @@ class simTutorial(daeSimulation):
         self.m.x2.AssignValue(5)
         self.m.x3.AssignValue(5)
         self.m.x4.AssignValue(1)
-        
-        self.m.foo.SetInitialGuess(1)
-        self.m.foo.AssignValue(1)
-        
-        self.m.dfoo.SetInitialCondition(0)
 
     def SetUpOptimization(self):
         # Set the objective function (minimization).
