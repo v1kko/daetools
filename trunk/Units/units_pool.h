@@ -10,6 +10,10 @@ namespace units
 **************************************************************/
 namespace base_units_pool
 {
+const double yotta = 1E+24;
+const double zetta = 1E+21;
+const double exa   = 1E+18;
+const double peta  = 1E+15;
 const double tera  = 1E+12;
 const double giga  = 1E+9;
 const double mega  = 1E+6;
@@ -18,10 +22,14 @@ const double hecto = 1E+2;
 const double deka  = 1E+1;
 const double deci  = 1E-1;
 const double centi = 1E-2;
-const double mili  = 1E-3;
+const double milli = 1E-3;
 const double micro = 1E-6;
 const double nano  = 1E-9;
 const double pico  = 1E-12;
+const double femto = 1E-15;
+const double atto  = 1E-18;
+const double zepto = 1E-21;
+const double yocto = 1E-24;
 
 const base_unit dimless = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -38,7 +46,7 @@ const base_unit rad = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Radian
 const base_unit sr  = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Steradian
 
 // Time
-const base_unit ms   = mili  * s;
+const base_unit ms   = milli  * s;
 const base_unit us   = micro * s;
 const base_unit min  = 60    * s;
 const base_unit hour = 3600  * s;
@@ -50,7 +58,7 @@ const base_unit Hz   = s^(-1);
 // Length related:
 const base_unit km = kilo  * m;
 const base_unit cm = centi * m;
-const base_unit mm = mili  * m;
+const base_unit mm = milli  * m;
 
 // Volume:
 const base_unit l  = 1E-3 * (m^3);
@@ -107,6 +115,10 @@ namespace units_pool
 {
 #define DECLARE_UNIT(UNIT) \
 	const unit UNIT     = unit(std::string(#UNIT), 1); \
+	const unit Y##UNIT  = unit(std::string("Y")  + std::string(#UNIT), 1); \
+	const unit Z##UNIT  = unit(std::string("Z")  + std::string(#UNIT), 1); \
+	const unit E##UNIT  = unit(std::string("E")  + std::string(#UNIT), 1); \
+	const unit P##UNIT  = unit(std::string("P")  + std::string(#UNIT), 1); \
 	const unit T##UNIT  = unit(std::string("T")  + std::string(#UNIT), 1); \
 	const unit G##UNIT  = unit(std::string("G")  + std::string(#UNIT), 1); \
 	const unit M##UNIT  = unit(std::string("M")  + std::string(#UNIT), 1); \
@@ -118,8 +130,11 @@ namespace units_pool
 	const unit m##UNIT  = unit(std::string("m")  + std::string(#UNIT), 1); \
 	const unit u##UNIT  = unit(std::string("u")  + std::string(#UNIT), 1); \
 	const unit n##UNIT  = unit(std::string("n")  + std::string(#UNIT), 1); \
-	const unit p##UNIT  = unit(std::string("p")  + std::string(#UNIT), 1); 
-
+	const unit p##UNIT  = unit(std::string("p")  + std::string(#UNIT), 1); \
+	const unit f##UNIT  = unit(std::string("f")  + std::string(#UNIT), 1); \
+	const unit a##UNIT  = unit(std::string("a")  + std::string(#UNIT), 1); \
+	const unit z##UNIT  = unit(std::string("z")  + std::string(#UNIT), 1); \
+	const unit y##UNIT  = unit(std::string("y")  + std::string(#UNIT), 1); 
 
 const unit dimensionless = unit();
 

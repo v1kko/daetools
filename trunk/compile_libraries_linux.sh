@@ -8,6 +8,10 @@ Ncpu=1
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
+PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
+PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
+
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
 
@@ -46,6 +50,8 @@ fi
 export DAE_COMPILER_FLAGS
 echo $DAE_COMPILER_FLAGS
 
+vBOOST=1.49.0
+vBOOST_=1_49_0
 vBONMIN=1.5.1
 vSUPERLU=4.1
 vSUPERLU_MT=2.0
@@ -53,6 +59,10 @@ vNLOPT=2.2.4
 vIDAS=1.1.0
 vTRILINOS=10.8.0
 
+BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+BOOST_PYTHON_BUILD_ID=
+
+BOOST_HTTP=http://sourceforge.net/projects/boost/files/boost
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
@@ -62,6 +72,29 @@ NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
 
 # ACHTUNG! cd to TRUNK (in case the script is called from some other folder)
 cd ${TRUNK}
+
+#######################################################
+#                       BOOST                         #
+#######################################################
+if [ ! -e boost ]; then
+  echo "Setting-up BOOST..."
+  if [ ! -e boost_${vBOOST_}.tar.gz ]; then
+    wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
+  fi
+  tar -xzf boost_${vBOOST_}.tar.gz
+  mv boost_${vBOOST_} boost
+  cd boost
+  mkdir build
+  sh bootstrap.sh
+  cd ${TRUNK}
+fi
+cd boost
+if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so ]; then
+  echo "Building BOOST..."
+  ./bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} \
+         --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
+         variant=release link=shared threading=multi runtime-link=shared
+fi
 
 #######################################################
 #                       IDAS                          #

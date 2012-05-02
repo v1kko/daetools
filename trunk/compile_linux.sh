@@ -4,11 +4,11 @@ set -e
 
 if [ "$1" = "--help" ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
   echo "Usage: compile_linux [commands]"
-  echo "Commands: all | cdae | pydae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt"
-  echo "  - all (or empty list of commands): build all daetools libraries and python wrapper modules"
-  echo "  - cdae: build daetools c++ libraries"
-  echo "  - pydae: build daetools python wrapper modules"
-  echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt: build particular solvers and their python wrapper modules"
+  echo "Commands: all | core | pydae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt"
+  echo "  - all (or empty list of commands): build all daetools libraries, solvers and python wrapper modules"
+  echo "  - core: build core daetools c++ libraries and python wrapper modules (no 3rd party LA/(MI)NLP solvers)"
+  echo "  - pydae: build daetools core python wrapper modules only"
+  echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt: build particular solver and its python wrapper module"
   return
 fi
 
@@ -131,7 +131,7 @@ case ${PROJECTS} in
      for PROJECT in $*
      do
        echo Compiling $PROJECT...
-       if [ ${PROJECT} = "cdae" ]; then
+       if [ ${PROJECT} = "core" ]; then
          compile dae "-j$Ncpu"
        
        elif [ ${PROJECT} = "superlu" ]; then

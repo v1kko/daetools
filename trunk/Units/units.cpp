@@ -403,7 +403,7 @@ const unit unit::operator-(void) const
 //}
 std::string unit::toString(void) const
 {
-	std::string strPositive, strNegative, strUnits;
+	std::string strPositive, strNegative;
 	std::vector<std::string> arrPositive, arrNegative;
 	
 	for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
@@ -419,14 +419,18 @@ std::string unit::toString(void) const
 	strPositive = boost::algorithm::join(arrPositive, __string_unit_delimiter__);
 	strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
 	
-	if(arrNegative.size() == 0)
-		strUnits = strPositive;
-	else if(arrNegative.size() == 1)
-		strUnits = strPositive + "/" + strNegative;
-	else
-		strUnits = strPositive + "/(" + strNegative + ")"; 
+// If there are multiple units with negative exponents wrap them into ()
+	if(arrNegative.size() > 1)
+		strNegative = "(" + strNegative + ")"; 
 	
-	return "[" + strUnits + "]"; 
+// If there are no units with positive exponents set the positive part to 1
+	if(arrPositive.size() == 0)
+		strPositive = "1"; 
+
+	if(arrNegative.size() == 0)
+		return (boost::format("[%1%]") % strPositive).str();
+	else
+		return (boost::format("[%1%/%2%]") % strPositive % strNegative).str();
 }
 
 std::string unit::toLatex(void) const

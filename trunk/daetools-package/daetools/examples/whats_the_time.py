@@ -41,8 +41,8 @@ from time import localtime, strftime
 #    The daeVariable constructor takes 6 arguments:
 #     - Name: string
 #     - Units: unit object
-#     - LowerBound: float
-#     - UpperBound: float
+#     - LowerBound: float (not enforced at the moment)
+#     - UpperBound: float (not enforced at the moment)
 #     - InitialGuess: float
 #     - AbsoluteTolerance: float
 #    Here, a very simple dimensionless variable type is declared:
@@ -63,7 +63,7 @@ class modTutorial(daeModel):
         #                    variable = daeVariable(...)
         #
         #     In this example we declare only one variable: tau.
-        #     daeVariable constructor accepts 3 arguments:
+        #     daeVariable constructor accepts 4 arguments:
         #      - Name: string
         #      - VariableType: daeVariableType
         #      - Parent: daeModel object (indicating the model where the variable will be added)
@@ -83,15 +83,38 @@ class modTutorial(daeModel):
         #     It accepts two arguments: equation name and description (optional). All naming conventions apply here as well.
         #     Equations are written in the form of a residual, which is accepted by DAE equation system solvers:
         #                           'residual expression' = 0
-        #     Residuals are defined by creating the above expression by using the basic mathematical operations (+, -, * and /)
-        #     and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several useful functions:
-        #      - operator () which calculates the variable value
-        #      - function dt() which calculates a time derivative of the variable
-        #      - function d() and d2() which calculate a partial derivative of the variable of the 1st and the 2nd order, respectively
+        #     Residuals are defined by creating the above expression using the basic mathematical operations (+, -, * and /)
+        #     and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several useful functions
+        #     which return modified ADOL-C 'adouble' objects needed for construction of equation evaluation trees. adouble objects are 
+        #     used only for building the equation evaluation trees during the simulation initialization phase and cannot be used otherwise.
+        #     They hold a variable value, a derivative (required for construction of a Jacobian matrix) and the tree evaluation information.
+        #      - operator () which returns adouble object that calculates the variable value
+        #      - function dt() which returns adouble object thatcalculates a time derivative of the variable
+        #      - function d() and d2() which return adouble object that calculates a partial derivative of the variable of the 1st 
+        #        and the 2nd order, respectively
         #     In this example we simply write that the variable time derivative is equal to 1:
         #                          d(tau) / dt = 1
         #     which calculates the time as the current time elapsed in the simulation (which is a common way to obtain the current time within the model).
-        #     Note that the variables should be accessed through the model object, therefore we use self.tau
+        #     Normally, the built-in function Time() should be used to get the current time in the simulation; this is just an example 
+        #     explaining the basic concepts in the daetools.
+        #     Note that the variable objects should be declared as members of the models they belong to and therefore accessed through the model objects.
+        #
+        #     As of the version 1.2.0 all daetools objects use quantities with physical dimensions and unit-consistency is strictly enforced (although 
+        #     it can be turned off in daetools.cfg config file, typically located in /etc/daetools folder). All values and constants must be declared with
+        #     the information about their units. Units of variables, parameters and domains are specified in their constructor while constants and arrays
+        #     of constants are instantiated with the built-in Constant() and Array() functions. 
+        #     Obviously, the very strict unit-consistency requires an extra effort during the model building phase and makes models more verbose.
+        #     However, it helps eliminate some very hard to find errors and might save some NASA orbiters :-)
+        #     'quantity' objects consist of the value and the units. The daetools.pyDAE.pyUnits module declares the following units:
+        #       - All base SI units: m, kg, s, A, K, cd, mol 
+        #       - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc (see units_pool.h file in trunk/Units folder)
+        #       - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta- using the symbols: 
+        #         da, h, k, M, G, T, P, E, Z, Y)
+        #       - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto- using the symbols: 
+        #         d, c, m, u, n, p, f, a, z, y
+        #     ACHTUNG, ACHTUNG!! Never import all symbols from pyUnits module (it will polute the namespace with thousands of unit symbols)!!
+        #     Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects. 
+        #     In this example we declare a quantity with the value of 1.0 and units s^-1:
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.tau.dt() - Constant(1.0 * 1/s)
 

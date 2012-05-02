@@ -7,18 +7,26 @@ create_base_units::create_base_units()
 {
 	std::map<std::string, base_unit> __scaled_units__;
 	
-	double tera  = 1E+12;
-	double giga  = 1E+9;
-	double mega  = 1E+6;
-	double kilo  = 1E+3;
-	double hecto = 1E+2;
-	double deka  = 1E+1;
-	double deci  = 1E-1;
-	double centi = 1E-2;
-	double mili  = 1E-3;
-	double micro = 1E-6;
-	double nano  = 1E-9;
-	double pico  = 1E-12;
+	const double yotta = 1E+24;
+	const double zetta = 1E+21;
+	const double exa   = 1E+18;
+	const double peta  = 1E+15;
+	const double tera  = 1E+12;
+	const double giga  = 1E+9;
+	const double mega  = 1E+6;
+	const double kilo  = 1E+3;
+	const double hecto = 1E+2;
+	const double deka  = 1E+1;
+	const double deci  = 1E-1;
+	const double centi = 1E-2;
+	const double milli = 1E-3;
+	const double micro = 1E-6;
+	const double nano  = 1E-9;
+	const double pico  = 1E-12;
+	const double femto = 1E-15;
+	const double atto  = 1E-18;
+	const double zepto = 1E-21;
+	const double yocto = 1E-24;
 	
 	base_unit dimless = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0);
 	
@@ -35,7 +43,7 @@ create_base_units::create_base_units()
 	base_unit sr  = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Steradian
 	
 	// Time
-	base_unit ms   = mili  * s;
+	base_unit ms   = milli  * s;
 	base_unit us   = micro * s;
 	base_unit min  = 60    * s;
 	base_unit hour = 3600  * s;
@@ -47,7 +55,7 @@ create_base_units::create_base_units()
 	// Length related:
 	base_unit km = kilo  * m;
 	base_unit cm = centi * m;
-	base_unit mm = mili  * m;
+	base_unit mm = milli  * m;
 	
 	// Volume:
 	base_unit l  = 1E-3 * (m^3);
@@ -141,6 +149,10 @@ create_base_units::create_base_units()
 	
 	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
 	{
+		__scaled_units__["Y"  + (*iter).first] = yotta * base_unit((*iter).second);
+		__scaled_units__["Z"  + (*iter).first] = zetta * base_unit((*iter).second);
+		__scaled_units__["E"  + (*iter).first] = exa   * base_unit((*iter).second);
+		__scaled_units__["P"  + (*iter).first] = peta  * base_unit((*iter).second);
 		__scaled_units__["T"  + (*iter).first] = tera  * base_unit((*iter).second);
 		__scaled_units__["G"  + (*iter).first] = giga  * base_unit((*iter).second);
 		__scaled_units__["M"  + (*iter).first] = mega  * base_unit((*iter).second);
@@ -149,10 +161,14 @@ create_base_units::create_base_units()
 		__scaled_units__["da" + (*iter).first] = deka  * base_unit((*iter).second);
 		__scaled_units__["d"  + (*iter).first] = deci  * base_unit((*iter).second);
 		__scaled_units__["c"  + (*iter).first] = centi * base_unit((*iter).second);
-		__scaled_units__["m"  + (*iter).first] = mili  * base_unit((*iter).second);
+		__scaled_units__["m"  + (*iter).first] = milli * base_unit((*iter).second);
 		__scaled_units__["u"  + (*iter).first] = micro * base_unit((*iter).second);
 		__scaled_units__["n"  + (*iter).first] = nano  * base_unit((*iter).second);
 		__scaled_units__["p"  + (*iter).first] = pico  * base_unit((*iter).second);
+		__scaled_units__["f"  + (*iter).first] = femto * base_unit((*iter).second);
+		__scaled_units__["a"  + (*iter).first] = atto  * base_unit((*iter).second);
+		__scaled_units__["z"  + (*iter).first] = zepto * base_unit((*iter).second);
+		__scaled_units__["y"  + (*iter).first] = yocto * base_unit((*iter).second);
 	}
 	__base_units__.insert(__scaled_units__.begin(), __scaled_units__.end());
 	

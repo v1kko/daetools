@@ -65,26 +65,42 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	return strResult;
 }
 
+inline void SaveUnit(xmlTag_t* pTag, std::string strUnit, double dExponent)
+{
+	xmlTag_t *msup, *temp;
+	
+	if(dExponent == 1)
+	{
+		temp = pTag->AddTag(string("mi"), strUnit);	
+		temp->AddAttribute(string("mathvariant"), string("italic"));
+	}
+	else if(dExponent == 0)
+	{
+	}
+	else
+	{
+		msup = pTag->AddTag(string("msup"), string(""));
+		temp = msup->AddTag(string("mi"), strUnit);	
+		temp->AddAttribute(string("mathvariant"), string("italic"));
+		msup->AddTag(string("mn"), dExponent);	
+	}
+	
+}
+
 inline void SaveAsPresentationMathML(xmlTag_t* pTag, const unit& u)
 {
-	xmlTag_t *mrow, *msup, *temp;
-
-	mrow = pTag->AddTag(string("mrow"), string(""));
-
-	for(std::map<std::string, double>::const_iterator iter = u.units.begin(); iter != u.units.end(); iter++)
+	std::map<std::string, double>::const_iterator iter;
+	
+	xmlTag_t* mrow = pTag->AddTag(string("mrow"), string(""));
+	for(iter = u.units.begin(); iter != u.units.end(); iter++)
 	{
-		if(iter->second == 1)
-		{
-			temp = mrow->AddTag(string("mi"), iter->first);	
-			temp->AddAttribute(string("mathvariant"), string("italic"));
-		}
-		else
-		{
-			msup = mrow->AddTag(string("msup"), string(""));
-			temp = msup->AddTag(string("mi"), iter->first);	
-			temp->AddAttribute(string("mathvariant"), string("italic"));
-			msup->AddTag(string("mn"), iter->second);	
-		}
+		if(iter->second >= 0)
+			SaveUnit(mrow, iter->first, iter->second);
+	}
+	for(iter = u.units.begin(); iter != u.units.end(); iter++)
+	{
+		if(iter->second < 0)
+			SaveUnit(mrow, iter->first, iter->second);
 	}
 }
 

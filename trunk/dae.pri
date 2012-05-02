@@ -96,12 +96,10 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
-# Mac-OS 10.6 compiler complained about -Wno-unused-but-set-variable - thus removed
-unix::QMAKE_CXXFLAGS_WARN_ON         += -Wextra -Wno-sign-compare \
-                                        -Wno-unused-parameter \
-                                        -Wno-unused-variable 
-linux-g++-32::QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-but-set-variable
-linux-g++-64::QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-but-set-variable
+# Older GCCs complain about -Wno-unused-but-set-variable
+unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
+                                -Wno-unused-parameter \
+                                -Wno-unused-variable 
 
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
 unix::QMAKE_CXXFLAGS_RELEASE -= -O2
