@@ -11,6 +11,12 @@ PLATFORM=`uname -s`
 PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
 PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
+PYTHON_INCLUDE_DIR=`python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
+PYTHON_SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())"`
+PYTHON_LIB_DIR=`python -c "import sys; print(sys.prefix)"`/lib
+echo $PYTHON_INCLUDE_DIR
+echo $PYTHON_SITE_PACKAGES_DIR
+echo $PYTHON_LIB_DIR
 
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
@@ -84,13 +90,19 @@ if [ ! -e boost ]; then
   tar -xzf boost_${vBOOST_}.tar.gz
   mv boost_${vBOOST_} boost
   cd boost
-  mkdir build
   sh bootstrap.sh
   cd ${TRUNK}
 fi
 cd boost
 if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so ]; then
   echo "Building BOOST..."
+  
+  if [ -e build ]; then
+    rm -r build
+  fi
+  
+  echo "using python : ${PYTHON_MAJOR}.${PYTHON_MINOR} : python${PYTHON_MAJOR}.${PYTHON_MINOR} ;" > user-config.jam
+
   ./bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} \
          --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
          variant=release link=shared threading=multi runtime-link=shared

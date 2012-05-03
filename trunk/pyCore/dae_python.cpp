@@ -114,10 +114,10 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("daeVersionMinor",  &dae::daeVersionMinor);
 	def("daeVersionBuild",  &dae::daeVersionBuild);
 
-	def("daeBoostVersion",				&dae::daeBoostVersion);
-	def("daeBoostVersionMajor",			&dae::daeBoostVersionMajor);
-	def("daeBoostVersionMinor",			&dae::daeBoostVersionMinor);
-	def("daeBoostVersionBuild",			&dae::daeBoostVersionBuild);
+//	def("daeBoostVersion",				&dae::daeBoostVersion);
+//	def("daeBoostVersionMajor",			&dae::daeBoostVersionMajor);
+//	def("daeBoostVersionMinor",			&dae::daeBoostVersionMinor);
+//	def("daeBoostVersionBuild",			&dae::daeBoostVersionBuild);
 	
 /**************************************************************
 	Classes

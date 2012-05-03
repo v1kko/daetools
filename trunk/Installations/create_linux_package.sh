@@ -12,13 +12,16 @@ esac
 
 INSTALLATIONS_DIR="$( cd "$( dirname "$0" )" && pwd )"
 # ACHTUNG! cd to INSTALLATIONS_DIR (in case the script is called from some other folder)
+echo ${INSTALLATIONS_DIR}
 cd ${INSTALLATIONS_DIR}
 
-if [ "$1" = "" ]; then
-  PYTHON="python"
-else
-  PYTHON="$1"
-fi
+# if [ "$1" = "" ]; then
+#   PYTHON="python"
+# else
+#   PYTHON="$1"
+# fi
+
+PYTHON="python"
 
 VER_MAJOR=
 VER_MINOR=
@@ -60,9 +63,10 @@ fi
 
 if [ ${PLATFORM} = "linux" ]; then
   SO="so"
-  DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`
-  CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
+  DISTRIBUTOR_ID=`${PYTHON} -c "import platform; print(platform.linux_distribution()[0])" | tr "[:upper:]" "[:lower:]"`
+  CODENAME=`${PYTHON} -c "import platform; print(platform.linux_distribution()[1])" | tr "[:upper:]" "[:lower:]"`
   DISTRO=${DISTRIBUTOR_ID}-${CODENAME}
+  echo $DISTRO
 
 elif [ ${PLATFORM} = "gnu/kfreebsd" ]; then
   SO="so"
@@ -91,35 +95,23 @@ VER_MAJOR=`cat ${COMPILER_SETTINGS_DIR}/dae_major`
 VER_MINOR=`cat ${COMPILER_SETTINGS_DIR}/dae_minor`
 VER_BUILD=`cat ${COMPILER_SETTINGS_DIR}/dae_build`
 VERSION=${VER_MAJOR}.${VER_MINOR}.${VER_BUILD}
-SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
+#SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print (distutils.sysconfig.get_python_lib())"`
 
 # PYTHON
-PYTHON_TYPE=`cat ${COMPILER_SETTINGS_DIR}/python`
+#PYTHON_TYPE=`cat ${COMPILER_SETTINGS_DIR}/python`
 
 # BOOST
 BOOST_BUILD_TYPE=`cat ${COMPILER_SETTINGS_DIR}/boost`
-BOOST_LIB_DIR=`cat ${COMPILER_SETTINGS_DIR}/boost_lib_path`
-BOOST_PYTHON_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_python_lib_name`
-
-BOOST_MAJOR=`cat ${COMPILER_SETTINGS_DIR}/boost_major`
-BOOST_MINOR=`cat ${COMPILER_SETTINGS_DIR}/boost_minor`
-BOOST_BUILD=`cat ${COMPILER_SETTINGS_DIR}/boost_build`
-BOOST_VERSION=${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_BUILD}
-
-BOOST_PYTHON_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_python_lib_name`
-BOOST_PYTHON_LIB=lib${BOOST_PYTHON_LIB_NAME}.${SO}
-BOOST_SYSTEM_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_system_lib_name`
-BOOST_SYSTEM_LIB=lib${BOOST_SYSTEM_LIB_NAME}.${SO}
-BOOST_THREAD_LIB_NAME=`cat ${COMPILER_SETTINGS_DIR}/boost_thread_lib_name`
-BOOST_THREAD_LIB=lib${BOOST_THREAD_LIB_NAME}.${SO}
+if [ ${BOOST_BUILD_TYPE} = "custom" ]; then 
+  BOOST_PYTHON_LIB_NAME=boost_python-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+  BOOST_PYTHON_LIB=lib${BOOST_PYTHON_LIB_NAME}.${SO}
+  BOOST_SYSTEM_LIB_NAME=boost_system-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+  BOOST_SYSTEM_LIB=lib${BOOST_SYSTEM_LIB_NAME}.${SO}
+  BOOST_THREAD_LIB_NAME=boost_thread-daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+  BOOST_THREAD_LIB=lib${BOOST_THREAD_LIB_NAME}.${SO}
+fi
 
 echo $BOOST_BUILD_TYPE
-echo $BOOST_LIB_DIR
-echo $BOOST_PYTHON_LIB_NAME
-echo $BOOST_MAJOR
-echo $BOOST_MINOR
-echo $BOOST_BUILD
-echo $BOOST_VERSION
 echo $BOOST_PYTHON_LIB
 echo $BOOST_SYSTEM_LIB
 echo $BOOST_THREAD_LIB
@@ -192,8 +184,8 @@ echo "    architecture:      " ${ARCH}
 echo "    lib prefix:        " ${LIB}
 echo "    python version:    " ${PYTHON_VERSION}
 echo "    boost version:     " ${BOOST_VERSION}
-echo "    site-packages dir: " ${SITE_PACKAGES_DIR}
 echo "    /usr/lib dir:      " ${USRLIB}
+echo "    build dir:         " ${BUILD_DIR}
 echo " " 
 read -p " Proceed [y/n]? " do_proceed
 case ${do_proceed} in
@@ -451,46 +443,47 @@ mkdir ${BUILD_DIR}
 # echo "      ) " >> ${SETUP_PY}
 # echo " " >> ${SETUP_PY}
 
-echo "#!/usr/bin/env python 
-import sys 
-from distutils.core import setup 
-from distutils.util import get_platform
-
-setup(name='daetools', 
-      version='${VERSION}', 
-      description='DAE Tools', 
-      long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', 
-      author='Dragan Nikolic', 
-      author_email='dnikolic@daetools.com', 
-      url='http://www.daetools.com', 
-      license='GNU GPL v3', 
-#     platforms = get_platform(),
-      packages=['daetools'], 
-      package_dir={'daetools': '.'}, 
-      package_data={'daetools': ['__init__.py', '*.txt', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, 
-      data_files=[('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'] ), 
-                  ('/usr/share/applications', ['usr/share/applications/daetools-daeExamples.desktop', 'usr/share/applications/daetools-daePlotter.desktop'] ), 
-                  ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz'] ), 
-                  ('/usr/share/menu',         ['usr/share/menu/daetools-plotter', 'usr/share/menu/daetools-examples'] ), 
-                  ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools_main.png'] ), 
-                  ('/usr/bin',                ['usr/bin/daeexamples'] ), 
-                  ('/usr/bin',                ['usr/bin/daeplotter'] ) ]
-      )" > setup.py
+# echo "#!/usr/bin/env python 
+# import sys 
+# from distutils.core import setup 
+# from distutils.util import get_platform
+# 
+# setup(name='daetools', 
+#       version='${VERSION}', 
+#       description='DAE Tools', 
+#       long_description='A cross-platform equation-oriented process modelling software (pyDAE modules).', 
+#       author='Dragan Nikolic', 
+#       author_email='dnikolic@daetools.com', 
+#       url='http://www.daetools.com', 
+#       license='GNU GPL v3', 
+# #     platforms = get_platform(),
+#       packages=['daetools'], 
+#       package_dir={'daetools': '.'}, 
+#       package_data={'daetools': ['__init__.py', '*.txt', 'pyDAE/*.so', 'pyDAE/*.py', 'solvers/*.so', 'solvers/*.py', 'model_library/*.py', 'examples/*.py', 'examples/python/*.*', 'examples/c++/*.*', 'parsers/*.py', 'docs/*.html', 'docs/*.pdf', 'daeSimulator/*.py', 'daeSimulator/images/*.png', 'daePlotter/*.py', 'daePlotter/images/*.png']}, 
+#       data_files=[('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'] ), 
+#                   ('/usr/share/applications', ['usr/share/applications/daetools-daeExamples.desktop', 'usr/share/applications/daetools-daePlotter.desktop'] ), 
+#                   ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz'] ), 
+#                   ('/usr/share/menu',         ['usr/share/menu/daetools-plotter', 'usr/share/menu/daetools-examples'] ), 
+#                   ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools_main.png'] ), 
+#                   ('/usr/bin',                ['usr/bin/daeexamples'] ), 
+#                   ('/usr/bin',                ['usr/bin/daeplotter'] ) ]
+#       )" > setup.py
 
 if [ ${PCKG_TYPE} = "deb" ]; then
   # Debian Lenny workaround (--install-layout does not exist)
-  if [ ${DISTRO} = "debian-lenny" ]; then
-    ${PYTHON} setup.py install --root=${BUILD_DIR}
-  else
-    ${PYTHON} setup.py install --install-layout=deb --root=${BUILD_DIR}
-  fi
+#   if [ ${DISTRO} = "debian-lenny" ]; then
+#     ${PYTHON} setup.py install --root=${BUILD_DIR}
+#   else
+#     ${PYTHON} setup.py install --install-layout=deb --root=${BUILD_DIR}
+#   fi
+  cd ../daetools-package
+  ${PYTHON} setup.py install --root=${BUILD_DIR}
+  cd ${INSTALLATIONS_DIR}
 
 elif [ ${PCKG_TYPE} = "rpm" ]; then
   ${PYTHON} setup.py install --prefix=/usr --root=${BUILD_DIR}
 
 fi
-
-exit
 
 #if [ -d ${BUILD_DIR}/usr/lib ]; then
 #  PYTHON_USRLIB=/usr/lib
@@ -499,8 +492,7 @@ exit
 #fi
 #DAE_TOOLS_DIR=${PYTHON_USRLIB}/python${PYTHON_VERSION}/${SITE_PACK}/${PACKAGE_NAME}
 
-DAE_TOOLS_DIR=${SITE_PACKAGES_DIR}/${PACKAGE_NAME}
-
+#DAE_TOOLS_DIR=${SITE_PACKAGES_DIR}/${PACKAGE_NAME}
 
 # Delete all .pyc files
 find ${BUILD_DIR} -name \*.pyc | xargs rm
@@ -574,10 +566,12 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "/etc/daetools/daetools.cfg"   > ${CONFFILES}
   echo "/etc/daetools/bonmin.cfg"    >> ${CONFFILES}
 
-#  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
-#  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})"  > ${SHLIBS}
-#  echo "${BOOST_SYSTEM_LIB_NAME} ${BOOST_VERSION} ${BOOST_SYSTEM_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
-#  echo "${BOOST_THREAD_LIB_NAME} ${BOOST_VERSION} ${BOOST_THREAD_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+if [ ${BOOST_BUILD_TYPE} = "custom" ]; then 
+  SHLIBS=${BUILD_DIR}/DEBIAN/shlibs
+  echo "${BOOST_PYTHON_LIB_NAME} ${BOOST_VERSION} ${BOOST_PYTHON_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})"  > ${SHLIBS}
+  echo "${BOOST_SYSTEM_LIB_NAME} ${BOOST_VERSION} ${BOOST_SYSTEM_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+  echo "${BOOST_THREAD_LIB_NAME} ${BOOST_VERSION} ${BOOST_THREAD_LIB} (>= ${BOOST_MAJOR}:${BOOST_VERSION})" >> ${SHLIBS}
+fi
 
 #   mkdir ${BUILD_DIR}/usr/share/menu
 #   MENU=${BUILD_DIR}/usr/share/menu/${PACKAGE_NAME}
@@ -620,7 +614,6 @@ if [ ${PCKG_TYPE} = "deb" ]; then
   echo "        ldconfig "                                                                     >> ${POSTINST}
   echo "    ;; "                                                                               >> ${POSTINST}
   echo "esac "                                                                                 >> ${POSTINST}
-  echo "chmod -R o+w ${DAE_TOOLS_DIR}/examples"                                                >> ${POSTINST}
   chmod 0755 ${POSTINST}
 
   fakeroot dpkg -b ${BUILD_DIR}

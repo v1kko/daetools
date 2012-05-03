@@ -96,27 +96,27 @@ inline size_t daeVersionBuild()
 	return size_t(DAE_BUILD);
 }
 
-inline std::string daeBoostVersion()
-{
-	char boost__version[20];
-	::sprintf(boost__version, "%d.%d.%d", DAE_BOOST_MAJOR, DAE_BOOST_MINOR, DAE_BOOST_BUILD);
-	return std::string(boost__version);
-}
+//inline std::string daeBoostVersion()
+//{
+//	char boost__version[20];
+//	::sprintf(boost__version, "%d.%d.%d", DAE_BOOST_MAJOR, DAE_BOOST_MINOR, DAE_BOOST_BUILD);
+//	return std::string(boost__version);
+//}
 
-inline size_t daeBoostVersionMajor()
-{
-	return size_t(DAE_BOOST_MAJOR);
-}
+//inline size_t daeBoostVersionMajor()
+//{
+//	return size_t(DAE_BOOST_MAJOR);
+//}
 
-inline size_t daeBoostVersionMinor()
-{
-	return size_t(DAE_BOOST_MINOR);
-}
+//inline size_t daeBoostVersionMinor()
+//{
+//	return size_t(DAE_BOOST_MINOR);
+//}
 
-inline size_t daeBoostVersionBuild()
-{
-	return size_t(DAE_BOOST_BUILD);
-}
+//inline size_t daeBoostVersionBuild()
+//{
+//	return size_t(DAE_BOOST_BUILD);
+//}
 
 
 /*********************************************************************************************

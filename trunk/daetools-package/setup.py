@@ -48,7 +48,7 @@ elif platform.system() == 'Darwin':
 setup(name = 'daetools', 
       version = '1.2.0', 
       description = 'DAE Tools', 
-      long_description = 'A cross-platform equation-oriented process modelling, simulaton and optimization software (pyDAE modules).', 
+      long_description = 'A cross-platform equation-oriented process modelling, simulation and optimization software (pyDAE modules).', 
       author = 'Dragan Nikolic', 
       author_email = 'dnikolic@daetools.com', 
       url = 'http://www.daetools.com', 
