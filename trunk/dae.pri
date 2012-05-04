@@ -76,6 +76,18 @@ CONFIG(release, debug|release):message(release){
 
 DESTDIR = $${DAE_DEST_DIR}
 
+#####################################################################################
+#                           System + Machine + Python info
+#####################################################################################
+PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
+PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
+
+# System := {'Linux', 'Windows', 'Darwin'}
+DAE_SYSTEM   = $$system(python -c \"import platform; print(platform.system())\")
+
+# Machine := {'i386', ..., 'i686', 'AMD64'}
+DAE_MACHINE  = $$system(python -c \"import platform; print(platform.machine())\")
+
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
 # Necessary to pass lintian test in debian  
@@ -139,9 +151,6 @@ linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 #####################################################################################
 #                                PYTHON + NUMPY
 #####################################################################################
-PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
-PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
-
 #use_system_python {
 #PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
 #PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
