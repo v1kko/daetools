@@ -17,10 +17,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 """
 As of the version 1.1.1 the main linear algebraic equations solver is superLU.
-Originally it comes in three variates:
+It comes in three variaants:
  - sequential: superlu
  - multithreaded (OpenMP/posix threads): superlu_MT
- - MPI: superlu_MPI
+ - CUDA GPU: superlu_CUDA
 The first two are available in daetools with the addition of a new port: superlu_CUDA
 that works on computers with NVidia CUDA enabled video cards. However, the later is
 still in an early stage of the development.
@@ -31,12 +31,11 @@ In this example, usage and available options of superlu and superlu_MT are explo
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-from daetools.solvers import pySuperLU as superlu
-#from daetools.solvers import pySuperLU_MT as superlu
-#from daetools.solvers import pySuperLU_CUDA as superlu
+from daetools.solvers.superlu import pySuperLU as superlu
+#from daetools.solvers.superlu_mt import pySuperLU_MT as superlu
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

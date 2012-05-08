@@ -1,7 +1,18 @@
 #!/usr/bin/env python 
-import sys, platform
+import os, sys, platform
 from distutils.core import setup 
 from distutils.util import get_platform
+
+PYTHON_MAJOR = str(sys.version_info[0])
+PYTHON_MINOR = str(sys.version_info[1])
+
+# System := {'Linux', 'Windows', 'Darwin'}
+DAE_SYSTEM   = str(platform.system())
+
+# Machine := {'i386', ..., 'i686', 'AMD64'}
+DAE_MACHINE  = str(platform.machine())
+
+platform_so_dir = '{0}_{1}_py{2}{3}'.format(DAE_SYSTEM, DAE_MACHINE, PYTHON_MAJOR, PYTHON_MINOR)
 
 if platform.system() == 'Linux':
     so_extension = 'so'
@@ -45,6 +56,9 @@ elif platform.system() == 'Darwin':
                     ('/usr/bin',                ['usr/bin/daeplotter'])
                  ]
 
+solibs   = ['{0}/*.{1}'.format(platform_so_dir, so_extension)]
+
+
 setup(name = 'daetools', 
       version = '1.2.0', 
       description = 'DAE Tools', 
@@ -66,8 +80,8 @@ setup(name = 'daetools',
                  ], 
       package_data = {
                        'daetools':              ['*.txt', 'docs/*.html', 'docs/*.pdf'],
-                       'daetools.pyDAE':        ['*.{0}'.format(so_extension)],
-                       'daetools.solvers':      ['*.{0}'.format(so_extension)],
+                       'daetools.pyDAE':        solibs,
+                       'daetools.solvers':      solibs,
                        'daetools.daePlotter':   ['images/*.png'],
                        'daetools.daeSimulator': ['images/*.png'],
                        'daetools.examples' :    ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']

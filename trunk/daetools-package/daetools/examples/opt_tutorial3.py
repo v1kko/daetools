@@ -21,7 +21,7 @@ This tutorial introduces NLOPT NLP solver, its setup and options.
 
 import sys
 from daetools.pyDAE import *
-from daetools.solvers import pyNLOPT
+from daetools.solvers.nlopt import pyNLOPT
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py

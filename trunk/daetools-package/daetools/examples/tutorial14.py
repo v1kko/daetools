@@ -33,7 +33,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class extfnPower(daeScalarExternalFunction):
     def __init__(self, Name, Model, units, m, cp, dT):

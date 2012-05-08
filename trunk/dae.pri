@@ -475,8 +475,11 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 #######################################################
 #            Settings for installing files
 #######################################################
-SOLVERS_DIR     = ../daetools-package/daetools/solvers
-PYDAE_DIR       = ../daetools-package/daetools/pyDAE
+SOLVERS_DIR     = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+PYDAE_DIR       = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+
 STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
 

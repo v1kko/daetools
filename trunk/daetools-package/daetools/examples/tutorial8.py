@@ -40,7 +40,7 @@ from daetools.pyDAE.daeDataReporters import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, J, W
+from pyUnits import m, kg, s, K, J, W
 
 # The best starting point in creating custom data reporters that can export the results
 # into a file is daeDataReporterLocal class. It internally does all the processing

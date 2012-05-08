@@ -21,7 +21,7 @@ This tutorial introduces IPOPT NLP solver, its setup and options.
 
 import sys
 from daetools.pyDAE import *
-from daetools.solvers import pyIPOPT
+from daetools.solvers.ipopt import pyIPOPT
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py

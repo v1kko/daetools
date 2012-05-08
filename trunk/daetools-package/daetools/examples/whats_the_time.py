@@ -36,7 +36,10 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-# 2. Define variable types
+# 2a. Import some unit definitions (if needed) from the pyUnits module
+from pyUnits import m, kg, s, K, Pa, mol, J, W
+
+# 2b. Define variable types
 #    Variable types are typically declared outside of model classes since they define common, reusable types.
 #    The daeVariable constructor takes 6 arguments:
 #     - Name: string
@@ -96,7 +99,7 @@ class modTutorial(daeModel):
         #                          d(tau) / dt = 1
         #     which calculates the time as the current time elapsed in the simulation (which is a common way to obtain the current time within the model).
         #     Normally, the built-in function Time() should be used to get the current time in the simulation; this is just an example 
-        #     explaining the basic concepts in the daetools.
+        #     explaining the basic daetools concepts.
         #     Note that the variable objects should be declared as members of the models they belong to and therefore accessed through the model objects.
         #
         #     As of the version 1.2.0 all daetools objects use quantities with physical dimensions and unit-consistency is strictly enforced (although 

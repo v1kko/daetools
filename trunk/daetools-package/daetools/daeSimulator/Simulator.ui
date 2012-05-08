@@ -55,23 +55,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="MINLPSolverComboBox">
-       <item>
-        <property name="text">
-         <string>IPOPT NLP</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>NLOPT NLP</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>BONMIN MINLP</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="MINLPSolverComboBox"/>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="DAESolverLabel">
@@ -81,13 +65,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QComboBox" name="DAESolverComboBox">
-       <item>
-        <property name="text">
-         <string>Sundials IDAS</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="DAESolverComboBox"/>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="LASolverLabel">
@@ -97,83 +75,7 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="LASolverComboBox">
-       <item>
-        <property name="text">
-         <string>Sundials LU (dense, sequential)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Trilinos Amesos - KLU (sparse, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Trilinos Amesos - SuperLU (sparse, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Trilinos Amesos - Umfpack (sparse, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Trilinos Amesos - Lapack (dense, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Trilinos AztecOO - Krylov (sparse, sequential, iterative)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Intel Pardiso (sparse, OpenMP, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Intel MKL Lapack (dense, OpenMP, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>AMD ACML Lapack (dense, OpenMP, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Lapack (dense, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Magma Lapack (dense, CUDA, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SuperLU (sparse, sequential, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SuperLU_MT (sparse, POSIX threads, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SuperLU_CUDA (sparse, CUDA, direct)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CUSP (sparse, CUDA, iterative)</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="LASolverComboBox"/>
      </item>
      <item row="5" column="0">
       <widget class="QLabel" name="TimeHorizonLabel">

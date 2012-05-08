@@ -28,11 +28,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-from daetools.solvers import pyTrilinos
+from daetools.solvers.trilinos import pyTrilinos
 from daetools.solvers.aztecoo_options import daeAztecOptions
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

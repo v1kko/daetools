@@ -37,16 +37,13 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # First import desired solver's module:
-from daetools.solvers import pyTrilinos
-#from daetools.solvers import pySuperLU
-#from daetools.solvers import pySuperLU_MT
-#from daetools.solvers import pyIntelPardiso
-#from daetools.solvers import pyAmdACML
-#from daetools.solvers import pyIntelMKL
-#from daetools.solvers import pyLapack
+from daetools.solvers.trilinos import pyTrilinos
+#from daetools.solvers.superlu import pySuperLU
+#from daetools.solvers.superlu_mt import pySuperLU_MT
+#from daetools.solvers import.intel_pardiso pyIntelPardiso
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, J, W
+from pyUnits import m, kg, s, K, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

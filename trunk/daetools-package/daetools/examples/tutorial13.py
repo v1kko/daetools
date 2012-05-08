@@ -31,7 +31,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
-from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 # User defined action executed in OnEvent handler
 # The __init__ function accepts an event port as an argument that is used 
