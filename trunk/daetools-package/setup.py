@@ -3,16 +3,33 @@ import os, sys, platform
 from distutils.core import setup 
 from distutils.util import get_platform
 
-PYTHON_MAJOR = str(sys.version_info[0])
-PYTHON_MINOR = str(sys.version_info[1])
+python_major = str(sys.version_info[0])
+python_minor = str(sys.version_info[1])
 
 # System := {'Linux', 'Windows', 'Darwin'}
-DAE_SYSTEM   = str(platform.system())
+daetools_system   = str(platform.system())
 
-# Machine := {'i386', ..., 'i686', 'AMD64'}
-DAE_MACHINE  = str(platform.machine())
+# Machine := {'i386', ..., 'i686', 'x86_64'}
+daetools_machine  = str(platform.machine())
 
-platform_so_dir = '{0}_{1}_py{2}{3}'.format(DAE_SYSTEM, DAE_MACHINE, PYTHON_MAJOR, PYTHON_MINOR)
+# (Platform/Python)-dependent shared libraries directory
+platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
+
+boost_solib_dir = os.path.realpath('../boost/stage/lib')
+print boost_solib_dir
+
+boost_solibs = []
+if os.path.isdir(boost_solib_dir):
+    boost_files = os.listdir(boost_solib_dir)
+    boost_python = 'libboost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_system = 'libboost_system-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_thread = 'libboost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
+
+    for f in boost_files:
+        if (boost_python in f) or (boost_system in f) or (boost_thread in f):
+            boost_solibs.append(os.path.join(boost_solib_dir, f))  
+        
+print boost_solibs
 
 if platform.system() == 'Linux':
     so_extension = 'so'
@@ -29,7 +46,8 @@ if platform.system() == 'Linux':
                                                 ] ), 
                     ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']), 
                     ('/usr/bin',                ['usr/bin/daeexamples']), 
-                    ('/usr/bin',                ['usr/bin/daeplotter'])
+                    ('/usr/bin',                ['usr/bin/daeplotter']),
+                    ('/usr/lib',                boost_solibs)
                  ]
                  
 elif platform.system() == 'Windows':
@@ -53,10 +71,11 @@ elif platform.system() == 'Darwin':
                                                 ] ), 
                     ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']), 
                     ('/usr/bin',                ['usr/bin/daeexamples']), 
-                    ('/usr/bin',                ['usr/bin/daeplotter'])
+                    ('/usr/bin',                ['usr/bin/daeplotter']),
+                    ('/usr/lib',                boost_solibs)
                  ]
 
-solibs   = ['{0}/*.{1}'.format(platform_so_dir, so_extension)]
+solibs   = ['{0}/*.{1}'.format(platform_solib_dir, so_extension)]
 
 
 setup(name = 'daetools', 
