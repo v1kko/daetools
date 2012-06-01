@@ -14,21 +14,21 @@ CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
 # 3. Utilities (wget, subversion, etc)
 
 if [ ${DISTRIBUTOR_ID} = "debian" ]; then
-  sudo apt-get update
+  #sudo apt-get update
   sudo apt-get install libboost-all-dev python-qt4 python-numpy python-scipy python-matplotlib mayavi2 \
                        liblapack3gf libblas3gf libsuitesparse-dev libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev
 
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
-  sudo apt-get update
+  #sudo apt-get update
   sudo apt-get install libboost-all-dev python-qt4 python-numpy python-scipy python-matplotlib mayavi2 \
                        liblapack3gf libblas3gf libsuitesparse-dev libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev
 
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
-  sudo apt-get update
+  #sudo apt-get update
   sudo apt-get install libboost-all-dev python-qt4 python-numpy python-scipy python-matplotlib mayavi2 \
                        liblapack3gf libblas3gf libsuitesparse-dev libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \

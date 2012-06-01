@@ -56,13 +56,13 @@ QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
 QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
 QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
-win32::SHARED_LIB_EXT       = dll
-linux-g++-*::SHARED_LIB_EXT = so
-macx-g++::SHARED_LIB_EXT    = dylib
+win32::SHARED_LIB_EXT     = dll
+linux-g++::SHARED_LIB_EXT = so
+macx-g++::SHARED_LIB_EXT  = dylib
 
-win32::SHARED_LIB_APPEND       = pyd
-linux-g++-*::SHARED_LIB_APPEND = so.$${VERSION}
-macx-g++::SHARED_LIB_APPEND    = $${VERSION}.dylib
+win32::SHARED_LIB_APPEND     = pyd
+linux-g++::SHARED_LIB_APPEND = so.$${VERSION}
+macx-g++::SHARED_LIB_APPEND  = $${VERSION}.dylib
 
 CONFIG(debug, debug|release):message(debug){
     DAE_DEST_DIR = ../debug
@@ -119,13 +119,13 @@ unix::QMAKE_CXXFLAGS_RELEASE -= -O2
 unix::QMAKE_CFLAGS_RELEASE   += -O3
 unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
-# On some low-RAM machines pyCore cannot compile
+# On some low-RAM machines certain boost.python modules cannot compile
 # The workaround is to set the following flags:
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
 
-# Use SSE for x86 (32 bit machines)
-# When building for Mac-OS we build for all architectures - thus SSE flags are removed
-linux-g++-32::QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
+# Use SSE for x86 32 bit machines (not used by default)
+# When building for Mac-OS we build for all architectures and SSE flags should go away
+#QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
 
 ####################################################################################
 # Creating .vcproj under windows:
@@ -170,14 +170,14 @@ PYTHON_LIB_DIR           = $$system(python -c \"import sys; print(sys.prefix)\")
 
 message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR})
 
-win32::NUMPY_INCLUDE_DIR       = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
-linux-g++-*::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
-                                 /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                                 /usr/share/pyshared/numpy/core/include/numpy
-macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                                 $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                               /usr/share/pyshared/numpy/core/include/numpy
+macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
 
 #####################################################################################
@@ -186,15 +186,13 @@ macx-g++::NUMPY_INCLUDE_DIR    = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include
 # librt does not exist in Windows/MacOS
 # gfortran does not exist in MacOS XCode and must be installed separately
 #####################################################################################
-win32::RT        =
-linux-g++-32::RT = -lrt
-linux-g++-64::RT = -lrt
-macx-g++::RT     =
+win32::RT     =
+linux-g++::RT = -lrt
+macx-g++::RT  =
 
-win32::GFORTRAN        =
-linux-g++-32::GFORTRAN = -lgfortran
-linux-g++-64::GFORTRAN = -lgfortran
-macx-g++::GFORTRAN     = -lgfortran
+win32::GFORTRAN     =
+linux-g++::GFORTRAN = -lgfortran
+macx-g++::GFORTRAN  = -lgfortran
 
 
 #####################################################################################
@@ -337,18 +335,18 @@ BONMIN_DIR = ../bonmin/build
 BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 
-win32::BONMIN_LIBS =  libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-					  libBonmin.lib libIpopt.lib libCbc.lib \
-					  libCgl.lib libClp.lib libCoinUtils.lib \
-					  libOsiCbc.lib libOsiClp.lib libOsi.lib
-linux-g++-*::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
-                           -lClp -lCoinUtils -lipopt -lOsiCbc \
-                           -lOsiClp -lOsi \
-                           $${BLAS_LAPACK_LIBS} -ldl -lz
-macx-g++::BONMIN_LIBS  =  -lbonmin -lCbc -lCbcSolver -lCgl \
-                           -lClp -lCoinUtils -lipopt -lOsiCbc \
-                           -lOsiClp -lOsi \
-                           $${BLAS_LAPACK_LIBS} -ldl -lz -lbz2
+win32::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+                     libBonmin.lib libIpopt.lib libCbc.lib \
+                     libCgl.lib libClp.lib libCoinUtils.lib \
+                     libOsiCbc.lib libOsiClp.lib libOsi.lib
+linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
+                         -lClp -lCoinUtils -lipopt -lOsiCbc \
+                         -lOsiClp -lOsi \
+                         $${BLAS_LAPACK_LIBS} -ldl -lz
+macx-g++::BONMIN_LIBS  = -lbonmin -lCbc -lCbcSolver -lCgl \
+                         -lClp -lCoinUtils -lipopt -lOsiCbc \
+                         -lOsiClp -lOsi \
+                         $${BLAS_LAPACK_LIBS} -ldl -lz -lbz2
 
 
 #####################################################################################
@@ -387,18 +385,16 @@ unix::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpth
 ######################################################################################
 #                                SuperLU_CUDA
 ######################################################################################
-win32::CUDA_PATH          = 
-linux-g++-32::CUDA_PATH   = /usr/local/cuda
-linux-g++-64::CUDA_PATH   = /usr/local/cuda
+win32::CUDA_PATH     =
+linux-g++::CUDA_PATH = /usr/local/cuda
 
 SUPERLU_CUDA_PATH    = ../superlu_mt-GPU
 SUPERLU_CUDA_LIBPATH = $${SUPERLU_CUDA_PATH}/lib
 SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
-	                   $${CUDA_PATH}/include
+                       $${CUDA_PATH}/include
 
-win32::CUDA_LIBS = 
-linux-g++-32::CUDA_LIBS   = -L$${CUDA_PATH}/lib   -lcuda -lcudart
-linux-g++-64::CUDA_LIBS   = -L$${CUDA_PATH}/lib64 -lcuda -lcudart
+win32::CUDA_LIBS     =
+linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 
 
 #####################################################################################

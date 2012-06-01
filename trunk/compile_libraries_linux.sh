@@ -4,9 +4,14 @@
 set -e
 
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
-Ncpu=1
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
+
+if [ ${PLATFORM} = "Darwin" ]; then
+  Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+else
+  Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
+fi
 
 PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
 PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
@@ -107,7 +112,8 @@ if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so
          --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
          variant=release link=shared threading=multi runtime-link=shared
 fi
-exit
+cd ${TRUNK}
+
 #######################################################
 #                       IDAS                          #
 #######################################################

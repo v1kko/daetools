@@ -75,7 +75,7 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	daeConfig& cfg = daeConfig::GetConfig();
 	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
 	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
-	m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",        2.0);
+    m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",     2.0);
 
 	string strReuse = cfg.Get<string>("daetools.superlu.factorizationMethod", string("SamePattern"));
 	if(strReuse == string("SamePattern_SameRowPerm"))

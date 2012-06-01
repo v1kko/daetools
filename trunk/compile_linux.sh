@@ -2,21 +2,17 @@
 
 set -e
 
-if [ "$1" = "--help" ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
+if [ "$1" = "" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
   echo "Usage: compile_linux [commands]"
   echo "Commands: all | core | pydae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt"
-  echo "  - all (or empty list of commands): build all daetools libraries, solvers and python wrapper modules"
+  echo "  - all: build all daetools libraries, solvers and python wrapper modules"
   echo "  - core: build core daetools c++ libraries and python wrapper modules (no 3rd party LA/(MI)NLP solvers)"
   echo "  - pydae: build daetools core python wrapper modules only"
   echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt: build particular solver and its python wrapper module"
   return
 fi
 
-if [ "$1" = "" ]; then
-  PROJECTS=all
-else
-  PROJECTS=$1
-fi
+PROJECTS=$1
 
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
@@ -25,13 +21,15 @@ TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   SPEC=macx-g++
+
 else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  if [ ${HOST_ARCH} = "x86_64" ]; then
-    SPEC=linux-g++-64
-  else
-    SPEC=linux-g++-32
-  fi
+  SPEC=linux-g++
+#  if [ ${HOST_ARCH} = "x86_64" ]; then
+#    SPEC=linux-g++-64
+#  else
+#    SPEC=linux-g++-32
+#  fi
 fi
 
 if [ ${Ncpu} -gt 1 ]; then

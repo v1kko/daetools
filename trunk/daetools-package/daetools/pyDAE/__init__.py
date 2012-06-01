@@ -1,4 +1,10 @@
 # Platform-dependent extension modules
+import pyCore
+import pyActivity
+import pyDataReporting
+import pyIDAS
+import pyUnits
+
 from pyUnits import base_unit, unit, quantity
 from pyCore import *
 from pyActivity import *
