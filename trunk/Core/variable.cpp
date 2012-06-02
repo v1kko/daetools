@@ -1866,64 +1866,64 @@ void daeVariableWrapper::SetValue(real_t value)
 	if(!m_pVariable)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	size_t n = m_narrDomainIndexes.size();
-	
-	if(n == 0)
-		m_pVariable->ReAssignValue(value);
-	else if(n == 1)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   value);
-	else if(n == 2)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   value);
-	else if(n == 3)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   value);
-	else if(n == 4)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   m_narrDomainIndexes[3],
-								   value);
-	else if(n == 5)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   m_narrDomainIndexes[3],
-								   m_narrDomainIndexes[4],
-								   value);
-	else if(n == 6)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   m_narrDomainIndexes[3],
-								   m_narrDomainIndexes[4],
-								   m_narrDomainIndexes[5],
-								   value);
-	else if(n == 7)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   m_narrDomainIndexes[3],
-								   m_narrDomainIndexes[4],
-								   m_narrDomainIndexes[5],
-								   m_narrDomainIndexes[6],
-								   value);
-	else if(n == 8)
-		m_pVariable->ReAssignValue(m_narrDomainIndexes[0],
-								   m_narrDomainIndexes[1],
-								   m_narrDomainIndexes[2],
-								   m_narrDomainIndexes[3],
-								   m_narrDomainIndexes[4],
-								   m_narrDomainIndexes[5],
-								   m_narrDomainIndexes[6],
-								   m_narrDomainIndexes[7],
-								   value);
-	else
-		daeDeclareAndThrowException(exInvalidCall)
+    size_t n = m_narrDomainIndexes.size();
+
+    if(n == 0)
+        m_pVariable->SetValue(value);
+    else if(n == 1)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              value);
+    else if(n == 2)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              value);
+    else if(n == 3)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              value);
+    else if(n == 4)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              m_narrDomainIndexes[3],
+                              value);
+    else if(n == 5)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              m_narrDomainIndexes[3],
+                              m_narrDomainIndexes[4],
+                              value);
+    else if(n == 6)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              m_narrDomainIndexes[3],
+                              m_narrDomainIndexes[4],
+                              m_narrDomainIndexes[5],
+                              value);
+    else if(n == 7)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              m_narrDomainIndexes[3],
+                              m_narrDomainIndexes[4],
+                              m_narrDomainIndexes[5],
+                              m_narrDomainIndexes[6],
+                              value);
+    else if(n == 8)
+        m_pVariable->SetValue(m_narrDomainIndexes[0],
+                              m_narrDomainIndexes[1],
+                              m_narrDomainIndexes[2],
+                              m_narrDomainIndexes[3],
+                              m_narrDomainIndexes[4],
+                              m_narrDomainIndexes[5],
+                              m_narrDomainIndexes[6],
+                              m_narrDomainIndexes[7],
+                              value);
+    else
+        daeDeclareAndThrowException(exInvalidCall)
 }
 
 }
