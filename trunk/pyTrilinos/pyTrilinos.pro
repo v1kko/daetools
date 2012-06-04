@@ -28,7 +28,7 @@ HEADERS += stdafx.h
 #######################################################
 win32{
 QMAKE_POST_LINK = move /y \
-    $${DAE_DEST_DIR}/Trilinos1.dll \
+    $${DAE_DEST_DIR}/pyTrilinos1.dll \
     $${SOLVERS_DIR}/pyTrilinos.pyd
 }
 

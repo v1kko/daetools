@@ -108,9 +108,13 @@ if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so
   
   echo "using python : ${PYTHON_MAJOR}.${PYTHON_MINOR} : python${PYTHON_MAJOR}.${PYTHON_MINOR} ;" > user-config.jam
 
-  ./bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} \
+  ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
          --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
          variant=release link=shared threading=multi runtime-link=shared
+
+  cp stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
 fi
 cd ${TRUNK}
 

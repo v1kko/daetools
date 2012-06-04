@@ -72,30 +72,17 @@ public:
 
 	static std::string GetConfigFolder()
 	{
-/*
-		std::string strHOME;
-		char* pPath;
+        std::string strConfigFolder;
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-		pPath = getenv("\\%HOMEDRIVE%\\%HOMEPATH\\%");
+        char* szSysDrive = getenv("SYSTEMDRIVE");
+        if(szSysDrive != NULL)
+            strConfigFolder = std::string(szSysDrive) + std::string("\\daetools\\");
+        else
+            strConfigFolder = "c:\\daetools\\";
 #else
-		pPath = getenv("HOME");
+        strConfigFolder = "/etc/daetools/";
 #endif
-		if(!pPath) 
-		{
-			daeDeclareException(dae::exUnknown);
-			e << "Cannot get the $HOME folder path";
-			throw e;
-		}
-		strHOME = pPath;
-		configfile = strHOME + "/.daetools/daetools.cfg";
-		Reload();
-*/
-	
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-		return std::string("c:\\daetools\\");
-#else
-		return std::string("/etc/daetools/");
-#endif
+        return strConfigFolder;
 	}
 
 	std::string toString(void) const
