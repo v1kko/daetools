@@ -21,7 +21,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
         $${DAE_NLOPT_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
-        $${NLOPT_LIBS}
+        $${NLOPT_LIBS} \
+        $${BLAS_LAPACK_LIBS}        
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

@@ -64,6 +64,7 @@ echo $DAE_COMPILER_FLAGS
 vBOOST=1.49.0
 vBOOST_=1_49_0
 vBONMIN=1.5.1
+vLAPACK=3.4.1
 vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.2.4
@@ -74,6 +75,7 @@ BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
 
 BOOST_HTTP=http://sourceforge.net/projects/boost/files/boost
+LAPACK_HTTP=http://www.netlib.org/lapack
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
@@ -112,9 +114,36 @@ if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so
          --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
          variant=release link=shared threading=multi runtime-link=shared
 
-  cp stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
-  cp stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
-  cp stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+fi
+cd ${TRUNK}
+
+#######################################################
+#                   LAPACK + BLAS                     #
+#######################################################
+if [ ! -e lapack ]; then
+  echo "Setting-up lapack..."
+  if [ ! -e lapack-${vLAPACK}.tgz ]; then
+    wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
+  fi
+  if [ ! -e daetools_lapack_make.inc ]; then
+    wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
+  fi
+  tar -xzf lapack-${vLAPACK}.tgz
+  mv lapack-${vLAPACK} lapack
+  cp daetools_lapack_make.inc lapack/make.inc
+  cd ${TRUNK}
+fi
+cd lapack
+if [ ! -e liblapack.a ]; then
+  echo "Building lapack..."
+  make -j${Ncpu} lapacklib
+  make -j${Ncpu} blaslib
+  make clean
+else
+  echo "   lapack library already built"
 fi
 cd ${TRUNK}
 

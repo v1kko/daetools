@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-import os, sys, platform, shutil
+import os, sys, platform, shutil, numpy
 from distutils.core import setup
 from distutils.util import get_platform
 
+# Python version
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
+
+# Numpy version
+numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
 
 # System := {'Linux', 'Windows', 'Darwin'}
 daetools_system   = str(platform.system())
@@ -13,7 +17,7 @@ daetools_system   = str(platform.system())
 daetools_machine  = str(platform.machine())
 
 # (Platform/Python)-dependent shared libraries directory
-platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
+platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
 print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')

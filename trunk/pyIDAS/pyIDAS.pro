@@ -18,6 +18,7 @@ LIBS +=	$${DAE_IDAS_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
         $${MPI_LIBS}
         
 SOURCES += stdafx.cpp \

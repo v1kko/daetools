@@ -12,10 +12,10 @@ INCLUDEPATH +=  $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${DAE_TRILINOS_SOLVER_LIB} \
-        $${TRILINOS_LIBS} \
         $${BOOST_PYTHON_LIB} \
-		$${BLAS_LIBS} \
-		$${LAPACK_LIBS}		
+        $${BOOST_LIBS} \
+        $${TRILINOS_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 
 SOURCES += stdafx.cpp \
     dllmain.cpp \

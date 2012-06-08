@@ -19,6 +19,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BOOST_LIBS} \
         $${DAE_UNITS_LIB} \
         $${SUPERLU_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
         $${RT}
 
 SOURCES += cdae_tutorial5.cpp

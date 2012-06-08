@@ -23,6 +23,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BOOST_LIBS} \
         $${IPOPT_LIBS} \
         $${MUMPS_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
         $${RT}
 
 SOURCES += cdae_opt_tutorial1.cpp

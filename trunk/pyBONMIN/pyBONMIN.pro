@@ -49,7 +49,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${BONMIN_LIBS} \
-        $${MUMPS_LIBS}
+        $${MUMPS_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 }
 
 ######################################################################################
@@ -80,7 +81,8 @@ LIBS += $${BOOST_PYTHON_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${IPOPT_LIBS} \
-        $${MUMPS_LIBS}
+        $${MUMPS_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 }
 
 

@@ -65,14 +65,17 @@ win32{
 COPY_FILES = copy /y
 }
 unix{
-COPY_FILES = cp -f
+COPY_FILES = cp -fa
 }
 
 #####################################################################################
 #                           System + Machine + Python info
 #####################################################################################
-PYTHON_MAJOR = $$system(python -c \"import sys; print sys.version_info[0]\")
-PYTHON_MINOR = $$system(python -c \"import sys; print sys.version_info[1]\")
+PYTHON_MAJOR = $$system(python -c \"import sys; print(sys.version_info[0])\")
+PYTHON_MINOR = $$system(python -c \"import sys; print(sys.version_info[1])\")
+
+# Numpy version
+NUMPY_VERSION = $$system(python -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
 
 # System := {'Linux', 'Windows', 'Darwin'}
 DAE_SYSTEM   = $$system(python -c \"import platform; print(platform.system())\")
@@ -155,9 +158,9 @@ message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR}
 win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
-                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                               /usr/share/pyshared/numpy/core/include/numpy
+                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+#                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+#                               /usr/share/pyshared/numpy/core/include/numpy
 macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
@@ -242,8 +245,8 @@ win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
-unix::BLAS_LAPACK_LIBS = -lblas -llapack -lm
-#unix::BLAS_LAPACK_LIBS = ../GotoBLAS2/libgoto2.a -lm
+#unix::BLAS_LAPACK_LIBS = -llapack -lblas -lm
+unix::BLAS_LAPACK_LIBS = ../lapack/liblapack.a ../lapack/librefblas.a -lgfortran -lm
 
 
 #####################################################################################
@@ -258,11 +261,9 @@ SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
 win32::SUNDIALS_LIBS = sundials_idas.lib \
-                       sundials_nvecserial.lib \
-                       $${BLAS_LAPACK_LIBS}
+                       sundials_nvecserial.lib
 unix::SUNDIALS_LIBS = -lsundials_idas \
-                      -lsundials_nvecserial \
-                       $${BLAS_LAPACK_LIBS}
+                      -lsundials_nvecserial
 
 
 #####################################################################################
@@ -284,7 +285,7 @@ win32::MUMPS_LIBS = blas.lib \
 					libpord.lib \
 					libf95.a \
 					libgcc.a
-unix::MUMPS_LIBS = -lcoinmumps -lpthread $${BLAS_LAPACK_LIBS} $${RT} $${GFORTRAN}
+unix::MUMPS_LIBS = -lcoinmumps -lpthread $${RT}
 
 
 #####################################################################################
@@ -296,7 +297,7 @@ IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
 win32::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
-unix::IPOPT_LIBS  = -lipopt -ldl $${BLAS_LAPACK_LIBS}
+unix::IPOPT_LIBS  = -lipopt -ldl
 
 
 #####################################################################################
@@ -314,11 +315,11 @@ win32::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
-                         $${BLAS_LAPACK_LIBS} -ldl -lz
+                         -ldl -lz
 macx-g++::BONMIN_LIBS  = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
-                         $${BLAS_LAPACK_LIBS} -ldl -lz -lbz2
+                         -ldl -lz -lbz2
 
 
 #####################################################################################
@@ -340,7 +341,7 @@ SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
 win32::SUPERLU_LIBS  = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-unix::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+unix::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
 
 
 ######################################################################################
@@ -351,7 +352,7 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32::SUPERLU_MT_LIBS  = 
-unix::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread $${BLAS_LAPACK_LIBS}
+unix::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
 
 
 ######################################################################################
@@ -379,14 +380,12 @@ win32::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
 unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
 
 win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                        $${BLAS_LAPACK_LIBS} \
                         $${SUPERLU_LIBS} \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
 unix::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                        -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos -lumfpack -lamd \
-                       $${SUPERLU_LIBS} \
-                       $${BLAS_LAPACK_LIBS}
+                       $${SUPERLU_LIBS}
 
 
 #####################################################################################
@@ -443,14 +442,14 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 #######################################################
 #            Settings for installing files
 #######################################################
-SOLVERS_DIR     = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-PYDAE_DIR       = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}
+PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}
 
-win32::DUMMY = $$system(mkdir \"daetools-package\daetools\solvers\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}\")
-win32::DUMMY = $$system(mkdir \"daetools-package\daetools\pyDAE\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}\")
+win32::DUMMY = $$system(mkdir \"daetools-package\daetools\solvers\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}\")
+win32::DUMMY = $$system(mkdir \"daetools-package\daetools\pyDAE\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}\")
 
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
+unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
 
 STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 HEADERS_DIR     = ../daetools-package/daetools/usr/local/include

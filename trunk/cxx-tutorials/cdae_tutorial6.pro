@@ -16,6 +16,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${DAE_UNITS_LIB} \
+        $${BLAS_LAPACK_LIBS} \
         $${RT}
 
 SOURCES += cdae_tutorial6.cpp
