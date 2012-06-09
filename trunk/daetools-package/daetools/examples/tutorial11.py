@@ -28,8 +28,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-from daetools.solvers.trilinos import pyTrilinos
-from daetools.solvers.aztecoo_options import daeAztecOptions
+try:
+    from daetools.solvers.trilinos import pyTrilinos
+    from daetools.solvers.aztecoo_options import daeAztecOptions
+except ImportError as e:
+    print('Unable to import Trilinos LA solver: {0}'.format(e))
 
 # Standard variable types are defined in daeVariableTypes.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W

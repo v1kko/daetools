@@ -158,9 +158,9 @@ message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR}
 win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
-#                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-#                               /usr/share/pyshared/numpy/core/include/numpy
+                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+                               /usr/share/pyshared/numpy/core/include/numpy
 macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 

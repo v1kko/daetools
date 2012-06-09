@@ -23,6 +23,11 @@ print 'platform_solib_dir = ', platform_solib_dir
 boost_solib_dir = os.path.realpath('solibs')
 print 'boost_solib_dir = ', boost_solib_dir
 
+if daetools_machine == 'x86_64':
+    usrlib = '/usr/lib64'
+else:
+    usrlib = '/usr/lib'
+    
 boost_solibs = []
 if os.path.isdir(boost_solib_dir):
     boost_files = os.listdir(boost_solib_dir)
@@ -52,7 +57,7 @@ if platform.system() == 'Linux':
                     ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
                     ('/usr/bin',                ['usr/bin/daeexamples']),
                     ('/usr/bin',                ['usr/bin/daeplotter']),
-                    ('/usr/lib',                boost_solibs)
+                    (usrlib,                    boost_solibs)
                  ]
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
 

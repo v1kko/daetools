@@ -36,11 +36,14 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
-# First import desired solver's module:
-from daetools.solvers.trilinos import pyTrilinos
-#from daetools.solvers.superlu import pySuperLU
-#from daetools.solvers.superlu_mt import pySuperLU_MT
-#from daetools.solvers import.intel_pardiso pyIntelPardiso
+try:
+    # First import desired solver's module:
+    from daetools.solvers.trilinos import pyTrilinos
+    #from daetools.solvers.superlu import pySuperLU
+    #from daetools.solvers.superlu_mt import pySuperLU_MT
+    #from daetools.solvers import.intel_pardiso pyIntelPardiso
+except ImportError as e:
+    print('Unable to import LA solver: {0}'.format(e))
 
 # Standard variable types are defined in daeVariableTypes.py
 from pyUnits import m, kg, s, K, J, W
