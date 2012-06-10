@@ -27,8 +27,10 @@ import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 from numpy import *
-from scipy.optimize import leastsq
+import matplotlib
+matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
+from scipy.optimize import leastsq
 
 # Standard variable types are defined in daeVariableTypes.py
 

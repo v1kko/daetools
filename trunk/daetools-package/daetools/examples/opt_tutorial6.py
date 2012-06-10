@@ -23,8 +23,10 @@ from numpy import *
 from daetools.pyDAE import *
 from daetools.solvers.daeMinpackLeastSq import *
 from time import localtime, strftime
-import matplotlib.pyplot as plt
 from numpy.linalg import cholesky
+import matplotlib
+matplotlib.use('Qt4Agg')
+import matplotlib.pyplot as plt
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
