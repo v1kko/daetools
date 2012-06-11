@@ -14,10 +14,14 @@ numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
 daetools_system   = str(platform.system())
 
 # Machine := {'i386', ..., 'i686', 'x86_64'}
-daetools_machine  = str(platform.machine())
+if platform.system() == 'Darwin':
+    daetools_machine = 'universal'
+else:
+    daetools_machine = str(platform.machine())
 
 # (Platform/Python)-dependent shared libraries directory
 platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
+    
 print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')

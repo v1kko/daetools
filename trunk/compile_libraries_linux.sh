@@ -28,7 +28,7 @@ DAE_COMPILER_FLAGS="-fPIC"
 BOOST_MACOSX_FLAGS=
 
 if [ ${PLATFORM} = "Darwin" ]; then
-  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch ppc -arch x86_64"
+  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch x86_64"
   BOOST_MACOSX_FLAGS="macosx-version-min=10.5 architecture=x86 address-model=32_64"
   
   if type "wget" > /dev/null ; then
