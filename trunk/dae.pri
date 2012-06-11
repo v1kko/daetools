@@ -16,14 +16,6 @@ DAE_TOOLS_BUILD = 1
 
 # daetools always use the current system python version and custom compiled boost libs
 # located in ../boost with the libraries in ../boost/stage/lib
-# 1. On GNU/LINUX and MacOS:
-#    a) Set CONFIG += use_system_boost to use the system's default version
-#    b) Set CONFIG += use_custom_boost to use the boost build in ../boost
-# 2. On Windows: 
-#    Always use_custom_boost
-#CONFIG += use_custom_boost
-
-# Set CONFIG += enable_mpi to use MPI libraries
 
 # Build universal binaries for MAC OS-X
 # There is a problem with ppc64 under OSX 10.6 so it is excluded
@@ -48,6 +40,8 @@ macx-g++::SHARED_LIB_PREFIX  = lib
 win32::SHARED_LIB_APPEND     = pyd
 linux-g++::SHARED_LIB_APPEND = so.$${VERSION}
 macx-g++::SHARED_LIB_APPEND  = $${VERSION}.dylib
+
+# Set CONFIG += enable_mpi to use MPI libraries
 
 CONFIG(debug, debug|release):message(debug){
     DAE_DEST_DIR = ../debug
@@ -147,7 +141,6 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 #####################################################################################
 #                                PYTHON + NUMPY
 #####################################################################################
-PYTHONDIR                = 
 PYTHON_INCLUDE_DIR       = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
 PYTHON_SITE_PACKAGES_DIR = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
 unix::PYTHON_LIB_DIR     = $$system(python -c \"import sys; print(sys.prefix)\")/lib
@@ -183,38 +176,10 @@ macx-g++::GFORTRAN  = -lgfortran
 #####################################################################################
 #                                    BOOST
 #####################################################################################
-# Boost version installed must be 1.41+ (asio, system, python, thread, regex)
-# Manual compilation:
-# 1. Compile/Install bjam and Boost.Build
-#     - Go to the directory tools/build/v2.
-#     - Run bootstrap.bat/bootstrap.sh
-#     - Run bjam install --prefix=PREFIX as ROOT where PREFIX is the directory where 
-#       Boost.Build is to be installed (prefix is usually /usr for GNU/Linux and MacOS)
-#     - Add PREFIX/bin to PATH environment variable (perhaps not needed for GNU/Linux and MacOS)
-# 2) Build boost libraries (toolset=msvc or gcc; both static|shared)
-#      bjam --build-dir=./build --debug-building --buildid=daetools-pyXY --layout=system
-#      --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=X.Y
-#      variant=release link=static,shared threading=multi runtime-link=shared
-#    For MacOS in order to build universal binaries (x86, x86_64) this should be added:
-#      macosx-version-min=10.5 architecture=x86 address-model=32_64
-#    If there is more than one Python version installed the non-default one can be selected by adding 
-#    the following lines to user-config.jam located in the $HOME directory:
-#           using python : X.Y ;
-#           using python : Z.W ;
-#    where X.Y is a desired one. The option python=X.Y should be added to the build options.
+# Boost version installed must be 1.42+ (asio, system, python, thread, regex)
+# Starting with the version 1.2.1 daetools use manually compiled boost libraries.
+# The compilation is done in the shell script compile_libraries_linux.sh
 #####################################################################################
-#use_system_boost {
-#unix::BOOSTDIR              =
-#unix::BOOSTLIBPATH          =
-#unix::BOOST_PYTHON_LIB_NAME =
-#unix::BOOST_SYSTEM_LIB_NAME =
-#unix::BOOST_THREAD_LIB_NAME =
-#unix::BOOST_PYTHON_LIB      = -lboost_python -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-#unix::BOOST_LIBS            = -lboost_system -lboost_thread $${RT}
-#}
-
-#use_custom_boost {
-
 win32::BOOSTDIR              = ../boost
 win32::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
 win32::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
@@ -231,8 +196,6 @@ unix::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_
 unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                               -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} $${RT}
 unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$${BOOST_THREAD_LIB_NAME} $${RT}
-
-#}
 
 
 #####################################################################################

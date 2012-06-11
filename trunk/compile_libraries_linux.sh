@@ -25,9 +25,11 @@ echo $PYTHON_LIB_DIR
 
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
+BOOST_MACOSX_FLAGS=
 
 if [ ${PLATFORM} = "Darwin" ]; then
   DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch ppc -arch x86_64"
+  BOOST_MACOSX_FLAGS="macosx-version-min=10.5 architecture=x86 address-model=32_64"
   
   if type "wget" > /dev/null ; then
     echo "wget found"
@@ -112,7 +114,7 @@ if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so
 
   ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
          --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
-         variant=release link=shared threading=multi runtime-link=shared
+         variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
   cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
