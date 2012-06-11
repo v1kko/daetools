@@ -10,8 +10,11 @@ numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
 # System := {'Linux', 'Windows', 'Darwin'}
 daetools_system = str(platform.system())
 
-# Machine := {'i386', ..., 'i686', 'AMD64'}
-daetools_machine = str(platform.machine())
+# Machine := {'i386', ..., 'i686', 'x86_64'}
+if platform.system() == 'Darwin':
+    daetools_machine = 'universal'
+else:
+    daetools_machine = str(platform.machine())
 
 # daetools root directory
 daetools_dir = os.path.join(os.path.dirname(__file__))
