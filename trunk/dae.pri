@@ -14,6 +14,13 @@ DAE_TOOLS_MAJOR = 1
 DAE_TOOLS_MINOR = 2
 DAE_TOOLS_BUILD = 1
 
+# DAE Tools version (major, minor, build)
+VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
+
+QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
+QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
+QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
+
 # daetools always use the current system python version and custom compiled boost libs
 # located in ../boost with the libraries in ../boost/stage/lib
 
@@ -21,13 +28,6 @@ DAE_TOOLS_BUILD = 1
 # There is a problem with ppc64 under OSX 10.6 so it is excluded
 # Otherwise ppc64 should be added as well
 macx-g++::CONFIG += x86 x86_64
-
-# DAE Tools version (major, minor, build)
-VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
-
-QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
-QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
-QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 
 win32::SHARED_LIB_EXT     = dll
 linux-g++::SHARED_LIB_EXT = so
@@ -101,7 +101,8 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 # Older GCCs complain about -Wno-unused-but-set-variable
 unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
                                 -Wno-unused-parameter \
-                                -Wno-unused-variable 
+                                -Wno-unused-variable \
+                                -Wno-unused-but-set-variable
 
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
 unix::QMAKE_CXXFLAGS_RELEASE -= -O2
