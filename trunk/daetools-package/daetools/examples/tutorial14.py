@@ -16,16 +16,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
-In this example we use the same conduction problem as in the tutorial 1.
-Here we introduce:
- - Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)
-
-Here, we have the similar problem as in the tutorial 4. The model is equivalent.
-Again we have a piece of copper (a plate) is at one side exposed to the source of heat
-and at the other to the surroundings. The process starts at the temperature of 283K.
-The metal is allowed to warm up, and then its temperature is kept in the interval
-[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal
-cools down slowly again to the ambient temperature.
+In this example we use the same conduction problem as in the tutorial 5.
+Here we introduce the external functions concept that can handle and evaluate
+functions in external libraries. Here we use daeScalarExternalFunction class
+derived external function object to calculate the power.
+A support for external functions is still experimental and the goal is
+to support certain software components such as thermodynamic property packages etc.
 """
 
 import sys
@@ -45,6 +41,8 @@ class extfnPower(daeScalarExternalFunction):
         daeScalarExternalFunction.__init__(self, Name, Model, units, arguments)
     
     def Calculate(self, values):
+        """
+        """
         m  = values["m"]
         cp = values["cp"]
         dT = values["dT"]
@@ -112,8 +110,13 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial14")
-        self.m.Description = ""
-    
+        self.m.Description = "In this example we use the same conduction problem as in the tutorial 5." \
+                             "Here we introduce the external functions concept that can handle and evaluate" \
+                             "functions in external libraries. Here we use daeScalarExternalFunction class" \
+                             "derived external function object to calculate the power." \
+                             "A support for external functions is still experimental and the goal is" \
+                             "to support certain software components such as thermodynamic property packages etc."
+                                
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.m.SetValue(1 * kg)

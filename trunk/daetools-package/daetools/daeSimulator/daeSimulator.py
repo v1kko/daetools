@@ -62,13 +62,16 @@ class daeSimulator(QtGui.QDialog):
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
         font = QtGui.QFont()
-        font.setPointSize(9)
         if platform.system() == 'Linux':
             font.setFamily("Monospace")
+            font.setPointSize(9)
         elif platform.system() == 'Darwin':
-            font.setFamily("Monospace")
+            font.setFamily("Monaco")
+            font.setPointSize(10)
         else:
             font.setFamily("Courier New")
+            font.setPointSize(9)
+
         self.ui.textEdit.setFont(font)
         self.setWindowTitle("DAE Tools Simulator v" + daeVersion(True))
 

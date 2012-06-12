@@ -16,6 +16,7 @@ import os, sys, subprocess, webbrowser, traceback
 from os.path import join, realpath, dirname
 from StringIO import StringIO
 from time import localtime, strftime
+from os.path import join, realpath, dirname
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -92,6 +93,11 @@ except Exception, e:
     print '\n'.join(traceback.format_tb(exc_traceback))
     print '[daeRunExamples]: Cannot load opt_tutorial6 module\n Error: ', str(e)
 
+try:
+    _examples_dir = dirname(__file__)
+except:
+    # In case we are running the module on its own (i.e. as __main__)
+    _examples_dir = realpath(dirname(sys.argv[0]))
 
 class daeTextEditLog(daeStdOutLog):
     def __init__(self, TextEdit, App):
@@ -173,7 +179,8 @@ class RunExamples(QtGui.QDialog):
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
         try:
-            url   = QtCore.QUrl(simName + ".html")
+            url   = QtCore.QUrl(join(_examples_dir, simName + ".html"))
+            print url
             title = simName + ".py"
             wv = WebView(url)
             wv.setWindowTitle(title)
@@ -184,13 +191,13 @@ class RunExamples(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
-        url     = simName + ".xml"
+        url     = join(_examples_dir, simName + ".xml")
         webbrowser.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotShowRuntimeModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
-        url     = simName + "-rt.xml"
+        url     = join(_examples_dir, simName + "-rt.xml")
         webbrowser.open_new_tab(url)
 
     #@QtCore.pyqtSlot()

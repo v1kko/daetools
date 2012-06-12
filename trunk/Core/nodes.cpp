@@ -2945,9 +2945,47 @@ void adScalarExternalFunctionNode::Export(std::string& strContent, daeeModelLang
 //	return string("");
 //}
 
-string adScalarExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adScalarExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
 {
-	return string("");
+    string strLatex;
+
+    strLatex += "{ ";
+    strLatex += m_pExternalFunction->GetName();
+
+    daeExternalFunctionNodeMap_t::const_iterator iter;
+    const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
+
+    strLatex += " \\left( ";
+    for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+    {
+        std::string               strName  = iter->first;
+        daeExternalFunctionNode_t argument = iter->second;
+
+        adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
+        adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);
+
+        if(iter != mapArgumentNodes.begin())
+            strLatex += ", ";
+        strLatex += strName + " = { ";
+
+        if(ad)
+        {
+            adNode* node = ad->get();
+            strLatex += node->SaveAsLatex(c);
+        }
+        else if(adarr)
+        {
+            adNodeArray* nodearray = adarr->get();
+            strLatex += nodearray->SaveAsLatex(c);
+        }
+        else
+            daeDeclareAndThrowException(exInvalidCall);
+
+        strLatex += " } ";
+    }
+    strLatex += " \\right) }";
+
+    return strLatex;
 }
 
 void adScalarExternalFunctionNode::Open(io::xmlTag_t* pTag)
@@ -2956,14 +2994,74 @@ void adScalarExternalFunctionNode::Open(io::xmlTag_t* pTag)
 
 void adScalarExternalFunctionNode::Save(io::xmlTag_t* pTag) const
 {
+    pTag->Save(string("ExternalFunction"), m_pExternalFunction->GetName());
+
+    io::xmlTag_t* pArgumentsTag = pTag->AddTag(string("Arguments"));
+
+    daeExternalFunctionNodeMap_t::const_iterator iter;
+    const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
+
+    for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+    {
+        std::string               strName  = iter->first;
+        daeExternalFunctionNode_t argument = iter->second;
+
+        adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
+        adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);
+
+        if(ad)
+            adNode::SaveNode(pArgumentsTag, strName, ad->get());
+        else if(adarr)
+            adNodeArray::SaveNode(pArgumentsTag, strName, adarr->get());
+        else
+            daeDeclareAndThrowException(exInvalidCall);
+    }
 }
 
 void adScalarExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
 {
 }
 
-void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
 {
+    io::xmlTag_t* pRowTag = pTag->AddTag(string("mrow"));
+
+    io::xmlTag_t* pFunctionTag = pRowTag->AddTag(string("mi"), m_pExternalFunction->GetName());
+    pFunctionTag->AddAttribute(string("fontstyle"), string("italic"));
+
+    io::xmlTag_t* pFencedTag = pRowTag->AddTag(string("mfenced"));
+
+    daeExternalFunctionNodeMap_t::const_iterator iter;
+    const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
+
+    for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
+    {
+        std::string               strName  = iter->first;
+        daeExternalFunctionNode_t argument = iter->second;
+
+        adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
+        adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);
+
+        io::xmlTag_t* pArgRowTag = pFencedTag->AddTag(string("mrow"));
+
+        io::xmlTag_t* pArgNameTag = pArgRowTag->AddTag(string("mi"), strName);
+        pArgNameTag->AddAttribute(string("fontstyle"), string("italic"));
+
+        pArgRowTag->AddTag(string("mo"), string("="));
+
+        if(ad)
+        {
+            adNode* node = ad->get();
+            node->SaveAsPresentationMathML(pArgRowTag, c);
+        }
+        else if(adarr)
+        {
+            adNodeArray* nodearray = adarr->get();
+            nodearray->SaveAsPresentationMathML(pArgRowTag, c);
+        }
+        else
+            daeDeclareAndThrowException(exInvalidCall);
+    }
 }
 
 void adScalarExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)

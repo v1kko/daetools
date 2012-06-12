@@ -22,29 +22,29 @@ else:
 # (Platform/Python)-dependent shared libraries directory
 platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
     
-print 'platform_solib_dir = ', platform_solib_dir
+#print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')
-print 'boost_solib_dir = ', boost_solib_dir
+#print 'boost_solib_dir = ', boost_solib_dir
 
 if daetools_machine == 'x86_64':
     usrlib = '/usr/lib64'
 else:
     usrlib = '/usr/lib'
-    
+
+boost_python = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_system = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_thread = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_solibs = []
+
 if os.path.isdir(boost_solib_dir):
     boost_files = os.listdir(boost_solib_dir)
-    print 'boost_files = ', boost_files
-    boost_python = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_system = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_thread = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 
     for f in boost_files:
         if (boost_python in f) or (boost_system in f) or (boost_thread in f):
             boost_solibs.append(os.path.join(boost_solib_dir, f))
 
-print 'boost_solibs = ', boost_solibs
+#print 'boost_solibs = ', boost_solibs
 
 if platform.system() == 'Linux':
     data_files = [
@@ -102,7 +102,7 @@ elif platform.system() == 'Darwin':
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
 
-print 'solibs = ', solibs
+#print 'solibs = ', solibs
 
 setup(name = 'daetools',
       version = '1.2.1',
@@ -132,6 +132,6 @@ setup(name = 'daetools',
                        'daetools.examples' :    ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
                      },
       data_files = data_files,
-      requires = ['numpy', 'scipy', 'matplotlib']
+      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
      )
 

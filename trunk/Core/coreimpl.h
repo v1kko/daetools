@@ -3430,10 +3430,10 @@ public:
 	void									InitializeArguments(const daeExecutionContext* pExecutionContext);
 	void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
 	const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
-	unit									GetUnits(void) const;
+    const daeExternalFunctionNodeMap_t&		GetSetupArgumentNodes(void) const;
+    unit									GetUnits(void) const;
 
 protected:
-	string							m_strName;
 	unit							m_Unit;
 	daeExternalFunctionNodeMap_t	m_mapSetupArgumentNodes;
 	daeExternalFunctionNodeMap_t	m_mapArgumentNodes;

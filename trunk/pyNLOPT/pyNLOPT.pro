@@ -44,5 +44,5 @@ QMAKE_POST_LINK = move /y \
 unix{
 QMAKE_POST_LINK = cp -f \
         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${SOLVERS_DIR}/$${TARGET}.$${SHARED_LIB_EXT}
+        $${SOLVERS_DIR}/$${TARGET}.so
 }

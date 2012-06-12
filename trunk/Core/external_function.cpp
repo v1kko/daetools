@@ -20,9 +20,9 @@ daeExternalFunction_t::daeExternalFunction_t(const string& strName, daeModel* pM
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	m_strName = strName;
-	m_Unit    = units;
-	m_pModel  = pModel;
+    m_strShortName  = strName;
+    m_Unit          = units;
+    m_pModel        = pModel;
 	m_pModel->AddExternalFunction(this);
 }
 
@@ -65,6 +65,13 @@ const daeExternalFunctionNodeMap_t& daeExternalFunction_t::GetArgumentNodes(void
 // Achtung, Achtung!!
 // Returns Runtime nodes!!!
 	return m_mapArgumentNodes;
+}
+
+const daeExternalFunctionNodeMap_t& daeExternalFunction_t::GetSetupArgumentNodes(void) const
+{
+// Achtung, Achtung!!
+// Returns Setup nodes!!!
+    return m_mapSetupArgumentNodes;
 }
 
 void daeExternalFunction_t::InitializeArguments(const daeExecutionContext* pExecutionContext)

@@ -76,6 +76,7 @@ def Calculate(p, minpack, calc_values):
             # Run the simulation
             minpack.simulation.Reset()
             minpack.simulation.SolveInitial()
+            minpack.simulation.ReportData(minpack.simulation.CurrentTime)
             
             ct = 0
             if minpack.simulation.m.IsModelDynamic:
@@ -190,6 +191,7 @@ class daeMinpackLeastSq:
         # Call simulation.Initialize (with eParameterEstimation mode)
         self.simulation.SimulationMode = eParameterEstimation
         self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
+        self.simulation.RegisterData('')
         
         # Check the inputs
         if (self.simulation == None):

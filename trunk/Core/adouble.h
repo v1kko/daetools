@@ -420,7 +420,7 @@ public:
 	
 	static adNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
-	static adNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNode>* ood = NULL);
+    static adNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNode>* ood = NULL);
 	static void		SaveNodeAsMathML(io::xmlTag_t* pTag, 
 									 const string& strObjectName, 
 									 const adNode* node, 
