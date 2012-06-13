@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+Installation instructions
+
+- GNU/Linux (.tar.gz):
+  python setup.py install
+
+- Windows (.exe):
+  python setup.py bdist_wininst --install-script daetools_win_install.py
+"""
+
 import os, sys, platform, shutil, numpy
 from distutils.core import setup
 from distutils.util import get_platform
@@ -21,7 +31,7 @@ else:
 
 # (Platform/Python)-dependent shared libraries directory
 platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
-    
+
 #print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')
@@ -66,16 +76,13 @@ if platform.system() == 'Linux':
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
 
 elif platform.system() == 'Windows':
-    sys_drive = os.environ['SYSTEMDRIVE']
-    config_dir = os.path.realpath( os.path.join(sys_drive, '\\daetools') )
-    #print 'config_dir = ', config_dir
-
     for f in boost_solibs:
         shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
         shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
 
+    # Achtung!! data files dir must be '' in Windows
     data_files = [
-                    (config_dir, ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'])
+                    ('', ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'])
                  ]
     solibs = [
                '{0}/*.pyd'.format(platform_solib_dir),
@@ -112,7 +119,6 @@ setup(name = 'daetools',
       author_email = 'dnikolic@daetools.com',
       url = 'http://www.daetools.com',
       license = 'GNU GPL v3',
-#     platforms = get_platform(),
       packages = [
                    'daetools',
                    'daetools.pyDAE',
@@ -132,6 +138,6 @@ setup(name = 'daetools',
                        'daetools.examples' :    ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
                      },
       data_files = data_files,
+      scripts = ['scripts/daetools_win_install.py'],
       requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
      )
-

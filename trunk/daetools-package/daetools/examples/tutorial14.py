@@ -49,7 +49,7 @@ class extfnPower(daeScalarExternalFunction):
         
         res = m * cp * dT
         
-        print('Power(m = {0}, cp = {1}, dT = {2}) = {3}'.format(m, cp, dT, res))
+        #print('Power(m = {0}, cp = {1}, dT = {2}) = {3}'.format(m, cp, dT, res))
         return res
 
 class modTutorial(daeModel):
