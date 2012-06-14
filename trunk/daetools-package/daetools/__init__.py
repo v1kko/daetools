@@ -13,6 +13,8 @@ daetools_system = str(platform.system())
 # Machine := {'i386', ..., 'i686', 'x86_64'}
 if platform.system() == 'Darwin':
     daetools_machine = 'universal'
+elif platform.system() == 'Windows':
+    daetools_machine = 'win32'
 else:
     daetools_machine = str(platform.machine())
 

@@ -2,11 +2,11 @@
 """
 Installation instructions
 
-- GNU/Linux (.tar.gz):
+- GNU/Linux, MacOS (.tar.gz):
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --install-script daetools_win_install.py
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py
 """
 
 import os, sys, platform, shutil, numpy
@@ -26,19 +26,25 @@ daetools_system   = str(platform.system())
 # Machine := {'i386', ..., 'i686', 'x86_64'}
 if platform.system() == 'Darwin':
     daetools_machine = 'universal'
+elif platform.system() == 'Windows':
+    daetools_machine = 'win32'
 else:
     daetools_machine = str(platform.machine())
 
 # (Platform/Python)-dependent shared libraries directory
 platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
-
 #print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')
 #print 'boost_solib_dir = ', boost_solib_dir
 
 if daetools_machine == 'x86_64':
-    usrlib = '/usr/lib64'
+    if os.path.exists('/usr/lib'):
+        usrlib = '/usr/lib'
+    elif os.path.exists('/usr/lib64'):
+        usrlib = '/usr/lib64'
+    else:
+        usrlib = '/usr/lib'
 else:
     usrlib = '/usr/lib'
 
@@ -82,7 +88,11 @@ elif platform.system() == 'Windows':
 
     # Achtung!! data files dir must be '' in Windows
     data_files = [
-                    ('', ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg'])
+                    ('', ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
+                    ('', [
+                           'usr/share/applications/daeExamples.lnk',
+                           'usr/share/applications/daePlotter.lnk'
+                         ] ),
                  ]
     solibs = [
                '{0}/*.pyd'.format(platform_solib_dir),

@@ -75,7 +75,8 @@ NUMPY_VERSION = $$system(python -c \"import numpy; print(\'\'.join(numpy.__versi
 DAE_SYSTEM   = $$system(python -c \"import platform; print(platform.system())\")
 
 # Machine := {'i386', ..., 'i686', 'AMD64'}
-DAE_MACHINE  = $$system(python -c \"import platform; machine = \'universal\' if platform.system() == \'Darwin\' else platform.machine(); print(machine)\")
+MACHINE_COMMAND = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
+DAE_MACHINE = $$system(python -c \"$${MACHINE_COMMAND}\")
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
