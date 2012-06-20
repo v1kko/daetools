@@ -44,8 +44,6 @@ if [ ${PLATFORM} = "Darwin" ]; then
   fi
 
 else
-  Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  
   if [ ${HOST_ARCH} != "x86_64" ]; then
     DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -mfpmath=sse"
     SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`

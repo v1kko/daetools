@@ -39,9 +39,14 @@ boost_solib_dir = os.path.realpath('solibs')
 #print 'boost_solib_dir = ', boost_solib_dir
 
 if daetools_machine == 'x86_64':
-    if os.path.exists('/usr/lib'):
+    if os.path.exists('/usr/lib') and os.path.exists('/usr/lib64'):
+        # There are both /usr/lib and /usr/lib64
+        usrlib = '/usr/lib64'
+    elif os.path.exists('/usr/lib'):
+        # There is only /usr/lib
         usrlib = '/usr/lib'
     elif os.path.exists('/usr/lib64'):
+        # There is only /usr/lib64
         usrlib = '/usr/lib64'
     else:
         usrlib = '/usr/lib'

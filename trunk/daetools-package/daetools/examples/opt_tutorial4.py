@@ -84,7 +84,7 @@ def ObjectiveFunction(x, *args):
     # This function will be called repeatedly to obtain the values of the objective function.
     # In order to call DAE Tools repedeatly the following sequence of calls is necessary:
     # 1. Set initial conditions, initial guesses, initially active states etc (function simulation.SetUpVariables)
-    #    In general, variables values, active states, initial consitions etc can be saved in some arrays and
+    #    In general, variables values, active states, initial conditions etc can be saved in some arrays and
     #    later re-used. However, keeping the initialization data in SetUpVariables looks much better.
     simulation.SetUpVariables()
     
