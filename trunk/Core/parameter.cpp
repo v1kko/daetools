@@ -394,24 +394,24 @@ adouble_array daeParameter::Create_adouble_array(const daeArrayRange* ranges, co
 // Now I should create adNodeArray* node
 // I rely here on adNode* in each of adouble in varArray.m_arrValues 
 // created above
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimeParameterNodeArray* node = new adRuntimeParameterNodeArray();
-		varArray.node = adNodeArrayPtr(node);
-		varArray.setGatherInfo(true);
-		node->m_pParameter = const_cast<daeParameter*>(this);
-		
-		size_t size = varArray.m_arrValues.size();
-		if(size == 0)
-			daeDeclareAndThrowException(exInvalidCall); 
-		
-		node->m_ptrarrParameterNodes.resize(size);
-		for(size_t i = 0; i < size; i++)
-			node->m_ptrarrParameterNodes[i] = varArray.m_arrValues[i].node;
-		node->m_arrRanges.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrRanges[i] = ranges[i];
-	}
+//	if(m_pModel->m_pDataProxy->GetGatherInfo())
+//	{
+//		adRuntimeParameterNodeArray* node = new adRuntimeParameterNodeArray();
+//		varArray.node = adNodeArrayPtr(node);
+//		varArray.setGatherInfo(true);
+//		node->m_pParameter = const_cast<daeParameter*>(this);
+//	
+//		size_t size = varArray.m_arrValues.size();
+//		if(size == 0)
+//			daeDeclareAndThrowException(exInvalidCall); 
+//		
+//		node->m_ptrarrParameterNodes.resize(size);
+//		for(size_t i = 0; i < size; i++)
+//			node->m_ptrarrParameterNodes[i] = varArray.m_arrValues[i].node;
+//		node->m_arrRanges.resize(N);
+//		for(size_t i = 0; i < N; i++)
+//			node->m_arrRanges[i] = ranges[i];
+//	}
 	return varArray;
 }
 

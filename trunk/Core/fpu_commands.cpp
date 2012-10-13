@@ -116,11 +116,11 @@ void daeFPU::CreateCommandStack(adNode* node, vector<daeFPUCommand*>& ptrarrComm
 			CreateCommandStack(binary->right.get(), ptrarrCommands);
 		}
 	}
-	else if(infoNode == typeid(adRuntimePartialDerivativeNode))
-	{
-		adRuntimePartialDerivativeNode* partial = dynamic_cast<adRuntimePartialDerivativeNode*>(node);
-		CreateCommandStack(partial->pardevnode.get(), ptrarrCommands);
-	}
+//	else if(infoNode == typeid(adRuntimePartialDerivativeNode))
+//	{
+//		adRuntimePartialDerivativeNode* partial = dynamic_cast<adRuntimePartialDerivativeNode*>(node);
+//		CreateCommandStack(partial->pardevnode.get(), ptrarrCommands);
+//	}
 	else
 	{
 	}
@@ -184,9 +184,9 @@ bool FillOperandInfo(adNode* node, daeFPUCommand* cmd, bool isLeft)
 		SetValue(cmd, isLeft, n->m_nOverallIndex);
 		return true;
 	}
-	else if(infoNode == typeid(adRuntimePartialDerivativeNode))
-	{
-	}
+//	else if(infoNode == typeid(adRuntimePartialDerivativeNode))
+//	{
+//	}
 	else if(infoNode == typeid(adUnaryNode))
 	{
 	}

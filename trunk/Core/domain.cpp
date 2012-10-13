@@ -342,7 +342,7 @@ adouble daeDomain::pd_CFD(daePartialDerivativeVariable& pdv) const
 				pardev = (pdv[n+1] - pdv[n-1]) / (d[n+1] - d[n-1]);
 			}
 		}
-		else
+        else if(pdv.GetOrder() == 2)
 		{
 			if(n == 0) // LEFT BOUND
 			{
@@ -360,6 +360,10 @@ adouble daeDomain::pd_CFD(daePartialDerivativeVariable& pdv) const
 				pardev = (pdv[n+1] - 2*pdv[n] + pdv[n-1]) / ((d[n+1] - d[n]) * (d[n] - d[n-1]));
 			}
 		}
+        else
+        {
+            daeDeclareAndThrowException(exNotImplemented); 
+        }
 		break;
 
 	case 4:

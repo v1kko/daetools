@@ -2476,12 +2476,12 @@ public:
 	const adouble integral(const adouble_array& a) const;
 
 // Internal functions
-	const adouble __sum__(const adouble_array& a) const;
-	const adouble __product__(const adouble_array& a) const;
-	const adouble __min__(const adouble_array& a) const;
-	const adouble __max__(const adouble_array& a) const;
-	const adouble __average__(const adouble_array& a) const;
-	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<const real_t*>& pdarrPoints) const;
+//	const adouble __sum__(const adouble_array& a) const;
+//	const adouble __product__(const adouble_array& a) const;
+//	const adouble __min__(const adouble_array& a) const;
+//	const adouble __max__(const adouble_array& a) const;
+//	const adouble __average__(const adouble_array& a) const;
+//	const adouble __integral__(const adouble_array& a, daeDomain* pDomain, const std::vector<const real_t*>& pdarrPoints) const;
 
 	daeEquation* CreateEquation(const string& strName, string strDescription = "", real_t dScaling = 1.0);
 

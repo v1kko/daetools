@@ -26,7 +26,7 @@ bool adDoEnclose(const adNode* node)
 	   infoChild == typeid(const adRuntimeParameterNode)			|| 
 	   infoChild == typeid(const adRuntimeVariableNode)				|| 
 	   infoChild == typeid(const adRuntimeTimeDerivativeNode)		|| 
-	   infoChild == typeid(const adRuntimePartialDerivativeNode)	|| 
+//	   infoChild == typeid(const adRuntimePartialDerivativeNode)	|| 
 	   infoChild == typeid(const adSetupDomainIteratorNode)			|| 
 	   infoChild == typeid(const adSetupParameterNode)				|| 
 	   infoChild == typeid(const adSetupVariableNode)				|| 
@@ -216,10 +216,10 @@ adNode* adNode::CreateNode(const io::xmlTag_t* pTag)
 	{
 		return new adRuntimeTimeDerivativeNode();
 	}
-	else if(strClass == "adRuntimePartialDerivativeNode")
-	{
-		return new adRuntimePartialDerivativeNode();
-	}
+//	else if(strClass == "adRuntimePartialDerivativeNode")
+//	{
+//		return new adRuntimePartialDerivativeNode();
+//	}
 	else if(strClass == "adUnaryNode")
 	{
 		return new adUnaryNode();
@@ -674,15 +674,14 @@ adRuntimeParameterNode::~adRuntimeParameterNode()
 
 adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in evaluate mode we dont need the value
-	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    adouble tmp(m_dValue);
+
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		adouble tmp;
 		tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
-		return tmp;
 	}
-	return adouble(m_dValue);
+    return tmp;
 }
 
 const quantity adRuntimeParameterNode::GetQuantity(void) const
@@ -813,15 +812,16 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 	if(!m_pdPointValue)
 		daeDeclareAndThrowException(exInvalidCall);
 
+    adouble tmp(*m_pdPointValue);
+
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adouble tmp;
 		tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
-		return tmp;
 	}
 
-	return adouble(*m_pdPointValue);
+    return tmp;
 }
 
 const quantity adDomainIndexNode::GetQuantity(void) const
@@ -921,7 +921,7 @@ adRuntimeVariableNode::~adRuntimeVariableNode()
 
 adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in the evaluate mode we dont need the value
+// If we are in the GatherInfo mode we dont need the value
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		adouble tmp;
@@ -1326,6 +1326,7 @@ void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& m
 /*********************************************************************************************
 	adRuntimePartialDerivativeNode
 **********************************************************************************************/
+/*
 adRuntimePartialDerivativeNode::adRuntimePartialDerivativeNode(daeVariable* pVariable, 
 															   size_t nOverallIndex, 
 															   size_t nDegree, 
@@ -1355,14 +1356,14 @@ adRuntimePartialDerivativeNode::~adRuntimePartialDerivativeNode()
 
 adouble adRuntimePartialDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in evaluate mode we dont need the value
-	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
-	{
-		adouble tmp;
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr( Clone() );
-		return tmp;
-	}
+// If we are in GatherInfo mode we dont need the value
+//	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+//	{
+//		adouble tmp;
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr( Clone() );
+//		return tmp;
+//	}
 
 	return pardevnode->Evaluate(pExecutionContext);
 }
@@ -1481,7 +1482,7 @@ bool adRuntimePartialDerivativeNode::IsFunctionOfVariables(void) const
 	
 	return pardevnode->IsFunctionOfVariables();
 }
-
+*/
 /*********************************************************************************************
 	adUnaryNode
 **********************************************************************************************/

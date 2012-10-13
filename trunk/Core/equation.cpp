@@ -129,9 +129,16 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
 {
+// Here m_pDataProxy->GatherInfo is true!!
+
+// We need to propagate this as a global execution context for it will be used to add variable indexes
 	EC.m_pEquationExecutionInfo = this;
 	pModel->PropagateGlobalExecutionContext(&EC);
+
+// Get a runtime node by evaluating the setup node
 	pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
+
+// Restore NULL as a global execution context
 	pModel->PropagateGlobalExecutionContext(NULL);
 }
 

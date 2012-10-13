@@ -59,22 +59,22 @@ adNodeArray* adNodeArray::CreateNode(const io::xmlTag_t* pTag)
 	{
 		return new adConstantNodeArray();
 	}
-	else if(strClass == "adRuntimeParameterNodeArray")
-	{
-		return new adRuntimeParameterNodeArray();
-	}
-	else if(strClass == "adRuntimeVariableNodeArray")
-	{
-		return new adRuntimeVariableNodeArray();
-	}
-	else if(strClass == "adRuntimeTimeDerivativeNodeArray")
-	{
-		return new adRuntimeTimeDerivativeNodeArray();
-	}
-	else if(strClass == "adRuntimePartialDerivativeNodeArray")
-	{
-		return new adRuntimePartialDerivativeNodeArray();
-	}
+//	else if(strClass == "adRuntimeParameterNodeArray")
+//	{
+//		return new adRuntimeParameterNodeArray();
+//	}
+//	else if(strClass == "adRuntimeVariableNodeArray")
+//	{
+//		return new adRuntimeVariableNodeArray();
+//	}
+//	else if(strClass == "adRuntimeTimeDerivativeNodeArray")
+//	{
+//		return new adRuntimeTimeDerivativeNodeArray();
+//	}
+//	else if(strClass == "adRuntimePartialDerivativeNodeArray")
+//	{
+//		return new adRuntimePartialDerivativeNodeArray();
+//	}
 	else if(strClass == "adUnaryNodeArray")
 	{
 		return new adUnaryNodeArray();
@@ -264,16 +264,24 @@ void adConstantNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 adouble_array adConstantNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
 	adouble_array tmp;
-	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodeArrayPtr( Clone() );
-		return tmp;
-	}
+    
+// 13.10.2012
+//	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodeArrayPtr( Clone() );
+//		return tmp;
+//	}
 	
 	tmp.Resize(1);
-	tmp[0] = adouble(m_quantity.getValue());
-	return tmp;
+	
+    adouble a = adouble(m_quantity.getValue());
+    a.setGatherInfo(true);
+    a.node = adNodePtr( new adConstantNode(m_quantity.getValue(), m_quantity.getUnits()) );
+    
+    tmp[0] = a;
+	
+    return tmp;
 }
 
 const quantity adConstantNodeArray::GetQuantity(void) const
@@ -370,17 +378,26 @@ void adVectorNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 
 adouble_array adVectorNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+    adouble a;
     adouble_array tmp;
-    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
-    {
-        tmp.setGatherInfo(true);
-        tmp.node = adNodeArrayPtr( Clone() );
-        return tmp;
-    }
+    
+// 13.10.2012
+//    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+//    {
+//        tmp.setGatherInfo(true);
+//        tmp.node = adNodeArrayPtr( Clone() );
+//        return tmp;
+//    }
     
     tmp.Resize(m_qarrValues.size());
 	for(size_t i = 0; i < m_qarrValues.size(); i++)
-	    tmp[i] = adouble(m_qarrValues[i].getValue());
+	{
+        a = adouble(m_qarrValues[i].getValue());
+        a.setGatherInfo(true);
+        a.node = adNodePtr( new adConstantNode(m_qarrValues[i].getValue(), m_qarrValues[i].getUnits()) );
+        tmp[i] = a;
+    }
+    
     return tmp;
 }
 
@@ -455,6 +472,7 @@ bool adVectorNodeArray::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adRuntimeParameterNodeArray
 **********************************************************************************************/
+/*
 adRuntimeParameterNodeArray::adRuntimeParameterNodeArray(void)
 {
 	m_pParameter = NULL;
@@ -554,10 +572,11 @@ bool adRuntimeParameterNodeArray::IsFunctionOfVariables(void) const
 {
 	return false;
 }
-
+*/
 /*********************************************************************************************
 	adRuntimeVariableNodeArray
 **********************************************************************************************/
+/*
 adRuntimeVariableNodeArray::adRuntimeVariableNodeArray()
 {
 	m_pVariable = NULL;
@@ -658,10 +677,11 @@ bool adRuntimeVariableNodeArray::IsFunctionOfVariables(void) const
 {
 	return true;
 }
-
+*/
 /*********************************************************************************************
 	adRuntimeTimeDerivativeNodeArray
 **********************************************************************************************/
+/*
 adRuntimeTimeDerivativeNodeArray::adRuntimeTimeDerivativeNodeArray()
 {	
 	m_pVariable = NULL;
@@ -756,10 +776,11 @@ void adRuntimeTimeDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_
 	for(size_t i = 0; i < m_ptrarrTimeDerivativeNodes.size(); i++)
 		m_ptrarrTimeDerivativeNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
-
+*/
 /*********************************************************************************************
 	adRuntimePartialDerivativeNodeArray
 **********************************************************************************************/
+/*
 adRuntimePartialDerivativeNodeArray::adRuntimePartialDerivativeNodeArray()
 {	
 	m_pVariable = NULL;
@@ -888,10 +909,11 @@ bool adRuntimePartialDerivativeNodeArray::IsFunctionOfVariables(void) const
 			return true;
 	return false;
 }
-
+*/
 /*********************************************************************************************
 	adRuntimeSpecialFunctionNode
 **********************************************************************************************/
+/*
 adRuntimeSpecialFunctionNode::adRuntimeSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
 													       daeModel* pModel,
 														   adNodeArrayPtr n)
@@ -926,23 +948,39 @@ adouble adRuntimeSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecu
 	switch(eFunction)
 	{
 	case eSum:
-		tmp = m_pModel->__sum__(ad);
+        tmp = ad[0];
+        for(size_t i = 1; i < ad.GetSize(); i++)
+            tmp = tmp + ad[i];
+//		tmp = m_pModel->__sum__(ad);
 		break;
 		
 	case eProduct:
-		tmp = m_pModel->__product__(ad);
+        tmp = ad[0];
+        for(size_t i = 1; i < ad.GetSize(); i++)
+            tmp = tmp * ad[i];
+//		tmp = m_pModel->__product__(ad);
 		break;
 		
 	case eAverage:
-		tmp = m_pModel->__average__(ad);
+        tmp = ad[0];
+        for(size_t i = 1; i < ad.GetSize(); i++)
+            tmp = tmp + ad[i];
+        tmp = tmp / ad.m_arrValues.size();
+//		tmp = m_pModel->__average__(ad);
 		break;
 
 	case eMinInArray:
-		tmp = m_pModel->__min__(ad);
+        tmp = ad[0];
+        for(size_t i = 1; i < ad.GetSize(); i++)
+            tmp = dae::core::__min__(tmp, ad[i]);
+//		tmp = m_pModel->__min__(ad);
 		break;
 		
 	case eMaxInArray:
-		tmp = m_pModel->__max__(ad);
+        tmp = ad[0];
+        for(size_t i = 1; i < ad.GetSize(); i++)
+            tmp = dae::core::__max__(tmp, ad[i]);
+//		tmp = m_pModel->__max__(ad);
 		break;
 		
 	default:
@@ -1192,10 +1230,11 @@ bool adRuntimeSpecialFunctionNode::IsFunctionOfVariables(void) const
 		
 	return node->IsFunctionOfVariables();
 }
-
+*/
 /*********************************************************************************************
 	adRuntimeIntegralNode
 **********************************************************************************************/
+/*
 adRuntimeIntegralNode::adRuntimeIntegralNode(daeeIntegralFunctions eFun,
 											 daeModel* pModel,
 											 adNodeArrayPtr n,
@@ -1385,6 +1424,7 @@ bool adRuntimeIntegralNode::IsFunctionOfVariables(void) const
 {
 	return true;
 }
+*/
 
 /*********************************************************************************************
 	adUnaryNodeArray
@@ -1420,55 +1460,136 @@ void adUnaryNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 
 adouble_array adUnaryNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	switch(eFunction)
+    size_t n;
+    adouble_array tmp, adarr;
+    
+    adarr = node->Evaluate(pExecutionContext);
+    
+    n = adarr.GetSize();
+    if(n == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    tmp.Resize(n);
+	
+    switch(eFunction)
 	{
 	case eSign:
-		return -(node->Evaluate(pExecutionContext));
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = -(adarr[i]);
+		
+        // 13.10.2012
+        //return -(node->Evaluate(pExecutionContext));
 		break;
-	case eSin:
- 		return sin(node->Evaluate(pExecutionContext));
+	
+    case eSin:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = sin(adarr[i]);
+
+        // 13.10.2012
+        //return sin(node->Evaluate(pExecutionContext));
 		break;
-	case eCos:
-		return cos(node->Evaluate(pExecutionContext));
+	
+    case eCos:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = cos(adarr[i]);
+
+        // 13.10.2012
+        //return cos(node->Evaluate(pExecutionContext));
 		break;
-	case eTan:
-		return tan(node->Evaluate(pExecutionContext));
+	
+    case eTan:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = tan(adarr[i]);
+
+        // 13.10.2012
+        //return tan(node->Evaluate(pExecutionContext));
 		break;
-	case eArcSin:
-		return asin(node->Evaluate(pExecutionContext));
+	
+    case eArcSin:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = asin(adarr[i]);
+
+        // 13.10.2012
+        //return asin(node->Evaluate(pExecutionContext));
 		break;
-	case eArcCos:
-		return acos(node->Evaluate(pExecutionContext));
+	
+    case eArcCos:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = acos(adarr[i]);
+
+        // 13.10.2012
+        //return acos(node->Evaluate(pExecutionContext));
 		break;
-	case eArcTan:
-		return atan(node->Evaluate(pExecutionContext));
+	
+    case eArcTan:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = atan(adarr[i]);
+
+        // 13.10.2012
+        //return atan(node->Evaluate(pExecutionContext));
 		break;
-	case eSqrt:
-		return sqrt(node->Evaluate(pExecutionContext));
+	
+    case eSqrt:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = sqrt(adarr[i]);
+
+        // 13.10.2012
+        //return sqrt(node->Evaluate(pExecutionContext));
 		break;
-	case eExp:
-		return exp(node->Evaluate(pExecutionContext));
+	
+    case eExp:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = exp(adarr[i]);
+
+        // 13.10.2012
+        //return exp(node->Evaluate(pExecutionContext));
 		break;
-	case eLn:
-		return log(node->Evaluate(pExecutionContext));
+	
+    case eLn:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = log(adarr[i]);
+
+        // 13.10.2012
+        //return log(node->Evaluate(pExecutionContext));
 		break;
-	case eLog:
-		return log10(node->Evaluate(pExecutionContext));
+	
+    case eLog:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = log10(adarr[i]);
+
+        // 13.10.2012
+        //return log10(node->Evaluate(pExecutionContext));
 		break;
-	case eAbs:
-		return abs(node->Evaluate(pExecutionContext));
+	
+    case eAbs:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = abs(adarr[i]);
+
+        // 13.10.2012
+        //return abs(node->Evaluate(pExecutionContext));
 		break;
-	case eCeil:
-		return ceil(node->Evaluate(pExecutionContext));
+	
+    case eCeil:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = ceil(adarr[i]);
+
+        // 13.10.2012
+        //return ceil(node->Evaluate(pExecutionContext));
 		break;
-	case eFloor:
-		return floor(node->Evaluate(pExecutionContext));
+	
+    case eFloor:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = floor(adarr[i]);
+		
+        // 13.10.2012
+        //return floor(node->Evaluate(pExecutionContext));
 		break;
-	default:
+	
+    default:
 		daeDeclareAndThrowException(exNotImplemented);
-		return adouble_array();
 	}
-	return adouble_array();
+
+    return tmp;
 }
 
 const quantity adUnaryNodeArray::GetQuantity(void) const
@@ -2203,33 +2324,70 @@ void adBinaryNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 
 adouble_array adBinaryNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	switch(eFunction)
+    size_t n;
+    adouble_array tmp, larr, darr;
+    
+    larr = left->Evaluate(pExecutionContext);
+    darr = right->Evaluate(pExecutionContext);
+    
+    n = this->GetSize();
+    if(n == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    tmp.Resize(n);
+
+    switch(eFunction)
 	{
 	case ePlus:
-		return left->Evaluate(pExecutionContext) + right->Evaluate(pExecutionContext);
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = larr[i] + darr[i];
+		
+        // 13.10.2012
+        //return left->Evaluate(pExecutionContext) + right->Evaluate(pExecutionContext);
 		break;
-	case eMinus:
-		return left->Evaluate(pExecutionContext) - right->Evaluate(pExecutionContext);
+	
+    case eMinus:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = larr[i] - darr[i];
+		
+        // 13.10.2012
+        //return left->Evaluate(pExecutionContext) - right->Evaluate(pExecutionContext);
 		break;
-	case eMulti:
-		return left->Evaluate(pExecutionContext) * right->Evaluate(pExecutionContext);
+	
+    case eMulti:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = larr[i] * darr[i];
+		
+        // 13.10.2012
+        //return left->Evaluate(pExecutionContext) * right->Evaluate(pExecutionContext);
 		break;
-	case eDivide:
-		return left->Evaluate(pExecutionContext) / right->Evaluate(pExecutionContext);
+	
+    case eDivide:
+        for(size_t i = 0; i < n; i++)
+            tmp[i] = larr[i] / darr[i];
+		
+        // 13.10.2012
+        //return left->Evaluate(pExecutionContext) / right->Evaluate(pExecutionContext);
 		break;
-	case ePower:
+	
+    case ePower:
 		daeDeclareAndThrowException(exNotImplemented);
 		break;
-	case eMin:
+	
+    case eMin:
 		daeDeclareAndThrowException(exNotImplemented);
 		break;
-	case eMax:
+	
+    case eMax:
 		daeDeclareAndThrowException(exNotImplemented);
 		break;
-	default:
+	
+    default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble_array();
 	}
+    
+    return tmp;
 }
 
 const quantity adBinaryNodeArray::GetQuantity(void) const
@@ -2811,20 +2969,56 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	
-	switch(eFunction)
+
+    adouble tmp;
+    adouble_array adarr;
+
+    adarr = node->Evaluate(pExecutionContext);
+
+    switch(eFunction)
 	{
 	case eSum:
-		return m_pModel->__sum__(node->Evaluate(pExecutionContext));
-	case eProduct:
-		return m_pModel->__product__(node->Evaluate(pExecutionContext));
-	case eAverage:
-		return m_pModel->__average__(node->Evaluate(pExecutionContext));
-	case eMinInArray:
-		return m_pModel->__min__(node->Evaluate(pExecutionContext));
-	case eMaxInArray:
-		return m_pModel->__max__(node->Evaluate(pExecutionContext));
-	default:
+        tmp = adarr[0];
+        for(size_t i = 1; i < adarr.GetSize(); i++)
+            tmp = tmp + adarr[i];
+        return tmp;
+//  13.10.2012
+//        return m_pModel->__sum__(node->Evaluate(pExecutionContext));
+
+    case eProduct:
+        tmp = adarr[0];
+        for(size_t i = 1; i < adarr.GetSize(); i++)
+            tmp = tmp * adarr[i];
+        return tmp;
+//  13.10.2012
+//        return m_pModel->__product__(node->Evaluate(pExecutionContext));
+
+    case eAverage:
+        tmp = adarr[0];
+        for(size_t i = 1; i < adarr.GetSize(); i++)
+            tmp = tmp + adarr[i];
+        tmp = tmp / adarr.m_arrValues.size();
+        return tmp;
+//  13.10.2012
+//        return m_pModel->__average__(node->Evaluate(pExecutionContext));
+
+    case eMinInArray:
+        tmp = adarr[0];
+        for(size_t i = 1; i < adarr.GetSize(); i++)
+            tmp = dae::core::__min__(tmp, adarr[i]);
+        return tmp;
+//  13.10.2012
+//        return m_pModel->__min__(node->Evaluate(pExecutionContext));
+
+    case eMaxInArray:
+        tmp = adarr[0];
+        for(size_t i = 1; i < adarr.GetSize(); i++)
+            tmp = dae::core::__max__(tmp, adarr[i]);
+        return tmp;
+//  13.10.2012
+//        return m_pModel->__max__(node->Evaluate(pExecutionContext));
+
+    default:
 		daeDeclareAndThrowException(exInvalidPointer);
 		return adouble();
 	}
@@ -3495,35 +3689,35 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain*
 			tmp = adres.node;
 		}
 	}
-	else if( dynamic_cast<adRuntimePartialDerivativeNode*>(adnode) )
-	{
-		adRuntimePartialDerivativeNode* rtnode = dynamic_cast<adRuntimePartialDerivativeNode*>(adnode);
-		if(rtnode->m_nDegree == 2)
-		{
-			if(rtnode->m_pDomain == pDomain)
-			{
-				daeDeclareException(exInvalidCall);
-				e << "The function d() cannot create partial derivatives of order higher than 2";
-				throw e;
-			}
-			else // It is permitted (calculate the derivative of the expression node)
-			{
-				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 			
-			}
-		}
-		else // m_nDegree == 1
-		{
-			if(rtnode->m_pDomain == pDomain) // Clone it and increase the order to 2
-			{
-				adouble adres = rtnode->m_pVariable->partial(2, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
-				tmp = adres.node;
-			}
-			else // // It is permitted (calculate the derivative of the expression node)
-			{
-				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 
-			}
-		}
-	}
+//	else if( dynamic_cast<adRuntimePartialDerivativeNode*>(adnode) )
+//	{
+//		adRuntimePartialDerivativeNode* rtnode = dynamic_cast<adRuntimePartialDerivativeNode*>(adnode);
+//		if(rtnode->m_nDegree == 2)
+//		{
+//			if(rtnode->m_pDomain == pDomain)
+//			{
+//				daeDeclareException(exInvalidCall);
+//				e << "The function d() cannot create partial derivatives of order higher than 2";
+//				throw e;
+//			}
+//			else // It is permitted (calculate the derivative of the expression node)
+//			{
+//				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 			
+//			}
+//		}
+//		else // m_nDegree == 1
+//		{
+//			if(rtnode->m_pDomain == pDomain) // Clone it and increase the order to 2
+//			{
+//				adouble adres = rtnode->m_pVariable->partial(2, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
+//				tmp = adres.node;
+//			}
+//			else // // It is permitted (calculate the derivative of the expression node)
+//			{
+//				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 
+//			}
+//		}
+//	}
 	else if( dynamic_cast<adRuntimeParameterNode*>(adnode) || 
 			 dynamic_cast<adDomainIndexNode*>(adnode)	   ||
 			 dynamic_cast<adConstantNode*>(adnode)          )
@@ -3737,9 +3931,10 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
-	adouble_array a;
+    adouble tmp;
+    size_t d1, d2;
+    adouble_array adarr;
 	vector<size_t> narrPoints;
-	vector<const real_t*> pdarrPoints;
 
 	switch(eFunction)
 	{
@@ -3749,19 +3944,27 @@ adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionConte
 		
 		m_ArrayRange.m_Range.GetPoints(narrPoints);
 		
-		pdarrPoints.resize(narrPoints.size(), NULL);
-		for(size_t i = 0; i < narrPoints.size(); i++)
-			pdarrPoints[i] = m_pDomain->GetPoint(i);
-		
-		a = node->Evaluate(pExecutionContext);
-		
-		return m_pModel->__integral__(a, const_cast<daeDomain*>(m_pDomain), pdarrPoints);
-	
+        adarr = node->Evaluate(pExecutionContext);
+
+        if(adarr.GetSize() != narrPoints.size())
+            daeDeclareAndThrowException(exInvalidCall);
+
+        for(size_t i = 0; i < narrPoints.size() - 1; i++)
+        {
+        // Get the indexes in domains
+            d1 = narrPoints[i];
+            d2 = narrPoints[i+1];
+
+            tmp = tmp + (adarr[i] + adarr[i+1]) * ((*m_pDomain)[d2] - (*m_pDomain)[d1]) / 2;
+        }
+        break;
+
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
 	}
-	return adouble();
+    
+	return tmp;
 }
 
 const quantity adSetupIntegralNode::GetQuantity(void) const
@@ -3957,12 +4160,12 @@ void adSingleNodeArray::GetArrayRanges(vector<daeArrayRange>& /*arrRanges*/) con
 
 adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble a;
 	adouble_array tmp;
 	
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+/* 13.10.2012
 // Achtung!! The node that we have is a setup node!!!
 // During the GatherInfo phase we have to transform it into the runtime node.
 // Thus, here we have to call node->Evaluate() and to store the returned node as a cloned node
@@ -3976,10 +4179,10 @@ adouble_array adSingleNodeArray::Evaluate(const daeExecutionContext* pExecutionC
 
 		return tmp;
 	}
-	
+*/
+    
 	tmp.Resize(1);
-	a = node->Evaluate(pExecutionContext);
-	tmp[0] = a;
+	tmp[0] = node->Evaluate(pExecutionContext);
 	return tmp;
 }
 

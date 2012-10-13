@@ -170,8 +170,9 @@ BOOST_PYTHON_MODULE(pyCore)
   .def("PutFloat",	   &daepython::PutFloat)
   .def("PutInteger",	   &daepython::PutInteger)
   .def("PutString",	   &daepython::PutString)
-*/  
-	class_<daeCondition>("daeCondition")
+*/
+
+    class_<daeCondition>("daeCondition")
 		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
 		//.def(!self)
 		.def(self | self)

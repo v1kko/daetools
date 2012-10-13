@@ -117,6 +117,7 @@ public:
 /*********************************************************************************************
 	adRuntimeParameterNodeArray
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimeParameterNodeArray : public adNodeArrayImpl
 {
 public:
@@ -146,10 +147,11 @@ public:
 	daeParameter*			m_pParameter;
 	vector<daeArrayRange>	m_arrRanges;
 };
-
+*/
 /*********************************************************************************************
 	adRuntimeVariableNodeArray
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimeVariableNodeArray : public adNodeArrayImpl
 {
 public:
@@ -179,10 +181,11 @@ public:
 	daeVariable*							m_pVariable;
 	vector<daeArrayRange>					m_arrRanges;
 };
-
+*/
 /*********************************************************************************************
 	adRuntimeTimeDerivativeNodeArray
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimeTimeDerivativeNodeArray : public adNodeArrayImpl
 {
 public:
@@ -211,10 +214,11 @@ public:
 	daeVariable*						m_pVariable;
 	vector<daeArrayRange>				m_arrRanges;
 };
-
+*/
 /*********************************************************************************************
 	adRuntimePartialDerivativeNodeArray
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimePartialDerivativeNodeArray : public adNodeArrayImpl
 {
 public:
@@ -246,10 +250,11 @@ public:
 	daeDomain*							m_pDomain;
 	vector<daeArrayRange>				m_arrRanges;
 };
-
+*/
 /*********************************************************************************************
 	adRuntimeSpecialFunctionNode
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimeSpecialFunctionNode : public adNodeImpl
 {
 public:
@@ -280,10 +285,11 @@ public:
 // Report/GUI part
 	daeeSpecialUnaryFunctions		eFunction;
 };
-
+*/
 /*********************************************************************************************
 	adRuntimeIntegralNode
 **********************************************************************************************/
+/*
 class DAE_CORE_API adRuntimeIntegralNode : public adNodeImpl
 {
 public:
@@ -316,7 +322,7 @@ public:
 	daeDomain*						m_pDomain;
 	vector<const real_t*>			m_pdarrPoints;
 };
-
+*/
 /*********************************************************************************************
 	adUnaryNodeArray
 **********************************************************************************************/

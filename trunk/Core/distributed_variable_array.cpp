@@ -255,24 +255,24 @@ adouble_array daeVariable::Create_adouble_array(const daeArrayRange* ranges, con
 // Now I should create adNodeArray* node
 // I rely here on adNode* in each of adouble in varArray.m_arrValues 
 // created above
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimeVariableNodeArray* node = new adRuntimeVariableNodeArray();
-		varArray.node = adNodeArrayPtr(node);
-		varArray.setGatherInfo(true);
-		node->m_pVariable = const_cast<daeVariable*>(this);
-		
-		size_t size = varArray.m_arrValues.size();
-		if(size == 0)
-			daeDeclareAndThrowException(exInvalidCall); 
-		
-		node->m_ptrarrVariableNodes.resize(size);
-		for(size_t i = 0; i < size; i++)
-			node->m_ptrarrVariableNodes[i] = varArray.m_arrValues[i].node;
-		node->m_arrRanges.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrRanges[i] = ranges[i];
-	}
+//	if(m_pModel->m_pDataProxy->GetGatherInfo())
+//	{
+//		adRuntimeVariableNodeArray* node = new adRuntimeVariableNodeArray();
+//		varArray.node = adNodeArrayPtr(node);
+//		varArray.setGatherInfo(true);
+//		node->m_pVariable = const_cast<daeVariable*>(this);
+//		
+//		size_t size = varArray.m_arrValues.size();
+//		if(size == 0)
+//			daeDeclareAndThrowException(exInvalidCall); 
+//		
+//		node->m_ptrarrVariableNodes.resize(size);
+//		for(size_t i = 0; i < size; i++)
+//			node->m_ptrarrVariableNodes[i] = varArray.m_arrValues[i].node;
+//		node->m_arrRanges.resize(N);
+//		for(size_t i = 0; i < N; i++)
+//			node->m_arrRanges[i] = ranges[i];
+//	}
 	
 	return varArray;
 }
@@ -289,26 +289,27 @@ adouble_array daeVariable::Calculate_dt_array(const daeArrayRange* ranges, const
 	Fill_dt_array(varArray.m_arrValues, ranges, indexes, N, 0);
 	delete[] indexes;
 
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimeTimeDerivativeNodeArray* node = new adRuntimeTimeDerivativeNodeArray();
-		varArray.node = adNodeArrayPtr(node);
-		varArray.setGatherInfo(true);
-		node->m_pVariable = const_cast<daeVariable*>(this);
-		node->m_nDegree   = 1;
-		
-		size_t size = varArray.m_arrValues.size();
-		if(size == 0)
-			daeDeclareAndThrowException(exInvalidCall); 
-		
-		node->m_ptrarrTimeDerivativeNodes.resize(size);
-		for(size_t i = 0; i < size; i++)
-			node->m_ptrarrTimeDerivativeNodes[i] = varArray.m_arrValues[i].node;
-		node->m_arrRanges.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrRanges[i] = ranges[i];
-	}
-	return varArray;
+//	if(m_pModel->m_pDataProxy->GetGatherInfo())
+//	{
+//		adRuntimeTimeDerivativeNodeArray* node = new adRuntimeTimeDerivativeNodeArray();
+//		varArray.node = adNodeArrayPtr(node);
+//		varArray.setGatherInfo(true);
+//		node->m_pVariable = const_cast<daeVariable*>(this);
+//		node->m_nDegree   = 1;
+//		
+//		size_t size = varArray.m_arrValues.size();
+//		if(size == 0)
+//			daeDeclareAndThrowException(exInvalidCall); 
+//		
+//		node->m_ptrarrTimeDerivativeNodes.resize(size);
+//		for(size_t i = 0; i < size; i++)
+//			node->m_ptrarrTimeDerivativeNodes[i] = varArray.m_arrValues[i].node;
+//		node->m_arrRanges.resize(N);
+//		for(size_t i = 0; i < N; i++)
+//			node->m_arrRanges[i] = ranges[i];
+//	}
+
+    return varArray;
 }
 
 adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const
@@ -323,28 +324,29 @@ adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t&
 	Fill_partial_array(varArray.m_arrValues, nOrder, rDomain, ranges, indexes, N, 0);
 	delete[] indexes;
 
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimePartialDerivativeNodeArray* node = new adRuntimePartialDerivativeNodeArray();
-		varArray.node = adNodeArrayPtr(node);
-		varArray.setGatherInfo(true);
-		node->m_pVariable = const_cast<daeVariable*>(this);
-		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&rDomain);
-		node->m_pDomain = const_cast<daeDomain*>(pDomain);
-		node->m_nDegree = nOrder;
-		
-		size_t size = varArray.m_arrValues.size();
-		if(size == 0)
-			daeDeclareAndThrowException(exInvalidCall); 
-		
-		node->m_ptrarrPartialDerivativeNodes.resize(size);
-		for(size_t i = 0; i < size; i++)
-			node->m_ptrarrPartialDerivativeNodes[i] = varArray.m_arrValues[i].node;
-		node->m_arrRanges.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrRanges[i] = ranges[i];
-	}
-	return varArray;
+//	if(m_pModel->m_pDataProxy->GetGatherInfo())
+//	{
+//		adRuntimePartialDerivativeNodeArray* node = new adRuntimePartialDerivativeNodeArray();
+//		varArray.node = adNodeArrayPtr(node);
+//		varArray.setGatherInfo(true);
+//		node->m_pVariable = const_cast<daeVariable*>(this);
+//		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&rDomain);
+//		node->m_pDomain = const_cast<daeDomain*>(pDomain);
+//		node->m_nDegree = nOrder;
+//		
+//		size_t size = varArray.m_arrValues.size();
+//		if(size == 0)
+//			daeDeclareAndThrowException(exInvalidCall); 
+//		
+//		node->m_ptrarrPartialDerivativeNodes.resize(size);
+//		for(size_t i = 0; i < size; i++)
+//			node->m_ptrarrPartialDerivativeNodes[i] = varArray.m_arrValues[i].node;
+//		node->m_arrRanges.resize(N);
+//		for(size_t i = 0; i < N; i++)
+//			node->m_arrRanges[i] = ranges[i];
+//	}
+
+    return varArray;
 }
 
 adouble_array daeVariable::CreateSetupVariableArray(const daeArrayRange* ranges, const size_t N) const
@@ -940,24 +942,25 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 	daePartialDerivativeVariable pdv(nOrder, *this, *pDomain, nFixedDomain, N, indexes);
 	tmp = pDomain->partial(pdv);
 
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimePartialDerivativeNode* node = new adRuntimePartialDerivativeNode();
-		node->pardevnode = tmp.node;
-		node->m_nOverallIndex = nIndex;
-		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&D);
-		node->m_pDomain = const_cast<daeDomain*>(pDomain);
-		node->m_pVariable = const_cast<daeVariable*>(this);
-		node->m_nDegree = nOrder;
-		if(N > 0)
-		{
-			node->m_narrDomains.resize(N);
-			for(size_t i = 0; i < N; i++)
-				node->m_narrDomains[i] = indexes[i];
-		}
-		tmp.node = adNodePtr(node);
-		tmp.setGatherInfo(true);
-	}
+//	if(m_pModel->m_pDataProxy->GetGatherInfo())
+//	{
+//		adRuntimePartialDerivativeNode* node = new adRuntimePartialDerivativeNode();
+//		node->pardevnode = tmp.node;
+//		node->m_nOverallIndex = nIndex;
+//		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&D);
+//		node->m_pDomain = const_cast<daeDomain*>(pDomain);
+//		node->m_pVariable = const_cast<daeVariable*>(this);
+//		node->m_nDegree = nOrder;
+//		if(N > 0)
+//		{
+//			node->m_narrDomains.resize(N);
+//			for(size_t i = 0; i < N; i++)
+//				node->m_narrDomains[i] = indexes[i];
+//		}
+//		tmp.node = adNodePtr(node);
+//		tmp.setGatherInfo(true);
+//	}
+    
 	return tmp;
 }
 

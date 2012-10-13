@@ -127,6 +127,11 @@ void adouble_array::setGatherInfo(bool bGatherInfo)
 	m_bGatherInfo = bGatherInfo;
 }
 
+// In all theses functions +, -, *, / we do not need to actually calculate anything,
+// just to create tmp.node pointer (adNodeArrayPtr). All calculation is done in 
+// adUnaryNodeArray and adBinaryNodeArray::evaluate() function.
+// The calculation part is left just in case.
+
 const adouble_array adouble_array::operator -(void) const
 {
 	adouble_array tmp;
@@ -135,9 +140,11 @@ const adouble_array adouble_array::operator -(void) const
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSign, 
 		                                               CLONE_NODE_ARRAY(node) ));
-		return tmp;
+        return tmp;
 	}
 	
+    daeDeclareAndThrowException(exInvalidCall);
+    
 	size_t n = GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -154,8 +161,10 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -177,8 +186,10 @@ const adouble_array adouble_array::operator +(const real_t v) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -196,8 +207,10 @@ const adouble_array adouble_array::operator +(const adouble& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -216,8 +229,10 @@ const adouble_array operator +(const adouble& a, const adouble_array& arr)
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 		                                                CLONE_NODE_ARRAY(arr.node)
 		                                                ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -235,8 +250,10 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(ePlus, 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -254,8 +271,10 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -277,8 +296,10 @@ const adouble_array adouble_array::operator -(const real_t v) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -296,8 +317,10 @@ const adouble_array adouble_array::operator -(const adouble& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -316,8 +339,10 @@ const adouble_array operator -(const adouble& a, const adouble_array& arr)
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 		                                                CLONE_NODE_ARRAY(arr.node)
 		                                                ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -335,8 +360,10 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMinus, 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -354,8 +381,10 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -377,8 +406,10 @@ const adouble_array adouble_array::operator *(const real_t v) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -396,8 +427,10 @@ const adouble_array adouble_array::operator *(const adouble& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -416,8 +449,10 @@ const adouble_array operator *(const adouble& a, const adouble_array& arr)
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 		                                                CLONE_NODE_ARRAY(arr.node)
 		                                                ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -435,8 +470,10 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eMulti, 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -454,8 +491,10 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -477,8 +516,10 @@ const adouble_array adouble_array::operator /(const real_t v) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -496,8 +537,10 @@ const adouble_array adouble_array::operator /(const adouble& a) const
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 		                                                CLONE_NODE_ARRAY(node), 
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -516,8 +559,10 @@ const adouble_array operator /(const adouble& a, const adouble_array& arr)
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ),
 		                                                CLONE_NODE_ARRAY(arr.node)
 		                                                ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -535,8 +580,10 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 		tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eDivide, 
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(a.node))),
 		                                                CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -570,8 +617,8 @@ const adouble daeModel::d(const adouble& a, daeDomain& domain) const
 // Called only during declaring of equations !!!
 const adouble daeModel::average(const adouble_array& a) const
 {
-	adouble tmp;
-	
+    adouble tmp;
+
 	tmp.setGatherInfo(true);
 	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eAverage, 
 	                                                    const_cast<daeModel*>(this),
@@ -579,22 +626,25 @@ const adouble daeModel::average(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__average__(const adouble_array& a) const
 {
 	adouble tmp;
 	
-	if(a.getGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eAverage,
-		                                                      const_cast<daeModel*>(this),
-		                                                      CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
-	}
-	
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eAverage,
+//		                                                      const_cast<daeModel*>(this),
+//		                                                      CLONE_NODE_ARRAY(a.node) ));
+//		return tmp;
+//	}
+
 	tmp = __sum__(a) / a.m_arrValues.size();
 	return tmp;
 }
+*/
 
 const adouble daeModel::sum(const adouble_array& a) const
 {
@@ -606,18 +656,20 @@ const adouble daeModel::sum(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__sum__(const adouble_array& a) const
 {
 	adouble tmp;
 	
-	if(a.getGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eSum,
-		                                                      const_cast<daeModel*>(this),
-		                                                      CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
-	}
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eSum,
+//		                                                      const_cast<daeModel*>(this),
+//		                                                      CLONE_NODE_ARRAY(a.node) ));
+//		return tmp;
+//	}
 	
 	tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
@@ -625,6 +677,7 @@ const adouble daeModel::__sum__(const adouble_array& a) const
 	
 	return tmp;
 }
+*/
 
 const adouble daeModel::product(const adouble_array& a) const
 {
@@ -637,24 +690,27 @@ const adouble daeModel::product(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__product__(const adouble_array& a) const
 {
 	adouble tmp;
 	
-	if(a.getGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eProduct,
-		                                                      const_cast<daeModel*>(this),
-		                                                      CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
-	}
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eProduct,
+//		                                                      const_cast<daeModel*>(this),
+//		                                                      CLONE_NODE_ARRAY(a.node) ));
+//		return tmp;
+//	}
 	
 	tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = tmp * a[i];
 	return tmp;
 }
+*/
 
 const adouble daeModel::integral(const adouble_array& a) const
 {
@@ -701,28 +757,30 @@ const adouble daeModel::integral(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain, const vector<const real_t*>& pdarrPoints) const
 {
 	adouble tmp;
 	size_t i;
 	real_t d1, d2;
-	
-	if(a.getGatherInfo())
-	{
-		if(!pDomain)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(pdarrPoints.empty())
-			daeDeclareAndThrowException(exInvalidCall);
-		
-		tmp.setGatherInfo(true);
-		adRuntimeIntegralNode* node = new adRuntimeIntegralNode(eSingleIntegral,
-		                                                        const_cast<daeModel*>(this),
-		                                                        CLONE_NODE_ARRAY(a.node),
-		                                                        pDomain,
-		                                                        pdarrPoints);
-		tmp.node = adNodePtr(node);
-		return tmp;
-	}
+
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		if(!pDomain)
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		if(pdarrPoints.empty())
+//			daeDeclareAndThrowException(exInvalidCall);
+//
+//		tmp.setGatherInfo(true);
+//		adRuntimeIntegralNode* node = new adRuntimeIntegralNode(eSingleIntegral,
+//		                                                        const_cast<daeModel*>(this),
+//		                                                        CLONE_NODE_ARRAY(a.node),
+//		                                                        pDomain,
+//		                                                        pdarrPoints);
+//		tmp.node = adNodePtr(node);
+//		return tmp;
+//	}
 	
 	for(i = 0; i < pdarrPoints.size() - 1; i++)
 	{
@@ -739,6 +797,7 @@ const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain,
 	
 	return tmp;
 }
+*/
 
 const adouble daeModel::min(const adouble_array& a) const
 {
@@ -751,29 +810,26 @@ const adouble daeModel::min(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__min__(const adouble_array& a) const
 {
-	adouble tmp;
-	if(a.getGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMinInArray,
-		                                                      const_cast<daeModel*>(this),
-		                                                      CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
-	}
+    adouble tmp;
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMinInArray,
+//		                                                      const_cast<daeModel*>(this),
+//		                                                      CLONE_NODE_ARRAY(a.node) ));
+//		return tmp;
+//	}
 	
-	//	tmp = a[0];
-	//	for(size_t i = 1; i < a.GetSize(); i++)
-	//		if(a[i].getValue() < tmp.getValue())
-	//			tmp = a[i];
-	//	return tmp;
-	
-	tmp = a[0];
+    tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__min__(tmp, a[i]);		
 	return tmp;
 }
+*/
 
 const adouble daeModel::max(const adouble_array& a) const
 {
@@ -786,30 +842,27 @@ const adouble daeModel::max(const adouble_array& a) const
 	return tmp;
 }
 
+/*
 const adouble daeModel::__max__(const adouble_array& a) const
 {
 	adouble tmp;
 	
-	if(a.getGatherInfo())
-	{
-		tmp.setGatherInfo(true);
-		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMaxInArray,
-		                                                      const_cast<daeModel*>(this),
-		                                                      CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
-	}
-	
-	//	tmp = a[0];
-	//	for(size_t i = 1; i < a.GetSize(); i++)
-	//		if(a[i].getValue() > tmp.getValue())
-	//			tmp = a[i];
-	//	return tmp;
+// Commented
+//	if(a.getGatherInfo())
+//	{
+//		tmp.setGatherInfo(true);
+//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMaxInArray,
+//		                                                      const_cast<daeModel*>(this),
+//		                                                      CLONE_NODE_ARRAY(a.node) ));
+//		return tmp;
+//	}
 	
 	tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__max__(tmp, a[i]);
 	return tmp;
 }
+*/
 
 const adouble_array exp(const adouble_array& a)
 {
@@ -819,8 +872,10 @@ const adouble_array exp(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eExp, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -837,8 +892,10 @@ const adouble_array sqrt(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSqrt, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -855,8 +912,10 @@ const adouble_array log(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eLn, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -873,8 +932,10 @@ const adouble_array log10(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eLog, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -891,8 +952,10 @@ const adouble_array abs(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eAbs, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -909,8 +972,10 @@ const adouble_array floor(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eFloor, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -927,8 +992,10 @@ const adouble_array ceil(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eCeil, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -945,8 +1012,10 @@ const adouble_array sin(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSin, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -963,8 +1032,10 @@ const adouble_array cos(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eCos, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -981,8 +1052,10 @@ const adouble_array tan(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eTan, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -999,8 +1072,10 @@ const adouble_array asin(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcSin, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1017,8 +1092,10 @@ const adouble_array acos(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcCos, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1035,8 +1112,10 @@ const adouble_array atan(const adouble_array& a)
 		tmp.setGatherInfo(true);
 		tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcTan, 
 		                                               CLONE_NODE_ARRAY(a.node) ));
-		return tmp;
+        return tmp;
 	}
+    
+    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
