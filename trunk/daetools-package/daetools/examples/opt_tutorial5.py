@@ -26,7 +26,7 @@ implementing Levenberg-Marquardt algorithm is used to estimate the parameters.
 import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
-from numpy import *
+import numpy
 import matplotlib
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
@@ -46,7 +46,7 @@ class modTutorial(daeModel):
 
     def DeclareEquations(self):
         eq = self.CreateEquation("y")
-        eq.Residual = self.y() - self.A() * Sin(2 * pi * self.k() * self.x() + self.theta())
+        eq.Residual = self.y() - self.A() * sin(2 * numpy.pi * self.k() * self.x() + self.theta())
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -82,8 +82,8 @@ def Function(p, simulation, xin, ymeas, calc_values):
     if(len(xin) != len(ymeas)):
         raise RuntimeError('The number of input data and the number of measurements must be equal') 
     
-    values = zeros((Nexp))
-    derivs = zeros((Nexp, Nparams))
+    values = numpy.zeros((Nexp))
+    derivs = numpy.zeros((Nexp, Nparams))
     
     for e in range(0, Nexp):
         # Set initial conditions, initial guesses, initially active states etc
@@ -135,7 +135,7 @@ def Derivatives(p, simulation, xin, ymeas):
 
 # Function to calculate y  values for the estimated parameters
 def peval(x, p):
-    return p[0]*sin(2*pi*p[1]*x+p[2])
+    return p[0] * numpy.sin(2 * numpy.pi * p[1] * x + p[2])
 
 def run():
     log          = daePythonStdOutLog()
@@ -168,13 +168,13 @@ def run():
     p0 = [8, 43.47826087, 1.047196667]
 
     # Input data for the model
-    x = arange(0, 0.06, 0.002)
+    x = numpy.arange(0, 0.06, 0.002)
 
     # The values of y for given x and exact values of A, k, and theta
-    y_true = A * sin(2 * pi * k * x + theta)
+    y_true = A * numpy.sin(2 * numpy.pi * k * x + theta)
 
     # Measured values for y
-    y_meas = zeros_like(x)
+    y_meas = numpy.zeros_like(x)
     y_meas = [ 5.95674236,  10.03610565,  10.14475642,   9.16722521,   8.52093929,
                4.78842863,   2.87467755,  -3.93427325,  -6.13071010,  -9.26168083,
               -9.25272475, -10.42850414,  -4.71175587,  -3.60403013,  -0.11039750,
@@ -200,7 +200,7 @@ def run():
     print 'Number of function evaluations =', infodict['nfev']
     chisq = (infodict['fvec']**2).sum()
     dof = len(x) - len(p0)
-    rmse = sqrt(chisq / dof)
+    rmse = numpy.sqrt(chisq / dof)
     print 'Root mean square deviation =', rmse
 
     A, k, theta = p

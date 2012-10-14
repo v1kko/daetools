@@ -18,8 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 daeMinpackLeastSq module test.
 """
 
-import sys
-from numpy import *
+import sys, numpy
 from daetools.pyDAE import *
 from daetools.solvers.daeMinpackLeastSq import *
 from time import localtime, strftime
@@ -45,7 +44,7 @@ class modTutorial(daeModel):
 
     def DeclareEquations(self):
         eq = self.CreateEquation("y")
-        eq.Residual = self.y() - self.A() * Sin(2 * pi * self.k() * self.x() + self.theta())
+        eq.Residual = self.y() - self.A() * sin(2 * numpy.pi * self.k() * self.x() + self.theta())
 
 class simTutorial(daeSimulation):
     def __init__(self):

@@ -118,13 +118,18 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 //	strName = "m_ptrarrDomains";
 //	pTag->SaveObjectRefArray(strName, m_ptrarrDomains);
 
-	daeSaveAsMathMLContext c(NULL); //m_pModel);
+	daeNodeSaveAsContext c(NULL); //m_pModel);
 
 	strName = "EquationEvaluationNode";
 	adNode::SaveNodeAsMathML(pTag, string("MathML"), m_EquationEvaluationNode.get(), &c, true);
 	
 	strName = "IsLinear";
 	pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
+}
+
+adNode* daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr(void) const
+{
+	return m_EquationEvaluationNode.get();
 }
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
@@ -871,7 +876,7 @@ void daeEquation::SaveRuntime(io::xmlTag_t* pTag) const
 void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;
-	daeSaveAsMathMLContext c(m_pModel, m_ptrarrDistributedEquationDomainInfos);
+	daeNodeSaveAsContext c(m_pModel); //, m_ptrarrDistributedEquationDomainInfos);
 	adNode* node = m_pResidualNode.get();
 
 	io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
@@ -1624,6 +1629,7 @@ void daeEquation::SetResidual(adouble res)
 adouble daeEquation::GetResidual(void) const
 {
 	adouble ad;
+    ad.setGatherInfo(true);
 	ad.node = m_pResidualNode;
 	return ad;
 }

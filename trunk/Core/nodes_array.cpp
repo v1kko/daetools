@@ -136,7 +136,7 @@ adNodeArray* adNodeArray::OpenNode(io::xmlTag_t* pTag, const string& strObjectNa
 
 void adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag, 
 													       const std::vector< adNodePtr >& arrNodes, 
-													       const daeSaveAsMathMLContext* c)
+													       const daeNodeSaveAsContext* c)
 {
 	size_t i, n;
 	string strName, strValue;
@@ -160,7 +160,7 @@ void adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag,
 }
  
 string adNodeArray::SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes, 
-										        const daeSaveAsMathMLContext* c)
+										        const daeNodeSaveAsContext* c)
 {
 	size_t i, n;
 	string strResult;
@@ -176,7 +176,7 @@ string adNodeArray::SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& 
 }
 
 //string adNodeArray::SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes, 
-//											        const daeSaveAsMathMLContext* c)
+//											        const daeNodeSaveAsContext* c)
 //{
 //	size_t i, n;
 //	string strResult;
@@ -299,12 +299,12 @@ void adConstantNodeArray::Export(std::string& strContent, daeeModelLanguage eLan
 	strContent += units::Export(eLanguage, c, m_quantity);
 }
 
-//string adConstantNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adConstantNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //	return textCreator::Constant(m_dValue);
 //}
 
-string adConstantNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adConstantNodeArray::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	return m_quantity.toLatex();
 }
@@ -321,11 +321,11 @@ void adConstantNodeArray::Save(io::xmlTag_t* pTag) const
 	units::Save(pTag, strName, m_quantity);
 }
 
-void adConstantNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adConstantNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adConstantNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adConstantNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 	units::SaveAsPresentationMathML(pTag, m_quantity);
 }
@@ -417,21 +417,21 @@ adNodeArray* adVectorNodeArray::Clone(void) const
 void adVectorNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {   
 	if(eLanguage == eCDAE)
-		strContent += "Vector({" + toString(m_qarrValues) + "})";
+		strContent += "Array({" + toString(m_qarrValues) + "})";
 	else if(eLanguage == ePYDAE)
-		strContent += "Vector([" + toString(m_qarrValues) + "])";
+		strContent += "Array([" + toString(m_qarrValues) + "])";
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
 
-//string adVectorNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adVectorNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //  return textCreator::Constant(m_dValue);
 //}
 
-string adVectorNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adVectorNodeArray::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
-    return "Vector \\left( \\left[" + toString(m_qarrValues) + "\\right] )";
+    return "Array \\left( \\left[" + toString(m_qarrValues) + "\\right] )";
 }
 
 void adVectorNodeArray::Open(io::xmlTag_t* pTag)
@@ -446,11 +446,11 @@ void adVectorNodeArray::Save(io::xmlTag_t* pTag) const
 	units::Save(pTag, strName, m_qarrValues);
 }
 
-void adVectorNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adVectorNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adVectorNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adVectorNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 	units::SaveAsPresentationMathML(pTag, m_qarrValues);
 }
@@ -524,12 +524,12 @@ adNodeArray* adRuntimeParameterNodeArray::Clone(void) const
 	return new adRuntimeParameterNodeArray(*this);
 }
 
-//string adRuntimeParameterNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeParameterNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	return adNodeArray::SaveRuntimeNodeArrayAsPlainText(m_ptrarrParameterNodes, c);
 //}
 
-string adRuntimeParameterNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeParameterNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return adNodeArray::SaveRuntimeNodeArrayAsLatex(m_ptrarrParameterNodes, c);
 }
@@ -550,11 +550,11 @@ void adRuntimeParameterNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrParameterNodes);
 }
 
-void adRuntimeParameterNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeParameterNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimeParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrParameterNodes, c);
 }
@@ -627,12 +627,12 @@ adNodeArray* adRuntimeVariableNodeArray::Clone(void) const
 	return new adRuntimeVariableNodeArray(*this);
 }
 
-//string adRuntimeVariableNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeVariableNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	return adNodeArray::SaveRuntimeNodeArrayAsPlainText(m_ptrarrVariableNodes, c);
 //}
 
-string adRuntimeVariableNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeVariableNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return adNodeArray::SaveRuntimeNodeArrayAsLatex(m_ptrarrVariableNodes, c);
 }
@@ -653,11 +653,11 @@ void adRuntimeVariableNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrVariableNodes);
 }
 
-void adRuntimeVariableNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeVariableNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimeVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrVariableNodes, c);
 }
@@ -733,12 +733,12 @@ adNodeArray* adRuntimeTimeDerivativeNodeArray::Clone(void) const
 	return new adRuntimeTimeDerivativeNodeArray(*this);
 }
 
-//string adRuntimeTimeDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeTimeDerivativeNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	return adNodeArray::SaveRuntimeNodeArrayAsPlainText(m_ptrarrTimeDerivativeNodes, c);
 //}
 
-string adRuntimeTimeDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeTimeDerivativeNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return adNodeArray::SaveRuntimeNodeArrayAsLatex(m_ptrarrTimeDerivativeNodes, c);
 }
@@ -762,11 +762,11 @@ void adRuntimeTimeDerivativeNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrTimeDerivativeNodes);
 }
 
-void adRuntimeTimeDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeTimeDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimeTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrTimeDerivativeNodes, c);
 }
@@ -839,12 +839,12 @@ adNodeArray* adRuntimePartialDerivativeNodeArray::Clone(void) const
 	return new adRuntimePartialDerivativeNodeArray(*this);
 }
 
-//string adRuntimePartialDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimePartialDerivativeNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	return adNodeArray::SaveRuntimeNodeArrayAsPlainText(m_ptrarrPartialDerivativeNodes, c);
 //}
 
-string adRuntimePartialDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimePartialDerivativeNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return adNodeArray::SaveRuntimeNodeArrayAsLatex(m_ptrarrPartialDerivativeNodes, c);
 }
@@ -871,11 +871,11 @@ void adRuntimePartialDerivativeNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrPartialDerivativeNodes);
 }
 
-void adRuntimePartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimePartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimePartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimePartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	adNodeArray::SaveRuntimeNodeArrayAsPresentationMathML(pTag, m_ptrarrPartialDerivativeNodes, c);
 }
@@ -1018,7 +1018,7 @@ adNode* adRuntimeSpecialFunctionNode::Clone(void) const
 	return new adRuntimeSpecialFunctionNode(*this);
 }
 
-//string adRuntimeSpecialFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeSpecialFunctionNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //	switch(eFunction)
@@ -1054,7 +1054,7 @@ adNode* adRuntimeSpecialFunctionNode::Clone(void) const
 //	return strResult;
 //}
 
-string adRuntimeSpecialFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeSpecialFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 
@@ -1107,11 +1107,11 @@ void adRuntimeSpecialFunctionNode::Save(io::xmlTag_t* pTag) const
 	daeDeclareAndThrowException(exNotImplemented)
 }
 
-void adRuntimeSpecialFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeSpecialFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimeSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrow, *temp;
@@ -1308,7 +1308,7 @@ adNode* adRuntimeIntegralNode::Clone(void) const
 	return new adRuntimeIntegralNode(*this);
 }
 
-//string adRuntimeIntegralNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeIntegralNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //
@@ -1328,7 +1328,7 @@ adNode* adRuntimeIntegralNode::Clone(void) const
 //	return strResult;
 //}
 
-string adRuntimeIntegralNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeIntegralNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
@@ -1364,11 +1364,11 @@ void adRuntimeIntegralNode::Save(io::xmlTag_t* pTag) const
 	daeDeclareAndThrowException(exNotImplemented)
 }
 
-void adRuntimeIntegralNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeIntegralNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimeIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrow, *mrow2;
@@ -1793,7 +1793,7 @@ void adUnaryNodeArray::Export(std::string& strContent, daeeModelLanguage eLangua
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 }
-//string adUnaryNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adUnaryNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //	switch(eFunction)
@@ -1874,7 +1874,7 @@ void adUnaryNodeArray::Export(std::string& strContent, daeeModelLanguage eLangua
 //	return strResult;
 //}
 
-string adUnaryNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adUnaryNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 
@@ -1992,11 +1992,11 @@ void adUnaryNodeArray::Save(io::xmlTag_t* pTag) const
 	adNodeArray::SaveNode(pTag, strName, node.get());
 }
 
-void adUnaryNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adUnaryNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adUnaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adUnaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrowout, *msup, *mrow, *msqrt;
@@ -2522,7 +2522,7 @@ void adBinaryNodeArray::Export(std::string& strContent, daeeModelLanguage eLangu
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 }
-//string adBinaryNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adBinaryNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult, strLeft, strRight;
 //
@@ -2597,7 +2597,7 @@ void adBinaryNodeArray::Export(std::string& strContent, daeeModelLanguage eLangu
 //	return strResult;
 //}
 
-string adBinaryNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adBinaryNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult, strLeft, strRight;
 
@@ -2693,11 +2693,11 @@ void adBinaryNodeArray::Save(io::xmlTag_t* pTag) const
 	adNodeArray::SaveNode(pTag, strName, right.get());
 }
 
-void adBinaryNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adBinaryNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adBinaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adBinaryNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	bool bDoEncloseLeft, bDoEncloseRight;
 	string strName, strValue, strLeft, strRight;
@@ -2942,20 +2942,14 @@ bool adBinaryNodeArray::IsFunctionOfVariables(void) const
 	adSetupSpecialFunctionNode
 **********************************************************************************************/
 adSetupSpecialFunctionNode::adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-													   daeModel* pModel,
 													   adNodeArrayPtr n)
 {
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	m_pModel  = pModel;
 	node      = n;
 	eFunction = eFun;
 }
 
 adSetupSpecialFunctionNode::adSetupSpecialFunctionNode()
 {
-	m_pModel  = NULL;
 	eFunction = eSUFUnknown;
 }
 
@@ -2965,11 +2959,6 @@ adSetupSpecialFunctionNode::~adSetupSpecialFunctionNode()
 
 adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-#ifdef DAE_DEBUG
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-#endif
-
     adouble tmp;
     adouble_array adarr;
 
@@ -3050,7 +3039,7 @@ const quantity adSetupSpecialFunctionNode::GetQuantity(void) const
 adNode* adSetupSpecialFunctionNode::Clone(void) const
 {
 	adNodeArrayPtr n = adNodeArrayPtr( (node ? node->Clone() : NULL) );
-	return new adSetupSpecialFunctionNode(eFunction, m_pModel, n);
+	return new adSetupSpecialFunctionNode(eFunction, n);
 }
 
 void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
@@ -3061,7 +3050,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		if(eLanguage == eCDAE)
 			strContent += "sum(";
 		else if(eLanguage == ePYDAE)
-			strContent += "self.sum(";
+			strContent += "sum(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3071,7 +3060,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		if(eLanguage == eCDAE)
 			strContent += "product(";
 		else if(eLanguage == ePYDAE)
-			strContent += "self.product(";
+			strContent += "product(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3081,7 +3070,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		if(eLanguage == eCDAE)
 			strContent += "min(";
 		else if(eLanguage == ePYDAE)
-			strContent += "self.min(";
+			strContent += "min(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3091,7 +3080,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		if(eLanguage == eCDAE)
 			strContent += "max(";
 		else if(eLanguage == ePYDAE)
-			strContent += "self.max(";
+			strContent += "max(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3101,7 +3090,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		if(eLanguage == eCDAE)
 			strContent += "average(";
 		else if(eLanguage == ePYDAE)
-			strContent += "self.average(";
+			strContent += "average(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3111,7 +3100,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 }
-//string adSetupSpecialFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupSpecialFunctionNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //	switch(eFunction)
@@ -3147,7 +3136,7 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 //	return strResult;
 //}
 
-string adSetupSpecialFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupSpecialFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 
@@ -3206,11 +3195,11 @@ void adSetupSpecialFunctionNode::Save(io::xmlTag_t* pTag) const
 	adNodeArray::SaveNode(pTag, strName, node.get());
 }
 
-void adSetupSpecialFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupSpecialFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrow, *mrow2, *temp;
@@ -3318,13 +3307,8 @@ bool adSetupSpecialFunctionNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adSetupExpressionDerivativeNode
 **********************************************************************************************/
-adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(daeModel* pModel,
-													             adNodePtr n)
+adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(adNodePtr n)
 {
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	m_pModel  = pModel;
 	node      = n;
 	m_nDegree = 1;
 }
@@ -3332,7 +3316,6 @@ adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(daeModel* pMode
 adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode()
 {
 	m_nDegree = 0;
-	m_pModel  = NULL;
 }
 
 adSetupExpressionDerivativeNode::~adSetupExpressionDerivativeNode()
@@ -3461,14 +3444,14 @@ void adSetupExpressionDerivativeNode::Export(std::string& strContent, daeeModelL
 
 	strContent += fmtFile.str();
 }
-//string adSetupExpressionDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupExpressionDerivativeNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	string strExpression = node->SaveAsPlainText(c);
 //	return textCreator::TimeDerivative(m_nDegree, strExpression, strarrIndexes, true);
 //}
 
-string adSetupExpressionDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupExpressionDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	string strExpression = node->SaveAsLatex(c);
@@ -3491,11 +3474,11 @@ void adSetupExpressionDerivativeNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, node.get());
 }
 
-void adSetupExpressionDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupExpressionDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupExpressionDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
@@ -3584,11 +3567,9 @@ void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t
 /*********************************************************************************************
 	adSetupExpressionPartialDerivativeNode
 **********************************************************************************************/
-adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeModel*  pModel,
-																			   daeDomain* pDomain,
+adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeDomain* pDomain,
 													                           adNodePtr n)
 {
-	m_pModel  = pModel;
 	m_pDomain = pDomain;
 	node      = n;
 	m_nDegree = 1;
@@ -3597,7 +3578,6 @@ adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(d
 adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode()
 {
 	m_nDegree = 0;
-	m_pModel  = NULL;
 	m_pDomain = NULL;
 }
 
@@ -3763,7 +3743,7 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
 
 	strContent += fmtFile.str();
 }
-//string adSetupExpressionPartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupExpressionPartialDerivativeNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	string strExpression = node->SaveAsPlainText(c);
@@ -3771,7 +3751,7 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
 //	return textCreator::PartialDerivative(m_nDegree, strExpression, strDomainName, strarrIndexes, true);
 //}
 
-string adSetupExpressionPartialDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupExpressionPartialDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	string strExpression = node->SaveAsLatex(c);
@@ -3798,11 +3778,11 @@ void adSetupExpressionPartialDerivativeNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, node.get());
 }
 
-void adSetupExpressionPartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupExpressionPartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
@@ -3894,17 +3874,13 @@ void adSetupExpressionPartialDerivativeNode::AddVariableIndexToArray(map<size_t,
 	adSetupIntegralNode
 **********************************************************************************************/
 adSetupIntegralNode::adSetupIntegralNode(daeeIntegralFunctions eFun,
-										 daeModel* pModel,
 										 adNodeArrayPtr n,
 										 daeDomain* pDomain,
 										 const daeArrayRange& arrayRange)
 {
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	m_pModel     = pModel;
 	m_pDomain    = pDomain;
 	node         = n;
 	eFunction    = eFun;
@@ -3913,7 +3889,6 @@ adSetupIntegralNode::adSetupIntegralNode(daeeIntegralFunctions eFun,
 
 adSetupIntegralNode::adSetupIntegralNode()
 {
-	m_pModel  = NULL;
 	m_pDomain = NULL;
 	eFunction = eIFUnknown;
 }
@@ -3924,8 +3899,6 @@ adSetupIntegralNode::~adSetupIntegralNode()
 
 adouble adSetupIntegralNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
 	if(!m_pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!node)
@@ -4015,7 +3988,7 @@ void adSetupIntegralNode::Export(std::string& strContent, daeeModelLanguage eLan
 
 	strContent += fmtFile.str();
 }
-//string adSetupIntegralNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupIntegralNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //
@@ -4035,7 +4008,7 @@ void adSetupIntegralNode::Export(std::string& strContent, daeeModelLanguage eLan
 //	return strResult;
 //}
 
-string adSetupIntegralNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupIntegralNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 	string strDomain = daeGetRelativeName(c->m_pModel, m_pDomain);
@@ -4083,11 +4056,11 @@ void adSetupIntegralNode::Save(io::xmlTag_t* pTag) const
 	adNodeArray::SaveNode(pTag, strName, node.get());
 }
 
-void adSetupIntegralNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupIntegralNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adSetupIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupIntegralNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrow, *mrow2;
@@ -4203,14 +4176,14 @@ void adSingleNodeArray::Export(std::string& strContent, daeeModelLanguage eLangu
 {
 	node->Export(strContent, eLanguage, c);
 }
-//string adSingleNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSingleNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	if(!node)
 //		daeDeclareAndThrowException(exInvalidPointer);
 //	return node->SaveAsPlainText(c);
 //}
 
-string adSingleNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSingleNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -4231,11 +4204,11 @@ void adSingleNodeArray::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, node.get());
 }
 
-void adSingleNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adSingleNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adSingleNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSingleNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);

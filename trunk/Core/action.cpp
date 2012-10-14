@@ -443,7 +443,7 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 void daeAction::SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;
-	daeSaveAsMathMLContext c(m_pModel);
+	daeNodeSaveAsContext c(m_pModel);
 
 	io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
 	if(!pChildTag)

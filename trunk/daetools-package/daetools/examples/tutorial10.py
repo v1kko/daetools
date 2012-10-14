@@ -60,38 +60,38 @@ class modTutorial(daeModel):
         self.area = daeVariable("area", area_t, self, "Area of the semi-circle")
 
     def DeclareEquations(self):
-        # All equations are written so that they use only functions d() and dt() from daeModel
+        # All equations are written so that they use only functions d() and dt()
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.dt( self.ro() * self.cp() * self.T(x, y) ) - \
-                      self.k() * ( self.d ( self.d ( self.T(x, y), self.x ), self.x ) + \
-                                   self.d ( self.d ( self.T(x, y), self.y ), self.y ) )
+        eq.Residual = dt( self.ro() * self.cp() * self.T(x, y) ) - \
+                      self.k() * ( d ( d ( self.T(x, y), self.x ), self.x ) + \
+                                   d ( d ( self.T(x, y), self.y ), self.y ) )
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.d( self.k() * self.T(x, y), self.y) - self.Qb()
+        eq.Residual = - d( self.k() * self.T(x, y), self.y) - self.Qb()
 
         eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.d ( self.k() * self.T(x, y), self.y) - self.Qt()
+        eq.Residual = - d ( self.k() * self.T(x, y), self.y) - self.Qt()
 
         eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.d( self.T(x, y), self.x )
+        eq.Residual = d( self.T(x, y), self.x )
 
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.d( self.T(x, y), self.x )
+        eq.Residual = d( self.T(x, y), self.x )
 
         # Here we have a function that calculates integral of heat fluxes at y = 0: integral(-k * (dT/dy) / dx)|y=0
         # The result should be 1E6 W/m2, which is equal to the input flux
         eq = self.CreateEquation("Q_int", "Integral of the heat flux per x domain; just an example of the integral function")
-        eq.Residual = self.Q_int() - self.integral( -self.k() * self.T.d_array(self.y, '*', 0) / self.dx() )
+        eq.Residual = self.Q_int() - integral( -self.k() * self.T.d_array(self.y, '*', 0) / self.dx() )
 
         # To check the integral function we can create a semi-circle around domain c with 100 intervals and bounds: -1 to +1
         # The variable semicircle will be a cirle with the radius 1 and coordinates: (0,0)
@@ -99,10 +99,10 @@ class modTutorial(daeModel):
         # which is not exactly equal to r*r*pi/2 = 1.570795 because of the discretization
         eq = self.CreateEquation("Semicircle", "Semi-circle around domain c")
         c = eq.DistributeOnDomain(self.c, eClosedClosed)
-        eq.Residual = self.semicircle(c) - Sqrt( Constant(1.0 * m**2) - c()**2 )
+        eq.Residual = self.semicircle(c) - sqrt( Constant(1.0 * m**2) - c()**2 )
 
         eq = self.CreateEquation("Area", "Area of the semi-circle")
-        eq.Residual = self.area() - self.integral( self.semicircle.array('*') )
+        eq.Residual = self.area() - integral( self.semicircle.array('*') )
 
 class simTutorial(daeSimulation):
     def __init__(self):

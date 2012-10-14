@@ -34,7 +34,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
-from pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W, kW
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

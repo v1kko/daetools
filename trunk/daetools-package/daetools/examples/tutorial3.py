@@ -49,7 +49,7 @@ class modTutorial(daeModel):
         self.Qsum = daeVariable("Q_sum", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
         self.Qmul = daeVariable("Q_mul", heat_flux_t,   self, "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
 
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 
@@ -112,7 +112,8 @@ class modTutorial(daeModel):
         # For the list of all available functions please have a look on pyDAE API Reference, module Core.
 
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
-        eq.Residual = self.Tave() - self.average( self.T.array( '*', '*' ) )
+        eq.Residual = self.Tave() - average( self.T.array( '*', '*' ) )
+
         # An equivalent to the equation above is:
         #   a) xr = daeIndexRange(self.x)
         #      yr = daeIndexRange(self.y)
@@ -126,7 +127,7 @@ class modTutorial(daeModel):
         #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y 
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
-        eq.Residual = self.Qsum() + self.k() * self.sum( self.T.d_array(self.y, '*', 0) )
+        eq.Residual = self.Qsum() + self.k() * sum( self.T.d_array(self.y, '*', 0) )
         
         # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Vector)
         #  - The function Constant() creates a constant quantity that contains a value and units 
@@ -143,7 +144,7 @@ class modTutorial(daeModel):
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
         values = [2 * K for i in xrange(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qmul() + self.sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
+        eq.Residual = self.Qmul() + sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -215,7 +216,7 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
+    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

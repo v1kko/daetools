@@ -79,7 +79,7 @@ class modTutorial(daeModel):
         #     Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.
         #     In this example we use Greek character 'τ' to name the variable 'tau'.
         daeModel.__init__(self, Name, Parent, Description)
-        self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process, s")
+        self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process")
 
     def DeclareEquations(self):
         # 3.2 Declare equations and state transition networks

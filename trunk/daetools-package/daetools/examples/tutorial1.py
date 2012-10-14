@@ -130,9 +130,7 @@ class modTutorial(daeModel):
         self.T = daeVariable("T", temperature_t, self)
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
-        self.T.Description = "Temperature of the plate, K"
-        
-        self.test = daeVariable("test", temperature_t, self)
+        self.T.Description = "Temperature of the plate"
 
     def DeclareEquations(self):
         # To distribute an equation on a domain the function DistributeOnDomain can be again used.
@@ -182,11 +180,6 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
-        
-        xr = daeIndexRange(self.x)
-        eq = self.CreateEquation("test")
-        eq.Residual = self.test() - self.average(self.T.array(xr, 0))
-
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -262,7 +255,7 @@ def consoleRun():
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
+    simulation.TimeHorizon = 200
 
     #simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
     #print simulation.ReportingTimes
@@ -288,6 +281,11 @@ def consoleRun():
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
+
+    from daeModelicaExport import daeModelicaExport
+    ex = daeModelicaExport(simulation.m)
+    print '\n'
+    ex.export()
 
     # Run
     simulation.Run()

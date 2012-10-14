@@ -50,7 +50,7 @@ class modTutorial(daeModel):
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 

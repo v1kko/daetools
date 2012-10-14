@@ -53,7 +53,7 @@ class modTutorial(daeModel):
         self.T = daeVariable("T", temperature_t, self)
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
-        self.T.Description = "Temperature of the plate, K"
+        self.T.Description = "Temperature of the plate"
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")

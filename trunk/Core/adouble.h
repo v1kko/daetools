@@ -62,6 +62,7 @@ using units::quantity;
 class condNode;
 class adNode;
 class adNodeArray;
+class daeDomain;
 class daeModel;
 class daeExecutionContext;
 
@@ -147,6 +148,9 @@ public:
     const adouble operator /(const adouble& a) const;
     friend DAE_CORE_API const adouble operator /(const real_t v, const adouble& a);
     friend DAE_CORE_API const adouble operator /(const adouble& a, const real_t v);
+    
+    friend DAE_CORE_API const adouble dt(const adouble& a);
+    friend DAE_CORE_API const adouble d(const adouble& a, daeDomain& domain);
 
     friend DAE_CORE_API const adouble exp(const adouble &a);
     friend DAE_CORE_API const adouble log(const adouble &a);
@@ -235,7 +239,17 @@ public:
 		m_bGatherInfo = bGatherInfo;
 	}
 
-	adNodePtr node;
+    adNodePtr getNode() const 
+	{
+		return node;
+	}
+    
+    adNode* getNodeRawPtr() const 
+	{
+		return node.get();
+	}
+
+    adNodePtr node;
 
 private:
     real_t m_dValue;
@@ -311,6 +325,13 @@ DAE_CORE_API const adouble_array operator +(const adouble& a, const adouble_arra
 DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
+
+DAE_CORE_API const adouble sum(const adouble_array& a);
+DAE_CORE_API const adouble product(const adouble_array& a);
+DAE_CORE_API const adouble min(const adouble_array& a);
+DAE_CORE_API const adouble max(const adouble_array& a);
+DAE_CORE_API const adouble average(const adouble_array& a);
+DAE_CORE_API const adouble integral(const adouble_array& a);
 
 DAE_CORE_API const adouble_array exp(const adouble_array& a);
 DAE_CORE_API const adouble_array sqrt(const adouble_array& a);
@@ -390,7 +411,7 @@ static const string strarrUnaryFns[12]={"minus",
 										"abs"
 										};
 
-class daeSaveAsMathMLContext;
+class daeNodeSaveAsContext;
 class DAE_CORE_API adNode : public daeReferenceCountable,
                             public daeExportable_t
 
@@ -406,12 +427,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag)										= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const									= 0;
 
-	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const				= 0;
-	//virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const		= 0;
+	virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const				= 0;
+	//virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const		= 0;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
-		                                const daeSaveAsMathMLContext* c) const		= 0;
+		                                const daeNodeSaveAsContext* c) const		= 0;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
-		                                     const daeSaveAsMathMLContext* c) const	= 0;
+		                                     const daeNodeSaveAsContext* c) const	= 0;
 
 	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
 											bool bAddFixed)							= 0;
@@ -424,7 +445,7 @@ public:
 	static void		SaveNodeAsMathML(io::xmlTag_t* pTag, 
 									 const string& strObjectName, 
 									 const adNode* node, 
-									 const daeSaveAsMathMLContext* c, 
+									 const daeNodeSaveAsContext* c, 
 									 bool bAppendEqualToZero = false);
 };
 
@@ -452,12 +473,12 @@ public:
 	virtual void	Open(io::xmlTag_t* pTag)												= 0;
 	virtual void	Save(io::xmlTag_t* pTag) const											= 0;
 
-	virtual string  SaveAsLatex(const daeSaveAsMathMLContext* c) const						= 0;
-	//virtual string  SaveAsPlainText(const daeSaveAsMathMLContext* c) const					= 0;
+	virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const						= 0;
+	//virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const					= 0;
 	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
-		                                const daeSaveAsMathMLContext* c) const				= 0;
+		                                const daeNodeSaveAsContext* c) const				= 0;
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
-		                                     const daeSaveAsMathMLContext* c) const			= 0;
+		                                     const daeNodeSaveAsContext* c) const			= 0;
 
 	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
 											bool bAddFixed)									= 0;
@@ -471,11 +492,11 @@ public:
 	
 	static void			SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag, 
 														         const std::vector< adNodePtr >& arrNodes, 
-														         const daeSaveAsMathMLContext* c);
+														         const daeNodeSaveAsContext* c);
 	static string		SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes, 
-											        const daeSaveAsMathMLContext* c);
+											        const daeNodeSaveAsContext* c);
 //	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes, 
-//												        const daeSaveAsMathMLContext* c);
+//												        const daeNodeSaveAsContext* c);
 };
 
 /*********************************************************************************************
@@ -496,10 +517,10 @@ public:
 	virtual void		Open(io::xmlTag_t* pTag)															= 0;
 	virtual void		Save(io::xmlTag_t* pTag) const														= 0;
 
-	virtual string		SaveAsLatex(const daeSaveAsMathMLContext* c) const									= 0;
-	//virtual string	SaveAsPlainText(const daeSaveAsMathMLContext* c) const								= 0;
-	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const		= 0;
-	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const = 0;
+	virtual string		SaveAsLatex(const daeNodeSaveAsContext* c) const									= 0;
+	//virtual string	SaveAsPlainText(const daeNodeSaveAsContext* c) const								= 0;
+	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const		= 0;
+	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const = 0;
 
 	virtual void		BuildExpressionsArray(std::vector<adNodePtr>& ptrarrExpressions, 
 		                                      const daeExecutionContext* pExecutionContext,
@@ -509,7 +530,7 @@ public:
 	static condNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node);
 	static condNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<condNode>* ood = NULL);
-	static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeSaveAsMathMLContext* c);
+	static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeNodeSaveAsContext* c);
 };
 
 

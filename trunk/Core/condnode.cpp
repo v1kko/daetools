@@ -102,7 +102,7 @@ condNode* condNode::OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io
 void condNode::SaveNodeAsMathML(io::xmlTag_t* pTag, 
 								const string& strObjectName, 
 								const condNode* node,
-								const daeSaveAsMathMLContext* c)
+								const daeNodeSaveAsContext* c)
 {
 	string strName, strValue;
 	io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
@@ -235,7 +235,7 @@ void condExpressionNode::Export(std::string& strContent, daeeModelLanguage eLang
 	m_pRight->Export(strContent, eLanguage, c);
 }
 
-//string condExpressionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string condExpressionNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strValue;
 //
@@ -261,16 +261,16 @@ void condExpressionNode::Export(std::string& strContent, daeeModelLanguage eLang
 //	return strValue;
 //}
 
-string condExpressionNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string condExpressionNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	return string("");
 }
 
-void condExpressionNode::SaveAsContentMathML(io::xmlTag_t* /*pTag*/, const daeSaveAsMathMLContext* /*c*/) const
+void condExpressionNode::SaveAsContentMathML(io::xmlTag_t* /*pTag*/, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void condExpressionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void condExpressionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue, strOperator, strLeft, strRight;
 	io::xmlTag_t *mrowout, *mrowleft, *mrowright;
@@ -572,7 +572,7 @@ void condUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage,
 	m_pNode->Export(strContent, eLanguage, c);
 	strContent += ")";
 }
-//string condUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string condUnaryNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strValue;
 //
@@ -588,16 +588,16 @@ void condUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage,
 //	return strValue;
 //}
 
-string condUnaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string condUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return string("");
 }
 
-void condUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void condUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void condUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void condUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrowout, *mrow;
@@ -756,7 +756,7 @@ void condBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage
 	m_pRight->Export(strContent, eLanguage, c);
 	strContent += ")";
 }
-//string condBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string condBinaryNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strValue;
 //
@@ -778,16 +778,16 @@ void condBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage
 //	return strValue;
 //}
 
-string condBinaryNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string condBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	return string("");
 }
 
-void condBinaryNode::SaveAsContentMathML(io::xmlTag_t* /*pTag*/, const daeSaveAsMathMLContext* /*c*/) const
+void condBinaryNode::SaveAsContentMathML(io::xmlTag_t* /*pTag*/, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void condBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void condBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue, strOperator, strLeft, strRight;
 	io::xmlTag_t *mrowout, *mrowleft, *mrowright;

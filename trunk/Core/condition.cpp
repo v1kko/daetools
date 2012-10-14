@@ -96,7 +96,7 @@ string daeCondition::SaveNodeAsPlainText(void) const
 void daeCondition::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;
-	daeSaveAsMathMLContext c(m_pModel);
+	daeNodeSaveAsContext c(m_pModel);
 	
 	condNode* node = m_pSetupConditionNode.get();
 	if(!node)

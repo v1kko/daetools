@@ -593,126 +593,87 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 }
 
 /*********************************************************************************************
- dt, sum, product, integral, min, max, average
+  d, dt
 **********************************************************************************************/
-const adouble daeModel::dt(const adouble& a) const
+const adouble dt(const adouble& a)
 {
 	adouble tmp;
 	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupExpressionDerivativeNode(const_cast<daeModel*>(this),
-	                                                         CLONE_NODE(a.node, a.getValue()) ));
+	tmp.node = adNodePtr(new adSetupExpressionDerivativeNode(CLONE_NODE(a.node, a.getValue()) ));
 	return tmp;
 }
 
-const adouble daeModel::d(const adouble& a, daeDomain& domain) const
+const adouble d(const adouble& a, daeDomain& domain)
 {
 	adouble tmp;
 	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(const_cast<daeModel*>(this),
-	                                                                &domain,
+	tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(&domain,
 	                                                                CLONE_NODE(a.node, a.getValue()) ));
 	return tmp;
 }
 
-// Called only during declaring of equations !!!
-const adouble daeModel::average(const adouble_array& a) const
+/*********************************************************************************************
+ sum, product, integral, min, max, average
+**********************************************************************************************/
+// If called during declaring of equations then GatherInfo is true
+// In other cases will calculate a value of the function
+const adouble average(const adouble_array& a)
 {
     adouble tmp;
 
-	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eAverage, 
-	                                                    const_cast<daeModel*>(this),
-	                                                    CLONE_NODE_ARRAY(a.node) ));
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eAverage, 
+                                                            CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+    
+    tmp = a[0];
+	for(size_t i = 1; i < a.GetSize(); i++)
+		tmp = tmp + a[i];
+    tmp = tmp / a.m_arrValues.size();
+	
 	return tmp;
 }
 
-/*
-const adouble daeModel::__average__(const adouble_array& a) const
+const adouble sum(const adouble_array& a)
 {
 	adouble tmp;
-	
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eAverage,
-//		                                                      const_cast<daeModel*>(this),
-//		                                                      CLONE_NODE_ARRAY(a.node) ));
-//		return tmp;
-//	}
-
-	tmp = __sum__(a) / a.m_arrValues.size();
-	return tmp;
-}
-*/
-
-const adouble daeModel::sum(const adouble_array& a) const
-{
-	adouble tmp;
-	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr( new adSetupSpecialFunctionNode(eSum, 
-	                                                     const_cast<daeModel*>(this),
-	                                                     CLONE_NODE_ARRAY(a.node) ) );
-	return tmp;
-}
-
-/*
-const adouble daeModel::__sum__(const adouble_array& a) const
-{
-	adouble tmp;
-	
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eSum,
-//		                                                      const_cast<daeModel*>(this),
-//		                                                      CLONE_NODE_ARRAY(a.node) ));
-//		return tmp;
-//	}
-	
-	tmp = a[0];
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr( new adSetupSpecialFunctionNode(eSum, 
+                                                             CLONE_NODE_ARRAY(a.node) ) );
+        return tmp;
+    }
+    
+    tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = tmp + a[i];
 	
 	return tmp;
 }
-*/
 
-const adouble daeModel::product(const adouble_array& a) const
+const adouble product(const adouble_array& a)
 {
 	adouble tmp;
 	
-	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eProduct,
-	                                                    const_cast<daeModel*>(this),
-	                                                    CLONE_NODE_ARRAY(a.node) ));
-	return tmp;
-}
-
-/*
-const adouble daeModel::__product__(const adouble_array& a) const
-{
-	adouble tmp;
-	
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eProduct,
-//		                                                      const_cast<daeModel*>(this),
-//		                                                      CLONE_NODE_ARRAY(a.node) ));
-//		return tmp;
-//	}
-	
-	tmp = a[0];
+	if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eProduct,
+                                                            CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+    
+    tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = tmp * a[i];
 	return tmp;
 }
-*/
 
-const adouble daeModel::integral(const adouble_array& a) const
+const adouble integral(const adouble_array& a)
 {
 	adouble tmp;
 	size_t i, nCount;
@@ -720,7 +681,10 @@ const adouble daeModel::integral(const adouble_array& a) const
 	vector<daeArrayRange> arrRanges;
 	daeDomain* pDomain = NULL;
 	
-	adNodeArrayImpl* n = dynamic_cast<adNodeArrayImpl*>(a.node.get());
+    if(!a.getGatherInfo())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    adNodeArrayImpl* n = dynamic_cast<adNodeArrayImpl*>(a.node.get());
 	if(!n)
 		daeDeclareAndThrowException(exInvalidPointer);
 	n->GetArrayRanges(arrRanges);
@@ -733,7 +697,7 @@ const adouble daeModel::integral(const adouble_array& a) const
 	if(nCount != 1)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "At the moment, it is possible to calculate one dimensional integrals only, in model [" << GetCanonicalName() << "]";
+		e << "At the moment, it is possible to calculate one dimensional integrals only";
 		throw e;
 	}
 	
@@ -749,7 +713,6 @@ const adouble daeModel::integral(const adouble_array& a) const
 	
 	tmp.setGatherInfo(true);
 	adSetupIntegralNode* node = new adSetupIntegralNode(eSingleIntegral,
-	                                                    const_cast<daeModel*>(this),
 	                                                    CLONE_NODE_ARRAY(a.node),
 	                                                    pDomain,
 	                                                    range);
@@ -757,112 +720,41 @@ const adouble daeModel::integral(const adouble_array& a) const
 	return tmp;
 }
 
-/*
-const adouble daeModel::__integral__(const adouble_array& a, daeDomain* pDomain, const vector<const real_t*>& pdarrPoints) const
-{
-	adouble tmp;
-	size_t i;
-	real_t d1, d2;
-
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		if(!pDomain)
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		if(pdarrPoints.empty())
-//			daeDeclareAndThrowException(exInvalidCall);
-//
-//		tmp.setGatherInfo(true);
-//		adRuntimeIntegralNode* node = new adRuntimeIntegralNode(eSingleIntegral,
-//		                                                        const_cast<daeModel*>(this),
-//		                                                        CLONE_NODE_ARRAY(a.node),
-//		                                                        pDomain,
-//		                                                        pdarrPoints);
-//		tmp.node = adNodePtr(node);
-//		return tmp;
-//	}
-	
-	for(i = 0; i < pdarrPoints.size() - 1; i++)
-	{
-		d1 = *pdarrPoints[i];
-		d2 = *pdarrPoints[i+1];
-		
-		// In daeDomain operator[] I always return node, not the value
-		// Therefore I cannot call here operator[] but function GetPoint
-		tmp = tmp + (a[i] + a[i+1]) * (d2 - d1) / 2;
-		
-		// Old code:
-		//	tmp = tmp + (a[i1] + a[i2]) * ( (*pDomain)[i2] - (*pDomain)[i1] ) / 2;
-	}
-	
-	return tmp;
-}
-*/
-
-const adouble daeModel::min(const adouble_array& a) const
+const adouble min(const adouble_array& a)
 {
 	adouble tmp;
 	
-	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMinInArray, 
-	                                                    const_cast<daeModel*>(this),
-	                                                    CLONE_NODE_ARRAY(a.node) ));
-	return tmp;
-}
-
-/*
-const adouble daeModel::__min__(const adouble_array& a) const
-{
-    adouble tmp;
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMinInArray,
-//		                                                      const_cast<daeModel*>(this),
-//		                                                      CLONE_NODE_ARRAY(a.node) ));
-//		return tmp;
-//	}
-	
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMinInArray, 
+                                                            CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+    
     tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__min__(tmp, a[i]);		
 	return tmp;
 }
-*/
 
-const adouble daeModel::max(const adouble_array& a) const
+const adouble max(const adouble_array& a)
 {
 	adouble tmp;
 	
-	tmp.setGatherInfo(true);
-	tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMaxInArray, 
-	                                                    const_cast<daeModel*>(this),
-	                                                    CLONE_NODE_ARRAY(a.node) ));
-	return tmp;
-}
-
-/*
-const adouble daeModel::__max__(const adouble_array& a) const
-{
-	adouble tmp;
-	
-// Commented
-//	if(a.getGatherInfo())
-//	{
-//		tmp.setGatherInfo(true);
-//		tmp.node = adNodePtr(new adRuntimeSpecialFunctionNode(eMaxInArray,
-//		                                                      const_cast<daeModel*>(this),
-//		                                                      CLONE_NODE_ARRAY(a.node) ));
-//		return tmp;
-//	}
-	
-	tmp = a[0];
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eMaxInArray, 
+                                                            CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+    
+    tmp = a[0];
 	for(size_t i = 1; i < a.GetSize(); i++)
 		tmp = dae::core::__max__(tmp, a[i]);
 	return tmp;
 }
-*/
 
 const adouble_array exp(const adouble_array& a)
 {
@@ -875,8 +767,6 @@ const adouble_array exp(const adouble_array& a)
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -895,8 +785,6 @@ const adouble_array sqrt(const adouble_array& a)
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -914,8 +802,6 @@ const adouble_array log(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -934,8 +820,6 @@ const adouble_array log10(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -954,8 +838,6 @@ const adouble_array abs(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -974,8 +856,6 @@ const adouble_array floor(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -994,8 +874,6 @@ const adouble_array ceil(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1014,8 +892,6 @@ const adouble_array sin(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1034,8 +910,6 @@ const adouble_array cos(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1054,8 +928,6 @@ const adouble_array tan(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1074,8 +946,6 @@ const adouble_array asin(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1094,8 +964,6 @@ const adouble_array acos(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -1114,8 +982,6 @@ const adouble_array atan(const adouble_array& a)
 		                                               CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);

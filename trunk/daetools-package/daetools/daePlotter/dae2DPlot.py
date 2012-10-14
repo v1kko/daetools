@@ -334,15 +334,15 @@ class dae2DPlot(QtGui.QDialog):
         ymin = 1e20
         ymax = -1e20
         for line in lines:
-            if min(line.get_xdata()) < xmin:
-                xmin = min(line.get_xdata())
-            if max(line.get_xdata()) > xmax:
-                xmax = max(line.get_xdata())
+            if numpy.min(line.get_xdata()) < xmin:
+                xmin = numpy.min(line.get_xdata())
+            if numpy.max(line.get_xdata()) > xmax:
+                xmax = numpy.max(line.get_xdata())
 
-            if min(line.get_ydata()) < ymin:
-                ymin = min(line.get_ydata())
-            if max(line.get_ydata()) > ymax:
-                ymax = max(line.get_ydata())
+            if numpy.min(line.get_ydata()) < ymin:
+                ymin = numpy.min(line.get_ydata())
+            if numpy.max(line.get_ydata()) > ymax:
+                ymax = numpy.max(line.get_ydata())
         
         dx = (xmax - xmin) * 0.05
         dy = (ymax - ymin) * 0.05

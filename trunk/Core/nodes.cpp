@@ -294,7 +294,7 @@ adNode* adNode::OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::da
 void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag, 
 							  const string& strObjectName, 
 							  const adNode* node,
-							  const daeSaveAsMathMLContext* c,
+							  const daeNodeSaveAsContext* c,
 							  bool bAppendEqualToZero)
 {
 	string strName, strValue;
@@ -420,12 +420,12 @@ void adConstantNode::Export(std::string& strContent, daeeModelLanguage eLanguage
 	strContent += units::Export(eLanguage, c, m_quantity);
 }
 
-//string adConstantNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adConstantNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //	return textCreator::Constant(m_dValue);
 //}
 
-string adConstantNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adConstantNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	return m_quantity.toLatex();
 }
@@ -442,11 +442,11 @@ void adConstantNode::Save(io::xmlTag_t* pTag) const
 	units::Save(pTag, strName, m_quantity);
 }
 
-void adConstantNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adConstantNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adConstantNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adConstantNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 	units::SaveAsPresentationMathML(pTag, m_quantity);
 }
@@ -507,12 +507,12 @@ void adTimeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, da
 		daeDeclareAndThrowException(exNotImplemented);
 }
 
-//string adTimeNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adTimeNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //
 //}
 
-string adTimeNode::SaveAsLatex(const daeSaveAsMathMLContext* /*c*/) const
+string adTimeNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	vector<string> domains;
 	return latexCreator::Variable(string("\\tau"), domains);
@@ -529,11 +529,11 @@ void adTimeNode::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, strValue);
 }
 
-void adTimeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adTimeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adTimeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adTimeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 	vector<string> domains;
 	xmlPresentationCreator::Variable(pTag, string("&tau;"), domains);
@@ -603,12 +603,12 @@ void adEventPortDataNode::Export(std::string& strContent, daeeModelLanguage eLan
 		daeDeclareAndThrowException(exNotImplemented);
 }
 
-//string adEventPortDataNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adEventPortDataNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //
 //}
 
-string adEventPortDataNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adEventPortDataNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> domains;
 	string strName = daeGetRelativeName(c->m_pModel, m_pEventPort);
@@ -625,11 +625,11 @@ void adEventPortDataNode::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectRef(strName, m_pEventPort);
 }
 
-void adEventPortDataNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adEventPortDataNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adEventPortDataNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adEventPortDataNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> domains;
 	string strName = daeGetRelativeName(c->m_pModel, m_pEventPort);
@@ -698,7 +698,7 @@ adNode* adRuntimeParameterNode::Clone(void) const
 	return new adRuntimeParameterNode(*this);
 }
 
-//string adRuntimeParameterNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeParameterNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -708,7 +708,7 @@ adNode* adRuntimeParameterNode::Clone(void) const
 //	return textCreator::Variable(strName, strarrIndexes);
 //}
 
-string adRuntimeParameterNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeParameterNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -746,7 +746,7 @@ void adRuntimeParameterNode::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_dValue);
 }
 
-void adRuntimeParameterNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeParameterNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -756,7 +756,7 @@ void adRuntimeParameterNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSa
 	xmlPresentationCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adRuntimeParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeParameterNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -836,14 +836,14 @@ adNode* adDomainIndexNode::Clone(void) const
 	return new adDomainIndexNode(*this);
 }
 
-//string adDomainIndexNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adDomainIndexNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strName  = daeGetRelativeName(c->m_pModel, m_pDomain);
 //	string strIndex = toString<size_t>(m_nIndex);
 //	return textCreator::Domain(strName, strIndex);
 //}
 
-string adDomainIndexNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adDomainIndexNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strName  = daeGetRelativeName(c->m_pModel, m_pDomain);
 	string strIndex = toString<size_t>(m_nIndex);
@@ -866,12 +866,12 @@ void adDomainIndexNode::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_nIndex);
 }
 
-void adDomainIndexNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adDomainIndexNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	daeDeclareAndThrowException(exNotImplemented)
 }
 
-void adDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adDomainIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName  = daeGetRelativeName(c->m_pModel, m_pDomain);
 	string strIndex = toString<size_t>(m_nIndex);
@@ -1026,7 +1026,7 @@ adNode* adRuntimeVariableNode::Clone(void) const
 	return new adRuntimeVariableNode(*this);
 }
 
-//string adRuntimeVariableNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeVariableNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1036,7 +1036,7 @@ adNode* adRuntimeVariableNode::Clone(void) const
 //	return textCreator::Variable(strName, strarrIndexes);
 //}
 
-string adRuntimeVariableNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeVariableNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1080,7 +1080,7 @@ void adRuntimeVariableNode::Save(io::xmlTag_t* pTag) const
 	//pTag->Save(strName, *m_pdValue);
 }
 
-void adRuntimeVariableNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeVariableNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1090,7 +1090,7 @@ void adRuntimeVariableNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSav
 	xmlContentCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adRuntimeVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1236,7 +1236,7 @@ adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 	return new adRuntimeTimeDerivativeNode(*this);
 }
 
-//string adRuntimeTimeDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimeTimeDerivativeNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1246,7 +1246,7 @@ adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 //	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
 //}
 
-string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1296,7 +1296,7 @@ void adRuntimeTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
 	//pTag->Save(strName, *m_pdTimeDerivative);
 }
 
-void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1306,7 +1306,7 @@ void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const 
 	xmlContentCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
-void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1387,12 +1387,12 @@ adNode* adRuntimePartialDerivativeNode::Clone(void) const
 	return new adRuntimePartialDerivativeNode(*this);
 }
 
-//string adRuntimePartialDerivativeNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adRuntimePartialDerivativeNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	return pardevnode->SaveAsPlainText(c);
 //}
 
-string adRuntimePartialDerivativeNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adRuntimePartialDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 //	vector<string> strarrIndexes;
 //	for(size_t i = 0; i < m_narrDomains.size(); i++)
@@ -1451,11 +1451,11 @@ void adRuntimePartialDerivativeNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, pardevnode.get());
 }
 
-void adRuntimePartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimePartialDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adRuntimePartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adRuntimePartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	return pardevnode->SaveAsPresentationMathML(pTag, c);
 }
@@ -1596,7 +1596,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "sin(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Sin(";
+			strContent += "sin(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1606,7 +1606,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "cos(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Cos(";
+			strContent += "cos(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1616,7 +1616,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "tan(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Tan(";
+			strContent += "tan(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1626,7 +1626,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "asin(";
 		else if(eLanguage == ePYDAE)
-			strContent += "ASin(";
+			strContent += "asin(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1636,7 +1636,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "acos(";
 		else if(eLanguage == ePYDAE)
-			strContent += "ACos(";
+			strContent += "acos(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1646,7 +1646,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "atan(";
 		else if(eLanguage == ePYDAE)
-			strContent += "ATan(";
+			strContent += "atan(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1656,7 +1656,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "sqrt(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Sqrt(";
+			strContent += "sqrt(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1666,7 +1666,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "exp(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Exp(";
+			strContent += "exp(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1676,7 +1676,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "log(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Log(";
+			strContent += "log(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1686,7 +1686,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "log10(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Log10(";
+			strContent += "log10(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1696,7 +1696,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "abs(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Abs(";
+			strContent += "abs(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1706,7 +1706,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "ceil(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Ceil(";
+			strContent += "ceil(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1716,7 +1716,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "floor(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Floor(";
+			strContent += "floor(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1726,7 +1726,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 }
-//string adUnaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adUnaryNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult;
 //	switch(eFunction)
@@ -1807,7 +1807,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 //	return strResult;
 //}
 
-string adUnaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult;
 
@@ -1931,7 +1931,7 @@ void adUnaryNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, node.get());
 }
 
-void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName;
 	//io::xmlTag_t* nodeTag;
@@ -1988,7 +1988,7 @@ void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLC
 	//node->SaveAsContentMathML(nodeTag);
 }
 
-void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	string strName, strValue;
 	io::xmlTag_t *mrowout, *msup, *mrow, *msqrt;
@@ -2395,7 +2395,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		if(eLanguage == eCDAE)
 			strContent += "min(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Min(";
+			strContent += "min(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		strContent += strLeft;
@@ -2407,7 +2407,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		if(eLanguage == eCDAE)
 			strContent += "max(";
 		else if(eLanguage == ePYDAE)
-			strContent += "Max(";
+			strContent += "max(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		strContent += strLeft;
@@ -2420,7 +2420,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 	}
 }
 
-//string adBinaryNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adBinaryNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	string strResult, strLeft, strRight;
 //
@@ -2495,7 +2495,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 //	return strResult;
 //}
 
-string adBinaryNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	string strResult, strLeft, strRight;
 
@@ -2602,11 +2602,11 @@ void adBinaryNode::Save(io::xmlTag_t* pTag) const
 	adNode::SaveNode(pTag, strName, right.get());
 }
 
-void adBinaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adBinaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	bool bDoEncloseLeft, bDoEncloseRight;
 	string strName, strValue;
@@ -2941,12 +2941,12 @@ adNode* adScalarExternalFunctionNode::Clone(void) const
 void adScalarExternalFunctionNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 }
-//string adScalarExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* /*c*/) const
+//string adScalarExternalFunctionNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //	return string("");
 //}
 
-string adScalarExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adScalarExternalFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
     string strLatex;
 
@@ -3019,11 +3019,11 @@ void adScalarExternalFunctionNode::Save(io::xmlTag_t* pTag) const
     }
 }
 
-void adScalarExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* /*c*/) const
+void adScalarExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adScalarExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
     io::xmlTag_t* pRowTag = pTag->AddTag(string("mrow"));
 

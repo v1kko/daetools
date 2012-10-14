@@ -15,6 +15,8 @@ from pyIDAS import *
 from daeLogs import daePythonStdOutLog
 from daeVariableTypes import *
 
+#from daeModelicaExport import daeModelicaExport
+
 try:
     from daetools.daeSimulator import *
 except ImportError as e:

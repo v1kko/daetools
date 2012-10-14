@@ -88,7 +88,7 @@ void adSetupParameterNodeArray::Export(std::string& strContent, daeeModelLanguag
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
-//string adSetupParameterNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupParameterNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	FillDomains(m_arrRanges, strarrIndexes);
@@ -96,7 +96,7 @@ void adSetupParameterNodeArray::Export(std::string& strContent, daeeModelLanguag
 //	return textCreator::Variable(strName, strarrIndexes);
 //}
 
-string adSetupParameterNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupParameterNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -119,7 +119,7 @@ void adSetupParameterNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_arrRanges);
 }
 
-void adSetupParameterNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupParameterNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -127,7 +127,7 @@ void adSetupParameterNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const da
 	xmlContentCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupParameterNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -217,7 +217,7 @@ void adSetupVariableNodeArray::Export(std::string& strContent, daeeModelLanguage
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
-//string adSetupVariableNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupVariableNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	FillDomains(m_arrRanges, strarrIndexes);
@@ -225,7 +225,7 @@ void adSetupVariableNodeArray::Export(std::string& strContent, daeeModelLanguage
 //	return textCreator::Variable(strName, strarrIndexes);
 //}
 
-string adSetupVariableNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupVariableNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -248,7 +248,7 @@ void adSetupVariableNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_arrRanges);
 }
 
-void adSetupVariableNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupVariableNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -256,7 +256,7 @@ void adSetupVariableNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const dae
 	xmlContentCreator::Variable(pTag, strName, strarrIndexes);
 }
 
-void adSetupVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupVariableNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -362,7 +362,7 @@ void adSetupTimeDerivativeNodeArray::Export(std::string& strContent, daeeModelLa
 
 	strContent += fmtFile.str();
 }
-//string adSetupTimeDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupTimeDerivativeNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	FillDomains(m_arrRanges, strarrIndexes);
@@ -370,7 +370,7 @@ void adSetupTimeDerivativeNodeArray::Export(std::string& strContent, daeeModelLa
 //	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
 //}
 
-string adSetupTimeDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupTimeDerivativeNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -396,7 +396,7 @@ void adSetupTimeDerivativeNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_arrRanges);
 }
 
-void adSetupTimeDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupTimeDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -404,7 +404,7 @@ void adSetupTimeDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, con
 	xmlContentCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
 }
 
-void adSetupTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupTimeDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -521,7 +521,7 @@ void adSetupPartialDerivativeNodeArray::Export(std::string& strContent, daeeMode
 
 	strContent += fmtFile.str();
 }
-//string adSetupPartialDerivativeNodeArray::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adSetupPartialDerivativeNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
 //	FillDomains(m_arrRanges, strarrIndexes);
@@ -530,7 +530,7 @@ void adSetupPartialDerivativeNodeArray::Export(std::string& strContent, daeeMode
 //	return textCreator::PartialDerivative(m_nDegree, strName, strDomainName, strarrIndexes);
 //}
 
-string adSetupPartialDerivativeNodeArray::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adSetupPartialDerivativeNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -560,7 +560,7 @@ void adSetupPartialDerivativeNodeArray::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_arrRanges);
 }
 
-void adSetupPartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupPartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -569,7 +569,7 @@ void adSetupPartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, 
 	xmlContentCreator::PartialDerivative(pTag, m_nDegree, strName, strDomainName, strarrIndexes);
 }
 
-void adSetupPartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adSetupPartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 	vector<string> strarrIndexes;
 	FillDomains(m_arrRanges, strarrIndexes);
@@ -669,11 +669,11 @@ void adVectorExternalFunctionNode::Export(std::string& strContent, daeeModelLang
 {
 	daeDeclareAndThrowException(exNotImplemented);
 }
-//string adVectorExternalFunctionNode::SaveAsPlainText(const daeSaveAsMathMLContext* c) const
+//string adVectorExternalFunctionNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //}
 
-string adVectorExternalFunctionNode::SaveAsLatex(const daeSaveAsMathMLContext* c) const
+string adVectorExternalFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
 	return string();
 }
@@ -686,11 +686,11 @@ void adVectorExternalFunctionNode::Save(io::xmlTag_t* pTag) const
 {
 }
 
-void adVectorExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adVectorExternalFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adVectorExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const
+void adVectorExternalFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 

@@ -104,6 +104,47 @@ BOOST_PYTHON_MODULE(pyCore)
 		.value("eEqualityConstraint",	dae::core::eEqualityConstraint)
 		.export_values()
 	;
+    
+    enum_<daeeUnaryFunctions>("daeeUnaryFunctions")
+        .value("eUFUnknown",dae::core::eUFUnknown)
+        .value("eSign",     dae::core::eSign)
+        .value("eSqrt",     dae::core::eSqrt)
+        .value("eExp",      dae::core::eExp)
+        .value("eLog",      dae::core::eLog)
+        .value("eLn",       dae::core::eLn)
+        .value("eAbs",      dae::core::eAbs)
+        .value("eSin",      dae::core::eSin)
+        .value("eCos",      dae::core::eCos)
+        .value("eTan",      dae::core::eTan)
+        .value("eArcSin",	dae::core::eArcSin)
+        .value("eArcCos",	dae::core::eArcCos)
+        .value("eArcTan",	dae::core::eArcTan)
+        .value("eCeil",     dae::core::eCeil)
+        .value("eFloor",	dae::core::eFloor)
+        .export_values()
+    ;
+    
+    enum_<daeeBinaryFunctions>("daeeBinaryFunctions")
+        .value("eBFUnknown",	dae::core::eBFUnknown)
+        .value("ePlus",         dae::core::ePlus)
+        .value("eMinus",        dae::core::eMinus)
+        .value("eMulti",        dae::core::eMulti)
+        .value("eDivide",       dae::core::eDivide)
+        .value("ePower",        dae::core::ePower)
+        .value("eMin",          dae::core::eMin)
+        .value("eMax",          dae::core::eMax)
+        .export_values()
+    ;
+    
+    enum_<daeeSpecialUnaryFunctions>("daeeSpecialUnaryFunctions")
+        .value("eSUFUnknown",	dae::core::eSUFUnknown)
+        .value("eSum",          dae::core::eSum)
+        .value("eProduct",      dae::core::eProduct)
+        .value("eMinInArray",   dae::core::eMinInArray)
+        .value("eMaxInArray",   dae::core::eMaxInArray)
+        .value("eAverage",      dae::core::eAverage)
+        .export_values()
+    ;
 
 /**************************************************************
 	Global functions
@@ -171,7 +212,152 @@ BOOST_PYTHON_MODULE(pyCore)
   .def("PutInteger",	   &daepython::PutInteger)
   .def("PutString",	   &daepython::PutString)
 */
+        
+    class_<daeNodeSaveAsContext>("daeNodeSaveAsContext")
+        .def(init<daeModel*>())
+        .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel)
+    ;
 
+    class_<adNode, boost::noncopyable>("adNode", no_init)
+        .def("SaveAsLatex", &adNode::SaveAsLatex)
+    ;
+    
+    class_<adNodeArray, boost::noncopyable>("adNodeArray", no_init)
+    ;
+    
+    class_<condNode, boost::noncopyable>("condNode", no_init)
+    ;
+
+    class_<adConstantNode, bases<adNode>, boost::noncopyable>("adConstantNode", no_init)
+        .def_readonly("Quantity",	&adConstantNode::m_quantity)
+    ;
+
+    class_<adTimeNode, bases<adNode>, boost::noncopyable>("adTimeNode", no_init)
+    ;
+
+    class_<adEventPortDataNode, bases<adNode>, boost::noncopyable>("adEventPortDataNode", no_init)
+    ;
+    
+    class_<adUnaryNode, bases<adNode>, boost::noncopyable>("adUnaryNode", no_init)
+        .def_readonly("Function",	&adUnaryNode::eFunction)
+        .add_property("Node",       make_function(&adUnaryNode::getNodeRawPtr, return_internal_reference<>()))
+    ;
+    
+    class_<adBinaryNode, bases<adNode>, boost::noncopyable>("adBinaryNode", no_init)
+        .def_readonly("Function",	&adBinaryNode::eFunction)
+        .add_property("LNode",      make_function(&adBinaryNode::getLeftRawPtr,  return_internal_reference<>()))
+        .add_property("RNode",      make_function(&adBinaryNode::getRightRawPtr, return_internal_reference<>()))
+    ;
+    
+    class_<adSetupDomainIteratorNode, bases<adNode>, boost::noncopyable>("adSetupDomainIteratorNode", no_init)
+    ;
+    
+    class_<adSetupParameterNode, bases<adNode>, boost::noncopyable>("adSetupParameterNode", no_init)
+        .add_property("Parameter",      make_function(&daepython::adSetupParameterNode_Parameter, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adSetupParameterNode_Domains)
+    ;
+        
+    class_<adSetupVariableNode, bases<adNode>, boost::noncopyable>("adSetupVariableNode", no_init)
+        .add_property("Variable",       make_function(&daepython::adSetupVariableNode_Variable, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adSetupVariableNode_Domains)
+    ;
+    
+    class_<adSetupTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupTimeDerivativeNode", no_init)
+        .def_readonly("Order",          &adSetupTimeDerivativeNode::m_nDegree)
+        .add_property("Variable",       make_function(&daepython::adSetupTimeDerivativeNode_Variable, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adSetupTimeDerivativeNode_Domains)
+    ;
+    
+    class_<adSetupPartialDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupPartialDerivativeNode", no_init)
+        .def_readonly("Order",          &adSetupPartialDerivativeNode::m_nDegree)
+        .add_property("Variable",       make_function(&daepython::adSetupPartialDerivativeNode_Variable, return_internal_reference<>()))
+        .add_property("Domain",         make_function(&daepython::adSetupPartialDerivativeNode_Domain,   return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adSetupPartialDerivativeNode_Domains)
+    ;
+
+    class_<adSetupExpressionDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupExpressionDerivativeNode", no_init)
+    ;
+    
+    class_<adSetupExpressionPartialDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupExpressionPartialDerivativeNode", no_init)
+    ;
+
+    class_<adSetupIntegralNode, bases<adNode>, boost::noncopyable>("adSetupIntegralNode", no_init)
+    ;
+    
+    class_<adSetupSpecialFunctionNode, bases<adNode>, boost::noncopyable>("adSetupSpecialFunctionNode", no_init)
+    ;
+
+    class_<adScalarExternalFunctionNode, bases<adNode>, boost::noncopyable>("adScalarExternalFunctionNode", no_init)
+    ;
+    
+    class_<adVectorExternalFunctionNode, bases<adNode>, boost::noncopyable>("adVectorExternalFunctionNode", no_init)
+    ;
+
+    
+    class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
+        .def_readonly("Index",   &adDomainIndexNode::m_nIndex)
+        .add_property("Domain",  make_function(&daepython::adDomainIndexNode_Domain, return_internal_reference<>()))
+    ;
+
+    class_<adRuntimeParameterNode, bases<adNode>, boost::noncopyable>("adRuntimeParameterNode", no_init)
+        .def_readonly("Value",          &adRuntimeParameterNode::m_dValue)
+        .add_property("Parameter",      make_function(&daepython::adRuntimeParameterNode_Parameter, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adRuntimeParameterNode_Domains)
+    ;
+
+    class_<adRuntimeVariableNode, bases<adNode>, boost::noncopyable>("adRuntimeVariableNode", no_init)
+        .def_readonly("OverallIndex",   &adRuntimeVariableNode::m_nOverallIndex)
+        .def_readonly("BlockIndex",     &adRuntimeVariableNode::m_nBlockIndex)
+        .def_readonly("IsAssigned",     &adRuntimeVariableNode::m_bIsAssigned)
+            
+        .add_property("Variable",       make_function(&daepython::adRuntimeVariableNode_Variable, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adRuntimeVariableNode_Domains)
+    ;
+    
+    class_<adRuntimeTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adRuntimeTimeDerivativeNode", no_init)
+        .def_readonly("Order",          &adRuntimeTimeDerivativeNode::m_nDegree)
+        .def_readonly("OverallIndex",   &adRuntimeTimeDerivativeNode::m_nOverallIndex)
+        .def_readonly("BlockIndex",     &adRuntimeTimeDerivativeNode::m_nBlockIndex)        
+        .add_property("Variable",       make_function(&daepython::adRuntimeTimeDerivativeNode_Variable, return_internal_reference<>()))
+        .add_property("DomainIndexes",	&daepython::adRuntimeTimeDerivativeNode_Domains)
+    ;
+
+    
+
+    class_<adSingleNodeArray, bases<adNode>, boost::noncopyable>("adSingleNodeArray", no_init)
+    ;
+    
+    class_<adVectorNodeArray, bases<adNode>, boost::noncopyable>("adVectorNodeArray", no_init)
+    ;
+    
+    class_<adUnaryNodeArray, bases<adNode>, boost::noncopyable>("adUnaryNodeArray", no_init)
+    ;
+    
+    class_<adBinaryNodeArray, bases<adNode>, boost::noncopyable>("adBinaryNodeArray", no_init)
+    ;
+    
+    class_<adSetupVariableNodeArray, bases<adNode>, boost::noncopyable>("adSetupVariableNodeArray", no_init)
+    ;
+    
+    class_<adSetupParameterNodeArray, bases<adNode>, boost::noncopyable>("adSetupParameterNodeArray", no_init)
+    ;
+    
+    class_<adSetupTimeDerivativeNodeArray, bases<adNode>, boost::noncopyable>("adSetupTimeDerivativeNodeArray", no_init)
+    ;
+    
+    class_<adSetupPartialDerivativeNodeArray, bases<adNode>, boost::noncopyable>("adSetupPartialDerivativeNodeArray", no_init)
+    ;
+
+    
+    class_<condUnaryNode, bases<condNode>, boost::noncopyable>("condUnaryNode", no_init)
+    ;
+
+    class_<condBinaryNode, bases<condNode>, boost::noncopyable>("condBinaryNode", no_init)
+    ;
+
+    class_<condExpressionNode, bases<condNode>, boost::noncopyable>("condExpressionNode", no_init)
+    ;
+    
     class_<daeCondition>("daeCondition")
 		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
 		//.def(!self)
@@ -182,6 +368,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<adouble>("adouble")
 		.add_property("Value",		&adouble::getValue,      &adouble::setValue)
 		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative) 
+        .add_property("Node",       make_function(&adouble::getNodeRawPtr, return_internal_reference<>()))
 
         .def("__repr__",     &daepython::adouble_repr)
 
@@ -224,37 +411,40 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(real_t() >= self)
 		.def(real_t() != self)
 		;
-	def("Exp",   &daepython::ad_exp);
-	def("Log",   &daepython::ad_log);
-	def("Sqrt",  &daepython::ad_sqrt);
-	def("Sin",   &daepython::ad_sin);
-	def("Cos",   &daepython::ad_cos);
-	def("Tan",   &daepython::ad_tan);
-	def("ASin",  &daepython::ad_asin);
-	def("ACos",  &daepython::ad_acos);
-	def("ATan",  &daepython::ad_atan);
+	def("exp",   &daepython::ad_exp);
+	def("log",   &daepython::ad_log);
+	def("sqrt",  &daepython::ad_sqrt);
+	def("sin",   &daepython::ad_sin);
+	def("cos",   &daepython::ad_cos);
+	def("tan",   &daepython::ad_tan);
+	def("asin",  &daepython::ad_asin);
+	def("acos",  &daepython::ad_acos);
+	def("atan",  &daepython::ad_atan);
 
-	def("Sinh",  &daepython::ad_sinh);
-	def("Cosh",  &daepython::ad_cosh);
-	def("Tanh",  &daepython::ad_tanh);
-	def("ASinh", &daepython::ad_asinh);
-	def("ACosh", &daepython::ad_acosh);
-	def("ATanh", &daepython::ad_atanh);
-	def("ATan2", &daepython::ad_atan2);
+	def("sinh",  &daepython::ad_sinh);
+	def("cosh",  &daepython::ad_cosh);
+	def("tanh",  &daepython::ad_tanh);
+	def("asinh", &daepython::ad_asinh);
+	def("acosh", &daepython::ad_acosh);
+	def("atanh", &daepython::ad_atanh);
+	def("atan2", &daepython::ad_atan2);
 
-	def("Log10", &daepython::ad_log10);
-	def("Abs",   &daepython::ad_abs);
-	def("Ceil",  &daepython::ad_ceil);
-	def("Floor", &daepython::ad_floor);
-	def("Min",   &daepython::ad_min1);
-	def("Min",   &daepython::ad_min2);
-	def("Min",   &daepython::ad_min3);
-	def("Max",   &daepython::ad_max1);
-	def("Max",   &daepython::ad_max2);
-	def("Max",   &daepython::ad_max3);
-	def("Pow",   &daepython::ad_pow1);
-	def("Pow",   &daepython::ad_pow2);
-	def("Pow",   &daepython::ad_pow3);
+	def("log10", &daepython::ad_log10);
+	def("abs",   &daepython::ad_abs);
+	def("ceil",  &daepython::ad_ceil);
+	def("floor", &daepython::ad_floor);
+	def("min",   &daepython::ad_min1);
+	def("min",   &daepython::ad_min2);
+	def("min",   &daepython::ad_min3);
+	def("max",   &daepython::ad_max1);
+	def("max",   &daepython::ad_max2);
+	def("max",   &daepython::ad_max3);
+	def("pow",   &daepython::ad_pow1);
+	def("pow",   &daepython::ad_pow2);
+	def("pow",   &daepython::ad_pow3);
+    
+    def("dt",	 &daepython::ad_dt);
+    def("d",	 &daepython::ad_d);
 
 	def("Time",			&Time);
 	def("Constant",		&daepython::ad_Constant_c);
@@ -287,19 +477,26 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(adouble() * self)
 		.def(adouble() / self)
 		;
-	def("Exp",		&daepython::adarr_exp);
-	def("Log",		&daepython::adarr_log);
-	def("Sqrt",		&daepython::adarr_sqrt);
-	def("Sin",		&daepython::adarr_sin);
-	def("Cos",		&daepython::adarr_cos);
-	def("Tan",		&daepython::adarr_tan);
-	def("ASin",		&daepython::adarr_asin);
-	def("ACos",		&daepython::adarr_acos);
-	def("ATan",		&daepython::adarr_atan);
-	def("Log10",	&daepython::adarr_log10);
-	def("Abs",		&daepython::adarr_abs);
-	def("Ceil",		&daepython::adarr_ceil);
-	def("Floor",	&daepython::adarr_floor);
+	def("exp",		&daepython::adarr_exp);
+	def("log",		&daepython::adarr_log);
+	def("sqrt",		&daepython::adarr_sqrt);
+	def("sin",		&daepython::adarr_sin);
+	def("cos",		&daepython::adarr_cos);
+	def("tan",		&daepython::adarr_tan);
+	def("asin",		&daepython::adarr_asin);
+	def("acos",		&daepython::adarr_acos);
+	def("atan",		&daepython::adarr_atan);
+	def("log10",	&daepython::adarr_log10);
+	def("abs",		&daepython::adarr_abs);
+	def("ceil",		&daepython::adarr_ceil);
+	def("floor",	&daepython::adarr_floor);
+    
+    def("sum",		 &daepython::adarr_sum);
+    def("product",   &daepython::adarr_product); 
+    def("integral",  &daepython::adarr_integral);
+    def("min",		 &daepython::adarr_min);
+    def("max",		 &daepython::adarr_max);
+    def("average",	 &daepython::adarr_average);
 
 	class_<daeVariableType>("daeVariableType")
 		.def(init<string, unit, real_t, real_t, real_t, real_t>())
@@ -337,6 +534,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("Index",		&daeDomainIndex::m_nIndex)
 		.def_readonly("DEDI",		&daeDomainIndex::m_pDEDI)
 		.def_readonly("Increment",	&daeDomainIndex::m_iIncrement)
+
+        .def("__str__",				&daeDomainIndex::GetIndexAsString)
 		;
 
 	class_<daeIndexRange>("daeIndexRange")
@@ -351,6 +550,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("StartIndex",	&daeIndexRange::m_iStartIndex)
 		.def_readonly("EndIndex",	&daeIndexRange::m_iEndIndex)
 		.def_readonly("Step",		&daeIndexRange::m_iStride)
+
+        .def("__str__",				&daeIndexRange::ToString)
 		;
 
 	class_<daeArrayRange>("daeArrayRange")
@@ -383,6 +584,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("LowerBound",				&daeDomain::GetLowerBound)
 		.add_property("UpperBound",				&daeDomain::GetUpperBound)    
 		.add_property("Points",					&daepython::GetDomainPoints, &daepython::SetDomainPoints)
+        .add_property("Units",					&daeDomain::GetUnits)
 
 		.def("__str__",							&daepython::daeDomain_str)
 		.def("CreateArray",						&daeDomain::CreateArray)
@@ -820,15 +1022,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("ConnectEventPorts",&daeModel::ConnectEventPorts)
 		.def("SetReportingOn",	 &daeModel::SetReportingOn)
 
-		.def("sum",				&daeModel::sum) 
-		.def("product",         &daeModel::product) 
-		.def("integral",		&daeModel::integral)
-		.def("min",				&daeModel::min)
-		.def("max",				&daeModel::max)
-		.def("average",			&daeModel::average)
-		.def("dt",				&daeModel::dt)
-		.def("d",				&daeModel::d)
-
 		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
 		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
 		.def("ELSE",			&daepython::daeModelWrapper::ELSE)
@@ -854,12 +1047,18 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("Export",					&daeModel::Export)
 		;
 
+    class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", no_init)
+        .add_property("Node",	make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()))
+    ;
+    
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation")
+        .add_property("Residual",               &daeEquation::GetResidual, &daeEquation::SetResidual)
+        .add_property("Scaling",                &daeEquation::GetScaling,  &daeEquation::SetScaling)
+        .add_property("EquationExecutionInfos",	&daepython::GetEquationExecutionInfos)
+            
 		.def("__str__",				&daepython::daeEquation_str)
 		.def("DistributeOnDomain",	&daepython::DistributeOnDomain1, return_internal_reference<>())
 		.def("DistributeOnDomain",	&daepython::DistributeOnDomain2, return_internal_reference<>())
-		.add_property("Residual",	&daeEquation::GetResidual, &daeEquation::SetResidual)
-        .add_property("Scaling",	&daeEquation::GetScaling,  &daeEquation::SetScaling)
 		;
 
 	class_<daepython::daeStateWrapper, bases<daeObject>, boost::noncopyable>("daeState")

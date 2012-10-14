@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-import sys
-from numpy import *
+import sys, numpy
 from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import leastsq
@@ -38,8 +37,8 @@ The main properties:
 # Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values
 def Calculate(p, minpack, calc_values):
     # col_deriv must be True
-    values = zeros( (minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
-    derivs = zeros( (minpack.Nparameters, minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
+    values = numpy.zeros( (minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
+    derivs = numpy.zeros( (minpack.Nparameters, minpack.Nmeasured_variables, minpack.Nexperiments, minpack.Ntime_points) )
     
     r_values = values.reshape( (minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
     r_derivs = derivs.reshape( (minpack.Nparameters, minpack.Nmeasured_variables * minpack.Nexperiments * minpack.Ntime_points) )
@@ -267,7 +266,7 @@ class daeMinpackLeastSq:
         
         self.x2 = (self.infodict['fvec']**2).sum()
         self.Ndof = self.Nexperiments * self.Nmeasured_variables - self.Nparameters
-        self.sigma = sqrt(self.x2 / self.Ndof)
+        self.sigma = numpy.sqrt(self.x2 / self.Ndof)
         
     def Finalize(self):
         self.simulation.Finalize()
@@ -300,22 +299,22 @@ class daeMinpackLeastSq:
         if (confidence <= 0) or (confidence > 100):
             raise RuntimeError('Invalid [confidence] argument') 
 
-        X = zeros((2, np))
+        X = numpy.zeros((2, np))
         chol = cholesky(self.cov_x)
-        C = zeros((2,2))
+        C = numpy.zeros((2,2))
         C[0, 0] = chol[x_param_index, x_param_index]
         C[0, 1] = chol[x_param_index, y_param_index]
         C[1, 0] = chol[y_param_index, x_param_index]
         C[1, 1] = chol[y_param_index, y_param_index]
         
-        fi = linspace(0, 2*pi, num = np)
-        X[0, :] = sin(fi)
-        X[1, :] = cos(fi)
-        M = zeros((2, np))
+        fi = numpy.linspace(0, 2*numpy.pi, num = np)
+        X[0, :] = numpy.sin(fi)
+        X[1, :] = numpy.cos(fi)
+        M = numpy.zeros((2, np))
         M[0, :] = self.p_estimated[x_param_index]
         M[1, :] = self.p_estimated[y_param_index]
         k = self.getConfidenceCoefficient(confidence)
-        Y = M + k * dot(C, X)
+        Y = M + k * numpy.dot(C, X)
         
         return (Y[0, :], Y[1, :], [self.p_estimated[x_param_index]], [self.p_estimated[y_param_index]])
 

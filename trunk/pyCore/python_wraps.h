@@ -22,9 +22,32 @@
 #include "../dae_develop.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
+#include "../Core/nodes.h"
+#include "../Core/nodes_array.h"
 
 namespace daepython
 {
+template<typename ITEM>
+boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(boost::ref(arrItems[i]));
+
+    return l;
+}
+
+template<typename ITEM>
+boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(arrItems[i]);
+
+    return l;
+}
 /*******************************************************
 	String functions
 *******************************************************/
@@ -68,6 +91,35 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 void                  daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::python::object value);
 
 /*******************************************************
+	adNode...
+*******************************************************/
+daeParameter* adSetupParameterNode_Parameter(adSetupParameterNode& node);
+boost::python::list adSetupParameterNode_Domains(adSetupParameterNode& node);
+
+daeVariable* adSetupVariableNode_Variable(adSetupVariableNode& node);
+boost::python::list adSetupVariableNode_Domains(adSetupVariableNode& node);
+
+daeVariable* adSetupTimeDerivativeNode_Variable(adSetupTimeDerivativeNode& node);
+boost::python::list adSetupTimeDerivativeNode_Domains(adSetupTimeDerivativeNode& node);
+
+daeVariable* adSetupPartialDerivativeNode_Variable(adSetupPartialDerivativeNode& node);
+daeDomain* adSetupPartialDerivativeNode_Domain(adSetupPartialDerivativeNode& node);
+boost::python::list adSetupPartialDerivativeNode_Domains(adSetupPartialDerivativeNode& node);
+
+
+daeParameter* adRuntimeParameterNode_Parameter(adRuntimeParameterNode& node);
+boost::python::list adRuntimeParameterNode_Domains(adRuntimeParameterNode& node);
+
+daeVariable* adRuntimeVariableNode_Variable(adRuntimeVariableNode& node);
+boost::python::list adRuntimeVariableNode_Domains(adRuntimeVariableNode& node);
+
+daeVariable* adRuntimeTimeDerivativeNode_Variable(adRuntimeTimeDerivativeNode& node);
+boost::python::list adRuntimeTimeDerivativeNode_Domains(adRuntimeTimeDerivativeNode& node);
+
+daeDomain* adDomainIndexNode_Domain(adDomainIndexNode& node);
+
+
+/*******************************************************
 	adouble
 *******************************************************/
 const adouble ad_exp(const adouble &a);
@@ -103,6 +155,9 @@ const adouble ad_min1(const adouble &a, const adouble &b);
 const adouble ad_min2(real_t v, const adouble &a);
 const adouble ad_min3(const adouble &a, real_t v);
 
+const adouble ad_dt(const adouble& a);
+const adouble ad_d(const adouble& a, daeDomain& domain);
+
 const adouble ad_Constant_q(const quantity& q);
 const adouble ad_Constant_c(real_t c);
 const adouble_array adarr_Array(boost::python::list Values);
@@ -123,6 +178,13 @@ const adouble_array adarr_tan(const adouble_array& a);
 const adouble_array adarr_asin(const adouble_array& a);
 const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
+
+const adouble adarr_sum(const adouble_array& a);
+const adouble adarr_product(const adouble_array& a);
+const adouble adarr_min(const adouble_array& a);
+const adouble adarr_max(const adouble_array& a);
+const adouble adarr_average(const adouble_array& a);
+const adouble adarr_integral(const adouble_array& a);
 
 /*******************************************************
 	daeObject
@@ -786,6 +848,7 @@ boost::python::list GetEventPortEventsList(daeEventPort& self);
 //daeEquation* __init__daeEquation(const string& strName, daeModel& model);
 daeDEDI* DistributeOnDomain1(daeEquation& eq, daeDomain& rDomain, daeeDomainBounds eDomainBounds);
 daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python::list l);
+boost::python::list GetEquationExecutionInfos(daeEquation& eq);
 
 /*******************************************************
 	daeModel
@@ -1129,134 +1192,154 @@ public:
 
 	boost::python::list GetDomains(void)
 	{
-		boost::python::list l;
-		daeDomain* obj;
+//		boost::python::list l;
+//		daeDomain* obj;
 
-		for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
-		{
-			obj = m_ptrarrDomains[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrDomains.size(); i++)
+//		{
+//			obj = m_ptrarrDomains[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrDomains);
 	}
 
 	boost::python::list GetParameters(void)
 	{
-		boost::python::list l;
-		daeParameter* obj;
+//		boost::python::list l;
+//		daeParameter* obj;
 
-		for(size_t i = 0; i < m_ptrarrParameters.size(); i++)
-		{
-			obj = m_ptrarrParameters[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrParameters.size(); i++)
+//		{
+//			obj = m_ptrarrParameters[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrParameters);
 	}
 
 	boost::python::list GetVariables(void)
 	{
-		boost::python::list l;
-		daeVariable* obj;
+//		boost::python::list l;
+//		daeVariable* obj;
 
-		for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
-		{
-			obj = m_ptrarrVariables[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
+//		{
+//			obj = m_ptrarrVariables[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrVariables);
 	}
 
 	boost::python::list GetPorts(void)
 	{
-		boost::python::list l;
-		daePort* obj;
+//		boost::python::list l;
+//		daePort* obj;
 
-		for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
-		{
-			obj = m_ptrarrPorts[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
+//		{
+//			obj = m_ptrarrPorts[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrPorts);
 	}
 
 	boost::python::list GetEventPorts(void)
 	{
-		boost::python::list l;
-		daeEventPort* obj;
+//		boost::python::list l;
+//		daeEventPort* obj;
 
-		for(size_t i = 0; i < m_ptrarrEventPorts.size(); i++)
-		{
-			obj = m_ptrarrEventPorts[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrEventPorts.size(); i++)
+//		{
+//			obj = m_ptrarrEventPorts[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrEventPorts);
 	}
 	
 	boost::python::list GetOnEventActions(void)
 	{
-		boost::python::list l;
-		daeOnEventActions* obj;
+//		boost::python::list l;
+//		daeOnEventActions* obj;
 
-		for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
-		{
-			obj = m_ptrarrOnEventActions[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrOnEventActions.size(); i++)
+//		{
+//			obj = m_ptrarrOnEventActions[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrOnEventActions);
 	}
 	
 	boost::python::list GetPortArrays(void)
 	{
-		boost::python::list l;
-		daePortArray* obj;
+//		boost::python::list l;
+//		daePortArray* obj;
 
-		for(size_t i = 0; i < m_ptrarrPortArrays.size(); i++)
-		{
-			obj = m_ptrarrPortArrays[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrPortArrays.size(); i++)
+//		{
+//			obj = m_ptrarrPortArrays[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrPortArrays);
 	}
 
 	boost::python::list GetChildModels(void)
 	{
-		boost::python::list l;
-		daeModel* obj;
+//		boost::python::list l;
+//		daeModel* obj;
 
-		for(size_t i = 0; i < m_ptrarrModels.size(); i++)
-		{
-			obj = m_ptrarrModels[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrModels.size(); i++)
+//		{
+//			obj = m_ptrarrModels[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrModels);
 	}
 
 	boost::python::list GetChildModelArrays(void)
 	{
-		boost::python::list l;
-		daeModelArray* obj;
+//		boost::python::list l;
+//		daeModelArray* obj;
 
-		for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
-		{
-			obj = m_ptrarrModelArrays[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
+//		{
+//			obj = m_ptrarrModelArrays[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrModelArrays);
 	}
 
 	boost::python::list GetSTNs(void)
 	{
-		boost::python::list l;
-		daeSTN* obj;
+//		boost::python::list l;
+//		daeSTN* obj;
 
-		for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
-		{
-			obj = m_ptrarrSTNs[i];
-			l.append(boost::ref(obj));
-		}
-		return l;
+//		for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+//		{
+//			obj = m_ptrarrSTNs[i];
+//			l.append(boost::ref(obj));
+//		}
+//		return l;
+        return getListFromVector(m_ptrarrSTNs);
 	}
-
+    
+    boost::python::list GetEquations(void)
+	{
+        return getListFromVector(m_ptrarrEquations);
+    }
+    
+    boost::python::list GetPortConnections(void)
+	{
+        return getListFromVector(m_ptrarrPortConnections);
+    }
+    
 	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
 	{
 		daeObject* pObject;

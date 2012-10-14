@@ -40,14 +40,14 @@ class modTutorial(daeModel):
         self.x  = daeDomain("x", self, m, "X axis domain")
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
-        self.Qb = daeVariable("Q_b",  heat_flux_t, self, "Heat flux at the bottom edge of the plate, W/m2")
-        self.Qt = daeParameter("Q_t",    W/(m**2), self, "Heat flux at the top edge of the plate, W/m2")
+        self.Qb = daeVariable("Q_b",  heat_flux_t, self, "Heat flux at the bottom edge of the plate")
+        self.Qt = daeParameter("Q_t",    W/(m**2), self, "Heat flux at the top edge of the plate")
 
-        self.ro = daeParameter("&rho;",   kg/(m**3), self, "Density of the plate, kg/m3")
-        self.cp = daeParameter("c_p",      J/(kg*K), self, "Specific heat capacity of the plate, J/kgK")
-        self.k  = daeParameter("&lambda;",  W/(m*K), self, "Thermal conductivity of the plate, W/mK")
+        self.ro = daeParameter("&rho;",   kg/(m**3), self, "Density of the plate")
+        self.cp = daeParameter("c_p",      J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k  = daeParameter("&lambda;",  W/(m*K), self, "Thermal conductivity of the plate")
 
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate, K")
+        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
 
@@ -112,7 +112,7 @@ class simTutorial(daeSimulation):
     # In this example we first assign the value of Qb to 1E6 and then use the function IntegrateForTimeInterval
     # to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after
     # you finished with re-assigning or re-setting the initial conditions you have to call the function
-    # Reinitialize from daeDynamicSimulation class. The function Reinitialize reinitializes the DAE solver
+    # Reinitialize from daeSimulation class. The function Reinitialize reinitializes the DAE solver
     # and clears all previous data accumulated in the solver. Also, you can call the function ReportData
     # at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization
     # we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and

@@ -39,7 +39,8 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def("__str__",		&daepython::unit__str__)
 		.def("__repr__",	&daepython::unit__repr__)
 
-		.add_property("baseUnit",	&unit::getBaseUnit)
+		.add_property("baseUnit",	    &unit::getBaseUnit)
+        .add_property("unitDictionary",	&daepython::unit_get_units_dict)
         
 		.def(self * self)
 		.def(self / self)

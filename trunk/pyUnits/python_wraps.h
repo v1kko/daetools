@@ -14,6 +14,18 @@ using namespace units;
 
 namespace daepython
 {
+template<typename KEY, typename VALUE>
+boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+{
+    typedef typename std::map<KEY,VALUE>::const_iterator c_iterator;
+
+    boost::python::dict d;
+    for(c_iterator iter = mapItems.begin(); iter != mapItems.end(); iter++)
+        d[iter->first] = iter->second;
+
+    return d;
+}
+
 /*******************************************************
 	base_unit
 *******************************************************/
@@ -73,6 +85,11 @@ string unit__str__(unit& self)
 string unit__repr__(unit& self)
 {
 	return (boost::format("unit(%s)") % self).str();
+}
+
+boost::python::dict unit_get_units_dict(unit& self)
+{
+    return getDictFromMapByValue(self.units);
 }
 
 /*******************************************************

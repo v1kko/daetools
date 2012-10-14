@@ -454,6 +454,90 @@ string adouble_repr(const adouble& self)
 }
 
 /*******************************************************
+	adNode...
+*******************************************************/
+daeParameter* adSetupParameterNode_Parameter(adSetupParameterNode& node)
+{
+    return node.m_pParameter;
+}
+
+boost::python::list adSetupParameterNode_Domains(adSetupParameterNode& node)
+{
+    return getListFromVector(node.m_arrDomains);
+}
+
+daeVariable* adSetupVariableNode_Variable(adSetupVariableNode& node)
+{
+    return node.m_pVariable;
+}
+
+boost::python::list adSetupVariableNode_Domains(adSetupVariableNode& node)
+{
+    return getListFromVector(node.m_arrDomains);
+}
+
+daeVariable* adSetupTimeDerivativeNode_Variable(adSetupTimeDerivativeNode& node)
+{
+    return node.m_pVariable;
+}
+
+boost::python::list adSetupTimeDerivativeNode_Domains(adSetupTimeDerivativeNode& node)
+{
+    return getListFromVector(node.m_arrDomains);
+}
+
+daeVariable* adSetupPartialDerivativeNode_Variable(adSetupPartialDerivativeNode& node)
+{
+    return node.m_pVariable;
+}
+
+daeDomain* adSetupPartialDerivativeNode_Domain(adSetupPartialDerivativeNode& node)
+{
+    return node.m_pDomain;
+}
+
+boost::python::list adSetupPartialDerivativeNode_Domains(adSetupPartialDerivativeNode& node)
+{
+    return getListFromVector(node.m_arrDomains);
+}
+
+
+daeParameter* adRuntimeParameterNode_Parameter(adRuntimeParameterNode& node)
+{
+    return node.m_pParameter;
+}
+
+boost::python::list adRuntimeParameterNode_Domains(adRuntimeParameterNode& node)
+{
+    return getListFromVectorByValue(node.m_narrDomains);
+}
+
+daeVariable* adRuntimeVariableNode_Variable(adRuntimeVariableNode& node)
+{
+    return node.m_pVariable;
+}
+
+boost::python::list adRuntimeVariableNode_Domains(adRuntimeVariableNode& node)
+{
+    return getListFromVectorByValue(node.m_narrDomains);
+}
+
+daeVariable* adRuntimeTimeDerivativeNode_Variable(adRuntimeTimeDerivativeNode& node)
+{
+    return node.m_pVariable;
+}
+
+boost::python::list adRuntimeTimeDerivativeNode_Domains(adRuntimeTimeDerivativeNode& node)
+{
+    return getListFromVectorByValue(node.m_narrDomains);
+}
+
+daeDomain* adDomainIndexNode_Domain(adDomainIndexNode& node)
+{
+    return node.m_pDomain;
+}
+
+/*******************************************************
 	adouble
 *******************************************************/
 const adouble ad_Constant_q(const quantity& q)
@@ -612,6 +696,14 @@ const adouble ad_min3(const adouble &a, real_t v)
 {
 	return min(a,v);
 }
+const adouble ad_dt(const adouble& a)
+{
+    return dt(a);   
+}
+const adouble ad_d(const adouble& a, daeDomain& domain)
+{
+    return d(a, domain);     
+}
 
 /*******************************************************
 	adouble_array
@@ -667,6 +759,31 @@ const adouble_array adarr_acos(const adouble_array& a)
 const adouble_array adarr_atan(const adouble_array& a)
 {
 	return atan(a);
+}
+
+const adouble adarr_sum(const adouble_array& a)
+{
+	return sum(a);
+}
+const adouble adarr_product(const adouble_array& a)
+{
+	return product(a);
+}
+const adouble adarr_min(const adouble_array& a)
+{
+	return min(a);
+}
+const adouble adarr_max(const adouble_array& a)
+{
+	return max(a);
+}
+const adouble adarr_average(const adouble_array& a)
+{
+	return average(a);
+}
+const adouble adarr_integral(const adouble_array& a)
+{
+	return integral(a);
 }
 
 /*******************************************************
@@ -1984,6 +2101,13 @@ daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python:
 	}
 
 	 return eq.DistributeOnDomain(rDomain, narrDomainIndexes);
+}
+
+boost::python::list GetEquationExecutionInfos(daeEquation& eq)
+{
+    std::vector<daeEquationExecutionInfo*> ptrarr;
+    eq.GetEquationExecutionInfos(ptrarr);
+    return getListFromVector(ptrarr);
 }
 
 /*******************************************************

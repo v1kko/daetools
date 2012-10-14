@@ -47,7 +47,7 @@ public:
 	bool IsLinear(void) const;
 	bool IsFunctionOfVariables(void) const;
 	
-	virtual void GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 };
 
 /*********************************************************************************************
@@ -64,14 +64,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -96,14 +96,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -127,14 +127,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -142,10 +142,10 @@ public:
 
 public:
 // Runtime part
-	vector<adNodePtr>		m_ptrarrParameterNodes;
+	std::vector<adNodePtr>		m_ptrarrParameterNodes;
 // Report/GUI part
 	daeParameter*			m_pParameter;
-	vector<daeArrayRange>	m_arrRanges;
+	std::vector<daeArrayRange>	m_arrRanges;
 };
 */
 /*********************************************************************************************
@@ -161,14 +161,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -176,10 +176,10 @@ public:
 
 public:
 // Runtime part
-	vector< adNodePtr >		m_ptrarrVariableNodes;
+	std::vector< adNodePtr >		m_ptrarrVariableNodes;
 // Report/GUI part
 	daeVariable*							m_pVariable;
-	vector<daeArrayRange>					m_arrRanges;
+	std::vector<daeArrayRange>					m_arrRanges;
 };
 */
 /*********************************************************************************************
@@ -195,24 +195,24 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual const quantity	GetQuantity(void) const;
 
 public:
 // Runtime part
-	vector< adNodePtr >	m_ptrarrTimeDerivativeNodes;
+	std::vector< adNodePtr >	m_ptrarrTimeDerivativeNodes;
 	size_t								m_nDegree;
 // Report/GUI part
 	daeVariable*						m_pVariable;
-	vector<daeArrayRange>				m_arrRanges;
+	std::vector<daeArrayRange>				m_arrRanges;
 };
 */
 /*********************************************************************************************
@@ -228,14 +228,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -243,12 +243,12 @@ public:
 
 public:
 // Runtime part
-	vector< adNodePtr >	m_ptrarrPartialDerivativeNodes;
+	std::vector< adNodePtr >	m_ptrarrPartialDerivativeNodes;
 	size_t								m_nDegree;
 // Report/GUI part
 	daeVariable*						m_pVariable;
 	daeDomain*							m_pDomain;
-	vector<daeArrayRange>				m_arrRanges;
+	std::vector<daeArrayRange>				m_arrRanges;
 };
 */
 /*********************************************************************************************
@@ -270,9 +270,9 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
@@ -299,7 +299,7 @@ public:
 						  daeModel* pModel,
 						  adNodeArrayPtr n,
 	                      daeDomain* pDomain,
-						  const vector<const real_t*>& pdarrPoints);
+						  const std::vector<const real_t*>& pdarrPoints);
 	virtual ~adRuntimeIntegralNode(void);
 
 public:
@@ -307,9 +307,9 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
@@ -320,7 +320,7 @@ public:
 	daeModel*						m_pModel;
 	daeeIntegralFunctions			eFunction;
 	daeDomain*						m_pDomain;
-	vector<const real_t*>			m_pdarrPoints;
+	std::vector<const real_t*>		m_pdarrPoints;
 };
 */
 /*********************************************************************************************
@@ -336,14 +336,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -351,8 +351,8 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	adNodeArrayPtr	node;
-	daeeUnaryFunctions				eFunction;
+	adNodeArrayPtr      node;
+	daeeUnaryFunctions	eFunction;
 };
 
 /*********************************************************************************************
@@ -368,14 +368,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool			IsLinear(void) const;
 	virtual bool			IsFunctionOfVariables(void) const;
@@ -383,9 +383,9 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	adNodeArrayPtr	left;
-	adNodeArrayPtr	right;
-	daeeBinaryFunctions				eFunction;
+	adNodeArrayPtr          left;
+	adNodeArrayPtr          right;
+	daeeBinaryFunctions		eFunction;
 };
 
 /*********************************************************************************************
@@ -397,7 +397,6 @@ public:
 	daeDeclareDynamicClass(adSetupSpecialFunctionNode)
 	adSetupSpecialFunctionNode(void);
 	adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-					           daeModel* pModel,
 							   adNodeArrayPtr n);
 	virtual ~adSetupSpecialFunctionNode(void);
 
@@ -406,9 +405,9 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
@@ -416,9 +415,8 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	daeModel*						m_pModel;
-	adNodeArrayPtr	node;
-	daeeSpecialUnaryFunctions		eFunction;
+	adNodeArrayPtr              node;
+	daeeSpecialUnaryFunctions	eFunction;
 };
 
 /*********************************************************************************************
@@ -429,7 +427,7 @@ class DAE_CORE_API adSetupExpressionDerivativeNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adSetupExpressionDerivativeNode)
 	adSetupExpressionDerivativeNode(void);
-	adSetupExpressionDerivativeNode(daeModel* pModel, adNodePtr n);
+	adSetupExpressionDerivativeNode(adNodePtr n);
 	virtual ~adSetupExpressionDerivativeNode(void);
 
 public:
@@ -437,9 +435,9 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
@@ -448,9 +446,8 @@ protected:
 	adNodePtr calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
 	
 public:
-	daeModel*					m_pModel;
 	adNodePtr	node;
-	size_t						m_nDegree;
+	size_t		m_nDegree;
 };
 
 /*********************************************************************************************
@@ -461,7 +458,7 @@ class DAE_CORE_API adSetupExpressionPartialDerivativeNode : public adNodeImpl
 public:
 	daeDeclareDynamicClass(adSetupExpressionPartialDerivativeNode)
 	adSetupExpressionPartialDerivativeNode(void);
-	adSetupExpressionPartialDerivativeNode(daeModel* pModel, daeDomain* pDomain, adNodePtr n);
+	adSetupExpressionPartialDerivativeNode(daeDomain* pDomain, adNodePtr n);
 	virtual ~adSetupExpressionPartialDerivativeNode(void);
 
 public:
@@ -469,9 +466,9 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
@@ -480,10 +477,9 @@ protected:
 	adNodePtr calc_d(adNodePtr n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const;
 	
 public:
-	daeModel*					m_pModel;
-	daeDomain*					m_pDomain;
+	daeDomain*	m_pDomain;
 	adNodePtr	node;
-	size_t						m_nDegree;
+	size_t		m_nDegree;
 };
 
 /*********************************************************************************************
@@ -495,7 +491,6 @@ public:
 	daeDeclareDynamicClass(adSetupIntegralNode)
 	adSetupIntegralNode(void);
 	adSetupIntegralNode(daeeIntegralFunctions eFun,
-					    daeModel* pModel,
 						adNodeArrayPtr n,
 		                daeDomain* pDomain,
 						const daeArrayRange& arrayRange);
@@ -506,19 +501,18 @@ public:
 	virtual adNode*	Clone(void) const;
 	virtual void	Open(io::xmlTag_t* pTag);
 	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	daeModel*						m_pModel;
-	adNodeArrayPtr	node;
-	daeDomain*						m_pDomain;
-	daeeIntegralFunctions			eFunction;
-	daeArrayRange					m_ArrayRange;
+	adNodeArrayPtr          node;
+	daeDomain*				m_pDomain;
+	daeeIntegralFunctions	eFunction;
+	daeArrayRange			m_ArrayRange;
 };
 
 /*********************************************************************************************
@@ -534,14 +528,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
@@ -559,26 +553,26 @@ public:
 	daeDeclareDynamicClass(adSetupParameterNodeArray)
 	adSetupParameterNodeArray(void);
 	adSetupParameterNodeArray(daeParameter* pParameter,
-							  vector<daeArrayRange>& arrRanges);
+							  std::vector<daeArrayRange>& arrRanges);
 	virtual ~adSetupParameterNodeArray(void);
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	daeParameter*			m_pParameter;
-	vector<daeArrayRange>	m_arrRanges;
+	daeParameter*               m_pParameter;
+	std::vector<daeArrayRange>	m_arrRanges;
 };
 
 /*********************************************************************************************
@@ -590,26 +584,26 @@ public:
 	daeDeclareDynamicClass(adSetupVariableNodeArray)
 	adSetupVariableNodeArray(void);
 	adSetupVariableNodeArray(daeVariable* pVariable,
-	                         vector<daeArrayRange>& arrRanges);
+	                         std::vector<daeArrayRange>& arrRanges);
 	virtual ~adSetupVariableNodeArray(void);
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	daeVariable*			m_pVariable;
-	vector<daeArrayRange>	m_arrRanges;
+	daeVariable*                m_pVariable;
+	std::vector<daeArrayRange>	m_arrRanges;
 };
 
 /*********************************************************************************************
@@ -622,27 +616,27 @@ public:
 	adSetupTimeDerivativeNodeArray(void);
 	adSetupTimeDerivativeNodeArray(daeVariable* pVariable, 
 	                               size_t nDegree,
-							       vector<daeArrayRange>& arrRanges);
+							       std::vector<daeArrayRange>& arrRanges);
 	virtual ~adSetupTimeDerivativeNodeArray(void);
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	daeVariable*			m_pVariable;
-	size_t					m_nDegree;
-	vector<daeArrayRange>	m_arrRanges;
+	daeVariable*                m_pVariable;
+	size_t                      m_nDegree;
+	std::vector<daeArrayRange>	m_arrRanges;
 };
 
 /*********************************************************************************************
@@ -655,29 +649,29 @@ public:
 	adSetupPartialDerivativeNodeArray(void);
 	adSetupPartialDerivativeNodeArray(daeVariable* pVariable, 
 	                                  size_t nDegree, 
-								      vector<daeArrayRange>& arrRanges,
+								      std::vector<daeArrayRange>& arrRanges,
 								      daeDomain* pDomain);
 	virtual ~adSetupPartialDerivativeNodeArray(void);
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	daeVariable*			m_pVariable;
-	daeDomain*				m_pDomain;
-	size_t					m_nDegree;
-	vector<daeArrayRange>	m_arrRanges;
+	daeVariable*                m_pVariable;
+	daeDomain*                  m_pDomain;
+	size_t                      m_nDegree;
+	std::vector<daeArrayRange>	m_arrRanges;
 };
 
 
@@ -693,14 +687,14 @@ public:
 
 public:
 	virtual size_t			GetSize(void) const;
-	virtual void			GetArrayRanges(vector<daeArrayRange>& arrRanges) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
 	virtual adNodeArray*	Clone(void) const;
 	virtual void			Open(io::xmlTag_t* pTag);
 	virtual void			Save(io::xmlTag_t* pTag) const;
-	virtual string			SaveAsLatex(const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
-	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeSaveAsMathMLContext* c) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
@@ -710,7 +704,7 @@ public:
 };
 
 
-inline void FillDomains(const vector<daeArrayRange>& arrRanges, vector<string>& strarrDomains)
+inline void FillDomains(const std::vector<daeArrayRange>& arrRanges, std::vector<string>& strarrDomains)
 {
 	size_t n = arrRanges.size();
 	strarrDomains.resize(n);
