@@ -547,7 +547,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 /**************************************************************************************
   New code; just we need is to add variable indexes to the equation
 **************************************************************************************/
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		if(m_pModel->m_pExecutionContextForGatherInfo)
 		{
@@ -569,7 +569,7 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
   Old code; all this seems non necessary (we dont need values in this function)
   Just we need is to add variable indexes to the equation
 ***************************************************************************************   
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnAssigned)
 	{
 		tmp.setValue(GetValueAt(nIndex));
 		tmp.setDerivative(0); // Since it is assigned value
@@ -712,7 +712,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 
 	nIndex = m_nOverallIndex + CalculateIndex(indexes, N);
 
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) == cnAssigned)
 	{	
 		daeDeclareException(exInvalidCall); 
 		e << "Differential variable [" << GetCanonicalName() << "] cannot be fixed";

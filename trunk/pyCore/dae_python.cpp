@@ -161,6 +161,13 @@ BOOST_PYTHON_MODULE(pyCore)
 //	def("daeBoostVersionBuild",			&dae::daeBoostVersionBuild);
 	
 /**************************************************************
+    Global constants
+***************************************************************/
+    boost::python::scope().attr("cnNormal")       = cnNormal;
+    boost::python::scope().attr("cnDifferential") = cnDifferential;
+    boost::python::scope().attr("cnAssigned")     = cnAssigned;
+    
+/**************************************************************
 	Classes
 ***************************************************************/
 	class_<daeVariableWrapper>("daeVariableWrapper", no_init)
@@ -677,9 +684,12 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
 		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >())
 		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >())
-		.add_property("Domains",		&daepython::daeVariable_Wrapper::GetDomains)
+		
+        .add_property("Domains",		&daepython::daeVariable_Wrapper::GetDomains)
 		.add_property("VariableType",	make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()) )
 		.add_property("ReportingOn",	&daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
+        .add_property("OverallIndex",	&daeVariable::GetOverallIndex)
+        .add_property("NumberOfPoints",	&daeVariable::GetNumberOfPoints)
 
 		.def("__str__",					&daepython::daeVariable_str) 
 		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain)

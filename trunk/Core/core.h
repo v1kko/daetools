@@ -26,7 +26,7 @@ namespace core
 // cnNormal must be zero!!
 const int cnNormal		 = 0;
 const int cnDifferential = 1;
-const int cnFixed		 = 2;
+const int cnAssigned	 = 2;
 
 enum daeeDomainType
 {

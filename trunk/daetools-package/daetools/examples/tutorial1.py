@@ -283,7 +283,7 @@ def consoleRun():
     simulation.SolveInitial()
 
     from daeModelicaExport import daeModelicaExport
-    ex = daeModelicaExport(simulation.m)
+    ex = daeModelicaExport(simulation)
     print '\n'
     ex.export()
 

@@ -3491,7 +3491,7 @@ void daeModel::GetModelInfo(daeModelInfo& mi) const
 			mi.m_nNumberOfStateVariables++;
 		else if(m_pDataProxy->GetVariableType(i) == cnDifferential)
 			mi.m_nNumberOfInitialConditions++;
-		else if(m_pDataProxy->GetVariableType(i) == cnFixed)
+		else if(m_pDataProxy->GetVariableType(i) == cnAssigned)
 			mi.m_nNumberOfFixedVariables++;
 	}
 	

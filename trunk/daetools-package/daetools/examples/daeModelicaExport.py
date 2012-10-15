@@ -1,6 +1,12 @@
 import sys
 from daetools.pyDAE import *
 
+portTemplate = """connector %(port)s
+public
+%(variables)s
+end %(port)s;
+"""
+
 modelTemplate = """class %(model)s
 public
 // Parameters:
@@ -8,7 +14,6 @@ public
 
 // Variables:
 %(variables)s
-
 // Components:
 %(units)s
 
@@ -42,24 +47,66 @@ def unitFormat(unit):
     return '.'.join(res)
     
 class daeModelicaExport:
-    def __init__(self, model):
-        self.model = model
-        
+    def __init__(self, simulation):
+        self.ports         = {}
+        self.models        = {}
+        self.initialValues = {}
+        self.topLevelModel = simulation.m
+        self.simulation    = simulation
+
+        self.models[self.simulation.m.__class__] = self.simulation.m
+        self.collectObjects(self.simulation.m)
+
+    def collectObjects(self, model):
+        for port in model.Ports:
+            if not port.__class__ in self.ports:
+                self.ports[port.__class__] = port
+
+        for model in model.Models:
+            if not model.__class__ in self.models:
+                self.models[model.__class__] = model
+
+        print 'Models collected:', self.models
+        print 'Ports collected:', self.ports
+
     def export(self):
+        result = ''
+        for port_class, port in self.ports.items():
+            result += self.exportPort(port) 
+        for model_class, model in self.models.items():
+            result += self.exportModel(model)
+        print result
+        #print '\n'.join('  {0} = {1};'.format(key, value) for key, value in self.initialValues.items())
+        print ','.join('{0}={1}'.format(key, value) for key, value in self.initialValues.items())
+        
+    def exportPort(self, port):
+        return ''
+    
+    def exportModel(self, model):
         sParameters = []
         sVariables  = []
         sUnits      = []
         sEquations  = []
+
+        varTypes   = self.simulation.VariableTypes
+        initValues = self.simulation.InitialValues
+
+        # cnNormal = 0, cnDifferential = 1, cnAssigned = 2
+        for domain in model.Domains:
+            canonicalName = nameFormat(daeGetRelativeName(self.topLevelModel, domain))
+            sParameters.append('  parameter Integer {0}_np = {1} "Number of points in domain {0}";'.format(nameFormat(domain.Name),
+                                                                                                          domain.NumberOfPoints) )
         
-        for domain in self.model.Domains:
-            sParameters.append( '    parameter Integer {0}_np = {1} "Number of points in domain {0}";'.format(nameFormat(domain.Name),
-                                                                                                              domain.NumberOfPoints) )
-            sParameters.append( '    parameter Real[{0}_np] {1}(unit="{2}") = {{{3}}} "{4}";'.format(nameFormat(domain.Name),
-                                                                                                     nameFormat(domain.Name),
-                                                                                                     unitFormat(domain.Units),
-                                                                                                     ','.join(str(p) for p in domain.Points),
-                                                                                                     domain.Description) )
-        for parameter in self.model.Parameters:
+            sParameters.append('  parameter Real[{0}_np] {1}(unit="{2}") = {{{3}}} "{4}";\n'.format(nameFormat(domain.Name),
+                                                                                                    nameFormat(domain.Name),
+                                                                                                    unitFormat(domain.Units),
+                                                                                                    ','.join(str(p) for p in domain.Points),
+                                                                                                    domain.Description) )
+            self.initialValues[canonicalName+'_np'] = str(domain.NumberOfPoints)
+            self.initialValues[canonicalName]       = '{{{0}}}'.format(','.join(str(p) for p in domain.Points))
+                                                                                                        
+        for parameter in model.Parameters:
+            canonicalName = nameFormat(daeGetRelativeName(self.topLevelModel, parameter))
             values = ''
             if len(parameter.Domains) > 0:
                 domains = '[{0}]'.format(','.join(nameFormat(d.Name)+'_np' for d in parameter.Domains))
@@ -71,44 +118,85 @@ class daeModelicaExport:
                 domains = ''
                 values = str(parameter.GetValue())
 
-            sParameters.append( '    parameter Real{0} {1}(unit="{2}") = {3} "{4}";'.format(domains,
-                                                                                            nameFormat(parameter.Name),
-                                                                                            unitFormat(parameter.Units),
-                                                                                            values,
-                                                                                            parameter.Description) )
+            sParameters.append('  parameter Real{0} {1}(unit="{2}") = {3} "{4}";'.format(domains,
+                                                                                         nameFormat(parameter.Name),
+                                                                                         unitFormat(parameter.Units),
+                                                                                         values,
+                                                                                         parameter.Description) )
+            self.initialValues[canonicalName] = values
 
-        for variable in self.model.Variables:
-            values = ''
+        for variable in model.Variables:
+            canonicalName = nameFormat(daeGetRelativeName(self.topLevelModel, variable))
+            startValue    = ''
+            assignedValue = ''
             if len(variable.Domains) > 0:
                 domains = '[{0}]'.format(','.join(nameFormat(d.Name)+'_np' for d in variable.Domains))
-                #_vals = []
-                #for domain in variable.Domains:
-                #    _vals.append('{{{0}}}'.format(','.join(str(p) for p in domain.Points)))
-                #values = '{{{0}}}'.format(','.join(_vals))
-                values = '0.0'
+                isDiff     = False
+                isAssigned = False
+                isNormal   = False
+                for vt in varTypes[variable.OverallIndex : variable.OverallIndex+variable.NumberOfPoints]:
+                    if vt == cnDifferential:
+                        isDiff = True
+                    elif vt == cnAssigned:
+                        isAssigned = True
+                    else:
+                        isNormal = True
+
+                if isDiff and not isAssigned and not isNormal:
+                    varType = 'all differential'
+                    startValue = 'start = 0.0, '
+                elif not isDiff and isAssigned and not isNormal:
+                    varType = 'all assigned'
+                elif not isDiff and not isAssigned and isNormal:
+                    varType = 'all state'
+                elif isDiff and not isAssigned and isNormal:
+                    varType = 'differential or state'
+                    startValue = 'start = 0.0, '
+                elif isDiff and isAssigned and not isNormal:
+                    varType = 'differential or assigned'
+                    startValue = 'start = 0.0, '
+                elif not isDiff and isAssigned and isNormal:
+                    varType = 'assigned or state'
+                else:
+                    varType = 'differential, assigned or state'
+                    startValue = 'start = 0.0, '                    
+
             else:
                 domains = ''
-                values = str(variable.GetValue())
+                if varTypes[variable.OverallIndex] == cnDifferential:
+                    varType = 'differential'
+                    startValue = 'start = {0}, '.format(variable.GetValue())
 
-            sVariables.append( '    Real{0} {1}(start={2}, unit="{3}") "{4}";'.format(domains,
-                                                                                      nameFormat(variable.Name),
-                                                                                      values,
-                                                                                      unitFormat(variable.VariableType.Units),
-                                                                                      variable.Description) )
+                elif varTypes[variable.OverallIndex] == cnAssigned:
+                    varType = 'assigned'
+                    assignedValue = '= {0}'.format(variable.GetValue())
+
+                else:
+                    varType = 'state'
+
+            sVariables.append('  // Type of variable(s): {0}'.format(varType))
+            sVariables.append('  Real{0} {1}({2}unit="{3}") {4} "{5}";\n'.format(domains,
+                                                                                     nameFormat(variable.Name),
+                                                                                     startValue,
+                                                                                     unitFormat(variable.VariableType.Units),
+                                                                                     assignedValue,
+                                                                                     variable.Description) )
+            self.initialValues[canonicalName] = assignedValue
                                                                           
-        for equation in self.model.Equations:
+        for equation in model.Equations:
             for eeinfo in equation.EquationExecutionInfos:
                 node = eeinfo.Node
-                sEquations.append('    {0} = 0;'.format(self.processNode(node)))
+                sEquations.append('  {0} = 0;'.format(self.processNode(node)))
 
         dictModel = {
-                      'model'      : nameFormat(self.model.Name),
-                      'parameters' : '\n'.join(sParameters),
-                      'variables'  : '\n'.join(sVariables),
-                      'units'      : '\n'.join(sUnits),
-                      'equations'  : '\n'.join(sEquations)
+                      'model'             : nameFormat(model.Name),
+                      'parameters'        : '\n'.join(sParameters),
+                      'variables'         : '\n'.join(sVariables),
+                      'units'             : '\n'.join(sUnits),
+                      'equations'         : '\n'.join(sEquations)
                     }
-        print modelTemplate % dictModel
+        result = modelTemplate % dictModel
+        return result
         
     def processNode(self, node):
         res = ''

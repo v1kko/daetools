@@ -520,7 +520,7 @@ void daeVariable::AssignValues(real_t dValues)
 	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
 	{
 		m_pModel->m_pDataProxy->AssignValue(m_nOverallIndex + i, dValues);
-		m_pModel->m_pDataProxy->SetVariableType(m_nOverallIndex + i, cnFixed);
+		m_pModel->m_pDataProxy->SetVariableType(m_nOverallIndex + i, cnAssigned);
 	}	
 }
 
@@ -533,7 +533,7 @@ void daeVariable::AssignValue(real_t dValue)
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, real_t dValue)
@@ -546,7 +546,7 @@ void daeVariable::AssignValue(size_t nD1, real_t dValue)
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, real_t dValue)
@@ -559,7 +559,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, real_t dValue)
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValue)
@@ -572,7 +572,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValue)
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, real_t dValue)
@@ -585,7 +585,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, re
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, real_t dValue)
@@ -598,7 +598,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dValue)
@@ -611,7 +611,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dValue)
@@ -624,7 +624,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dValue)
@@ -637,7 +637,7 @@ void daeVariable::AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, si
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
 	m_pModel->m_pDataProxy->AssignValue(nIndex, dValue);
-	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnFixed);
+	m_pModel->m_pDataProxy->SetVariableType(nIndex, cnAssigned);
 }
 
 void daeVariable::AssignValues(const quantity& q)
@@ -710,7 +710,7 @@ void daeVariable::ReAssignValues(real_t dValues)
 	size_t nTotalNumberOfVariables = GetNumberOfPoints();
 	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
 	{
-		if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnFixed)
+		if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnAssigned)
 		{
 			daeDeclareException(exInvalidCall);
 			e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -728,7 +728,7 @@ void daeVariable::ReAssignValue(real_t dValue)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -746,7 +746,7 @@ void daeVariable::ReAssignValue(size_t nD1, real_t dValue)
 
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -764,7 +764,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, real_t dValue)
 
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -782,7 +782,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, real_t dValu
 
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -800,7 +800,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -818,7 +818,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -836,7 +836,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -854,7 +854,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";
@@ -872,7 +872,7 @@ void daeVariable::ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, 
 
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnFixed)
+	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnAssigned)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reassign the value of the state variable for [" << GetCanonicalName() << "] variable";

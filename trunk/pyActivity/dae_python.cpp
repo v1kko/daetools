@@ -71,7 +71,10 @@ BOOST_PYTHON_MODULE(pyActivity)
 												&daepython::daeDefaultSimulationWrapper::SetModel_)
 		.add_property("m",                      &daepython::daeDefaultSimulationWrapper::GetModel_,
 												&daepython::daeDefaultSimulationWrapper::SetModel_)  
-        
+
+        .add_property("InitialValues",          &daepython::daeDefaultSimulationWrapper::GetInitialValues)
+        .add_property("VariableTypes",          &daepython::daeDefaultSimulationWrapper::GetVariableTypes)
+            
 		.add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_)
 		.add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_)
 		.add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_)  

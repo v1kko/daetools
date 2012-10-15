@@ -946,7 +946,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		
 		if(m_nBlockIndex == ULONG_MAX)
 		{
-			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
+			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnAssigned)
 			{
 				self->m_nBlockIndex = m_nOverallIndex;
 				self->m_bIsAssigned = true;
@@ -986,7 +986,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		{
 			//If it is fixed variable then its derivative per parameter is 0
 			//Otherwise take the value from the DataProxy
-			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnFixed)
+			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnAssigned)
 			{
 				return adouble(value, 0);
 			}
@@ -1116,7 +1116,7 @@ void adRuntimeVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapInde
 		if(!m_pVariable || !m_pVariable->m_pModel || !m_pVariable->m_pModel->GetDataProxy())
 			daeDeclareAndThrowException(exInvalidPointer);
 		
-		if(m_pVariable->m_pModel->GetDataProxy()->GetVariableType(m_nOverallIndex) != cnFixed)
+		if(m_pVariable->m_pModel->GetDataProxy()->GetVariableType(m_nOverallIndex) != cnAssigned)
 			mapIndexes.insert(mapPair);
 	}
 }

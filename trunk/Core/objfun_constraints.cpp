@@ -646,7 +646,7 @@ bool daeOptimizationVariable::CheckObject(vector<string>& strarrErrors) const
 	size_t index = GetOverallIndex();
 	int type = m_pVariable->m_pModel->m_pDataProxy->GetVariableType(index);
 
-	if(type != cnFixed)
+	if(type != cnAssigned)
 	{
 		strError = "Optimization variable [" + m_pVariable->GetCanonicalName() + "] must be assigned (cannot be a state-variable)";
 		strarrErrors.push_back(strError);

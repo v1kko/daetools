@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 """
-October 2012 by Caleb Huttingh:
+October 2012 by Caleb Hattingh:
   - 3D plot bug fix when detecting free domains
   - code refactoring
 """

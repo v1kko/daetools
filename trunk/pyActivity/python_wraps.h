@@ -26,6 +26,28 @@
 
 namespace daepython
 {
+template<typename ITEM>
+boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(arrItems[i]);
+
+    return l;
+}
+
+template<typename ITEM>
+boost::python::list getListFromVectorByValue(const ITEM* pItems, size_t n)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < n; i++)
+        l.append(pItems[i]);
+
+    return l;
+}
+
 class daeSimulationWrapper : public daeSimulation_t,
 							 public boost::python::wrapper<daeSimulation_t>
 {
@@ -181,7 +203,28 @@ public:
 	{
 		return model;
 	}
-	
+
+    boost::python::list GetInitialValues(void) const
+	{
+        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        size_t  nVars      = pDataProxy->GetTotalNumberOfVariables();
+        real_t* pInitConds = pDataProxy->GetInitialValuesPointer();        
+        return getListFromVectorByValue(pInitConds, nVars);
+	}
+
+    boost::python::list GetVariableTypes(void) const
+	{
+        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        size_t  nVars     = pDataProxy->GetTotalNumberOfVariables();
+        real_t* pVarTypes = pDataProxy->GetVariableTypesPointer();  
+        
+        boost::python::list l;       
+        for(size_t i = 0; i < nVars; i++)
+            l.append(static_cast<int>(pVarTypes[i]));
+    
+        return l;
+	}
+    
 	boost::python::object GetDataReporter_(void) const
 	{
 		return datareporter;

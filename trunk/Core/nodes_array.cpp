@@ -3387,7 +3387,7 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
 	else if( dynamic_cast<adRuntimeVariableNode*>(adnode) )
 	{
 		adRuntimeVariableNode* rtnode = dynamic_cast<adRuntimeVariableNode*>(adnode);
-	// Here we do not check if the variable is fixed (cnFixed) and do not add it to list of derivative variables !!!
+	// Here we do not check if the variable is fixed (cnAssigned) and do not add it to list of derivative variables !!!
 	//	adRuntimeTimeDerivativeNode* devnode = new adRuntimeTimeDerivativeNode();
 	//	tmp = adNodePtr(devnode);
 	//	devnode->m_pVariable        = rtnode->m_pVariable;
