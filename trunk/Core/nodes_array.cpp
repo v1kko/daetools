@@ -3048,9 +3048,9 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 	{
 	case eSum:
 		if(eLanguage == eCDAE)
-			strContent += "sum(";
+			strContent += "Sum(";
 		else if(eLanguage == ePYDAE)
-			strContent += "sum(";
+			strContent += "Sum(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3058,9 +3058,9 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		break;
 	case eProduct:
 		if(eLanguage == eCDAE)
-			strContent += "product(";
+			strContent += "Product(";
 		else if(eLanguage == ePYDAE)
-			strContent += "product(";
+			strContent += "Product(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3068,9 +3068,9 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		break;
 	case eMinInArray:
 		if(eLanguage == eCDAE)
-			strContent += "min(";
+			strContent += "Min(";
 		else if(eLanguage == ePYDAE)
-			strContent += "min(";
+			strContent += "Min(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3078,9 +3078,9 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		break;
 	case eMaxInArray:
 		if(eLanguage == eCDAE)
-			strContent += "max(";
+			strContent += "Average(";
 		else if(eLanguage == ePYDAE)
-			strContent += "max(";
+			strContent += "Average(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3088,9 +3088,9 @@ void adSetupSpecialFunctionNode::Export(std::string& strContent, daeeModelLangua
 		break;
 	case eAverage:
 		if(eLanguage == eCDAE)
-			strContent += "average(";
+			strContent += "Average(";
 		else if(eLanguage == ePYDAE)
-			strContent += "average(";
+			strContent += "Average(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -3155,22 +3155,22 @@ string adSetupSpecialFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) co
 		strResult += " } ";
 		break;
 	case eMinInArray:
-		strResult += "min";
+		strResult += "Min";
 		strResult += " \\left( ";
 		strResult += node->SaveAsLatex(c);
 		strResult += " \\right( ";
 		break;
 	case eMaxInArray:
-		strResult += "max";
+		strResult += "Max";
 		strResult += " \\left( ";
 		strResult += node->SaveAsLatex(c);
 		strResult += " \\right( ";
 		break;
 	case eAverage:
-		strResult += "\\overline";
-		strResult += " { ";
+		strResult += "Average";
+		strResult += " \\left( ";
 		strResult += node->SaveAsLatex(c);
-		strResult += " } ";
+        strResult += " \\right( ";
 		break;
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
@@ -3224,7 +3224,7 @@ void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, co
 		break; 
 	case eMinInArray:
 		strName  = "mo";
-		strValue = "min";
+		strValue = "Min";
 		temp = mrow->AddTag(strName, strValue);		
 		temp->AddAttribute(string("mathvariant"), string("italic"));
 
@@ -3244,7 +3244,7 @@ void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, co
 		break;
 	case eMaxInArray:
 		strName  = "mo";
-		strValue = "max";
+		strValue = "Max";
 		temp = mrow->AddTag(strName, strValue);		
 		temp->AddAttribute(string("mathvariant"), string("italic"));
 
@@ -3264,7 +3264,7 @@ void adSetupSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, co
 		break;
 	case eAverage:
 		strName  = "mo";
-		strValue = "average"; 
+		strValue = "Average"; 
 		temp = mrow->AddTag(strName, strValue);		
 		temp->AddAttribute(string("mathvariant"), string("italic"));
 

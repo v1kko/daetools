@@ -946,12 +946,22 @@ public:
 		return m_pdInitialConditions;
 	}
 	
-	real_t* GetVariableTypesPointer(void) const
+	real_t* GetVariableTypesGatheredPointer(void) const
 	{
-	// It is not a mistake, it should be VariablesTypesGathered
+    // Filled during DeclareEquations function
+	// VariablesTypesGathered does not contain information about assigned variables!!
+    // It contains only 0 and 1
 		return m_pdVariablesTypesGathered;
 	}
-	
+
+    real_t* GetVariableTypesPointer(void) const
+	{
+    // Filled during SetUpVariables function
+    // VariablesTypes contains information about assigned variables!!
+    // It contains 0, 1 and 2
+		return m_pdVariablesTypes;
+	}
+    
 	real_t* GetAbsoluteTolerancesPointer(void) const
 	{
 		return m_pdAbsoluteTolerances;
@@ -2629,7 +2639,7 @@ protected:
 	size_t								m_nVariablesStartingIndex;
 	size_t								m_nTotalNumberOfVariables;
 
-	daePtrVector<daeModel*>					m_ptrarrModels;
+	daePtrVector<daeModel*>					m_ptrarrComponents;
 	daePtrVector<daeEquation*>				m_ptrarrEquations;
 	daePtrVector<daeSTN*>					m_ptrarrSTNs;
 	daePtrVector<daePortConnection*>		m_ptrarrPortConnections;
@@ -2643,7 +2653,7 @@ protected:
 	daePtrVector<daeEventPort*>				m_ptrarrEventPorts;
 	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
 	daePtrVector<daePortArray*>				m_ptrarrPortArrays;
-	daePtrVector<daeModelArray*>			m_ptrarrModelArrays;
+	daePtrVector<daeModelArray*>			m_ptrarrComponentArrays;
 	daePtrVector<daeExternalFunction_t*>	m_ptrarrExternalFunctions;
 
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;

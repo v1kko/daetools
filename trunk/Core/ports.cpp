@@ -991,7 +991,7 @@ daePort_t* daePortConnection::GetPortFrom(void) const
 	
 daePort_t* daePortConnection::GetPortTo(void) const
 {
-	return m_pPortFrom;
+	return m_pPortTo;
 }
 
 size_t daePortConnection::GetTotalNumberOfEquations(void) const

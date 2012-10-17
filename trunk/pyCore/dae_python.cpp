@@ -376,6 +376,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Value",		&adouble::getValue,      &adouble::setValue)
 		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative) 
         .add_property("Node",       make_function(&adouble::getNodeRawPtr, return_internal_reference<>()))
+        .add_property("GatherInfo",	&adouble::getGatherInfo, &adouble::setGatherInfo)
 
         .def("__repr__",     &daepython::adouble_repr)
 
@@ -459,8 +460,16 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Array",		&daepython::adarr_Array);  
 	
 	class_<adouble_array>("adouble_array")
+        .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo)
+        .add_property("Node",        make_function(&adouble_array::getNodeRawPtr, return_internal_reference<>()))
+        
+        .def("Resize",      &adouble_array::Resize)
+        .def("__len__",     &adouble_array::GetSize)
 		.def("__getitem__", &adouble_array::GetItem)
-		.def(- self)
+        .def("__setitem__", &adouble_array::SetItem)
+        .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end))
+
+        .def(- self)
 		.def(self + self)
 		.def(self - self)
 		.def(self * self)
@@ -497,13 +506,13 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("abs",		&daepython::adarr_abs);
 	def("ceil",		&daepython::adarr_ceil);
 	def("floor",	&daepython::adarr_floor);
-    
-    def("sum",		 &daepython::adarr_sum);
-    def("product",   &daepython::adarr_product); 
-    def("integral",  &daepython::adarr_integral);
-    def("min",		 &daepython::adarr_min);
-    def("max",		 &daepython::adarr_max);
-    def("average",	 &daepython::adarr_average);
+      
+    def("Sum",		 &daepython::adarr_sum);
+    def("Product",   &daepython::adarr_product); 
+    def("Integral",  &daepython::adarr_integral);
+    def("Min",		 &daepython::adarr_min);
+    def("Max",		 &daepython::adarr_max);
+    def("Average",	 &daepython::adarr_average);
 
 	class_<daeVariableType>("daeVariableType")
 		.def(init<string, unit, real_t, real_t, real_t, real_t>())
@@ -1016,10 +1025,11 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Ports",					&daepython::daeModelWrapper::GetPorts)
 		.add_property("EventPorts",				&daepython::daeModelWrapper::GetEventPorts)
 		.add_property("OnEventActions",			&daepython::daeModelWrapper::GetOnEventActions)
-		.add_property("Models",					&daepython::daeModelWrapper::GetChildModels)
+        .add_property("STNs",					&daepython::daeModelWrapper::GetSTNs)
+		.add_property("Components",				&daepython::daeModelWrapper::GetComponents)
 		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays)
-		.add_property("ModelArrays",			&daepython::daeModelWrapper::GetChildModelArrays)
-		.add_property("STNs",					&daepython::daeModelWrapper::GetSTNs)
+		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays)
+        .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections)
 		.add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode)
 		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic)
 
@@ -1071,6 +1081,11 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("DistributeOnDomain",	&daepython::DistributeOnDomain2, return_internal_reference<>())
 		;
 
+    class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", no_init)
+        .add_property("PortFrom", make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()))
+        .add_property("PortTo",   make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()))
+    ;
+    
 	class_<daepython::daeStateWrapper, bases<daeObject>, boost::noncopyable>("daeState")
 		.add_property("NumberOfStateTransitions",	&daeState::GetNumberOfStateTransitions)
 		.add_property("NumberOfNestedSTNs",			&daeState::GetNumberOfSTNs)

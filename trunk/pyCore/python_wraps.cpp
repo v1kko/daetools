@@ -763,27 +763,27 @@ const adouble_array adarr_atan(const adouble_array& a)
 
 const adouble adarr_sum(const adouble_array& a)
 {
-	return sum(a);
+	return Sum(a);
 }
 const adouble adarr_product(const adouble_array& a)
 {
-	return product(a);
+	return Product(a);
 }
 const adouble adarr_min(const adouble_array& a)
 {
-	return min(a);
+	return Min(a);
 }
 const adouble adarr_max(const adouble_array& a)
 {
-	return max(a);
+	return Max(a);
 }
 const adouble adarr_average(const adouble_array& a)
 {
-	return average(a);
+	return Average(a);
 }
 const adouble adarr_integral(const adouble_array& a)
 {
-	return integral(a);
+	return Integral(a);
 }
 
 /*******************************************************
@@ -2108,6 +2108,19 @@ boost::python::list GetEquationExecutionInfos(daeEquation& eq)
     std::vector<daeEquationExecutionInfo*> ptrarr;
     eq.GetEquationExecutionInfos(ptrarr);
     return getListFromVector(ptrarr);
+}
+
+/*******************************************************
+	daePortConnection
+*******************************************************/
+daeObject* daePortConnection_GetPortFrom(daePortConnection& self)
+{
+    return dynamic_cast<daeObject*>(self.GetPortFrom());
+}
+
+daeObject* daePortConnection_GetPortTo(daePortConnection& self)
+{
+    return dynamic_cast<daeObject*>(self.GetPortTo()); 
 }
 
 /*******************************************************

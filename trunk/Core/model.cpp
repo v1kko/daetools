@@ -21,9 +21,9 @@ daeModel::daeModel()
 	m_ptrarrEventPorts.SetOwnershipOnPointers(false);
 	m_ptrarrVariables.SetOwnershipOnPointers(false);
 	m_ptrarrParameters.SetOwnershipOnPointers(false);
-	m_ptrarrModels.SetOwnershipOnPointers(false);
+	m_ptrarrComponents.SetOwnershipOnPointers(false);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(false);
-	m_ptrarrModelArrays.SetOwnershipOnPointers(false);
+	m_ptrarrComponentArrays.SetOwnershipOnPointers(false);
 	m_ptrarrExternalFunctions.SetOwnershipOnPointers(false);
 }
 
@@ -41,9 +41,9 @@ daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 	m_ptrarrEventPorts.SetOwnershipOnPointers(false);
 	m_ptrarrVariables.SetOwnershipOnPointers(false);
 	m_ptrarrParameters.SetOwnershipOnPointers(false);
-	m_ptrarrModels.SetOwnershipOnPointers(false);
+	m_ptrarrComponents.SetOwnershipOnPointers(false);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(false);
-	m_ptrarrModelArrays.SetOwnershipOnPointers(false);
+	m_ptrarrComponentArrays.SetOwnershipOnPointers(false);
 	m_ptrarrExternalFunctions.SetOwnershipOnPointers(false);
 	
 	SetName(strName);
@@ -71,12 +71,12 @@ void daeModel::Clone(const daeModel& rObject)
 		pDomain->Clone(*rObject.m_ptrarrDomains[i]);
 	}
 
-	for(size_t i = 0; i < rObject.m_ptrarrModels.size(); i++)
+	for(size_t i = 0; i < rObject.m_ptrarrComponents.size(); i++)
 	{
-		daeModel* pModel = new daeModel(rObject.m_ptrarrModels[i]->m_strShortName, 
+		daeModel* pModel = new daeModel(rObject.m_ptrarrComponents[i]->m_strShortName, 
 										this, 
-										rObject.m_ptrarrModels[i]->m_strDescription);
-		pModel->Clone(*rObject.m_ptrarrModels[i]);
+										rObject.m_ptrarrComponents[i]->m_strDescription);
+		pModel->Clone(*rObject.m_ptrarrComponents[i]);
 	}
 	
 	for(size_t i = 0; i < rObject.m_ptrarrParameters.size(); i++)
@@ -155,11 +155,11 @@ void daeModel::CleanUpSetupData()
 	clean_vector(m_ptrarrPortConnections);
 	clean_vector(m_ptrarrEventPortConnections);
 
-	for(size_t i = 0; i < m_ptrarrModels.size(); i++)
-		m_ptrarrModels[i]->CleanUpSetupData();
+	for(size_t i = 0; i < m_ptrarrComponents.size(); i++)
+		m_ptrarrComponents[i]->CleanUpSetupData();
 	
-	for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
-		m_ptrarrModelArrays[i]->CleanUpSetupData();
+	for(size_t i = 0; i < m_ptrarrComponentArrays.size(); i++)
+		m_ptrarrComponentArrays[i]->CleanUpSetupData();
 
 	for(size_t i = 0; i < m_ptrarrPorts.size(); i++)
 		m_ptrarrPorts[i]->CleanUpSetupData();
@@ -170,7 +170,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 {
 	string strName;
 
-	m_ptrarrModels.EmptyAndFreeMemory();
+	m_ptrarrComponents.EmptyAndFreeMemory();
 	m_ptrarrEquations.EmptyAndFreeMemory();
 	m_ptrarrSTNs.EmptyAndFreeMemory();
 	m_ptrarrPortConnections.EmptyAndFreeMemory();
@@ -182,9 +182,9 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrEventPorts.EmptyAndFreeMemory();
 	m_ptrarrEquationExecutionInfos.EmptyAndFreeMemory();
 	m_ptrarrPortArrays.EmptyAndFreeMemory();
-	m_ptrarrModelArrays.EmptyAndFreeMemory();
+	m_ptrarrComponentArrays.EmptyAndFreeMemory();
 
-	m_ptrarrModels.SetOwnershipOnPointers(true);
+	m_ptrarrComponents.SetOwnershipOnPointers(true);
 	m_ptrarrEquations.SetOwnershipOnPointers(true);
 	m_ptrarrSTNs.SetOwnershipOnPointers(true);
 	m_ptrarrPortConnections.SetOwnershipOnPointers(true);
@@ -196,7 +196,7 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrEventPorts.SetOwnershipOnPointers(true);
 	m_ptrarrEquationExecutionInfos.SetOwnershipOnPointers(true);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(true);
-	m_ptrarrModelArrays.SetOwnershipOnPointers(true);
+	m_ptrarrComponentArrays.SetOwnershipOnPointers(true);
 	
 	m_pDataProxy.reset();
 	m_nVariablesStartingIndex	= 0;
@@ -251,11 +251,11 @@ void daeModel::Open(io::xmlTag_t* pTag)
 
 // CHILD MODELS
 	strName = "Units";
-	pTag->OpenObjectArray(strName, m_ptrarrModels, &del);
+	pTag->OpenObjectArray(strName, m_ptrarrComponents, &del);
 
 // MODEL ARRAYS
 	//strName = "UnitArrays";
-	//pTag->OpenObjectArray(strName, m_ptrarrModelArrays, &del);
+	//pTag->OpenObjectArray(strName, m_ptrarrComponentArrays, &del);
 
 // PORT ARRAYS
 	//strName = "PortArrays";
@@ -310,11 +310,11 @@ void daeModel::Save(io::xmlTag_t* pTag) const
 
 // CHILD MODELS
 	strName = "Units";
-	pTag->SaveObjectArray(strName, m_ptrarrModels);
+	pTag->SaveObjectArray(strName, m_ptrarrComponents);
 
 // MODELARRAYS
 	strName = "UnitArrays";
-	pTag->SaveObjectArray(strName, m_ptrarrModelArrays);
+	pTag->SaveObjectArray(strName, m_ptrarrComponentArrays);
 
 // PORTARRAYS
 	strName = "PortArrays";
@@ -373,11 +373,11 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 
 // CHILD MODELS
 	strName = "Units";
-	pTag->SaveRuntimeObjectArray(strName, m_ptrarrModels);
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrComponents);
 
 // MODELARRAYS
 	strName = "UnitArrays";
-	pTag->SaveRuntimeObjectArray(strName, m_ptrarrModelArrays);
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrComponentArrays);
 
 // PORTARRAYS
 	strName = "PortArrays";
@@ -584,8 +584,8 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrVariables,       strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,           strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPorts,      strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels,          strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModelArrays,     strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponents,          strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponentArrays,     strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,      strConstructor, eLanguage, c);
 		
 		ExportObjectArray(m_ptrarrEquations,			strDeclareEquations, eLanguage, c);
@@ -626,8 +626,8 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrVariables,   strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,       strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPorts,  strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels,      strCXXDeclaration, eLanguage, c);
-		ExportObjectArray(m_ptrarrModelArrays, strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponents,      strCXXDeclaration, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponentArrays, strCXXDeclaration, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,  strCXXDeclaration, eLanguage, c);
 
 
@@ -639,8 +639,8 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrVariables,   strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,       strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPorts,  strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModels,      strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrModelArrays, strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponents,      strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponentArrays, strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,  strConstructor, eLanguage, c);
 
 		c.m_bExportDefinition = false;
@@ -686,14 +686,14 @@ void daeModel::DetectVariableTypesForExport(std::vector<const daeVariableType*>&
 	for(i = 0; i < m_ptrarrPorts.size(); i++)
 		m_ptrarrPorts[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
-		m_ptrarrModels[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
+		m_ptrarrComponents[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 
 	for(i = 0; i < m_ptrarrPortArrays.size(); i++)
 		m_ptrarrPortArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
-		m_ptrarrModelArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+		m_ptrarrComponentArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 }
 
 /*
@@ -799,7 +799,7 @@ void daeModel::AddModel(daeModel* pModel)
 		e << "Model name cannot be empty";
 		throw e;
 	}
-//	if(CheckName(m_ptrarrModels, strName))
+//	if(CheckName(m_ptrarrComponents, strName))
 //	{
 //		daeDeclareException(exInvalidCall); 
 //		e << "Child Model [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
@@ -807,7 +807,7 @@ void daeModel::AddModel(daeModel* pModel)
 //	}
 
     SetModelAndCanonicalName(pModel);
-	dae_push_back(m_ptrarrModels, pModel);
+	dae_push_back(m_ptrarrComponents, pModel);
 }
 
 void daeModel::AddPort(daePort* pPort)
@@ -911,7 +911,7 @@ void daeModel::AddModelArray(daeModelArray* pModelArray)
 		e << "ModelArray name cannot be empty";
 		throw e;
 	}
-	if(CheckName(m_ptrarrModelArrays, strName))
+	if(CheckName(m_ptrarrComponentArrays, strName))
 	{
 		daeDeclareException(exInvalidCall); 
 		e << "ModelArray [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
@@ -919,7 +919,7 @@ void daeModel::AddModelArray(daeModelArray* pModelArray)
 	}
 
     SetModelAndCanonicalName(pModelArray);
-	dae_push_back(m_ptrarrModelArrays, pModelArray);
+	dae_push_back(m_ptrarrComponentArrays, pModelArray);
 }
 
 void daeModel::AddExternalFunction(daeExternalFunction_t* pExternalFunction)
@@ -1427,7 +1427,7 @@ boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
 
 void daeModel::RemoveModel(daeModel* pObject)
 {
-	m_ptrarrModels.Remove(pObject);
+	m_ptrarrComponents.Remove(pObject);
 }
 
 void daeModel::RemoveEquation(daeEquation* pObject)
@@ -1487,7 +1487,7 @@ void daeModel::RemovePortArray(daePortArray* pObject)
 
 void daeModel::RemoveModelArray(daeModelArray* pObject)
 {
-	m_ptrarrModelArrays.Remove(pObject);
+	m_ptrarrComponentArrays.Remove(pObject);
 }
 
 void daeModel::RemoveExternalFunction(daeExternalFunction_t* pObject)
@@ -1541,9 +1541,9 @@ void daeModel::SetReportingOn(bool bOn)
 	}
 
 // Set reporting on for child models
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->SetReportingOn(bOn);
 	}
 	
@@ -1555,9 +1555,9 @@ void daeModel::SetReportingOn(bool bOn)
 	}
 	
 // Set reporting on for each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->SetReportingOn(bOn);
 	}
 }
@@ -1583,16 +1583,16 @@ void daeModel::DeclareEquationsBase()
 	daeModelArray* pModelArray;
 
 // Then, create equations for each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->DeclareEquations();
 	}
 	
 // Finally, create equations for each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->DeclareEquations();
 	}
 }
@@ -1615,16 +1615,16 @@ void daeModel::CreatePortConnectionEquations(void)
 	}
 
 // Then, create port connection equations for each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->CreatePortConnectionEquations();
 	}
 	
 // Finally, create port connection equations for each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->CreatePortConnectionEquations();
 	}
 }
@@ -2055,15 +2055,15 @@ void daeModel::PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)
 
 	m_pDataProxy = pDataProxy;
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->PropagateDataProxy(pDataProxy);
 	}
 	
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->PropagateDataProxy(pDataProxy);
 	}
 }
@@ -2076,15 +2076,15 @@ void daeModel::PropagateGlobalExecutionContext(daeExecutionContext* pExecutionCo
 
 	m_pExecutionContextForGatherInfo = pExecutionContext;
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->PropagateGlobalExecutionContext(pExecutionContext);
 	}
 	
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->PropagateGlobalExecutionContext(pExecutionContext);
 	}
 }
@@ -2162,18 +2162,18 @@ void daeModel::InitializeDEDIs(void)
 	}
 
 // Next, InitializeDEDIs for equations in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer);
 		pModel->InitializeDEDIs();
 	}
 	
 // Finally, InitializeDEDIs for equations in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		if(!pModelArray)
 			daeDeclareAndThrowException(exInvalidPointer);
 		pModelArray->InitializeDEDIs();
@@ -2220,9 +2220,9 @@ void daeModel::InitializeParameters()
 	}
 
 // Then, initialize all parameters in the child-models
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->InitializeParameters();
 	}
 	
@@ -2234,9 +2234,9 @@ void daeModel::InitializeParameters()
 	}
 	
 // Finally, initialize all parameters in the modelarrays
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->InitializeParameters();
 	}
 }
@@ -2256,16 +2256,16 @@ void daeModel::InitializePortAndModelArrays()
 	}
 
 // Then, initialize all model arrays in the model
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->Create();
 	}
 
 // Finally, initialize all arrays in the child-models
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->InitializePortAndModelArrays();
 	}
 }
@@ -2300,9 +2300,9 @@ void daeModel::InitializeVariables()
 	}
 
 // Then, initialize all variables in the child-models
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->SetVariablesStartingIndex(_currentVariablesIndex);
 		pModel->InitializeVariables();
 		_currentVariablesIndex = pModel->_currentVariablesIndex;
@@ -2318,9 +2318,9 @@ void daeModel::InitializeVariables()
 	}
 	
 // Finally, initialize all variables in the modelarrays
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->SetVariablesStartingIndex(_currentVariablesIndex);
 		pModelArray->InitializeVariables();
 		_currentVariablesIndex = pModelArray->_currentVariablesIndex;
@@ -2347,16 +2347,16 @@ void daeModel::InitializeOnEventActions(void)
 	}
 
 // Next, initialize OnEventActions in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->InitializeOnEventActions();
 	}
 	
 // Finally, initialize OnEventActions in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->InitializeOnEventActions();
 	}
 }
@@ -2379,16 +2379,16 @@ void daeModel::InitializeSTNs(void)
 	}
 
 // Next, initialize STNs in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->InitializeSTNs();
 	}
 	
 // Finally, initialize STNs in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->InitializeSTNs();
 	}
 }
@@ -2444,16 +2444,16 @@ void daeModel::InitializeEquations()
 	}
 	
 // Next, create EqnExecInfos for equations in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->InitializeEquations();
 	}
 	
 // Finally, gather info for equations in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->InitializeEquations();
 	}
 }
@@ -2475,16 +2475,16 @@ void daeModel::CollectAllSTNs(vector<daeSTN*>& ptrarrSTNs) const
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Then, fill it with STNs in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->CollectAllSTNs(ptrarrSTNs);
 	}
 	
 // Finally, ill it with STNs in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->CollectAllSTNs(ptrarrSTNs);
 	}
 }
@@ -2504,16 +2504,16 @@ void daeModel::CollectEquationExecutionInfosFromSTNs(vector<daeEquationExecution
 	}
 
 // Then, fill it with execution info in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->CollectEquationExecutionInfosFromSTNs(ptrarrEquationExecutionInfo);
 	}
 	
 // Finally, fill it with execution info in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->CollectEquationExecutionInfosFromSTNs(ptrarrEquationExecutionInfo);
 	}
 }
@@ -2533,16 +2533,16 @@ void daeModel::CollectEquationExecutionInfosFromModels(vector<daeEquationExecuti
 //	std::cout << GetName() << ": ptrarrEquationExecutionInfo: " << ptrarrEquationExecutionInfo.size() << std::endl;
 	
 // Then, fill it with execution info in each child-model
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		pModel->CollectEquationExecutionInfosFromModels(ptrarrEquationExecutionInfo);
 	}
 	
 // Finally, fill it with execution info in each modelarray
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->CollectEquationExecutionInfosFromModels(ptrarrEquationExecutionInfo);
 	}
 }
@@ -2814,9 +2814,9 @@ void daeModel::SetDefaultInitialGuesses(void)
 		}	
 	}	
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer); 
 		pModel->SetDefaultInitialGuesses();
@@ -2828,9 +2828,9 @@ void daeModel::SetDefaultInitialGuesses(void)
 		pPortArray->SetDefaultInitialGuesses();
 	}
 	
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->SetDefaultInitialGuesses();
 	}
 }
@@ -2876,9 +2876,9 @@ void daeModel::SetDefaultAbsoluteTolerances()
 		}	
 	}	
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer); 
 		pModel->SetDefaultAbsoluteTolerances();
@@ -2890,9 +2890,9 @@ void daeModel::SetDefaultAbsoluteTolerances()
 		pPortArray->SetDefaultAbsoluteTolerances();
 	}
 	
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->SetDefaultAbsoluteTolerances();
 	}
 }
@@ -2998,9 +2998,9 @@ daeDomain* daeModel::FindDomain(unsigned long nID) const
 			return pDomain;
 	}
 // Look in child models' domains
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer);
 
@@ -3035,9 +3035,9 @@ daeVariable* daeModel::FindVariable(unsigned long nID) const
 			return pVariable;
 	}
 // Look in child models' variables
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer);
 
@@ -3062,9 +3062,9 @@ daePort* daeModel::FindPort(unsigned long nID) const
 			return pPort;
 	}
 // Look in child models' ports
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer);
 
@@ -3089,9 +3089,9 @@ daeEventPort* daeModel::FindEventPort(unsigned long nID) const
 			return pEventPort;
 	}
 // Look in child models' event ports
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer);
 
@@ -3537,10 +3537,10 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 	dae_capacity_check(m_ptrarrSTNs);
 	dae_capacity_check(m_ptrarrPorts);
 	dae_capacity_check(m_ptrarrEventPorts);
-	dae_capacity_check(m_ptrarrModels);
+	dae_capacity_check(m_ptrarrComponents);
 	dae_capacity_check(m_ptrarrOnEventActions);
 	dae_capacity_check(m_ptrarrEquationExecutionInfos);
-	dae_capacity_check(m_ptrarrModelArrays);
+	dae_capacity_check(m_ptrarrComponentArrays);
 	dae_capacity_check(m_ptrarrPortArrays);
 	dae_capacity_check(m_ptrarrPortConnections);
 	dae_capacity_check(m_ptrarrEventPortConnections);
@@ -3666,9 +3666,9 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 	}
 
 // Check all child models
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 		{
 			strError = "Invalid child model in the model: [" + GetCanonicalName() + "]";
@@ -3681,9 +3681,9 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 	}
 
 // Check all modelarrays
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		if(!pModelArray)
 		{
 			strError = "Invalid model array in the model: [" + GetCanonicalName() + "]";
@@ -3737,17 +3737,17 @@ size_t daeModel::GetTotalNumberOfEquations(void) const
 		nNoEqns += pSTN->GetNumberOfEquations();
 	}
 
-	for(i = 0; i < m_ptrarrModels.size(); i++)
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pModel = m_ptrarrModels[i];
+		pModel = m_ptrarrComponents[i];
 		if(!pModel)
 			daeDeclareAndThrowException(exInvalidPointer); 
 		nNoEqns += pModel->GetTotalNumberOfEquations();
 	}
 
-	for(i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pModelArray = m_ptrarrModelArrays[i];
+		pModelArray = m_ptrarrComponentArrays[i];
 		if(!pModelArray)
 			daeDeclareAndThrowException(exInvalidPointer); 
 		nNoEqns += pModelArray->GetTotalNumberOfEquations();
@@ -3784,7 +3784,7 @@ const std::vector<daePort*>& daeModel::Ports() const
 
 const std::vector<daeModel*>& daeModel::Models() const
 {
-	return m_ptrarrModels;
+	return m_ptrarrComponents;
 }
 
 const std::vector<daeDomain*>& daeModel::Domains() const
@@ -3809,7 +3809,7 @@ const std::vector<daePortArray*>& daeModel::PortArrays() const
 
 const std::vector<daeModelArray*>& daeModel::ModelArrays() const
 {
-	return m_ptrarrModelArrays;
+	return m_ptrarrComponentArrays;
 }
 
 
@@ -3837,8 +3837,8 @@ void daeModel::GetEquations(vector<daeEquation_t*>& ptrarrEquations)
 void daeModel::GetModels(vector<daeModel_t*>& ptrarrModels)
 {
 	ptrarrModels.clear();
-	for(size_t i = 0; i < m_ptrarrModels.size(); i++)
-		ptrarrModels.push_back(m_ptrarrModels[i]);
+	for(size_t i = 0; i < m_ptrarrComponents.size(); i++)
+		ptrarrModels.push_back(m_ptrarrComponents[i]);
 }
 	
 void daeModel::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
@@ -3886,8 +3886,8 @@ void daeModel::GetPortArrays(vector<daePortArray_t*>& ptrarrPortArrays)
 void daeModel::GetModelArrays(vector<daeModelArray_t*>& ptrarrModelArrays)
 {
 	ptrarrModelArrays.clear();
-	for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
-		ptrarrModelArrays.push_back(m_ptrarrModelArrays[i]);
+	for(size_t i = 0; i < m_ptrarrComponentArrays.size(); i++)
+		ptrarrModelArrays.push_back(m_ptrarrComponentArrays[i]);
 }
 
 void daeModel::GetEquationExecutionInfos(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
@@ -4054,9 +4054,9 @@ daeEventPort_t* daeModel::FindEventPort(string& strName)
 daeModel_t* daeModel::FindModel(string& strName)
 {
 	daeModel* pObject;
-	for(size_t i = 0; i < m_ptrarrModels.size(); i++)
+	for(size_t i = 0; i < m_ptrarrComponents.size(); i++)
 	{
-		pObject = m_ptrarrModels[i];
+		pObject = m_ptrarrComponents[i];
 		if(pObject->m_strShortName == strName)
 			return pObject;
 	}
@@ -4090,9 +4090,9 @@ daePortArray_t* daeModel::FindPortArray(string& strName)
 daeModelArray_t* daeModel::FindModelArray(string& strName)
 {
 	daeModelArray* pObject;
-	for(size_t i = 0; i < m_ptrarrModelArrays.size(); i++)
+	for(size_t i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
-		pObject = m_ptrarrModelArrays[i];
+		pObject = m_ptrarrComponentArrays[i];
 		if(pObject->m_strShortName == strName)
 			return pObject;
 	}

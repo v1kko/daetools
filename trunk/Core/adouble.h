@@ -218,23 +218,28 @@ public:
 	{
 		return m_dValue;
 	}
-	void setValue(const real_t v) 
+	
+    void setValue(const real_t v) 
 	{
 		m_dValue = v;
 	}
-	real_t getDerivative() const 
+	
+    real_t getDerivative() const 
 	{
 		return m_dDeriv;
 	}
-	void setDerivative(real_t v) 
+	
+    void setDerivative(real_t v) 
 	{
 		m_dDeriv = v;
 	}	   
-	bool getGatherInfo(void) const
+	
+    bool getGatherInfo(void) const
 	{
 		return m_bGatherInfo;
 	}
-	void setGatherInfo(bool bGatherInfo)
+
+    void setGatherInfo(bool bGatherInfo)
 	{
 		m_bGatherInfo = bGatherInfo;
 	}
@@ -249,6 +254,7 @@ public:
 		return node.get();
 	}
 
+public:
     adNodePtr node;
 
 private:
@@ -281,12 +287,17 @@ public:
 	virtual ~adouble_array(void);
 
 public:
-	size_t GetSize(void) const;
-	void   Resize(size_t n);
-	adouble& operator[](size_t n);
+	size_t  GetSize(void) const;
+	void    Resize(size_t n);
+    adouble GetItem(size_t n);
+    void    SetItem(size_t n, adouble &a);
+	
+    adouble&       operator[](size_t n);
 	const adouble& operator[](size_t n) const;
-	adouble GetItem(size_t n);
-
+	
+    std::vector<adouble>::iterator begin();
+    std::vector<adouble>::iterator end();
+    
 	void operator =(const adouble_array& a);
 	
 	const adouble_array operator -(void) const;
@@ -307,8 +318,25 @@ public:
     const adouble_array operator /(const real_t v) const;
     const adouble_array operator /(const adouble& a) const;
 	
-	bool getGatherInfo(void) const;
-	void setGatherInfo(bool bGatherInfo);
+    bool getGatherInfo(void) const
+	{
+		return m_bGatherInfo;
+	}
+
+    void setGatherInfo(bool bGatherInfo)
+	{
+		m_bGatherInfo = bGatherInfo;
+	}
+    
+    adNodeArrayPtr getNode() const 
+	{
+		return node;
+	}
+    
+    adNodeArray* getNodeRawPtr() const 
+	{
+		return node.get();
+	}
 	
 public:
 	bool					m_bGatherInfo;
@@ -326,12 +354,12 @@ DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_arra
 DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
 
-DAE_CORE_API const adouble sum(const adouble_array& a);
-DAE_CORE_API const adouble product(const adouble_array& a);
-DAE_CORE_API const adouble min(const adouble_array& a);
-DAE_CORE_API const adouble max(const adouble_array& a);
-DAE_CORE_API const adouble average(const adouble_array& a);
-DAE_CORE_API const adouble integral(const adouble_array& a);
+DAE_CORE_API const adouble Sum(const adouble_array& a);
+DAE_CORE_API const adouble Product(const adouble_array& a);
+DAE_CORE_API const adouble Min(const adouble_array& a);
+DAE_CORE_API const adouble Max(const adouble_array& a);
+DAE_CORE_API const adouble Average(const adouble_array& a);
+DAE_CORE_API const adouble Integral(const adouble_array& a);
 
 DAE_CORE_API const adouble_array exp(const adouble_array& a);
 DAE_CORE_API const adouble_array sqrt(const adouble_array& a);

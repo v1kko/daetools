@@ -284,7 +284,8 @@ void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray
 
 	const real_t* pBlockValues            = m_pDataProxy->GetInitialValuesPointer();
 	const real_t* pBlockInitialConditions = m_pDataProxy->GetInitialConditionsPointer();
-	const real_t* pBlockIDs               = m_pDataProxy->GetVariableTypesPointer();
+    // Here I need information which variables are differential
+	const real_t* pBlockIDs               = m_pDataProxy->GetVariableTypesGatheredPointer();
 	const real_t* pBlockAbsoluteTolerance = m_pDataProxy->GetAbsoluteTolerancesPointer();
 	
 	for(iter = m_mapVariableIndexes.begin(); iter != m_mapVariableIndexes.end(); iter++)

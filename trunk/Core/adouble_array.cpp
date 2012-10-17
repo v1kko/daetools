@@ -53,6 +53,16 @@ void adouble_array::Resize(size_t n)
 	m_arrValues.resize(n);
 }
 
+std::vector<adouble>::iterator adouble_array::begin()
+{
+    return m_arrValues.begin();
+}
+
+std::vector<adouble>::iterator adouble_array::end()
+{
+    return m_arrValues.end();    
+}
+
 void adouble_array::operator =(const adouble_array& a) 
 {
 	if(this->m_bGatherInfo || a.getGatherInfo())
@@ -117,14 +127,12 @@ adouble adouble_array::GetItem(size_t nIndex)
 	}
 }
 
-bool adouble_array::getGatherInfo(void) const
+void adouble_array::SetItem(size_t nIndex, adouble& a)
 {
-	return m_bGatherInfo;
-}
-
-void adouble_array::setGatherInfo(bool bGatherInfo)
-{
-	m_bGatherInfo = bGatherInfo;
+    if(nIndex >= m_arrValues.size())
+        daeDeclareAndThrowException(exInvalidCall);
+		
+	m_arrValues[nIndex] = a;
 }
 
 // In all theses functions +, -, *, / we do not need to actually calculate anything,
@@ -142,8 +150,6 @@ const adouble_array adouble_array::operator -(void) const
 		                                               CLONE_NODE_ARRAY(node) ));
         return tmp;
 	}
-	
-    daeDeclareAndThrowException(exInvalidCall);
     
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -163,8 +169,6 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -188,8 +192,6 @@ const adouble_array adouble_array::operator +(const real_t v) const
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -209,8 +211,6 @@ const adouble_array adouble_array::operator +(const adouble& a) const
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -231,8 +231,6 @@ const adouble_array operator +(const adouble& a, const adouble_array& arr)
 		                                                ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -252,8 +250,6 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -273,8 +269,6 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -298,8 +292,6 @@ const adouble_array adouble_array::operator -(const real_t v) const
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -319,8 +311,6 @@ const adouble_array adouble_array::operator -(const adouble& a) const
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -341,8 +331,6 @@ const adouble_array operator -(const adouble& a, const adouble_array& arr)
 		                                                ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -363,8 +351,6 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -384,8 +370,6 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	adCheckArrays(*this, a);
 	        
 	size_t n = (GetSize() > a.GetSize() ? GetSize() : a.GetSize());
@@ -409,8 +393,6 @@ const adouble_array adouble_array::operator *(const real_t v) const
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -430,8 +412,6 @@ const adouble_array adouble_array::operator *(const adouble& a) const
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -452,8 +432,6 @@ const adouble_array operator *(const adouble& a, const adouble_array& arr)
         return tmp;
 	}
     
-    daeDeclareAndThrowException(exInvalidCall);
-	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
 	for(size_t i = 0; i < n; i++)
@@ -472,8 +450,6 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -493,8 +469,6 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	adCheckArrays(*this, a);
 	        
@@ -518,8 +492,6 @@ const adouble_array adouble_array::operator /(const real_t v) const
 		                                                adNodeArrayPtr(new adConstantNodeArray(v, UNITS(node))) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -539,8 +511,6 @@ const adouble_array adouble_array::operator /(const adouble& a) const
 		                                                adNodeArrayPtr(new adSingleNodeArray(CLONE_NODE(a.node, a.getValue())) ) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = GetSize();
 	tmp.Resize(n);
@@ -561,8 +531,6 @@ const adouble_array operator /(const adouble& a, const adouble_array& arr)
 		                                                ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = arr.GetSize();
 	tmp.Resize(n);
@@ -582,8 +550,6 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 		                                                CLONE_NODE_ARRAY(a.node) ));
         return tmp;
 	}
-    
-    daeDeclareAndThrowException(exInvalidCall);
 	
 	size_t n = a.GetSize();
 	tmp.Resize(n);
@@ -617,7 +583,7 @@ const adouble d(const adouble& a, daeDomain& domain)
 **********************************************************************************************/
 // If called during declaring of equations then GatherInfo is true
 // In other cases will calculate a value of the function
-const adouble average(const adouble_array& a)
+const adouble Average(const adouble_array& a)
 {
     adouble tmp;
 
@@ -637,7 +603,7 @@ const adouble average(const adouble_array& a)
 	return tmp;
 }
 
-const adouble sum(const adouble_array& a)
+const adouble Sum(const adouble_array& a)
 {
 	adouble tmp;
     if(a.getGatherInfo())
@@ -655,7 +621,7 @@ const adouble sum(const adouble_array& a)
 	return tmp;
 }
 
-const adouble product(const adouble_array& a)
+const adouble Product(const adouble_array& a)
 {
 	adouble tmp;
 	
@@ -673,7 +639,7 @@ const adouble product(const adouble_array& a)
 	return tmp;
 }
 
-const adouble integral(const adouble_array& a)
+const adouble Integral(const adouble_array& a)
 {
 	adouble tmp;
 	size_t i, nCount;
@@ -720,7 +686,7 @@ const adouble integral(const adouble_array& a)
 	return tmp;
 }
 
-const adouble min(const adouble_array& a)
+const adouble Min(const adouble_array& a)
 {
 	adouble tmp;
 	
@@ -738,7 +704,7 @@ const adouble min(const adouble_array& a)
 	return tmp;
 }
 
-const adouble max(const adouble_array& a)
+const adouble Max(const adouble_array& a)
 {
 	adouble tmp;
 	

@@ -45,9 +45,10 @@ class modTutorial(daeModel):
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
-        self.Tave = daeVariable("T_ave", temperature_t, self, "The average temperature")
-        self.Qsum = daeVariable("Q_sum", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
-        self.Qmul = daeVariable("Q_mul", heat_flux_t,   self, "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
+        self.Tave   = daeVariable("T_ave",  temperature_t, self, "The average temperature")
+        self.Qsum   = daeVariable("Q_sum",  heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
+        self.Qmul   = daeVariable("Q_mul",  heat_flux_t,   self, "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
+        self.adTest = daeVariable("adTest", heat_flux_t,   self, "User-defined adouble_array test variable")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
@@ -108,26 +109,50 @@ class modTutorial(daeModel):
         #  a) the average temperature of the plate
         #  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)
         #
-        # To calculate the average and the sum of heat fluxes we can use functions 'average' and 'sum' from daeModel class.
-        # For the list of all available functions please have a look on pyDAE API Reference, module Core.
+        # To calculate the average and the sum of heat fluxes we can use functions 'Average' and 'Sum'.
+        # Available functions are: Sum, Product, Average, Integral, Min, Max.
 
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
-        eq.Residual = self.Tave() - average( self.T.array( '*', '*' ) )
+        eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )
+
+        # This is physically meaningles example how to setup a user-defined array of adouble objects.
+        # In some cases when a user needs to create his own adouble_array then the functions:
+        # array, d_array, dt_array, Array etc are NOT available (due to some implementation details)!
+        # and arrays must be filled with adouble items manually as shown bellow.
+        # Check the model report to see the result and differences.
+        arr1 = adouble_array()
+        arr1.Resize(2)
+        arr1[0] = self.Qb()
+        arr1[1] = self.Qt()
+        print arr1, len(arr1)
+        for a in arr1.items():
+            print a
+
+        arr2 = adouble_array()
+        arr2.Resize(2)
+        arr2[0] = self.k() * self.T.d(self.y, 0, 0)
+        arr2[1] = self.k() * self.T.d(self.y, 1, 0)
+        print arr2, len(arr2)
+        for a in arr2.items():
+            print a
+            
+        eq = self.CreateEquation("adTest", "User-defined adouble_array")
+        eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)
 
         # An equivalent to the equation above is:
         #   a) xr = daeIndexRange(self.x)
         #      yr = daeIndexRange(self.y)
-        #      eq.Residual = self.Tave() - self.average( self.T.array( xr, yr ) )
-        #   b) eq.Residual = self.Tave() - self.average( self.T.array( '*', -1 ) )
-        #   c) eq.Residual = self.Tave() - self.average( self.T.array( [], '*' ) )
-        #   d) eq.Residual = self.Tave() - self.average( self.T.array( -1, slice(0, -1) ) )
+        #      eq.Residual = self.Tave() - Average( self.T.array( xr, yr ) )
+        #   b) eq.Residual = self.Tave() - Average( self.T.array( '*', -1 ) )
+        #   c) eq.Residual = self.Tave() - Average( self.T.array( [], '*' ) )
+        #   d) eq.Residual = self.Tave() - Average( self.T.array( -1, slice(0, -1) ) )
         #
         # To select only certain points from a domain we can use a list or a slice:
         #   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1, 3, 7 from domain y 
         #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y 
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
-        eq.Residual = self.Qsum() + self.k() * sum( self.T.d_array(self.y, '*', 0) )
+        eq.Residual = self.Qsum() + self.k() * Sum( self.T.d_array(self.y, '*', 0) )
         
         # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Vector)
         #  - The function Constant() creates a constant quantity that contains a value and units 
@@ -144,7 +169,7 @@ class modTutorial(daeModel):
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
         values = [2 * K for i in xrange(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qmul() + sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
+        eq.Residual = self.Qmul() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
 class simTutorial(daeSimulation):
     def __init__(self):
