@@ -88,7 +88,7 @@ public:
 	virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	virtual bool Evaluate(const daeExecutionContext* pExecutionContext) const;
-		operator bool(void);
+    operator bool(void);
 
     daeCondition operator ||(const daeCondition& rCondition) const;
     daeCondition operator &&(const daeCondition& rCondition) const;
@@ -100,8 +100,29 @@ public:
 	real_t GetEventTolerance(void);
 
 	void BuildExpressionsArray(const daeExecutionContext* pExecutionContext);
+    void GetExpressionsArray(std::vector<adNode*>& ptrarrExpressions);
 	string SaveNodeAsPlainText(void) const;
+    
+    condNodePtr getSetupNode() const 
+	{
+		return m_pSetupConditionNode;
+	}
+    
+    condNode* getSetupNodeRawPtr() const 
+	{
+		return m_pSetupConditionNode.get();
+	}
 
+    condNodePtr getRuntimeNode() const 
+	{
+		return m_pConditionNode;
+	}
+    
+    condNode* getRuntimeNodeRawPtr() const 
+	{
+		return m_pConditionNode.get();
+	}
+    
 protected:
 	void   SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
 

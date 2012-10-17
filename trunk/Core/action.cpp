@@ -122,6 +122,46 @@ daeeActionType daeAction::GetType(void) const
 	return m_eActionType;
 }
 
+daeSTN* daeAction::GetSTN() const 
+{
+    return m_pSTN;
+}
+
+daeState* daeAction::GetStateTo() const 
+{
+    return m_pStateTo;
+}
+
+daeEventPort* daeAction::GetSendEventPort() const 
+{
+    return m_pSendEventPort;
+}
+
+daeVariableWrapper* daeAction::GetVariableWrapper() const
+{
+    return m_pVariableWrapper.get();
+}
+
+adNodePtr daeAction::getSetupNode() const 
+{
+    return m_pSetupNode;
+}
+
+adNode* daeAction::getSetupNodeRawPtr() const 
+{
+    return m_pSetupNode.get();
+}
+
+adNodePtr daeAction::getRuntimeNode() const 
+{
+    return m_pNode;
+}
+
+adNode* daeAction::getRuntimeNodeRawPtr() const 
+{
+    return m_pNode.get();
+}
+
 void daeAction::Initialize(void)
 {
 	if(!m_pModel)

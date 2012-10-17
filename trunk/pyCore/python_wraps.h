@@ -38,6 +38,20 @@ boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
     return l;
 }
 
+template<typename ITEM, typename CAST>
+boost::python::list getListFromVectorAndCastPointer(std::vector<ITEM>& arrItems)
+{
+    CAST pObject;
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+    {
+        pObject = dynamic_cast<CAST>(arrItems[i]);
+        l.append(boost::ref(pObject));
+    }
+    return l;
+}
+
 template<typename ITEM>
 boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
 {
@@ -186,6 +200,11 @@ const adouble adarr_min(const adouble_array& a);
 const adouble adarr_max(const adouble_array& a);
 const adouble adarr_average(const adouble_array& a);
 const adouble adarr_integral(const adouble_array& a);
+
+/*******************************************************
+	adouble_array
+*******************************************************/
+boost::python::list daeCondition_GetExpressions(daeCondition& self);
 
 /*******************************************************
 	daeObject
@@ -836,7 +855,7 @@ daeObject* daePortConnection_GetPortTo(daePortConnection& self);
 /*******************************************************
 	daeSTN
 *******************************************************/
-boost::python::list GetStatesSTN(daeSTN& stn);
+boost::python::list GetStatesSTN(daeSTN& self);
 
 /*******************************************************
 	daeModel
@@ -1269,30 +1288,9 @@ public:
 /*******************************************************
 	daeState
 *******************************************************/
-class daeStateWrapper : public daeState,
-                        public boost::python::wrapper<daeState>
-{
-public:
-	daeStateWrapper(void)
-	{
-	}
-
-public:
-	boost::python::list GetEquations(void)
-	{
-        return getListFromVector(m_ptrarrEquations);
-	}
-
-	boost::python::list GetStateTransitions(void)
-	{
-        return getListFromVector(m_ptrarrStateTransitions);
-	}
-
-	boost::python::list GetNestedSTNs(void)
-	{
-        return getListFromVector(m_ptrarrSTNs);
-	}
-};
+boost::python::list daeState_GetEquations(daeState& self);
+boost::python::list daeState_GetStateTransitions(daeState& self);
+boost::python::list daeState_GetNestedSTNs(daeState& self);
 
 /*******************************************************
 	daeSTN
@@ -1302,14 +1300,6 @@ boost::python::list GetStatesSTN(daeSTN& stn);
 /*******************************************************
 	daeIF
 *******************************************************/
-class daeIFWrapper : public daeIF,
-                     public boost::python::wrapper<daeIF>
-{
-public:
-	daeIFWrapper(void)
-	{
-	}
-};
 
 /*******************************************************
 	daeScalarExternalFunctionWrapper
@@ -1476,21 +1466,8 @@ public:
 /*******************************************************
 	daeStateTransition
 *******************************************************/
-class daeStateTransitionWrapper : public daeStateTransition,
-                                  public boost::python::wrapper<daeStateTransition>
-{
-public:
-	daeStateTransitionWrapper(void)
-	{
-	}
-
-public:
-	daeCondition GetCondition(void)
-	{
-		return m_Condition;
-	}
-};
-
+daeCondition* daeStateTransition_GetCondition(daeStateTransition& self);
+boost::python::list daeStateTransition_GetActions(daeStateTransition& self);
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

@@ -787,6 +787,16 @@ const adouble adarr_integral(const adouble_array& a)
 }
 
 /*******************************************************
+	adouble_array
+*******************************************************/
+boost::python::list daeCondition_GetExpressions(daeCondition& self)
+{
+    std::vector<adNode*> ptrarrExpressions;
+	self.GetExpressionsArray(ptrarrExpressions);
+    return getListFromVector(ptrarrExpressions);
+}
+
+/*******************************************************
 	daeObject
 *******************************************************/
 daeObject* daeObject_GetModel(daeObject& self)
@@ -2131,20 +2141,50 @@ daeObject* daePortConnection_GetPortTo(daePortConnection& self)
 /*******************************************************
 	daeSTN
 *******************************************************/
-boost::python::list GetStatesSTN(daeSTN& stn)
+boost::python::list GetStatesSTN(daeSTN& self)
 {
-	std::vector<daeState_t*> ptrarrStates;
-	boost::python::list l;
-	daeState* obj;
+    std::vector<daeState_t*> ptrarrStates;
+	self.GetStates(ptrarrStates);
+    return getListFromVectorAndCastPointer<daeState_t*, daeState*>(ptrarrStates);
+}
 
-	stn.GetStates(ptrarrStates);
+/*******************************************************
+	daeState
+*******************************************************/
+boost::python::list daeState_GetEquations(daeState& self)
+{
+    std::vector<daeEquation_t*> ptrarrEquations;
+	self.GetEquations(ptrarrEquations);
+    return getListFromVectorAndCastPointer<daeEquation_t*, daeEquation*>(ptrarrEquations);
+}
 
-	for(size_t i = 0; i < ptrarrStates.size(); i++)
-	{
-		obj = dynamic_cast<daeState*>(ptrarrStates[i]);
-		l.append(boost::ref(obj));
-	}
-	return l;
+boost::python::list daeState_GetStateTransitions(daeState& self)
+{
+    std::vector<daeStateTransition_t*> ptrarrStateTransitions;
+	self.GetStateTransitions(ptrarrStateTransitions);
+    return getListFromVectorAndCastPointer<daeStateTransition_t*, daeStateTransition*>(ptrarrStateTransitions);
+}
+
+boost::python::list daeState_GetNestedSTNs(daeState& self)
+{
+    std::vector<daeSTN_t*> ptrarrSTNs;
+	self.GetNestedSTNs(ptrarrSTNs);
+    return getListFromVectorAndCastPointer<daeSTN_t*, daeSTN*>(ptrarrSTNs);
+}
+
+/*******************************************************
+	daeStateTransition
+*******************************************************/
+daeCondition* daeStateTransition_GetCondition(daeStateTransition& self)
+{
+    return self.GetCondition();
+}
+
+boost::python::list daeStateTransition_GetActions(daeStateTransition& self)
+{
+    std::vector<daeAction_t*> ptrarrActions;
+	self.GetActions(ptrarrActions);
+    return getListFromVectorAndCastPointer<daeAction_t*, daeAction*>(ptrarrActions);
 }
 
 /*******************************************************

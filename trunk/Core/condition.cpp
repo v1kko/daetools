@@ -126,6 +126,12 @@ void daeCondition::BuildExpressionsArray(const daeExecutionContext* pExecutionCo
 	m_pConditionNode->BuildExpressionsArray(m_ptrarrExpressions, pExecutionContext, m_dEventTolerance);
 }
 
+void daeCondition::GetExpressionsArray(std::vector<adNode*>& ptrarrExpressions)
+{
+    for(size_t i = 0; i < m_ptrarrExpressions.size(); i++)
+        ptrarrExpressions.push_back(m_ptrarrExpressions[i].get());
+}
+
 void daeCondition::SetEventTolerance(real_t dEventTolerance)
 {
 	m_dEventTolerance = dEventTolerance;

@@ -211,7 +211,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("modelica_export_test")
+        self.m = modTutorial("test")
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
                              "their boundary and initial conditions."
@@ -298,8 +298,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Models and ports now can be exported into some other modelling language
     # At the moment, models can be exported into pyDAE (python) and cDAE (c++)
@@ -309,7 +309,7 @@ def consoleRun():
     export(simulation, [simulation.m])
     
     # Solve at time=0 (initialization)
-    simulation.SolveInitial() 
+    simulation.SolveInitial()
 
     from modelica import daeModelicaExport
     modelicaExport = daeModelicaExport()

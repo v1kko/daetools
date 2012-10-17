@@ -146,6 +146,39 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
+    enum_<daeeLogicalUnaryOperator>("daeeLogicalUnaryOperator")
+        .value("eUOUnknown",	dae::core::eUOUnknown)
+        .value("eNot",          dae::core::eNot)
+        .export_values()
+    ;
+    
+    enum_<daeeLogicalBinaryOperator>("daeeLogicalBinaryOperator")
+        .value("eBOUnknown",	dae::core::eBOUnknown)
+        .value("eAnd",          dae::core::eAnd)
+        .value("eOr",           dae::core::eOr)
+        .export_values()
+    ;
+    
+    enum_<daeeConditionType>("daeeConditionType")
+        .value("eCTUnknown",	dae::core::eCTUnknown)
+        .value("eNotEQ",        dae::core::eNotEQ)
+        .value("eEQ",           dae::core::eEQ)
+        .value("eGT",           dae::core::eGT)
+        .value("eGTEQ",         dae::core::eGTEQ)
+        .value("eLT",           dae::core::eLT)
+        .value("eLTEQ",         dae::core::eLTEQ)
+        .export_values()
+    ;
+
+    enum_<daeeActionType>("daeeActionType")
+        .value("eUnknownAction",                    dae::core::eUnknownAction)
+        .value("eChangeState",                      dae::core::eChangeState)
+        .value("eSendEvent",                        dae::core::eSendEvent)
+        .value("eReAssignOrReInitializeVariable",   dae::core::eReAssignOrReInitializeVariable)
+        .value("eUserDefinedAction",                dae::core::eUserDefinedAction)
+        .export_values()
+    ;
+    
 /**************************************************************
 	Global functions
 ***************************************************************/
@@ -357,16 +390,28 @@ BOOST_PYTHON_MODULE(pyCore)
 
     
     class_<condUnaryNode, bases<condNode>, boost::noncopyable>("condUnaryNode", no_init)
+        .def_readonly("LogicalOperator",	&condUnaryNode::m_eLogicalOperator)
+        .add_property("Node",               make_function(&condUnaryNode::getNodeRawPtr, return_internal_reference<>()))
     ;
 
     class_<condBinaryNode, bases<condNode>, boost::noncopyable>("condBinaryNode", no_init)
+        .def_readonly("LogicalOperator",	&condBinaryNode::m_eLogicalOperator)
+        .add_property("LNode",              make_function(&condBinaryNode::getLeftRawPtr,  return_internal_reference<>()))
+        .add_property("RNode",              make_function(&condBinaryNode::getRightRawPtr, return_internal_reference<>()))
     ;
 
     class_<condExpressionNode, bases<condNode>, boost::noncopyable>("condExpressionNode", no_init)
+        .def_readonly("ConditionType",	&condExpressionNode::m_eConditionType)
+        .add_property("LNode",          make_function(&condExpressionNode::getLeftRawPtr,  return_internal_reference<>()))
+        .add_property("RNode",          make_function(&condExpressionNode::getRightRawPtr, return_internal_reference<>()))
     ;
     
     class_<daeCondition>("daeCondition")
 		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
+        .add_property("SetupNode",      make_function(&daeCondition::getSetupNodeRawPtr, return_internal_reference<>()))
+        .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()))
+        .add_property("Expressions",    &daepython::daeCondition_GetExpressions)
+            
 		//.def(!self)
 		.def(self | self)
 		.def(self & self)
@@ -968,6 +1013,14 @@ BOOST_PYTHON_MODULE(pyCore)
         ;
 
 	class_<daepython::daeActionWrapper, bases<daeObject>, boost::noncopyable>("daeAction")
+        .add_property("Type",            &daepython::daeActionWrapper::GetType)
+        .add_property("STN",             make_function(&daepython::daeActionWrapper::GetSTN, return_internal_reference<>()))
+        .add_property("StateTo",         make_function(&daepython::daeActionWrapper::GetStateTo, return_internal_reference<>()))
+        .add_property("SendEventPort",   make_function(&daepython::daeActionWrapper::GetSendEventPort, return_internal_reference<>()))
+        .add_property("VariableWrapper", make_function(&daepython::daeActionWrapper::GetVariableWrapper, return_internal_reference<>()))
+        .add_property("SetupNode",       make_function(&daepython::daeActionWrapper::getSetupNodeRawPtr, return_internal_reference<>()))
+        .add_property("RuntimeNode",     make_function(&daepython::daeActionWrapper::getRuntimeNodeRawPtr, return_internal_reference<>()))
+            
 		.def("Execute",		pure_virtual(&daepython::daeActionWrapper::Execute))
         ;
  
@@ -1088,19 +1141,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("PortTo",   make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()))
     ;
     
-	class_<daepython::daeStateWrapper, bases<daeObject>, boost::noncopyable>("daeState")
-		.add_property("NumberOfStateTransitions",	&daeState::GetNumberOfStateTransitions)
-		.add_property("NumberOfNestedSTNs",			&daeState::GetNumberOfSTNs)
-		.add_property("NumberOfEquations",			&daeState::GetNumberOfEquations)
-		.add_property("Equations",					&daepython::daeStateWrapper::GetEquations)
-		.add_property("StateTransitions",			&daepython::daeStateWrapper::GetStateTransitions)
-		.add_property("NestedSTNs",					&daepython::daeStateWrapper::GetNestedSTNs)
+	class_<daeState, bases<daeObject>, boost::noncopyable>("daeState")
+		.add_property("Equations",			&daepython::daeState_GetEquations)
+		.add_property("StateTransitions",	&daepython::daeState_GetStateTransitions)
+		.add_property("NestedSTNs",			&daepython::daeState_GetNestedSTNs)
 		;
 
-	class_<daepython::daeStateTransitionWrapper, bases<daeObject>, boost::noncopyable>("daeStateTransition")
-		//.add_property("StateFrom",	make_function(&daepython::daeStateTransitionWrapper::GetStateFrom, return_internal_reference<>()))
-		//.add_property("StateTo",	make_function(&daepython::daeStateTransitionWrapper::GetStateTo, return_internal_reference<>()))
-		.add_property("Condition",	&daepython::daeStateTransitionWrapper::GetCondition)
+	class_<daeStateTransition, bases<daeObject>, boost::noncopyable>("daeStateTransition")
+		.add_property("Condition",	make_function(&daepython::daeStateTransition_GetCondition, return_internal_reference<>()))
+        .add_property("Actions",	&daepython::daeStateTransition_GetActions)
 		;
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN")
@@ -1108,7 +1157,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("States",			&daepython::GetStatesSTN)
         ;
 
-	class_<daepython::daeIFWrapper, bases<daeSTN>, boost::noncopyable>("daeIF")
+	class_<daeIF, bases<daeSTN>, boost::noncopyable>("daeIF")
 		;
 	
 	class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction", init<const string&, daeModel*, const unit&, boost::python::dict>())

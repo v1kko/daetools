@@ -404,10 +404,20 @@ public:
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual bool		GetQuantity(void) const;
 
+    adNode* getLeftRawPtr() const 
+	{
+		return m_pLeft.get();
+	}
+    
+    adNode* getRightRawPtr() const 
+	{
+		return m_pRight.get();
+	}
+    
 public:
-	adNodePtr	m_pLeft;
-	daeeConditionType			m_eConditionType;
-	adNodePtr	m_pRight;
+	adNodePtr           m_pLeft;
+	adNodePtr           m_pRight;
+    daeeConditionType	m_eConditionType;
 };
 
 /*********************************************************************************************
@@ -437,10 +447,15 @@ public:
 	virtual void		AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual bool		GetQuantity(void) const;
-
+    
+    condNode* getNodeRawPtr() const 
+	{
+		return m_pNode.get();
+	}
+    
 public:
-	condNodePtr		m_pNode;
-	daeeLogicalUnaryOperator		m_eLogicalOperator;
+	condNodePtr                 m_pNode;
+	daeeLogicalUnaryOperator	m_eLogicalOperator;
 };
 
 /*********************************************************************************************
@@ -471,6 +486,16 @@ public:
 	virtual void		Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual bool		GetQuantity(void) const;
 
+    condNode* getLeftRawPtr() const 
+	{
+		return m_pLeft.get();
+	}
+    
+    condNode* getRightRawPtr() const 
+	{
+		return m_pRight.get();
+	}
+    
 public:
 	condNodePtr					m_pLeft;
 	condNodePtr					m_pRight;

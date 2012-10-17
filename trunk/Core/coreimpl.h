@@ -2233,6 +2233,15 @@ public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void Initialize(void);
+    
+    daeSTN* GetSTN() const;
+    daeState* GetStateTo() const; 
+    daeEventPort* GetSendEventPort() const; 
+    daeVariableWrapper* GetVariableWrapper() const;
+    adNodePtr getSetupNode() const;
+    adNode* getSetupNodeRawPtr() const; 
+    adNodePtr getRuntimeNode() const; 
+    adNode* getRuntimeNodeRawPtr() const; 
 
 protected:
 	void SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string& strObjectName) const;
@@ -2973,9 +2982,8 @@ public:
 
 	string GetConditionAsString() const;
 	
-protected:
-	daeCondition*		GetCondition(void);
-	void				SetCondition(daeCondition& rCondition);
+	daeCondition*	GetCondition(void);
+	void			SetCondition(daeCondition& rCondition);
 
 protected:
 	daeSTN*								m_pSTN;
