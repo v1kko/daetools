@@ -282,11 +282,6 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from daeModelicaExport import daeModelicaExport
-    ex = daeModelicaExport(simulation)
-    print '\n'
-    ex.export()
-
     # Run
     simulation.Run()
     simulation.Finalize()

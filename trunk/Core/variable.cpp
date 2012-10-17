@@ -220,6 +220,227 @@ void daeVariable::SetAbsoluteTolerances(real_t dAbsTolerances)
 	}	
 }
 
+void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes) const
+{
+    std::vector<size_t> narrDomainIndexes;
+    size_t d1, d2, d3, d4, d5, d6, d7, d8;
+	daeDomain *pDomain1, *pDomain2, *pDomain3, 
+		      *pDomain4, *pDomain5, *pDomain6,
+			  *pDomain7, *pDomain8;
+
+    size_t nNoDomains           = m_ptrDomains.size();
+    size_t nOverallIndexCounter = m_nOverallIndex;
+    
+    if(nNoDomains == 0)
+    {
+        narrDomainIndexes.clear();
+        mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+    }
+    else if(nNoDomains == 1)
+    {
+        pDomain1 = m_ptrDomains[0];
+        if(!pDomain1)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(1);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        {
+            narrDomainIndexes[0] = d1;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 2)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        if(!pDomain1 || !pDomain2)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(2);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 3)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        if(!pDomain1 || !pDomain2 || !pDomain3)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(3);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 4)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        pDomain4 = m_ptrDomains[3];
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(4);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        for(d4 = 0; d4 < pDomain4->m_nNumberOfPoints; d4++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            narrDomainIndexes[3] = d4;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 5)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        pDomain4 = m_ptrDomains[3];
+        pDomain5 = m_ptrDomains[4];
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || !pDomain5)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(5);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        for(d4 = 0; d4 < pDomain4->m_nNumberOfPoints; d4++)
+        for(d5 = 0; d5 < pDomain5->m_nNumberOfPoints; d5++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            narrDomainIndexes[3] = d4;
+            narrDomainIndexes[4] = d5;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 6)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        pDomain4 = m_ptrDomains[3];
+        pDomain5 = m_ptrDomains[4];
+        pDomain6 = m_ptrDomains[5];
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+           !pDomain5 || !pDomain6)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(6);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        for(d4 = 0; d4 < pDomain4->m_nNumberOfPoints; d4++)
+        for(d5 = 0; d5 < pDomain5->m_nNumberOfPoints; d5++)
+        for(d6 = 0; d6 < pDomain6->m_nNumberOfPoints; d6++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            narrDomainIndexes[3] = d4;
+            narrDomainIndexes[4] = d5;
+            narrDomainIndexes[5] = d6;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 7)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        pDomain4 = m_ptrDomains[3];
+        pDomain5 = m_ptrDomains[4];
+        pDomain6 = m_ptrDomains[5];
+        pDomain7 = m_ptrDomains[6];
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+           !pDomain5 || !pDomain6 || !pDomain7)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(7);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        for(d4 = 0; d4 < pDomain4->m_nNumberOfPoints; d4++)
+        for(d5 = 0; d5 < pDomain5->m_nNumberOfPoints; d5++)
+        for(d6 = 0; d6 < pDomain6->m_nNumberOfPoints; d6++)
+        for(d7 = 0; d7 < pDomain7->m_nNumberOfPoints; d7++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            narrDomainIndexes[3] = d4;
+            narrDomainIndexes[4] = d5;
+            narrDomainIndexes[5] = d6;
+            narrDomainIndexes[6] = d7;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else if(nNoDomains == 8)
+    {
+        pDomain1 = m_ptrDomains[0];
+        pDomain2 = m_ptrDomains[1];
+        pDomain3 = m_ptrDomains[2];
+        pDomain4 = m_ptrDomains[3];
+        pDomain5 = m_ptrDomains[4];
+        pDomain6 = m_ptrDomains[5];
+        pDomain7 = m_ptrDomains[6];
+        pDomain8 = m_ptrDomains[7];
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+           !pDomain5 || !pDomain6 || !pDomain7 || !pDomain8)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        narrDomainIndexes.resize(8);
+        for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
+        for(d2 = 0; d2 < pDomain2->m_nNumberOfPoints; d2++)
+        for(d3 = 0; d3 < pDomain3->m_nNumberOfPoints; d3++)
+        for(d4 = 0; d4 < pDomain4->m_nNumberOfPoints; d4++)
+        for(d5 = 0; d5 < pDomain5->m_nNumberOfPoints; d5++)
+        for(d6 = 0; d6 < pDomain6->m_nNumberOfPoints; d6++)
+        for(d7 = 0; d7 < pDomain7->m_nNumberOfPoints; d7++)
+        for(d8 = 0; d8 < pDomain8->m_nNumberOfPoints; d8++)
+        {
+            narrDomainIndexes[0] = d1;
+            narrDomainIndexes[1] = d2;
+            narrDomainIndexes[2] = d3;
+            narrDomainIndexes[3] = d4;
+            narrDomainIndexes[4] = d5;
+            narrDomainIndexes[5] = d6;
+            narrDomainIndexes[6] = d7;
+            narrDomainIndexes[7] = d8;
+            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+            nOverallIndexCounter++;
+        }
+    }
+    else
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+    }
+}
+
 void daeVariable::SetInitialGuesses(real_t dInitialGuesses)
 {
 	if(!m_pModel)

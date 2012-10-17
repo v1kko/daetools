@@ -789,6 +789,11 @@ const adouble adarr_integral(const adouble_array& a)
 /*******************************************************
 	daeObject
 *******************************************************/
+daeObject* daeObject_GetModel(daeObject& self)
+{
+	return dynamic_cast<daeObject*>(self.GetModel());
+}
+
 string daeGetRelativeName_1(const daeObject* parent, const daeObject* child)
 {
 	return daeGetRelativeName(parent, child);

@@ -1863,6 +1863,8 @@ public:
 	size_t GetOverallIndex(void) const;
 	daeDomain* GetDomain(size_t nIndex) const;
 
+    void GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes) const;
+
 public:
 	adouble	operator()(void);
 	template<typename TYPE1>

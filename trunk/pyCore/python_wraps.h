@@ -48,6 +48,7 @@ boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
 
     return l;
 }
+
 /*******************************************************
 	String functions
 *******************************************************/
@@ -189,6 +190,7 @@ const adouble adarr_integral(const adouble_array& a);
 /*******************************************************
 	daeObject
 *******************************************************/
+daeObject* daeObject_GetModel(daeObject& self);
 string daeGetRelativeName_1(const daeObject* parent, const daeObject* child);
 string daeGetRelativeName_2(const string& strParent, const string& strChild);
 
@@ -521,6 +523,22 @@ public:
 	{
 		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
+    
+    boost::python::dict GetOverallVSDomainsIndexesMap1()
+    {
+       // Returns dictionary {integer : [list of integers]}
+        boost::python::dict d;
+        std::map<size_t, std::vector<size_t> > mapIndexes;
+        typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
+
+        daeVariable::GetOverallVSDomainsIndexesMap(mapIndexes);
+        
+        for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
+            d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
+    
+        return d;        
+    }
+    
 };
 
 boost::python::numeric::array GetNumPyArrayVariable(daeVariable& var);

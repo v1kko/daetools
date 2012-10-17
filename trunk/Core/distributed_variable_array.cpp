@@ -53,12 +53,7 @@ size_t daeVariable::CalculateIndex(const std::vector<size_t>& narrDomainIndexes)
 	}
 	else
 	{
-		indexes = new size_t[N];
-		for(i = 0; i < N; i++)
-			indexes[i] = narrDomainIndexes[i];
-		
-		index = CalculateIndex(indexes, N);
-		delete[] indexes;
+		index = CalculateIndex(&narrDomainIndexes[0], N);
 	}
 	return index;
 }
