@@ -339,10 +339,8 @@ public:
 	
 	adouble	partial(daePartialDerivativeVariable& pdv) const;
 
-	adouble			operator[](size_t nIndex) const;
-	daeIndexRange	operator()(void);
-	daeIndexRange	operator()(int start, int end, int step);
-	daeIndexRange	operator()(const std::vector<size_t>& narrCustomPoints);
+	adouble	operator[](size_t nIndex) const;
+	adouble	operator()(size_t nIndex) const;
 	
 	void	CreateArray(size_t nNoIntervals);
 	void	CreateDistributed(daeeDiscretizationMethod eMethod, size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dRB);
@@ -659,8 +657,8 @@ public:
 
 		m_pdVariablesTypes			= new real_t[m_nTotalNumberOfVariables];
 		m_pdVariablesTypesGathered	= new real_t[m_nTotalNumberOfVariables];
-		memset(m_pdVariablesTypes,         cnNormal, m_nTotalNumberOfVariables * sizeof(real_t));
-		memset(m_pdVariablesTypesGathered, cnNormal, m_nTotalNumberOfVariables * sizeof(real_t));
+		memset(m_pdVariablesTypes,         cnAlgebraic, m_nTotalNumberOfVariables * sizeof(real_t));
+		memset(m_pdVariablesTypesGathered, cnAlgebraic, m_nTotalNumberOfVariables * sizeof(real_t));
 
 		m_pdAbsoluteTolerances	= new real_t[m_nTotalNumberOfVariables];
 		memset(m_pdAbsoluteTolerances, 0, m_nTotalNumberOfVariables * sizeof(real_t));
@@ -1863,7 +1861,7 @@ public:
 	size_t GetOverallIndex(void) const;
 	daeDomain* GetDomain(size_t nIndex) const;
 
-    void GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes) const;
+    void GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes, size_t nIndexBase) const;
 
 public:
 	adouble	operator()(void);

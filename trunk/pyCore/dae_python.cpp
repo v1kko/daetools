@@ -196,7 +196,7 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
     Global constants
 ***************************************************************/
-    boost::python::scope().attr("cnNormal")       = cnNormal;
+    boost::python::scope().attr("cnAlgebraic")    = cnAlgebraic;
     boost::python::scope().attr("cnDifferential") = cnDifferential;
     boost::python::scope().attr("cnAssigned")     = cnAssigned;
     
@@ -627,13 +627,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("DomainIndex",	&daeArrayRange::m_domainIndex)
 		;
 
-	class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", no_init)
-		.def("__str__",		&daepython::daeDEDI_str)
-		.def("__call__",	&daeDEDI::operator())
-		.def(self + size_t())
-		.def(self - size_t())  
-		;
-
 	class_<daeDomain, bases<daeObject> , boost::noncopyable>("daeDomain")
 		.def(init<string, daeModel*, const unit&, optional<string> >())
 		.def(init<string, daePort*, const unit&, optional<string> >())
@@ -646,19 +639,31 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("LowerBound",				&daeDomain::GetLowerBound)
 		.add_property("UpperBound",				&daeDomain::GetUpperBound)    
 		.add_property("Points",					&daepython::GetDomainPoints, &daepython::SetDomainPoints)
+        .add_property("npyPoints",              &daepython::GetNumPyArrayDomain)
         .add_property("Units",					&daeDomain::GetUnits)
 
 		.def("__str__",							&daepython::daeDomain_str)
 		.def("CreateArray",						&daeDomain::CreateArray)
 		.def("CreateDistributed",				&daeDomain::CreateDistributed)
-		.def("GetNumPyArray",                   &daepython::GetNumPyArrayDomain)
-		.def("__getitem__",						&daeDomain::operator [])
-		.def("__call__",						&daepython::FunctionCallDomain1)
-		.def("__call__",						&daepython::FunctionCallDomain2)
-		.def("__call__",						&daepython::FunctionCallDomain3)  
+		.def("__getitem__",						&daeDomain::operator[])
+        .def("__call__",						&daeDomain::operator())
+//		.def("__call__",						&daepython::FunctionCallDomain1)
+//		.def("__call__",						&daepython::FunctionCallDomain2)
+//		.def("__call__",						&daepython::FunctionCallDomain3)  
 		//.def("array",							&daepython::DomainArray1)
 		//.def("array",							&daepython::DomainArray2)
 		; 
+    
+    class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", no_init)
+        .add_property("Domain",			make_function(&daepython::daeDEDI_GetDomain, return_internal_reference<>()))
+        .add_property("DomainPoints",	&daepython::daeDEDI_GetDomainPoints)
+        .add_property("DomainBounds",	&daeDEDI::GetDomainBounds)
+		
+        .def("__str__",		&daepython::daeDEDI_str)
+		.def("__call__",	&daeDEDI::operator())
+		.def(self + size_t())
+		.def(self - size_t())  
+		;
 
 	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter")
 		.def(init<string, const unit&, daePort*, optional<string, boost::python::list> >())
@@ -667,6 +672,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Units",			&daeParameter::GetUnits)
 		.add_property("Domains",		&daepython::daeParameterWrapper::GetDomains)
         .add_property("ReportingOn",	&daeParameter::GetReportingOn,	&daeParameter::SetReportingOn)
+        .add_property("npyValues",      &daepython::GetNumPyArrayParameter)
 
 		.def("__str__",				&daepython::daeParameter_str)  
 		.def("DistributeOnDomain",	&daeParameter::DistributeOnDomain)
@@ -724,8 +730,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__call__", &daepython::FunctionCallParameter7)
 		.def("__call__", &daepython::FunctionCallParameter8)  
 
-		.def("GetNumPyArray", &daepython::GetNumPyArrayParameter)
-
 		.def("array", &daepython::ParameterArray1)
 		.def("array", &daepython::ParameterArray2)
 		.def("array", &daepython::ParameterArray3)
@@ -736,7 +740,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("array", &daepython::ParameterArray8)
 		;    
 
-	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")
+	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")  
 		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >())
 		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >())
 		
@@ -745,7 +749,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("ReportingOn",                &daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
         .add_property("OverallIndex",               &daeVariable::GetOverallIndex)
         .add_property("NumberOfPoints",             &daeVariable::GetNumberOfPoints)
-        .add_property("OverallVSDomainsIndexesMap",	&daepython::daeVariable_Wrapper::GetOverallVSDomainsIndexesMap1)
+        .add_property("npyValues",                  &daepython::daeVariable_Values)
+        .add_property("npyIDs",                     &daepython::daeVariable_IDs)
 
 		.def("__str__",					&daepython::daeVariable_str) 
 		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain)
@@ -759,8 +764,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("__call__", &daepython::VariableFunctionCall6)
 		.def("__call__", &daepython::VariableFunctionCall7)
 		.def("__call__", &daepython::VariableFunctionCall8)
-
-		.def("GetNumPyArray", &daepython::GetNumPyArrayVariable)
 
 		.def("SetValue", &daepython::SetVariableValue0)
 		.def("SetValue", &daepython::SetVariableValue1)
@@ -915,6 +918,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReSetInitialConditions",	&daepython::qReSetInitialConditions) 
 		
 	    .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
+         
+        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetOverallVSDomainsIndexesMap1)
 
 		.def("dt", &daepython::Get_dt0)
 		.def("dt", &daepython::Get_dt1)
@@ -1127,13 +1132,14 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
     
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation")
-        .add_property("Residual",               &daeEquation::GetResidual, &daeEquation::SetResidual)
-        .add_property("Scaling",                &daeEquation::GetScaling,  &daeEquation::SetScaling)
-        .add_property("EquationExecutionInfos",	&daepython::GetEquationExecutionInfos)
+        .add_property("Residual",                       &daeEquation::GetResidual, &daeEquation::SetResidual)
+        .add_property("Scaling",                        &daeEquation::GetScaling,  &daeEquation::SetScaling)
+        .add_property("EquationExecutionInfos",	        &daepython::daeEquation_GetEquationExecutionInfos)
+        .add_property("DistributedEquationDomainInfos",	&daepython::daeEquation_DistributedEquationDomainInfos)
             
 		.def("__str__",				&daepython::daeEquation_str)
-		.def("DistributeOnDomain",	&daepython::DistributeOnDomain1, return_internal_reference<>())
-		.def("DistributeOnDomain",	&daepython::DistributeOnDomain2, return_internal_reference<>())
+		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain1, return_internal_reference<>())
+		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain2, return_internal_reference<>())
 		;
 
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", no_init)

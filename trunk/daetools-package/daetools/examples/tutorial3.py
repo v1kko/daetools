@@ -115,30 +115,6 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("T_ave", "The average temperature of the plate")
         eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )
 
-        # This is physically meaningles example how to setup a user-defined array of adouble objects.
-        # In some cases when a user needs to create his own adouble_array then the functions:
-        # array, d_array, dt_array, Array etc are NOT available (due to some implementation details)!
-        # and arrays must be filled with adouble items manually as shown bellow.
-        # Check the model report to see the result and differences.
-        arr1 = adouble_array()
-        arr1.Resize(2)
-        arr1[0] = self.Qb()
-        arr1[1] = self.Qt()
-        print arr1, len(arr1)
-        for a in arr1.items():
-            print a
-
-        arr2 = adouble_array()
-        arr2.Resize(2)
-        arr2[0] = self.k() * self.T.d(self.y, 0, 0)
-        arr2[1] = self.k() * self.T.d(self.y, 1, 0)
-        print arr2, len(arr2)
-        for a in arr2.items():
-            print a
-            
-        eq = self.CreateEquation("adTest", "User-defined adouble_array")
-        eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)
-
         # An equivalent to the equation above is:
         #   a) xr = daeIndexRange(self.x)
         #      yr = daeIndexRange(self.y)
@@ -171,6 +147,30 @@ class modTutorial(daeModel):
         values = [2 * K for i in xrange(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
         eq.Residual = self.Qmul() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
+        # This is physically meaningles example how to setup a user-defined array of adouble objects.
+        # In some cases when a user needs to create his own adouble_array then the functions:
+        # array, d_array, dt_array, Array etc are NOT available (due to some implementation details)!
+        # and arrays must be filled with adouble items manually as shown bellow.
+        # Check the model report to see the result and differences.
+        arr1 = adouble_array()
+        arr1.Resize(2)
+        arr1[0] = self.Qb()
+        arr1[1] = self.Qt()
+        print arr1, len(arr1)
+        for a in arr1.items():
+            print a
+
+        arr2 = adouble_array()
+        arr2.Resize(2)
+        arr2[0] = self.k() * self.T.d(self.y, 0, 0)
+        arr2[1] = self.k() * self.T.d(self.y, 1, 0)
+        print arr2, len(arr2)
+        for a in arr2.items():
+            print a
+
+        eq = self.CreateEquation("adTest", "User-defined adouble_array")
+        eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)
+        
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)

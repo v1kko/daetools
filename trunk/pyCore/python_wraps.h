@@ -219,9 +219,9 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild);
 boost::python::numeric::array GetNumPyArrayDomain(daeDomain& domain);
 adouble_array DomainArray1(daeDomain& domain);
 adouble_array DomainArray2(daeDomain& domain, boost::python::slice s);
-daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
-daeIndexRange FunctionCallDomain2(daeDomain& domain, boost::python::list l);
-daeIndexRange FunctionCallDomain3(daeDomain& domain);
+//daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
+//daeIndexRange FunctionCallDomain2(daeDomain& domain, boost::python::list l);
+//daeIndexRange FunctionCallDomain3(daeDomain& domain);
 boost::python::list GetDomainPoints(daeDomain& domain);
 void SetDomainPoints(daeDomain& domain, boost::python::list l);
 
@@ -543,14 +543,14 @@ public:
 		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
     
-    boost::python::dict GetOverallVSDomainsIndexesMap1()
+    boost::python::dict GetOverallVSDomainsIndexesMap1(size_t nIndexBase)
     {
        // Returns dictionary {integer : [list of integers]}
         boost::python::dict d;
         std::map<size_t, std::vector<size_t> > mapIndexes;
         typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
 
-        daeVariable::GetOverallVSDomainsIndexesMap(mapIndexes);
+        daeVariable::GetOverallVSDomainsIndexesMap(mapIndexes, nIndexBase);
         
         for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
             d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
@@ -560,7 +560,8 @@ public:
     
 };
 
-boost::python::numeric::array GetNumPyArrayVariable(daeVariable& var);
+boost::python::numeric::array daeVariable_Values(daeVariable& var);
+boost::python::numeric::array daeVariable_IDs(daeVariable& var);
 
 adouble VariableFunctionCall0(daeVariable& var);
 adouble VariableFunctionCall1(daeVariable& var, boost::python::object o1);
@@ -841,10 +842,16 @@ boost::python::list GetEventPortEventsList(daeEventPort& self);
 /*******************************************************
 	daeEquation
 *******************************************************/
-//daeEquation* __init__daeEquation(const string& strName, daeModel& model);
-daeDEDI* DistributeOnDomain1(daeEquation& eq, daeDomain& rDomain, daeeDomainBounds eDomainBounds);
-daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python::list l);
-boost::python::list GetEquationExecutionInfos(daeEquation& eq);
+daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, daeeDomainBounds eDomainBounds);
+daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l);
+boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
+boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
+
+/*******************************************************
+	daeDEDI
+*******************************************************/
+daeDomain* daeDEDI_GetDomain(daeDEDI& self);
+boost::python::list daeDEDI_GetDomainPoints(daeDEDI& self);
 
 /*******************************************************
 	daePortConnection

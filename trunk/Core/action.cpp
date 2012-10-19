@@ -365,7 +365,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		
 		// Achtung!! At this point the VariableTypeGathered has not been set yet, so we cannot check the type!!!
 		//const int iVarType = m_pVariableWrapper->m_pDataProxy->GetVariableTypeGathered(m_pVariableWrapper->m_nOverallIndex);
-		//if(iVarType == cnNormal)
+		//if(iVarType == cnAlgebraic)
 		//{
 		//	daeDeclareException(exInvalidCall);
 		//	e << "Cannot set the variable value for [" << m_pVariableWrapper->GetName() << "]; it is not a state nor an assigned variable";

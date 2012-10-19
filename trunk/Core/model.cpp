@@ -3487,7 +3487,7 @@ void daeModel::GetModelInfo(daeModelInfo& mi) const
 	
 	for(i = 0; i < m_pDataProxy->GetTotalNumberOfVariables(); i++)
 	{
-		if(m_pDataProxy->GetVariableType(i) == cnNormal)
+		if(m_pDataProxy->GetVariableType(i) == cnAlgebraic)
 			mi.m_nNumberOfStateVariables++;
 		else if(m_pDataProxy->GetVariableType(i) == cnDifferential)
 			mi.m_nNumberOfInitialConditions++;

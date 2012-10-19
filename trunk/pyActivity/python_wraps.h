@@ -229,7 +229,7 @@ public:
 	{
 		return datareporter;
 	}
-
+    
 	boost::python::object GetLog_(void) const
 	{
 		return log;

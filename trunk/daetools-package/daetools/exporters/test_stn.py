@@ -156,7 +156,7 @@ def consoleRun():
 
     from modelica import daeModelicaExport
     modelicaExport = daeModelicaExport()
-    modelicaExport.exportSimulation(simulation, simulation.m.Name + '_export.mo')
+    modelicaExport.exportSimulation(simulation, simulation.m.Name + '.mo')
 
     # Run
     simulation.Run()

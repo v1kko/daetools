@@ -545,30 +545,9 @@ adouble_array daeDomain::array(int start, int end, int step)
 	return varArray;
 }
 
-daeIndexRange daeDomain::operator()(void)
+adouble daeDomain::operator()(size_t nIndex) const
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	return daeIndexRange(this);
-}
-
-daeIndexRange daeDomain::operator()(int start, int end, int step)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
-	return daeIndexRange(this, start, end, step);
-}
-
-daeIndexRange daeDomain::operator()(const std::vector<size_t>& narrCustomPoints)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	if(narrCustomPoints.empty())
-		daeDeclareAndThrowException(exInvalidCall);
-
-	return daeIndexRange(this, narrCustomPoints);
+    return (*this)[nIndex];
 }
 
 adouble daeDomain::operator[](size_t nIndex) const

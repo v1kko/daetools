@@ -79,7 +79,6 @@ class daeModelicaExport(object):
         self.simulation              = None
         self.variableTypes           = []
         self.initialVariableValues   = []
-        self.models                  = {}
 
     def exportModel(self, model, filename):
         try:
@@ -99,7 +98,6 @@ class daeModelicaExport(object):
             self.topLevelModel           = model
             self.variableTypes           = []
             self.initialVariableValues   = []
-            self.models                  = {}
 
             indent   = 1
             s_indent = indent * self.defaultIndent
@@ -136,7 +134,6 @@ class daeModelicaExport(object):
             self.topLevelModel           = port.Model
             self.variableTypes           = []
             self.initialVariableValues   = []
-            self.models                  = {}
 
             indent   = 1
             s_indent = indent * self.defaultIndent
@@ -251,7 +248,7 @@ class daeModelicaExport(object):
                 self.models[model.__class__.__name__] = model
 
         for model in model.Components:
-            self.collectObjects(model)
+            self._collectObjects(model)
 
         print 'Models collected:', self.models.keys()
         print 'Ports collected:', self.ports.keys()

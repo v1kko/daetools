@@ -23,8 +23,8 @@ namespace dae
 {
 namespace core 
 {
-// cnNormal must be zero!!
-const int cnNormal		 = 0;
+// cnAlgebraic must be 0 while cnDifferential 1!!
+const int cnAlgebraic	 = 0;
 const int cnDifferential = 1;
 const int cnAssigned	 = 2;
 

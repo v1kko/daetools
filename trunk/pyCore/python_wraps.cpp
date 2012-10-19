@@ -890,6 +890,7 @@ daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list Cus
 	return new daeIndexRange(pDomain, narrCustomPoints);
 }
 
+/*
 daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step)
 {
 	return domain(start, end, step);
@@ -913,6 +914,7 @@ daeIndexRange FunctionCallDomain3(daeDomain& domain)
 {
 	return domain();
 }
+*/
 
 /*******************************************************
 	daeParameter
@@ -1133,7 +1135,7 @@ adouble_array ParameterArray8(daeParameter& param, object o1, object o2, object 
 /*******************************************************
 	daeVariable
 *******************************************************/
-python::numeric::array GetNumPyArrayVariable(daeVariable& var)
+python::numeric::array daeVariable_Values(daeVariable& var)
 {
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
@@ -1143,16 +1145,45 @@ python::numeric::array GetNumPyArrayVariable(daeVariable& var)
 	var.GetDomains(ptrarrDomains);
 	nDomains = ptrarrDomains.size();
 	dimensions = new npy_intp[nDomains];
-	nStart = var.GetOverallIndex();
+    for(size_t i = 0; i < nDomains; i++)
+        dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+    nStart = var.GetOverallIndex();
 	nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
 
 	daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
 	boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
-	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+	real_t* values = static_cast<real_t*>(PyArray_DATA(numpy_array.ptr()));
 	
 	for(k = 0, i = nStart; i < nEnd; i++, k++)
 		values[k] = pDataProxy->GetValue(i);
+
+	delete[] dimensions;
+	return numpy_array;
+}
+
+python::numeric::array daeVariable_IDs(daeVariable& var)
+{
+	size_t i, k, nType, nDomains, nStart, nEnd;
+	npy_intp* dimensions;
+	vector<daeDomain_t*> ptrarrDomains;
+
+	nType = NPY_INT;
+	var.GetDomains(ptrarrDomains);
+	nDomains = ptrarrDomains.size();
+	dimensions = new npy_intp[nDomains];
+    for(size_t i = 0; i < nDomains; i++)
+        dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+    nStart = var.GetOverallIndex();
+	nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
+
+	daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
+	boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+	npy_int* values = static_cast<npy_int*>(PyArray_DATA(numpy_array.ptr()));
+	
+	for(k = 0, i = nStart; i < nEnd; i++, k++)
+		values[k] = static_cast<npy_int>(pDataProxy->GetVariableType(i));
 
 	delete[] dimensions;
 	return numpy_array;
@@ -2099,12 +2130,12 @@ boost::python::list GetEventPortEventsList(daeEventPort& self)
 /*******************************************************
 	daeEquation
 *******************************************************/
-daeDEDI* DistributeOnDomain1(daeEquation& eq, daeDomain& rDomain, daeeDomainBounds eDomainBounds)
+daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, daeeDomainBounds eDomainBounds)
 {
-	return eq.DistributeOnDomain(rDomain, eDomainBounds);
+	return self.DistributeOnDomain(rDomain, eDomainBounds);
 }
 
-daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python::list l)
+daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l)
 {
 	size_t index;
 	std::vector<size_t> narrDomainIndexes;
@@ -2115,14 +2146,37 @@ daeDEDI* DistributeOnDomain2(daeEquation& eq, daeDomain& rDomain, boost::python:
 		narrDomainIndexes.push_back(index);
 	}
 
-	 return eq.DistributeOnDomain(rDomain, narrDomainIndexes);
+	 return self.DistributeOnDomain(rDomain, narrDomainIndexes);
 }
 
-boost::python::list GetEquationExecutionInfos(daeEquation& eq)
+boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self)
 {
     std::vector<daeEquationExecutionInfo*> ptrarr;
-    eq.GetEquationExecutionInfos(ptrarr);
+    self.GetEquationExecutionInfos(ptrarr);
     return getListFromVector(ptrarr);
+}
+
+boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self)
+{
+    std::vector<daeDistributedEquationDomainInfo_t*> ptrarr;
+    self.GetDomainDefinitions(ptrarr);
+    return getListFromVectorAndCastPointer<daeDistributedEquationDomainInfo_t*, daeDistributedEquationDomainInfo*>(ptrarr);
+}
+
+/*******************************************************
+	daeDEDI
+*******************************************************/
+daeDomain* daeDEDI_GetDomain(daeDEDI& self)
+{
+    daeDomain* pDomain = dynamic_cast<daeDomain*>(self.GetDomain());
+    return pDomain;
+}
+
+boost::python::list daeDEDI_GetDomainPoints(daeDEDI& self)
+{
+    std::vector<size_t> narrDomainPoints;
+    self.GetDomainPoints(narrDomainPoints);
+    return getListFromVectorByValue(narrDomainPoints);
 }
 
 /*******************************************************

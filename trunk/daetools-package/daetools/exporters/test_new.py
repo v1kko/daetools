@@ -311,11 +311,12 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from modelica import daeModelicaExport
-    modelicaExport = daeModelicaExport()
-    modelicaExport.exportSimulation(simulation,     simulation.m.Name + '.mo')
-    modelicaExport.exportModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    modelicaExport.exportPort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    from expression_formatter import daeExpressionFormatter
+    from analyzer import daeExportAnalyzer
+
+    formatter = daeExpressionFormatter()
+    modelicaExport = daeExportAnalyzer(formatter)
+    modelicaExport.analyzeSimulation(simulation)
 
     # Run
     simulation.Run()
