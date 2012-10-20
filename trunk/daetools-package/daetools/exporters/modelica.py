@@ -1,5 +1,8 @@
 import sys, numpy, traceback
 from daetools.pyDAE import *
+from expression_formatter import daeExpressionFormatter
+from analyzer import daeExportAnalyzer
+
 
 portTemplate = """connector %(port)s
 %(variables)s
@@ -33,35 +36,91 @@ end %(model)s_simulation;
 
 """
 
+
 def printNumpyArrayForModelica(nd_arr):
     return '{' + ','.join([str(val) for val in nd_arr]) + '}'
     
-def nameFormat(name):
-    return name.replace('&', '').replace(';', '')
+class daeModelicaExpressionFormatter(daeExpressionFormatter):
+    def __init__(self):
+        daeModel.__init__(self, Name, Parent, Description)
 
-def unitFormat(unit):
-    res = []
-    for u, exp in unit.unitDictionary.items():
-        if exp >= 0:
-            if exp == 1:
-                res.append('{0}'.format(u))
-            elif int(exp) == exp:
-                res.append('{0}{1}'.format(u, int(exp)))
-            else:
-                res.append('{0}{1}'.format(u, exp))
+        # Index base in arrays
+        self.exprFormatter.indexBase = 1
 
-    for u, exp in unit.unitDictionary.items():
-        if exp < 0:
-            if int(exp) == exp:
-                res.append('{0}{1}'.format(u, int(exp)))
-            else:
-                res.append('{0}{1}'.format(u, exp))
+        # Use relative names
+        self.exprFormatter.useRelativeNames = True
 
-    return '.'.join(res)
+        # One- and multi-dimensional parameters/variables and domain points
+        self.exprFormatter.indexLeftBracket  = '['
+        self.exprFormatter.indexRightBracket = ']'
+        self.exprFormatter.indexFormat = 'python_index_style'
 
-class exportNodeContext(object):
-    def __init__(self, model):
-        self.model = model
+        # String format for the time derivative: der(variable)
+        self.exprFormatter.derivative = 'der({variable}{indexes})'
+
+        # Logical operators
+        self.exprFormatter.AND   = 'and'
+        self.exprFormatter.OR    = 'or'
+        self.exprFormatter.NOT   = 'not'
+
+        self.exprFormatter.EQ    = '=='
+        self.exprFormatter.NEQ   = '!='
+        self.exprFormatter.LT    = '<'
+        self.exprFormatter.LTEQ  = '<='
+        self.exprFormatter.GT    = '>'
+        self.exprFormatter.GTEQ  = '>='
+
+        # Mathematical operators
+        self.exprFormatter.PLUS   = '+'
+        self.exprFormatter.MINUS  = '-'
+        self.exprFormatter.MULTI  = '*'
+        self.exprFormatter.DIVIDE = '/'
+        self.exprFormatter.POWER  = '^'
+
+        # Mathematical functions
+        self.exprFormatter.SIN    = 'sin'
+        self.exprFormatter.COS    = 'cos'
+        self.exprFormatter.TAN    = 'tan'
+        self.exprFormatter.ASIN   = 'asin'
+        self.exprFormatter.ACOS   = 'acos'
+        self.exprFormatter.ATAN   = 'atan'
+        self.exprFormatter.EXP    = 'exp'
+        self.exprFormatter.SQRT   = 'sqrt'
+        self.exprFormatter.LOG    = 'log'
+        self.exprFormatter.LOG10  = 'log10'
+        self.exprFormatter.FLOOR  = 'floor'
+        self.exprFormatter.CEIL   = 'ceil'
+        self.exprFormatter.ABS    = 'abs'
+        self.exprFormatter.MIN    = 'min'
+        self.exprFormatter.MAX    = 'max'
+
+        # Current time in simulation
+        self.exprFormatter.TIME   = 'time'
+
+    def formatQuantity(self, quantity):
+        # Formats constants/quantities in equations that have a value and units
+        return str(quantity.value)
+
+    def formatUnit(self, unit):
+        # Format: m.kg2.s-1 meaning m * kg**2 / s
+        res = []
+        for u, exp in unit.unitDictionary.items():
+            if exp >= 0:
+                if exp == 1:
+                    res.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    res.append('{0}{1}'.format(u, int(exp)))
+                else:
+                    res.append('{0}{1}'.format(u, exp))
+
+        for u, exp in unit.unitDictionary.items():
+            if exp < 0:
+                if int(exp) == exp:
+                    res.append('{0}{1}'.format(u, int(exp)))
+                else:
+                    res.append('{0}{1}'.format(u, exp))
+
+        return '.'.join(res)
         
 class daeModelicaExport(object):
     def __init__(self, simulation = None):
@@ -79,12 +138,16 @@ class daeModelicaExport(object):
         self.simulation              = None
         self.variableTypes           = []
         self.initialVariableValues   = []
+        
+        self.exprFormatter = daeModelicaExpressionFormatter()
+        self.analyzer = daeExportAnalyzer(self.exprFormatter)
 
-    def exportModel(self, model, filename):
+    def exportModel(self, model, filename = None):
         try:
             if not model:
                 return
 
+            self.analyzer.analyzeModel(model)
             numpy.set_string_function(printNumpyArrayForModelica, repr=False)
 
             self.ports                   = {}
@@ -104,9 +167,12 @@ class daeModelicaExport(object):
 
             result = self._processModel(model, indent)
 
-            f = open(filename, "w")
-            f.write(result)
-            f.close()
+            if filename:
+                f = open(filename, "w")
+                f.write(result)
+                f.close()
+
+            return result
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -116,11 +182,12 @@ class daeModelicaExport(object):
             # Restore numpy printing to defaults
             numpy.set_string_function(None, repr=False)
             
-    def exportPort(self, port, filename):
+    def exportPort(self, port, filename = None):
         try:
             if not port:
                 return
 
+            self.analyzer.analyzePort(port)
             numpy.set_string_function(printNumpyArrayForModelica, repr=False)
 
             self.ports                   = {}
@@ -140,9 +207,12 @@ class daeModelicaExport(object):
 
             result = self._processPort(port, indent)
 
-            f = open(filename, "w")
-            f.write(result)
-            f.close()
+            if filename:
+                f = open(filename, "w")
+                f.write(result)
+                f.close()
+
+            return result
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -152,11 +222,12 @@ class daeModelicaExport(object):
             # Restore numpy printing to defaults
             numpy.set_string_function(None, repr=False)
 
-    def exportSimulation(self, simulation, filename):
+    def exportSimulation(self, simulation, filename = None):
         try:
             if not simulation:
                 return
 
+            self.analyzer.analyzeSimulation(simulation)
             numpy.set_string_function(printNumpyArrayForModelica, repr=False)
 
             self.ports                   = {}
@@ -170,21 +241,18 @@ class daeModelicaExport(object):
             self.topLevelModel           = simulation.m
             self.variableTypes           = simulation.VariableTypes
             self.initialVariableValues   = simulation.InitialValues
-            self._collectObjects(self.simulation.m)
 
             indent   = 1
             s_indent = indent * self.defaultIndent
 
-            result = ''
-            for port_class, port in self.ports.items():
-                result += self._processPort(port, indent)
-            for model_class, model in self.models.items():
-                result += self._processModel(model, indent)
+            resultModel = ''
+            for port_class, info in self.analyzer.portsToAnalyze.items():
+                resultModel += self._processPort(info['data'], indent)
+
+            for model_class, info in self.models.items():
+                resultModel += self._processModel(info['data'], indent)
 
             self._collectRuntimeInformationFromModel(self.topLevelModel)
-
-            f = open(filename, "w")
-            f.write(result)
 
             model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.wrapperInstanceName)
             indent = ' ' * len(model_instance)
@@ -224,9 +292,15 @@ class daeModelicaExport(object):
                         'end_time'         : self.simulation.TimeHorizon,
                         'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5)
                         }
-            wrapper = wrapperTemplate % dictModel
-            f.write(wrapper)
-            f.close()
+            resultWrapper = wrapperTemplate % dictModel
+
+            if filename:
+                f = open(filename, "w")
+                f.write(resultModel)
+                f.write(resultWrapper)
+                f.close()
+
+            return resultModel, resultWrapper
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -235,23 +309,6 @@ class daeModelicaExport(object):
         finally:
             # Restore numpy printing to defaults
             numpy.set_string_function(None, repr=False)
-
-    def _collectObjects(self, model):
-        self.models[model.__class__.__name__] = model
-
-        for port in model.Ports:
-            if not port.__class__.__name__ in self.ports:
-                self.ports[port.__class__.__name__] = port
-
-        for model in model.Components:
-            if not model.__class__.__name__ in self.models:
-                self.models[model.__class__.__name__] = model
-
-        for model in model.Components:
-            self._collectObjects(model)
-
-        print 'Models collected:', self.models.keys()
-        print 'Ports collected:', self.ports.keys()
         
     def _processPort(self, port, indent):
         sVariables  = []

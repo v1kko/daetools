@@ -1,9 +1,6 @@
 import sys, numpy, traceback
 from daetools.pyDAE import *
 
-def fixName(name):
-    return name.replace('&', '').replace(';', '')
-
 class daeExpressionFormatter(object):
     def __init__(self):
         # Equation and condition node formatting settings
@@ -30,11 +27,11 @@ class daeExpressionFormatter(object):
         # else if indexFormat is c_index_style:
         #     var[i1][i2]...[in]
 
-        # String format for the time derivative
-        #    ie. der(variable[1, 2])
+        # String format for the time derivative, ie. der(variable[1,2]) in Modelica
+        # daetools use: variable.dt(1,2)
         self.derivative = 'der({variable}{indexes})'
 
-        # Operators
+        # Logical operators
         self.AND   = 'and'
         self.OR    = 'or'
         self.NOT   = 'not'
@@ -51,7 +48,7 @@ class daeExpressionFormatter(object):
         self.MINUS  = '-'
         self.MULTI  = '*'
         self.DIVIDE = '/'
-        self.POWER  = '**'
+        self.POWER  = '^'
 
         # Mathematical functions
         self.SIN    = 'sin'
@@ -75,6 +72,10 @@ class daeExpressionFormatter(object):
 
         # Internal data: model will be set by the analyzer
         self.model = None
+
+    def formatIdentifier(self, identifier):
+        # Removes illegal characters from domains/parameters/variables/ports/models/... names
+        return identifier.replace('&', '').replace(';', '')
 
     def formatDomain(self, domainCanonicalName, index):
         # python_index_style: domain(0)
@@ -294,16 +295,16 @@ class daeExpressionFormatter(object):
             raise RuntimeError('External functions are not supported')
 
         elif isinstance(node, adDomainIndexNode):
-            res = self.formatDomain(fixName(node.Domain.CanonicalName), node.Index)
+            res = self.formatDomain(self.formatIdentifier(node.Domain.CanonicalName), node.Index)
 
         elif isinstance(node, adRuntimeParameterNode):
-            res = self.formatParameter(fixName(node.Parameter.CanonicalName), node.DomainIndexes)
+            res = self.formatParameter(self.formatIdentifier(node.Parameter.CanonicalName), node.DomainIndexes)
 
         elif isinstance(node, adRuntimeVariableNode):
-            res = self.formatVariable(fixName(node.Variable.CanonicalName), node.DomainIndexes)
+            res = self.formatVariable(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes)
 
         elif isinstance(node, adRuntimeTimeDerivativeNode):
-            res = self.formatTimeDerivative(fixName(node.Variable.CanonicalName), node.DomainIndexes, node.Order)
+            res = self.formatTimeDerivative(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.Order)
 
         else:
             raise RuntimeError('Not supported node')

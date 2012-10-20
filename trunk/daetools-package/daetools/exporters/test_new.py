@@ -313,10 +313,20 @@ def consoleRun():
 
     from expression_formatter import daeExpressionFormatter
     from analyzer import daeExportAnalyzer
+    import pprint
 
     formatter = daeExpressionFormatter()
-    modelicaExport = daeExportAnalyzer(formatter)
-    modelicaExport.analyzeSimulation(simulation)
+    analyzer = daeExportAnalyzer(formatter)
+    analyzer.analyzeSimulation(simulation)
+
+    pp = pprint.PrettyPrinter(indent=2)
+    ports = pp.pformat(analyzer.portsToAnalyze)
+    models = pp.pformat(analyzer.modelsToAnalyze)
+
+    f = open(simulation.m.Name + '-analysys.txt', "w")
+    f.write(ports)
+    f.write(models)
+    f.close()
 
     # Run
     simulation.Run()

@@ -1,27 +1,12 @@
 import sys, numpy, traceback
 from daetools.pyDAE import *
 
-def formatNumpyArray(self, nd_arr):
-    # Example for modelica, c/c++
-    return '{' + ', '.join([str(val) for val in nd_arr]) + '}'
-
-def fixName(name):
-    return name.replace('&', '').replace(';', '')
-
 class daeExportAnalyzer(object):
     def __init__(self, expressionFormatter):
-        self.expressionFormatter = expressionFormatter
+        if not expressionFormatter:
+            raise RuntimeError('Invalid expression formatter object')
 
-        #self.domains                 = {}
-        #self.parameters              = {}
-        #self.variables               = {}
-        #self.ports                   = {}
-        #self.components              = {}
-        #self.equations               = {}
-        #self.stns                    = {}
-
-        self.warnings                = []
-        self.topLevelModel           = None
+        self.expressionFormatter     = expressionFormatter
         self.simulation              = None
         self.portsToAnalyze          = {}
         self.modelsToAnalyze         = {}
@@ -30,36 +15,19 @@ class daeExportAnalyzer(object):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
-        #self.domains                 = {}
-        #self.parameters              = {}
-        #self.variables               = {}
-        #self.ports                   = {}
-        #self.components              = {}
-        #self.equations               = {}
-        #self.stns                    = {}
-
-        self.warnings                = []
         self.simulation              = simulation
-        self.topLevelModel           = simulation.m
         self.portsToAnalyze          = {}
         self.modelsToAnalyze         = {}
 
         self._collectObjects(self.simulation.m)
 
         for port_class, dict_port in self.portsToAnalyze.items():
-            data = self._analyzePort(dict_port['port'])
+            data = self.analyzePort(dict_port['port'])
             self.portsToAnalyze[port_class]['data'] = data
 
         for model_class, dict_model in self.modelsToAnalyze.items():
-            data = self._analyzeModel(dict_model['model'])
+            data = self.analyzeModel(dict_model['model'])
             self.modelsToAnalyze[model_class]['data'] = data
-
-        import pprint
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(self.portsToAnalyze)
-        pp.pprint(self.modelsToAnalyze)
-
-        print eCFDM, str(eCFDM), repr(eCFDM)
 
     def _collectObjects(self, model):
         self.modelsToAnalyze[model.__class__.__name__] = {'model' : model, 'data' : None}
@@ -75,10 +43,10 @@ class daeExportAnalyzer(object):
         for model in model.Components:
             self._collectObjects(model)
 
-        print 'Models collected:', self.modelsToAnalyze.keys()
-        print 'Ports collected:', self.portsToAnalyze.keys()
+        #print 'Models collected:', self.modelsToAnalyze.keys()
+        #print 'Ports collected:', self.portsToAnalyze.keys()
         
-    def _analyzePort(self, port):
+    def analyzePort(self, port):
         result = { 'Class'         : None,
                    'Parameters'    : [],
                    'Domains'       : [],
@@ -97,7 +65,7 @@ class daeExportAnalyzer(object):
         # Domains
         for domain in port.Domains:
             data = {}
-            data['Name']                 = fixName(domain.Name)
+            data['Name']                 = domain.Name
             data['Type']                 = str(domain.Type)
             data['Units']                = domain.Units
             data['NumberOfIntervals']    = domain.NumberOfIntervals
@@ -114,8 +82,8 @@ class daeExportAnalyzer(object):
         # Parameters
         for parameter in port.Parameters:
             data = {}
-            data['Name']                 = fixName(parameter.Name)
-            data['Domains']              = [fixName(daeGetRelativeName(port, domain)) for domain in parameter.Domains]
+            data['Name']                 = parameter.Name
+            data['Domains']              = [daeGetRelativeName(port, domain) for domain in parameter.Domains]
             data['Units']                = parameter.Units
             data['Description']          = parameter.Description
             data['Values']               = parameter.npyValues
@@ -128,8 +96,8 @@ class daeExportAnalyzer(object):
                 raise RuntimeError('Modelica ports cannot contain distributed variables')
 
             data = {}
-            data['Name']              = fixName(variable.Name)
-            data['Domains']           = [fixName(daeGetRelativeName(port, domain)) for domain in variable.Domains]
+            data['Name']              = variable.Name
+            data['Domains']           = [daeGetRelativeName(port, domain) for domain in variable.Domains]
             data['Type']              = variable.VariableType.Name
             #data['Units']             = variable.VariableType.Units
             #data['LowerBound']        = variable.VariableType.LowerBound
@@ -143,7 +111,7 @@ class daeExportAnalyzer(object):
             data['ReportingOn']       = variable.ReportingOn
             if not variable.VariableType.Name in result['VariableTypes']:
                 vt_data = {}
-                vt_data['Name']              = fixName(variable.VariableType.Name)
+                vt_data['Name']              = variable.VariableType.Name
                 vt_data['Units']             = variable.VariableType.Units
                 vt_data['LowerBound']        = variable.VariableType.LowerBound
                 vt_data['UpperBound']        = variable.VariableType.UpperBound
@@ -155,7 +123,7 @@ class daeExportAnalyzer(object):
 
         return result
     
-    def _analyzeModel(self, model):
+    def analyzeModel(self, model):
         result = { 'Class'                : None,
                    'VariableTypes'        : [],
                    'Parameters'           : [],
@@ -183,7 +151,7 @@ class daeExportAnalyzer(object):
         # Domains
         for domain in model.Domains:
             data = {}
-            data['Name']                 = fixName(domain.Name)
+            data['Name']                 = domain.Name
             data['Type']                 = str(domain.Type)
             data['Units']                = domain.Units
             data['NumberOfIntervals']    = domain.NumberOfIntervals
@@ -200,8 +168,8 @@ class daeExportAnalyzer(object):
         # Parameters
         for parameter in model.Parameters:
             data = {}
-            data['Name']                 = fixName(parameter.Name)
-            data['Domains']              = [fixName(daeGetRelativeName(model, domain)) for domain in parameter.Domains]
+            data['Name']                 = parameter.Name
+            data['Domains']              = [daeGetRelativeName(model, domain) for domain in parameter.Domains]
             data['Units']                = parameter.Units
             data['Description']          = parameter.Description
             data['Values']               = parameter.npyValues
@@ -212,8 +180,8 @@ class daeExportAnalyzer(object):
         # Variables
         for variable in model.Variables:
             data = {}
-            data['Name']              = fixName(variable.Name)
-            data['Domains']           = [fixName(daeGetRelativeName(model, domain)) for domain in variable.Domains]
+            data['Name']              = variable.Name
+            data['Domains']           = [daeGetRelativeName(model, domain) for domain in variable.Domains]
             data['Type']              = variable.VariableType.Name
             #data['Units']             = variable.VariableType.Units
             #data['LowerBound']        = variable.VariableType.LowerBound
@@ -227,7 +195,7 @@ class daeExportAnalyzer(object):
             data['ReportingOn']       = variable.ReportingOn
             if not variable.VariableType.Name in result['VariableTypes']:
                 vt_data = {}
-                vt_data['Name']              = fixName(variable.VariableType.Name)
+                vt_data['Name']              = variable.VariableType.Name
                 vt_data['Units']             = variable.VariableType.Units
                 vt_data['LowerBound']        = variable.VariableType.LowerBound
                 vt_data['UpperBound']        = variable.VariableType.UpperBound
@@ -240,15 +208,15 @@ class daeExportAnalyzer(object):
         # PortConnections
         for port_connection in model.PortConnections:
             data = {}
-            data['PortFrom'] = fixName(daeGetRelativeName(model, port_connection.PortFrom))
-            data['PortTo']   = fixName(daeGetRelativeName(model, port_connection.PortTo))
+            data['PortFrom'] = daeGetRelativeName(model, port_connection.PortFrom)
+            data['PortTo']   = daeGetRelativeName(model, port_connection.PortTo)
 
             result['PortConnections'].append(data)
 
         # Ports
         for port in model.Ports:
             data = {}
-            data['Name']              = fixName(port.Name)
+            data['Name']              = port.Name
             data['Class']             = port.__class__.__name__
             data['Type']              = str(port.Type)
             data['Description']       = port.Description
@@ -264,7 +232,7 @@ class daeExportAnalyzer(object):
         # Components
         for component in model.Components:
             data = {}
-            data['Name']              = fixName(component.Name)
+            data['Name']              = component.Name
             data['Class']             = component.__class__.__name__
             data['Description']       = component.Description
 
@@ -276,7 +244,7 @@ class daeExportAnalyzer(object):
         eqns = []
         for equation in equations:
             data = {}
-            data['Name']                           = fixName(equation.Name)
+            data['Name']                           = equation.Name
             data['Scaling']                        = equation.Scaling
             data['Residual']                       = equation.Residual
             data['Description']                    = equation.Description
@@ -284,7 +252,7 @@ class daeExportAnalyzer(object):
             data['DistributedEquationDomainInfos'] = []
             for dedi in equation.DistributedEquationDomainInfos:
                 dedi_data = {}
-                dedi_data['Domain']       = fixName(daeGetRelativeName(model, dedi.Domain))
+                dedi_data['Domain']       = dedi.Domain.Name
                 dedi_data['DomainBounds'] = str(dedi.DomainBounds)
                 dedi_data['DomainPoints'] = dedi.DomainPoints
                 
@@ -305,12 +273,12 @@ class daeExportAnalyzer(object):
                 data['Class'] = 'daeIF'
             else:
                 data['Class'] = 'daeSTN'
-            data['Name']        = fixName(stn.Name)
+            data['Name']        = stn.Name
             data['ActiveState'] = stn.ActiveState
             data['States']      = []
             for i, state in enumerate(stn.States):
                 state_data = {}
-                state_data['Name']              = fixName(state.Name)
+                state_data['Name']              = state.Name
                 state_data['Equations']         = self._processEquations(state.Equations, model)
                 state_data['NestedSTNs']        = self._processSTNs(state.NestedSTNs, model)
                 state_data['StateTransitions']  = []
@@ -335,7 +303,7 @@ class daeExportAnalyzer(object):
             data['Type']            = str(action.Type)
             data['STN']             = action.STN.Name
             data['StateTo']         = action.StateTo.Name
-            data['SendEventPort']   = fixName(daeGetRelativeName(model, action.SendEventPort))
+            data['SendEventPort']   = daeGetRelativeName(model, action.SendEventPort)
             data['VariableWrapper'] = action.VariableWrapper
             data['SetupNode']       = action.SetupNode
             data['RuntimeNode']     = action.RuntimeNode
