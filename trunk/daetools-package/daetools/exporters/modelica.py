@@ -1,6 +1,6 @@
 import sys, numpy, math, traceback
 from daetools.pyDAE import *
-from expression_formatter import daeExpressionFormatter
+from formatter import daeExpressionFormatter
 from analyzer import daeCodeGeneratorAnalyzer
 
 
