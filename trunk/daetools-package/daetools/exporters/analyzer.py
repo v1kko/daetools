@@ -1,57 +1,47 @@
 import sys, numpy, traceback
 from daetools.pyDAE import *
 
-class daeExportAnalyzer(object):
-    def __init__(self, expressionFormatter):
-        if not expressionFormatter:
-            raise RuntimeError('Invalid expression formatter object')
-
-        self.expressionFormatter     = expressionFormatter
-        self.simulation              = None
-        self.portsToAnalyze          = {}
-        self.modelsToAnalyze         = {}
+class daeCodeGeneratorAnalyzer(object):
+    def __init__(self):
+        self._simulation        = None
+        self.ports              = {}
+        self.models             = {}
+        self.runtimeInformation = {}
 
     def analyzeSimulation(self, simulation):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
-        self.simulation              = simulation
-        self.portsToAnalyze          = {}
-        self.modelsToAnalyze         = {}
+        self._simulation        = simulation
+        self.ports              = {}
+        self.models             = {}
+        self.runtimeInformation = {
+                                    'Domains'     : [],
+                                    'Parameters'  : [],
+                                    'Variables'   : [],
+                                    'STNs'        : []
+                                  }
 
-        self._collectObjects(self.simulation.m)
+        self._collectObjects(self._simulation.m)
 
-        for port_class, dict_port in self.portsToAnalyze.items():
+        for port_class, dict_port in self.ports.items():
             data = self.analyzePort(dict_port['port'])
-            self.portsToAnalyze[port_class]['data'] = data
 
-        for model_class, dict_model in self.modelsToAnalyze.items():
+            self.ports[port_class]['data'] = data
+
+        for model_class, dict_model in self.models.items():
             data = self.analyzeModel(dict_model['model'])
-            self.modelsToAnalyze[model_class]['data'] = data
 
-    def _collectObjects(self, model):
-        self.modelsToAnalyze[model.__class__.__name__] = {'model' : model, 'data' : None}
+            self.models[model_class]['data'] = data
 
-        for port in model.Ports:
-            if not port.__class__.__name__ in self.portsToAnalyze:
-                self.portsToAnalyze[port.__class__.__name__] = {'port' : port, 'data' : None}
-
-        for model in model.Components:
-            if not model.__class__.__name__ in self.modelsToAnalyze:
-                self.modelsToAnalyze[model.__class__.__name__] = {'model' : model, 'data' : None}
-
-        for model in model.Components:
-            self._collectObjects(model)
-
-        #print 'Models collected:', self.modelsToAnalyze.keys()
-        #print 'Ports collected:', self.portsToAnalyze.keys()
-        
+        self._collectRuntimeInformationFromModel(self._simulation.m)
+       
     def analyzePort(self, port):
-        result = { 'Class'         : None,
+        result = { 'Class'         : '',
                    'Parameters'    : [],
                    'Domains'       : [],
                    'Variables'     : [],
-                   'VariableTypes' : []
+                   'VariableTypes' : {}
                  }
                  
         result['Class'] = port.__class__.__name__
@@ -72,10 +62,7 @@ class daeExportAnalyzer(object):
             data['NumberOfPoints']       = domain.NumberOfPoints
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
-            data['LowerBound']           = domain.LowerBound
-            data['UpperBound']           = domain.UpperBound
             data['Description']          = domain.Description
-            data['Points']               = domain.npyPoints
 
             result['Domains'].append(data)
 
@@ -86,8 +73,6 @@ class daeExportAnalyzer(object):
             data['Domains']              = [daeGetRelativeName(port, domain) for domain in parameter.Domains]
             data['Units']                = parameter.Units
             data['Description']          = parameter.Description
-            data['Values']               = parameter.npyValues
-            data['ReportingOn']          = parameter.ReportingOn
 
             result['Parameters'].append(data)
 
@@ -99,16 +84,17 @@ class daeExportAnalyzer(object):
             data['Name']              = variable.Name
             data['Domains']           = [daeGetRelativeName(port, domain) for domain in variable.Domains]
             data['Type']              = variable.VariableType.Name
-            #data['Units']             = variable.VariableType.Units
-            #data['LowerBound']        = variable.VariableType.LowerBound
-            #data['UpperBound']        = variable.VariableType.UpperBound
-            #data['InitialGuess']      = variable.VariableType.InitialGuess
-            #data['AbsoluteTolerance'] = variable.VariableType.AbsoluteTolerance
             data['Description']       = variable.Description
-            data['Values']            = variable.npyValues
-            data['IDs']               = variable.npyIDs
-            data['DomainsIndexesMap'] = variable.GetDomainsIndexesMap(0)
-            data['ReportingOn']       = variable.ReportingOn
+            if variable.NumberOfPoints == 1:
+                IDs = [variable.npyIDs]
+            else:
+                IDs = variable.npyIDs
+            if cnDifferential in IDs:
+                data['RuntimeHint'] = 'differential'
+            elif cnAssigned in IDs:
+                data['RuntimeHint'] = 'assigned'
+            else:
+                data['RuntimeHint'] = 'algebraic'
             if not variable.VariableType.Name in result['VariableTypes']:
                 vt_data = {}
                 vt_data['Name']              = variable.VariableType.Name
@@ -117,15 +103,17 @@ class daeExportAnalyzer(object):
                 vt_data['UpperBound']        = variable.VariableType.UpperBound
                 vt_data['InitialGuess']      = variable.VariableType.InitialGuess
                 vt_data['AbsoluteTolerance'] = variable.VariableType.AbsoluteTolerance
-                result['VariableTypes'].append(vt_data)
+                if not variable.VariableType.Name in result['VariableTypes']:
+                    result['VariableTypes'][variable.VariableType.Name] = vt_data
 
             result['Variables'].append(data)
 
         return result
     
     def analyzeModel(self, model):
-        result = { 'Class'                : None,
-                   'VariableTypes'        : [],
+        result = { 'Class'                : '',
+                   'CanonicalName'        : '',
+                   'VariableTypes'        : {},
                    'Parameters'           : [],
                    'Domains'              : [],
                    'Variables'            : [],
@@ -135,18 +123,10 @@ class daeExportAnalyzer(object):
                    'PortConnections'      : [],
                    'EventPortConnections' : [],
                    'STNs'                 : []
-               }
-        sParameters      = []
-        sVariables       = []
-        sPorts           = []
-        sComponents      = []
-        sPortConnections = []
-        sEquations       = []
-        sSTNs            = []
-
-        self.expressionFormatter.model = model
-
-        result['Class'] = model.__class__.__name__
+                 }
+ 
+        result['Class']         = model.__class__.__name__
+        result['CanonicalName'] = model.CanonicalName
         
         # Domains
         for domain in model.Domains:
@@ -158,10 +138,7 @@ class daeExportAnalyzer(object):
             data['NumberOfPoints']       = domain.NumberOfPoints
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
-            data['LowerBound']           = domain.LowerBound
-            data['UpperBound']           = domain.UpperBound
             data['Description']          = domain.Description
-            data['Points']               = domain.npyPoints
 
             result['Domains'].append(data)
 
@@ -172,8 +149,6 @@ class daeExportAnalyzer(object):
             data['Domains']              = [daeGetRelativeName(model, domain) for domain in parameter.Domains]
             data['Units']                = parameter.Units
             data['Description']          = parameter.Description
-            data['Values']               = parameter.npyValues
-            data['ReportingOn']          = parameter.ReportingOn
 
             result['Parameters'].append(data)
         
@@ -183,16 +158,17 @@ class daeExportAnalyzer(object):
             data['Name']              = variable.Name
             data['Domains']           = [daeGetRelativeName(model, domain) for domain in variable.Domains]
             data['Type']              = variable.VariableType.Name
-            #data['Units']             = variable.VariableType.Units
-            #data['LowerBound']        = variable.VariableType.LowerBound
-            #data['UpperBound']        = variable.VariableType.UpperBound
-            #data['InitialGuess']      = variable.VariableType.InitialGuess
-            #data['AbsoluteTolerance'] = variable.VariableType.AbsoluteTolerance
             data['Description']       = variable.Description
-            data['Values']            = variable.npyValues
-            data['IDs']               = variable.npyIDs
-            data['DomainsIndexesMap'] = variable.GetDomainsIndexesMap(0)
-            data['ReportingOn']       = variable.ReportingOn
+            if variable.NumberOfPoints == 1:
+                IDs = [variable.npyIDs]
+            else:
+                IDs = variable.npyIDs
+            if cnDifferential in IDs:
+                data['RuntimeHint'] = 'differential'
+            elif cnAssigned in IDs:
+                data['RuntimeHint'] = 'assigned'
+            else:
+                data['RuntimeHint'] = 'algebraic'
             if not variable.VariableType.Name in result['VariableTypes']:
                 vt_data = {}
                 vt_data['Name']              = variable.VariableType.Name
@@ -201,7 +177,8 @@ class daeExportAnalyzer(object):
                 vt_data['UpperBound']        = variable.VariableType.UpperBound
                 vt_data['InitialGuess']      = variable.VariableType.InitialGuess
                 vt_data['AbsoluteTolerance'] = variable.VariableType.AbsoluteTolerance
-                result['VariableTypes'].append(vt_data)
+                if not variable.VariableType.Name in result['VariableTypes']:
+                    result['VariableTypes'][variable.VariableType.Name] = vt_data
 
             result['Variables'].append(data)
 
@@ -240,6 +217,20 @@ class daeExportAnalyzer(object):
 
         return result
 
+    def _collectObjects(self, model):
+        self.models[model.__class__.__name__] = {'model' : model, 'data' : None}
+
+        for port in model.Ports:
+            if not port.__class__.__name__ in self.ports:
+                self.ports[port.__class__.__name__] = {'port' : port, 'data' : None}
+
+        for model in model.Components:
+            if not model.__class__.__name__ in self.models:
+                self.models[model.__class__.__name__] = {'model' : model, 'data' : None}
+
+        for model in model.Components:
+            self._collectObjects(model)
+
     def _processEquations(self, equations, model):
         eqns = []
         for equation in equations:
@@ -248,7 +239,6 @@ class daeExportAnalyzer(object):
             data['Scaling']                        = equation.Scaling
             data['Residual']                       = equation.Residual
             data['Description']                    = equation.Description
-            data['EquationExecutionInfos']         = []
             data['DistributedEquationDomainInfos'] = []
             for dedi in equation.DistributedEquationDomainInfos:
                 dedi_data = {}
@@ -257,9 +247,13 @@ class daeExportAnalyzer(object):
                 dedi_data['DomainPoints'] = dedi.DomainPoints
                 
                 data['DistributedEquationDomainInfos'].append(dedi_data)
-                
+
+            data['EquationExecutionInfos']         = []
             for eeinfo in equation.EquationExecutionInfos:
-                data['EquationExecutionInfos'].append( self.expressionFormatter.formatRuntimeNode(eeinfo.Node) ) #############
+                eedata = {}
+                eedata['ResidualRuntimeNode'] = eeinfo.Node
+
+                data['EquationExecutionInfos'].append(eedata)
 
             eqns.append(data)
 
@@ -285,7 +279,7 @@ class daeExportAnalyzer(object):
                 for state_transition in state.StateTransitions:
                     st_data = {}
                     st_data['ConditionSetupNode']   = state_transition.Condition.SetupNode
-                    st_data['ConditionRuntimeNode'] = self.expressionFormatter.formatRuntimeConditionNode(state_transition.Condition.RuntimeNode) ############
+                    st_data['ConditionRuntimeNode'] = state_transition.Condition.RuntimeNode
                     st_data['Actions']              = self._processActions(state_transition.Actions, model)
 
                     state_data['StateTransitions'].append(st_data)
@@ -312,3 +306,92 @@ class daeExportAnalyzer(object):
 
         return sActions
 
+    def _collectRuntimeInformationFromModel(self, model):
+        for domain in model.Domains:
+            data = {}
+            data['CanonicalName']        = domain.CanonicalName
+            data['Type']                 = str(domain.Type)
+            data['NumberOfIntervals']    = domain.NumberOfIntervals
+            data['NumberOfPoints']       = domain.NumberOfPoints
+            data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
+            data['DiscretizationOrder']  = domain.DiscretizationOrder
+            data['Points']               = domain.npyPoints
+
+            self.runtimeInformation['Domains'].append(data)
+
+        for parameter in model.Parameters:
+            data = {}
+            data['CanonicalName']        = parameter.CanonicalName
+            data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
+            data['NumberOfPoints']       = parameter.NumberOfPoints
+            data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
+            data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
+            data['ReportingOn']          = parameter.ReportingOn
+
+            self.runtimeInformation['Parameters'].append(data)
+
+        for variable in model.Variables:
+            data = {}
+            data['CanonicalName']        = variable.CanonicalName
+            data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
+            data['NumberOfPoints']       = variable.NumberOfPoints
+            data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
+            data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
+            data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
+            data['ReportingOn']          = variable.ReportingOn
+
+            self.runtimeInformation['Variables'].append(data)
+
+        for port in model.Ports:
+            self._collectRuntimeInformationFromPort(port)
+
+        for stn in model.STNs:
+            if isinstance(stn, daeSTN):
+                data = {}
+                data['CanonicalName']   = stn.CanonicalName
+                data['ActiveState']     = stn.ActiveState
+                stateMap = {}
+                for i, state in enumerate(stn.States):
+                    stateMap[state.Name] = i
+                data['StateMap']        = stateMap
+
+                self.runtimeInformation['STNs'].append(data)
+
+        for component in model.Components:
+            self._collectRuntimeInformationFromModel(component)
+
+    def _collectRuntimeInformationFromPort(self, port):
+        for domain in port.Domains:
+            data = {}
+            data['CanonicalName']        = domain.CanonicalName
+            data['Type']                 = str(domain.Type)
+            data['NumberOfIntervals']    = domain.NumberOfIntervals
+            data['NumberOfPoints']       = domain.NumberOfPoints
+            data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
+            data['DiscretizationOrder']  = domain.DiscretizationOrder
+            data['Points']               = domain.npyPoints
+
+            self.runtimeInformation['Domains'].append(data)
+
+        for parameter in port.Parameters:
+            data = {}
+            data['CanonicalName']        = parameter.CanonicalName
+            data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
+            data['NumberOfPoints']       = parameter.NumberOfPoints
+            data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
+            data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
+            data['ReportingOn']          = parameter.ReportingOn
+
+            self.runtimeInformation['Parameters'].append(data)
+
+        for variable in port.Variables:
+            data = {}
+            data['CanonicalName']        = variable.CanonicalName
+            data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
+            data['NumberOfPoints']       = variable.NumberOfPoints
+            data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
+            data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
+            data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
+            data['ReportingOn']          = variable.ReportingOn
+
+            self.runtimeInformation['Variables'].append(data)

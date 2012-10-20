@@ -1,4 +1,4 @@
-import sys, numpy, traceback
+import sys, numpy, math, traceback
 from daetools.pyDAE import *
 
 class daeExpressionFormatter(object):
@@ -8,7 +8,7 @@ class daeExpressionFormatter(object):
         # Index base in arrays:
         #  - Modelica, Fortran use 1
         #  - daetools, python, c/c++ use 0
-        self.indexBase = 1
+        self.indexBase = 0
 
         # Use relative names (relative to domains/parameters/variables model) or full canonical names
         # If we are in model root.comp1 then variables' names could be:
@@ -28,8 +28,8 @@ class daeExpressionFormatter(object):
         #     var[i1][i2]...[in]
 
         # String format for the time derivative, ie. der(variable[1,2]) in Modelica
-        # daetools use: variable.dt(1,2)
-        self.derivative = 'der({variable}{indexes})'
+        # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
+        self.derivative = '{variable}.dt{indexes}'
 
         # Logical operators
         self.AND   = 'and'
@@ -71,8 +71,53 @@ class daeExpressionFormatter(object):
         self.TIME   = 'time'
 
         # Internal data: model will be set by the analyzer
-        self.model = None
+        self.modelCanonicalName = None
 
+    """
+    formatQuantity(), formatQuantity(), and formatNumpyArray() are commonly defined in derived classes
+    """
+    def formatQuantity(self, quantity):
+        # Formats constants/quantities in equations that have a value and units
+        return '{{{0} {1}}}'.format(quantity.value, self.formatUnits(quantity.units))
+
+    def formatUnits(self, units):
+        # Format: m kg^2/(s^2) meaning m * kg**2 / s**2
+        positive = []
+        negative = []
+        for u, exp in units.unitDictionary.items():
+            if exp >= 0:
+                if exp == 1:
+                    positive.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    positive.append('{0}^{1}'.format(u, int(exp)))
+                else:
+                    positive.append('{0}^{1}'.format(u, exp))
+
+        for u, exp in units.unitDictionary.items():
+            if exp < 0:
+                if exp == -1:
+                    negative.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    negative.append('{0}^{1}'.format(u, int(math.fabs(exp))))
+                else:
+                    negative.append('{0}^{1}'.format(u, math.fabs(exp)))
+
+        sPositive = ' '.join(positive)
+        if len(negative) == 0:
+            sNegative = ''
+        elif len(negative) == 1:
+            sNegative = '/' + ' '.join(negative)
+        else:
+            sNegative = '/(' + ' '.join(negative) + ')'
+
+        return sPositive + sNegative
+
+    def formatNumpyArray(self, nd_arr):
+        if isinstance(arr, numpy.ndarray):
+            return '[' + ','.join([self.formatNumpyArray(val) for val in arr]) + ']'
+        else:
+            return str(arr)
+            
     def formatIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
         return identifier.replace('&', '').replace(';', '')
@@ -82,14 +127,14 @@ class daeExpressionFormatter(object):
         # c_index_style: domain[0]
         # ACHTUNG, ACHTUNG!! Take care of indexing
         if self.useRelativeNames:
-            name = daeGetRelativeName(self.model.CanonicalName, domainCanonicalName)
+            name = daeGetRelativeName(self.modelCanonicalName, domainCanonicalName)
         else:
             name = domainCanonicalName
 
         if self.indexFormat == 'python_index_style':
-            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index + self.indexBase, self.indexRightBracket)
+            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index+self.indexBase, self.indexRightBracket)
         elif self.indexFormat == 'c_index_style':
-            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index + self.indexBase, self.indexRightBracket)
+            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index+self.indexBase, self.indexRightBracket)
         else:
             raise RuntimeError('Unsupported index style')
         return res
@@ -99,7 +144,7 @@ class daeExpressionFormatter(object):
         # c_index_style: parameter[0][1][2]
         # ACHTUNG, ACHTUNG!! Take care of indexing
         if self.useRelativeNames:
-            name = daeGetRelativeName(self.model.CanonicalName, parameterCanonicalName)
+            name = daeGetRelativeName(self.modelCanonicalName, parameterCanonicalName)
         else:
             name = parameterCanonicalName
 
@@ -116,11 +161,11 @@ class daeExpressionFormatter(object):
         return res
 
     def formatVariable(self, variableCanonicalName, domainIndexes):
-        # python_index_style: variable(0, 1, 2)
+        # python_index_style: variable(0,1,2)
         # c_index_style: variable[0][1][2]
         # ACHTUNG, ACHTUNG!! Take care of indexing
         if self.useRelativeNames:
-            name = daeGetRelativeName(self.model.CanonicalName, variableCanonicalName)
+            name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
         else:
             name = variableCanonicalName
 
@@ -141,7 +186,7 @@ class daeExpressionFormatter(object):
         # c_index_style: derivative(variable[0][1][2])
         # ACHTUNG, ACHTUNG!! Take care of indexing
         if self.useRelativeNames:
-            name = daeGetRelativeName(self.model.CanonicalName, variableCanonicalName)
+            name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
         else:
             name = variableCanonicalName
 
@@ -156,31 +201,6 @@ class daeExpressionFormatter(object):
 
         res = self.derivative.format(variable = name, indexes = domainindexes)
         return res
-
-    def formatQuantity(self, quantity):
-        # Formats constants/quantities in equations that have a value and units
-        return str(quantity.value) # + ' ' + self.formatUnit(quantity.units)
-
-    def formatUnit(self, unit):
-        # Format: m.kg2.s-1 meaning m * kg**2 / s
-        res = []
-        for u, exp in unit.unitDictionary.items():
-            if exp >= 0:
-                if exp == 1:
-                    res.append('{0}'.format(u))
-                elif int(exp) == exp:
-                    res.append('{0}{1}'.format(u, int(exp)))
-                else:
-                    res.append('{0}{1}'.format(u, exp))
-
-        for u, exp in unit.unitDictionary.items():
-            if exp < 0:
-                if int(exp) == exp:
-                    res.append('{0}{1}'.format(u, int(exp)))
-                else:
-                    res.append('{0}{1}'.format(u, exp))
-
-        return '.'.join(res)
 
     def formatRuntimeConditionNode(self, node):
         res = ''
@@ -221,7 +241,7 @@ class daeExpressionFormatter(object):
             else:
                 raise RuntimeError('Not supported condition type')
         else:
-            raise RuntimeError('Not supported condition node')
+            raise RuntimeError('Not supported condition node: {0}'.format(type(node)))
 
         return res
 

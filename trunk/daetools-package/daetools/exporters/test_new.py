@@ -320,12 +320,14 @@ def consoleRun():
     analyzer.analyzeSimulation(simulation)
 
     pp = pprint.PrettyPrinter(indent=2)
-    ports = pp.pformat(analyzer.portsToAnalyze)
-    models = pp.pformat(analyzer.modelsToAnalyze)
+    ports   = pp.pformat(analyzer.portsToAnalyze)
+    models  = pp.pformat(analyzer.modelsToAnalyze)
+    rt_info = pp.pformat(analyzer.runtimeInformation)
 
     f = open(simulation.m.Name + '-analysys.txt', "w")
-    f.write(ports)
-    f.write(models)
+    #f.write(ports + '\n\n')
+    #f.write(models + '\n\n')
+    f.write(rt_info)
     f.close()
 
     # Run

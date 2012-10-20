@@ -216,7 +216,7 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild);
 /*******************************************************
 	daeDomain
 *******************************************************/
-boost::python::numeric::array GetNumPyArrayDomain(daeDomain& domain);
+boost::python::object GetNumPyArrayDomain(daeDomain& domain);
 adouble_array DomainArray1(daeDomain& domain);
 adouble_array DomainArray2(daeDomain& domain, boost::python::slice s);
 //daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
@@ -269,6 +269,21 @@ public:
 	{
         return getListFromVector(m_ptrDomains);
 	}
+    
+    boost::python::dict GetDomainsIndexesMap1(size_t nIndexBase)
+    {
+       // Returns dictionary {integer : [list of integers]}
+        boost::python::dict d;
+        std::map<size_t, std::vector<size_t> > mapIndexes;
+        typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
+
+        daeParameter::GetDomainsIndexesMap(mapIndexes, nIndexBase);
+        
+        for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
+            d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
+    
+        return d;        
+    }
 
 	real_t GetParameterValue0()
 	{
@@ -361,7 +376,7 @@ public:
 	}
 };
 
-boost::python::numeric::array GetNumPyArrayParameter(daeParameter& param);
+boost::python::object GetNumPyArrayParameter(daeParameter& param);
 
 adouble FunctionCallParameter0(daeParameter& param);
 adouble FunctionCallParameter1(daeParameter& param, boost::python::object o1);
@@ -543,14 +558,14 @@ public:
 		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
     
-    boost::python::dict GetOverallVSDomainsIndexesMap1(size_t nIndexBase)
+    boost::python::dict GetDomainsIndexesMap1(size_t nIndexBase)
     {
        // Returns dictionary {integer : [list of integers]}
         boost::python::dict d;
         std::map<size_t, std::vector<size_t> > mapIndexes;
         typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
 
-        daeVariable::GetOverallVSDomainsIndexesMap(mapIndexes, nIndexBase);
+        daeVariable::GetDomainsIndexesMap(mapIndexes, nIndexBase);
         
         for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
             d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
@@ -560,8 +575,8 @@ public:
     
 };
 
-boost::python::numeric::array daeVariable_Values(daeVariable& var);
-boost::python::numeric::array daeVariable_IDs(daeVariable& var);
+boost::python::object daeVariable_Values(daeVariable& var);
+boost::python::object daeVariable_IDs(daeVariable& var);
 
 adouble VariableFunctionCall0(daeVariable& var);
 adouble VariableFunctionCall1(daeVariable& var, boost::python::object o1);

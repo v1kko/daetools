@@ -1,7 +1,7 @@
-import sys, numpy, traceback
+import sys, numpy, math, traceback
 from daetools.pyDAE import *
 from expression_formatter import daeExpressionFormatter
-from analyzer import daeExportAnalyzer
+from analyzer import daeCodeGeneratorAnalyzer
 
 
 portTemplate = """connector %(port)s
@@ -37,305 +37,276 @@ end %(model)s_simulation;
 """
 
 
-def printNumpyArrayForModelica(nd_arr):
-    return '{' + ','.join([str(val) for val in nd_arr]) + '}'
-    
 class daeModelicaExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
-        daeModel.__init__(self, Name, Parent, Description)
+        daeExpressionFormatter.__init__(self)
 
         # Index base in arrays
-        self.exprFormatter.indexBase = 1
+        self.indexBase = 1
 
         # Use relative names
-        self.exprFormatter.useRelativeNames = True
+        self.useRelativeNames = True
 
         # One- and multi-dimensional parameters/variables and domain points
-        self.exprFormatter.indexLeftBracket  = '['
-        self.exprFormatter.indexRightBracket = ']'
-        self.exprFormatter.indexFormat = 'python_index_style'
+        self.indexLeftBracket  = '['
+        self.indexRightBracket = ']'
+        self.indexFormat = 'python_index_style'
 
         # String format for the time derivative: der(variable)
-        self.exprFormatter.derivative = 'der({variable}{indexes})'
+        self.derivative = 'der({variable}{indexes})'
 
         # Logical operators
-        self.exprFormatter.AND   = 'and'
-        self.exprFormatter.OR    = 'or'
-        self.exprFormatter.NOT   = 'not'
+        self.AND   = 'and'
+        self.OR    = 'or'
+        self.NOT   = 'not'
 
-        self.exprFormatter.EQ    = '=='
-        self.exprFormatter.NEQ   = '!='
-        self.exprFormatter.LT    = '<'
-        self.exprFormatter.LTEQ  = '<='
-        self.exprFormatter.GT    = '>'
-        self.exprFormatter.GTEQ  = '>='
+        self.EQ    = '=='
+        self.NEQ   = '!='
+        self.LT    = '<'
+        self.LTEQ  = '<='
+        self.GT    = '>'
+        self.GTEQ  = '>='
 
         # Mathematical operators
-        self.exprFormatter.PLUS   = '+'
-        self.exprFormatter.MINUS  = '-'
-        self.exprFormatter.MULTI  = '*'
-        self.exprFormatter.DIVIDE = '/'
-        self.exprFormatter.POWER  = '^'
+        self.PLUS   = '+'
+        self.MINUS  = '-'
+        self.MULTI  = '*'
+        self.DIVIDE = '/'
+        self.POWER  = '^'
 
         # Mathematical functions
-        self.exprFormatter.SIN    = 'sin'
-        self.exprFormatter.COS    = 'cos'
-        self.exprFormatter.TAN    = 'tan'
-        self.exprFormatter.ASIN   = 'asin'
-        self.exprFormatter.ACOS   = 'acos'
-        self.exprFormatter.ATAN   = 'atan'
-        self.exprFormatter.EXP    = 'exp'
-        self.exprFormatter.SQRT   = 'sqrt'
-        self.exprFormatter.LOG    = 'log'
-        self.exprFormatter.LOG10  = 'log10'
-        self.exprFormatter.FLOOR  = 'floor'
-        self.exprFormatter.CEIL   = 'ceil'
-        self.exprFormatter.ABS    = 'abs'
-        self.exprFormatter.MIN    = 'min'
-        self.exprFormatter.MAX    = 'max'
+        self.SIN    = 'sin'
+        self.COS    = 'cos'
+        self.TAN    = 'tan'
+        self.ASIN   = 'asin'
+        self.ACOS   = 'acos'
+        self.ATAN   = 'atan'
+        self.EXP    = 'exp'
+        self.SQRT   = 'sqrt'
+        self.LOG    = 'log'
+        self.LOG10  = 'log10'
+        self.FLOOR  = 'floor'
+        self.CEIL   = 'ceil'
+        self.ABS    = 'abs'
+        self.MIN    = 'min'
+        self.MAX    = 'max'
 
         # Current time in simulation
-        self.exprFormatter.TIME   = 'time'
+        self.TIME   = 'time'
+
+    def formatNumpyArray(self, arr):
+        if isinstance(arr, numpy.ndarray):
+            return '{' + ','.join([self.formatNumpyArray(val) for val in arr]) + '}'
+        else:
+            return str(arr)
 
     def formatQuantity(self, quantity):
         # Formats constants/quantities in equations that have a value and units
         return str(quantity.value)
 
-    def formatUnit(self, unit):
-        # Format: m.kg2.s-1 meaning m * kg**2 / s
-        res = []
-        for u, exp in unit.unitDictionary.items():
+    def formatUnits(self, units):
+        # Format: m.kg2/s-2 meaning m * kg**2 / s**2
+        positive = []
+        negative = []
+        for u, exp in units.unitDictionary.items():
             if exp >= 0:
                 if exp == 1:
-                    res.append('{0}'.format(u))
+                    positive.append('{0}'.format(u))
                 elif int(exp) == exp:
-                    res.append('{0}{1}'.format(u, int(exp)))
+                    positive.append('{0}{1}'.format(u, int(exp)))
                 else:
-                    res.append('{0}{1}'.format(u, exp))
+                    positive.append('{0}{1}'.format(u, exp))
 
-        for u, exp in unit.unitDictionary.items():
+        for u, exp in units.unitDictionary.items():
             if exp < 0:
-                if int(exp) == exp:
-                    res.append('{0}{1}'.format(u, int(exp)))
+                if exp == -1:
+                    negative.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    negative.append('{0}{1}'.format(u, int(math.fabs(exp))))
                 else:
-                    res.append('{0}{1}'.format(u, exp))
+                    negative.append('{0}{1}'.format(u, math.fabs(exp)))
 
-        return '.'.join(res)
+        sPositive = ' '.join(positive)
+        if len(negative) == 0:
+            sNegative = ''
+        elif len(negative) == 1:
+            sNegative = '/' + '.'.join(negative)
+        else:
+            sNegative = '/(' + '.'.join(negative) + ')'
+
+        return sPositive + sNegative
         
 class daeModelicaExport(object):
     def __init__(self, simulation = None):
-        self.wrapperInstanceName     = 'wrapper'
+        self.wrapperInstanceName     = ''
         self.defaultIndent           = '  '
+        self.warnings                = []
+        self.topLevelModel           = None
+        self.simulation              = None
+        
+        self.exprFormatter = daeModelicaExpressionFormatter()
+        self.analyzer      = daeCodeGeneratorAnalyzer()
 
-        self.ports                   = {}
-        self.models                  = {}
+    def exportModel(self, model, filename = None):
+        if not model:
+            raise RuntimeError('Invalid model object')
+
         self.parametersValues        = {}
         self.assignedVariablesValues = {}
         self.initialConditions       = {}
         self.initiallyActiveStates   = {}
         self.warnings                = []
-        self.topLevelModel           = None
         self.simulation              = None
-        self.variableTypes           = []
-        self.initialVariableValues   = []
-        
-        self.exprFormatter = daeModelicaExpressionFormatter()
-        self.analyzer = daeExportAnalyzer(self.exprFormatter)
+        self.topLevelModel           = model
 
-    def exportModel(self, model, filename = None):
-        try:
-            if not model:
-                return
+        indent   = 1
+        s_indent = indent * self.defaultIndent
 
-            self.analyzer.analyzeModel(model)
-            numpy.set_string_function(printNumpyArrayForModelica, repr=False)
+        self.analyzer.analyzeModel(model)
+        result = self._processModel(model, indent)
 
-            self.ports                   = {}
-            self.models                  = {}
-            self.parametersValues        = {}
-            self.assignedVariablesValues = {}
-            self.initialConditions       = {}
-            self.initiallyActiveStates   = {}
-            self.warnings                = []
-            self.simulation              = None
-            self.topLevelModel           = model
-            self.variableTypes           = []
-            self.initialVariableValues   = []
+        if filename:
+            f = open(filename, "w")
+            f.write(result)
+            f.close()
 
-            indent   = 1
-            s_indent = indent * self.defaultIndent
+        return result
 
-            result = self._processModel(model, indent)
-
-            if filename:
-                f = open(filename, "w")
-                f.write(result)
-                f.close()
-
-            return result
-
-        except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            print e
-            traceback.print_tb(exc_traceback)
-        finally:
-            # Restore numpy printing to defaults
-            numpy.set_string_function(None, repr=False)
-            
     def exportPort(self, port, filename = None):
-        try:
-            if not port:
-                return
+        if not port:
+            raise RuntimeError('Invalid port object')
 
-            self.analyzer.analyzePort(port)
-            numpy.set_string_function(printNumpyArrayForModelica, repr=False)
+        self.parametersValues        = {}
+        self.assignedVariablesValues = {}
+        self.initialConditions       = {}
+        self.initiallyActiveStates   = {}
+        self.warnings                = []
+        self.simulation              = None
+        self.topLevelModel           = port.Model
 
-            self.ports                   = {}
-            self.models                  = {}
-            self.parametersValues        = {}
-            self.assignedVariablesValues = {}
-            self.initialConditions       = {}
-            self.initiallyActiveStates   = {}
-            self.warnings                = []
-            self.simulation              = None
-            self.topLevelModel           = port.Model
-            self.variableTypes           = []
-            self.initialVariableValues   = []
+        indent   = 1
+        s_indent = indent * self.defaultIndent
 
-            indent   = 1
-            s_indent = indent * self.defaultIndent
+        self.analyzer.analyzePort(port)
+        result = self._processPort(port, indent)
 
-            result = self._processPort(port, indent)
+        if filename:
+            f = open(filename, "w")
+            f.write(result)
+            f.close()
 
-            if filename:
-                f = open(filename, "w")
-                f.write(result)
-                f.close()
-
-            return result
-
-        except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            print e
-            traceback.print_tb(exc_traceback)
-        finally:
-            # Restore numpy printing to defaults
-            numpy.set_string_function(None, repr=False)
+        return result
 
     def exportSimulation(self, simulation, filename = None):
-        try:
-            if not simulation:
-                return
+        if not simulation:
+            raise RuntimeError('Invalid simulation object')
 
-            self.analyzer.analyzeSimulation(simulation)
-            numpy.set_string_function(printNumpyArrayForModelica, repr=False)
+        self.parametersValues        = {}
+        self.assignedVariablesValues = {}
+        self.initialConditions       = {}
+        self.initiallyActiveStates   = {}
+        self.warnings                = []
+        self.simulation              = simulation
+        self.topLevelModel           = simulation.m
+        self.wrapperInstanceName     = self.exprFormatter.formatIdentifier(simulation.m.Name)
 
-            self.ports                   = {}
-            self.models                  = {}
-            self.parametersValues        = {}
-            self.assignedVariablesValues = {}
-            self.initialConditions       = {}
-            self.initiallyActiveStates   = {}
-            self.warnings                = []
-            self.simulation              = simulation
-            self.topLevelModel           = simulation.m
-            self.variableTypes           = simulation.VariableTypes
-            self.initialVariableValues   = simulation.InitialValues
+        indent   = 1
+        s_indent = indent * self.defaultIndent
 
-            indent   = 1
-            s_indent = indent * self.defaultIndent
+        self.analyzer.analyzeSimulation(simulation)
 
-            resultModel = ''
-            for port_class, info in self.analyzer.portsToAnalyze.items():
-                resultModel += self._processPort(info['data'], indent)
+        resultModel = ''
+        for port_class, info in self.analyzer.ports.items():
+            resultModel += self._processPort(info['data'], indent)
 
-            for model_class, info in self.models.items():
-                resultModel += self._processModel(info['data'], indent)
+        for model_class, info in self.analyzer.models.items():
+            resultModel += self._processModel(info['data'], indent)
 
-            self._collectRuntimeInformationFromModel(self.topLevelModel)
+        self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-            model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.wrapperInstanceName)
-            indent = ' ' * len(model_instance)
+        model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.wrapperInstanceName)
+        indent = ' ' * len(model_instance)
 
-            params        = ['{0} = {1}'     .format(key, value) for key, value in self.parametersValues.items()]
-            assigned_vars = ['{0}{1} = {2};' .format(s_indent, key, value) for key, value in self.assignedVariablesValues.items()]
-            init_conds    = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initialConditions.items()]
-            init_states   = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initiallyActiveStates.items()]
+        params        = ['{0} = {1}'     .format(key, value) for key, value in self.parametersValues.items()]
+        assigned_vars = ['{0}{1} = {2};' .format(s_indent, key, value) for key, value in self.assignedVariablesValues.items()]
+        init_conds    = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initialConditions.items()]
+        init_states   = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initiallyActiveStates.items()]
 
-            params.sort(key=str.lower)
-            assigned_vars.sort(key=str.lower)
-            init_conds.sort(key=str.lower)
-            init_states.sort(key=str.lower)
+        params.sort(key=str.lower)
+        assigned_vars.sort(key=str.lower)
+        init_conds.sort(key=str.lower)
+        init_states.sort(key=str.lower)
 
-            join_format = ',\n%s' % indent
-            arguments = join_format.join(params)
+        join_format = ',\n%s' % indent
+        arguments = join_format.join(params)
 
-            initial_equations = ''
-            if len(assigned_vars) > 0:
-                initial_equations  = 'equation\n/* Assigned variables (DOFs) */\n' + '\n'.join(sorted(assigned_vars))
+        initial_equations = ''
+        if len(assigned_vars) > 0:
+            initial_equations  = 'equation\n/* Assigned variables (DOFs) */\n' + '\n'.join(assigned_vars)
 
-            if len(init_states) > 0 or len(init_conds) > 0:
-                initial_equations += '\n\ninitial algorithm\n'
+        if len(init_states) > 0 or len(init_conds) > 0:
+            initial_equations += '\n\ninitial algorithm\n'
 
-            if len(init_states) > 0:
-                initial_equations += '\n/* Initially active states */\n' + '\n'.join(sorted(init_states))
+        if len(init_states) > 0:
+            initial_equations += '\n/* Initially active states */\n' + '\n'.join(init_states)
 
-            if len(init_conds) > 0:
-                initial_equations += '\n/* Initial conditions */\n' + '\n'.join(sorted(init_conds))
+        if len(init_conds) > 0:
+            initial_equations += '\n/* Initial conditions */\n' + '\n'.join(init_conds)
 
-            model_instance = model_instance + arguments + ');'
-            dictModel = {
-                        'model'            : self.topLevelModel.__class__.__name__,
-                        'model_instance'   : model_instance,
-                        'initial_equation' : initial_equations,
-                        'start_time'       : 0.0,
-                        'end_time'         : self.simulation.TimeHorizon,
-                        'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5)
-                        }
-            resultWrapper = wrapperTemplate % dictModel
+        model_instance = model_instance + arguments + ');'
+        dictModel = {
+                    'model'            : self.topLevelModel.__class__.__name__,
+                    'model_instance'   : model_instance,
+                    'initial_equation' : initial_equations,
+                    'start_time'       : 0.0,
+                    'end_time'         : self.simulation.TimeHorizon,
+                    'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5)
+                    }
+        resultWrapper = wrapperTemplate % dictModel
 
-            if filename:
-                f = open(filename, "w")
-                f.write(resultModel)
-                f.write(resultWrapper)
-                f.close()
+        if filename:
+            f = open(filename, "w")
+            f.write(resultModel)
+            f.write(resultWrapper)
+            f.close()
 
-            return resultModel, resultWrapper
+        return resultModel, resultWrapper
 
-        except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            print e
-            traceback.print_tb(exc_traceback)
-        finally:
-            # Restore numpy printing to defaults
-            numpy.set_string_function(None, repr=False)
-        
-    def _processPort(self, port, indent):
+    def _processPort(self, data, indent):
         sVariables  = []
         s_indent = indent * self.defaultIndent
 
-        if len(port.Domains) > 0:
+        if len(data['Domains']) > 0:
             raise RuntimeError('Modelica ports cannot contain domains')
 
-        if len(port.Parameters) > 0:
-            raise RuntimeError('Modelica ports cannot contain domains')
+        if len(data['Parameters']) > 0:
+            raise RuntimeError('Modelica ports cannot contain parameters')
 
-        for variable in port.Variables:
-            if len(variable.Domains) > 0:
+        # Variables
+        for variable in data['Variables']:
+            if len(variable['Domains']) > 0:
                 raise RuntimeError('Modelica ports cannot contain distributed variables')
-                
-            sVariables.append(s_indent + 'Real {0}(unit="{1}") "{2}";'.format(nameFormat(variable.Name),
-                                                                              unitFormat(variable.VariableType.Units),
-                                                                              variable.Description) )
+
+            name        = self.exprFormatter.formatIdentifier(variable['Name'])
+            units       = self.exprFormatter.formatUnits(data['VariableTypes'][variable['Type']]['Units'] if variable['Type'] in data['VariableTypes'] else '')
+            domains     = ''
+            attributes  = '(unit="{units}")'.format(units = units)
+            description = variable['Description']
+
+            varTemplate = s_indent + 'Real{domains} {name}{attributes} "{description}";'
+            sVariables.append(varTemplate.format(name = name,
+                                                 domains = domains,
+                                                 attributes = attributes,
+                                                 description = description))
 
         dictPort = {
-                     'port'      : nameFormat(port.__class__.__name__),
+                     'port'      : data['Class'],
                      'variables' : '\n'.join(sVariables)
                    }
         result = portTemplate % dictPort
         return result
     
-    def _processModel(self, model, indent):
+    def _processModel(self, data, indent):
         sParameters      = []
         sVariables       = []
         sPorts           = []
@@ -343,101 +314,113 @@ class daeModelicaExport(object):
         sPortConnections = []
         sEquations       = []
         sSTNs            = []
+
         s_indent = indent * self.defaultIndent
 
+        # Achtung, Achtung!!
+        self.exprFormatter.modelCanonicalName = data['CanonicalName']
+        
         # Domains
-        for domain in model.Domains:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, domain))
-            sParameters.append(s_indent + 'parameter Integer {0}_np "Number of points in domain {0}";'.format(nameFormat(domain.Name)))
-            sParameters.append(s_indent + 'parameter Real[{0}_np] {1}(unit="{2}") "{3}";\n'.format(nameFormat(domain.Name),
-                                                                                                   nameFormat(domain.Name),
-                                                                                                   unitFormat(domain.Units),
-                                                                                                   domain.Description) )
+        for domain in data['Domains']:
+            name        = self.exprFormatter.formatIdentifier(domain['Name'])
+            units       = self.exprFormatter.formatUnits(domain['Units'])
+            noPoints    = domain['NumberOfPoints']
+            domains     = '[{name}_np]'.format(name = name)
+            attributes  = '(unit="{units}")'.format(units = units)
+            description = domain['Description']
+            
+            domTemplate   = s_indent + 'parameter Integer {name}_np "Number of points in domain {name}";'
+            paramTemplate = s_indent + 'parameter Real{domains} {name}{attributes} "{description}";\n'
+            
+            sParameters.append(domTemplate.format(name = name,
+                                                  noPoints = noPoints))
+            sParameters.append(paramTemplate.format(name = name,
+                                                    domains = domains,
+                                                    attributes = attributes,
+                                                    description = description))
                                                                                                         
         # Parameters
-        for parameter in model.Parameters:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, parameter))
+        for parameter in data['Parameters']:
+            name        = self.exprFormatter.formatIdentifier(parameter['Name'])
+            units       = self.exprFormatter.formatUnits(parameter['Units'])
             domains = ''
-            if len(parameter.Domains) > 0:
-                domains = '[{0}]'.format(','.join(nameFormat(d.Name)+'_np' for d in parameter.Domains))
+            if len(parameter['Domains']) > 0:
+                domains = '[{0}]'.format(','.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in parameter['Domains']))
+            attributes  = '(unit="{units}")'.format(units = units)
+            description = parameter['Description']
 
-            sParameters.append(s_indent + 'parameter Real{0} {1}(unit="{2}") "{3}";'.format(domains,
-                                                                                            nameFormat(parameter.Name),
-                                                                                            unitFormat(parameter.Units),
-                                                                                            parameter.Description) )
+            paramTemplate = s_indent + 'parameter Real{domains} {name}{attributes} "{description}";'
+            sParameters.append(paramTemplate.format(name = name,
+                                                    domains = domains,
+                                                    attributes = attributes,
+                                                    description = description))
 
         # Variables
-        for variable in model.Variables:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, variable))
-            startValue    = ''
-            if len(variable.Domains) > 0:
-                domains    = '[{0}]'.format(','.join(nameFormat(d.Name)+'_np' for d in variable.Domains))
-                varType = 'distributed'
-                startValue = ''
-                try:
-                    for vt in self.variableTypes[variable.OverallIndex : variable.OverallIndex+variable.NumberOfPoints]:
-                        if vt == cnDifferential:
-                            varType    = 'distributed differential'
-                            startValue = 'start = 0.0, '
-                            break
-                except:
-                    pass
-
+        for variable in data['Variables']:
+            name        = self.exprFormatter.formatIdentifier(variable['Name'])
+            units       = self.exprFormatter.formatUnits(data['VariableTypes'][variable['Type']]['Units'] if variable['Type'] in data['VariableTypes'] else '')
+            if len(variable['Domains']) > 0:
+                domains = '[{0}]'.format(','.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in variable['Domains']))
+                if variable['RuntimeHint'] == 'differential':
+                    attributes  = '(start=0.0, unit="{units}")'.format(units = units)
+                else:
+                    attributes  = '(unit="{units}")'.format(units = units)
             else:
                 domains = ''
-                varType = 'unknown'
-                startValue = ''
-                try:
-                    if self.variableTypes[variable.OverallIndex] == cnDifferential:
-                        varType    = 'differential'
-                        startValue = 'start = 0.0, '
-                    elif self.variableTypes[variable.OverallIndex] == cnAssigned:
-                        varType = 'assigned'
-                    else:
-                        varType = 'algebraic'
-                except:
-                    pass
-                
-            sVariables.append(s_indent + '/* type: {0} */'.format(varType))
-            sVariables.append(s_indent + 'Real{0} {1}({2}unit="{3}") "{4}";'.format(domains,
-                                                                                    nameFormat(variable.Name),
-                                                                                    startValue,
-                                                                                    unitFormat(variable.VariableType.Units),
-                                                                                    variable.Description) )
+                if variable['RuntimeHint'] == 'differential':
+                    attributes  = '(start=0.0, unit="{units}")'.format(units = units)
+                else:
+                    attributes  = '(unit="{units}")'.format(units = units)
+            description = variable['Description']
 
-        context = exportNodeContext(model)
-
-        # equations
-        sEquations.extend(self._processEquations(model.Equations, indent, context))
+            varTemplate = s_indent + 'Real{domains} {name}{attributes} "{description}";'
+            sVariables.append(s_indent + '/* type hint: {0} variable */'.format(variable['RuntimeHint']))
+            sVariables.append(varTemplate.format(name = name,
+                                                 domains = domains,
+                                                 attributes = attributes,
+                                                 description = description))
+        
+        # Equations
+        sEquations.extend(self._processEquations(data['Equations'], indent))
 
         # PortConnections
-        for port_connection in model.PortConnections:
-            nameFrom = nameFormat(daeGetRelativeName(model, port_connection.PortFrom))
-            nameTo   = nameFormat(daeGetRelativeName(model, port_connection.PortTo))
-            sPortConnections.append(s_indent + 'connect({0}, {1});'.format(nameFrom, nameTo))
+        for port_connection in data['PortConnections']:
+            portconnTemplate = s_indent + 'connect({portFrom}, {portTo});'
+            sPortConnections.append(portconnTemplate.format(portFrom = port_connection['PortFrom'],
+                                                            portTo = port_connection['PortTo']))
 
         # Ports
-        for port in model.Ports:
-            if port.Type == eInletPort:
+        for port in data['Ports']:
+            class_      = port['Class']
+            name        = port['Name']
+            if port['Type'] == 'eInletPort':
                 portType = 'inlet'
-            elif port.Type == eOutletPort:
+            elif port['Type'] == 'eOutletPort':
                 portType = 'outlet'
             else:
                 portType = 'unknown'
-            sPorts.append(s_indent + '/* type: {0} */'.format(portType))
-            sPorts.append(s_indent + '{0} {1} "{2}";'.format(port.__class__.__name__,
-                                                             nameFormat(port.Name),
-                                                             port.Description))
+            description = port['Description']
+
+            portTemplate = s_indent + '{class_} {name} "{description}";'
+            sPorts.append(s_indent + '/* type: {0} port */'.format(portType))
+            sPorts.append(portTemplate.format(class_ = class_,
+                                              name = name,
+                                              description = description))
 
         # StateTransitionNetworks
-        sSTNs.extend(self._processSTNs(model.STNs, indent, context, sVariables))
+        sSTNs.extend(self._processSTNs(data['STNs'], indent, sVariables))
 
         # Components
-        for component in model.Components:
-            sComponents.append(s_indent + '{0} {1} "{2}";'.format(component.__class__.__name__,
-                                                                  nameFormat(component.Name),
-                                                                  component.Description))
+        for component in data['Components']:
+            class_      = component['Class']
+            name        = component['Name']
+            description = component['Description']
 
+            compTemplate = s_indent + '{class_} {name} "{description}";'
+            sComponents.append(compTemplate.format(class_ = class_,
+                                                   name = name,
+                                                   description = description))
+                
         # Put all together                                                                    
         _ports            = ('\n/* Ports */      \n' if len(sPorts)      else '') + '\n'.join(sPorts)
         _parameters       = ('\n/* Parameters */ \n' if len(sParameters) else '') + '\n'.join(sParameters)
@@ -447,7 +430,7 @@ class daeModelicaExport(object):
         _equations        =                                                         '\n'.join(sEquations)
         _stns             =                                                         '\n'.join(sSTNs)
         dictModel = {
-                      'model'            : model.__class__.__name__,
+                      'model'            : data['Class'],
                       'ports'            : _ports,
                       'parameters'       : _parameters,
                       'variables'        : _variables,
@@ -459,143 +442,80 @@ class daeModelicaExport(object):
         result = modelTemplate % dictModel
         return result
 
-    def _collectRuntimeInformationFromModel(self, model):
-        for domain in model.Domains:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, domain))
-            self.parametersValues[relativeName+'_np'] = str(domain.NumberOfPoints)
-            self.parametersValues[relativeName]       = '{{{0}}}'.format(','.join(str(p) for p in domain.Points))
-
-        for parameter in model.Parameters:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, parameter))
-            if len(parameter.Domains) > 0:
-                p_vals = parameter.GetNumPyArray()
-                values = str(p_vals)
-            else:
-                values = str(parameter.GetValue())
-            self.parametersValues[relativeName] = values
-
-        for variable in model.Variables:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, variable))
-            if len(variable.Domains) > 0:
-                # This will return dictionary {overallIndex : [domain_indexes]}
-                # Domain indexes are 0-based and must be converted to 1-base
-                dictIndexes = variable.OverallVSDomainsIndexesMap
-                for overall_index, list_of_domain_indexes in dictIndexes.iteritems():
-                    vt = self.variableTypes[overall_index]
-                    # ACHTUNG, ACHTUNG!!
-                    # Modelica uses 1-based indexing
-                    name = '{0}.{1}[{2}]'.format(self.wrapperInstanceName, relativeName, ','.join([str(di+1) for di in list_of_domain_indexes]))
-                    if vt == cnDifferential:
-                        self.initialConditions[name] = value
-                    elif vt == cnAssigned:
-                        self.assignedVariablesValues[name] = value
-                    
-            else:
-                name  = '{0}.{1}'.format(self.wrapperInstanceName, relativeName)
-                value = variable.GetValue()
-                if self.variableTypes[variable.OverallIndex] == cnDifferential:
-                    self.initialConditions[name] = value
-                elif self.variableTypes[variable.OverallIndex] == cnAssigned:
-                    self.assignedVariablesValues[name] = value
-
-        for port in model.Ports:
-            self._collectRuntimeInformationFromPort(port)
-
-        for stn in model.STNs:
-            if isinstance(stn, daeSTN):
-                name = '{0}.{1}'.format(self.wrapperInstanceName, nameFormat(daeGetRelativeName(self.topLevelModel, stn)))
-                stateMap = {}
-                for i, state in enumerate(stn.States):
-                    stateMap[state.Name] = i
-                self.initiallyActiveStates[name] = stateMap[stn.ActiveState]
-
-        for component in model.Components:
-            self._collectRuntimeInformationFromModel(component)
-
-    def _collectRuntimeInformationFromPort(self, port):
-        for variable in port.Variables:
-            relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, variable))
-            if len(variable.Domains) > 0:
-                raise RuntimeError('Modelica ports cannot contain distributed variables')
-            else:
-                name  = '{0}.{1}'.format(self.wrapperInstanceName, relativeName)
-                value = variable.GetValue()
-                if self.variableTypes[variable.OverallIndex] == cnDifferential:
-                    self.initialConditions[name] = value
-                elif self.variableTypes[variable.OverallIndex] == cnAssigned:
-                    self.assignedVariablesValues[name] = value
-
-    def _processEquations(self, Equations, indent, context):
+    def _processEquations(self, Equations, indent):
         sEquations = []
         s_indent = indent * self.defaultIndent
+        eqTemplate = s_indent + '{residual} = 0;'
         for equation in Equations:
-            sEquations.append(s_indent + '/* {0} */'.format(equation.Description))
-            for eeinfo in equation.EquationExecutionInfos:
-                node = eeinfo.Node
-                sEquations.append(s_indent + '{0} = 0;'.format(self._processNode(node, context)))
+            description = equation['Description']
+            sEquations.append(s_indent + '/* {0} */'.format(description))
+            for eeinfo in equation['EquationExecutionInfos']:
+                residual = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
+                sEquations.append(eqTemplate.format(residual = residual))
         return sEquations
                     
-    def _processSTNs(self, STNs, indent, context, sVariables):
+    def _processSTNs(self, STNs, indent, sVariables):
         sSTNs  = []
         sWhens = []
         s_indent  = indent * self.defaultIndent
         
         for stn in STNs:
-            if isinstance(stn, daeIF):
-                for i, state in enumerate(stn.States):
+            nStates = len(stn['States'])
+            if stn['Class'] == 'daeIF':
+                for i, state in enumerate(stn['States']):
                     if i == 0:
-                        state_transition = state.StateTransitions[0]
-                        condition = self._processConditionNode(state_transition.Condition.RuntimeNode, context)
+                        state_transition = state['StateTransitions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
                         sSTNs.append(s_indent + 'if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state.Equations, indent+1, context))
+                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
-                    elif i != len(stn.States)-1:
-                        state_transition = state.StateTransitions[0]
-                        condition = self._processConditionNode(state_transition.Condition.RuntimeNode, context)
+                    elif (i > 0) and (i < nStates - 1):
+                        state_transition = state['StateTransitions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
                         sSTNs.append(s_indent + 'else if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state.Equations, indent+1, context))
+                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
                     else:
                         sSTNs.append(s_indent + 'else')
-                        sSTNs.extend(self._processEquations(state.Equations, indent+1, context))
+                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
-                    sSTNs.extend(self._processSTNs(state.NestedSTNs, indent+1, context, sVariables))
+                    sSTNs.extend(self._processSTNs(state['NestedSTNs'], indent+1, sVariables))
 
                 sSTNs.append(s_indent + 'end if;')
 
-            elif isinstance(stn, daeSTN):
-                relativeName = nameFormat(daeGetRelativeName(self.topLevelModel, stn))
-                stnVariableName = relativeName
-                activeState = stn.ActiveState
-                stateMap = {}
-                for i, state in enumerate(stn.States):
-                    stateMap[state.Name] = i
-                sortedStateMap = sorted(stateMap.iteritems(), key=lambda x:x[1])
+            elif stn['Class'] == 'daeSTN':
+                stnVariableName = stn['Name'] + '_stn'
+                activeState     = stn['ActiveState']
+                #stateMap = {}
+                #for i, state in enumerate(stn['States']):
+                #    stateMap[state['Name']] = i
+                #sortedStateMap = sorted(stateMap.iteritems(), key=lambda x:x[1])
                 
                 sVariables.append(s_indent + '/* State transition network */')
-                sVariables.append(s_indent + 'Integer {0};'.format(stnVariableName))
+                sVariables.append(s_indent + 'String {0};'.format(stnVariableName))
 
-                for i, state in enumerate(stn.States):
+                nStates = len(stn['States'])
+                for i, state in enumerate(stn['States']):
                     if i == 0:
-                        sSTNs.append(s_indent + '/* STN {0}: {1}*/'.format(stnVariableName, ', '.join([st + ' = ' + str(i) for st, i in sortedStateMap])))
-                        sSTNs.append(s_indent + 'if {0} == {1} then'.format(stnVariableName, str(stateMap[state.Name])))
-                    elif i != len(stn.States)-1:
-                        sSTNs.append(s_indent + 'elseif {0} == {1} then'.format(stnVariableName, str(stateMap[state.Name])))
+                        sSTNs.append(s_indent + '/* STN {0}: {1}*/'.format(stnVariableName, ', '.join([st['Name'] for st in stn['States']])))
+                        sSTNs.append(s_indent + 'if {0} == "{1}" then'.format(stnVariableName, state['Name']))
+                    elif (i > 0) and (i < nStates - 1):
+                        sSTNs.append(s_indent + 'elseif {0} == "{1}" then'.format(stnVariableName, state['Name']))
                     else:
                         sSTNs.append(s_indent + 'else')
 
-                    sSTNs.extend(self._processEquations(state.Equations, indent+1, context))
+                    sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
-                    for state_transition in state.StateTransitions:
-                        condition = self._processConditionNode(state_transition.Condition.RuntimeNode, context)
+                    for state_transition in state['StateTransitions']:
+                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
                         if len(sWhens) == 0:
                             sWhens.append(s_indent + '/* State transitions of {0} */'.format(stnVariableName))
-                            sWhens.append(s_indent + 'when ({0} == {1}) and ({2}) then'.format(stnVariableName, str(stateMap[state.Name]), condition))
+                            sWhens.append(s_indent + 'when ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition))
                         else:
-                            sWhens.append(s_indent + 'elsewhen ({0} == {1}) and ({2}) then'.format(stnVariableName, str(stateMap[state.Name]), condition))
-                        sWhens.extend(self._processActions(state_transition.Actions, indent+1, context, stateMap))
+                            sWhens.append(s_indent + 'elsewhen ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition))
+                        sWhens.extend(self._processActions(state_transition['Actions'], indent+1))
 
-                    if len(state.NestedSTNs) > 0:
+                    if len(state['NestedSTNs']) > 0:
                         raise RuntimeError('Nested state transition networks (daeSTN) canot be exported to modelica')
 
                 if len(sWhens) > 0:
@@ -606,177 +526,72 @@ class daeModelicaExport(object):
 
         return sSTNs
 
-    def _processActions(self, Actions, indent, context, stateMap):
+    def _processActions(self, Actions, indent):
         sActions = []
         s_indent  = indent * self.defaultIndent
 
         for action in Actions:
-            if action.Type == eChangeState:
-                sActions.append(s_indent + '{0} = {1};'.format(action.STN.Name, str(stateMap[action.StateTo.Name])))
+            if action['Type'] == 'eChangeState':
+                stnVariableName = action['STN'] + '_stn'
+                stateTo         = action['StateTo']
+                sActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
-            elif action.Type == eSendEvent:
-                pass
+            elif action['Type'] == 'eSendEvent':
+                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
 
-            elif action.Type == eReAssignOrReInitializeVariable:
-                pass
+            elif action['Type'] == 'eReAssignOrReInitializeVariable':
+                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
 
-            elif action.Type == eUserDefinedAction:
-                pass
+            elif action['Type'] == 'eUserDefinedAction':
+                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
 
             else:
                 pass
        
         return sActions
-    
-    def _processConditionNode(self, node, context):
-        res = ''
-        if isinstance(node, condUnaryNode):
-            n = '(' + self._processConditionNode(node.Node, context) + ')'
-            if node.LogicalOperator == eNot:
-                res = 'not {0}'.format(n)
+
+    def _generateRuntimeInformation(self, runtimeInformation):
+        for domain in runtimeInformation['Domains']:
+            relativeName = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
+            relativeName = self.exprFormatter.formatIdentifier(relativeName)
+            self.parametersValues[relativeName+'_np'] = str(domain['NumberOfPoints'])
+            self.parametersValues[relativeName]       = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
+            
+        for parameter in runtimeInformation['Parameters']:
+            relativeName = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
+            relativeName = self.exprFormatter.formatIdentifier(relativeName)
+            if parameter['NumberOfPoints'] == 1:
+                self.parametersValues[relativeName] = str(parameter['Values'])
             else:
-                raise RuntimeError('Not supported unary logical operator')
+                self.parametersValues[relativeName] = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
 
-        elif isinstance(node, condBinaryNode):
-            left  = '(' + self._processConditionNode(node.LNode, context) + ')'
-            right = '(' + self._processConditionNode(node.RNode, context) + ')'
+        for variable in runtimeInformation['Variables']:
+            canonicalName = self.exprFormatter.formatIdentifier(variable['CanonicalName'])
+            n = variable['NumberOfPoints']
+            if n == 1:
+                ID    = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
+                value = float(variable['Values'])   # numpy float
+                name  = canonicalName
 
-            if node.LogicalOperator == eAnd:
-                res = '{0} and {1}'.format(left, right)
-            elif node.LogicalOperator == eOr:
-                res = '{0} or {1}'.format(left, right)
+                if ID == cnDifferential:
+                    self.initialConditions[name] = value
+                elif ID == cnAssigned:
+                    self.assignedVariablesValues[name] = value
+
             else:
-                raise RuntimeError('Not supported binary logical operator')
+                for i in range(0, n):
+                    domIndexes = tuple(variable['DomainsIndexesMap'][i])  # list of integers
+                    ID         = int(variable['IDs'][domIndexes])         # cnDifferential, cnAssigned or cnAlgebraic
+                    value      = float(variable['Values'][domIndexes])    # numpy float
+                    # ACHTUNG, ACHTUNG!!
+                    # Modelica uses 1-based indexing
+                    name = canonicalName + '[' + ','.join([str(index + self.exprFormatter.indexBase) for index in domIndexes]) + ']'
 
-        elif isinstance(node, condExpressionNode):
-            left  = '(' + self._processNode(node.LNode, context) + ')'
-            right = '(' + self._processNode(node.RNode, context) + ')'
+                    if ID == cnDifferential:
+                        self.initialConditions[name] = value
+                    elif ID == cnAssigned:
+                        self.assignedVariablesValues[name] = value
 
-            if node.ConditionType == eNotEQ: # !=
-                res = '{0} != {1}'.format(left, right)
-            elif node.ConditionType == eEQ: # ==
-                res = '{0} == {1}'.format(left, right)
-            elif node.ConditionType == eGT: # >
-                res = '{0} > {1}'.format(left, right)
-            elif node.ConditionType == eGTEQ: # >=
-                res = '{0} >= {1}'.format(left, right)
-            elif node.ConditionType == eLT: # <
-                res = '{0} < {1}'.format(left, right)
-            elif node.ConditionType == eLTEQ: # <=
-                res = '{0} <= {1}'.format(left, right)
-            else:
-                raise RuntimeError('Not supported condition type')
-        else:
-            raise RuntimeError('Not supported condition node')
-
-        return res
-
-    def _processNode(self, node, context):
-        res = ''
-        if isinstance(node, adConstantNode):
-            res = '{0}'.format(node.Quantity.value) #, node.Quantity.units)
-
-        elif isinstance(node, adTimeNode):
-            res = 'time'
-
-        elif isinstance(node, adUnaryNode):
-            n = '(' + self._processNode(node.Node, context) + ')'
-
-            if node.Function == eSign:
-                res = '-{0}'.format(n)
-            elif node.Function == eSqrt:
-                res = 'sqrt({0})'.format(n)
-            elif node.Function == eExp:
-                res = 'exp({0})'.format(n)
-            elif node.Function == eLog:
-                res = 'log10({0})'.format(n)
-            elif node.Function == eLn:
-                res = 'log({0})'.format(n)
-            elif node.Function == eAbs:
-                res = 'abs({0})'.format(n)
-            elif node.Function == eSin:
-                res = 'sin({0})'.format(n)
-            elif node.Function == eCos:
-                res = 'cos({0})'.format(n)
-            elif node.Function == eTan:
-                res = 'tan({0})'.format(n)
-            elif node.Function == eArcSin:
-                res = 'asin({0})'.format(n)
-            elif node.Function == eArcCos:
-                res = 'acos({0})'.format(n)
-            elif node.Function == eArcTan:
-                res = 'atan({0})'.format(n)
-            elif node.Function == eCeil:
-                res = 'ceil({0})'.format(n)
-            elif node.Function == eFloor:
-                res = 'floor({0})'.format(n)
-            else:
-                raise RuntimeError('Not supported unary function')
-
-        elif isinstance(node, adBinaryNode):
-            left  = '(' + self._processNode(node.LNode, context) + ')'
-            right = '(' + self._processNode(node.RNode, context) + ')'
-
-            if node.Function == ePlus:
-                res = '{0} + {1}'.format(left, right)
-            elif node.Function == eMinus:
-                res = '{0} - {1}'.format(left, right)
-            elif node.Function == eMulti:
-                res = '{0} * {1}'.format(left, right)
-            elif node.Function == eDivide:
-                res = '{0} / {1}'.format(left, right)
-            elif node.Function == ePower:
-                res = '{0} ^ {1}'.format(left, right)
-            elif node.Function == eMin:
-                res = 'min({0}, {1})'.format(left, right)
-            elif node.Function == eMax:
-                res = 'max({0}, {1})'.format(left, right)
-            else:
-                raise RuntimeError('Not supported binary function')
-
-        elif isinstance(node, adScalarExternalFunctionNode):
-            raise RuntimeError('External functions are not supported')
-
-        elif isinstance(node, adVectorExternalFunctionNode):
-            raise RuntimeError('External functions are not supported')
-
-        elif isinstance(node, adDomainIndexNode):
-            # ACHTUNG, ACHTUNG!!
-            # Modelica uses 1-based indexing
-            name = nameFormat(daeGetRelativeName(context.model, node.Domain))
-            res = '{0}[{1}]'.format(name, node.Index+1)
-
-        elif isinstance(node, adRuntimeParameterNode):
-            # ACHTUNG, ACHTUNG!!
-            # Modelica uses 1-based indexing
-            domainindexes = ''
-            if len(node.DomainIndexes) > 0:
-                domainindexes = '[{0}]'.format(','.join([str(di + 1) for di in node.DomainIndexes]))
-
-            name = nameFormat(daeGetRelativeName(context.model, node.Parameter))
-            res = '{0}{1}'.format(name, domainindexes)
-
-        elif isinstance(node, adRuntimeVariableNode):
-            # ACHTUNG, ACHTUNG!!
-            # Modelica uses 1-based indexing
-            domainindexes = ''
-            if len(node.DomainIndexes) > 0:
-                domainindexes = '[{0}]'.format(','.join([str(di + 1) for di in node.DomainIndexes]))
-
-            name = nameFormat(daeGetRelativeName(context.model, node.Variable))
-            res = '{0}{1}'.format(name, domainindexes)
-
-        elif isinstance(node, adRuntimeTimeDerivativeNode):
-            # ACHTUNG, ACHTUNG!!
-            # Modelica uses 1-based indexing
-            domainindexes = ''
-            if len(node.DomainIndexes) > 0:
-                domainindexes = '[{0}]'.format(','.join([str(di + 1) for di in node.DomainIndexes]))
-
-            name = nameFormat(daeGetRelativeName(context.model, node.Variable))
-            res = 'der({0}{1})'.format(name, domainindexes)
-
-        else:
-            raise RuntimeError('Not supported node')
-
-        return res
+        for stn in runtimeInformation['STNs']:
+            stnVariableName = stn['CanonicalName'] + '_stn'
+            self.initiallyActiveStates[stnVariableName] = '"' + stn['ActiveState'] + '"'

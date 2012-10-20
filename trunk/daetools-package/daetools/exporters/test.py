@@ -105,7 +105,10 @@ class portSimple(daePort):
 class modTest(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-        self.T = daeVariable("T", temperature_t, self)
+
+        self.p  = daeParameter("p", unit(), self, "p description")
+        self.T1 = daeVariable("T1", temperature_t, self)
+        self.T2 = daeVariable("T2", temperature_t, self)
 
     def DeclareEquations(self):
         pass
@@ -152,13 +155,16 @@ class modTutorial(daeModel):
         self.T.Description = "Temperature of the plate"
 
         self.test = modTest("test", self, "test descr")
-        self.portIn  = portSimple("portIn", eInletPort, self, "port descr")
-        self.portOut = portSimple("portOut", eOutletPort, self, "port descr")
+        self.portIn  = portSimple("portIn", eInletPort, self, "portIn descr")
+        self.portOut = portSimple("portOut", eOutletPort, self, "portOut descr")
         self.ConnectPorts(self.portOut, self.portIn)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("dummy", "")
         eq.Residual = self.dummy()
+
+        eq = self.CreateEquation("test_T1", "")
+        eq.Residual = self.test.T1() - Constant(12.3 * K)
 
         # To distribute an equation on a domain the function DistributeOnDomain can be again used.
         # However, when distributing equations the function DistributeOnDomain takes an additional argument.
@@ -238,6 +244,8 @@ class simTutorial(daeSimulation):
             for y in range(0, self.m.y.NumberOfPoints):
                 self.m.k.SetValue(x, y, 401 * W/(m*K))
 
+        self.m.test.p.SetValue(15)
+
     def SetUpVariables(self):
         # SetInitialCondition function in the case of distributed variables can accept additional arguments
         # specifying the indexes in the domains. In this example we loop over the open x and y domains,
@@ -246,7 +254,7 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
 
-        self.m.test.T.AssignValue(123 * K)
+        self.m.test.T2.AssignValue(1.03 * K)
         self.m.portOut.t1.AssignValue(2)
         self.m.portOut.t2.AssignValue(3)
 
@@ -314,12 +322,12 @@ def consoleRun():
     from modelica import daeModelicaExport
     modelicaExport = daeModelicaExport()
     modelicaExport.exportSimulation(simulation,     simulation.m.Name + '.mo')
-    modelicaExport.exportModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    modelicaExport.exportPort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    #modelicaExport.exportModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    #modelicaExport.exportPort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
     # Run
-    simulation.Run()
-    simulation.Finalize()
+    #simulation.Run()
+    #simulation.Finalize()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

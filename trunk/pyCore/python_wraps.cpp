@@ -817,7 +817,7 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild)
 /*******************************************************
 	daeDomain
 *******************************************************/
-python::numeric::array GetNumPyArrayDomain(daeDomain& domain)
+boost::python::object GetNumPyArrayDomain(daeDomain& domain)
 {
 	size_t nType;
 	npy_intp dimensions;
@@ -919,7 +919,7 @@ daeIndexRange FunctionCallDomain3(daeDomain& domain)
 /*******************************************************
 	daeParameter
 *******************************************************/
-python::numeric::array GetNumPyArrayParameter(daeParameter& param)
+boost::python::object GetNumPyArrayParameter(daeParameter& param)
 {
 	size_t nType, nDomains, nTotalSize;
 	real_t* data;
@@ -930,21 +930,29 @@ python::numeric::array GetNumPyArrayParameter(daeParameter& param)
 	data = param.GetValuePointer();
 	param.GetDomains(ptrarrDomains);
 	nDomains = ptrarrDomains.size();
-	dimensions = new npy_intp[nDomains];
-	nTotalSize = 1;
-	for(size_t i = 0; i < nDomains; i++)
-	{
-		dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
-		nTotalSize *= dimensions[i];
-	}
-
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
-	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
-	for(size_t k = 0; k < nTotalSize; k++)
-		values[k] = data[k];
-
-	delete[] dimensions;
-	return numpy_array;
+    
+    if(nDomains == 0)
+    {
+        return boost::python::object(param.GetValue());
+    }
+    else
+    {
+        dimensions = new npy_intp[nDomains];
+        nTotalSize = 1;
+        for(size_t i = 0; i < nDomains; i++)
+        {
+            dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+            nTotalSize *= dimensions[i];
+        }
+    
+        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+        for(size_t k = 0; k < nTotalSize; k++)
+            values[k] = data[k];
+    
+        delete[] dimensions;
+        return numpy_array;
+    }
 }
 
 adouble FunctionCallParameter0(daeParameter& param)
@@ -1135,7 +1143,7 @@ adouble_array ParameterArray8(daeParameter& param, object o1, object o2, object 
 /*******************************************************
 	daeVariable
 *******************************************************/
-python::numeric::array daeVariable_Values(daeVariable& var)
+boost::python::object daeVariable_Values(daeVariable& var)
 {
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
@@ -1144,25 +1152,33 @@ python::numeric::array daeVariable_Values(daeVariable& var)
 	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	var.GetDomains(ptrarrDomains);
 	nDomains = ptrarrDomains.size();
-	dimensions = new npy_intp[nDomains];
-    for(size_t i = 0; i < nDomains; i++)
-        dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
-    nStart = var.GetOverallIndex();
-	nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
-
-	daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-	boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
-	real_t* values = static_cast<real_t*>(PyArray_DATA(numpy_array.ptr()));
-	
-	for(k = 0, i = nStart; i < nEnd; i++, k++)
-		values[k] = pDataProxy->GetValue(i);
-
-	delete[] dimensions;
-	return numpy_array;
+    daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    
+    if(nDomains == 0)
+    {
+        return boost::python::object(pDataProxy->GetValue(var.GetOverallIndex()));
+    }
+    else
+    {
+        dimensions = new npy_intp[nDomains];
+        for(size_t i = 0; i < nDomains; i++)
+            dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+        nStart = var.GetOverallIndex();
+        nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
+    
+        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        real_t* values = static_cast<real_t*>(PyArray_DATA(numpy_array.ptr()));
+        
+        for(k = 0, i = nStart; i < nEnd; i++, k++)
+            values[k] = pDataProxy->GetValue(i);
+    
+        delete[] dimensions;
+        return numpy_array;
+    }
 }
 
-python::numeric::array daeVariable_IDs(daeVariable& var)
+boost::python::object daeVariable_IDs(daeVariable& var)
 {
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
@@ -1171,22 +1187,30 @@ python::numeric::array daeVariable_IDs(daeVariable& var)
 	nType = NPY_INT;
 	var.GetDomains(ptrarrDomains);
 	nDomains = ptrarrDomains.size();
-	dimensions = new npy_intp[nDomains];
-    for(size_t i = 0; i < nDomains; i++)
-        dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
-    nStart = var.GetOverallIndex();
-	nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
+    daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 
-	daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-	boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
-	npy_int* values = static_cast<npy_int*>(PyArray_DATA(numpy_array.ptr()));
-	
-	for(k = 0, i = nStart; i < nEnd; i++, k++)
-		values[k] = static_cast<npy_int>(pDataProxy->GetVariableType(i));
-
-	delete[] dimensions;
-	return numpy_array;
+    if(nDomains == 0)
+    {
+        return boost::python::object(pDataProxy->GetVariableType(var.GetOverallIndex()));
+    }
+    else
+    {
+        dimensions = new npy_intp[nDomains];
+        for(size_t i = 0; i < nDomains; i++)
+            dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+        nStart = var.GetOverallIndex();
+        nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
+    
+        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        npy_int* values = static_cast<npy_int*>(PyArray_DATA(numpy_array.ptr()));
+        
+        for(k = 0, i = nStart; i < nEnd; i++, k++)
+            values[k] = static_cast<npy_int>(pDataProxy->GetVariableType(i));
+    
+        delete[] dimensions;
+        return numpy_array;
+    }
 }
 
 adouble VariableFunctionCall0(daeVariable& var)

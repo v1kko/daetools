@@ -220,7 +220,7 @@ void daeVariable::SetAbsoluteTolerances(real_t dAbsTolerances)
 	}	
 }
 
-void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes, size_t nIndexBase) const
+void daeVariable::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const
 {
     std::vector<size_t> narrDomainIndexes;
     size_t d1, d2, d3, d4, d5, d6, d7, d8;
@@ -228,13 +228,13 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
 		      *pDomain4, *pDomain5, *pDomain6,
 			  *pDomain7, *pDomain8;
 
-    size_t nNoDomains           = m_ptrDomains.size();
-    size_t nOverallIndexCounter = 0;
+    size_t nNoDomains    = m_ptrDomains.size();
+    size_t nIndexCounter = 0;
     
     if(nNoDomains == 0)
     {
         narrDomainIndexes.clear();
-        mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
+        mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
     }
     else if(nNoDomains == 1)
     {
@@ -246,8 +246,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
         for(d1 = 0; d1 < pDomain1->m_nNumberOfPoints; d1++)
         {
             narrDomainIndexes[0] = nIndexBase + d1;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 2)
@@ -263,8 +263,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
         {
             narrDomainIndexes[0] = nIndexBase + d1;
             narrDomainIndexes[1] = nIndexBase + d2;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 3)
@@ -283,8 +283,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[0] = nIndexBase + d1;
             narrDomainIndexes[1] = nIndexBase + d2;
             narrDomainIndexes[2] = nIndexBase + d3;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 4)
@@ -306,8 +306,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[1] = nIndexBase + d2;
             narrDomainIndexes[2] = nIndexBase + d3;
             narrDomainIndexes[3] = nIndexBase + d4;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 5)
@@ -332,8 +332,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[2] = nIndexBase + d3;
             narrDomainIndexes[3] = nIndexBase + d4;
             narrDomainIndexes[4] = nIndexBase + d5;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 6)
@@ -362,8 +362,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[3] = nIndexBase + d4;
             narrDomainIndexes[4] = nIndexBase + d5;
             narrDomainIndexes[5] = nIndexBase + d6;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 7)
@@ -395,8 +395,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[4] = nIndexBase + d5;
             narrDomainIndexes[5] = nIndexBase + d6;
             narrDomainIndexes[6] = nIndexBase + d7;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else if(nNoDomains == 8)
@@ -431,8 +431,8 @@ void daeVariable::GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<siz
             narrDomainIndexes[5] = nIndexBase + d6;
             narrDomainIndexes[6] = nIndexBase + d7;
             narrDomainIndexes[7] = nIndexBase + d8;
-            mapOverallVSDomainsIndexes[nOverallIndexCounter] = narrDomainIndexes;
-            nOverallIndexCounter++;
+            mapDomainsIndexes[nIndexCounter] = narrDomainIndexes;
+            nIndexCounter++;
         }
     }
     else

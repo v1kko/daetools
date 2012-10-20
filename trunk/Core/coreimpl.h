@@ -1640,7 +1640,9 @@ public:
 		adouble_array array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	daeDomain* GetDomain(size_t nIndex) const;
-	
+
+    void GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const;
+    
 protected:
 	void SetUnits(const unit& units);
 	void Initialize(void);
@@ -1861,7 +1863,7 @@ public:
 	size_t GetOverallIndex(void) const;
 	daeDomain* GetDomain(size_t nIndex) const;
 
-    void GetOverallVSDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapOverallVSDomainsIndexes, size_t nIndexBase) const;
+    void GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const;
 
 public:
 	adouble	operator()(void);

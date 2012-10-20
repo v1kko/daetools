@@ -483,18 +483,20 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("atan2", &daepython::ad_atan2);
 
 	def("log10", &daepython::ad_log10);
-	def("abs",   &daepython::ad_abs);
 	def("ceil",  &daepython::ad_ceil);
 	def("floor", &daepython::ad_floor);
-	def("min",   &daepython::ad_min1);
+	def("pow",   &daepython::ad_pow1);
+	def("pow",   &daepython::ad_pow2);
+	def("pow",   &daepython::ad_pow3);
+    
+// Python built-in functions
+    def("abs",   &daepython::ad_abs);
+    def("min",   &daepython::ad_min1);
 	def("min",   &daepython::ad_min2);
 	def("min",   &daepython::ad_min3);
 	def("max",   &daepython::ad_max1);
 	def("max",   &daepython::ad_max2);
 	def("max",   &daepython::ad_max3);
-	def("pow",   &daepython::ad_pow1);
-	def("pow",   &daepython::ad_pow2);
-	def("pow",   &daepython::ad_pow3);
     
     def("dt",	 &daepython::ad_dt);
     def("d",	 &daepython::ad_d);
@@ -673,6 +675,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Domains",		&daepython::daeParameterWrapper::GetDomains)
         .add_property("ReportingOn",	&daeParameter::GetReportingOn,	&daeParameter::SetReportingOn)
         .add_property("npyValues",      &daepython::GetNumPyArrayParameter)
+        .add_property("NumberOfPoints", &daeParameter::GetNumberOfPoints)
 
 		.def("__str__",				&daepython::daeParameter_str)  
 		.def("DistributeOnDomain",	&daeParameter::DistributeOnDomain)
@@ -720,6 +723,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetValues", &daepython::SetParameterValues)
 		.def("SetValues", &daepython::qSetParameterValues)
 	        
+        .def("GetDomainsIndexesMap",    &daepython::daeParameterWrapper::GetDomainsIndexesMap1)
+            
 		.def("__call__", &daepython::FunctionCallParameter0)
 		.def("__call__", &daepython::FunctionCallParameter1)
 		.def("__call__", &daepython::FunctionCallParameter2)
@@ -919,7 +924,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		
 	    .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
          
-        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetOverallVSDomainsIndexesMap1)
+        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetDomainsIndexesMap1)
 
 		.def("dt", &daepython::Get_dt0)
 		.def("dt", &daepython::Get_dt1)
