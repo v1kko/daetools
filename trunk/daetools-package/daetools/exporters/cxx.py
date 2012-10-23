@@ -4,61 +4,225 @@ from formatter import daeExpressionFormatter
 from analyzer import daeCodeGeneratorAnalyzer
 
 
-portTemplate = """connector %(port)s
-%(variables)s
-end %(port)s;
+headerTemplate = """
+#include <math.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+typedef real_t double;
+#define _v_(overallIndex)  adouble(values[i],            overallIndex == currentIndexForJacobian ? 1.0 : 0.0)
+#define _dt_(overallIndex) adouble(values[overallIndex], overallIndex == currentIndexForJacobian ? inverseDT : 0.0)
+#define _time_ adouble(currentTime, 0.0)
+
+class cModel
+{
+public:
+    real_t  m_dCurrentTime;
+    real_t  m_dInverseDT;
+    real_t  m_dCurrentIndexForJacobianEvaluation;
+    real_t* m_values;
+    real_t* m_timeDerivatives;
+
+    void residual(real_t* values, real_t* timeDerivatives, real_t currentTime, real_t* residuals)
+    {
+        m_dCurrentIndexForJacobianEvaluation = 0;
+    }
+};
+
+class cVariable
+{
+public:
+    cModel*          m_pModel;
+    int              m_nOverallIndex;
+    std::vector<int> m_Domains;
+
+    cVariable(cModel*  pModel, int nOverallIndex, const std::map<int>& indexMap)
+    {
+        m_pModel = pModel;
+        m_nOverallIndex = nOverallIndex;
+        m_indexMap = indexMap;
+    }
+
+    int calcIndex(int i0=-1, int i1=-1, int i2=-1, int i3=-1, int i4=-1, int i5=-1, int i6=-1, int i7=-1)
+    {
+        int i, j, nIndex,temp;
+        std::vector<int> indexes;
+        
+        if(i0 == -1)
+        {
+        }
+        else if(i1 == -1)
+        {
+            indexes.resize(1);
+            indexes[0] = i0;
+        }
+        else if(i2 == -1)
+        {
+            indexes.resize(2);
+            indexes[0] = i0;
+            indexes[1] = i1;
+        }
+        else if(i3 == -1)
+        {
+            indexes.resize(3);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+        }
+        else if(i4 == -1)
+        {
+            indexes.resize(4);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+            indexes[3] = i3;
+        }
+        else if(i5 == -1)
+        {
+            indexes.resize(5);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+            indexes[3] = i3;
+            indexes[4] = i4;
+        }
+        else if(i6 == -1)
+        {
+            indexes.resize(6);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+            indexes[3] = i3;
+            indexes[4] = i4;
+            indexes[5] = i5;
+        }
+        else if(i7 == -1)
+        {
+            indexes.resize(7);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+            indexes[3] = i3;
+            indexes[4] = i4;
+            indexes[5] = i5;
+            indexes[6] = i6;
+        }
+        else
+        {
+            indexes.resize(8);
+            indexes[0] = i0;
+            indexes[1] = i1;
+            indexes[2] = i2;
+            indexes[3] = i3;
+            indexes[4] = i4;
+            indexes[5] = i5;
+            indexes[6] = i6;
+            indexes[7] = i7;
+        }
+        
+        nIndex = m_nOverallIndex;
+        for(i = 0; i < m_Domains.size(); i++)
+        {
+            temp = indexes[i];
+            for(j = i+1; j < N; j++)
+                temp *= m_Domains[j];
+            nIndex += temp;
+        }
+        return nIndex;
+    }
+
+    real_t getValue(int i0=-1, int i1=-1, int i2=-1, int i3=-1, int i4=-1, int i5=-1, int i6=-1, int i7=-1)
+    {
+        int index = calcIndex(i0, i1, i2, i3, i4, i5, i6, i7);
+        return m_pModel->m_values[index];
+    }
+
+    void setValue(real_t value, int i0=-1, int i1=-1, int i2=-1, int i3=-1, int i4=-1, int i5=-1, int i6=-1, int i7=-1)
+    {
+        int index = calcIndex(i0, i1, i2, i3, i4, i5, i6, i7);
+        m_pModel->m_values[index] = value;
+    }
+    /*
+    adouble operator()(int i0=-1, int i1=-1, int i2=-1, int i3=-1, int i4=-1, int i5=-1, int i6=-1, int i7=-1)
+    {
+        int index = calcIndex(i0, i1, i2, i3, i4, i5, i6, i7);
+        return adouble(m_pModel->m_values[index], index == m_pModel->m_dCurrentIndexForJacobianEvaluation ? 1.0 : 0.0);
+    }
+
+    adouble dt(int i0=-1, int i1=-1, int i2=-1, int i3=-1, int i4=-1, int i5=-1, int i6=-1, int i7=-1)
+    {
+        int index = calcIndex(i0, i1, i2, i3, i4, i5, i6, i7);
+        return adouble(m_pModel->m_timeDerivatives[index], index == m_pModel->m_dCurrentIndexForJacobianEvaluation ? m_pModel->m_dInverseDT : 0.0);
+    }
+    */
+};
 
 """
 
-modelTemplate = """class %(model)s
-/* Import libs */
-  import Modelica.Math.*;
+portTemplate = """
+class %(port)s
+{
+public:
 %(parameters)s
 %(variables)s
-%(ports)s
-%(components)s
+};
+"""
 
-equation
-%(port_connections)s
+modelTemplate = """
+class %(model)s : public cModel
+{
+%(model)s() :
+%(parameters_init)s
+%(variables_def)s
+{
+}
+public:
+%(parameters_def)s
+%(variables_def)s
+
 %(equations)s
 %(stns)s
-end %(model)s;
+};
+"""
+
+mainTemplate = """
+void main()
+{
+%(parameters)s
+%(variables)s
+}
 
 """
 
-wrapperTemplate = """class %(model)s_simulation
-  annotation(experiment(StartTime = %(start_time)s, StopTime = %(end_time)s, Tolerance = %(tolerance)s));
-  
-%(model_instance)s
 
-%(initial_equation)s
-end %(model)s_simulation;
-
-"""
-
-
-class daeModelicaExpressionFormatter(daeExpressionFormatter):
+class daeCXXExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
 
         # Index base in arrays
-        self.indexBase = 1
+        self.indexBase = 0
 
         # Use relative names
-        self.useRelativeNames = True
+        self.useRelativeNames   = False
+        self.flattenIdentifiers = True
 
         # One- and multi-dimensional parameters/variables and domain points
         self.indexLeftBracket  = '['
         self.indexRightBracket = ']'
-        self.indexFormat = 'python_index_style'
+        self.indexFormat = 'c_index_style'
 
-        # String format for the time derivative: der(variable)
-        self.derivative = 'der({variable}{indexes})'
+        # String formats for identifiers
+        self.derivative = 'dt[{overallIndex}]'
+        self.domain    = '{value}' #'{domain}{index}'
+        self.parameter = '{value}' #'{parameter}{indexes}'
+        self.variable  = 'v[{overallIndex}]'
 
         # Logical operators
-        self.AND   = 'and'
-        self.OR    = 'or'
-        self.NOT   = 'not'
+        self.AND   = '&&'
+        self.OR    = '||'
+        self.NOT   = '!'
 
         self.EQ    = '=='
         self.NEQ   = '!='
@@ -72,7 +236,7 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.MINUS  = '-'
         self.MULTI  = '*'
         self.DIVIDE = '/'
-        self.POWER  = '^'
+        self.POWER  = '???'
 
         # Mathematical functions
         self.SIN    = 'sin'
@@ -92,7 +256,7 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.MAX    = 'max'
 
         # Current time in simulation
-        self.TIME   = 'time'
+        self.TIME   = '_time_'
 
     def formatNumpyArray(self, arr):
         if isinstance(arr, numpy.ndarray):
@@ -126,17 +290,17 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
                 else:
                     negative.append('{0}{1}'.format(u, math.fabs(exp)))
 
-        sPositive = '.'.join(positive)
+        sPositive = ' '.join(positive)
         if len(negative) == 0:
             sNegative = ''
         elif len(negative) == 1:
-            sNegative = '/' + '.'.join(negative)
+            sNegative = '/' + ' '.join(negative)
         else:
-            sNegative = '/(' + '.'.join(negative) + ')'
+            sNegative = '/(' + ' '.join(negative) + ')'
 
         return sPositive + sNegative
         
-class daeModelicaExport(object):
+class daeCXXExport(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '  '
@@ -144,7 +308,7 @@ class daeModelicaExport(object):
         self.topLevelModel           = None
         self.simulation              = None
         
-        self.exprFormatter = daeModelicaExpressionFormatter()
+        self.exprFormatter = daeCXXExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
     def exportModel(self, model, filename = None):
@@ -205,6 +369,7 @@ class daeModelicaExport(object):
         self.assignedVariablesValues = {}
         self.initialConditions       = {}
         self.initiallyActiveStates   = {}
+        self.residuals               = {}
         self.warnings                = []
         self.simulation              = simulation
         self.topLevelModel           = simulation.m
@@ -214,16 +379,21 @@ class daeModelicaExport(object):
         s_indent = indent * self.defaultIndent
 
         self.analyzer.analyzeSimulation(simulation)
+        print self.analyzer.models
+        print self.analyzer.ports
 
         resultModel = ''
+        """
         for port_class, info in self.analyzer.ports:
             resultModel += self._processPort(info['data'], indent)
 
         for model_class, info in self.analyzer.models:
             resultModel += self._processModel(info['data'], indent)
-
+        """
+        
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
+        """
         model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.wrapperInstanceName)
         indent = ' ' * len(model_instance)
 
@@ -263,49 +433,83 @@ class daeModelicaExport(object):
                     'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5)
                     }
         resultWrapper = wrapperTemplate % dictModel
+        """
+        
+        import pprint
+        pp = pprint.PrettyPrinter(indent=2)
+        rti = pp.pformat(self.analyzer.runtimeInformation)
+
+        eqns = ''
+        for i, res in self.residuals.items():
+            eqns += 'res[{0}] = {1}\n'.format(i, res)
 
         if filename:
             f = open(filename, "w")
-            f.write(resultModel)
-            f.write(resultWrapper)
+            #f.write(headerTemplate)
+            #f.write(resultModel)
+            #f.write(arguments)
+            f.write(eqns)
             f.close()
 
-        return resultModel, resultWrapper
+        return resultModel#, resultWrapper
 
     def _processPort(self, data, indent):
+        sParameters = []
         sVariables  = []
         s_indent = indent * self.defaultIndent
 
-        if len(data['Domains']) > 0:
-            raise RuntimeError('Modelica ports cannot contain domains')
+        # Domains
+        for domain in data['Domains']:
+            name        = self.exprFormatter.formatIdentifier(domain['Name'])
+            domains     = '[{name}_np]'.format(name = name)
+            units       = self.exprFormatter.formatUnits(domain['Units'])
+            description = domain['Description']
 
-        if len(data['Parameters']) > 0:
-            raise RuntimeError('Modelica ports cannot contain parameters')
+            domTemplate   = s_indent + 'const int {name}_np; // Number of points in domain {name}'
+            paramTemplate = s_indent + 'real_t {name}{domains}; // {description}, {units}\n'
+
+            sParameters.append(domTemplate.format(name = name))
+            sParameters.append(paramTemplate.format(name = name,
+                                                    domains = domains,
+                                                    units = units,
+                                                    description = description))
+
+        # Parameters
+        for parameter in data['Parameters']:
+            name        = self.exprFormatter.formatIdentifier(parameter['Name'])
+            units       = self.exprFormatter.formatUnits(parameter['Units'])
+            domains = ''
+            if len(parameter['Domains']) > 0:
+                domains = '[{0}]'.format(']['.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in parameter['Domains']))
+            description = parameter['Description']
+
+            paramTemplate = s_indent + 'real_t {name}{domains}; // {description}, {units}'
+            sParameters.append(paramTemplate.format(name = name,
+                                                    domains = domains,
+                                                    units = units,
+                                                    description = description))
 
         # Variables
         for variable in data['Variables']:
-            if len(variable['Domains']) > 0:
-                raise RuntimeError('Modelica ports cannot contain distributed variables')
-
             name        = self.exprFormatter.formatIdentifier(variable['Name'])
             units       = self.exprFormatter.formatUnits(data['VariableTypes'][variable['Type']]['Units'] if variable['Type'] in data['VariableTypes'] else '')
             domains     = ''
-            attributes  = '(unit="{units}")'.format(units = units)
             description = variable['Description']
 
-            varTemplate = s_indent + 'Real{domains} {name}{attributes} "{description}";'
+            varTemplate = s_indent + 'cVariable {name}; // {description}, {units}'
             sVariables.append(varTemplate.format(name = name,
                                                  domains = domains,
-                                                 attributes = attributes,
+                                                 units = units,
                                                  description = description))
 
         dictPort = {
-                     'port'      : data['Class'],
-                     'variables' : '\n'.join(sVariables)
+                     'port'       : data['Class'],
+                     'parameters' : '\n'.join(sParameters),
+                     'variables'  : '\n'.join(sVariables)
                    }
         result = portTemplate % dictPort
         return result
-    
+
     def _processModel(self, data, indent):
         sParameters      = []
         sVariables       = []
@@ -323,63 +527,47 @@ class daeModelicaExport(object):
         # Domains
         for domain in data['Domains']:
             name        = self.exprFormatter.formatIdentifier(domain['Name'])
-            units       = self.exprFormatter.formatUnits(domain['Units'])
-            noPoints    = domain['NumberOfPoints']
             domains     = '[{name}_np]'.format(name = name)
-            attributes  = '(unit="{units}")'.format(units = units)
+            units       = self.exprFormatter.formatUnits(domain['Units'])
             description = domain['Description']
-            
-            domTemplate   = s_indent + 'parameter Integer {name}_np "Number of points in domain {name}";'
-            paramTemplate = s_indent + 'parameter Real{domains} {name}{attributes} "{description}";\n'
-            
-            sParameters.append(domTemplate.format(name = name,
-                                                  noPoints = noPoints))
+
+            domTemplate   = s_indent + 'const int {name}_np; // Number of points in domain {name}'
+            paramTemplate = s_indent + 'real_t {name}{domains}; // {description}, {units}\n'
+
+            sParameters.append(domTemplate.format(name = name))
             sParameters.append(paramTemplate.format(name = name,
                                                     domains = domains,
-                                                    attributes = attributes,
+                                                    units = units,
                                                     description = description))
-                                                                                                        
+
         # Parameters
         for parameter in data['Parameters']:
             name        = self.exprFormatter.formatIdentifier(parameter['Name'])
             units       = self.exprFormatter.formatUnits(parameter['Units'])
             domains = ''
             if len(parameter['Domains']) > 0:
-                domains = '[{0}]'.format(','.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in parameter['Domains']))
-            attributes  = '(unit="{units}")'.format(units = units)
+                domains = '[{0}]'.format(']['.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in parameter['Domains']))
             description = parameter['Description']
 
-            paramTemplate = s_indent + 'parameter Real{domains} {name}{attributes} "{description}";'
+            paramTemplate = s_indent + 'real_t {name}{domains}; // {description}, {units}'
             sParameters.append(paramTemplate.format(name = name,
                                                     domains = domains,
-                                                    attributes = attributes,
+                                                    units = units,
                                                     description = description))
 
-        # Variables
         for variable in data['Variables']:
             name        = self.exprFormatter.formatIdentifier(variable['Name'])
             units       = self.exprFormatter.formatUnits(data['VariableTypes'][variable['Type']]['Units'] if variable['Type'] in data['VariableTypes'] else '')
-            if len(variable['Domains']) > 0:
-                domains = '[{0}]'.format(','.join(self.exprFormatter.formatIdentifier(d)+'_np' for d in variable['Domains']))
-                if variable['RuntimeHint'] == 'differential':
-                    attributes  = '(start=0.0, unit="{units}")'.format(units = units)
-                else:
-                    attributes  = '(unit="{units}")'.format(units = units)
-            else:
-                domains = ''
-                if variable['RuntimeHint'] == 'differential':
-                    attributes  = '(start=0.0, unit="{units}")'.format(units = units)
-                else:
-                    attributes  = '(unit="{units}")'.format(units = units)
+            domains     = ''
             description = variable['Description']
 
-            varTemplate = s_indent + 'Real{domains} {name}{attributes} "{description}";'
-            sVariables.append(s_indent + '/* type hint: {0} variable */'.format(variable['RuntimeHint']))
+            varTemplate = s_indent + 'cVariable {name}; // {description}, {units}'
             sVariables.append(varTemplate.format(name = name,
                                                  domains = domains,
-                                                 attributes = attributes,
+                                                 units = units,
                                                  description = description))
         
+        """
         # Equations
         sEquations.extend(self._processEquations(data['Equations'], indent))
 
@@ -420,7 +608,8 @@ class daeModelicaExport(object):
             sComponents.append(compTemplate.format(class_ = class_,
                                                    name = name,
                                                    description = description))
-                
+        """
+        
         # Put all together                                                                    
         _ports            = ('\n/* Ports */      \n' if len(sPorts)      else '') + '\n'.join(sPorts)
         _parameters       = ('\n/* Parameters */ \n' if len(sParameters) else '') + '\n'.join(sParameters)
@@ -591,6 +780,10 @@ class daeModelicaExport(object):
                         self.initialConditions[name] = value
                     elif ID == cnAssigned:
                         self.assignedVariablesValues[name] = value
+
+        for equation in runtimeInformation['Equations']:
+            for eeinfo in equation['EquationExecutionInfos']:
+                self.residuals[len(self.residuals)] = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
 
         for stn in runtimeInformation['STNs']:
             if stn['Class'] == 'daeSTN':

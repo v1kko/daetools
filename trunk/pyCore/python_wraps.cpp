@@ -537,6 +537,11 @@ daeDomain* adDomainIndexNode_Domain(adDomainIndexNode& node)
     return node.m_pDomain;
 }
 
+real_t adDomainIndexNode_Value(adDomainIndexNode& node)
+{
+    return (*node.m_pdPointValue);
+}
+
 /*******************************************************
 	adouble
 *******************************************************/
@@ -2185,6 +2190,16 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
     std::vector<daeDistributedEquationDomainInfo_t*> ptrarr;
     self.GetDomainDefinitions(ptrarr);
     return getListFromVectorAndCastPointer<daeDistributedEquationDomainInfo_t*, daeDistributedEquationDomainInfo*>(ptrarr);
+}
+
+/*******************************************************
+	daeEquationExecutionInfo
+*******************************************************/
+boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self)
+{
+    std::vector<size_t> narr;
+    self.GetVariableIndexes(narr);
+    return getListFromVectorByValue(narr);
 }
 
 /*******************************************************

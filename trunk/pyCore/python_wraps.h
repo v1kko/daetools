@@ -132,7 +132,7 @@ daeVariable* adRuntimeTimeDerivativeNode_Variable(adRuntimeTimeDerivativeNode& n
 boost::python::list adRuntimeTimeDerivativeNode_Domains(adRuntimeTimeDerivativeNode& node);
 
 daeDomain* adDomainIndexNode_Domain(adDomainIndexNode& node);
-
+real_t adDomainIndexNode_Value(adDomainIndexNode& node);
 
 /*******************************************************
 	adouble
@@ -861,6 +861,11 @@ daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, 
 daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l);
 boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
 boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
+
+/*******************************************************
+	daeEquationExecutionInfo
+*******************************************************/
+boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
 
 /*******************************************************
 	daeDEDI

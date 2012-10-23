@@ -337,6 +337,7 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
         .def_readonly("Index",   &adDomainIndexNode::m_nIndex)
         .add_property("Domain",  make_function(&daepython::adDomainIndexNode_Domain, return_internal_reference<>()))
+        .add_property("Value",   &daepython::adDomainIndexNode_Value)
     ;
 
     class_<adRuntimeParameterNode, bases<adNode>, boost::noncopyable>("adRuntimeParameterNode", no_init)
@@ -1133,7 +1134,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", no_init)
-        .add_property("Node",	make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()))
+        .add_property("Node",	          make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()))
+        .add_property("VariableIndexes",  &daepython::daeEquationExecutionInfo_GetVariableIndexes)
     ;
     
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation")

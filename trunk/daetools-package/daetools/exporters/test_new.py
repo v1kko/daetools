@@ -311,17 +311,17 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from expression_formatter import daeExpressionFormatter
-    from analyzer import daeExportAnalyzer
+    from formatter import daeExpressionFormatter
+    from analyzer import daeCodeGeneratorAnalyzer
     import pprint
 
     formatter = daeExpressionFormatter()
-    analyzer = daeExportAnalyzer(formatter)
+    analyzer = daeCodeGeneratorAnalyzer()
     analyzer.analyzeSimulation(simulation)
 
     pp = pprint.PrettyPrinter(indent=2)
-    ports   = pp.pformat(analyzer.portsToAnalyze)
-    models  = pp.pformat(analyzer.modelsToAnalyze)
+    ports   = pp.pformat(analyzer.ports)
+    models  = pp.pformat(analyzer.models)
     rt_info = pp.pformat(analyzer.runtimeInformation)
 
     f = open(simulation.m.Name + '-analysys.txt', "w")

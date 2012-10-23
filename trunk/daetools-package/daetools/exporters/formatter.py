@@ -18,6 +18,12 @@ class daeExpressionFormatter(object):
         #       name = 'root.comp1.comp2.Var' (full canonical name)
         self.useRelativeNames = True
 
+        self.flattenIdentifiers = False
+
+        self.domain    = '{domain}{index}'
+        self.parameter = '{parameter}{indexes}'
+        self.variable  = '{variable}{indexes}'
+
         # One- and multi-dimensional parameters/variables and domain points
         self.indexLeftBracket  = '['
         self.indexRightBracket = ']'
@@ -120,9 +126,13 @@ class daeExpressionFormatter(object):
             
     def formatIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
-        return identifier.replace('&', '').replace(';', '')
+        return identifier.replace('&', '').replace(';', '').replace('(', '_').replace(')', '').replace(',', '_').replace(' ', '')
 
-    def formatDomain(self, domainCanonicalName, index):
+    def flattenIdentifier(self, identifier):
+        # Removes illegal characters from domains/parameters/variables/ports/models/... names
+        return identifier.replace('.', '_')
+
+    def formatDomain(self, domainCanonicalName, index, value):
         # python_index_style: domain(0)
         # c_index_style: domain[0]
         # ACHTUNG, ACHTUNG!! Take care of indexing
@@ -131,15 +141,15 @@ class daeExpressionFormatter(object):
         else:
             name = domainCanonicalName
 
-        if self.indexFormat == 'python_index_style':
-            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index+self.indexBase, self.indexRightBracket)
-        elif self.indexFormat == 'c_index_style':
-            res = '{0}{1}{2}{3}'.format(name, self.indexLeftBracket, index+self.indexBase, self.indexRightBracket)
-        else:
-            raise RuntimeError('Unsupported index style')
+        if self.flattenIdentifiers:
+            name = self.flattenIdentifier(name)
+
+        indexes = self.indexLeftBracket + str(index + self.indexBase) + self.indexRightBracket
+
+        res = self.domain.format(domain = name, index = indexes, value = value)
         return res
 
-    def formatParameter(self, parameterCanonicalName, domainIndexes):
+    def formatParameter(self, parameterCanonicalName, domainIndexes, value):
         # python_index_style: parameter(0, 1, 2)
         # c_index_style: parameter[0][1][2]
         # ACHTUNG, ACHTUNG!! Take care of indexing
@@ -148,6 +158,9 @@ class daeExpressionFormatter(object):
         else:
             name = parameterCanonicalName
 
+        if self.flattenIdentifiers:
+            name = self.flattenIdentifier(name)
+        
         domainindexes = ''
         if len(domainIndexes) > 0:
             if self.indexFormat == 'python_index_style':
@@ -157,10 +170,10 @@ class daeExpressionFormatter(object):
             else:
                 raise RuntimeError('Unsupported index style')
 
-        res = '{0}{1}'.format(name, domainindexes)
+        res = self.parameter.format(parameter = name, indexes = domainindexes, value = value)
         return res
 
-    def formatVariable(self, variableCanonicalName, domainIndexes):
+    def formatVariable(self, variableCanonicalName, domainIndexes, overallIndex):
         # python_index_style: variable(0,1,2)
         # c_index_style: variable[0][1][2]
         # ACHTUNG, ACHTUNG!! Take care of indexing
@@ -169,6 +182,9 @@ class daeExpressionFormatter(object):
         else:
             name = variableCanonicalName
 
+        if self.flattenIdentifiers:
+            name = self.flattenIdentifier(name)
+
         domainindexes = ''
         if len(domainIndexes) > 0:
             if self.indexFormat == 'python_index_style':
@@ -178,10 +194,10 @@ class daeExpressionFormatter(object):
             else:
                 raise RuntimeError('Unsupported index style')
 
-        res = '{0}{1}'.format(name, domainindexes)
+        res = self.variable.format(variable = name, indexes = domainindexes, overallIndex = overallIndex)
         return res
 
-    def formatTimeDerivative(self, variableCanonicalName, domainIndexes, order):
+    def formatTimeDerivative(self, variableCanonicalName, domainIndexes, overallIndex, order):
         # python_index_style: derivative(variable(0, 1, 2))
         # c_index_style: derivative(variable[0][1][2])
         # ACHTUNG, ACHTUNG!! Take care of indexing
@@ -190,6 +206,9 @@ class daeExpressionFormatter(object):
         else:
             name = variableCanonicalName
 
+        if self.flattenIdentifiers:
+            name = self.flattenIdentifier(name)
+
         domainindexes = ''
         if len(domainIndexes) > 0:
             if self.indexFormat == 'python_index_style':
@@ -199,7 +218,7 @@ class daeExpressionFormatter(object):
             else:
                 raise RuntimeError('Unsupported index style')
 
-        res = self.derivative.format(variable = name, indexes = domainindexes)
+        res = self.derivative.format(variable = name, indexes = domainindexes, overallIndex = overallIndex)
         return res
 
     def formatRuntimeConditionNode(self, node):
@@ -315,16 +334,16 @@ class daeExpressionFormatter(object):
             raise RuntimeError('External functions are not supported')
 
         elif isinstance(node, adDomainIndexNode):
-            res = self.formatDomain(self.formatIdentifier(node.Domain.CanonicalName), node.Index)
+            res = self.formatDomain(self.formatIdentifier(node.Domain.CanonicalName), node.Index, node.Value)
 
         elif isinstance(node, adRuntimeParameterNode):
-            res = self.formatParameter(self.formatIdentifier(node.Parameter.CanonicalName), node.DomainIndexes)
+            res = self.formatParameter(self.formatIdentifier(node.Parameter.CanonicalName), node.DomainIndexes, node.Value)
 
         elif isinstance(node, adRuntimeVariableNode):
-            res = self.formatVariable(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes)
+            res = self.formatVariable(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.OverallIndex)
 
         elif isinstance(node, adRuntimeTimeDerivativeNode):
-            res = self.formatTimeDerivative(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.Order)
+            res = self.formatTimeDerivative(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.OverallIndex, node.Order)
 
         else:
             raise RuntimeError('Not supported node')

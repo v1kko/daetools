@@ -319,9 +319,10 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from modelica import daeModelicaExport
-    modelicaExport = daeModelicaExport()
-    modelicaExport.exportSimulation(simulation,     simulation.m.Name + '.mo')
+    #from modelica import daeModelicaExport
+    from cxx import daeCXXExport
+    modelicaExport = daeCXXExport() #daeModelicaExport()
+    modelicaExport.exportSimulation(simulation,     simulation.m.Name + '.cpp')
     #modelicaExport.exportModel(simulation.m,        simulation.m.Name + '_model_export.mo')
     #modelicaExport.exportPort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 

@@ -4,8 +4,8 @@ from daetools.pyDAE import *
 class daeCodeGeneratorAnalyzer(object):
     def __init__(self):
         self._simulation        = None
-        self.ports              = {}
-        self.models             = {}
+        self.ports              = []
+        self.models             = []
         self.runtimeInformation = {}
 
     def analyzeSimulation(self, simulation):
@@ -13,26 +13,28 @@ class daeCodeGeneratorAnalyzer(object):
             raise RuntimeError('Invalid simulation object')
 
         self._simulation        = simulation
-        self.ports              = {}
-        self.models             = {}
+        self.ports              = []
+        self.models             = []
         self.runtimeInformation = {
                                     'Domains'     : [],
                                     'Parameters'  : [],
                                     'Variables'   : [],
+                                    'Equations'   : [],
                                     'STNs'        : []
                                   }
 
         self._collectObjects(self._simulation.m)
+        self.models.reverse()
 
-        for port_class, dict_port in self.ports.items():
+        for port_class, dict_port in self.ports:
             data = self.analyzePort(dict_port['port'])
 
-            self.ports[port_class]['data'] = data
+            dict_port['data'] = data
 
-        for model_class, dict_model in self.models.items():
+        for model_class, dict_model in self.models:
             data = self.analyzeModel(dict_model['model'])
 
-            self.models[model_class]['data'] = data
+            dict_model['data'] = data
 
         self._collectRuntimeInformationFromModel(self._simulation.m)
        
@@ -218,15 +220,15 @@ class daeCodeGeneratorAnalyzer(object):
         return result
 
     def _collectObjects(self, model):
-        self.models[model.__class__.__name__] = {'model' : model, 'data' : None}
+        modelClasses = [class_ for class_, info_ in self.models]
+        portClasses  = [class_ for class_, info_ in self.ports]
+
+        if not model.__class__.__name__ in modelClasses:
+            self.models.append( (model.__class__.__name__, {'model' : model, 'data' : None}) )
 
         for port in model.Ports:
-            if not port.__class__.__name__ in self.ports:
-                self.ports[port.__class__.__name__] = {'port' : port, 'data' : None}
-
-        for model in model.Components:
-            if not model.__class__.__name__ in self.models:
-                self.models[model.__class__.__name__] = {'model' : model, 'data' : None}
+            if not port.__class__.__name__ in portClasses:
+                self.ports.append( (port.__class__.__name__, {'port' : port, 'data' : None}) )
 
         for model in model.Components:
             self._collectObjects(model)
@@ -252,6 +254,7 @@ class daeCodeGeneratorAnalyzer(object):
             for eeinfo in equation.EquationExecutionInfos:
                 eedata = {}
                 eedata['ResidualRuntimeNode'] = eeinfo.Node
+                eedata['VariableIndexes']     = eeinfo.VariableIndexes
 
                 data['EquationExecutionInfos'].append(eedata)
 
@@ -267,9 +270,14 @@ class daeCodeGeneratorAnalyzer(object):
                 data['Class'] = 'daeIF'
             else:
                 data['Class'] = 'daeSTN'
-            data['Name']        = stn.Name
-            data['ActiveState'] = stn.ActiveState
-            data['States']      = []
+            data['Name']          = stn.Name
+            data['CanonicalName'] = stn.CanonicalName
+            data['ActiveState']   = stn.ActiveState
+            stateMap = {}
+            for i, state in enumerate(stn.States):
+                stateMap[state.Name] = i
+            data['StateMap'] = stateMap
+            data['States']   = []
             for i, state in enumerate(stn.States):
                 state_data = {}
                 state_data['Name']              = state.Name
@@ -280,6 +288,8 @@ class daeCodeGeneratorAnalyzer(object):
                     st_data = {}
                     st_data['ConditionSetupNode']   = state_transition.Condition.SetupNode
                     st_data['ConditionRuntimeNode'] = state_transition.Condition.RuntimeNode
+                    st_data['EventTolerance']       = state_transition.Condition.EventTolerance
+                    st_data['Expressions']          = state_transition.Condition.Expressions
                     st_data['Actions']              = self._processActions(state_transition.Actions, model)
 
                     state_data['StateTransitions'].append(st_data)
@@ -345,9 +355,15 @@ class daeCodeGeneratorAnalyzer(object):
         for port in model.Ports:
             self._collectRuntimeInformationFromPort(port)
 
+        # OLD
+        """
         for stn in model.STNs:
             if isinstance(stn, daeSTN):
                 data = {}
+                if isinstance(stn, daeIF):
+                    data['Class'] = 'daeIF'
+                else:
+                    data['Class'] = 'daeSTN'
                 data['CanonicalName']   = stn.CanonicalName
                 data['ActiveState']     = stn.ActiveState
                 stateMap = {}
@@ -356,6 +372,13 @@ class daeCodeGeneratorAnalyzer(object):
                 data['StateMap']        = stateMap
 
                 self.runtimeInformation['STNs'].append(data)
+        """
+        
+        # equations
+        self.runtimeInformation['Equations'].extend( self._processEquations(model.Equations, model) )
+
+        # StateTransitionNetworks
+        self.runtimeInformation['STNs'].extend( self._processSTNs(model.STNs, model) )
 
         for component in model.Components:
             self._collectRuntimeInformationFromModel(component)
