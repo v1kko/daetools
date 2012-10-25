@@ -314,20 +314,22 @@ def consoleRun():
     # but other languages will be supported in the future (such as OpenModelica, EMSO ...)
     # export() auxiliary function exports the model into pyDAE and cDAE and saves the
     # exported models into the temporary folder (/tmp or c:\temp)
-    export(simulation, [simulation.m])
+    #export(simulation, [simulation.m])
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
     #from modelica import daeCodeGenerator_Modelica
-    #export_ = daeCodeGenerator_Modelica()
-    #export_.generateSimulation(simulation,     simulation.m.Name + '.mo')
-    #export_.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    #export_.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    #cg = daeCodeGenerator_Modelica()
+    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
+    import os
     from ansi_c import daeCodeGenerator_ANSI_C
-    export_ = daeCodeGenerator_ANSI_C()
-    export_.generateSimulation(simulation, simulation.m.Name + '.cpp')
+    cg = daeCodeGenerator_ANSI_C()
+    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    cg.generateSimulation(simulation, folder)
 
     # Run
     #simulation.Run()

@@ -181,11 +181,6 @@ class daeExpressionFormatter(object):
 
     def formatVariable(self, variableCanonicalName, domainIndexes, overallIndex):
         # ACHTUNG, ACHTUNG!! Take care of indexing of the overallIndex and the domainIndexes
-
-        #if variableCanonicalName == 'test.test.T2':
-        #    print ''
-        #    print variableCanonicalName, overallIndex < len(self.IDs), self.IDs[overallIndex]
-            
         if self.useFlattenedNamesForAssignedVariables and (self.IDs[overallIndex] == cnAssigned):
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
             name = self.flattenIdentifier(name)
@@ -330,7 +325,10 @@ class daeExpressionFormatter(object):
             elif node.Function == eDivide:
                 res = '{0} {1} {2}'.format(left, self.DIVIDE, right)
             elif node.Function == ePower:
-                res = '{0} {1} {2}'.format(left, self.POWER, right)
+                if self.POWER == 'pow': # use function pow()
+                    res = 'pow({0}, {1})'.format(left, right)
+                else:
+                    res = '{0} {1} {2}'.format(left, self.POWER, right)
             elif node.Function == eMin:
                 res = '{0}({1}, {2})'.format(self.MIN, left, right)
             elif node.Function == eMax:

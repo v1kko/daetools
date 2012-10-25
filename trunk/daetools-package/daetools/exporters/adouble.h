@@ -43,6 +43,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <float.h>
 #include <stack>
 
+#ifndef real_t
+#define real_t double
+#endif
+
 /*********************************************************************************************
 	adouble
 **********************************************************************************************/

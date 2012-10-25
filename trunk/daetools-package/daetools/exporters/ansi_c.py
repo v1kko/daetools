@@ -1,22 +1,23 @@
-import sys, numpy, math, traceback
+import os, shutil, sys, numpy, math, traceback
 from daetools.pyDAE import *
 from formatter import daeExpressionFormatter
 from analyzer import daeCodeGeneratorAnalyzer
 
+
 """
-#define real_t   double
-#define _v_(i)   adouble(_model_.m_valueProxies[i]->getValue(_values_),        (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  adouble(_model_.m_valueProxies[i]->getdt(_time_derivatives_), (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
-#define _time_   adouble(_current_time_, 0.0)
+Compile with:
+  g++ -O3 -Wall -o daetools_simulation adouble.cpp main.cpp
 """
-mainTemplate = """
+
+mainTemplate = """#ifndef DAETOOLS_ANSI_C_MODEL_H
+#define DAETOOLS_ANSI_C_MODEL_H
+
 #include <string>
 #include <vector>
 #include <map>
 #include "adouble.h"
 #include "matrix.h"
 
-#define real_t   double
 #define _v_(i)   adouble(_values_[ _indexMap_[i] ],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
 #define _dt_(i)  adouble(_time_derivatives_[ _indexMap_[i] ], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   adouble(_current_time_, 0.0)
@@ -41,7 +42,7 @@ void roots(real_t _current_time_,
 bool check_for_discontinuities(real_t _current_time_,
                                real_t* _values_,
                                real_t* _time_derivatives_);
-void execute_actions(real_t _current_time_,
+bool execute_actions(real_t _current_time_,
                      real_t* _values_,
                      real_t* _time_derivatives_);
 
@@ -63,19 +64,15 @@ void initial_values()
 %(initialConditions)s
 }
 
-int main()
-{
-}
-
 void residuals(real_t _current_time_,
                real_t* _values_,
                real_t* _time_derivatives_,
                real_t* _residuals_)
 {
+    adouble _temp_;
     int _ec_ = 0;
     int _current_index_for_jacobian_evaluation_ = -1;
     real_t _inverse_time_step_ = 0;
-    adouble _temp_;
     
 %(residuals)s
 }
@@ -88,12 +85,11 @@ void jacobian(long int _number_of_equations_,
               real_t* _residuals_,
               daeMatrix<real_t>* _jacobian_matrix_)
 {
-    int _current_index_for_jacobian_evaluation_ = -1;
+    adouble _temp_;
+    int _ec_ = 0;
     int i, _block_index_;
     real_t _jacobianItem_;
-    adouble _temp_;
-
-    int _ec_ = 0;
+    int _current_index_for_jacobian_evaluation_ = -1;
     
 %(jacobian)s
 }
@@ -112,7 +108,10 @@ void roots(real_t _current_time_,
            real_t* _time_derivatives_,
            real_t* _roots_)
 {
+    adouble _temp_;
     int _rc_ = 0;
+    real_t _inverse_time_step_ = 0;
+    int _current_index_for_jacobian_evaluation_ = -1;
     
 %(roots)s
 }
@@ -121,23 +120,32 @@ bool check_for_discontinuities(real_t _current_time_,
                                real_t* _values_,
                                real_t* _time_derivatives_)
 {
-    bool reinitializationNeeded = false;
+    adouble _temp_;
+    real_t _inverse_time_step_ = 0;
+    bool foundDiscontinuity = false;
+    int _current_index_for_jacobian_evaluation_ = -1;
     
 %(checkForDiscontinuities)s
+
+    return foundDiscontinuity;
+}
+
+bool execute_actions(real_t _current_time_,
+                     real_t* _values_,
+                     real_t* _time_derivatives_)
+{
+    adouble _temp_;
+    real_t _inverse_time_step_ = 0;
+    bool reinitializationNeeded = false;
+    int _current_index_for_jacobian_evaluation_ = -1;
+
+%(executeActions)s
 
     return reinitializationNeeded;
 }
 
-
-void execute_actions(real_t _current_time_,
-                     real_t* _values_,
-                     real_t* _time_derivatives_)
-{
-%(executeActions)s
-}
-
+#endif
 """
-
 
 class daeANSICExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
@@ -187,7 +195,7 @@ class daeANSICExpressionFormatter(daeExpressionFormatter):
         self.MINUS  = '-'
         self.MULTI  = '*'
         self.DIVIDE = '/'
-        self.POWER  = '???'
+        self.POWER  = 'pow'
 
         # Mathematical functions
         self.SIN    = 'sin'
@@ -243,7 +251,7 @@ class daeCodeGenerator_ANSI_C(object):
         self.exprFormatter = daeANSICExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
-    def generateSimulation(self, simulation, filename = None):
+    def generateSimulation(self, simulation, directory = None):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
@@ -265,9 +273,6 @@ class daeCodeGenerator_ANSI_C(object):
 
         self.analyzer.analyzeSimulation(simulation)
         self.exprFormatter.IDs = self.analyzer.runtimeInformation['IDs']
-        
-        #print self.analyzer.models
-        #print self.analyzer.ports
 
         #import pprint
         #pp = pprint.PrettyPrinter(indent=2)
@@ -303,8 +308,29 @@ class daeCodeGenerator_ANSI_C(object):
 
         results = mainTemplate % dictInfo;
 
-        if filename:
-            f = open(filename, "w")
+        code_generators_dir = os.path.join(os.path.dirname(__file__))
+
+        # If the argument 'directory' is given create the folder and the project
+        if directory:
+            path, dirName = os.path.split(directory)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            main_cpp     = os.path.join(code_generators_dir, 'main.cpp')
+            adouble_h    = os.path.join(code_generators_dir, 'adouble.h')
+            adouble_cpp  = os.path.join(code_generators_dir, 'adouble.cpp')
+            matrix_h     = os.path.join(code_generators_dir, 'matrix.h')
+            project_pro  = os.path.join(code_generators_dir, 'qt_project.pro'.format(dirName))
+            project_pro2 = os.path.join(directory,           '{0}.pro'.format(dirName))
+            model_h      = os.path.join(directory,           'daetools_model.h')
+
+            shutil.copy(main_cpp,     directory)
+            shutil.copy(adouble_h,    directory)
+            shutil.copy(adouble_cpp,  directory)
+            shutil.copy(matrix_h,     directory)
+            shutil.copy2(project_pro, project_pro2)
+
+            f = open(model_h, "w")
             f.write(results)
             f.close()
 
@@ -329,8 +355,7 @@ class daeCodeGenerator_ANSI_C(object):
                     ID = len(self.jacobians)
                     str_indexes = self.exprFormatter.formatNumpyArray(overall_indexes)
                     self.jacobians.append(s_indent + 'int _overall_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
-                    self.jacobians.append(s_indent + 'for(i = 0; i < {0}; i++)'.format(n))
-                    self.jacobians.append(s_indent + '{')
+                    self.jacobians.append(s_indent + 'for(i = 0; i < {0}; i++) {{'.format(n))
                     self.jacobians.append(s_indent2 + '_block_index_ = _indexMap_[ _overall_indexes_{0}[i] ];'.format(ID))
                     self.jacobians.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _overall_indexes_{0}[i];'.format(ID))
                     
@@ -388,6 +413,7 @@ class daeCodeGenerator_ANSI_C(object):
                     if i == 0:
                         temp = s_indent + '/* STN {0} */'.format(stnVariableName)
                         self.residuals.append(temp)
+                        self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
                         self.numberOfRoots.append(temp)
@@ -395,6 +421,7 @@ class daeCodeGenerator_ANSI_C(object):
 
                         temp = s_indent + 'if({0} == "{1}") {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
+                        self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
                         self.numberOfRoots.append(temp)
@@ -403,6 +430,7 @@ class daeCodeGenerator_ANSI_C(object):
                     elif (i > 0) and (i < nStates - 1):
                         temp = s_indent + 'else if({0} == "{1}") {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
+                        self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
                         self.numberOfRoots.append(temp)
@@ -411,29 +439,42 @@ class daeCodeGenerator_ANSI_C(object):
                     else:
                         temp = s_indent + 'else {'
                         self.residuals.append(temp)
+                        self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
                     # 1. Put equations into the residuals list
+                    self.equationGenerationMode  = 'residuals'
                     self._processEquations(state['Equations'], indent+1)
                     self.residuals.append(s_indent + '}')
 
+                    self.equationGenerationMode  = 'jacobian'
+                    self._processEquations(state['Equations'], indent+1)
+                    self.jacobians.append(s_indent + '}')
+
                     nStateTransitions = len(state['StateTransitions'])
                     s_indent2 = (indent + 1) * self.defaultIndent
+                    s_indent3 = (indent + 2) * self.defaultIndent
 
                     # 2. checkForDiscontinuities
                     for i, state_transition in enumerate(state['StateTransitions']):
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
                         if i == 0:
-                            self.checkForDiscontinuities.append(s_indent2 + 'if({0}) {{ reinitializationNeeded = true; }}'.format(condition))
+                            self.checkForDiscontinuities.append(s_indent2 + 'if({0}) {{'.format(condition))
+                            self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
+                            self.checkForDiscontinuities.append(s_indent2 + '}')
 
                         elif (i > 0) and (i < nStates - 1):
-                            self.checkForDiscontinuities.append(s_indent2 + 'else if({0}) {{ reinitializationNeeded = true; }}'.format(condition))
+                            self.checkForDiscontinuities.append(s_indent2 + 'else if({0}) {{'.format(condition))
+                            self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
+                            self.checkForDiscontinuities.append(s_indent2 + '}')
 
                         else:
-                            self.checkForDiscontinuities.append(s_indent2 + 'else { reinitializationNeeded = true; }')
+                            self.checkForDiscontinuities.append(s_indent2 + 'else {')
+                            self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
+                            self.checkForDiscontinuities.append(s_indent2 + '}')
 
                     self.checkForDiscontinuities.append(s_indent + '}')
                     
@@ -464,7 +505,8 @@ class daeCodeGenerator_ANSI_C(object):
                     # 5. rootFunctions
                     for i, state_transition in enumerate(state['StateTransitions']):
                         for expression in state_transition['Expressions']:
-                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = {0}'.format(self.exprFormatter.formatRuntimeNode(expression)))
+                            self.rootFunctions.append(s_indent2 + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
+                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = _temp_.getValue();')
 
                     self.rootFunctions.append(s_indent + '}')
 
@@ -630,6 +672,7 @@ class daeCodeGenerator_ANSI_C(object):
         indent = 1
         s_indent = indent * self.defaultIndent
 
+        # First generate residuals for equations and port connections
         self.equationGenerationMode  = 'residuals'
         for port_connection in runtimeInformation['PortConnections']:
             self.residuals.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
@@ -637,8 +680,8 @@ class daeCodeGenerator_ANSI_C(object):
 
         self.residuals.append(s_indent + '/* Equations */')
         self._processEquations(runtimeInformation['Equations'], indent)
-        self._processSTNs(runtimeInformation['STNs'], indent)
 
+        # Then generate jacobians for equations and port connections
         self.equationGenerationMode  = 'jacobian'
         for port_connection in runtimeInformation['PortConnections']:
             self.residuals.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
@@ -646,5 +689,9 @@ class daeCodeGenerator_ANSI_C(object):
 
         self.residuals.append(s_indent + '/* Equations */')
         self._processEquations(runtimeInformation['Equations'], indent)
-        #self._processSTNs(runtimeInformation['STNs'], indent)
-        
+
+        # Finally generate together residuals and jacobians for STNs
+        # _processSTNs will take care of self.equationGenerationMode regime
+        self._processSTNs(runtimeInformation['STNs'], indent)
+
+   
