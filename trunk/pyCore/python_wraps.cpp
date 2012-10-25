@@ -2231,6 +2231,13 @@ daeObject* daePortConnection_GetPortTo(daePortConnection& self)
     return dynamic_cast<daeObject*>(self.GetPortTo()); 
 }
 
+boost::python::list daePortConnection_GetEquations(daePortConnection& self)
+{
+    std::vector<daeEquation*> ptrarr;
+	self.GetEquations(ptrarr);
+    return getListFromVector(ptrarr);
+}
+
 /*******************************************************
 	daeSTN
 *******************************************************/

@@ -5,7 +5,9 @@ class daeCodeGeneratorAnalyzer(object):
     def __init__(self):
         self._simulation        = None
         self.ports              = []
+        self.dictPorts          = {}
         self.models             = []
+        self.dictModels         = {}
         self.runtimeInformation = {}
 
     def analyzeSimulation(self, simulation):
@@ -14,16 +16,22 @@ class daeCodeGeneratorAnalyzer(object):
 
         self._simulation        = simulation
         self.ports              = []
+        self.dictPorts          = {}
         self.models             = []
+        self.dictModels         = {}
         self.runtimeInformation = {
-                                    'Domains'     : [],
-                                    'Parameters'  : [],
-                                    'Variables'   : [],
-                                    'Equations'   : [],
-                                    'STNs'        : []
+                                    'Domains'         : [],
+                                    'Parameters'      : [],
+                                    'Variables'       : [],
+                                    'Equations'       : [],
+                                    'STNs'            : [],
+                                    'PortConnections' : []
                                   }
 
         self._collectObjects(self._simulation.m)
+        #print self.ports
+        #print self.models
+        
         self.models.reverse()
 
         for port_class, dict_port in self.ports:
@@ -35,6 +43,12 @@ class daeCodeGeneratorAnalyzer(object):
             data = self.analyzeModel(dict_model['model'])
 
             dict_model['data'] = data
+
+        self.runtimeInformation['TotalNumberOfVariables'] = self._simulation.TotalNumberOfVariables
+        self.runtimeInformation['NumberOfEquations']      = self._simulation.NumberOfEquations
+        self.runtimeInformation['IDs']                    = self._simulation.VariableTypes
+        self.runtimeInformation['InitialValues']          = self._simulation.InitialValues
+        self.runtimeInformation['IndexMappings']          = self._simulation.IndexMappings
 
         self._collectRuntimeInformationFromModel(self._simulation.m)
        
@@ -187,8 +201,9 @@ class daeCodeGeneratorAnalyzer(object):
         # PortConnections
         for port_connection in model.PortConnections:
             data = {}
-            data['PortFrom'] = daeGetRelativeName(model, port_connection.PortFrom)
-            data['PortTo']   = daeGetRelativeName(model, port_connection.PortTo)
+            data['PortFrom']  = daeGetRelativeName(model, port_connection.PortFrom)
+            data['PortTo']    = daeGetRelativeName(model, port_connection.PortTo)
+            data['Equations'] = self._processEquations(port_connection.Equations, model)
 
             result['PortConnections'].append(data)
 
@@ -220,14 +235,13 @@ class daeCodeGeneratorAnalyzer(object):
         return result
 
     def _collectObjects(self, model):
-        modelClasses = [class_ for class_, info_ in self.models]
-        portClasses  = [class_ for class_, info_ in self.ports]
-
-        if not model.__class__.__name__ in modelClasses:
+        if not model.__class__.__name__ in self.dictModels:
+            self.dictModels[model.__class__.__name__] = None
             self.models.append( (model.__class__.__name__, {'model' : model, 'data' : None}) )
 
         for port in model.Ports:
-            if not port.__class__.__name__ in portClasses:
+            if not port.__class__.__name__ in self.dictPorts:
+                self.dictPorts[port.__class__.__name__] = None
                 self.ports.append( (port.__class__.__name__, {'port' : port, 'data' : None}) )
 
         for model in model.Components:
@@ -272,6 +286,7 @@ class daeCodeGeneratorAnalyzer(object):
                 data['Class'] = 'daeSTN'
             data['Name']          = stn.Name
             data['CanonicalName'] = stn.CanonicalName
+            data['Description']   = stn.Description
             data['ActiveState']   = stn.ActiveState
             stateMap = {}
             for i, state in enumerate(stn.States):
@@ -304,13 +319,14 @@ class daeCodeGeneratorAnalyzer(object):
         sActions = []
         for action in actions:
             data = {}
-            data['Type']            = str(action.Type)
-            data['STN']             = action.STN.Name
-            data['StateTo']         = action.StateTo.Name
-            data['SendEventPort']   = daeGetRelativeName(model, action.SendEventPort)
-            data['VariableWrapper'] = action.VariableWrapper
-            data['SetupNode']       = action.SetupNode
-            data['RuntimeNode']     = action.RuntimeNode
+            data['Type']             = str(action.Type)
+            data['STN']              = action.STN.Name
+            data['STNCanonicalName'] = action.STN.CanonicalName
+            data['StateTo']          = action.StateTo.Name
+            data['SendEventPort']    = daeGetRelativeName(model, action.SendEventPort)
+            data['VariableWrapper']  = action.VariableWrapper
+            data['SetupNode']        = action.SetupNode
+            data['RuntimeNode']      = action.RuntimeNode
        
             sActions.append(data)
 
@@ -320,6 +336,7 @@ class daeCodeGeneratorAnalyzer(object):
         for domain in model.Domains:
             data = {}
             data['CanonicalName']        = domain.CanonicalName
+            data['Description']          = domain.Description
             data['Type']                 = str(domain.Type)
             data['NumberOfIntervals']    = domain.NumberOfIntervals
             data['NumberOfPoints']       = domain.NumberOfPoints
@@ -332,6 +349,7 @@ class daeCodeGeneratorAnalyzer(object):
         for parameter in model.Parameters:
             data = {}
             data['CanonicalName']        = parameter.CanonicalName
+            data['Description']          = parameter.Description
             data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
             data['NumberOfPoints']       = parameter.NumberOfPoints
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
@@ -343,8 +361,10 @@ class daeCodeGeneratorAnalyzer(object):
         for variable in model.Variables:
             data = {}
             data['CanonicalName']        = variable.CanonicalName
+            data['Description']          = variable.Description
             data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
             data['NumberOfPoints']       = variable.NumberOfPoints
+            data['OverallIndex']         = variable.OverallIndex
             data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
@@ -354,6 +374,14 @@ class daeCodeGeneratorAnalyzer(object):
 
         for port in model.Ports:
             self._collectRuntimeInformationFromPort(port)
+
+        for port_connection in model.PortConnections:
+            data = {}
+            data['PortFrom']        = port_connection.PortFrom.CanonicalName
+            data['PortTo']          = port_connection.PortTo.CanonicalName
+            data['Equations']       = self._processEquations(port_connection.Equations, model)
+
+            self.runtimeInformation['PortConnections'].append(data)
 
         # OLD
         """
@@ -387,6 +415,7 @@ class daeCodeGeneratorAnalyzer(object):
         for domain in port.Domains:
             data = {}
             data['CanonicalName']        = domain.CanonicalName
+            data['Description']          = domain.Description
             data['Type']                 = str(domain.Type)
             data['NumberOfIntervals']    = domain.NumberOfIntervals
             data['NumberOfPoints']       = domain.NumberOfPoints
@@ -399,6 +428,7 @@ class daeCodeGeneratorAnalyzer(object):
         for parameter in port.Parameters:
             data = {}
             data['CanonicalName']        = parameter.CanonicalName
+            data['Description']          = parameter.Description
             data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
             data['NumberOfPoints']       = parameter.NumberOfPoints
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
@@ -410,8 +440,10 @@ class daeCodeGeneratorAnalyzer(object):
         for variable in port.Variables:
             data = {}
             data['CanonicalName']        = variable.CanonicalName
+            data['Description']          = variable.Description
             data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
             data['NumberOfPoints']       = variable.NumberOfPoints
+            data['OverallIndex']         = variable.OverallIndex
             data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}

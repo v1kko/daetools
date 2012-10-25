@@ -3,28 +3,79 @@ from daetools.pyDAE import *
 from formatter import daeExpressionFormatter
 from analyzer import daeCodeGeneratorAnalyzer
 
-mainTemplate = """
-#include <string.h>
-#include <stdio.h>
-
+"""
 #define real_t   double
 #define _v_(i)   adouble(_model_.m_valueProxies[i]->getValue(_values_),        (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
 #define _dt_(i)  adouble(_model_.m_valueProxies[i]->getdt(_time_derivatives_), (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   adouble(_current_time_, 0.0)
+"""
+mainTemplate = """
+#include <string>
+#include <vector>
+#include <map>
+#include "adouble.h"
+#include "matrix.h"
 
+#define real_t   double
+#define _v_(i)   adouble(_values_[ _indexMap_[i] ],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  adouble(_time_derivatives_[ _indexMap_[i] ], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _time_   adouble(_current_time_, 0.0)
+
+void initial_values();
+void residuals(real_t _current_time_,
+               real_t* _values_,
+               real_t* _time_derivatives_,
+               real_t* _residuals_);
+void jacobian(long int _number_of_equations_,
+              real_t _current_time_,
+              real_t _inverse_time_step_,
+              real_t* _values_,
+              real_t* _time_derivatives_,
+              real_t* _residuals_,
+              daeMatrix<real_t>* _jacobian_matrix_);
+int number_of_roots();
+void roots(real_t _current_time_,
+           real_t* _values_,
+           real_t* _time_derivatives_,
+           real_t* _roots_);
+bool check_for_discontinuities(real_t _current_time_,
+                               real_t* _values_,
+                               real_t* _time_derivatives_);
+void execute_actions(real_t _current_time_,
+                     real_t* _values_,
+                     real_t* _time_derivatives_);
+
+/* General info */          
 %(model)s
+
+/* Domains and parameters */
 %(parameters)s
+
+/* StateTransitionNetworks */
 %(activeStates)s
+
+/* Assigned variables */
 %(assignedVariables)s
+
+void initial_values()
+{
+/* Initial conditions */
 %(initialConditions)s
+}
+
+int main()
+{
+}
 
 void residuals(real_t _current_time_,
                real_t* _values_,
                real_t* _time_derivatives_,
-               real_t* _residuals_,
-               cModel* _pmodel_)
+               real_t* _residuals_)
 {
     int _ec_ = 0;
+    int _current_index_for_jacobian_evaluation_ = -1;
+    real_t _inverse_time_step_ = 0;
+    adouble _temp_;
     
 %(residuals)s
 }
@@ -35,10 +86,14 @@ void jacobian(long int _number_of_equations_,
               real_t* _values_,
               real_t* _time_derivatives_,
               real_t* _residuals_,
-              daeMatrix<real_t>& _jacobian_,
-              cModel* _pmodel_)
+              daeMatrix<real_t>* _jacobian_matrix_)
 {
-    int _current_index_for_jacobian_evaluation_ = 0;
+    int _current_index_for_jacobian_evaluation_ = -1;
+    int i, _block_index_;
+    real_t _jacobianItem_;
+    adouble _temp_;
+
+    int _ec_ = 0;
     
 %(jacobian)s
 }
@@ -55,8 +110,7 @@ int number_of_roots()
 void roots(real_t _current_time_,
            real_t* _values_,
            real_t* _time_derivatives_,
-           real_t* _roots_,
-           cModel* _pmodel_)
+           real_t* _roots_)
 {
     int _rc_ = 0;
     
@@ -65,8 +119,7 @@ void roots(real_t _current_time_,
 
 bool check_for_discontinuities(real_t _current_time_,
                                real_t* _values_,
-                               real_t* _time_derivatives_,
-                               cModel* _pmodel_)
+                               real_t* _time_derivatives_)
 {
     bool reinitializationNeeded = false;
     
@@ -78,8 +131,7 @@ bool check_for_discontinuities(real_t _current_time_,
 
 void execute_actions(real_t _current_time_,
                      real_t* _values_,
-                     real_t* _time_derivatives_,
-                     cModel* _pmodel_)
+                     real_t* _time_derivatives_)
 {
 %(executeActions)s
 }
@@ -87,7 +139,7 @@ void execute_actions(real_t _current_time_,
 """
 
 
-class daeCXXExpressionFormatter(daeExpressionFormatter):
+class daeANSICExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
 
@@ -167,30 +219,31 @@ class daeCXXExpressionFormatter(daeExpressionFormatter):
         # Formats constants/quantities in equations that have a value and units
         return str(quantity.value)
      
-class daeCXXExport(object):
+class daeCodeGenerator_ANSI_C(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '    '
         self.warnings                = []
         self.topLevelModel           = None
         self.simulation              = None
-
+        self.equationGenerationMode  = ''
+        
         self.assignedVariables       = []
         self.initialConditions       = []
         self.initiallyActiveStates   = []
         self.modelDef                = []
         self.parametersDefs          = []
-        self.initiallyActiveStates           = []
         self.residuals               = []
+        self.jacobians               = []
         self.checkForDiscontinuities = []
         self.executeActions          = []
         self.numberOfRoots           = []
         self.rootFunctions           = []
         
-        self.exprFormatter = daeCXXExpressionFormatter()
+        self.exprFormatter = daeANSICExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
-    def exportSimulation(self, simulation, filename = None):
+    def generateSimulation(self, simulation, filename = None):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
@@ -199,8 +252,8 @@ class daeCXXExport(object):
         self.initiallyActiveStates   = []
         self.modelDef                = []
         self.parametersDefs          = []
-        self.initiallyActiveStates           = []
         self.residuals               = []
+        self.jacobians               = []
         self.warnings                = []
         self.simulation              = simulation
         self.topLevelModel           = simulation.m
@@ -220,24 +273,15 @@ class daeCXXExport(object):
         #pp = pprint.PrettyPrinter(indent=2)
         #pp.pprint(self.analyzer.runtimeInformation)
 
-        """
-        resultModel = ''
-        for port_class, info in self.analyzer.ports:
-            resultModel += self._processPort(info['data'], indent)
-
-        for model_class, info in self.analyzer.models:
-            resultModel += self._processModel(info['data'], indent)
-        """
-        
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-        modelDef       = '\n/* General info */\n' + '\n'.join(self.modelDef) + '\n'
-        paramsDef      = '\n/* Domains and parameters */\n' + '\n'.join(self.parametersDefs) + '\n'
-        stnDef         = '\n/* STNs */\n' + '\n'.join(self.initiallyActiveStates) + '\n'
-        assignedVars   = '\n/* Assigned variables */\n' + '\n'.join(self.assignedVariables) + '\n'
-        initConds      = '\n/* Initial conditions */\n' + '\n'.join(self.initialConditions) + '\n'
-        eqnsRes        = '\n'.join(self.residuals) + '\n'
-        jacobRes       = ''
+        modelDef       = '\n'.join(self.modelDef)
+        paramsDef      = '\n'.join(self.parametersDefs)
+        stnDef         = '\n'.join(self.initiallyActiveStates)
+        assignedVars   = '\n'.join(self.assignedVariables)
+        initConds      = '\n'.join(self.initialConditions)
+        eqnsRes        = '\n'.join(self.residuals)
+        jacobRes       = '\n'.join(self.jacobians)
         rootsDef       = '\n'.join(self.rootFunctions)
         checkDiscont   = '\n'.join(self.checkForDiscontinuities)
         execActionsDef = '\n'.join(self.executeActions)
@@ -262,24 +306,43 @@ class daeCXXExport(object):
         if filename:
             f = open(filename, "w")
             f.write(results)
-            #f.write(modelDef)
-            #f.write(paramsDef)
-            #f.write(varsDef)
-            #f.write(eqnsRes)
-            #f.write(checkDiscont)
-            #f.write(rootsDef)
-            #f.write(execActionsDef)
-            #f.write(noRootsDef)
             f.close()
 
-        #return results
+        return results
 
     def _processEquations(self, Equations, indent):
-        s_indent  = indent * self.defaultIndent
-        for equation in Equations:
-            for eeinfo in equation['EquationExecutionInfos']:
-                self.residuals.append(s_indent + '_residuals_[_ec_++] = ' + self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode']) + ';')
+        s_indent  = indent     * self.defaultIndent
+        s_indent2 = (indent+1) * self.defaultIndent
+        
+        if self.equationGenerationMode == 'residuals':
+            for equation in Equations:
+                for eeinfo in equation['EquationExecutionInfos']:
+                    res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
+                    self.residuals.append(s_indent + '_temp_ = {0};'.format(res))
+                    self.residuals.append(s_indent + '_residuals_[_ec_++] = _temp_.getValue();')
+
+        elif self.equationGenerationMode == 'jacobian':
+            for equation in Equations:
+                for eeinfo in equation['EquationExecutionInfos']:
+                    overall_indexes = eeinfo['VariableIndexes']
+                    n = len(overall_indexes)
+                    ID = len(self.jacobians)
+                    str_indexes = self.exprFormatter.formatNumpyArray(overall_indexes)
+                    self.jacobians.append(s_indent + 'int _overall_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
+                    self.jacobians.append(s_indent + 'for(i = 0; i < {0}; i++)'.format(n))
+                    self.jacobians.append(s_indent + '{')
+                    self.jacobians.append(s_indent2 + '_block_index_ = _indexMap_[ _overall_indexes_{0}[i] ];'.format(ID))
+                    self.jacobians.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _overall_indexes_{0}[i];'.format(ID))
                     
+                    res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
+                    self.jacobians.append(s_indent2 + '_temp_ = {0};'.format(res))
+                    self.jacobians.append(s_indent2 + '_jacobianItem_ = _temp_.getDerivative();')
+                    #                                            SetItem(Eq.index, blockIndex, value)
+                    self.jacobians.append(s_indent2 + '_jacobian_matrix_->SetItem(_ec_, _block_index_, _jacobianItem_);')
+
+                    self.jacobians.append(s_indent + '}')
+                    self.jacobians.append(s_indent + '_ec_++;')
+
     def _processSTNs(self, STNs, indent):
         s_indent = indent * self.defaultIndent
         for stn in STNs:
@@ -314,7 +377,7 @@ class daeCXXExport(object):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                varTemplate = 'char* {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                varTemplate = 'std::string {name} = "{activeState}"; /* States: {states}; {description} */ \n'
                 self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
                                                              states = states,
                                                              activeState = activeState,
@@ -330,7 +393,7 @@ class daeCXXExport(object):
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
-                        temp = s_indent + 'if(strcmp({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'if({0} == "{1}") {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
@@ -338,7 +401,7 @@ class daeCXXExport(object):
                         self.rootFunctions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
-                        temp = s_indent + 'else if(strcmp({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'else if({0} == "{1}") {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
@@ -565,5 +628,23 @@ class daeCXXExport(object):
         """
         
         indent = 1
+        s_indent = indent * self.defaultIndent
+
+        self.equationGenerationMode  = 'residuals'
+        for port_connection in runtimeInformation['PortConnections']:
+            self.residuals.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
+            self._processEquations(port_connection['Equations'], indent)
+
+        self.residuals.append(s_indent + '/* Equations */')
         self._processEquations(runtimeInformation['Equations'], indent)
         self._processSTNs(runtimeInformation['STNs'], indent)
+
+        self.equationGenerationMode  = 'jacobian'
+        for port_connection in runtimeInformation['PortConnections']:
+            self.residuals.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
+            self._processEquations(port_connection['Equations'], indent)
+
+        self.residuals.append(s_indent + '/* Equations */')
+        self._processEquations(runtimeInformation['Equations'], indent)
+        #self._processSTNs(runtimeInformation['STNs'], indent)
+        

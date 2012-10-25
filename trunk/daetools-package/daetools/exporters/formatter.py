@@ -10,6 +10,9 @@ class daeExpressionFormatter(object):
         #  - daetools, python, c/c++ use 0
         self.indexBase = 0
 
+        self.useFlattenedNamesForAssignedVariables = False
+        self.IDs = {}
+        
         # Use relative names (relative to domains/parameters/variables model) or full canonical names
         # If we are in model root.comp1 then variables' names could be:
         #   if useRelativeNames is True:
@@ -20,22 +23,34 @@ class daeExpressionFormatter(object):
 
         self.flattenIdentifiers = False
 
-        self.domain    = '{domain}{index}'
-        self.parameter = '{parameter}{indexes}'
-        self.variable  = '{variable}{indexes}'
-
         # One- and multi-dimensional parameters/variables and domain points
-        self.indexLeftBracket  = '['
-        self.indexRightBracket = ']'
-        self.indexFormat = 'python_index_style'
+        #self.indexLeftBracket  = ''
+        #self.indexRightBracket = ''
+
+        self.domain                   = '{domain}[{index}]'
+
+        self.parameter                = '{parameter}({indexes})'
+        self.parameterIndexStart      = ''
+        self.parameterIndexEnd        = ''
+        self.parameterIndexDelimiter  = ','
+
+        self.variable                 = '{variable}({indexes})'
+        self.variableIndexStart       = ''
+        self.variableIndexEnd         = ''
+        self.variableIndexDelimiter   = ','
+        
+        # String format for the time derivative, ie. der(variable[1,2]) in Modelica
+        # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
+        self.derivative               = '{variable}.dt({indexes})'
+        self.derivativeIndexStart     = ''
+        self.derivativeIndexEnd       = ''
+        self.derivativeIndexDelimiter = ','
+
+        #self.indexFormat = 'python_index_style'
         # if format is python_index_style:
         #     var(i1, i2, ..., in)
         # else if indexFormat is c_index_style:
         #     var[i1][i2]...[in]
-
-        # String format for the time derivative, ie. der(variable[1,2]) in Modelica
-        # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
-        self.derivative = '{variable}.dt{indexes}'
 
         # Logical operators
         self.AND   = 'and'
@@ -118,24 +133,22 @@ class daeExpressionFormatter(object):
 
         return sPositive + sNegative
 
-    def formatNumpyArray(self, nd_arr):
-        if isinstance(arr, numpy.ndarray):
-            return '[' + ','.join([self.formatNumpyArray(val) for val in arr]) + ']'
+    def formatNumpyArray(self, arr):
+        if isinstance(arr, (numpy.ndarray, list)):
+            return '[' + ', '.join([self.formatNumpyArray(val) for val in arr]) + ']'
         else:
             return str(arr)
             
     def formatIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
-        return identifier.replace('&', '').replace(';', '').replace('(', '_').replace(')', '').replace(',', '_').replace(' ', '')
+        return identifier.replace('&', '').replace(';', '').replace('(', '_').replace(')', '_').replace(',', '_').replace(' ', '')
 
     def flattenIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
-        return identifier.replace('.', '_')
+        return identifier.replace('.', '_').replace('(', '_').replace(')', '_').replace('[', '_').replace(']', '_').replace(',', '_').replace(' ', '')
 
     def formatDomain(self, domainCanonicalName, index, value):
-        # python_index_style: domain(0)
-        # c_index_style: domain[0]
-        # ACHTUNG, ACHTUNG!! Take care of indexing
+        # ACHTUNG, ACHTUNG!! Take care of indexing of the domain index
         if self.useRelativeNames:
             name = daeGetRelativeName(self.modelCanonicalName, domainCanonicalName)
         else:
@@ -144,15 +157,13 @@ class daeExpressionFormatter(object):
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
 
-        indexes = self.indexLeftBracket + str(index + self.indexBase) + self.indexRightBracket
+        indexes = str(index + self.indexBase)
 
         res = self.domain.format(domain = name, index = indexes, value = value)
         return res
 
     def formatParameter(self, parameterCanonicalName, domainIndexes, value):
-        # python_index_style: parameter(0, 1, 2)
-        # c_index_style: parameter[0][1][2]
-        # ACHTUNG, ACHTUNG!! Take care of indexing
+        # ACHTUNG, ACHTUNG!! Take care of indexing of the domainIndexes
         if self.useRelativeNames:
             name = daeGetRelativeName(self.modelCanonicalName, parameterCanonicalName)
         else:
@@ -163,44 +174,48 @@ class daeExpressionFormatter(object):
         
         domainindexes = ''
         if len(domainIndexes) > 0:
-            if self.indexFormat == 'python_index_style':
-                domainindexes = self.indexLeftBracket + ','.join([str(di+self.indexBase) for di in domainIndexes]) + self.indexRightBracket
-            elif self.indexFormat == 'c_index_style':
-                domainindexes = ''.join([self.indexLeftBracket + str(di+self.indexBase) + self.indexRightBracket for di in domainIndexes])
-            else:
-                raise RuntimeError('Unsupported index style')
-
+            domainindexes = self.parameterIndexStart + self.parameterIndexDelimiter.join([str(di+self.indexBase) for di in domainIndexes]) + self.parameterIndexEnd
+        
         res = self.parameter.format(parameter = name, indexes = domainindexes, value = value)
         return res
 
     def formatVariable(self, variableCanonicalName, domainIndexes, overallIndex):
-        # python_index_style: variable(0,1,2)
-        # c_index_style: variable[0][1][2]
-        # ACHTUNG, ACHTUNG!! Take care of indexing
-        if self.useRelativeNames:
-            name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
-        else:
-            name = variableCanonicalName
+        # ACHTUNG, ACHTUNG!! Take care of indexing of the overallIndex and the domainIndexes
 
-        if self.flattenIdentifiers:
+        #if variableCanonicalName == 'test.test.T2':
+        #    print ''
+        #    print variableCanonicalName, overallIndex < len(self.IDs), self.IDs[overallIndex]
+            
+        if self.useFlattenedNamesForAssignedVariables and (self.IDs[overallIndex] == cnAssigned):
+            name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
             name = self.flattenIdentifier(name)
 
-        domainindexes = ''
-        if len(domainIndexes) > 0:
-            if self.indexFormat == 'python_index_style':
-                domainindexes = self.indexLeftBracket + ','.join([str(di+self.indexBase) for di in domainIndexes]) + self.indexRightBracket
-            elif self.indexFormat == 'c_index_style':
-                domainindexes = ''.join([self.indexLeftBracket + str(di+self.indexBase) + self.indexRightBracket for di in domainIndexes])
-            else:
-                raise RuntimeError('Unsupported index style')
+            domainindexes = ''
+            if len(domainIndexes) > 0:
+                domainindexes = '_' + '_'.join([str(di+self.indexBase) for di in domainIndexes]) + '_'
 
-        res = self.variable.format(variable = name, indexes = domainindexes, overallIndex = overallIndex)
+            res = name + domainindexes
+
+        else:
+            if self.useRelativeNames:
+                name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
+            else:
+                name = variableCanonicalName
+
+            if self.flattenIdentifiers:
+                name = self.flattenIdentifier(name)
+
+            index = overallIndex + self.indexBase
+            domainindexes = ''
+            if len(domainIndexes) > 0:
+                domainindexes = self.variableIndexStart + self.variableIndexDelimiter.join([str(di+self.indexBase) for di in domainIndexes]) + self.variableIndexEnd
+
+            res = self.variable.format(variable = name, indexes = domainindexes, overallIndex = index)
+
         return res
 
     def formatTimeDerivative(self, variableCanonicalName, domainIndexes, overallIndex, order):
-        # python_index_style: derivative(variable(0, 1, 2))
-        # c_index_style: derivative(variable[0][1][2])
-        # ACHTUNG, ACHTUNG!! Take care of indexing
+        # ACHTUNG, ACHTUNG!! Take care of indexing of the overallIndex and the domainIndexes
         if self.useRelativeNames:
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
         else:
@@ -209,16 +224,12 @@ class daeExpressionFormatter(object):
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
 
+        index = overallIndex + self.indexBase
         domainindexes = ''
         if len(domainIndexes) > 0:
-            if self.indexFormat == 'python_index_style':
-                domainindexes = self.indexLeftBracket + ','.join([str(di+self.indexBase) for di in domainIndexes]) + self.indexRightBracket
-            elif self.indexFormat == 'c_index_style':
-                domainindexes = ''.join([self.indexLeftBracket + str(di+self.indexBase) + self.indexRightBracket for di in domainIndexes])
-            else:
-                raise RuntimeError('Unsupported index style')
-
-        res = self.derivative.format(variable = name, indexes = domainindexes, overallIndex = overallIndex)
+            domainindexes = self.derivativeIndexStart + self.derivativeIndexDelimiter.join([str(di+self.indexBase) for di in domainIndexes]) + self.derivativeIndexEnd
+        
+        res = self.derivative.format(variable = name, indexes = domainindexes, overallIndex = index)
         return res
 
     def formatRuntimeConditionNode(self, node):

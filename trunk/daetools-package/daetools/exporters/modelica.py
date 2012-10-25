@@ -44,16 +44,30 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         # Index base in arrays
         self.indexBase = 1
 
+        self.useFlattenedNamesForAssignedVariables = False
+        self.IDs = {}
+
         # Use relative names
         self.useRelativeNames = True
 
-        # One- and multi-dimensional parameters/variables and domain points
-        self.indexLeftBracket  = '['
-        self.indexRightBracket = ']'
-        self.indexFormat = 'python_index_style'
+        self.domain                   = '{domain}[{index}]'
 
-        # String format for the time derivative: der(variable)
-        self.derivative = 'der({variable}{indexes})'
+        self.parameter                = '{parameter}{indexes}'
+        self.parameterIndexStart      = '['
+        self.parameterIndexEnd        = ']'
+        self.parameterIndexDelimiter  = ','
+
+        self.variable                 = '{variable}{indexes}'
+        self.variableIndexStart       = '['
+        self.variableIndexEnd         = ']'
+        self.variableIndexDelimiter   = ','
+
+        # String format for the time derivative, ie. der(variable[1,2]) in Modelica
+        # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
+        self.derivative               = 'der({variable}{indexes})'
+        self.derivativeIndexStart     = '['
+        self.derivativeIndexEnd       = ']'
+        self.derivativeIndexDelimiter = ','
 
         # Logical operators
         self.AND   = 'and'
@@ -95,8 +109,8 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.TIME   = 'time'
 
     def formatNumpyArray(self, arr):
-        if isinstance(arr, numpy.ndarray):
-            return '{' + ','.join([self.formatNumpyArray(val) for val in arr]) + '}'
+        if isinstance(arr, (numpy.ndarray, list)):
+            return '{' + ', '.join([self.formatNumpyArray(val) for val in arr]) + '}'
         else:
             return str(arr)
 
@@ -136,7 +150,7 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
 
         return sPositive + sNegative
         
-class daeModelicaExport(object):
+class daeCodeGenerator_Modelica(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '  '
@@ -147,7 +161,7 @@ class daeModelicaExport(object):
         self.exprFormatter = daeModelicaExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
-    def exportModel(self, model, filename = None):
+    def generateModel(self, model, filename = None):
         if not model:
             raise RuntimeError('Invalid model object')
 
@@ -172,7 +186,7 @@ class daeModelicaExport(object):
 
         return result
 
-    def exportPort(self, port, filename = None):
+    def generatePort(self, port, filename = None):
         if not port:
             raise RuntimeError('Invalid port object')
 
@@ -197,7 +211,7 @@ class daeModelicaExport(object):
 
         return result
 
-    def exportSimulation(self, simulation, filename = None):
+    def generateSimulation(self, simulation, filename = None):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
@@ -224,7 +238,7 @@ class daeModelicaExport(object):
 
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-        model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.wrapperInstanceName)
+        model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.exprFormatter.formatIdentifier(self.wrapperInstanceName))
         indent = ' ' * len(model_instance)
 
         params        = ['{0} = {1}'     .format(key, value) for key, value in self.parametersValues.items()]

@@ -161,7 +161,7 @@ class modTutorial(daeModel):
 
     def DeclareEquations(self):
         eq = self.CreateEquation("dummy", "")
-        eq.Residual = self.dummy()
+        eq.Residual = self.dummy() - self.test.T2()
 
         eq = self.CreateEquation("test_T1", "")
         eq.Residual = self.test.T1() - Constant(12.3 * K)
@@ -319,12 +319,15 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    #from modelica import daeModelicaExport
-    from cxx import daeCXXExport
-    modelicaExport = daeCXXExport() #daeModelicaExport()
-    modelicaExport.exportSimulation(simulation,     simulation.m.Name + '.cpp')
-    #modelicaExport.exportModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    #modelicaExport.exportPort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    #from modelica import daeCodeGenerator_Modelica
+    #export_ = daeCodeGenerator_Modelica()
+    #export_.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    #export_.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    #export_.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+
+    from ansi_c import daeCodeGenerator_ANSI_C
+    export_ = daeCodeGenerator_ANSI_C()
+    export_.generateSimulation(simulation, simulation.m.Name + '.cpp')
 
     # Run
     #simulation.Run()

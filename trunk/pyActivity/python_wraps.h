@@ -224,6 +224,23 @@ public:
     
         return l;
 	}
+
+    boost::python::dict GetIndexMappings(void) const
+    {
+    // Returns dictionary {overallIndex : blockIndex}
+        if(m_ptrarrBlocks.size() != 1)
+            daeDeclareAndThrowException(exInvalidCall);
+        
+        boost::python::dict d;
+        typedef std::map<size_t, size_t>::iterator c_iterator;
+        
+        std::map<size_t, size_t>& mapIndexes = dynamic_cast<daeBlock*>(m_ptrarrBlocks[0])->m_mapVariableIndexes;
+        
+        for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
+            d[iter->first] = iter->second;
+        
+        return d;        
+    }
     
 	boost::python::object GetDataReporter_(void) const
 	{

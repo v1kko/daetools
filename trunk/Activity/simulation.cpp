@@ -254,6 +254,18 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 					string(" s"), 0);
 }
 
+size_t daeSimulation::GetNumberOfEquations(void) const
+{
+    if(m_ptrarrBlocks.size() != 1)
+        daeDeclareAndThrowException(exInvalidCall);
+    return m_ptrarrBlocks[0]->GetNumberOfEquations();
+}
+
+size_t daeSimulation::GetTotalNumberOfVariables(void) const
+{
+    return m_pModel->GetDataProxy()->GetTotalNumberOfVariables();    
+}
+
 void daeSimulation::SetupSolver(void)
 {
 	size_t i;

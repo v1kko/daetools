@@ -878,6 +878,7 @@ boost::python::list daeDEDI_GetDomainPoints(daeDEDI& self);
 *******************************************************/
 daeObject* daePortConnection_GetPortFrom(daePortConnection& self);
 daeObject* daePortConnection_GetPortTo(daePortConnection& self);
+boost::python::list daePortConnection_GetEquations(daePortConnection& self);
 
 /*******************************************************
 	daeSTN

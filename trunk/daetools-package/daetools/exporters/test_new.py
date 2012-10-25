@@ -311,24 +311,13 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from formatter import daeExpressionFormatter
-    from analyzer import daeCodeGeneratorAnalyzer
-    import pprint
+    #from modelica import daeCodeGenerator_Modelica
+    #cg = daeCodeGenerator_Modelica()
+    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
 
-    formatter = daeExpressionFormatter()
-    analyzer = daeCodeGeneratorAnalyzer()
-    analyzer.analyzeSimulation(simulation)
-
-    pp = pprint.PrettyPrinter(indent=2)
-    ports   = pp.pformat(analyzer.ports)
-    models  = pp.pformat(analyzer.models)
-    rt_info = pp.pformat(analyzer.runtimeInformation)
-
-    f = open(simulation.m.Name + '-analysys.txt', "w")
-    #f.write(ports + '\n\n')
-    #f.write(models + '\n\n')
-    f.write(rt_info)
-    f.close()
+    from ansi_c import daeCodeGenerator_ANSI_C
+    cg = daeCodeGenerator_ANSI_C()
+    cg.generateSimulation(simulation, simulation.m.Name + '.cpp')
 
     # Run
     simulation.Run()

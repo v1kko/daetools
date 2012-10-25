@@ -154,9 +154,13 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from modelica import daeModelicaExport
-    modelicaExport = daeModelicaExport()
-    modelicaExport.exportSimulation(simulation, simulation.m.Name + '.mo')
+    #from modelica import daeCodeGenerator_Modelica
+    #cg = daeCodeGenerator_Modelica()
+    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+
+    from ansi_c import daeCodeGenerator_ANSI_C
+    cg = daeCodeGenerator_ANSI_C()
+    cg.generateSimulation(simulation, simulation.m.Name + '.cpp')
 
     # Run
     simulation.Run()
