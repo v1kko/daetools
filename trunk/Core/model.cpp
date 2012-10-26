@@ -1008,7 +1008,7 @@ daeIF* daeModel::AddIF(const string& strCondition)
 	}
 	else
 	{
-		strName = "IF_" + toString<size_t>(pParentState->GetNumberOfSTNs());
+		strName = "IF_" + toString<size_t>(m_ptrarrSTNs.size()) + "_" + toString<size_t>(pParentState->GetNumberOfSTNs());
 		pIF->m_pParentState = pParentState;
 		pParentState->AddNestedSTN(pIF);
 	}

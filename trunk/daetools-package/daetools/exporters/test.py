@@ -319,17 +319,17 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    #from modelica import daeCodeGenerator_Modelica
-    #cg = daeCodeGenerator_Modelica()
-    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    from modelica import daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
     #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
     #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
-    import os
-    from ansi_c import daeCodeGenerator_ANSI_C
-    cg = daeCodeGenerator_ANSI_C()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, folder)
+    #import os
+    #from ansi_c import daeCodeGenerator_ANSI_C
+    #cg = daeCodeGenerator_ANSI_C()
+    #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    #cg.generateSimulation(simulation, folder)
 
     # Run
     #simulation.Run()

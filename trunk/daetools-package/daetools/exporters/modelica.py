@@ -4,13 +4,15 @@ from formatter import daeExpressionFormatter
 from analyzer import daeCodeGeneratorAnalyzer
 
 
-portTemplate = """connector %(port)s
+portTemplate = """\
+connector %(port)s
 %(variables)s
 end %(port)s;
 
 """
 
-modelTemplate = """class %(model)s
+modelTemplate = """\
+class %(model)s
 /* Import libs */
   import Modelica.Math.*;
 %(parameters)s
@@ -26,7 +28,8 @@ end %(model)s;
 
 """
 
-wrapperTemplate = """class %(model)s_simulation
+wrapperTemplate = """\
+class %(model)s_simulation
   annotation(experiment(StartTime = %(start_time)s, StopTime = %(end_time)s, Tolerance = %(tolerance)s));
   
 %(model_instance)s
@@ -70,40 +73,43 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.derivativeIndexDelimiter = ','
 
         # Logical operators
-        self.AND   = 'and'
-        self.OR    = 'or'
-        self.NOT   = 'not'
+        self.AND   = '{leftValue} and {rightValue}'
+        self.OR    = '{leftValue} or {rightValue}'
+        self.NOT   = 'not {value}'
 
-        self.EQ    = '=='
-        self.NEQ   = '!='
-        self.LT    = '<'
-        self.LTEQ  = '<='
-        self.GT    = '>'
-        self.GTEQ  = '>='
+        self.EQ    = '{leftValue} == {rightValue}'
+        self.NEQ   = '{leftValue} != {rightValue}'
+        self.LT    = '{leftValue} < {rightValue}'
+        self.LTEQ  = '{leftValue} <= {rightValue}'
+        self.GT    = '{leftValue} > {rightValue}'
+        self.GTEQ  = '{leftValue} >= {rightValue}'
 
         # Mathematical operators
-        self.PLUS   = '+'
-        self.MINUS  = '-'
-        self.MULTI  = '*'
-        self.DIVIDE = '/'
-        self.POWER  = '^'
+        self.SIGN   = '-{value}'
+
+        self.PLUS   = '{leftValue} + {rightValue}'
+        self.MINUS  = '{leftValue} - {rightValue}'
+        self.MULTI  = '{leftValue} * {rightValue}'
+        self.DIVIDE = '{leftValue} / {rightValue}'
+        self.POWER  = '{leftValue} ^ {rightValue}'
 
         # Mathematical functions
-        self.SIN    = 'sin'
-        self.COS    = 'cos'
-        self.TAN    = 'tan'
-        self.ASIN   = 'asin'
-        self.ACOS   = 'acos'
-        self.ATAN   = 'atan'
-        self.EXP    = 'exp'
-        self.SQRT   = 'sqrt'
-        self.LOG    = 'log'
-        self.LOG10  = 'log10'
-        self.FLOOR  = 'floor'
-        self.CEIL   = 'ceil'
-        self.ABS    = 'abs'
-        self.MIN    = 'min'
-        self.MAX    = 'max'
+        self.SIN    = 'sin({value})'
+        self.COS    = 'cos({value})'
+        self.TAN    = 'tan({value})'
+        self.ASIN   = 'asin({value})'
+        self.ACOS   = 'acos({value})'
+        self.ATAN   = 'atan({value})'
+        self.EXP    = 'exp({value})'
+        self.SQRT   = 'sqrt({value})'
+        self.LOG    = 'log({value})'
+        self.LOG10  = 'log10({value})'
+        self.FLOOR  = 'floor({value})'
+        self.CEIL   = 'ceil({value})'
+        self.ABS    = 'abs({value})'
+
+        self.MIN    = 'min({leftValue}, {rightValue})'
+        self.MAX    = 'max({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = 'time'

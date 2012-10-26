@@ -1,5 +1,17 @@
-#ifndef DAE_ARRAY_MATRIX_H
-#define DAE_ARRAY_MATRIX_H
+/***********************************************************************************
+*                 DAE Tools Project: www.daetools.com
+*                 Copyright (C) Dragan Nikolic, 2010
+************************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the 
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+***********************************************************************************/
+#ifndef DAE_MATRIX_H
+#define DAE_MATRIX_H
 
 #include <cstring>
 #include <iostream>
@@ -7,10 +19,6 @@
 #include <map>
 #include <stdexcept>
 #include <algorithm>
-
-#ifndef real_t
-#define real_t double
-#endif
 
 /*********************************************************************************************
 	daeMatrix
@@ -24,24 +32,24 @@ enum daeeMatrixAccess
 	eColumnWise
 };
 
-template<typename REAL = real_t> 
+template<typename FLOAT> 
 class daeMatrix
 {
 public:
 	virtual ~daeMatrix(void){}
 
 public:
-	virtual REAL	GetItem(size_t row, size_t col) const       = 0;
-	virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
-	virtual size_t	GetNrows(void) const                        = 0;
-	virtual size_t	GetNcols(void) const                        = 0;
+	virtual FLOAT	GetItem(size_t row, size_t col) const        = 0;
+	virtual void	SetItem(size_t row, size_t col, FLOAT value) = 0;
+	virtual size_t	GetNrows(void) const                         = 0;
+	virtual size_t	GetNcols(void) const                         = 0;
 };
 
 /******************************************************************
 	daeSparseMatrix
 *******************************************************************/
-template<typename REAL = real_t> 
-class daeSparseMatrix : public daeMatrix<REAL>
+template<typename FLOAT> 
+class daeSparseMatrix : public daeMatrix<FLOAT>
 {
 public:
 	virtual ~daeSparseMatrix(void){}
@@ -59,7 +67,8 @@ public:
 /*********************************************************************************************
 	daeDenseMatrix
 **********************************************************************************************/
-class daeDenseMatrix : public daeMatrix<real_t>
+template<typename FLOAT> 
+class daeDenseMatrix : public daeMatrix<FLOAT>
 {
 public:
 	daeDenseMatrix(void)
@@ -89,7 +98,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-	virtual real_t GetItem(size_t row, size_t col) const
+	virtual FLOAT GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
             throw std::runtime_error("Invalid data");
@@ -102,7 +111,7 @@ public:
 			return data[col][row];
 	}
 
-	virtual void SetItem(size_t row, size_t col, real_t value)
+	virtual void SetItem(size_t row, size_t col, FLOAT value)
 	{
 		if(!data) 
             throw std::runtime_error("Invalid data");
@@ -125,7 +134,7 @@ public:
 		return Ncol;
 	}
 
-	void InitMatrix(size_t nrows, size_t ncols, real_t** pData, daeeMatrixAccess access)
+	void InitMatrix(size_t nrows, size_t ncols, FLOAT** pData, daeeMatrixAccess access)
 	{
 		Nrow        = nrows;
 		Ncol        = ncols;
@@ -210,16 +219,17 @@ public:
 	}
 	
 public:
-	size_t				Nrow;
-	size_t				Ncol;
-	real_t**			data;
-	daeeMatrixAccess	data_access;
+	size_t			    Nrow;
+	size_t			    Ncol;
+    FLOAT**			    data;
+	daeeMatrixAccess    data_access;
 };
 
 /*********************************************************************************************
 	daeLapackMatrix
 **********************************************************************************************/
-class daeLapackMatrix : public daeMatrix<real_t>
+template<typename FLOAT> 
+class daeLapackMatrix : public daeMatrix<FLOAT>
 {
 public:
 	daeLapackMatrix(void)
@@ -240,7 +250,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-	virtual real_t GetItem(size_t row, size_t col) const
+	virtual FLOAT GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
             throw std::runtime_error("Invalid data");
@@ -253,7 +263,7 @@ public:
 			return data[col*Nrow + row];
 	}
 
-	virtual void SetItem(size_t row, size_t col, real_t value)
+	virtual void SetItem(size_t row, size_t col, FLOAT value)
 	{
 		if(!data) 
             throw std::runtime_error("Invalid data");
@@ -276,7 +286,7 @@ public:
 		return Ncol;
 	}
 
-	void InitMatrix(size_t nrows, size_t ncols, real_t* pData, daeeMatrixAccess access)
+	void InitMatrix(size_t nrows, size_t ncols, FLOAT* pData, daeeMatrixAccess access)
 	{
 		Nrow        = nrows;
 		Ncol        = ncols;
@@ -305,7 +315,7 @@ public:
 	
 	void ClearMatrix(void)
 	{
-		::memset(data, 0, Nrow*Ncol*sizeof(real_t));
+		::memset(data, 0, Nrow*Ncol*sizeof(FLOAT));
 	}
 
 	void SaveMatrixAsXPM(const std::string& strFilename)
@@ -341,7 +351,7 @@ public:
 public:
 	size_t				Nrow;
 	size_t				Ncol;
-	real_t*				data;
+	FLOAT*				data;
 	daeeMatrixAccess	data_access;
 };		
 
@@ -428,7 +438,7 @@ public:
 		JA  = NULL;
 	}
 	
-	real_t GetItem(size_t i, size_t j) const
+	FLOAT GetItem(size_t i, size_t j) const
 	{
 		INT index = CalcIndex(i, j);
 		if(index < 0)
@@ -437,7 +447,7 @@ public:
 			return A[index];
 	}
 	
-	void SetItem(size_t i, size_t j, real_t val)
+	void SetItem(size_t i, size_t j, FLOAT val)
 	{
 		INT index = CalcIndex(i, j);
 		if(index < 0)
@@ -483,10 +493,10 @@ public:
 		return -1;
 	}
 
-	real_t CalculateRatio(void) const
+	FLOAT CalculateRatio(void) const
 	{
-		real_t sparse = 2 * NNZ + N + 1;
-		real_t dense  = N * N;
+		FLOAT sparse = 2 * NNZ + N + 1;
+		FLOAT dense  = N * N;
 		
 		return sparse/dense; 
 	}
@@ -494,7 +504,7 @@ public:
 	void Print(bool bStructureOnly = false) const
 	{
 		INT n, i, k;
-		real_t value;
+		FLOAT value;
 		
 		std::cout << "N     = " << N   << std::endl;
 		std::cout << "NNZ   = " << NNZ << std::endl;

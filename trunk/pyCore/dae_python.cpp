@@ -1152,7 +1152,7 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()))
         .add_property("PortTo",     make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()))
-        .add_property("Equations",	&daepython::daePortConnection_GetEquations)
+        .add_property("Equations",	&daepython::daePortConnection_GetEquations)  
     ;
     
 	class_<daeState, bases<daeObject>, boost::noncopyable>("daeState")

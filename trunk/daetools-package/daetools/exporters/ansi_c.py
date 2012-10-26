@@ -9,7 +9,20 @@ Compile with:
   g++ -O3 -Wall -o daetools_simulation adouble.cpp main.cpp
 """
 
-mainTemplate = """#ifndef DAETOOLS_ANSI_C_MODEL_H
+mainTemplate = """\
+/***********************************************************************************
+                 DAE Tools Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic, 2010
+************************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+***********************************************************************************/
+#ifndef DAETOOLS_ANSI_C_MODEL_H
 #define DAETOOLS_ANSI_C_MODEL_H
 
 #include <string>
@@ -34,7 +47,9 @@ void jacobian(long int _number_of_equations_,
               real_t* _time_derivatives_,
               real_t* _residuals_,
               daeMatrix<real_t>* _jacobian_matrix_);
-int number_of_roots();
+int number_of_roots(real_t _current_time_,
+                    real_t* _values_,
+                    real_t* _time_derivatives_);
 void roots(real_t _current_time_,
            real_t* _values_,
            real_t* _time_derivatives_,
@@ -94,7 +109,9 @@ void jacobian(long int _number_of_equations_,
 %(jacobian)s
 }
 
-int number_of_roots()
+int number_of_roots(real_t _current_time_,
+                    real_t* _values_,
+                    real_t* _time_derivatives_)
 {
     int _noRoots_ = 0;
     
@@ -179,40 +196,43 @@ class daeANSICExpressionFormatter(daeExpressionFormatter):
         self.derivativeIndexDelimiter = ''
 
         # Logical operators
-        self.AND   = '&&'
-        self.OR    = '||'
-        self.NOT   = '!'
+        self.AND   = '{leftValue} && {rightValue}'
+        self.OR    = '{leftValue} || {rightValue}'
+        self.NOT   = '! {value}'
 
-        self.EQ    = '=='
-        self.NEQ   = '!='
-        self.LT    = '<'
-        self.LTEQ  = '<='
-        self.GT    = '>'
-        self.GTEQ  = '>='
+        self.EQ    = '{leftValue} == {rightValue}'
+        self.NEQ   = '{leftValue} != {rightValue}'
+        self.LT    = '{leftValue} < {rightValue}'
+        self.LTEQ  = '{leftValue} <= {rightValue}'
+        self.GT    = '{leftValue} > {rightValue}'
+        self.GTEQ  = '{leftValue} >= {rightValue}'
 
         # Mathematical operators
-        self.PLUS   = '+'
-        self.MINUS  = '-'
-        self.MULTI  = '*'
-        self.DIVIDE = '/'
-        self.POWER  = 'pow'
+        self.SIGN   = '-{value}'
+
+        self.PLUS   = '{leftValue} + {rightValue}'
+        self.MINUS  = '{leftValue} - {rightValue}'
+        self.MULTI  = '{leftValue} * {rightValue}'
+        self.DIVIDE = '{leftValue} / {rightValue}'
+        self.POWER  = 'pow({leftValue}, {rightValue})'
 
         # Mathematical functions
-        self.SIN    = 'sin'
-        self.COS    = 'cos'
-        self.TAN    = 'tan'
-        self.ASIN   = 'asin'
-        self.ACOS   = 'acos'
-        self.ATAN   = 'atan'
-        self.EXP    = 'exp'
-        self.SQRT   = 'sqrt'
-        self.LOG    = 'log'
-        self.LOG10  = 'log10'
-        self.FLOOR  = 'floor'
-        self.CEIL   = 'ceil'
-        self.ABS    = 'abs'
-        self.MIN    = 'min'
-        self.MAX    = 'max'
+        self.SIN    = 'sin({value})'
+        self.COS    = 'cos({value})'
+        self.TAN    = 'tan({value})'
+        self.ASIN   = 'asin({value})'
+        self.ACOS   = 'acos({value})'
+        self.ATAN   = 'atan({value})'
+        self.EXP    = 'exp({value})'
+        self.SQRT   = 'sqrt({value})'
+        self.LOG    = 'log({value})'
+        self.LOG10  = 'log10({value})'
+        self.FLOOR  = 'floor({value})'
+        self.CEIL   = 'ceil({value})'
+        self.ABS    = 'abs({value})'
+
+        self.MIN    = 'min({leftValue}, {rightValue})'
+        self.MAX    = 'max({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = '_time_'
@@ -373,26 +393,105 @@ class daeCodeGenerator_ANSI_C(object):
         for stn in STNs:
             nStates = len(stn['States'])
             if stn['Class'] == 'daeIF':
+                relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
+                relativeName    = self.exprFormatter.formatIdentifier(relativeName)
+                stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_ifstn'
+                description     = stn['Description']
+                states          = ', '.join(st['Name'] for st in stn['States'])
+                activeState     = stn['ActiveState']
+
+                varTemplate = 'std::string {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
+                                                                     states = states,
+                                                                     activeState = activeState,
+                                                                     description = description))
+
+                nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
+                    # Not all states have state_transitions ('else' state has no state transitions)
+                    state_transition = None
                     if i == 0:
+                        temp = s_indent + '/* IF {0} */'.format(stnVariableName)
+                        self.residuals.append(temp)
+                        self.jacobians.append(temp)
+                        self.checkForDiscontinuities.append(temp)
+                        self.executeActions.append(temp)
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
+
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
-                        sSTNs.append(s_indent + 'if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
+
+                        temp = s_indent + 'if({0}) {{'.format(condition)
+                        self.residuals.append(temp)
+                        self.jacobians.append(temp)
+                        self.checkForDiscontinuities.append(temp)
+                        self.executeActions.append(temp)
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
-                        sSTNs.append(s_indent + 'else if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
+
+                        temp = s_indent + 'else if({0}) {{'.format(condition)
+                        self.residuals.append(temp)
+                        self.jacobians.append(temp)
+                        self.checkForDiscontinuities.append(temp)
+                        self.executeActions.append(temp)
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
                     else:
-                        sSTNs.append(s_indent + 'else')
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
+                        temp = s_indent + 'else {'
+                        self.residuals.append(temp)
+                        self.jacobians.append(temp)
+                        self.checkForDiscontinuities.append(temp)
+                        self.executeActions.append(temp)
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
-                    sSTNs.extend(self._processSTNs(state['NestedSTNs'], indent+1, sVariables))
+                    # 1a. Put equations into the residuals list
+                    self.equationGenerationMode  = 'residuals'
+                    self._processEquations(state['Equations'], indent+1)
+                    self.residuals.append(s_indent + '}')
 
-                sSTNs.append(s_indent + 'end if;')
+                    # 1b. Put equations into the jacobians list
+                    self.equationGenerationMode  = 'jacobian'
+                    self._processEquations(state['Equations'], indent+1)
+                    self.jacobians.append(s_indent + '}')
+
+                    nStateTransitions = len(state['StateTransitions'])
+                    s_indent2 = (indent + 1) * self.defaultIndent
+                    s_indent3 = (indent + 2) * self.defaultIndent
+
+                    # 2. checkForDiscontinuities
+                    self.checkForDiscontinuities.append(s_indent2 + 'if({0} != "{1}") {{'.format(stnVariableName, state['Name']))
+                    self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
+                    self.checkForDiscontinuities.append(s_indent2 + '}')
+                    self.checkForDiscontinuities.append(s_indent + '}')
+
+                    # 3. executeActions
+                    self.executeActions.append(s_indent2 + '{0} = "{1}";'.format(stnVariableName, state['Name']))
+                    self.executeActions.append(s_indent + '}')
+
+                    # 4. numberOfRoots
+                    if state_transition: # For 'else' state has no state transitions
+                        nExpr = len(state_transition['Expressions'])
+                        self.numberOfRoots.append(s_indent2 + '_noRoots_ += {0};'.format(nExpr))
+
+                    self.numberOfRoots.append(s_indent + '}')
+
+                    # 5. rootFunctions
+                    if state_transition: # For 'else' state has no state transitions
+                        for expression in state_transition['Expressions']:
+                            self.rootFunctions.append(s_indent2 + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
+                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = _temp_.getValue();')
+
+                    self.rootFunctions.append(s_indent + '}')
+
+                    if len(state['NestedSTNs']) > 0:
+                        raise RuntimeError('Nested state transition networks (daeIF) canot be exported to c')
 
             elif stn['Class'] == 'daeSTN':
                 relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
@@ -450,6 +549,7 @@ class daeCodeGenerator_ANSI_C(object):
                     self._processEquations(state['Equations'], indent+1)
                     self.residuals.append(s_indent + '}')
 
+                    # 1b. Put equations into the jacobians list
                     self.equationGenerationMode  = 'jacobian'
                     self._processEquations(state['Equations'], indent+1)
                     self.jacobians.append(s_indent + '}')
