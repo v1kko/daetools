@@ -164,6 +164,18 @@ bool execute_actions(real_t _current_time_,
 #endif
 """
 
+c_macros_definition = """
+#define _v_(i)   adouble(_values_[ _indexMap_[i] ],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  adouble(_time_derivatives_[ _indexMap_[i] ], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _time_   adouble(_current_time_, 0.0)
+"""
+
+cxx_macros_definition = """
+#define _v_(i)   adouble(_values_[ _indexMap_[i] ],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  adouble(_time_derivatives_[ _indexMap_[i] ], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _time_   adouble(_current_time_, 0.0)
+"""
+
 class daeANSICExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
@@ -251,6 +263,7 @@ class daeCodeGenerator_ANSI_C(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '    '
+        self.language                = 'c++'
         self.warnings                = []
         self.topLevelModel           = None
         self.simulation              = None
@@ -267,13 +280,23 @@ class daeCodeGenerator_ANSI_C(object):
         self.executeActions          = []
         self.numberOfRoots           = []
         self.rootFunctions           = []
-        
+
         self.exprFormatter = daeANSICExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
-    def generateSimulation(self, simulation, directory = None):
+    def generateSimulation(self, simulation, **kwargs):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
+
+        directory     = kwargs.get('projectDirectory', None)
+        self.language = kwargs.get('language',        'c++')
+        
+        if self.language == 'c':
+            self.set_ANSI_C()
+        elif self.language == 'c++':
+            self.set_CXX()
+        else:
+            raise RuntimeError('Invalid language')
 
         self.assignedVariables       = []
         self.initialConditions       = []
@@ -336,25 +359,111 @@ class daeCodeGenerator_ANSI_C(object):
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
-            main_cpp     = os.path.join(code_generators_dir, 'main.cpp')
-            adouble_h    = os.path.join(code_generators_dir, 'adouble.h')
-            adouble_cpp  = os.path.join(code_generators_dir, 'adouble.cpp')
-            matrix_h     = os.path.join(code_generators_dir, 'matrix.h')
-            project_pro  = os.path.join(code_generators_dir, 'qt_project.pro'.format(dirName))
-            project_pro2 = os.path.join(directory,           '{0}.pro'.format(dirName))
-            model_h      = os.path.join(directory,           'daetools_model.h')
+            daetools_model_h = os.path.join(directory, 'daetools_model.h')
+            if self.language == 'c':
+                shutil.copy2(os.path.join(code_generators_dir, 'main_c'),       os.path.join(directory, 'main.c'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_c'),  os.path.join(directory, 'adouble.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_c'),    os.path.join(directory, 'adouble.c'))
+                shutil.copy2(os.path.join(code_generators_dir, 'matrix_h_c'),   os.path.join(directory, 'matrix.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_c'), os.path.join(directory, '{0}.pro'.format(dirName)))
+            else:
+                shutil.copy2(os.path.join(code_generators_dir, 'main_cpp'),       os.path.join(directory, 'main.cpp'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_cpp'),  os.path.join(directory, 'adouble.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_cpp'),    os.path.join(directory, 'adouble.cpp'))
+                shutil.copy2(os.path.join(code_generators_dir, 'matrix_h_cxx'),   os.path.join(directory, 'matrix.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_cpp'), os.path.join(directory, '{0}.pro'.format(dirName)))
 
-            shutil.copy(main_cpp,     directory)
-            shutil.copy(adouble_h,    directory)
-            shutil.copy(adouble_cpp,  directory)
-            shutil.copy(matrix_h,     directory)
-            shutil.copy2(project_pro, project_pro2)
-
-            f = open(model_h, "w")
+            f = open(daetools_model_h, "w")
             f.write(results)
             f.close()
 
         return results
+
+    def set_ANSI_C(self):
+        # Logical operators
+        self.exprFormatter.AND   = '{leftValue} && {rightValue}'
+        self.exprFormatter.OR    = '{leftValue} || {rightValue}'
+        self.exprFormatter.NOT   = '! {value}'
+
+        self.exprFormatter.EQ    = '{leftValue} == {rightValue}'
+        self.exprFormatter.NEQ   = '{leftValue} != {rightValue}'
+        self.exprFormatter.LT    = '{leftValue} < {rightValue}'
+        self.exprFormatter.LTEQ  = '{leftValue} <= {rightValue}'
+        self.exprFormatter.GT    = '{leftValue} > {rightValue}'
+        self.exprFormatter.GTEQ  = '{leftValue} >= {rightValue}'
+
+        # Mathematical operators
+        self.exprFormatter.SIGN   = '-{value}'
+
+        self.exprFormatter.PLUS   = '{leftValue} + {rightValue}'
+        self.exprFormatter.MINUS  = '{leftValue} - {rightValue}'
+        self.exprFormatter.MULTI  = '{leftValue} * {rightValue}'
+        self.exprFormatter.DIVIDE = '{leftValue} / {rightValue}'
+        self.exprFormatter.POWER  = 'pow({leftValue}, {rightValue})'
+
+        # Mathematical functions
+        self.exprFormatter.SIN    = 'sin({value})'
+        self.exprFormatter.COS    = 'cos({value})'
+        self.exprFormatter.TAN    = 'tan({value})'
+        self.exprFormatter.ASIN   = 'asin({value})'
+        self.exprFormatter.ACOS   = 'acos({value})'
+        self.exprFormatter.ATAN   = 'atan({value})'
+        self.exprFormatter.EXP    = 'exp({value})'
+        self.exprFormatter.SQRT   = 'sqrt({value})'
+        self.exprFormatter.LOG    = 'log({value})'
+        self.exprFormatter.LOG10  = 'log10({value})'
+        self.exprFormatter.FLOOR  = 'floor({value})'
+        self.exprFormatter.CEIL   = 'ceil({value})'
+        self.exprFormatter.ABS    = 'abs({value})'
+
+        self.exprFormatter.MIN    = 'min({leftValue}, {rightValue})'
+        self.exprFormatter.MAX    = 'max({leftValue}, {rightValue})'
+
+        # Current time in simulation
+        self.exprFormatter.TIME   = '_time_'
+
+    def set_CXX(self):
+        # Logical operators
+        self.exprFormatter.AND   = 'AND({leftValue}, {rightValue})'
+        self.exprFormatter.OR    = 'OR({leftValue}, {rightValue})'
+        self.exprFormatter.NOT   = 'NOT({value})'
+
+        self.exprFormatter.EQ    = 'EQ({leftValue}, {rightValue})'
+        self.exprFormatter.NEQ   = 'NEQ({leftValue}, {rightValue})'
+        self.exprFormatter.LT    = 'LT({leftValue}, {rightValue})'
+        self.exprFormatter.LTEQ  = 'LTEQ({leftValue}, {rightValue})'
+        self.exprFormatter.GT    = 'GT({leftValue}, {rightValue})'
+        self.exprFormatter.GTEQ  = 'GTEQ({leftValue}, {rightValue})'
+
+        # Mathematical operators
+        self.exprFormatter.SIGN   = '-({value})'
+
+        self.exprFormatter.PLUS   = 'PLUS({leftValue}, {rightValue})'
+        self.exprFormatter.MINUS  = 'MINUS({leftValue}, {rightValue})'
+        self.exprFormatter.MULTI  = 'MULTI({leftValue}, {rightValue})'
+        self.exprFormatter.DIVIDE = 'DIVIDE({leftValue}, {rightValue})'
+        self.exprFormatter.POWER  = 'POW({leftValue}, {rightValue})'
+
+        # Mathematical functions
+        self.exprFormatter.SIN    = 'sin({value})'
+        self.exprFormatter.COS    = 'cos({value})'
+        self.exprFormatter.TAN    = 'tan({value})'
+        self.exprFormatter.ASIN   = 'asin({value})'
+        self.exprFormatter.ACOS   = 'acos({value})'
+        self.exprFormatter.ATAN   = 'atan({value})'
+        self.exprFormatter.EXP    = 'exp({value})'
+        self.exprFormatter.SQRT   = 'sqrt({value})'
+        self.exprFormatter.LOG    = 'log({value})'
+        self.exprFormatter.LOG10  = 'log10({value})'
+        self.exprFormatter.FLOOR  = 'floor({value})'
+        self.exprFormatter.CEIL   = 'ceil({value})'
+        self.exprFormatter.ABS    = 'abs({value})'
+
+        self.exprFormatter.MIN    = 'min({leftValue}, {rightValue})'
+        self.exprFormatter.MAX    = 'max({leftValue}, {rightValue})'
+
+        # Current time in simulation
+        self.exprFormatter.TIME   = '_time_'
 
     def _processEquations(self, Equations, indent):
         s_indent  = indent     * self.defaultIndent

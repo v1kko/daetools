@@ -319,7 +319,7 @@ def consoleRun():
     from ansi_c import daeCodeGenerator_ANSI_C
     cg = daeCodeGenerator_ANSI_C()
     folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, folder)
+    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
 
     # Run
     simulation.Run()
