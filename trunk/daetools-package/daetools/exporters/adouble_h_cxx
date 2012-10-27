@@ -42,6 +42,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <float.h>
 #include <stack>
+#include <string>
+#include <vector>
+#include <map>
 
 #ifndef real_t
 #define real_t double
@@ -171,6 +174,12 @@ private:
     real_t m_dDeriv;
 };
 
+real_t getValue(const adouble* a);
+void   setValue(adouble* a, const real_t v); 
+real_t getDerivative(const adouble* a);
+void   setDerivative(adouble* a, real_t v); 
 
+const adouble adouble_(real_t value, real_t derivative = 0);
+bool compareStrings(const std::string& s1, const std::string& s2);
 
 #endif

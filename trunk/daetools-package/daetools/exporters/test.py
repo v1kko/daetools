@@ -232,8 +232,8 @@ class simTutorial(daeSimulation):
         # - UpperBound: 0.1
         # Here we use 25 intervals. In general any number of intervals can be used. However, the computational costs become
         # prohibitive at the very high number (especially if dense linear solvers are used).
-        self.m.x.CreateDistributed(eCFDM, 2, 25, 0, 0.1)
-        self.m.y.CreateDistributed(eCFDM, 2, 25, 0, 0.1)
+        self.m.x.CreateDistributed(eCFDM, 2, 10, 0, 0.1)
+        self.m.y.CreateDistributed(eCFDM, 2, 10, 0, 0.1)
 
         # Parameter values can be set by using a function SetValue.
         self.m.cp.SetValue(385 * J/(kg*K))
@@ -328,8 +328,8 @@ def consoleRun():
     import os
     from ansi_c import daeCodeGenerator_ANSI_C
     cg = daeCodeGenerator_ANSI_C()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
+    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name + '_cpp')
+    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c++')
 
     # Run
     #simulation.Run()

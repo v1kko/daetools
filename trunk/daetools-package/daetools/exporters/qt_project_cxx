@@ -15,7 +15,7 @@ TARGET = daetools_ansic_simulation
 TEMPLATE = app
 
 QMAKE_LIBDIR += 
-LIBS +=	
+LIBS +=	-lsundials_ida -lsundials_nvecserial -lblas -llapack
 
 SOURCES += adouble.cpp main.cpp
 HEADERS += adouble.h matrix.h daetools_model.h

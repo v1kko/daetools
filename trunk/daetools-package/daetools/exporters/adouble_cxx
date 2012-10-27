@@ -784,3 +784,32 @@ std::ostream& operator<<(std::ostream& out, const adouble& a)
     return out << "(" << a.getValue() << ", " << a.getDerivative() << ")";
 }
 
+const adouble adouble_(real_t value, real_t derivative)
+{
+    return adouble(value, derivative);
+}
+
+real_t getValue(const adouble* a)
+{
+    return a->getValue();
+}
+
+void setValue(adouble* a, const real_t v)
+{
+    a->setValue(v);
+}
+
+real_t getDerivative(const adouble* a)
+{
+    return a->getDerivative();
+}
+
+void setDerivative(adouble* a, real_t v)
+{
+    a->setDerivative(v);
+}      
+
+bool compareStrings(const std::string& s1, const std::string& s2)
+{
+    return s1 == s2;
+}

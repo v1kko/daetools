@@ -72,6 +72,9 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.derivativeIndexEnd       = ']'
         self.derivativeIndexDelimiter = ','
 
+        # Constants
+        self.constant = '{value}'
+
         # Logical operators
         self.AND   = '{leftValue} and {rightValue}'
         self.OR    = '{leftValue} or {rightValue}'

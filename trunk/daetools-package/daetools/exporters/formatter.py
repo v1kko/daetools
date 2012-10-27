@@ -23,10 +23,6 @@ class daeExpressionFormatter(object):
 
         self.flattenIdentifiers = False
 
-        # One- and multi-dimensional parameters/variables and domain points
-        #self.indexLeftBracket  = ''
-        #self.indexRightBracket = ''
-
         self.domain                   = '{domain}[{index}]'
 
         self.parameter                = '{parameter}({indexes})'
@@ -46,12 +42,9 @@ class daeExpressionFormatter(object):
         self.derivativeIndexEnd       = ''
         self.derivativeIndexDelimiter = ','
 
-        #self.indexFormat = 'python_index_style'
-        # if format is python_index_style:
-        #     var(i1, i2, ..., in)
-        # else if indexFormat is c_index_style:
-        #     var[i1][i2]...[in]
-
+        # Constants
+        self.constant = '{value}'
+        
         # Logical operators
         self.AND   = '{leftValue} and {rightValue}'
         self.OR    = '{leftValue} or {rightValue}'
@@ -293,7 +286,9 @@ class daeExpressionFormatter(object):
     def formatRuntimeNode(self, node):
         res = ''
         if isinstance(node, adConstantNode):
-            res = self.formatQuantity(node.Quantity)
+            value = node.Quantity.value
+            units = self.formatUnits(node.Quantity.units)
+            res = self.constant.format(value = value, units = units)
 
         elif isinstance(node, adTimeNode):
             res = self.TIME

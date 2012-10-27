@@ -26,6 +26,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define CSR_FORTRAN_STYLE false
 #define CSR_C_STYLE       true
 
+#ifndef real_t
+#define real_t double
+#endif
+
 enum daeeMatrixAccess
 {
 	eRowWise = 0,
@@ -44,6 +48,15 @@ public:
 	virtual size_t	GetNrows(void) const                         = 0;
 	virtual size_t	GetNcols(void) const                         = 0;
 };
+
+#define DAE_MATRIX real_t**
+
+void setMatrixItem(DAE_MATRIX matrix, size_t row, size_t col, real_t value);
+
+void setMatrixItem(DAE_MATRIX matrix, size_t row, size_t col, real_t value)
+{
+    matrix[col][row] = value;
+}
 
 /******************************************************************
 	daeSparseMatrix
