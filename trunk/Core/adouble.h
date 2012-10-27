@@ -36,12 +36,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #undef min
 #endif
 
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 #include "definitions.h"
 #include "io_impl.h"
 #include "export.h"
 #include "../Units/units.h"
-#endif
 
 #include <cstdio>
 #include <cstdlib>
@@ -54,7 +52,6 @@ namespace dae
 {
 namespace core 
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 using units::base_unit;
 using units::unit;
 using units::quantity;
@@ -136,7 +133,6 @@ public:
 	std::vector<adNodePtr>	m_ptrarrExpressions;
 	real_t					m_dEventTolerance;
 };
-#endif
 
 /*********************************************************************************************
 	adouble
@@ -174,11 +170,9 @@ public:
     friend DAE_CORE_API const adouble operator /(const real_t v, const adouble& a);
     friend DAE_CORE_API const adouble operator /(const adouble& a, const real_t v);
     
-#if !defined(DAE_REMOVE_NODE_FEATURES)
     friend DAE_CORE_API const adouble dt(const adouble& a);
     friend DAE_CORE_API const adouble d(const adouble& a, daeDomain& domain);
-#endif
-    
+
     friend DAE_CORE_API const adouble exp(const adouble &a);
     friend DAE_CORE_API const adouble log(const adouble &a);
     friend DAE_CORE_API const adouble sqrt(const adouble &a);
@@ -217,7 +211,6 @@ public:
     void operator =(const real_t v);
     void operator =(const adouble& a);
 
-#if !defined(DAE_REMOVE_NODE_FEATURES)
     daeCondition operator !=(const adouble&) const;
     daeCondition operator !=(const real_t) const;
     friend daeCondition operator !=(const real_t, const adouble&);
@@ -241,8 +234,7 @@ public:
     daeCondition operator <(const adouble&) const;
     daeCondition operator <(const real_t) const;
     friend daeCondition operator <(const real_t, const adouble&);
-#endif
-    
+
 	real_t getValue() const 
 	{
 		return m_dValue;
@@ -263,7 +255,6 @@ public:
 		m_dDeriv = v;
 	}	   
 	
-#if !defined(DAE_REMOVE_NODE_FEATURES)
     bool getGatherInfo(void) const
 	{
 		return m_bGatherInfo;
@@ -286,14 +277,11 @@ public:
 
 public:
     adNodePtr node;
-#endif
-    
+
 private:
     real_t m_dValue;
     real_t m_dDeriv;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	bool   m_bGatherInfo;
-#endif
 };
 
 // Issues with daeModel::min/max
@@ -309,7 +297,6 @@ inline const adouble __min__(const adouble &a, const adouble &b)
 
 std::ostream& operator<<(std::ostream& out, const adouble& a);
 
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 /******************************************************************
 	adouble_array
 *******************************************************************/
@@ -595,7 +582,6 @@ public:
 	static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeNodeSaveAsContext* c);
 };
 
-#endif
 
 }
 }

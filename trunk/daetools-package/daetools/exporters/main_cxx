@@ -24,33 +24,42 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #define JACOBIAN(A) (A->cols)
 
-int resrob(realtype tres, N_Vector yy, N_Vector yp,
-           N_Vector resval, void *user_data);
+int resid(realtype tres,
+          N_Vector yy,
+          N_Vector yp,
+          N_Vector resval,
+          void *user_data);
 
-static int grob(realtype t, N_Vector yy, N_Vector yp,
-                realtype *gout, void *user_data);
+int root(realtype t,
+         N_Vector yy,
+         N_Vector yp,
+         realtype *gout,
+         void *user_data);
 
-int jacrob(long int Neq, realtype tt,  realtype cj,
-           N_Vector yy, N_Vector yp, N_Vector resvec,
-           DlsMat JJ, void *user_data,
-           N_Vector tempv1, N_Vector tempv2, N_Vector tempv3);
+int jacob(long int Neq,
+          realtype tt,
+          realtype cj,
+          N_Vector yy,
+          N_Vector yp,
+          N_Vector resvec,
+          DlsMat JJ,
+          void *user_data,
+          N_Vector tempv1,
+          N_Vector tempv2,
+          N_Vector tempv3);
 
 /* Prototypes of private functions */
-static void PrintHeader(realtype rtol, N_Vector avtol, N_Vector y);
-static void PrintOutput(void *mem, realtype t, N_Vector y);
-static void PrintRootInfo(int root_f1, int root_f2);
 static void PrintFinalStats(void *mem);
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
 int main(int argc, char *argv[])
 {
-    int i, overallIndex, blockIndex;
     void *mem;
+    int i, retval, no_roots;
+    bool discontinuityFound;
     N_Vector yy, yp, avtol, ids;
     realtype rtol, *yval, *ypval, *atval, *idsval;
-    realtype t0, tout, tret;
-    int iout, retval, retvalr;
-    int rootsfound[2];
+    realtype t, t0, tend, tret, treport;
 
     mem = NULL;
     yy = yp = avtol = NULL;
@@ -79,34 +88,25 @@ int main(int argc, char *argv[])
     yval  = NV_DATA_S(yy);
     for(i = 0; i < _Neqns_; i++)
         yval[i] = _initValues_[i];
-    printf("yval: \n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%12.4e", yval[i]);
-    printf("\n\n");
-    
+
     ypval = NV_DATA_S(yp);
     for(i = 0; i < _Neqns_; i++)
-        ypval[i] = 0;
+        ypval[i] = _initDerivatives_[i];
 
-    rtol = RCONST(1.0e-5);
+    rtol = _relative_tolerance_;
 
     atval = NV_DATA_S(avtol);
     for(i = 0; i < _Neqns_; i++)
-        atval[i] = 1E-6;
+        atval[i] = _absolute_tolerances_[i];
 
     idsval  = NV_DATA_S(ids);
     for(i = 0; i < _Neqns_; i++)
         idsval[i] = (realtype)_IDs_[i];
-    printf("idsval: \n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%d", (int)idsval[i]);
-    printf("\n\n");
-    
-    /* Integration limits */
-    t0 = 0;
-    tout = 200;
 
-    /* PrintHeader(rtol, avtol, yy); */
+    /* Integration limits */
+    t0      = _start_time_;
+    tend    = _end_time_;
+    treport = _reporting_interval_;
 
     /* Call IDACreate and IDAMalloc to initialize IDA memory */
     mem = IDACreate();
@@ -117,50 +117,110 @@ int main(int argc, char *argv[])
     if(check_flag(&retval, "IDASetId", 1))
         return(1);
 
-    retval = IDAInit(mem, resrob, t0, yy, yp);
+    retval = IDAInit(mem, resid, t0, yy, yp);
     if(check_flag(&retval, "IDAInit", 1))
         return(1);
 
     retval = IDASVtolerances(mem, rtol, avtol);
-    if(check_flag(&retval, "IDASVtolerances", 1)) return(1);
+    if(check_flag(&retval, "IDASVtolerances", 1))
+        return(1);
 
     /* Free avtol */
     N_VDestroy_Serial(avtol);
     N_VDestroy_Serial(ids);
 
-    /* Call IDARootInit to specify the root function grob with 2 components */
-    /*
-    int no_roots = number_of_roots(t0, yy, yp);
-    retval = IDARootInit(mem, no_roots, roots);
+    /* For IF state transition network we do not know which state is initially active.
+     * Therefore, we have to call check_for_discontinuities() which will check if
+     * there should be any change in active states. If there is, we have to call
+     * function execute_actions() which will activate correct states. */
+    discontinuityFound = check_for_discontinuities(t0, yval, ypval);
+    if(discontinuityFound)
+        execute_actions(tret, yval, ypval);
+
+    /* Now when we obtained correct active states we have to get the number of roots
+     * and call specify IDARootInit to set the root function and number of roots. */
+    no_roots = number_of_roots();
+    retval = IDARootInit(mem, no_roots, root);
     if (check_flag(&retval, "IDARootInit", 1))
          return(1);
-    */
-    
+
     /* Call IDADense and set up the linear solver. */
     retval = IDADense(mem, _Neqns_);
     if(check_flag(&retval, "IDADense", 1))
         return(1);
 
-    retval = IDADlsSetDenseJacFn(mem, jacrob);
+    retval = IDADlsSetDenseJacFn(mem, jacob);
     if(check_flag(&retval, "IDADlsSetDenseJacFn", 1))
         return(1);
-
-    /* In loop, call IDASolve, print results, and test for error.
-       Break out of loop when NOUT preset output times have been reached. */
 
     retval = IDACalcIC(mem, IDA_YA_YDP_INIT, 0.1);
     if(check_flag(&retval, "IDACalcIC", 1))
         return(1);
 
-    realtype t;
-    for(t = t0+10; t <= tout; t += 10)
+    /* Print the results at time = 0 */
+    print_results(t0, yval);
+
+    /* In loop, call IDASolve, print results, and test for error.
+       Break out of loop when NOUT preset output times have been reached. */
+    t = t0 + treport;
+    tret = t0;
+    while(tret < tend)
     {
-        retval = IDASolve(mem, t, &tret, yy, yp, IDA_TSTOP_RETURN);
+        retval = IDASolve(mem, t, &tret, yy, yp, IDA_NORMAL);
         if(check_flag(&retval, "IDASolve", 1))
             return(1);
 
-        realtype* yval  = NV_DATA_S(yy);
-        print_results(tret, yval);
+        yval  = NV_DATA_S(yy);
+        ypval = NV_DATA_S(yp);
+
+        if(retval == IDA_ROOT_RETURN)
+        {
+            bool discontinuityFound = check_for_discontinuities(tret, yval, ypval);
+            if(discontinuityFound)
+            {
+                printf("**************************************\n");
+                printf("DISCONTINUITY FOUND: %f \n", tret);
+                printf("**************************************\n");
+
+                /* Print results before the discontinuity */
+                print_results(tret, yval);
+
+                /* Execute ON_CONDITION actions */
+                execute_actions(tret, yval, ypval);
+
+                /* Find the number of root functions and inform ida */
+                no_roots = number_of_roots();
+                retval = IDARootInit(mem, no_roots, root);
+                if (check_flag(&retval, "IDARootInit", 1))
+                     return(1);
+
+                /* Reinitialize the system */
+                retval = IDAReInit(mem, tret, yy, yp);
+                if(check_flag(&retval, "IDAReInit", 1))
+                    return(1);
+
+                retval = IDACalcIC(mem, IDA_YA_YDP_INIT, t + 1E-05);
+                if(check_flag(&retval, "IDACalcIC", 1))
+                    return(1);
+
+                /* Print results again after the discontinuity */
+                print_results(tret, yval);
+            }
+            if(tret < t)
+                continue;
+        }
+        else if(retval == IDA_SUCCESS)
+        {
+            print_results(tret, yval);
+        }
+        else
+        {
+            printf("IDA return value: %d", retval);
+        }
+
+        t += treport;
+        if(t > tend)
+            t = tend;
     }
 
     PrintFinalStats(mem);
@@ -174,8 +234,11 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-int resrob(realtype tres, N_Vector yy, N_Vector yp,
-           N_Vector resval, void *user_data)
+int resid(realtype tres,
+          N_Vector yy,
+          N_Vector yp,
+          N_Vector resval,
+          void *user_data)
 {
     realtype* yval   = NV_DATA_S(yy);
     realtype* ypval  = NV_DATA_S(yp);
@@ -184,8 +247,11 @@ int resrob(realtype tres, N_Vector yy, N_Vector yp,
     return residuals(tres, yval, ypval, res);
 }
 
-int grob(realtype t, N_Vector yy, N_Vector yp,
-         realtype *gout, void *user_data)
+int root(realtype t,
+         N_Vector yy,
+         N_Vector yp,
+         realtype *gout,
+         void *user_data)
 {
     realtype* yval   = NV_DATA_S(yy);
     realtype* ypval  = NV_DATA_S(yp);
@@ -193,10 +259,17 @@ int grob(realtype t, N_Vector yy, N_Vector yp,
     return roots(t, yval, ypval, gout);
 }
 
-int jacrob(long int Neq, realtype tt,  realtype cj,
-           N_Vector yy, N_Vector yp, N_Vector resvec,
-           DlsMat JJ, void *user_data,
-           N_Vector tempv1, N_Vector tempv2, N_Vector tempv3)
+int jacob(long int Neq,
+          realtype tt,
+          realtype cj,
+          N_Vector yy,
+          N_Vector yp,
+          N_Vector resvec,
+          DlsMat JJ,
+          void *user_data,
+          N_Vector tempv1,
+          N_Vector tempv2,
+          N_Vector tempv3)
 {
     realtype* yval   = NV_DATA_S(yy);
     realtype* ypval  = NV_DATA_S(yp);
@@ -205,84 +278,6 @@ int jacrob(long int Neq, realtype tt,  realtype cj,
 
     return jacobian(Neq, tt,  cj, yval, ypval, res, jacob);
 }
-
-/*
- * Print first lines of output (problem description)
- */
-
-static void PrintHeader(realtype rtol, N_Vector avtol, N_Vector y)
-{
-    realtype *atval, *yval;
-
-    atval  = NV_DATA_S(avtol);
-    yval  = NV_DATA_S(y);
-
-    printf("\nidasRoberts_dns: Robertson kinetics DAE serial example problem for IDA.\n");
-    printf("               Three equation chemical kinetics problem.\n\n");
-    printf("Linear solver: IDADENSE, with user-supplied Jacobian.\n");
-#if defined(SUNDIALS_EXTENDED_PRECISION)
-    printf("Tolerance parameters:  rtol = %Lg   atol = %Lg %Lg %Lg \n",
-           rtol, atval[0],atval[1],atval[2]);
-    printf("Initial conditions y0 = (%Lg %Lg %Lg)\n",
-           yval[0], yval[1], yval[2]);
-#elif defined(SUNDIALS_DOUBLE_PRECISION)
-    printf("Tolerance parameters:  rtol = %lg   atol = %lg %lg %lg \n",
-           rtol, atval[0],atval[1],atval[2]);
-    printf("Initial conditions y0 = (%lg %lg %lg)\n",
-           yval[0], yval[1], yval[2]);
-#else
-    printf("Tolerance parameters:  rtol = %g   atol = %g %g %g \n",
-           rtol, atval[0],atval[1],atval[2]);
-    printf("Initial conditions y0 = (%g %g %g)\n",
-           yval[0], yval[1], yval[2]);
-#endif
-    printf("Constraints and id not used.\n\n");
-    printf("-----------------------------------------------------------------------\n");
-    printf("  t             y1           y2           y3");
-    printf("      | nst  k      h\n");
-    printf("-----------------------------------------------------------------------\n");
-}
-
-/*
- * Print Output
- */
-
-static void PrintOutput(void *mem, realtype t, N_Vector y)
-{
-    realtype *yval;
-    int retval, kused;
-    long int nst;
-    realtype hused;
-
-    yval  = NV_DATA_S(y);
-
-    retval = IDAGetLastOrder(mem, &kused);
-    check_flag(&retval, "IDAGetLastOrder", 1);
-    retval = IDAGetNumSteps(mem, &nst);
-    check_flag(&retval, "IDAGetNumSteps", 1);
-    retval = IDAGetLastStep(mem, &hused);
-    check_flag(&retval, "IDAGetLastStep", 1);
-#if defined(SUNDIALS_EXTENDED_PRECISION)
-    printf("%10.4Le %12.4Le %12.4Le %12.4Le | %3ld  %1d %12.4Le\n",
-           t, yval[0], yval[1], yval[2], nst, kused, hused);
-#elif defined(SUNDIALS_DOUBLE_PRECISION)
-    printf("%10.4le %12.4le %12.4le %12.4le | %3ld  %1d %12.4le\n",
-           t, yval[0], yval[1], yval[2], nst, kused, hused);
-#else
-    printf("%10.4e %12.4e %12.4e %12.4e | %3ld  %1d %12.4e\n",
-           t, yval[0], yval[1], yval[2], nst, kused, hused);
-#endif
-}
-
-static void PrintRootInfo(int root_f1, int root_f2)
-{
-    printf("    rootsfound[] = %3d %3d\n", root_f1, root_f2);
-    return;
-}
-
-/*
- * Print final integrator statistics
- */
 
 static void PrintFinalStats(void *mem)
 {
@@ -330,25 +325,25 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
 {
     int *errflag;
     /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
-    if (opt == 0 && flagvalue == NULL) {
-        fprintf(stderr,
-                "\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n",
-                funcname);
+    if (opt == 0 && flagvalue == NULL)
+    {
+        fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n", funcname);
         return(1);
-    } else if (opt == 1) {
+    }
+    else if (opt == 1)
+    {
         /* Check if flag < 0 */
         errflag = (int *) flagvalue;
-        if (*errflag < 0) {
-            fprintf(stderr,
-                    "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
-                    funcname, *errflag);
+        if (*errflag < 0)
+        {
+            fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n", funcname, *errflag);
             return(1);
         }
-    } else if (opt == 2 && flagvalue == NULL) {
+    }
+    else if (opt == 2 && flagvalue == NULL)
+    {
         /* Check if function returned NULL pointer - no memory allocated */
-        fprintf(stderr,
-                "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
-                funcname);
+        fprintf(stderr, "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n", funcname);
         return(1);
     }
 

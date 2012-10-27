@@ -1,19 +1,19 @@
 /***********************************************************************************
- *                 DAE Tools Project: www.daetools.com
- *                 Copyright (C) Dragan Nikolic, 2010
- ************************************************************************************
- DAE Tools is free software; you can redistribute it and/or modify it under the 
- terms of the GNU General Public License version 3 as published by the Free Software
- Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- PARTICULAR PURPOSE. See the GNU General Public License for more details.
- You should have received a copy of the GNU General Public License along with the
- DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
- ***********************************************************************************/
+*                 DAE Tools Project: www.daetools.com
+*                 Copyright (C) Dragan Nikolic, 2010
+************************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+***********************************************************************************/
 #include "adouble.h"
 #include <math.h>
 
-inline real_t makeNaN() 
+real_t makeNaN()
 {
 #ifdef NAN
     return NAN;
@@ -50,7 +50,7 @@ void setDerivative(adouble* a, real_t v)
     a->m_dDeriv = v;
 }      
 
-adouble SIGN(adouble a)
+adouble sign_(adouble a)
 {
     adouble tmp;
     
@@ -59,7 +59,7 @@ adouble SIGN(adouble a)
     return tmp;
 }
 
-adouble PLUS(const adouble a, const adouble b)
+adouble plus_(const adouble a, const adouble b)
 {
     adouble tmp;
     
@@ -68,7 +68,7 @@ adouble PLUS(const adouble a, const adouble b)
     return tmp;
 }
 
-adouble MINUS(const adouble a, const adouble b)
+adouble minus_(const adouble a, const adouble b)
 {
     adouble tmp;
     
@@ -77,7 +77,7 @@ adouble MINUS(const adouble a, const adouble b)
     return tmp;
 }
 
-adouble MULTI(const adouble a, const adouble b)
+adouble multi_(const adouble a, const adouble b)
 {
     adouble tmp;
     
@@ -86,7 +86,7 @@ adouble MULTI(const adouble a, const adouble b)
     return tmp;
 }
 
-adouble DIVIDE(const adouble a, const adouble b)
+adouble divide_(const adouble a, const adouble b)
 {
     adouble tmp;
     
@@ -138,8 +138,8 @@ adouble sqrt_(const adouble a)
 {
     adouble tmp;
     
-    // ACHTUNG, ACHTUNG!!!  
-    // sqrt(number) = NaN if the number is < 0
+    /* ACHTUNG, ACHTUNG!!! */
+    /* sqrt(number) = NaN if the number is < 0 */
     if(a.m_dValue > 0)
     {
         tmp.m_dValue = sqrt(a.m_dValue);
@@ -147,8 +147,8 @@ adouble sqrt_(const adouble a)
     }
     else if(a.m_dValue == 0)
     {
-        tmp.m_dValue = 0; // sqrt(0) = 0
-        tmp.m_dDeriv = 0; // number/0 = 0 (Is it??) 
+        tmp.m_dValue = 0; /* sqrt(0) = 0 */
+        tmp.m_dDeriv = 0; /* number/0 = 0 (Is it??) */
     }
     else
     {
@@ -313,7 +313,7 @@ adouble atan2_(const adouble a, const adouble b)
     return tmp;
 }
 
-// ceil is non-differentiable: should I remove it?
+/* ceil is non-differentiable: should I remove it? */
 adouble ceil_(const adouble a)
 {
     adouble tmp;
@@ -323,7 +323,7 @@ adouble ceil_(const adouble a)
     return tmp;
 }
 
-// floor is non-differentiable: should I remove it?
+/* floor is non-differentiable: should I remove it? */
 adouble floor_(const adouble a)
 {
     adouble tmp;
@@ -389,37 +389,37 @@ adouble min_(const adouble a, const adouble b)
     return tmp;
 }
 
-bool NEQ(const adouble a, const adouble b) 
+bool neq_(const adouble a, const adouble b)
 {
     return (a.m_dValue != b.m_dValue);
 }
 
-bool EQ(const adouble a, const adouble b) 
+bool eq_(const adouble a, const adouble b)
 {
     return (a.m_dValue == b.m_dValue);
 }
 
-bool LTEQ(const adouble a, const adouble b) 
+bool lteq_(const adouble a, const adouble b)
 {
     return (a.m_dValue <= b.m_dValue);
 }
 
-bool GTEQ(const adouble a, const adouble b) 
+bool gteq_(const adouble a, const adouble b)
 {
     return (a.m_dValue >= b.m_dValue);
 }
 
-bool GT(const adouble a, const adouble b) 
+bool gt_(const adouble a, const adouble b)
 {
     return (a.m_dValue > b.m_dValue);
 }
 
-bool LT(const adouble a, const adouble b) 
+bool lt_(const adouble a, const adouble b)
 {
     return (a.m_dValue < b.m_dValue);
 }
 
 bool compareStrings(const char* s1, const char* s2)
 {
-    return strcmp(s1, s2);
+    return (strcmp(s1, s2) == 0 ? true : false);
 }

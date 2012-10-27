@@ -1,15 +1,7 @@
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 #include "stdafx.h"
 #include "coreimpl.h"
 #include "nodes.h"
 #include <limits>
-#else
-#include <string>
-#include <iostream>
-#include <limits>
-#include <stdexcept>
-#include "adouble.h"
-#endif
 
 namespace dae 
 {
@@ -46,40 +38,32 @@ adouble::adouble()
 {
 	m_dValue = 0.0;
     m_dDeriv = 0.0;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	m_bGatherInfo = false;
-#endif
 }
 
 adouble::adouble(const real_t value)
 {
 	m_dValue = value;
     m_dDeriv = 0.0;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	m_bGatherInfo = false;
-#endif
 }
 
 adouble::adouble(const real_t value, real_t deriv)
 {
 	m_dValue = value;
     m_dDeriv = deriv;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	m_bGatherInfo = false;
-#endif
 }
 
 adouble::adouble(const adouble& a)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	m_bGatherInfo = false;
 	if(a.getGatherInfo())
 	{
 		m_bGatherInfo = true;
 		node  = adNodePtr( (a.node ? a.node->Clone() : new adConstantNode(a.m_dValue)) );  
 	}
-#endif
-    m_dValue = a.m_dValue;
+	m_dValue = a.m_dValue;
     m_dDeriv = a.m_dDeriv;
 }
 
@@ -90,14 +74,12 @@ adouble::~adouble()
 const adouble adouble::operator - () const 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = adNodePtr(new adUnaryNode(eSign, CLONE_NODE(node, m_dValue)));
 	    return tmp;
 	}
-#endif
     tmp.m_dValue = -m_dValue;
     tmp.m_dDeriv = -m_dDeriv;
     return tmp;
@@ -106,15 +88,12 @@ const adouble adouble::operator - () const
 const adouble adouble::operator + () const 
 {
 	adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo)
 	{
 		tmp.m_bGatherInfo = true;
 		tmp.node = CLONE_NODE(node, m_dValue);
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = m_dValue;
     tmp.m_dDeriv = m_dDeriv;
 	return tmp;
@@ -123,7 +102,6 @@ const adouble adouble::operator + () const
 const adouble operator +(const adouble& a, const real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -132,7 +110,6 @@ const adouble operator +(const adouble& a, const real_t v)
 									          adNodePtr(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
-#endif
 
     tmp.m_dValue = a.m_dValue + v;
     tmp.m_dDeriv = a.m_dDeriv;
@@ -142,7 +119,6 @@ const adouble operator +(const adouble& a, const real_t v)
 const adouble adouble::operator + (const adouble& a) const 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -151,7 +127,6 @@ const adouble adouble::operator + (const adouble& a) const
 					                          CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
     tmp.m_dValue = m_dValue + a.m_dValue;
     tmp.m_dDeriv = m_dDeriv + a.m_dDeriv;
@@ -161,7 +136,6 @@ const adouble adouble::operator + (const adouble& a) const
 const adouble operator +(const real_t v, const adouble& a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -170,7 +144,6 @@ const adouble operator +(const real_t v, const adouble& a)
 											  CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
     tmp.m_dValue = v + a.m_dValue;
     tmp.m_dDeriv = a.m_dDeriv;
@@ -180,7 +153,6 @@ const adouble operator +(const real_t v, const adouble& a)
 const adouble operator -(const adouble& a, const real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -189,8 +161,6 @@ const adouble operator -(const adouble& a, const real_t v)
 											  adNodePtr(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = a.m_dValue - v;
     tmp.m_dDeriv = a.m_dDeriv;
     return tmp;
@@ -199,7 +169,6 @@ const adouble operator -(const adouble& a, const real_t v)
 const adouble adouble::operator - (const adouble& a) const 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -208,7 +177,6 @@ const adouble adouble::operator - (const adouble& a) const
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = m_dValue - a.m_dValue;
     tmp.m_dDeriv = m_dDeriv - a.m_dDeriv;
@@ -218,7 +186,6 @@ const adouble adouble::operator - (const adouble& a) const
 const adouble operator - (const real_t v, const adouble& a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -227,7 +194,6 @@ const adouble operator - (const real_t v, const adouble& a)
 		                                      CLONE_NODE(a.node, a.m_dValue)));
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = v - a.m_dValue;
     tmp.m_dDeriv =   - a.m_dDeriv;
@@ -237,7 +203,6 @@ const adouble operator - (const real_t v, const adouble& a)
 const adouble operator *(const adouble& a, const real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -246,7 +211,6 @@ const adouble operator *(const adouble& a, const real_t v)
 		                                      adNodePtr(new adConstantNode(v, UNITS(a.node))) ));  
 	    return tmp;
 	}
-#endif
 
     tmp.m_dValue = a.m_dValue * v;
     tmp.m_dDeriv = a.m_dDeriv * v;
@@ -256,7 +220,6 @@ const adouble operator *(const adouble& a, const real_t v)
 const adouble adouble::operator * (const adouble& a) const 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -265,7 +228,6 @@ const adouble adouble::operator * (const adouble& a) const
 		                                       CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = m_dValue * a.m_dValue;
     tmp.m_dDeriv = m_dDeriv * a.m_dValue + m_dValue * a.m_dDeriv;
@@ -275,7 +237,6 @@ const adouble adouble::operator * (const adouble& a) const
 const adouble operator * (const real_t v, const adouble& a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -284,8 +245,6 @@ const adouble operator * (const real_t v, const adouble& a)
 		                                       CLONE_NODE(a.node, a.m_dValue) )); 
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = v * a.m_dValue;
     tmp.m_dDeriv = v * a.m_dDeriv;
     return tmp;
@@ -294,7 +253,6 @@ const adouble operator * (const real_t v, const adouble& a)
 const adouble operator /(const adouble& a, const real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -303,8 +261,6 @@ const adouble operator /(const adouble& a, const real_t v)
 		                                       adNodePtr(new adConstantNode(v, UNITS(a.node))) )); 
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = a.m_dValue / v;
     tmp.m_dDeriv = a.m_dDeriv / v;
     return tmp;
@@ -313,7 +269,6 @@ const adouble operator /(const adouble& a, const real_t v)
 const adouble adouble::operator / (const adouble& a) const 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -322,8 +277,6 @@ const adouble adouble::operator / (const adouble& a) const
 		                                       CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = m_dValue / a.m_dValue;
     tmp.m_dDeriv = (m_dDeriv * a.m_dValue - m_dValue * a.m_dDeriv) / (a.m_dValue * a.m_dValue);
     return tmp;
@@ -332,7 +285,6 @@ const adouble adouble::operator / (const adouble& a) const
 const adouble operator / (const real_t v, const adouble& a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -341,8 +293,6 @@ const adouble operator / (const real_t v, const adouble& a)
 		                                       CLONE_NODE(a.node, a.m_dValue) ));  
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = v / a.m_dValue;
     tmp.m_dDeriv = (-v * a.m_dDeriv) / (a.m_dValue * a.m_dValue);
     return tmp;
@@ -351,7 +301,6 @@ const adouble operator / (const real_t v, const adouble& a)
 const adouble pow(const adouble &a, real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -360,7 +309,6 @@ const adouble pow(const adouble &a, real_t v)
 		                                       adNodePtr(new adConstantNode(v)) )); 
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = ::pow(a.m_dValue, v);
     real_t tmp2 = v * ::pow(a.m_dValue, v-1);
@@ -371,7 +319,6 @@ const adouble pow(const adouble &a, real_t v)
 const adouble pow(const adouble &a, const adouble &b) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.m_bGatherInfo || b.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -380,7 +327,6 @@ const adouble pow(const adouble &a, const adouble &b)
 		                                       CLONE_NODE(b.node, b.m_dValue) )); 
 	    return tmp;
 	}
-#endif
 
 	if(b.m_dDeriv == 0)
 	{
@@ -390,17 +336,13 @@ const adouble pow(const adouble &a, const adouble &b)
 	}
 	else if(a.m_dValue <= 0)
 	{
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 		daeDeclareException(exRuntimeCheck);
 		e << "Power function called for a negative base: " 
 	      << toStringFormatted<real_t>(a.m_dValue, -1, 5, true) 
 		  << " ^ " 
 		  << toStringFormatted<real_t>(b.m_dValue, -1, 5, true);
 		throw e;
-#else
-        throw std::runtime_error("Power function called for a negative base");
-#endif
-    }
+	}
 	
     tmp.m_dValue = ::pow(a.m_dValue, b.m_dValue);
     real_t tmp2 = b.m_dValue * ::pow(a.m_dValue, b.m_dValue-1);
@@ -412,7 +354,6 @@ const adouble pow(const adouble &a, const adouble &b)
 const adouble pow(real_t v, const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -421,22 +362,17 @@ const adouble pow(real_t v, const adouble &a)
 		                                       CLONE_NODE(a.node, a.m_dValue) )); 
 	    return tmp;
 	}
-#endif
 	
 // ACHTUNG, ACHTUNG!!!	
 // log(number) = NaN if the number is <= 0
 	if(v <= 0)
 	{
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 		daeDeclareException(exRuntimeCheck);
 		e << "Power function called for a negative base: " 
 		  << toStringFormatted<real_t>(v, -1, 5, true) 
 		  << " ^ " 
 		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true);
 		throw e;
-#else
-        throw std::runtime_error("Power function called for a negative base");
-#endif
 	}
 
 	tmp.m_dValue = ::pow(v, a.m_dValue);
@@ -448,7 +384,6 @@ const adouble pow(real_t v, const adouble &a)
 const adouble log10(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -456,21 +391,16 @@ const adouble log10(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 	
 // ACHTUNG, ACHTUNG!!!	
 // log10(number) = NaN if the number is <= 0
 	if(a.m_dValue <= 0)
 	{
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 		daeDeclareException(exRuntimeCheck);
 		e << "Log10 function called for a negative base: log10(" 
 	      << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
 		  << ")";
 		throw e;
-#else
-        throw std::runtime_error("Log10 function called for a negative base");
-#endif
 	}
 
     tmp.m_dValue = ::log10(a.m_dValue);
@@ -482,7 +412,6 @@ const adouble log10(const adouble &a)
 const adouble exp(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -490,8 +419,6 @@ const adouble exp(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::exp(a.m_dValue);
     tmp.m_dDeriv = tmp.m_dValue * a.m_dDeriv;
     return tmp;
@@ -500,7 +427,6 @@ const adouble exp(const adouble &a)
 const adouble log(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -508,21 +434,16 @@ const adouble log(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 	
 // ACHTUNG, ACHTUNG!!!	
 // log(number) = NaN if the number is <= 0
 	if(a.m_dValue <= 0)
 	{
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 		daeDeclareException(exRuntimeCheck);
 		e << "Log function called for a negative base: log(" 
 		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
 		  << ")";
 		throw e;
-#else
-        throw std::runtime_error("Log function called for a negative base");
-#endif
 	}
 
     tmp.m_dValue = ::log(a.m_dValue);
@@ -539,7 +460,6 @@ const adouble log(const adouble &a)
 const adouble sqrt(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -547,7 +467,6 @@ const adouble sqrt(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 	
 // ACHTUNG, ACHTUNG!!!	
 // sqrt(number) = NaN if the number is < 0
@@ -563,15 +482,11 @@ const adouble sqrt(const adouble &a)
 	}
 	else
 	{
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 		daeDeclareException(exRuntimeCheck);
 		e << "Sqrt function called with a negative argument: sqrt(" 
 		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
 		  << ")";
 		throw e;
-#else
-        throw std::runtime_error("Sqrt function called with a negative argument");
-#endif
 	}
 	return tmp;
 
@@ -585,7 +500,6 @@ const adouble sqrt(const adouble &a)
 const adouble abs(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -593,9 +507,7 @@ const adouble abs(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
-    tmp.m_dValue = ::fabs(a.m_dValue);
+	tmp.m_dValue = ::fabs(a.m_dValue);
 	int as = 0;
 	if(a.m_dValue > 0) 
 		as = 1;
@@ -621,7 +533,6 @@ const adouble sin(const adouble &a)
 {
     adouble tmp;
     real_t tmp2;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -629,8 +540,6 @@ const adouble sin(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::sin(a.m_dValue);
     tmp2         = ::cos(a.m_dValue);
     
@@ -642,7 +551,6 @@ const adouble cos(const adouble &a)
 {
     adouble tmp;
     real_t tmp2;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -650,8 +558,6 @@ const adouble cos(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::cos(a.m_dValue);
     tmp2         = -::sin(a.m_dValue);
     
@@ -663,7 +569,6 @@ const adouble tan(const adouble& a)
 {
     adouble tmp;
     real_t tmp2;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -671,8 +576,6 @@ const adouble tan(const adouble& a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::tan(a.m_dValue);
     tmp2         = ::cos(a.m_dValue);
     tmp2 *= tmp2;
@@ -684,7 +587,6 @@ const adouble tan(const adouble& a)
 const adouble asin(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -692,8 +594,6 @@ const adouble asin(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::asin(a.m_dValue);
     real_t tmp2  = ::sqrt(1 - a.m_dValue * a.m_dValue);
     
@@ -704,7 +604,6 @@ const adouble asin(const adouble &a)
 const adouble acos(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -712,8 +611,6 @@ const adouble acos(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue =  ::acos(a.m_dValue);
     real_t tmp2  = -::sqrt(1-a.m_dValue*a.m_dValue);
     
@@ -724,7 +621,6 @@ const adouble acos(const adouble &a)
 const adouble atan(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -732,8 +628,6 @@ const adouble atan(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
-
     tmp.m_dValue = ::atan(a.m_dValue);
     real_t tmp2  = 1 + a.m_dValue * a.m_dValue;
     tmp2 = 1 / tmp2;
@@ -746,13 +640,9 @@ const adouble atan(const adouble &a)
 
 const adouble sinh(const adouble& a) 
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("sinh function is not implemented");
-#endif    
-    return adouble();
-    
+	return adouble();
+
 //    if (a.getValue() < 0.0) 
 //	{
 //        adouble temp = exp(a);
@@ -767,11 +657,7 @@ const adouble sinh(const adouble& a)
 
 const adouble cosh(const adouble& a) 
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("cosh function is not implemented");
-#endif
 	return adouble();
 
 //    adouble temp = (a.getValue() < 0.0) ? exp(a) : exp(-a);
@@ -780,11 +666,7 @@ const adouble cosh(const adouble& a)
 
 const adouble tanh(const adouble& a)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("tanh function is not implemented");
-#endif
 	return adouble();
 
 //    if (a.getValue() < 0.0) 
@@ -801,41 +683,25 @@ const adouble tanh(const adouble& a)
 
 const adouble asinh(const adouble &a)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("asinh function is not implemented");
-#endif
 	return adouble();
 }
 
 const adouble acosh(const adouble &a)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("acosh function is not implemented");
-#endif
 	return adouble();
 }
 
 const adouble atanh(const adouble &a)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("atanh function is not implemented");
-#endif
 	return adouble();
 }
 
 const adouble atan2(const adouble &a, const adouble &b)
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	daeDeclareAndThrowException(exNotImplemented);
-#else
-    throw std::runtime_error("atan2 function is not implemented");
-#endif
 	return adouble();
 }
 
@@ -843,7 +709,6 @@ const adouble atan2(const adouble &a, const adouble &b)
 const adouble ceil(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -851,7 +716,6 @@ const adouble ceil(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = ::ceil(a.m_dValue);    
     tmp.m_dDeriv = 0.0;
@@ -862,7 +726,6 @@ const adouble ceil(const adouble &a)
 const adouble floor(const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -870,7 +733,6 @@ const adouble floor(const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	tmp.m_dValue = ::floor(a.m_dValue);
     tmp.m_dDeriv = 0.0;
@@ -880,7 +742,6 @@ const adouble floor(const adouble &a)
 const adouble max(const adouble &a, const adouble &b) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo() || b.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -889,7 +750,6 @@ const adouble max(const adouble &a, const adouble &b)
 		                                      CLONE_NODE(b.node, b.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = a.m_dValue - b.m_dValue;
 	if(tmp2 < 0) 
@@ -918,7 +778,6 @@ const adouble max(const adouble &a, const adouble &b)
 const adouble max(real_t v, const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -927,7 +786,6 @@ const adouble max(real_t v, const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = v - a.m_dValue;
 	if(tmp2 < 0)
@@ -956,7 +814,6 @@ const adouble max(real_t v, const adouble &a)
 const adouble max(const adouble &a, real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -965,7 +822,6 @@ const adouble max(const adouble &a, real_t v)
 		                                      adNodePtr(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = a.m_dValue - v;
 	if(tmp2 < 0) 
@@ -994,7 +850,6 @@ const adouble max(const adouble &a, real_t v)
 const adouble min(const adouble &a, const adouble &b) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo() || b.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -1003,7 +858,6 @@ const adouble min(const adouble &a, const adouble &b)
 		                                      CLONE_NODE(b.node, b.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = a.m_dValue - b.m_dValue;
 	if(tmp2 < 0) 
@@ -1032,7 +886,6 @@ const adouble min(const adouble &a, const adouble &b)
 const adouble min(real_t v, const adouble &a) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -1041,7 +894,6 @@ const adouble min(real_t v, const adouble &a)
 		                                      CLONE_NODE(a.node, a.m_dValue) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = v - a.m_dValue;
 	if(tmp2 < 0) 
@@ -1070,7 +922,6 @@ const adouble min(real_t v, const adouble &a)
 const adouble min(const adouble &a, real_t v) 
 {
     adouble tmp;
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(a.getGatherInfo())
 	{
 		tmp.m_bGatherInfo = true;
@@ -1079,7 +930,6 @@ const adouble min(const adouble &a, real_t v)
 		                                      adNodePtr(new adConstantNode(v, UNITS(a.node))) ));
 	    return tmp;
 	}
-#endif
 
 	real_t tmp2 = a.m_dValue - v;
 	if(tmp2 < 0) 
@@ -1105,7 +955,6 @@ const adouble min(const adouble &a, real_t v)
 	return tmp;
 }
 
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 const adouble Time(void)
 {
 	adouble tmp;
@@ -1127,35 +976,29 @@ const adouble Constant(real_t c)
 	quantity q(c, unit());
 	return Constant(q);
 }
-#endif
 
 void adouble::operator =(const real_t v) 
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	//if(getGatherInfo())
 	//{
 		if(node)
 			node.reset();
 	//}
-#endif
     m_dValue = v;
     m_dDeriv = 0.0;
 }
 
 void adouble::operator =(const adouble& a) 
 {
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
 		m_bGatherInfo = true;
 		node = adNodePtr(  (a.node ? a.node->Clone() : new adConstantNode(a.getValue()))  );
 	}
-#endif
     m_dValue = a.m_dValue;
     m_dDeriv = a.m_dDeriv;
 }
 
-#if !defined(DAE_REMOVE_NODE_FEATURES)
 daeCondition adouble::operator != (const adouble &a) const 
 {
 	condExpressionNode* expr = new condExpressionNode(*this, eNotEQ, a);
@@ -1299,7 +1142,6 @@ daeCondition operator <  (const real_t v, const adouble &a)
 	daeCondition cond(node);
     return cond;
 }
-#endif
 
 std::ostream& operator<<(std::ostream& out, const adouble& a)
 {

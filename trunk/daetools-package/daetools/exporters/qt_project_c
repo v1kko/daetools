@@ -14,6 +14,9 @@ QT -= core gui
 TARGET = daetools_ansic_simulation
 TEMPLATE = app
 
+unix::QMAKE_CFLAGS += -ansi -pedantic
+unix::QMAKE_CXXFLAGS += -ansi -pedantic
+
 INCLUDEPATH += 
 QMAKE_LIBDIR += 
 

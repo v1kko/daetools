@@ -208,7 +208,15 @@ public:
 	{
         boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         size_t  nVars      = pDataProxy->GetTotalNumberOfVariables();
-        real_t* pInitConds = pDataProxy->GetInitialValuesPointer();        
+        real_t* pInitVals  = pDataProxy->GetInitialValuesPointer();        
+        return getListFromVectorByValue(pInitVals, nVars);
+	}
+
+    boost::python::list GetInitialDerivatives(void) const
+	{
+        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        size_t  nVars      = pDataProxy->GetTotalNumberOfVariables();
+        real_t* pInitConds = pDataProxy->GetInitialConditionsPointer();        
         return getListFromVectorByValue(pInitConds, nVars);
 	}
 
@@ -225,6 +233,21 @@ public:
         return l;
 	}
 
+    real_t GetRelativeTolerance(void) const
+    {
+        if(!m_pDAESolver)
+            daeDeclareAndThrowException(exInvalidPointer);
+        return m_pDAESolver->GetRelativeTolerance();
+    }
+    
+    boost::python::list GetAbsoluteTolerances(void) const
+    {
+        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        size_t  nVars    = pDataProxy->GetTotalNumberOfVariables();
+        real_t* pAbsTols = m_pModel->GetDataProxy()->GetAbsoluteTolerancesPointer();    
+        return getListFromVectorByValue(pAbsTols, nVars);
+    }
+    
     boost::python::dict GetIndexMappings(void) const
     {
     // Returns dictionary {overallIndex : blockIndex}

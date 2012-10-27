@@ -48,7 +48,12 @@ class daeCodeGeneratorAnalyzer(object):
         self.runtimeInformation['NumberOfEquations']      = self._simulation.NumberOfEquations
         self.runtimeInformation['IDs']                    = self._simulation.VariableTypes
         self.runtimeInformation['InitialValues']          = self._simulation.InitialValues
+        self.runtimeInformation['InitialDerivatives']     = self._simulation.InitialDerivatives
         self.runtimeInformation['IndexMappings']          = self._simulation.IndexMappings
+        self.runtimeInformation['RelativeTolerance']      = self._simulation.RelativeTolerance
+        self.runtimeInformation['AbsoluteTolerances']     = self._simulation.AbsoluteTolerances
+        self.runtimeInformation['TimeHorizon']            = self._simulation.TimeHorizon
+        self.runtimeInformation['ReportingInterval']      = self._simulation.ReportingInterval
 
         self._collectRuntimeInformationFromModel(self._simulation.m)
        

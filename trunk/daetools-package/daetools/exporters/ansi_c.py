@@ -45,9 +45,7 @@ int jacobian(long int _number_of_equations_,
              real_t* _time_derivatives_,
              real_t* _residuals_,
              DAE_MATRIX _jacobian_matrix_);
-int number_of_roots(real_t _current_time_,
-                    real_t* _values_,
-                    real_t* _time_derivatives_);
+int number_of_roots();
 int roots(real_t _current_time_,
           real_t* _values_,
           real_t* _time_derivatives_,
@@ -83,28 +81,15 @@ int residuals(real_t _current_time_,
               real_t* _residuals_)
 {
     adouble _temp_;
-    int i;
-    int _ec_ = 0;
-    int _current_index_for_jacobian_evaluation_ = -1;
-    real_t _inverse_time_step_ = 0;
+    real_t _inverse_time_step_;
+    int i, _ec_, _current_index_for_jacobian_evaluation_;
     
+    _ec_                                    = 0;
+    _current_index_for_jacobian_evaluation_ = -1;
+    _inverse_time_step_                     = 0.0;
+
 %(residuals)s
 
-    /*
-    printf("Residal time: %%10.4e \\n", _current_time_);
-    printf("_values_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _values_[i]);
-    printf("\\n");
-    printf("_time_derivatives_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _time_derivatives_[i]);
-    printf("\\n");
-    printf("_residuals_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _residuals_[i]);
-    printf("\\n\\n");
-    */
     return 0;
 }
 
@@ -117,40 +102,22 @@ int jacobian(long int _number_of_equations_,
              DAE_MATRIX _jacobian_matrix_)
 {
     adouble _temp_;
-    int _ec_ = 0;
-    int i, _block_index_;
     real_t _jacobianItem_;
-    int _current_index_for_jacobian_evaluation_ = -1;
+    int i, _ec_, _block_index_, _current_index_for_jacobian_evaluation_;
+
+    _ec_                                    = 0;
+    _current_index_for_jacobian_evaluation_ = -1;
     
 %(jacobian)s
-    /*
-    printf("Jacobian time: %%10.4e \\n", _current_time_);
-    printf("InvDT: %%10.4e \\n", _inverse_time_step_);
-    printf("_values_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _values_[i]);
-    printf("\\n");
-    printf("_time_derivatives_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _time_derivatives_[i]);
-    printf("\\n");
-    printf("_residuals_: \\n");
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%12.4e", _residuals_[i]);
-    printf("\\n\\n");
 
-    daeDenseMatrix<real_t> j;
-    j.InitMatrix(_Neqns_, _Neqns_, _jacobian_matrix_, eColumnWise);
-    j.Print();
-    */
     return 0;
 }
 
-int number_of_roots(real_t _current_time_,
-                    real_t* _values_,
-                    real_t* _time_derivatives_)
+int number_of_roots()
 {
-    int _noRoots_ = 0;
+    int _noRoots_;
+
+    _noRoots_ = 0;
     
 %(numberOfRoots)s
 
@@ -163,9 +130,12 @@ int roots(real_t _current_time_,
           real_t* _roots_)
 {
     adouble _temp_;
-    int _rc_ = 0;
-    real_t _inverse_time_step_ = 0;
-    int _current_index_for_jacobian_evaluation_ = -1;
+    real_t _inverse_time_step_;
+    int _rc_, _current_index_for_jacobian_evaluation_;
+    
+    _rc_                                    = 0;
+    _inverse_time_step_                     = 0.0;
+    _current_index_for_jacobian_evaluation_ = -1;
     
 %(roots)s
 
@@ -177,9 +147,13 @@ bool check_for_discontinuities(real_t _current_time_,
                                real_t* _time_derivatives_)
 {
     adouble _temp_;
-    real_t _inverse_time_step_ = 0;
-    bool foundDiscontinuity = false;
-    int _current_index_for_jacobian_evaluation_ = -1;
+    bool foundDiscontinuity;
+    real_t _inverse_time_step_;
+    int _current_index_for_jacobian_evaluation_;
+
+    _inverse_time_step_                     = 0.0;
+    _current_index_for_jacobian_evaluation_ = -1;
+    foundDiscontinuity                      = false;
     
 %(checkForDiscontinuities)s
 
@@ -191,9 +165,13 @@ bool execute_actions(real_t _current_time_,
                      real_t* _time_derivatives_)
 {
     adouble _temp_;
-    real_t _inverse_time_step_ = 0;
-    bool reinitializationNeeded = false;
-    int _current_index_for_jacobian_evaluation_ = -1;
+    real_t _inverse_time_step_;
+    bool reinitializationNeeded;
+    int _current_index_for_jacobian_evaluation_;
+
+    _inverse_time_step_                     = 0.0;
+    _current_index_for_jacobian_evaluation_ = -1;
+    reinitializationNeeded                  = false;
 
 %(executeActions)s
 
@@ -203,6 +181,7 @@ bool execute_actions(real_t _current_time_,
 void print_results(real_t _current_time_, real_t* _values_)
 {
     int i;
+    
     printf("Results at time: %%12.5f\\n", _current_time_);
     for(i = 0; i < _Neqns_; i++)
         printf("%%s = %%20.14e\\n", _variable_names_[i], _values_[i]);
@@ -462,24 +441,24 @@ class daeCodeGenerator_ANSI_C(object):
         self.exprFormatter.constant = 'adouble_({value}, 0)'
 
         # Logical operators
-        self.exprFormatter.AND   = 'AND({leftValue}, {rightValue})'
-        self.exprFormatter.OR    = 'OR({leftValue}, {rightValue})'
-        self.exprFormatter.NOT   = 'NOT({value})'
+        self.exprFormatter.AND   = 'and_({leftValue}, {rightValue})'
+        self.exprFormatter.OR    = 'or_({leftValue}, {rightValue})'
+        self.exprFormatter.NOT   = 'not_({value})'
 
-        self.exprFormatter.EQ    = 'EQ({leftValue}, {rightValue})'
-        self.exprFormatter.NEQ   = 'NEQ({leftValue}, {rightValue})'
-        self.exprFormatter.LT    = 'LT({leftValue}, {rightValue})'
-        self.exprFormatter.LTEQ  = 'LTEQ({leftValue}, {rightValue})'
-        self.exprFormatter.GT    = 'GT({leftValue}, {rightValue})'
-        self.exprFormatter.GTEQ  = 'GTEQ({leftValue}, {rightValue})'
+        self.exprFormatter.EQ    = 'eq_({leftValue}, {rightValue})'
+        self.exprFormatter.NEQ   = 'neq_({leftValue}, {rightValue})'
+        self.exprFormatter.LT    = 'lt_({leftValue}, {rightValue})'
+        self.exprFormatter.LTEQ  = 'lteq_({leftValue}, {rightValue})'
+        self.exprFormatter.GT    = 'gt_({leftValue}, {rightValue})'
+        self.exprFormatter.GTEQ  = 'gteq_({leftValue}, {rightValue})'
 
         # Mathematical operators
-        self.exprFormatter.SIGN   = 'SIGN({value})'
+        self.exprFormatter.SIGN   = 'sign_({value})'
 
-        self.exprFormatter.PLUS   = 'PLUS({leftValue}, {rightValue})'
-        self.exprFormatter.MINUS  = 'MINUS({leftValue}, {rightValue})'
-        self.exprFormatter.MULTI  = 'MULTI({leftValue}, {rightValue})'
-        self.exprFormatter.DIVIDE = 'DIVIDE({leftValue}, {rightValue})'
+        self.exprFormatter.PLUS   = 'plus_({leftValue}, {rightValue})'
+        self.exprFormatter.MINUS  = 'minus_({leftValue}, {rightValue})'
+        self.exprFormatter.MULTI  = 'multi_({leftValue}, {rightValue})'
+        self.exprFormatter.DIVIDE = 'divide_({leftValue}, {rightValue})'
         self.exprFormatter.POWER  = 'pow_({leftValue}, {rightValue})'
 
         # Mathematical functions
@@ -582,25 +561,25 @@ class daeCodeGenerator_ANSI_C(object):
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'if({0}) {{'.format(condition)
+                        temp = s_indent + 'if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
+
+                        temp = s_indent + 'if({0}) {{'.format(condition)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
-                        self.numberOfRoots.append(temp)
-                        self.rootFunctions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'else if({0}) {{'.format(condition)
+                        temp = s_indent + 'else if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
+
+                        temp = s_indent + 'else if({0}) {{'.format(condition)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
-                        self.numberOfRoots.append(temp)
-                        self.rootFunctions.append(temp)
 
                     else:
                         temp = s_indent + 'else {'
@@ -608,8 +587,6 @@ class daeCodeGenerator_ANSI_C(object):
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
-                        self.numberOfRoots.append(temp)
-                        self.rootFunctions.append(temp)
 
                     # 1a. Put equations into the residuals list
                     self.equationGenerationMode  = 'residuals'
@@ -626,29 +603,26 @@ class daeCodeGenerator_ANSI_C(object):
                     s_indent3 = (indent + 2) * self.defaultIndent
 
                     # 2. checkForDiscontinuities
-                    self.checkForDiscontinuities.append(s_indent2 + 'if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name']))
+                    self.checkForDiscontinuities.append(s_indent2 + 'if(! compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name']))
                     self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
                     self.checkForDiscontinuities.append(s_indent2 + '}')
                     self.checkForDiscontinuities.append(s_indent + '}')
 
                     # 3. executeActions
+                    self.executeActions.append(s_indent2 + 'printf("The state {0} from {1} is active now.\\n");'.format(state['Name'], stnVariableName))
                     self.executeActions.append(s_indent2 + '{0} = "{1}";'.format(stnVariableName, state['Name']))
                     self.executeActions.append(s_indent + '}')
 
                     # 4. numberOfRoots
                     if state_transition: # For 'else' state has no state transitions
                         nExpr = len(state_transition['Expressions'])
-                        self.numberOfRoots.append(s_indent2 + '_noRoots_ += {0};'.format(nExpr))
-
-                    self.numberOfRoots.append(s_indent + '}')
+                        self.numberOfRoots.append(s_indent + '_noRoots_ += {0};'.format(nExpr))
 
                     # 5. rootFunctions
                     if state_transition: # For 'else' state has no state transitions
                         for expression in state_transition['Expressions']:
-                            self.rootFunctions.append(s_indent2 + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
-                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = getValue(&_temp_);')
-
-                    self.rootFunctions.append(s_indent + '}')
+                            self.rootFunctions.append(s_indent + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
+                            self.rootFunctions.append(s_indent + '_roots_[_rc_++] = getValue(&_temp_);')
 
                     if len(state['NestedSTNs']) > 0:
                         raise RuntimeError('Nested state transition networks (daeIF) canot be exported to c')
@@ -783,6 +757,7 @@ class daeCodeGenerator_ANSI_C(object):
                 relativeName    = self.exprFormatter.formatIdentifier(relativeName)
                 stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_stn'
                 stateTo         = action['StateTo']
+                self.executeActions.append(s_indent + 'printf("The state {0} from {1} is active now.\\n");'.format(stateTo, stnVariableName))
                 self.executeActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
@@ -798,11 +773,13 @@ class daeCodeGenerator_ANSI_C(object):
                 pass
 
     def _generateRuntimeInformation(self, runtimeInformation):
-        Ntotal        = runtimeInformation['TotalNumberOfVariables']
-        Neq           = runtimeInformation['NumberOfEquations']
-        IDs           = runtimeInformation['IDs']
-        initValues    = runtimeInformation['InitialValues']
-        indexMappings = runtimeInformation['IndexMappings']
+        Ntotal             = runtimeInformation['TotalNumberOfVariables']
+        Neq                = runtimeInformation['NumberOfEquations']
+        IDs                = runtimeInformation['IDs']
+        initValues         = runtimeInformation['InitialValues']
+        initDerivatives    = runtimeInformation['InitialDerivatives']
+        indexMappings      = runtimeInformation['IndexMappings']
+        absoluteTolerances = runtimeInformation['AbsoluteTolerances']
 
         self.variableNames = Neq * ['']
         
@@ -812,8 +789,22 @@ class daeCodeGenerator_ANSI_C(object):
         Neqns = '#define _Neqns_ {0}'.format(Neq)
         self.modelDef.append(Neqns)
 
-        blockIDs        = Neq * [-1]
-        blockInitValues = Neq * [-1]
+        startTime = 'const real_t _start_time_ = {0};'.format(0.0)
+        self.modelDef.append(startTime)
+
+        endTime = 'const real_t _end_time_ = {0};'.format(runtimeInformation['TimeHorizon'])
+        self.modelDef.append(endTime)
+
+        reportingInterval = 'const real_t _reporting_interval_ = {0};'.format(runtimeInformation['ReportingInterval'])
+        self.modelDef.append(reportingInterval)
+
+        relTolerance = 'const real_t _relative_tolerance_ = {0};'.format(runtimeInformation['RelativeTolerance'])
+        self.modelDef.append(relTolerance)
+
+        blockIDs             = Neq * [-1]
+        blockInitValues      = Neq * [-1]
+        absTolerances        = Neq * [1E-5]
+        blockInitDerivatives = Neq * [0.0]
         for oi, bi in indexMappings.items():
             if IDs[oi] == 0:
                blockIDs[bi] = 0 
@@ -821,13 +812,21 @@ class daeCodeGenerator_ANSI_C(object):
                blockIDs[bi] = 1
 
             if IDs[oi] != 2:
-                blockInitValues[bi] = initValues[oi]
+                blockInitValues[bi]      = initValues[oi]
+                blockInitDerivatives[bi] = initDerivatives[oi]
+                absTolerances[bi]        = absoluteTolerances[oi]
 
         strIDs = 'int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
         self.modelDef.append(strIDs)
             
         strInitValues = 'real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
         self.modelDef.append(strInitValues)
+
+        strInitDerivs = 'real_t _initDerivatives_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitDerivatives))
+        self.modelDef.append(strInitDerivs)
+
+        strAbsTol = 'real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
+        self.modelDef.append(strAbsTol)
 
         # ACHTUNG, ACHTUNG!! IndexMappings does not contain assigned variables!!
         #print indexMappings
@@ -949,10 +948,10 @@ class daeCodeGenerator_ANSI_C(object):
         # Then generate jacobians for equations and port connections
         self.equationGenerationMode  = 'jacobian'
         for port_connection in runtimeInformation['PortConnections']:
-            self.residuals.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
+            self.jacobians.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
             self._processEquations(port_connection['Equations'], indent)
 
-        self.residuals.append(s_indent + '/* Equations */')
+        self.jacobians.append(s_indent + '/* Equations */')
         self._processEquations(runtimeInformation['Equations'], indent)
 
         # Finally generate together residuals and jacobians for STNs
