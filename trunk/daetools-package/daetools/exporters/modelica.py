@@ -48,7 +48,8 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.indexBase = 1
 
         self.useFlattenedNamesForAssignedVariables = False
-        self.IDs = {}
+        self.IDs      = {}
+        self.indexMap = {}
 
         # Use relative names
         self.useRelativeNames = True
@@ -64,6 +65,8 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.variableIndexStart       = '['
         self.variableIndexEnd         = ']'
         self.variableIndexDelimiter   = ','
+
+        self.assignedVariable         = '{variable}'
 
         # String format for the time derivative, ie. der(variable[1,2]) in Modelica
         # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...

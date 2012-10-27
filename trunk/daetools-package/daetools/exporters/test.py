@@ -328,12 +328,12 @@ def consoleRun():
     import os
     from ansi_c import daeCodeGenerator_ANSI_C
     cg = daeCodeGenerator_ANSI_C()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name + '_cpp')
-    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c++')
+    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
 
     # Run
-    #simulation.Run()
-    #simulation.Finalize()
+    simulation.Run()
+    simulation.Finalize()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

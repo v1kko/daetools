@@ -44,7 +44,7 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 
 int main(int argc, char *argv[])
 {
-    int i;
+    int i, overallIndex, blockIndex;
     void *mem;
     N_Vector yy, yp, avtol, ids;
     realtype rtol, *yval, *ypval, *atval, *idsval;
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     yy = yp = avtol = NULL;
     yval = ypval = atval = NULL;
 
-    initial_values();
+    initial_conditions();
 
     /* Allocate N-vectors. */
     yy = N_VNew_Serial(_Neqns_);
@@ -78,7 +78,11 @@ int main(int argc, char *argv[])
     /* Create and initialize  y, y', and absolute tolerance vectors. */
     yval  = NV_DATA_S(yy);
     for(i = 0; i < _Neqns_; i++)
-        yval[i] = _initValues_[ _indexMap_[i] ];
+        yval[i] = _initValues_[i];
+    printf("yval: \n");
+    for(i = 0; i < _Neqns_; i++)
+        printf("%12.4e", yval[i]);
+    printf("\n\n");
 
     ypval = NV_DATA_S(yp);
     for(i = 0; i < _Neqns_; i++)
@@ -92,13 +96,17 @@ int main(int argc, char *argv[])
 
     idsval  = NV_DATA_S(ids);
     for(i = 0; i < _Neqns_; i++)
-        idsval[i] = (realtype)_IDs_[ _indexMap_[i] ];
+        idsval[i] = (realtype)_IDs_[i];
+    printf("idsval: \n");
+    for(i = 0; i < _Neqns_; i++)
+        printf("%d", (int)idsval[i]);
+    printf("\n\n");
 
     /* Integration limits */
     t0 = 0;
     tout = 200;
 
-    PrintHeader(rtol, avtol, yy);
+    /* PrintHeader(rtol, avtol, yy); */
 
     /* Call IDACreate and IDAMalloc to initialize IDA memory */
     mem = IDACreate();
@@ -121,10 +129,12 @@ int main(int argc, char *argv[])
     N_VDestroy_Serial(ids);
 
     /* Call IDARootInit to specify the root function grob with 2 components */
-    //    int no_roots = number_of_roots(t0, yy, yp);
-    //    retval = IDARootInit(mem, no_roots, roots);
-    //    if (check_flag(&retval, "IDARootInit", 1))
-    //        return(1);
+    /*
+    int no_roots = number_of_roots(t0, yy, yp);
+    retval = IDARootInit(mem, no_roots, roots);
+    if (check_flag(&retval, "IDARootInit", 1))
+         return(1);
+    */
 
     /* Call IDADense and set up the linear solver. */
     retval = IDADense(mem, _Neqns_);
@@ -143,15 +153,14 @@ int main(int argc, char *argv[])
         return(1);
 
     realtype t;
-    for(t = t0; t <= tout; t += 10)
+    for(t = t0+10; t <= tout; t += 10)
     {
-
-        retval = IDASolve(mem, t, &tret, yy, yp, IDA_NORMAL);
-
-        PrintOutput(mem,tret,yy);
-
+        retval = IDASolve(mem, t, &tret, yy, yp, IDA_TSTOP_RETURN);
         if(check_flag(&retval, "IDASolve", 1))
             return(1);
+
+        realtype* yval  = NV_DATA_S(yy);
+        print_results(tret, yval);
     }
 
     PrintFinalStats(mem);

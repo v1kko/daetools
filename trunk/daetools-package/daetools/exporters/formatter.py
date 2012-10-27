@@ -11,7 +11,8 @@ class daeExpressionFormatter(object):
         self.indexBase = 0
 
         self.useFlattenedNamesForAssignedVariables = False
-        self.IDs = {}
+        self.IDs      = {}
+        self.indexMap = {}
         
         # Use relative names (relative to domains/parameters/variables model) or full canonical names
         # If we are in model root.comp1 then variables' names could be:
@@ -34,6 +35,8 @@ class daeExpressionFormatter(object):
         self.variableIndexStart       = ''
         self.variableIndexEnd         = ''
         self.variableIndexDelimiter   = ','
+
+        self.assignedVariable         = '{variable}'
         
         # String format for the time derivative, ie. der(variable[1,2]) in Modelica
         # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
@@ -177,6 +180,12 @@ class daeExpressionFormatter(object):
 
     def formatVariable(self, variableCanonicalName, domainIndexes, overallIndex):
         # ACHTUNG, ACHTUNG!! Take care of indexing of the overallIndex and the domainIndexes
+        overall_ = overallIndex + self.indexBase
+        if overallIndex in self.indexMap:
+            block_ = self.indexMap[overallIndex] + self.indexBase
+        else:
+            block_ = -1
+
         if self.useFlattenedNamesForAssignedVariables and (self.IDs[overallIndex] == cnAssigned):
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
             name = self.flattenIdentifier(name)
@@ -185,7 +194,7 @@ class daeExpressionFormatter(object):
             if len(domainIndexes) > 0:
                 domainindexes = '_' + '_'.join([str(di+self.indexBase) for di in domainIndexes]) + '_'
 
-            res = name + domainindexes
+            res = self.assignedVariable.format(variable = name+domainindexes, overallIndex = overall_, blockIndex = block_)
 
         else:
             if self.useRelativeNames:
@@ -196,12 +205,11 @@ class daeExpressionFormatter(object):
             if self.flattenIdentifiers:
                 name = self.flattenIdentifier(name)
 
-            index = overallIndex + self.indexBase
             domainindexes = ''
             if len(domainIndexes) > 0:
                 domainindexes = self.variableIndexStart + self.variableIndexDelimiter.join([str(di+self.indexBase) for di in domainIndexes]) + self.variableIndexEnd
 
-            res = self.variable.format(variable = name, indexes = domainindexes, overallIndex = index)
+            res = self.variable.format(variable = name, indexes = domainindexes, overallIndex = overall_, blockIndex = block_)
 
         return res
 
@@ -215,12 +223,17 @@ class daeExpressionFormatter(object):
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
 
-        index = overallIndex + self.indexBase
+        overall_ = overallIndex + self.indexBase
+        if overallIndex in self.indexMap:
+            block_ = self.indexMap[overallIndex] + self.indexBase
+        else:
+            block_ = -1
+
         domainindexes = ''
         if len(domainIndexes) > 0:
             domainindexes = self.derivativeIndexStart + self.derivativeIndexDelimiter.join([str(di+self.indexBase) for di in domainIndexes]) + self.derivativeIndexEnd
         
-        res = self.derivative.format(variable = name, indexes = domainindexes, overallIndex = index)
+        res = self.derivative.format(variable = name, indexes = domainindexes, overallIndex = overall_, blockIndex = block_)
         return res
 
     def formatRuntimeConditionNode(self, node):

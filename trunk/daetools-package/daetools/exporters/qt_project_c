@@ -14,8 +14,10 @@ QT -= core gui
 TARGET = daetools_ansic_simulation
 TEMPLATE = app
 
-QMAKE_LIBDIR +=
-LIBS += -lsundials_ida -lsundials_nvecserial -lblas -llapack
+INCLUDEPATH += 
+QMAKE_LIBDIR += 
+
+LIBS += -lsundials_idas -lsundials_nvecserial -lblas -llapack
 
 SOURCES += adouble.c main.c
 HEADERS += adouble.h matrix.h daetools_model.h

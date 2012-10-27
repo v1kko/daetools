@@ -28,11 +28,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "adouble.h"
 #include "matrix.h"
 
-#define _v_(i)   adouble_(_values_[ _indexMap_[i] ],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  adouble_(_time_derivatives_[ _indexMap_[i] ], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _v_(i)   adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   adouble_(_current_time_, 0.0)
 
-void initial_values();
+void initial_conditions();
+void print_results(real_t _current_time_, real_t* _values_);
 int residuals(real_t _current_time_,
               real_t* _values_,
               real_t* _time_derivatives_,
@@ -70,7 +71,7 @@ bool execute_actions(real_t _current_time_,
 /* Assigned variables */
 %(assignedVariables)s
 
-void initial_values()
+void initial_conditions()
 {
 /* Initial conditions */
 %(initialConditions)s
@@ -89,6 +90,7 @@ int residuals(real_t _current_time_,
     
 %(residuals)s
 
+    /*
     printf("Residal time: %%10.4e \\n", _current_time_);
     printf("_values_: \\n");
     for(i = 0; i < _Neqns_; i++)
@@ -102,7 +104,7 @@ int residuals(real_t _current_time_,
     for(i = 0; i < _Neqns_; i++)
         printf("%%12.4e", _residuals_[i]);
     printf("\\n\\n");
-
+    */
     return 0;
 }
 
@@ -121,7 +123,7 @@ int jacobian(long int _number_of_equations_,
     int _current_index_for_jacobian_evaluation_ = -1;
     
 %(jacobian)s
-
+    /*
     printf("Jacobian time: %%10.4e \\n", _current_time_);
     printf("InvDT: %%10.4e \\n", _inverse_time_step_);
     printf("_values_: \\n");
@@ -140,8 +142,7 @@ int jacobian(long int _number_of_equations_,
     daeDenseMatrix<real_t> j;
     j.InitMatrix(_Neqns_, _Neqns_, _jacobian_matrix_, eColumnWise);
     j.Print();
-
-
+    */
     return 0;
 }
 
@@ -199,6 +200,15 @@ bool execute_actions(real_t _current_time_,
     return reinitializationNeeded;
 }
 
+void print_results(real_t _current_time_, real_t* _values_)
+{
+    int i;
+    printf("Results at time: %%12.5f\\n", _current_time_);
+    for(i = 0; i < _Neqns_; i++)
+        printf("%%s = %%20.14e\\n", _variable_names_[i], _values_[i]);
+    printf("\\n");
+}
+
 #endif
 """
 
@@ -239,6 +249,7 @@ class daeCodeGenerator_ANSI_C(object):
         self.executeActions          = []
         self.numberOfRoots           = []
         self.rootFunctions           = []
+        self.variableNames           = []
 
         self.exprFormatter = daeANSICExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
@@ -264,6 +275,11 @@ class daeCodeGenerator_ANSI_C(object):
         self.parametersDefs          = []
         self.residuals               = []
         self.jacobians               = []
+        self.checkForDiscontinuities = []
+        self.executeActions          = []
+        self.numberOfRoots           = []
+        self.rootFunctions           = []
+        self.variableNames           = []
         self.warnings                = []
         self.simulation              = simulation
         self.topLevelModel           = simulation.m
@@ -274,7 +290,8 @@ class daeCodeGenerator_ANSI_C(object):
         s_indent = indent * self.defaultIndent
 
         self.analyzer.analyzeSimulation(simulation)
-        self.exprFormatter.IDs = self.analyzer.runtimeInformation['IDs']
+        self.exprFormatter.IDs      = self.analyzer.runtimeInformation['IDs']
+        self.exprFormatter.indexMap = self.analyzer.runtimeInformation['IndexMappings']
 
         #import pprint
         #pp = pprint.PrettyPrinter(indent=2)
@@ -339,6 +356,11 @@ class daeCodeGenerator_ANSI_C(object):
         return results
 
     def set_CXX(self):
+        self.exprFormatter.indexBase                              = 0
+        self.exprFormatter.useFlattenedNamesForAssignedVariables  = True
+        self.exprFormatter.IDs                                    = {}
+        self.exprFormatter.indexMap                               = {}
+
         # Use relative names
         self.exprFormatter.useRelativeNames         = True
         self.exprFormatter.flattenIdentifiers       = True
@@ -350,12 +372,14 @@ class daeCodeGenerator_ANSI_C(object):
         self.exprFormatter.parameterIndexEnd        = ']'
         self.exprFormatter.parameterIndexDelimiter  = ']['
 
-        self.exprFormatter.variable                 = '_v_({overallIndex})'
+        self.exprFormatter.variable                 = '_v_({blockIndex})'
         self.exprFormatter.variableIndexStart       = ''
         self.exprFormatter.variableIndexEnd         = ''
         self.exprFormatter.variableIndexDelimiter   = ''
 
-        self.exprFormatter.derivative               = '_dt_({overallIndex})'
+        self.exprFormatter.assignedVariable         = 'adouble_({variable})'
+
+        self.exprFormatter.derivative               = '_dt_({blockIndex})'
         self.exprFormatter.derivativeIndexStart     = ''
         self.exprFormatter.derivativeIndexEnd       = ''
         self.exprFormatter.derivativeIndexDelimiter = ''
@@ -406,6 +430,11 @@ class daeCodeGenerator_ANSI_C(object):
         self.exprFormatter.TIME   = '_time_'
 
     def set_ANSI_C(self):
+        self.exprFormatter.indexBase                              = 0
+        self.exprFormatter.useFlattenedNamesForAssignedVariables  = True
+        self.exprFormatter.IDs                                    = {}
+        self.exprFormatter.indexMap                               = {}
+
         # Use relative names
         self.exprFormatter.useRelativeNames   = True
         self.exprFormatter.flattenIdentifiers = True
@@ -417,12 +446,14 @@ class daeCodeGenerator_ANSI_C(object):
         self.exprFormatter.parameterIndexEnd        = ']'
         self.exprFormatter.parameterIndexDelimiter  = ']['
 
-        self.exprFormatter.variable                 = '_v_({overallIndex})'
+        self.exprFormatter.variable                 = '_v_({blockIndex})'
         self.exprFormatter.variableIndexStart       = ''
         self.exprFormatter.variableIndexEnd         = ''
         self.exprFormatter.variableIndexDelimiter   = ''
 
-        self.exprFormatter.derivative               = '_dt_({overallIndex})'
+        self.exprFormatter.assignedVariable         = 'adouble_({variable}, 0)'
+
+        self.exprFormatter.derivative               = '_dt_({blockIndex})'
         self.exprFormatter.derivativeIndexStart     = ''
         self.exprFormatter.derivativeIndexEnd       = ''
         self.exprFormatter.derivativeIndexDelimiter = ''
@@ -489,16 +520,23 @@ class daeCodeGenerator_ANSI_C(object):
                     overall_indexes = eeinfo['VariableIndexes']
                     n = len(overall_indexes)
                     ID = len(self.jacobians)
-                    str_indexes = self.exprFormatter.formatNumpyArray(overall_indexes)
-                    self.jacobians.append(s_indent + 'int _overall_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
+                    block_indexes = []
+                    for oi in overall_indexes:
+                        if oi in self.exprFormatter.indexMap:
+                            bi = self.exprFormatter.indexBase + self.exprFormatter.indexMap[oi]
+                        else:
+                            bi = -1
+                        block_indexes.append(bi)
+                    str_indexes = self.exprFormatter.formatNumpyArray(block_indexes)
+
+                    self.jacobians.append(s_indent + 'int _block_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
                     self.jacobians.append(s_indent + 'for(i = 0; i < {0}; i++) {{'.format(n))
-                    self.jacobians.append(s_indent2 + '_block_index_ = _indexMap_[ _overall_indexes_{0}[i] ];'.format(ID))
-                    self.jacobians.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _overall_indexes_{0}[i];'.format(ID))
+                    self.jacobians.append(s_indent2 + '_block_index_ = _block_indexes_{0}[i];'.format(ID))
+                    self.jacobians.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _block_index_;')
                     
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                     self.jacobians.append(s_indent2 + '_temp_ = {0};'.format(res))
                     self.jacobians.append(s_indent2 + '_jacobianItem_ = getDerivative(&_temp_);')
-                    #                                            SetItem(Eq.index, blockIndex, value)
                     self.jacobians.append(s_indent2 + 'setMatrixItem(_jacobian_matrix_, _ec_, _block_index_, _jacobianItem_);')
 
                     self.jacobians.append(s_indent + '}')
@@ -760,36 +798,50 @@ class daeCodeGenerator_ANSI_C(object):
                 pass
 
     def _generateRuntimeInformation(self, runtimeInformation):
+        Ntotal        = runtimeInformation['TotalNumberOfVariables']
+        Neq           = runtimeInformation['NumberOfEquations']
+        IDs           = runtimeInformation['IDs']
+        initValues    = runtimeInformation['InitialValues']
         indexMappings = runtimeInformation['IndexMappings']
-        Ntotal = runtimeInformation['TotalNumberOfVariables']
-        Neq    = runtimeInformation['NumberOfEquations']
-        N      = len(indexMappings)
 
+        self.variableNames = Neq * ['']
+        
         Nvars = '#define _Ntotal_vars_ {0}'.format(Ntotal)
-        self.modelDef.append(Nvars)
-
-        Nvars = '#define _Nvars_ {0}'.format(N)
         self.modelDef.append(Nvars)
 
         Neqns = '#define _Neqns_ {0}'.format(Neq)
         self.modelDef.append(Neqns)
 
-        IDs = 'int _IDs_[_Ntotal_vars_] = {0};'.format(self.exprFormatter.formatNumpyArray(runtimeInformation['IDs']))
-        self.modelDef.append(IDs)
+        blockIDs        = Neq * [-1]
+        blockInitValues = Neq * [-1]
+        for oi, bi in indexMappings.items():
+            if IDs[oi] == 0:
+               blockIDs[bi] = 0 
+            elif IDs[oi] == 1:
+               blockIDs[bi] = 1
+
+            if IDs[oi] != 2:
+                blockInitValues[bi] = initValues[oi]
+
+        strIDs = 'int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
+        self.modelDef.append(strIDs)
+            
+        strInitValues = 'real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
+        self.modelDef.append(strInitValues)
 
         # ACHTUNG, ACHTUNG!! IndexMappings does not contain assigned variables!!
-        indexMapping = []
-        for overallIndex in range(0, Ntotal):
-            if overallIndex in indexMappings: # overallIndex is in the map
-                indexMapping.append(indexMappings[overallIndex])
-            else:
-                indexMapping.append(overallIndex)
+        #print indexMappings
+        #indexMapping = Ntotal * [-1]
+        #for overallIndex in range(0, Ntotal):
+        #    if overallIndex in indexMappings: # overallIndex is in the map
+        #        indexMapping[overallIndex] = indexMappings[overallIndex]
+        #    else:
+        #        indexMapping[overallIndex] = 
+        #print indexMapping
+        #raise RuntimeError('')
 
-        indexMap = 'int _indexMap_[_Ntotal_vars_] = {0};'.format(self.exprFormatter.formatNumpyArray(indexMapping))
-        self.modelDef.append(indexMap)
-
-        initValues = 'real_t _initValues_[_Ntotal_vars_] = {0};'.format(self.exprFormatter.formatNumpyArray(runtimeInformation['InitialValues']))
-        self.modelDef.append(initValues)
+        #indexMap = 'int _indexMap_[_Ntotal_vars_] = {0};'.format(self.exprFormatter.formatNumpyArray(indexMapping))
+        #self.modelDef.append(indexMap)
 
         #model = 'cModel _model_(_Ntotal_vars_, _Neqns_, _IDs_, _initValues_);'
         #self.modelDef.append(model)
@@ -840,16 +892,21 @@ class daeCodeGenerator_ANSI_C(object):
                 ID           = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
                 value        = float(variable['Values'])   # numpy float
                 overallIndex = variable['OverallIndex']
-                fullName = relativeName
+                fullName     = relativeName
 
                 if ID == cnDifferential:
-                    name_ = '_initValues_[{0}]'.format(overallIndex)
+                    blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
+                    name_ = '_initValues_[{0}]'.format(blockIndex)
                     temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                     self.initialConditions.append(temp)
 
                 elif ID == cnAssigned:
                     temp = 'real_t {name} = {value}; /* {fullName} */'.format(name = name, value = value, fullName = fullName)
                     self.assignedVariables.append(temp)
+
+                if ID != cnAssigned:
+                    blockIndex = indexMappings[overallIndex] + self.exprFormatter.indexBase
+                    self.variableNames[blockIndex] = fullName
 
             else:
                 for i in range(0, n):
@@ -860,7 +917,8 @@ class daeCodeGenerator_ANSI_C(object):
                     fullName     = relativeName + '(' + ','.join(str(di) for di in domIndexes) + ')'
 
                     if ID == cnDifferential:
-                        name_ = '_initValues_[{0}]'.format(overallIndex)
+                        blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
+                        name_ = '_initValues_[{0}]'.format(blockIndex)
                         temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                         self.initialConditions.append(temp)
 
@@ -868,30 +926,14 @@ class daeCodeGenerator_ANSI_C(object):
                         temp = 'real_t {name} = {value}; /* {fullName} */'.format(name = name, value = value, fullName = fullName)
                         self.assignedVariables.append(temp)
 
-        """
-        for variable in runtimeInformation['Variables']:
-            relativeName    = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
-            relativeName    = self.exprFormatter.formatIdentifier(relativeName)
-            name            = self.exprFormatter.flattenIdentifier(relativeName)
-            numberOfDomains = len(variable['Domains'])
-            domains         = '{' + ', '.join([str(d) for d in variable['Domains']]) + '}'
-            overallIndex    = variable['OverallIndex']
-            description     = variable['Description']
+                    if ID != cnAssigned:
+                        blockIndex = indexMappings[overallIndex] + self.exprFormatter.indexBase
+                        self.variableNames[blockIndex] = fullName
 
-            if numberOfDomains > 0:
-                self.variablesDefs.append('int {name}_domains[{numberOfDomains}] = {domains}'.format(name = name,
-                                                                                                    numberOfDomains = numberOfDomains,
-                                                                                                    domains = domains))
-                varTemplate = 'cVariable {name}(&_model_, {overallIndex}, {name}_domains, {numberOfDomains}); // {description}\n'
-            else:
-                varTemplate = 'cVariable {name}(&_model_, {overallIndex}); // {description}\n'
-                
-            self.variablesDefs.append(varTemplate.format(name = name,
-                                                         overallIndex = overallIndex,                                                         
-                                                         numberOfDomains = numberOfDomains,
-                                                         description = description))
-        """
-        
+        varNames = ['"' + name_ + '"' for name_ in self.variableNames]
+        strVariableNames = 'char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
+        self.modelDef.append(strVariableNames)
+
         indent = 1
         s_indent = indent * self.defaultIndent
 
