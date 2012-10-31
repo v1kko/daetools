@@ -2023,6 +2023,19 @@ void daeVariableWrapper::SetValue(real_t value)
 }
 */
 
+size_t daeVariableWrapper::GetOverallIndex(void) const
+{
+    size_t index = m_pVariable->CalculateIndex(m_narrDomainIndexes);
+    return m_pVariable->m_nOverallIndex + index;
+}
+
+int daeVariableWrapper::GetVariableType(void) const
+{
+    size_t nOverallIndex = GetOverallIndex();
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pVariable->m_pModel->GetDataProxy();
+    return pDataProxy->GetVariableType(nOverallIndex);
+}
+
 real_t daeVariableWrapper::GetValue(void) const
 {
 	if(!m_pVariable)

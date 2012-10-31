@@ -324,14 +324,27 @@ class daeCodeGeneratorAnalyzer(object):
         sActions = []
         for action in actions:
             data = {}
-            data['Type']             = str(action.Type)
-            data['STN']              = action.STN.Name
-            data['STNCanonicalName'] = action.STN.CanonicalName
-            data['StateTo']          = action.StateTo.Name
-            data['SendEventPort']    = daeGetRelativeName(model, action.SendEventPort)
-            data['VariableWrapper']  = action.VariableWrapper
-            data['SetupNode']        = action.SetupNode
-            data['RuntimeNode']      = action.RuntimeNode
+            data['Type'] = str(action.Type)
+            if action.Type == eChangeState:
+                data['STN']              = action.STN.Name
+                data['STNCanonicalName'] = action.STN.CanonicalName
+                data['StateTo']          = action.StateTo.Name
+
+            elif action.Type == eSendEvent:
+                data['SendEventPort']    = daeGetRelativeName(model, action.SendEventPort)
+                data['VariableWrapper']  = action.VariableWrapper
+
+            elif action.Type == eReAssignOrReInitializeVariable:
+                data['VariableWrapper']       = action.VariableWrapper
+                data['SetupNode']             = action.SetupNode
+                data['RuntimeNode']           = action.RuntimeNode
+                data['DomainIndexes']         = action.VariableWrapper.DomainIndexes
+                data['VariableCanonicalName'] = action.VariableWrapper.Variable.CanonicalName
+                data['OverallIndex']          = action.VariableWrapper.OverallIndex
+                data['ID']                    = action.VariableWrapper.VariableType
+
+            elif action.Type == eUserDefinedAction:
+                raise RuntimeError('User defined actions are not supported')
        
             sActions.append(data)
 

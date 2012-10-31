@@ -154,15 +154,15 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    #from modelica import daeCodeGenerator_Modelica
-    #cg = daeCodeGenerator_Modelica()
-    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    from modelica import daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation, simulation.m.Name + '.mo')
 
-    import os
-    from ansi_c import daeCodeGenerator_ANSI_C
-    cg = daeCodeGenerator_ANSI_C()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
+    #import os
+    #from ansi_c import daeCodeGenerator_ANSI_C
+    #cg = daeCodeGenerator_ANSI_C()
+    #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    #cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
 
     # Run
     simulation.Run()

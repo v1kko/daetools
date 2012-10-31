@@ -144,6 +144,16 @@ daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
 	return daeArrayRange();
 }
 
+boost::python::list daeVariableWrapper_GetDomainIndexes(daeVariableWrapper &self)
+{
+    return getListFromVectorByValue(self.m_narrDomainIndexes);
+}
+
+daeVariable* daeVariableWrapper_GetVariable(daeVariableWrapper &self)
+{
+    return boost::ref(self.m_pVariable);
+}
+
 boost::python::object daeGetConfig(void)
 {
 	return boost::python::object( boost::ref(daeConfig::GetConfig()) );

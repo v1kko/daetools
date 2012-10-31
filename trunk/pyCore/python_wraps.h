@@ -82,7 +82,8 @@ string adouble_repr(const adouble& self);
 daeDomainIndex CreateDomainIndex(boost::python::object& o);
 daeArrayRange  CreateArrayRange(boost::python::object& o, daeDomain* pDomain);
 
-//void daeSaveModel(daeModel& rModel, string strFileName);
+boost::python::list daeVariableWrapper_GetDomainIndexes(daeVariableWrapper &self);
+daeVariable* daeVariableWrapper_GetVariable(daeVariableWrapper &self);
 
 boost::python::object daeGetConfig(void);
 bool        GetBoolean(daeConfig& self, const std::string& strPropertyPath);

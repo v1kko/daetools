@@ -25,15 +25,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAETOOLS_MODEL_H
 #define DAETOOLS_MODEL_H
 
+#include "auxiliary.h"
 #include "adouble.h"
-#include "matrix.h"
 
 #define _v_(i)   adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
 #define _dt_(i)  adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   adouble_(_current_time_, 0.0)
 
 void initial_conditions();
-void print_results(real_t _current_time_, real_t* _values_);
 int residuals(real_t _current_time_,
               real_t* _values_,
               real_t* _time_derivatives_,
@@ -44,7 +43,7 @@ int jacobian(long int _number_of_equations_,
              real_t* _values_,
              real_t* _time_derivatives_,
              real_t* _residuals_,
-             DAE_MATRIX _jacobian_matrix_);
+             matrix_t _jacobian_matrix_);
 int number_of_roots();
 int roots(real_t _current_time_,
           real_t* _values_,
@@ -99,11 +98,11 @@ int jacobian(long int _number_of_equations_,
              real_t* _values_,
              real_t* _time_derivatives_,
              real_t* _residuals_,
-             DAE_MATRIX _jacobian_matrix_)
+             matrix_t _jacobian_matrix_)
 {
     adouble _temp_;
     real_t _jacobianItem_;
-    int i, _ec_, _block_index_, _current_index_for_jacobian_evaluation_;
+    int _i_, _ec_, _block_index_, _current_index_for_jacobian_evaluation_;
 
     _ec_                                    = 0;
     _current_index_for_jacobian_evaluation_ = -1;
@@ -166,26 +165,16 @@ bool execute_actions(real_t _current_time_,
 {
     adouble _temp_;
     real_t _inverse_time_step_;
-    bool reinitializationNeeded;
+    bool _copy_values_to_solver_;
     int _current_index_for_jacobian_evaluation_;
 
     _inverse_time_step_                     = 0.0;
     _current_index_for_jacobian_evaluation_ = -1;
-    reinitializationNeeded                  = false;
+    _copy_values_to_solver_                 = false;
 
 %(executeActions)s
 
-    return reinitializationNeeded;
-}
-
-void print_results(real_t _current_time_, real_t* _values_)
-{
-    int i;
-    
-    printf("Results at time: %%12.5f\\n", _current_time_);
-    for(i = 0; i < _Neqns_; i++)
-        printf("%%s = %%20.14e\\n", _variable_names_[i], _values_[i]);
-    printf("\\n");
+    return _copy_values_to_solver_;
 }
 
 #endif
@@ -316,11 +305,13 @@ class daeCodeGenerator_ANSI_C(object):
 
             daetools_model_h = os.path.join(directory, 'daetools_model.h')
             if self.language == 'c':
-                shutil.copy2(os.path.join(code_generators_dir, 'main_c'),       os.path.join(directory, 'main.c'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_c'),  os.path.join(directory, 'adouble.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_c'),    os.path.join(directory, 'adouble.c'))
-                shutil.copy2(os.path.join(code_generators_dir, 'matrix_h_c'),   os.path.join(directory, 'matrix.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_c'), os.path.join(directory, '{0}.pro'.format(dirName)))
+                shutil.copy2(os.path.join(code_generators_dir, 'main_c'),        os.path.join(directory, 'main.c'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_c'),   os.path.join(directory, 'adouble.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'adouble_c'),     os.path.join(directory, 'adouble.c'))
+                shutil.copy2(os.path.join(code_generators_dir, 'typedefs_h_c'),  os.path.join(directory, 'typedefs.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'auxiliary_h_c'), os.path.join(directory, 'auxiliary.h'))
+                shutil.copy2(os.path.join(code_generators_dir, 'auxiliary_c'),   os.path.join(directory, 'auxiliary.c'))
+                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_c'),  os.path.join(directory, '{0}.pro'.format(dirName)))
             else:
                 shutil.copy2(os.path.join(code_generators_dir, 'main_cxx'),       os.path.join(directory, 'main.cpp'))
                 shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_cxx'),  os.path.join(directory, 'adouble.h'))
@@ -509,14 +500,14 @@ class daeCodeGenerator_ANSI_C(object):
                     str_indexes = self.exprFormatter.formatNumpyArray(block_indexes)
 
                     self.jacobians.append(s_indent + 'int _block_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
-                    self.jacobians.append(s_indent + 'for(i = 0; i < {0}; i++) {{'.format(n))
-                    self.jacobians.append(s_indent2 + '_block_index_ = _block_indexes_{0}[i];'.format(ID))
+                    self.jacobians.append(s_indent + 'for(_i_ = 0; _i_ < {0}; _i_++) {{'.format(n))
+                    self.jacobians.append(s_indent2 + '_block_index_ = _block_indexes_{0}[_i_];'.format(ID))
                     self.jacobians.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _block_index_;')
                     
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                     self.jacobians.append(s_indent2 + '_temp_ = {0};'.format(res))
                     self.jacobians.append(s_indent2 + '_jacobianItem_ = getDerivative(&_temp_);')
-                    self.jacobians.append(s_indent2 + 'setMatrixItem(_jacobian_matrix_, _ec_, _block_index_, _jacobianItem_);')
+                    self.jacobians.append(s_indent2 + '_set_matrix_item_(_jacobian_matrix_, _ec_, _block_index_, _jacobianItem_);')
 
                     self.jacobians.append(s_indent + '}')
                     self.jacobians.append(s_indent + '_ec_++;')
@@ -561,7 +552,7 @@ class daeCodeGenerator_ANSI_C(object):
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
 
@@ -573,7 +564,7 @@ class daeCodeGenerator_ANSI_C(object):
                         state_transition = state['StateTransitions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'else if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'else if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
 
@@ -603,7 +594,7 @@ class daeCodeGenerator_ANSI_C(object):
                     s_indent3 = (indent + 2) * self.defaultIndent
 
                     # 2. checkForDiscontinuities
-                    self.checkForDiscontinuities.append(s_indent2 + 'if(! compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name']))
+                    self.checkForDiscontinuities.append(s_indent2 + 'if(! _compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name']))
                     self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
                     self.checkForDiscontinuities.append(s_indent2 + '}')
                     self.checkForDiscontinuities.append(s_indent + '}')
@@ -653,7 +644,7 @@ class daeCodeGenerator_ANSI_C(object):
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
-                        temp = s_indent + 'if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
@@ -662,7 +653,7 @@ class daeCodeGenerator_ANSI_C(object):
                         self.rootFunctions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
-                        temp = s_indent + 'else if(compareStrings({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'else if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
@@ -757,14 +748,42 @@ class daeCodeGenerator_ANSI_C(object):
                 relativeName    = self.exprFormatter.formatIdentifier(relativeName)
                 stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_stn'
                 stateTo         = action['StateTo']
-                self.executeActions.append(s_indent + 'printf("The state {0} from {1} is active now.\\n");'.format(stateTo, stnVariableName))
+                self.executeActions.append(s_indent + '_log_message_("The state [{0}] in STN [{1}] is active now.\\n");'.format(stateTo, stnVariableName))
                 self.executeActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                pass
+                #raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                relativeName  = daeGetRelativeName(self.wrapperInstanceName, action['VariableCanonicalName'])
+                relativeName  = self.exprFormatter.formatIdentifier(relativeName)
+                domainIndexes = action['DomainIndexes']
+                overallIndex  = action['OverallIndex']
+                ID            = action['ID']
+                node          = action['RuntimeNode']
+                strDomainIndexes = ''
+                if len(domainIndexes) > 0:
+                    strDomainIndexes = '(' + ','.join() + ')'
+                variableName = relativeName + strDomainIndexes
+                value = self.exprFormatter.formatRuntimeNode(node)
+
+                self.executeActions.append(s_indent + '_log_message_("The variable [{0}] new value is [{1}] now.\\n");'.format(variableName, value))
+                self.executeActions.append(s_indent + '_temp_ = {0};'.format(value))
+
+                if ID == cnDifferential:
+                    # Write a new value directly into the _values_ array
+                    # All actions that need this variable will use a new value.
+                    # Is that what we want??? Should be...
+                    self.executeActions.append(s_indent + '_values_[{0}] = getValue(&_temp_);'.format(overallIndex))
+
+                elif ID == cnAssigned:
+                    self.executeActions.append(s_indent + '{0} = getValue(&_temp_);'.format(variableName))
+
+                else:
+                    raise RuntimeError('Cannot reset a value of the state variable: {0}'.format(relativeName))
+
+                self.executeActions.append(s_indent + '_copy_values_to_solver_ = true;')
 
             elif action['Type'] == 'eUserDefinedAction':
                 raise RuntimeError('Unsupported action: {0}'.format(action['Type']))

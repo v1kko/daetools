@@ -207,8 +207,12 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(init<daeVariable&, optional<string> >())
 		.def(init<adouble&, optional<string> >())
 
-		.def_readwrite("Name", &daeVariableWrapper::m_strName)  
-		.add_property("Value", &daeVariableWrapper::GetValue, &daeVariableWrapper::SetValue)
+		.def_readwrite("Name",         &daeVariableWrapper::m_strName)  
+		.add_property("Value",         &daeVariableWrapper::GetValue, &daeVariableWrapper::SetValue)
+        .add_property("OverallIndex",  &daeVariableWrapper::GetOverallIndex)
+        .add_property("VariableType",  &daeVariableWrapper::GetVariableType)
+        .add_property("DomainIndexes", &daepython::daeVariableWrapper_GetDomainIndexes)
+        .add_property("Variable",      make_function(&daepython::daeVariableWrapper_GetVariable, return_internal_reference<>()))
 	;
 
 	class_<daeConfig>("daeConfig")

@@ -84,7 +84,7 @@ class daeModelicaExpressionFormatter(daeExpressionFormatter):
         self.NOT   = 'not {value}'
 
         self.EQ    = '{leftValue} == {rightValue}'
-        self.NEQ   = '{leftValue} != {rightValue}'
+        self.NEQ   = '{leftValue} <> {rightValue}'
         self.LT    = '{leftValue} < {rightValue}'
         self.LTEQ  = '{leftValue} <= {rightValue}'
         self.GT    = '{leftValue} > {rightValue}'
@@ -178,7 +178,8 @@ class daeCodeGenerator_Modelica(object):
             raise RuntimeError('Invalid model object')
 
         self.parametersValues        = {}
-        self.assignedVariablesValues = {}
+        self.assignedVariables       = {}
+        self.assignedDistrVariables  = {}
         self.initialConditions       = {}
         self.initiallyActiveStates   = {}
         self.warnings                = []
@@ -203,7 +204,7 @@ class daeCodeGenerator_Modelica(object):
             raise RuntimeError('Invalid port object')
 
         self.parametersValues        = {}
-        self.assignedVariablesValues = {}
+        self.assignedVariables = {}
         self.initialConditions       = {}
         self.initiallyActiveStates   = {}
         self.warnings                = []
@@ -228,7 +229,8 @@ class daeCodeGenerator_Modelica(object):
             raise RuntimeError('Invalid simulation object')
 
         self.parametersValues        = {}
-        self.assignedVariablesValues = {}
+        self.assignedVariables       = {}
+        self.assignedDistrVariables  = {}
         self.initialConditions       = {}
         self.initiallyActiveStates   = {}
         self.warnings                = []
@@ -253,22 +255,24 @@ class daeCodeGenerator_Modelica(object):
         model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.exprFormatter.formatIdentifier(self.wrapperInstanceName))
         indent = ' ' * len(model_instance)
 
-        params        = ['{0} = {1}'     .format(key, value) for key, value in self.parametersValues.items()]
-        assigned_vars = ['{0}{1} = {2};' .format(s_indent, key, value) for key, value in self.assignedVariablesValues.items()]
-        init_conds    = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initialConditions.items()]
-        init_states   = ['{0}{1} := {2};'.format(s_indent, key, value) for key, value in self.initiallyActiveStates.items()]
+        params              = ['{0} = {1}'               .format(key, value) for key, value in self.parametersValues.items()]
+        assigned_vars       = ['{0}(fixed = true) = {1}' .format(key, value) for key, value in self.assignedVariables.items()]
+        assigned_distr_vars = ['{0}{1} = {2};'           .format(s_indent, key, value) for key, value in self.assignedDistrVariables.items()]
+        init_conds          = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in self.initialConditions.items()]
+        init_states         = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in self.initiallyActiveStates.items()]
 
-        params.sort(key=str.lower)
-        assigned_vars.sort(key=str.lower)
+        params_and_assigned_vars = params + assigned_vars
+        params_and_assigned_vars.sort(key=str.lower)
+        assigned_distr_vars.sort(key=str.lower)
         init_conds.sort(key=str.lower)
         init_states.sort(key=str.lower)
 
         join_format = ',\n%s' % indent
-        arguments = join_format.join(params)
+        arguments = join_format.join(params_and_assigned_vars)
 
         initial_equations = ''
-        if len(assigned_vars) > 0:
-            initial_equations  = 'equation\n/* Assigned variables (DOFs) */\n' + '\n'.join(assigned_vars)
+        if len(assigned_distr_vars) > 0:
+            initial_equations  = 'equation\n/* Assigned distributed variables */\n' + '\n'.join(assigned_distr_vars)
 
         if len(init_states) > 0 or len(init_conds) > 0:
             initial_equations += '\n\ninitial algorithm\n'
@@ -512,10 +516,6 @@ class daeCodeGenerator_Modelica(object):
             elif stn['Class'] == 'daeSTN':
                 stnVariableName = stn['Name'] + '_stn'
                 activeState     = stn['ActiveState']
-                #stateMap = {}
-                #for i, state in enumerate(stn['States']):
-                #    stateMap[state['Name']] = i
-                #sortedStateMap = sorted(stateMap.iteritems(), key=lambda x:x[1])
                 
                 sVariables.append(s_indent + '/* State transition network */')
                 sVariables.append(s_indent + 'String {0};'.format(stnVariableName))
@@ -563,13 +563,22 @@ class daeCodeGenerator_Modelica(object):
                 sActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                raise RuntimeError('SendEvent actions are not supported')
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                relativeName = daeGetRelativeName(self.wrapperInstanceName, action['VariableWrapper'].Variable.CanonicalName)
+                relativeName = self.exprFormatter.formatIdentifier(relativeName)
+                domainIndexes = action['VariableWrapper'].DomainIndexes
+                node          = action['RuntimeNode']
+                strDomainIndexes = ''
+                if len(domainIndexes) > 0:
+                    strDomainIndexes = '[' + ','.join() + ']'
+                variableName = relativeName + strDomainIndexes
+                value = self.exprFormatter.formatRuntimeNode(node)
+                sActions.append(s_indent + 'reinit({0}, {1});'.format(variableName, value))
 
             elif action['Type'] == 'eUserDefinedAction':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                raise RuntimeError('User defined actions are not supported')
 
             else:
                 pass
@@ -593,16 +602,17 @@ class daeCodeGenerator_Modelica(object):
 
         for variable in runtimeInformation['Variables']:
             canonicalName = self.exprFormatter.formatIdentifier(variable['CanonicalName'])
+            relativeName = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
+            relativeName = self.exprFormatter.formatIdentifier(relativeName)
             n = variable['NumberOfPoints']
             if n == 1:
                 ID    = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
                 value = float(variable['Values'])   # numpy float
-                name  = canonicalName
 
                 if ID == cnDifferential:
-                    self.initialConditions[name] = value
+                    self.initialConditions[canonicalName] = value
                 elif ID == cnAssigned:
-                    self.assignedVariablesValues[name] = value
+                    self.assignedVariables[relativeName] = value
 
             else:
                 for i in range(0, n):
@@ -616,7 +626,7 @@ class daeCodeGenerator_Modelica(object):
                     if ID == cnDifferential:
                         self.initialConditions[name] = value
                     elif ID == cnAssigned:
-                        self.assignedVariablesValues[name] = value
+                        self.equationsForAssignedVariables[name] = value
 
         for stn in runtimeInformation['STNs']:
             if stn['Class'] == 'daeSTN':

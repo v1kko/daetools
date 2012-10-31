@@ -2786,15 +2786,15 @@ public:
 public:
 	void Initialize(daeVariable* pVariable, std::string strName, const std::vector<size_t>& narrDomainIndexes);	
     string GetName(void) const;
+    size_t GetOverallIndex(void) const;
+    int GetVariableType(void) const;
     real_t GetValue(void) const;
     void SetValue(real_t value);
 
 public:
-	std::string							m_strName;
-	daeVariable*						m_pVariable;
-	std::vector<size_t>					m_narrDomainIndexes;
-//	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
-//	size_t								m_nOverallIndex;
+	std::string			m_strName;
+	daeVariable*		m_pVariable;
+	std::vector<size_t>	m_narrDomainIndexes;
 };
 
 /******************************************************************
