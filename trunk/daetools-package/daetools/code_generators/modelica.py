@@ -30,6 +30,9 @@ end %(model)s;
 
 wrapperTemplate = """\
 class %(model)s_simulation
+/* CODE GENERATOR WARNINGS:
+%(warnings)s
+*/
   annotation(experiment(StartTime = %(start_time)s, StopTime = %(end_time)s, Tolerance = %(tolerance)s));
   
 %(model_instance)s
@@ -189,13 +192,17 @@ class daeCodeGenerator_Modelica(object):
         indent   = 1
         s_indent = indent * self.defaultIndent
 
-        self.analyzer.analyzeModel(model)
-        result = self._processModel(model, indent)
+        data = self.analyzer.analyzeModel(model)
+        result = self._processModel(data, indent)
 
         if filename:
             f = open(filename, "w")
             f.write(result)
             f.close()
+
+        if len(self.warnings) > 0:
+            print 'CODE GENERATOR WARNINGS:'
+            print '\n'.join(self.warnings)
 
         return result
 
@@ -214,13 +221,17 @@ class daeCodeGenerator_Modelica(object):
         indent   = 1
         s_indent = indent * self.defaultIndent
 
-        self.analyzer.analyzePort(port)
-        result = self._processPort(port, indent)
+        data = self.analyzer.analyzePort(port)
+        result = self._processPort(data, indent)
 
         if filename:
             f = open(filename, "w")
             f.write(result)
             f.close()
+
+        if len(self.warnings) > 0:
+            print 'CODE GENERATOR WARNINGS:'
+            print '\n'.join(self.warnings)
 
         return result
 
@@ -252,6 +263,8 @@ class daeCodeGenerator_Modelica(object):
 
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
+        warnings = '\n'.join(self.warnings)
+        
         model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.exprFormatter.formatIdentifier(self.wrapperInstanceName))
         indent = ' ' * len(model_instance)
 
@@ -290,7 +303,8 @@ class daeCodeGenerator_Modelica(object):
                     'initial_equation' : initial_equations,
                     'start_time'       : 0.0,
                     'end_time'         : self.simulation.TimeHorizon,
-                    'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5)
+                    'tolerance'        : daeGetConfig().GetFloat('daetools.IDAS.relativeTolerance', 1e-5),
+                    'warnings'         : warnings
                     }
         resultWrapper = wrapperTemplate % dictModel
 
@@ -299,6 +313,10 @@ class daeCodeGenerator_Modelica(object):
             f.write(resultModel)
             f.write(resultWrapper)
             f.close()
+
+        if len(self.warnings) > 0:
+            print 'CODE GENERATOR WARNINGS:'
+            print warnings
 
         return resultModel, resultWrapper
 
@@ -542,7 +560,7 @@ class daeCodeGenerator_Modelica(object):
                         sWhens.extend(self._processActions(state_transition['Actions'], indent+1))
 
                     if len(state['NestedSTNs']) > 0:
-                        raise RuntimeError('Nested state transition networks (daeSTN) canot be exported to modelica')
+                        raise RuntimeError('Modelica code cannot be generated for nested state transition networks')
 
                 if len(sWhens) > 0:
                     sWhens.append(s_indent + 'end when;')
@@ -563,7 +581,7 @@ class daeCodeGenerator_Modelica(object):
                 sActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
-                raise RuntimeError('SendEvent actions are not supported')
+                self.warnings.append('Modelica code cannot be generated for SendEvent actions - the model will not work as expected!!')
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
                 relativeName = daeGetRelativeName(self.wrapperInstanceName, action['VariableWrapper'].Variable.CanonicalName)
@@ -578,7 +596,7 @@ class daeCodeGenerator_Modelica(object):
                 sActions.append(s_indent + 'reinit({0}, {1});'.format(variableName, value))
 
             elif action['Type'] == 'eUserDefinedAction':
-                raise RuntimeError('User defined actions are not supported')
+                self.warnings.append('Modelica code cannot be generated for UserDefined actions - the model will not work as expected!!')
 
             else:
                 pass

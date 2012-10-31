@@ -25,12 +25,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAETOOLS_MODEL_H
 #define DAETOOLS_MODEL_H
 
+/* CODE GENERATOR WARNINGS!!!
+%(warnings)s
+*/
+
 #include "auxiliary.h"
 #include "adouble.h"
 
-#define _v_(i)   adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
-#define _time_   adouble_(_current_time_, 0.0)
+#define _v_(i)   _adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _time_   _adouble_(_current_time_, 0.0)
 
 void initial_conditions();
 int residuals(real_t _current_time_,
@@ -183,8 +187,78 @@ bool execute_actions(real_t _current_time_,
 class daeANSICExpressionFormatter(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
+        self.indexBase                              = 0
+        self.useFlattenedNamesForAssignedVariables  = True
+        self.IDs                                    = {}
+        self.indexMap                               = {}
 
-        # Details will be set in set_ANSI_C()/set_CXX() functions
+        # Use relative names
+        self.useRelativeNames         = True
+        self.flattenIdentifiers       = True
+
+        self.domain                   = '_adouble_({domain}[{index}], 0)'
+
+        self.parameter                = '_adouble_({parameter}{indexes}, 0)'
+        self.parameterIndexStart      = '['
+        self.parameterIndexEnd        = ']'
+        self.parameterIndexDelimiter  = ']['
+
+        self.variable                 = '_v_({blockIndex})'
+        self.variableIndexStart       = ''
+        self.variableIndexEnd         = ''
+        self.variableIndexDelimiter   = ''
+
+        self.assignedVariable         = '_adouble_({variable}, 0)'
+
+        self.derivative               = '_dt_({blockIndex})'
+        self.derivativeIndexStart     = ''
+        self.derivativeIndexEnd       = ''
+        self.derivativeIndexDelimiter = ''
+
+        # Constants
+        self.constant = '_adouble_({value}, 0)'
+
+        # Logical operators
+        self.AND   = '_and_({leftValue}, {rightValue})'
+        self.OR    = '_or_({leftValue}, {rightValue})'
+        self.NOT   = '_not_({value})'
+
+        self.EQ    = '_eq_({leftValue}, {rightValue})'
+        self.NEQ   = '_neq_({leftValue}, {rightValue})'
+        self.LT    = '_lt_({leftValue}, {rightValue})'
+        self.LTEQ  = '_lteq_({leftValue}, {rightValue})'
+        self.GT    = '_gt_({leftValue}, {rightValue})'
+        self.GTEQ  = '_gteq_({leftValue}, {rightValue})'
+
+        # Mathematical operators
+        self.SIGN   = '_sign_({value})'
+
+        self.PLUS   = '_plus_({leftValue}, {rightValue})'
+        self.MINUS  = '_minus_({leftValue}, {rightValue})'
+        self.MULTI  = '_multi_({leftValue}, {rightValue})'
+        self.DIVIDE = '_divide_({leftValue}, {rightValue})'
+        self.POWER  = '_pow_({leftValue}, {rightValue})'
+
+        # Mathematical functions
+        self.SIN    = '_sin_({value})'
+        self.COS    = '_cos_({value})'
+        self.TAN    = '_tan_({value})'
+        self.ASIN   = '_asin_({value})'
+        self.ACOS   = '_acos_({value})'
+        self.ATAN   = '_atan_({value})'
+        self.EXP    = '_exp_({value})'
+        self.SQRT   = '_sqrt_({value})'
+        self.LOG    = '_log_({value})'
+        self.LOG10  = '_log10_({value})'
+        self.FLOOR  = '_floor_({value})'
+        self.CEIL   = '_ceil_({value})'
+        self.ABS    = '_abs_({value})'
+
+        self.MIN    = '_min_({leftValue}, {rightValue})'
+        self.MAX    = '_max_({leftValue}, {rightValue})'
+
+        # Current time in simulation
+        self.TIME   = '_time_'
 
     def formatNumpyArray(self, arr):
         if isinstance(arr, (numpy.ndarray, list)):
@@ -200,7 +274,6 @@ class daeCodeGenerator_ANSI_C(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '    '
-        self.language                = 'c++'
         self.warnings                = []
         self.topLevelModel           = None
         self.simulation              = None
@@ -226,15 +299,7 @@ class daeCodeGenerator_ANSI_C(object):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
-        directory     = kwargs.get('projectDirectory', None)
-        self.language = kwargs.get('language',        'c++')
-        
-        if self.language == 'c':
-            self.set_ANSI_C()
-        elif self.language == 'c++':
-            self.set_CXX()
-        else:
-            raise RuntimeError('Invalid language')
+        directory = kwargs.get('projectDirectory', None)
 
         self.assignedVariables       = []
         self.initialConditions       = []
@@ -278,6 +343,7 @@ class daeCodeGenerator_ANSI_C(object):
         checkDiscont   = '\n'.join(self.checkForDiscontinuities)
         execActionsDef = '\n'.join(self.executeActions)
         noRootsDef     = '\n'.join(self.numberOfRoots)
+        warnings       = '\n'.join(self.warnings)
 
         dictInfo = {
                         'model' : modelDef,
@@ -290,12 +356,13 @@ class daeCodeGenerator_ANSI_C(object):
                         'roots' : rootsDef,
                         'numberOfRoots' : noRootsDef,
                         'checkForDiscontinuities' : checkDiscont,
-                        'executeActions' : execActionsDef
+                        'executeActions' : execActionsDef,
+                        'warnings' : warnings
                    }
 
         results = mainTemplate % dictInfo;
 
-        code_generators_dir = os.path.join(os.path.dirname(__file__))
+        ansic_dir = os.path.join(os.path.dirname(__file__), 'ansic')
 
         # If the argument 'directory' is given create the folder and the project
         if directory:
@@ -304,174 +371,23 @@ class daeCodeGenerator_ANSI_C(object):
                 os.makedirs(directory)
 
             daetools_model_h = os.path.join(directory, 'daetools_model.h')
-            if self.language == 'c':
-                shutil.copy2(os.path.join(code_generators_dir, 'main_c'),        os.path.join(directory, 'main.c'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_c'),   os.path.join(directory, 'adouble.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_c'),     os.path.join(directory, 'adouble.c'))
-                shutil.copy2(os.path.join(code_generators_dir, 'typedefs_h_c'),  os.path.join(directory, 'typedefs.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'auxiliary_h_c'), os.path.join(directory, 'auxiliary.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'auxiliary_c'),   os.path.join(directory, 'auxiliary.c'))
-                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_c'),  os.path.join(directory, '{0}.pro'.format(dirName)))
-            else:
-                shutil.copy2(os.path.join(code_generators_dir, 'main_cxx'),       os.path.join(directory, 'main.cpp'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_h_cxx'),  os.path.join(directory, 'adouble.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'adouble_cxx'),    os.path.join(directory, 'adouble.cpp'))
-                shutil.copy2(os.path.join(code_generators_dir, 'matrix_h_cxx'),   os.path.join(directory, 'matrix.h'))
-                shutil.copy2(os.path.join(code_generators_dir, 'qt_project_cxx'), os.path.join(directory, '{0}.pro'.format(dirName)))
+            shutil.copy2(os.path.join(ansic_dir, 'main-dense.c'),   os.path.join(directory, 'main.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'adouble.h'),      os.path.join(directory, 'adouble.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'adouble.c'),      os.path.join(directory, 'adouble.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'typedefs.h'),     os.path.join(directory, 'typedefs.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.h'),    os.path.join(directory, 'auxiliary.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.c'),    os.path.join(directory, 'auxiliary.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'), os.path.join(directory, '{0}.pro'.format(dirName)))
 
             f = open(daetools_model_h, "w")
             f.write(results)
             f.close()
 
+        if len(self.warnings) > 0:
+            print 'CODE GENERATOR WARNINGS:'
+            print warnings
+        
         return results
-
-    def set_CXX(self):
-        self.exprFormatter.indexBase                              = 0
-        self.exprFormatter.useFlattenedNamesForAssignedVariables  = True
-        self.exprFormatter.IDs                                    = {}
-        self.exprFormatter.indexMap                               = {}
-
-        # Use relative names
-        self.exprFormatter.useRelativeNames         = True
-        self.exprFormatter.flattenIdentifiers       = True
-
-        self.exprFormatter.domain                   = 'adouble_({domain}[{index}])'
-
-        self.exprFormatter.parameter                = 'adouble_({parameter}{indexes})'
-        self.exprFormatter.parameterIndexStart      = '['
-        self.exprFormatter.parameterIndexEnd        = ']'
-        self.exprFormatter.parameterIndexDelimiter  = ']['
-
-        self.exprFormatter.variable                 = '_v_({blockIndex})'
-        self.exprFormatter.variableIndexStart       = ''
-        self.exprFormatter.variableIndexEnd         = ''
-        self.exprFormatter.variableIndexDelimiter   = ''
-
-        self.exprFormatter.assignedVariable         = 'adouble_({variable})'
-
-        self.exprFormatter.derivative               = '_dt_({blockIndex})'
-        self.exprFormatter.derivativeIndexStart     = ''
-        self.exprFormatter.derivativeIndexEnd       = ''
-        self.exprFormatter.derivativeIndexDelimiter = ''
-
-        # Constants
-        self.exprFormatter.constant = 'adouble_({value}, 0)'
-
-        # Logical operators
-        self.exprFormatter.AND   = '{leftValue} && {rightValue}'
-        self.exprFormatter.OR    = '{leftValue} || {rightValue}'
-        self.exprFormatter.NOT   = '! {value}'
-
-        self.exprFormatter.EQ    = '{leftValue} == {rightValue}'
-        self.exprFormatter.NEQ   = '{leftValue} != {rightValue}'
-        self.exprFormatter.LT    = '{leftValue} < {rightValue}'
-        self.exprFormatter.LTEQ  = '{leftValue} <= {rightValue}'
-        self.exprFormatter.GT    = '{leftValue} > {rightValue}'
-        self.exprFormatter.GTEQ  = '{leftValue} >= {rightValue}'
-
-        # Mathematical operators
-        self.exprFormatter.SIGN   = '-{value}'
-
-        self.exprFormatter.PLUS   = '{leftValue} + {rightValue}'
-        self.exprFormatter.MINUS  = '{leftValue} - {rightValue}'
-        self.exprFormatter.MULTI  = '{leftValue} * {rightValue}'
-        self.exprFormatter.DIVIDE = '{leftValue} / {rightValue}'
-        self.exprFormatter.POWER  = 'pow({leftValue}, {rightValue})'
-
-        # Mathematical functions
-        self.exprFormatter.SIN    = 'sin({value})'
-        self.exprFormatter.COS    = 'cos({value})'
-        self.exprFormatter.TAN    = 'tan({value})'
-        self.exprFormatter.ASIN   = 'asin({value})'
-        self.exprFormatter.ACOS   = 'acos({value})'
-        self.exprFormatter.ATAN   = 'atan({value})'
-        self.exprFormatter.EXP    = 'exp({value})'
-        self.exprFormatter.SQRT   = 'sqrt({value})'
-        self.exprFormatter.LOG    = 'log({value})'
-        self.exprFormatter.LOG10  = 'log10({value})'
-        self.exprFormatter.FLOOR  = 'floor({value})'
-        self.exprFormatter.CEIL   = 'ceil({value})'
-        self.exprFormatter.ABS    = 'abs({value})'
-
-        self.exprFormatter.MIN    = 'min({leftValue}, {rightValue})'
-        self.exprFormatter.MAX    = 'max({leftValue}, {rightValue})'
-
-        # Current time in simulation
-        self.exprFormatter.TIME   = '_time_'
-
-    def set_ANSI_C(self):
-        self.exprFormatter.indexBase                              = 0
-        self.exprFormatter.useFlattenedNamesForAssignedVariables  = True
-        self.exprFormatter.IDs                                    = {}
-        self.exprFormatter.indexMap                               = {}
-
-        # Use relative names
-        self.exprFormatter.useRelativeNames   = True
-        self.exprFormatter.flattenIdentifiers = True
-
-        self.exprFormatter.domain                   = 'adouble_({domain}[{index}], 0)'
-
-        self.exprFormatter.parameter                = 'adouble_({parameter}{indexes}, 0)'
-        self.exprFormatter.parameterIndexStart      = '['
-        self.exprFormatter.parameterIndexEnd        = ']'
-        self.exprFormatter.parameterIndexDelimiter  = ']['
-
-        self.exprFormatter.variable                 = '_v_({blockIndex})'
-        self.exprFormatter.variableIndexStart       = ''
-        self.exprFormatter.variableIndexEnd         = ''
-        self.exprFormatter.variableIndexDelimiter   = ''
-
-        self.exprFormatter.assignedVariable         = 'adouble_({variable}, 0)'
-
-        self.exprFormatter.derivative               = '_dt_({blockIndex})'
-        self.exprFormatter.derivativeIndexStart     = ''
-        self.exprFormatter.derivativeIndexEnd       = ''
-        self.exprFormatter.derivativeIndexDelimiter = ''
-
-        # Constants
-        self.exprFormatter.constant = 'adouble_({value}, 0)'
-
-        # Logical operators
-        self.exprFormatter.AND   = 'and_({leftValue}, {rightValue})'
-        self.exprFormatter.OR    = 'or_({leftValue}, {rightValue})'
-        self.exprFormatter.NOT   = 'not_({value})'
-
-        self.exprFormatter.EQ    = 'eq_({leftValue}, {rightValue})'
-        self.exprFormatter.NEQ   = 'neq_({leftValue}, {rightValue})'
-        self.exprFormatter.LT    = 'lt_({leftValue}, {rightValue})'
-        self.exprFormatter.LTEQ  = 'lteq_({leftValue}, {rightValue})'
-        self.exprFormatter.GT    = 'gt_({leftValue}, {rightValue})'
-        self.exprFormatter.GTEQ  = 'gteq_({leftValue}, {rightValue})'
-
-        # Mathematical operators
-        self.exprFormatter.SIGN   = 'sign_({value})'
-
-        self.exprFormatter.PLUS   = 'plus_({leftValue}, {rightValue})'
-        self.exprFormatter.MINUS  = 'minus_({leftValue}, {rightValue})'
-        self.exprFormatter.MULTI  = 'multi_({leftValue}, {rightValue})'
-        self.exprFormatter.DIVIDE = 'divide_({leftValue}, {rightValue})'
-        self.exprFormatter.POWER  = 'pow_({leftValue}, {rightValue})'
-
-        # Mathematical functions
-        self.exprFormatter.SIN    = 'sin_({value})'
-        self.exprFormatter.COS    = 'cos_({value})'
-        self.exprFormatter.TAN    = 'tan_({value})'
-        self.exprFormatter.ASIN   = 'asin_({value})'
-        self.exprFormatter.ACOS   = 'acos_({value})'
-        self.exprFormatter.ATAN   = 'atan_({value})'
-        self.exprFormatter.EXP    = 'exp_({value})'
-        self.exprFormatter.SQRT   = 'sqrt_({value})'
-        self.exprFormatter.LOG    = 'log_({value})'
-        self.exprFormatter.LOG10  = 'log10_({value})'
-        self.exprFormatter.FLOOR  = 'floor_({value})'
-        self.exprFormatter.CEIL   = 'ceil_({value})'
-        self.exprFormatter.ABS    = 'abs_({value})'
-
-        self.exprFormatter.MIN    = 'min_({leftValue}, {rightValue})'
-        self.exprFormatter.MAX    = 'max_({leftValue}, {rightValue})'
-
-        # Current time in simulation
-        self.exprFormatter.TIME   = '_time_'
 
     def _processEquations(self, Equations, indent):
         s_indent  = indent     * self.defaultIndent
@@ -482,7 +398,7 @@ class daeCodeGenerator_ANSI_C(object):
                 for eeinfo in equation['EquationExecutionInfos']:
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                     self.residuals.append(s_indent + '_temp_ = {0};'.format(res))
-                    self.residuals.append(s_indent + '_residuals_[_ec_++] = getValue(&_temp_);')
+                    self.residuals.append(s_indent + '_residuals_[_ec_++] = _getValue_(&_temp_);')
 
         elif self.equationGenerationMode == 'jacobian':
             for equation in Equations:
@@ -506,7 +422,7 @@ class daeCodeGenerator_ANSI_C(object):
                     
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                     self.jacobians.append(s_indent2 + '_temp_ = {0};'.format(res))
-                    self.jacobians.append(s_indent2 + '_jacobianItem_ = getDerivative(&_temp_);')
+                    self.jacobians.append(s_indent2 + '_jacobianItem_ = _getDerivative_(&_temp_);')
                     self.jacobians.append(s_indent2 + '_set_matrix_item_(_jacobian_matrix_, _ec_, _block_index_, _jacobianItem_);')
 
                     self.jacobians.append(s_indent + '}')
@@ -514,11 +430,6 @@ class daeCodeGenerator_ANSI_C(object):
 
     def _processSTNs(self, STNs, indent):
         s_indent = indent * self.defaultIndent
-        if self.language == 'c':
-            string_def = 'char*'
-        elif self.language == 'c++':
-            string_def = 'std::string'
-        
         for stn in STNs:
             nStates = len(stn['States'])
             if stn['Class'] == 'daeIF':
@@ -529,9 +440,8 @@ class daeCodeGenerator_ANSI_C(object):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                varTemplate = '{string_def} {name} = "{activeState}"; /* States: {states}; {description} */ \n'
-                self.initiallyActiveStates.append(varTemplate.format(string_def = string_def,
-                                                                     name = stnVariableName,
+                varTemplate = 'char* {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
                                                                      states = states,
                                                                      activeState = activeState,
                                                                      description = description))
@@ -613,10 +523,10 @@ class daeCodeGenerator_ANSI_C(object):
                     if state_transition: # For 'else' state has no state transitions
                         for expression in state_transition['Expressions']:
                             self.rootFunctions.append(s_indent + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
-                            self.rootFunctions.append(s_indent + '_roots_[_rc_++] = getValue(&_temp_);')
+                            self.rootFunctions.append(s_indent + '_roots_[_rc_++] = _getValue_(&_temp_);')
 
                     if len(state['NestedSTNs']) > 0:
-                        raise RuntimeError('Nested state transition networks (daeIF) canot be exported to c')
+                        raise RuntimeError('C code cannot be generated for nested state transition networks')
 
             elif stn['Class'] == 'daeSTN':
                 relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
@@ -626,9 +536,8 @@ class daeCodeGenerator_ANSI_C(object):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                varTemplate = '{string_def} {name} = "{activeState}"; /* States: {states}; {description} */ \n'
-                self.initiallyActiveStates.append(varTemplate.format(string_def = string_def,
-                                                                     name = stnVariableName,
+                varTemplate = 'char* {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
                                                                      states = states,
                                                                      activeState = activeState,
                                                                      description = description))
@@ -732,12 +641,12 @@ class daeCodeGenerator_ANSI_C(object):
                     for i, state_transition in enumerate(state['StateTransitions']):
                         for expression in state_transition['Expressions']:
                             self.rootFunctions.append(s_indent2 + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
-                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = getValue(&_temp_);')
+                            self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = _getValue_(&_temp_);')
 
                     self.rootFunctions.append(s_indent + '}')
 
                     if len(state['NestedSTNs']) > 0:
-                        raise RuntimeError('Nested state transition networks (daeSTN) canot be exported to c')
+                        raise RuntimeError('C code cannot be generated for nested state transition networks')
 
     def _processActions(self, Actions, indent):
         s_indent = indent * self.defaultIndent
@@ -752,8 +661,7 @@ class daeCodeGenerator_ANSI_C(object):
                 self.executeActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
-                pass
-                #raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                self.warnings.append('C code cannot be generated for SendEvent actions - the model will not work as expected!!')
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
                 relativeName  = daeGetRelativeName(self.wrapperInstanceName, action['VariableCanonicalName'])
@@ -775,10 +683,10 @@ class daeCodeGenerator_ANSI_C(object):
                     # Write a new value directly into the _values_ array
                     # All actions that need this variable will use a new value.
                     # Is that what we want??? Should be...
-                    self.executeActions.append(s_indent + '_values_[{0}] = getValue(&_temp_);'.format(overallIndex))
+                    self.executeActions.append(s_indent + '_values_[{0}] = _getValue_(&_temp_);'.format(overallIndex))
 
                 elif ID == cnAssigned:
-                    self.executeActions.append(s_indent + '{0} = getValue(&_temp_);'.format(variableName))
+                    self.executeActions.append(s_indent + '{0} = _getValue_(&_temp_);'.format(variableName))
 
                 else:
                     raise RuntimeError('Cannot reset a value of the state variable: {0}'.format(relativeName))
@@ -786,10 +694,10 @@ class daeCodeGenerator_ANSI_C(object):
                 self.executeActions.append(s_indent + '_copy_values_to_solver_ = true;')
 
             elif action['Type'] == 'eUserDefinedAction':
-                raise RuntimeError('Unsupported action: {0}'.format(action['Type']))
+                self.warnings.append('C code cannot be generated for UserDefined actions - the model will not work as expected!!')
 
             else:
-                pass
+                raise RuntimeError('Unknown action type')
 
     def _generateRuntimeInformation(self, runtimeInformation):
         Ntotal             = runtimeInformation['TotalNumberOfVariables']

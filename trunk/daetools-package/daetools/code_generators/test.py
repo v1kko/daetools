@@ -258,18 +258,6 @@ class simTutorial(daeSimulation):
         self.m.portOut.t1.AssignValue(2)
         self.m.portOut.t2.AssignValue(3)
 
-def export(simulation, objects_to_export):
-    pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)
-    cdae_model  = simulation.m.ExportObjects(objects_to_export, eCDAE)
-
-    file_pydae = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.py", "w")
-    file_cdae  = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.h",  "w")
-
-    file_pydae.write(pydae_model)
-    file_cdae.write(cdae_model)
-    file_pydae.close()
-    file_cdae.close()
-
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -315,18 +303,18 @@ def consoleRun():
     from modelica import daeCodeGenerator_Modelica
     cg = daeCodeGenerator_Modelica()
     cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
-    #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
-    #import os
-    #from ansi_c import daeCodeGenerator_ANSI_C
-    #cg = daeCodeGenerator_ANSI_C()
-    #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    #cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
+    import os
+    from ansi_c import daeCodeGenerator_ANSI_C
+    cg = daeCodeGenerator_ANSI_C()
+    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    cg.generateSimulation(simulation, projectDirectory = folder)
 
     # Run
-    simulation.Run()
-    simulation.Finalize()
+    #simulation.Run()
+    #simulation.Finalize()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

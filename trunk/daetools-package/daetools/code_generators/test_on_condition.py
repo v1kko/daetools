@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """********************************************************************************
-                             tutorial5.py
+                             test_on_condition.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -16,16 +16,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
 """
-In this example we use the same conduction problem as in the tutorial 1.
+In this example we use the same problem as in the tutorial 5.
 Here we introduce:
- - Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)
-
-Here, we have the similar problem as in the tutorial 4. The model is equivalent.
-Again we have a piece of copper (a plate) is at one side exposed to the source of heat
-and at the other to the surroundings. The process starts at the temperature of 283K.
-The metal is allowed to warm up, and then its temperature is kept in the interval
-[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal
-cools down slowly again to the ambient temperature.
+ - The event ports
+ - ON_CONDITION() function showing the new types of actions that can be executed 
+   during state transitions
+ - ON_EVENT() function showing the new types of actions that can be executed 
+   when an event is triggered
+ - User defined actions
 """
 
 import sys
@@ -34,7 +32,7 @@ from time import localtime, strftime
 
 # Standard variable types are defined in daeVariableTypes.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
-
+       
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -47,23 +45,20 @@ class modTutorial(daeModel):
 
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
+        self.event = daeVariable("event", no_t,          self, "Variable which value is set in ON_EVENT function")
+
+        # Here we create two event ports (inlet and outlet) and connect them.
+        # It makes no sense in reality, but this is example is just a show case - in the real application
+        # they would be defined in separate models.
+        # Event ports can be connected/disconnected at any time.
+        self.epIn  = daeEventPort("epIn",  eInletPort,  self, "Inlet event port")
+        self.epOut = daeEventPort("epOut", eOutletPort, self, "Outlet event port")
+        self.ConnectEventPorts(self.epIn, self.epOut)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
-        # Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
-        # Again, states MUST contain the SAME NUMBER OF EQUATIONS.
-        # First start with the call to STN("STN_Name") function from daeModel class.
-        # If you need to change active states in operating procedure in function Run()
-        # store the stn reference (here in the stnRegulator object).
-        # After that call, define your states by calling the function STATE("State1") and write
-        # equations that will be active if this state (called 'State1') is active.
-        # If there are state transitions, write them by calling the function SWITCH_TO("State2", 'condition').
-        # This function defines the condition when the state 'State2' becomes the active one.
-        # Repeat this procedure for all states in the state transition network.
-        # Finally call the function END_STN() to finalize the state transition network.
-        # Again, there is an optional argument eventTolerance of the function SWITCH_TO, as explained in tutorial 4.
         self.stnRegulator = self.STN("Regulator")
 
         self.STATE("Heating")
@@ -71,17 +66,42 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is on")
         eq.Residual = self.Qin() - Constant(1500 * W)
 
-        # Here the Time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("Cooling",   self.T() > Constant(340 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        """
+                                          ON_CONDITION() function
+        Arguments:
+          - Condition that triggers the actions
+          - 'switchTo' is the name of the state (in the current state transition network) that will be set active 
+             when the condition is satisified
+          - 'triggerEvents' is a list of python tuples (outlet-event-port, expression), 
+             where the first part is the event-port object and the second a value to be sent when the event is trigerred
+          - 'setVariableValues' is a list of python tuples (variable, expression); if the variable is differential it
+             will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
+          - 'userDefinedActions' is a list of user defined daeAction-derived objects
+        """
+        self.ON_CONDITION(self.T() > Constant(340*K),    switchTo           = 'Cooling',
+                                                         setVariableValues  = [ (self.event, 100) ], # event variable is dimensionless
+                                                         triggerEvents      = [],
+                                                         userDefinedActions = [] )
+
+        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [ (self.epOut, self.T() + Constant(5.0*K)) ],
+                                                    userDefinedActions = [] )
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T() < Constant(320 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        self.ON_CONDITION(self.T() < Constant(320*K),    switchTo           = 'Heating',
+                                                         setVariableValues  = [ (self.event, 200) ], # event variable is dimensionless
+                                                         triggerEvents      = [],
+                                                         userDefinedActions = [] )
+
+        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [ (self.epOut, self.T() + Constant(6.0*K)) ],
+                                                    userDefinedActions = [] )
 
         self.STATE("HeaterOff")
 
@@ -90,17 +110,24 @@ class modTutorial(daeModel):
 
         self.END_STN()
 
+        self.ON_EVENT(self.epIn, switchToStates     = [ ('Regulator', 'HeaterOff')],
+                                 setVariableValues  = [ (self.event, self.epIn()) ],
+                                 triggerEvents      = [],
+                                 userDefinedActions = [])
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("test_stn")
-        self.m.Description = "This tutorial explains how to define and use another type of discontinuous equations: " \
-                             "non-symmetric state transition networks (daeSTN). \n" \
-                             "A piece of copper (a plate) is at one side exposed to the source of heat and at the " \
-                             "other to the surroundings. The process starts at the temperature of the metal of 283K. " \
-                             "The metal is allowed to warm up, and then its temperature is kept in the interval " \
-                             "[320 - 340] for at least 350 seconds. After 350s the heat source is removed and the metal" \
-                             "cools down slowly again to the ambient temperature."
+        self.m = modTutorial("test_on_condition")
+        self.m.Description = "In this example we use the same problem as in the tutorial 5. \n" \
+                             "Here we introduce: \n" \
+                             "  - The event ports \n" \
+                             "  - ON_CONDITION() function showing the new types of actions that can be executed " \
+                             "during state transitions \n" \
+                             "  - ON_EVENT() function showing the new types of actions that can be executed " \
+                             "when an event is triggered \n" \
+                             "  - User defined actions" \
+
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.m.SetValue(1 * kg)
@@ -113,6 +140,7 @@ class simTutorial(daeSimulation):
         self.m.stnRegulator.ActiveState = "Heating"
 
         self.m.T.SetInitialCondition(283 * K)
+        self.m.event.AssignValue(0.0)
 
 
 # Use daeSimulator class
@@ -166,6 +194,14 @@ def consoleRun():
 
     # Run
     #simulation.Run()
+
+    # Print the list of events
+    #log.Message('Events occured at the {0} event port:'.format(simulation.m.epOut.CanonicalName), 0)
+    #log.Message(str(simulation.m.epOut.Events), 0)
+
+    #log.Message('Events occured at the {0} event port:'.format(simulation.m.epIn.CanonicalName), 0)
+    #log.Message(str(simulation.m.epIn.Events), 0)
+    
     #simulation.Finalize()
 
 if __name__ == "__main__":
