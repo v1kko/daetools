@@ -169,6 +169,16 @@ public:
     const adouble operator /(const adouble& a) const;
     friend DAE_CORE_API const adouble operator /(const real_t v, const adouble& a);
     friend DAE_CORE_API const adouble operator /(const adouble& a, const real_t v);
+
+    adouble& operator +=(const adouble& a);
+    adouble& operator -=(const adouble& a);
+    adouble& operator *=(const adouble& a);
+    adouble& operator /=(const adouble& a);
+    
+    adouble& operator +=(const real_t v);
+    adouble& operator -=(const real_t v);
+    adouble& operator *=(const real_t v);
+    adouble& operator /=(const real_t v);
     
     friend DAE_CORE_API const adouble dt(const adouble& a);
     friend DAE_CORE_API const adouble d(const adouble& a, daeDomain& domain);
@@ -208,8 +218,8 @@ public:
     friend DAE_CORE_API const adouble min(real_t v, const adouble &a);
     friend DAE_CORE_API const adouble min(const adouble &a, real_t v);
 
-    void operator =(const real_t v);
-    void operator =(const adouble& a);
+    adouble& operator =(const real_t v);
+    adouble& operator =(const adouble& a);
 
     daeCondition operator !=(const adouble&) const;
     daeCondition operator !=(const real_t) const;
@@ -487,7 +497,8 @@ public:
 											bool bAddFixed)							= 0;
 	virtual bool	IsLinear(void) const											= 0;
 	virtual bool	IsFunctionOfVariables(void) const								= 0;
-	
+    virtual bool    IsDifferential(void) const                                      = 0;
+    
 	static adNode*	CreateNode(const io::xmlTag_t* pTag);
 	static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
     static adNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNode>* ood = NULL);
@@ -534,7 +545,8 @@ public:
 	
 	virtual bool	IsLinear(void) const													= 0;
 	virtual bool	IsFunctionOfVariables(void) const										= 0;
-
+    virtual bool    IsDifferential(void) const                                              = 0;
+ 
 	static adNodeArray*	CreateNode(const io::xmlTag_t* pTag);
 	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNodeArray* node);
 	static adNodeArray*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNodeArray>* ood = NULL);

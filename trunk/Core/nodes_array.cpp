@@ -226,6 +226,10 @@ bool adNodeArrayImpl::IsFunctionOfVariables(void) const
 	return true;
 }
 
+bool adNodeArrayImpl::IsDifferential(void) const
+{
+    return false;
+}
 
 void adNodeArrayImpl::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 {	
@@ -2262,6 +2266,13 @@ bool adUnaryNodeArray::IsFunctionOfVariables(void) const
 	return node->IsFunctionOfVariables();
 }
 
+bool adUnaryNodeArray::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsDifferential();
+}
+
 /*********************************************************************************************
 	adBinaryNodeArray
 **********************************************************************************************/
@@ -2935,7 +2946,18 @@ bool adBinaryNodeArray::IsFunctionOfVariables(void) const
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 // If ANY of these two nodes is a function of variables return true
-	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables() );
+	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables());
+}
+
+bool adBinaryNodeArray::IsDifferential(void) const
+{
+    if(!left)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!right)
+		daeDeclareAndThrowException(exInvalidPointer);
+	
+// If ANY of these two nodes is a function of variables return true
+	return (left->IsDifferential() || right->IsDifferential());
 }
 
 /*********************************************************************************************
@@ -3304,6 +3326,13 @@ bool adSetupSpecialFunctionNode::IsFunctionOfVariables(void) const
 	return true;
 }
 
+bool adSetupSpecialFunctionNode::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsDifferential();
+}
+
 /*********************************************************************************************
 	adSetupExpressionDerivativeNode
 **********************************************************************************************/
@@ -3562,6 +3591,19 @@ void adSetupExpressionDerivativeNode::AddVariableIndexToArray(map<size_t, size_t
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adSetupExpressionDerivativeNode::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+    
+    // If it is not a function of variables then we have a derivative of a constant expression.
+    // Therefore, return false.
+    if(!node->IsFunctionOfVariables()) 
+        return false;
+    else
+        return true;
 }
 
 /*********************************************************************************************
@@ -4107,6 +4149,14 @@ void adSetupIntegralNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexe
 	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
+bool adSetupIntegralNode::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+    
+    return node->IsDifferential(); 
+}
+
 /*********************************************************************************************
 	adSingleNodeArray
 **********************************************************************************************/
@@ -4221,6 +4271,14 @@ void adSingleNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes,
 	if(!node)
 		daeDeclareAndThrowException(exInvalidPointer);
 	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adSingleNodeArray::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+    
+    return node->IsDifferential(); 
 }
 
 

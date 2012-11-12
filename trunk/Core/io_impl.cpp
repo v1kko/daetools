@@ -268,24 +268,14 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeDomainIn
 		pTag->AddTag(strEnumName, strUnknown);
 }
 
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeEquationDefinitionMode eValue)
+void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeEquationType eValue)
 {
-	if(eValue == eMemberFunctionPointer)
-		pTag->AddTag(strEnumName, string("eMemberFunctionPointer"));
-	else if(eValue == eResidualNode)
-		pTag->AddTag(strEnumName, string("eResidualNode"));
-	else
-		pTag->AddTag(strEnumName, strUnknown);
-}
-
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeEquationEvaluationMode eValue)
-{
-	if(eValue == eResidualNodeEvaluation)
-		pTag->AddTag(strEnumName, string("eResidualNodeEvaluation"));
-	else if(eValue == eFunctionEvaluation)
-		pTag->AddTag(strEnumName, string("eFunctionEvaluation"));
-	else if(eValue == eCommandStackEvaluation)
-		pTag->AddTag(strEnumName, string("eCommandStackEvaluation"));
+	if(eValue == eExplicitODE)
+		pTag->AddTag(strEnumName, string("eExplicitODE"));
+	else if(eValue == eImplicitODE)
+		pTag->AddTag(strEnumName, string("eImplicitODE"));
+    else if(eValue == eAlgebraic)
+		pTag->AddTag(strEnumName, string("eAlgebraic"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -581,32 +571,19 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDomainIndexTyp
 		eValue = eDITUnknown;
 }
 
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeEquationDefinitionMode& eValue)
+void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeEquationType& eValue)
 {
 	string strValue;	
 	pTag->Open(strEnumName, strValue);
 
-	if(strValue == "eMemberFunctionPointer")
-		eValue = eMemberFunctionPointer;
-	else if(strValue == "eResidualNode")
-		eValue = eResidualNode;
+	if(strValue == "eExplicitODE")
+		eValue = eExplicitODE;
+	else if(strValue == "eImplicitODE")
+		eValue = eImplicitODE;
+    else if(strValue == "eAlgebraic")
+		eValue = eAlgebraic;
 	else
-		eValue = eEDMUnknown;
-}
-
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeEquationEvaluationMode& eValue)
-{
-	string strValue;	
-	pTag->Open(strEnumName, strValue);
-
-	if(strValue == "eResidualNodeEvaluation")
-		eValue = eResidualNodeEvaluation;
-	else if(strValue == "eFunctionEvaluation")
-		eValue = eFunctionEvaluation;
-	else if(strValue == "eCommandStackEvaluation")
-		eValue = eCommandStackEvaluation;
-	else
-		eValue = eEEMUnknown;
+		eValue = eETUnknown;
 }
 
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeSpecialUnaryFunctions& eValue)

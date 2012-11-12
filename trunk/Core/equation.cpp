@@ -2,6 +2,7 @@
 #include "coreimpl.h"
 #include "nodes.h"
 #include "xmlfunctions.h"
+#include <typeinfo>
 
 namespace dae 
 {
@@ -130,6 +131,11 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 adNode* daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr(void) const
 {
 	return m_EquationEvaluationNode.get();
+}
+
+daeeEquationType daeEquationExecutionInfo::GetEquationType(void) const
+{
+    return DetectEquationType(m_EquationEvaluationNode);
 }
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
@@ -641,11 +647,9 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 *******************************************************************/
 daeEquation::daeEquation()
 {
-	m_dScaling                = 1.0;
-	m_pParentState			  = NULL;
-	m_pModel			      = NULL;
-	m_eEquationDefinitionMode = eEDMUnknown;
-	m_eEquationEvaluationMode = eEEMUnknown;
+	m_dScaling      = 1.0;
+	m_pParentState	= NULL;
+	m_pModel		= NULL;
 }
 
 daeEquation::~daeEquation()
@@ -654,9 +658,7 @@ daeEquation::~daeEquation()
 
 void daeEquation::Clone(const daeEquation& rObject)
 {
-	m_eEquationDefinitionMode  = rObject.m_eEquationDefinitionMode;
-	m_eEquationEvaluationMode  = rObject.m_eEquationEvaluationMode;
-	m_pResidualNode			   = rObject.m_pResidualNode;
+	m_pResidualNode	= rObject.m_pResidualNode;
 	
 	for(size_t i = 0; i < rObject.m_ptrarrDistributedEquationDomainInfos.size(); i++)
 	{
@@ -683,18 +685,9 @@ void daeEquation::Open(io::xmlTag_t* pTag)
 
 	daeObject::Open(pTag);
 
-	strName = "EquationDefinitionMode";
-	OpenEnum(pTag, strName, m_eEquationDefinitionMode);
-
-	strName = "EquationEvaluationMode";
-	OpenEnum(pTag, strName, m_eEquationEvaluationMode);
-
-	if(m_eEquationDefinitionMode == eResidualNode)
-	{
-		strName = "Expression";
-		adNode* node = adNode::OpenNode(pTag, strName);
-		m_pResidualNode.reset(node);
-	}
+    strName = "Expression";
+    adNode* node = adNode::OpenNode(pTag, strName);
+    m_pResidualNode.reset(node);
 
 	strName = "DistributedDomainInfos";
 	daeSetModelAndCanonicalNameDelegate<daeDistributedEquationDomainInfo> del(this, m_pModel);
@@ -707,20 +700,14 @@ void daeEquation::Save(io::xmlTag_t* pTag) const
 
 	daeObject::Save(pTag);
 
-	strName = "EquationDefinitionMode";
-	SaveEnum(pTag, strName, m_eEquationDefinitionMode);
+	strName = "EquationType";
+	SaveEnum(pTag, strName, GetEquationType());
 
-	strName = "EquationEvaluationMode";
-	SaveEnum(pTag, strName, m_eEquationEvaluationMode);
+    strName = "Expression";
+    adNode::SaveNode(pTag, strName, m_pResidualNode.get());
 
-	if(m_eEquationDefinitionMode == eResidualNode)
-	{
-		strName = "Expression";
-		adNode::SaveNode(pTag, strName, m_pResidualNode.get());
-
-		strName = "MathML";
-		SaveNodeAsMathML(pTag, strName);
-	}
+    strName = "MathML";
+    SaveNodeAsMathML(pTag, strName);
 
 	strName = "DistributedDomainInfos";
 	pTag->SaveObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
@@ -831,12 +818,12 @@ void daeEquation::OpenRuntime(io::xmlTag_t* pTag)
 //	daeObject::OpenRuntime(pTag);
 
 //	strName = "EquationDefinitionMode";
-//	OpenEnum(pTag, strName, m_eEquationDefinitionMode);
+//	OpenEnum(pTag, strName, m_eEquationType);
 
 //	strName = "EquationEvaluationMode";
 //	OpenEnum(pTag, strName, m_eEquationEvaluationMode);
 
-//	if(m_eEquationDefinitionMode == eResidualNode)
+//	if(m_eEquationType == eResidualNode)
 //	{
 //		strName = "MathML";
 //		adNode* node = adNode::OpenNode(pTag, strName);
@@ -855,16 +842,13 @@ void daeEquation::SaveRuntime(io::xmlTag_t* pTag) const
 	daeObject::SaveRuntime(pTag);
 
 //	strName = "EquationDefinitionMode";
-//	SaveEnum(pTag, strName, m_eEquationDefinitionMode);
+//	SaveEnum(pTag, strName, m_eEquationType);
 
 //	strName = "EquationEvaluationMode";
 //	SaveEnum(pTag, strName, m_eEquationEvaluationMode);
 
-	if(m_eEquationDefinitionMode == eResidualNode)
-	{
-		strName = "MathML";
-		SaveNodeAsMathML(pTag, strName);
-	}
+	strName = "MathML";
+	SaveNodeAsMathML(pTag, strName);
 
 //	strName = "DistributedDomainInfos";
 //	pTag->SaveRuntimeObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
@@ -1134,33 +1118,9 @@ void daeEquation::SetResidualValue(size_t nEquationIndex, real_t dResidual, daeB
 	pBlock->SetResidual(nEquationIndex, dResidual);
 }
 
-daeeEquationDefinitionMode daeEquation::GetEquationDefinitionMode(void) const
+daeeEquationType daeEquation::GetEquationType(void) const
 {
-	return m_eEquationDefinitionMode;
-}
-
-daeeEquationEvaluationMode daeEquation::GetEquationEvaluationMode(void) const
-{
-	return m_eEquationEvaluationMode;
-}
-
-void daeEquation::SetEquationEvaluationMode(daeeEquationEvaluationMode eMode)
-{
-	if(m_eEquationDefinitionMode == eMemberFunctionPointer)
-	{
-	// Everything is fine, just anymode can be chosen
-	}
-	else if(m_eEquationDefinitionMode == eResidualNode)
-	{
-		if(eMode == eFunctionEvaluation)
-			daeDeclareAndThrowException(exInvalidCall);
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
-
-	m_eEquationEvaluationMode = eMode;
+    return DetectEquationType(m_pResidualNode);
 }
 
 void daeEquation::SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock)
@@ -1169,71 +1129,6 @@ void daeEquation::SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, 
 		daeDeclareAndThrowException(exInvalidPointer);
 	pBlock->SetJacobian(nEquationIndex, nVariableIndex, dJacobValue);
 }
-
-/*
-adouble daeEquation::Calculate()
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble daeEquation::Calculate(size_t nDomain1)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble daeEquation::Calculate(size_t nDomain1, size_t nDomain2)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall);
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-
-adouble	daeEquation::Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8)
-{
-// Should never be called! (must be overloaded in derived classes)
-	daeDeclareAndThrowException(exInvalidCall)
-	return adouble();
-}
-*/
 
 void daeEquation::InitializeDEDIs(void)
 {
@@ -1253,7 +1148,6 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	adouble ad;
 	size_t nNumberOfDomains = m_ptrarrDistributedEquationDomainInfos.size();
 	if(nNumberOfDomains != narrDomainIndexes.size())
 	{	
@@ -1261,303 +1155,12 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
 		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
 		throw e;
 	}
+    
+    for(size_t i = 0; i < nNumberOfDomains; i++)
+        m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = narrDomainIndexes[i];
 
-	if(m_eEquationDefinitionMode == eResidualNode)
-	{
-		for(size_t i = 0; i < nNumberOfDomains; i++)
-			m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = narrDomainIndexes[i];
-
-		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
-			node = m_pResidualNode->Evaluate(&EC).node;
-		else
-			daeDeclareAndThrowException(exInvalidCall);
-	}
-	else if(m_eEquationDefinitionMode == eMemberFunctionPointer)
-	{
-//		if(nNumberOfDomains == 0)
-//		{
-//			ad = Calculate();
-//		}
-//		else if(nNumberOfDomains == 1)
-//		{
-//			ad = Calculate(narrDomainIndexes[0]);
-//		}
-//		else if(nNumberOfDomains == 2)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1]);
-//		}
-//		else if(nNumberOfDomains == 3)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2]);
-//		}
-//		else if(nNumberOfDomains == 4)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2], 
-//						   narrDomainIndexes[3]);
-//		}
-//		else if(nNumberOfDomains == 5)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2], 
-//						   narrDomainIndexes[3], 
-//						   narrDomainIndexes[4]);
-//		}
-//		else if(nNumberOfDomains == 6)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2], 
-//						   narrDomainIndexes[3], 
-//						   narrDomainIndexes[4], 
-//						   narrDomainIndexes[5]);
-//		}
-//		else if(nNumberOfDomains == 7)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2], 
-//						   narrDomainIndexes[3], 
-//						   narrDomainIndexes[4], 
-//						   narrDomainIndexes[5], 
-//						   narrDomainIndexes[6]);
-//		}
-//		else if(nNumberOfDomains == 8)
-//		{
-//			ad = Calculate(narrDomainIndexes[0], 
-//						   narrDomainIndexes[1], 
-//						   narrDomainIndexes[2], 
-//						   narrDomainIndexes[3], 
-//						   narrDomainIndexes[4], 
-//						   narrDomainIndexes[5], 
-//						   narrDomainIndexes[6], 
-//						   narrDomainIndexes[7]);
-//		}
-//		else
-//		{	
-//			daeDeclareException(exInvalidCall);
-//			e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
-//			throw e;
-//		}
-
-//		if(m_eEquationEvaluationMode == eResidualNodeEvaluation)
-//			node = ad.node;
-//		else if(m_eEquationEvaluationMode == eCommandStackEvaluation)
-//			node = ad.node;
-	}
-	else
-	{
-		daeDeclareAndThrowException(exInvalidCall)
-	}
+    node = m_pResidualNode->Evaluate(&EC).node;
 }
-
-/*
-void daeEquation::Residual(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t nNumberOfDomains = m_ptrarrDistributedEquationDomainInfos.size();
-	if(nNumberOfDomains != narrDomainIndexes.size())
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
-		throw e;
-	}
-
-	adouble __ad;
-
-	if(nNumberOfDomains == 0)
-	{
-		__ad = Calculate();
-	}
-	else if(nNumberOfDomains == 1)
-	{
-		__ad = Calculate(narrDomainIndexes[0]);
-	}
-	else if(nNumberOfDomains == 2)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1]);
-	}
-	else if(nNumberOfDomains == 3)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2]);
-	}
-	else if(nNumberOfDomains == 4)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2], 
-						 narrDomainIndexes[3]);
-	}
-	else if(nNumberOfDomains == 5)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2], 
-						 narrDomainIndexes[3], 
-						 narrDomainIndexes[4]);
-	}
-	else if(nNumberOfDomains == 6)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2], 
-						 narrDomainIndexes[3], 
-						 narrDomainIndexes[4], 
-						 narrDomainIndexes[5]);
-	}
-	else if(nNumberOfDomains == 7)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2], 
-						 narrDomainIndexes[3], 
-						 narrDomainIndexes[4], 
-						 narrDomainIndexes[5], 
-						 narrDomainIndexes[6]);
-	}
-	else if(nNumberOfDomains == 8)
-	{
-		__ad = Calculate(narrDomainIndexes[0], 
-			             narrDomainIndexes[1], 
-						 narrDomainIndexes[2], 
-						 narrDomainIndexes[3], 
-						 narrDomainIndexes[4], 
-						 narrDomainIndexes[5], 
-						 narrDomainIndexes[6], 
-						 narrDomainIndexes[7]);
-	}
-	else
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "Maximal number of domains is 8, equation [ " << GetCanonicalName() << "]";
-		throw e;
-	}
-
-	SetResidualValue(EC.m_pEquationExecutionInfo->m_nEquationIndexInBlock, __ad.getValue(), EC.m_pBlock);
-}
-
-void daeEquation::Jacobian(const vector<size_t>& narrDomainIndexes, const map<size_t, size_t>& mapIndexes, daeExecutionContext& EC)
-{
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-
-	size_t nNumberOfDomains = m_ptrarrDistributedEquationDomainInfos.size();
-	if(nNumberOfDomains != narrDomainIndexes.size())
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
-		throw e;
-	}
-
-	adouble __ad;
-	size_t nEquationIndex, nVariableindexInBlock;
-	map<size_t, size_t>::iterator iter;
-	daeExecutionContext* pEC;
-	map<size_t, size_t>::const_iterator iter_out, iter_in;
-
-	nEquationIndex = EC.m_pEquationExecutionInfo->m_nEquationIndexInBlock;
-	for(iter_out = mapIndexes.begin(); iter_out != mapIndexes.end(); iter_out++)
-	{
-		nVariableindexInBlock										= (*iter_out).second;
-		EC.m_nCurrentVariableIndexForJacobianEvaluation				= (*iter_out).first;
-		EC.m_pBlock->m_nCurrentVariableIndexForJacobianEvaluation	= (*iter_out).first;
-
-		for(iter_in = mapIndexes.begin(); iter_in != mapIndexes.end(); iter_in++)
-		{
-			pEC = m_pModel->m_pDataProxy->GetExecutionContext((*iter_in).first);
-			pEC->m_pBlock										= EC.m_pBlock;
-			pEC->m_dInverseTimeStep								= EC.m_dInverseTimeStep;
-			pEC->m_pEquationExecutionInfo						= EC.m_pEquationExecutionInfo;
-			pEC->m_eEquationCalculationMode						= EC.m_eEquationCalculationMode;
-			pEC->m_nCurrentVariableIndexForJacobianEvaluation	= EC.m_nCurrentVariableIndexForJacobianEvaluation;
-		}
-
-		if(nNumberOfDomains == 0)
-		{
-			__ad = Calculate();
-		}
-		else if(nNumberOfDomains == 1)
-		{
-			__ad = Calculate(narrDomainIndexes[0]);
-		}
-		else if(nNumberOfDomains == 2)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-				             narrDomainIndexes[1]);
-		}
-		else if(nNumberOfDomains == 3)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-				             narrDomainIndexes[1], 
-							 narrDomainIndexes[2]);
-		}
-		else if(nNumberOfDomains == 4)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-				             narrDomainIndexes[1], 
-							 narrDomainIndexes[2], 
-							 narrDomainIndexes[3]);
-		}
-		else if(nNumberOfDomains == 5)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-				             narrDomainIndexes[1], 
-							 narrDomainIndexes[2], 
-							 narrDomainIndexes[3], 
-							 narrDomainIndexes[4]);
-		}
-		else if(nNumberOfDomains == 6)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-							 narrDomainIndexes[1], 
-							 narrDomainIndexes[2], 
-							 narrDomainIndexes[3], 
-							 narrDomainIndexes[4], 
-							 narrDomainIndexes[5]);
-		}
-		else if(nNumberOfDomains == 7)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-							 narrDomainIndexes[1], 
-							 narrDomainIndexes[2], 
-							 narrDomainIndexes[3], 
-							 narrDomainIndexes[4], 
-							 narrDomainIndexes[5], 
-							 narrDomainIndexes[6]);
-		}
-		else if(nNumberOfDomains == 8)
-		{
-			__ad = Calculate(narrDomainIndexes[0], 
-							 narrDomainIndexes[1], 
-							 narrDomainIndexes[2], 
-							 narrDomainIndexes[3], 
-							 narrDomainIndexes[4], 
-							 narrDomainIndexes[5], 
-							 narrDomainIndexes[6], 
-							 narrDomainIndexes[7]);
-		}
-		else
-		{	
-			daeDeclareException(exInvalidCall);
-			e << "Maximal number of domains is 8, equation [ " << GetCanonicalName() << "]";
-			throw e;
-		}
-		SetJacobianItem(nEquationIndex, nVariableindexInBlock, __ad.getDerivative(), EC.m_pBlock);
-	}
-}
-*/
 
 daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds)
 {
@@ -1621,9 +1224,7 @@ void daeEquation::SetResidual(adouble res)
 		throw e;
 	}
 
-	m_eEquationDefinitionMode = eResidualNode;
-	m_eEquationEvaluationMode = eResidualNodeEvaluation;
-	m_pResidualNode           = res.node;
+	m_pResidualNode = res.node;
 }
 
 adouble daeEquation::GetResidual(void) const
@@ -1657,28 +1258,8 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 	if(!daeObject::CheckObject(strarrErrors))
 		bCheck = false;
 
-// Check definition/evaluation modes	
-	if(m_eEquationDefinitionMode == eEDMUnknown)
-	{
-		strError = "Invalid definition mode in equation [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-	if(m_eEquationEvaluationMode == eEEMUnknown)
-	{
-		strError = "Invalid evaluation mode in equation [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-	if(m_eEquationDefinitionMode == eResidualNode && m_eEquationEvaluationMode == eFunctionEvaluation)
-	{
-		strError = "Incompatible definition/evaluation modes in equation [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
-
 // Check residual node	
-	if(m_eEquationDefinitionMode == eResidualNode && !m_pResidualNode)
+	if(!m_pResidualNode)
 	{
 		strError = "Invalid residual in equation [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
@@ -1740,8 +1321,6 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 **********************************************************************************************/
 daePortEqualityEquation::daePortEqualityEquation(void)
 {
-	m_eEquationDefinitionMode = eEDMUnknown;
-	m_eEquationEvaluationMode = eEEMUnknown;
 }
 
 daePortEqualityEquation::~daePortEqualityEquation(void)
@@ -1757,8 +1336,6 @@ void daePortEqualityEquation::Initialize(daeVariable* pLeft, daeVariable* pRight
 
 	m_pLeft  = pLeft;
 	m_pRight = pRight;
-	m_eEquationDefinitionMode = eResidualNode;
-	m_eEquationEvaluationMode = eResidualNodeEvaluation;
 }
 
 void daePortEqualityEquation::Open(io::xmlTag_t* pTag)

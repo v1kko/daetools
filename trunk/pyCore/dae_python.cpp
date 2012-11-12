@@ -178,6 +178,22 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eUserDefinedAction",                dae::core::eUserDefinedAction)
         .export_values()
     ;
+
+    enum_<daeeEquationType>("daeeEquationType")
+        .value("eETUnknown",	dae::core::eETUnknown)
+        .value("eExplicitODE",	dae::core::eExplicitODE)
+        .value("eImplicitODE",  dae::core::eImplicitODE)
+        .value("eAlgebraic",    dae::core::eAlgebraic)
+        .export_values()
+    ;
+    
+    enum_<daeeModelType>("daeeModelType")
+        .value("eMTUnknown",	dae::core::eMTUnknown)
+        .value("eSteadyState",	dae::core::eSteadyState)
+        .value("eODE",          dae::core::eODE)
+        .value("eDAE",          dae::core::eDAE)
+        .export_values()
+    ;
     
 /**************************************************************
 	Global functions
@@ -1102,6 +1118,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections)
 		.add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode)
 		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic)
+        .add_property("ModelType",	   		    &daeModel::GetModelType)
 
 		.def("__str__",          &daepython::daeModel_str)  
 		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation1, return_internal_reference<>())
@@ -1140,6 +1157,7 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", no_init)
         .add_property("Node",	          make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()))
         .add_property("VariableIndexes",  &daepython::daeEquationExecutionInfo_GetVariableIndexes)
+        .add_property("EquationType",	  &daeEquationExecutionInfo::GetEquationType)
     ;
     
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation")
@@ -1147,6 +1165,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Scaling",                        &daeEquation::GetScaling,  &daeEquation::SetScaling)
         .add_property("EquationExecutionInfos",	        &daepython::daeEquation_GetEquationExecutionInfos)
         .add_property("DistributedEquationDomainInfos",	&daepython::daeEquation_DistributedEquationDomainInfos)
+        .add_property("EquationType",	                &daeEquation::GetEquationType)
             
 		.def("__str__",				&daepython::daeEquation_str)
 		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain1, return_internal_reference<>())

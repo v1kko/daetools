@@ -25,6 +25,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAETOOLS_MODEL_H
 #define DAETOOLS_MODEL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* CODE GENERATOR WARNINGS!!!
 %(warnings)s
 */
@@ -180,6 +184,10 @@ bool execute_actions(real_t _current_time_,
 
     return _copy_values_to_solver_;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 """
@@ -397,6 +405,7 @@ class daeCodeGenerator_ANSI_C(object):
             for equation in Equations:
                 for eeinfo in equation['EquationExecutionInfos']:
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
+                    self.residuals.append(s_indent + '/* Equation type: ' + eeinfo['EquationType'] + ' */')
                     self.residuals.append(s_indent + '_temp_ = {0};'.format(res))
                     self.residuals.append(s_indent + '_residuals_[_ec_++] = _getValue_(&_temp_);')
 

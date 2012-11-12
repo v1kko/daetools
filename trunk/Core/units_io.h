@@ -131,11 +131,17 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 {
 	if(eLanguage == eCDAE)
 	{
-		return (boost::format("%1% * (%2%)") % q.getValue() % Export(eLanguage, c, q.getUnits())).str();
+        if(q.getUnits() == unit())
+    		return (boost::format("Constant(%1%)") % q.getValue()).str();
+        else
+            return (boost::format("Constant(%1% * (%2%))") % q.getValue() % Export(eLanguage, c, q.getUnits())).str();
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		return (boost::format("%1% * (%2%)") % q.getValue() % Export(eLanguage, c, q.getUnits())).str();
+        if(q.getUnits() == unit())
+    		return (boost::format("Constant(%1%)") % q.getValue()).str();
+		else
+            return (boost::format("Constant(%1% * (%2%))") % q.getValue() % Export(eLanguage, c, q.getUnits())).str();
 	}
 	else
 	{

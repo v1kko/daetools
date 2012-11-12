@@ -133,6 +133,62 @@ const adouble adouble::operator + (const adouble& a) const
     return tmp;
 }
 
+adouble& adouble::operator +=(const adouble& a)
+{
+    adouble tmp = (*this) + a;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator -=(const adouble& a)
+{
+    adouble tmp = (*this) - a;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator *=(const adouble& a)
+{
+    adouble tmp = (*this) * a;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator /=(const adouble& a)
+{
+    adouble tmp = (*this) / a;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator +=(const real_t v)
+{
+    adouble tmp = (*this) + v;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator -=(const real_t v)
+{
+    adouble tmp = (*this) - v;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator *=(const real_t v)
+{
+    adouble tmp = (*this) * v;   
+    *this = tmp;
+    return *this;
+}
+
+adouble& adouble::operator /=(const real_t v)
+{
+    adouble tmp = (*this) / v;   
+    *this = tmp;
+    return *this;
+}
+
 const adouble operator +(const real_t v, const adouble& a) 
 {
     adouble tmp;
@@ -977,7 +1033,7 @@ const adouble Constant(real_t c)
 	return Constant(q);
 }
 
-void adouble::operator =(const real_t v) 
+adouble& adouble::operator =(const real_t v) 
 {
 	//if(getGatherInfo())
 	//{
@@ -986,9 +1042,11 @@ void adouble::operator =(const real_t v)
 	//}
     m_dValue = v;
     m_dDeriv = 0.0;
+    
+    return *this;
 }
 
-void adouble::operator =(const adouble& a) 
+adouble& adouble::operator =(const adouble& a) 
 {
 	if(m_bGatherInfo || a.getGatherInfo())
 	{
@@ -997,6 +1055,8 @@ void adouble::operator =(const adouble& a)
 	}
     m_dValue = a.m_dValue;
     m_dDeriv = a.m_dDeriv;
+    
+    return *this;
 }
 
 daeCondition adouble::operator != (const adouble &a) const 

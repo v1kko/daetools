@@ -34,7 +34,10 @@ public:
 	void ExportAsLatex(string strFileName);
 	bool IsLinear(void) const;
 	bool IsFunctionOfVariables(void) const;
+    bool IsDifferential(void) const;
 };
+
+daeeEquationType DetectEquationType(adNodePtr node);
 
 /*********************************************************************************************
 	adConstantNode
@@ -245,6 +248,7 @@ public:
 	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
 public:
 // Runtime part
@@ -322,6 +326,7 @@ public:
 	virtual bool	IsFunctionOfVariables(void) const;
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
     adNode* getNodeRawPtr() const 
 	{
@@ -357,6 +362,7 @@ public:
 	virtual bool	IsFunctionOfVariables(void) const;
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
     
     adNode* getLeftRawPtr() const 
 	{
@@ -620,6 +626,7 @@ public:
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
 public:
 	daeVariable*			m_pVariable;

@@ -247,8 +247,7 @@ bool daeFunctionWithGradients::CheckObject(vector<string>& strarrErrors) const
 		strarrErrors.push_back(strError);
 		return false;
 	}
-	if(m_pEquation->GetEquationDefinitionMode() == eEDMUnknown ||
-	   m_pEquation->GetEquationEvaluationMode() == eEEMUnknown)
+	if(!m_pEquation->GetResidual().getNode())
 	{	
 		strError = "Equation residual not specified [" + m_pEquation->GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);

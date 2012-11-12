@@ -44,6 +44,9 @@ class daeCodeGeneratorAnalyzer(object):
 
             dict_model['data'] = data
 
+        self.runtimeInformation['ModelType']              = self._simulation.m.ModelType
+        self.runtimeInformation['IsModelDynamic']         = self._simulation.m.IsModelDynamic
+        print '\n\nSystem is: ', self.runtimeInformation['ModelType']
         self.runtimeInformation['TotalNumberOfVariables'] = self._simulation.TotalNumberOfVariables
         self.runtimeInformation['NumberOfEquations']      = self._simulation.NumberOfEquations
         self.runtimeInformation['IDs']                    = self._simulation.VariableTypes
@@ -260,6 +263,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['Scaling']                        = equation.Scaling
             data['Residual']                       = equation.Residual
             data['Description']                    = equation.Description
+            data['EquationType']                   = equation.EquationType
             data['DistributedEquationDomainInfos'] = []
             for dedi in equation.DistributedEquationDomainInfos:
                 dedi_data = {}
@@ -274,6 +278,7 @@ class daeCodeGeneratorAnalyzer(object):
                 eedata = {}
                 eedata['ResidualRuntimeNode'] = eeinfo.Node
                 eedata['VariableIndexes']     = eeinfo.VariableIndexes
+                eedata['EquationType']        = str(eeinfo.EquationType)
 
                 data['EquationExecutionInfos'].append(eedata)
 

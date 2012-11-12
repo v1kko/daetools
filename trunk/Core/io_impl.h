@@ -146,8 +146,7 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeLogicalB
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeConditionType& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSTNType& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainIndexType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeEquationDefinitionMode& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeEquationEvaluationMode& eValue);
+void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeEquationType& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSpecialUnaryFunctions& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeIntegralFunctions& eValue);
 void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeRangeType& eValue);
@@ -167,8 +166,7 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeLo
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeConditionType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSTNType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainIndexType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeEquationDefinitionMode eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeEquationEvaluationMode eValue);
+void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeEquationType eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSpecialUnaryFunctions eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeIntegralFunctions eValue);
 void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeRangeType eValue);

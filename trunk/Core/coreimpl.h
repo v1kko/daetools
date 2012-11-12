@@ -420,6 +420,8 @@ public:
 	adNodePtr GetEquationEvaluationNode(void) const;
 
     adNode* GetEquationEvaluationNodeRawPtr(void) const;
+    
+    daeeEquationType GetEquationType(void) const;
 	
 protected:
 	real_t					 m_dScaling;
@@ -595,8 +597,6 @@ public:
 		m_bGatherInfo				= false;
 		m_nTotalNumberOfVariables	= 0;
 		m_nNumberOfParameters		= 0;
-		m_eLanguage					= eMTUnknown;
-//		m_pCondition				= NULL;
 		m_pmatSValues				= NULL;
 		m_pmatSTimeDerivatives		= NULL; 
 		m_pmatSResiduals			= NULL;
@@ -1127,16 +1127,6 @@ public:
 		return m_narrOptimizationParametersIndexes;
 	}
 	
-	daeeModelType GetModelType(void)
-	{
-		if(m_bIsModelDynamic)
-			m_eLanguage = eDynamicModel;
-		else
-			m_eLanguage = eSteadyStateModel;
-		
-		return m_eLanguage;
-	}
-	
 	real_t GetCurrentTime(void) const
 	{
 		return m_dCurrentTime;
@@ -1337,7 +1327,6 @@ protected:
 
 	daeeInitialConditionMode		m_eInitialConditionMode;
 	size_t							m_nNumberOfParameters;
-	daeeModelType					m_eLanguage;
 	std::vector<size_t>				m_narrOptimizationParametersIndexes;
 	daeMatrix<real_t>*				m_pmatSValues;
 	daeMatrix<real_t>*				m_pmatSTimeDerivatives; 
@@ -2459,6 +2448,7 @@ public:
 	virtual void LoadInitializationValues(const std::string& strFileName) const;
 	
 	virtual bool IsModelDynamic() const;
+    virtual daeeModelType GetModelType() const;
 	
 	//boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
 
@@ -2561,25 +2551,6 @@ protected:
 				  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents,
 			      std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions);
 	
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(void));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t));
-	template<typename Model>
-		daeEquation* AddEquation(const string& strFunctionName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t));
-
 public:
 	daeDomain*		FindDomain(unsigned long nID) const;
 	daePort*		FindPort(unsigned long nID) const;
@@ -2891,25 +2862,6 @@ public:
 	size_t GetNumberOfStateTransitions(void) const;
 	size_t GetNumberOfSTNs(void) const;
 
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(void));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t));
-	template<class Model>
-		daeEquation* AddEquation(const string& strName, adouble (Model::*Calculate)(size_t, size_t, size_t, size_t, size_t, size_t, size_t, size_t));
-
 	void AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription);
 	
 	void CalcNonZeroElements(int& NNZ);
@@ -3140,9 +3092,7 @@ public:
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes);
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n);
 
-	daeeEquationDefinitionMode	GetEquationDefinitionMode(void) const;
-	daeeEquationEvaluationMode	GetEquationEvaluationMode(void) const;
-	void						SetEquationEvaluationMode(daeeEquationEvaluationMode eMode);
+	daeeEquationType GetEquationType(void) const;
 
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -3160,35 +3110,21 @@ public:
 	void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const;
 
 protected:
-//  virtual adouble		Calculate(void);
-//  virtual adouble		Calculate(size_t nDomain1);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7);
-//  virtual adouble		Calculate(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8);
-
 	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node);
-//	void Residual  (const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC);
-//	void Jacobian  (const std::vector<size_t>& narrDomainIndexes, const std::map<size_t, size_t>& mapVariableIndexesInEquation, daeExecutionContext& EC);
 
 	void SetResidualValue(size_t nEquationIndex, real_t dResidual, daeBlock* pBlock);
 	void SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock);
 	
 	void SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
 	void SetModelAndCanonicalName(daeObject* pObject);
-
+    
 protected:
 	real_t												m_dScaling;
 	daeState*											m_pParentState;
-	daeeEquationDefinitionMode							m_eEquationDefinitionMode;
-	daeeEquationEvaluationMode							m_eEquationEvaluationMode;
 	adNodePtr											m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
 // This vector is redundant - all EquationExecutionInfos already exist in models and states
-// However, it is useful when saving RuntimeReport
+// However, it is useful when saving RuntimeReport and generating code
 	std::vector<daeEquationExecutionInfo*>				m_ptrarrEquationExecutionInfos;
 	
 	friend class daeModel;
@@ -3561,7 +3497,7 @@ public:
 //	daePtrMap<string, pfnCreatePortConnection>		m_mapCreatePortConnection;
 };
 
-#include "inlines_equation.h"
+//#include "inlines_equation.h"
 #include "inlines_modelarray.h"
 #include "inlines_portarray.h"
 #include "inlines_io.h"

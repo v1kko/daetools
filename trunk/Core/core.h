@@ -87,23 +87,17 @@ enum daeeEquationCalculationMode
 enum daeeModelType
 {
 	eMTUnknown = 0,
-	eSteadyStateModel,
-	eDynamicModel
+	eSteadyState,
+	eODE,
+    eDAE
 };
 
-enum daeeEquationDefinitionMode
+enum daeeEquationType
 {
-	eEDMUnknown = 0,
-	eMemberFunctionPointer,
-	eResidualNode
-};
-
-enum daeeEquationEvaluationMode
-{
-	eEEMUnknown = 0,
-	eResidualNodeEvaluation,
-	eFunctionEvaluation,
-	eCommandStackEvaluation
+	eETUnknown = 0,
+	eExplicitODE,
+    eImplicitODE,
+    eAlgebraic
 };
 
 enum daeePortType
@@ -970,6 +964,7 @@ public:
 	virtual void	SaveModelReport(const string& strFileName) const		= 0;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
 	virtual bool	IsModelDynamic() const									= 0;
+    virtual daeeModelType GetModelType() const								= 0;
 
 	virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName)		= 0;

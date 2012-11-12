@@ -3448,6 +3448,53 @@ bool daeModel::IsModelDynamic() const
 	return m_pDataProxy->IsModelDynamic();		
 }
 
+daeeModelType daeModel::GetModelType() const
+{
+    daeeEquationType eType;
+    vector<daeEquationExecutionInfo*> ptrarrEEIfromModels;
+    vector<daeEquationExecutionInfo*> ptrarrEEIfromSTNs;
+    vector<daeEquationExecutionInfo*>::iterator c_iterator;
+
+    CollectEquationExecutionInfosFromModels(ptrarrEEIfromModels);
+	CollectEquationExecutionInfosFromSTNs(ptrarrEEIfromSTNs);
+    
+    bool bHasAlgebraic    = false;
+    bool bHasExplicitDiff = false;
+    bool bHasImplicitDiff = false;
+    bool bIsModelDynamic  = IsModelDynamic();
+    
+    for(c_iterator = ptrarrEEIfromModels.begin(); c_iterator != ptrarrEEIfromModels.end(); c_iterator++)
+    {
+        eType = (*c_iterator)->GetEquationType();
+        
+        if(eType == eImplicitODE)
+            bHasImplicitDiff = true;
+        else if(eType == eExplicitODE)
+            bHasExplicitDiff = true;
+        else if(eType == eAlgebraic)
+            bHasAlgebraic = true;
+    }
+    
+    for(c_iterator = ptrarrEEIfromSTNs.begin(); c_iterator != ptrarrEEIfromSTNs.end(); c_iterator++)
+    {
+        eType = (*c_iterator)->GetEquationType();
+        
+        if(eType == eImplicitODE)
+            bHasImplicitDiff = true;
+        else if(eType == eExplicitODE)
+            bHasExplicitDiff = true;
+        else if(eType == eAlgebraic)
+            bHasAlgebraic = true;
+    }
+
+    if(bHasExplicitDiff && !bHasAlgebraic && !bHasImplicitDiff)
+        return eODE;
+    else if(bHasAlgebraic && !bIsModelDynamic && !bHasExplicitDiff && !bHasImplicitDiff)
+        return eSteadyState;
+    else
+        return eDAE;
+}
+
 //void daeModel::SetInitialConditions(real_t value)
 //{
 //	if(!m_pDataProxy)

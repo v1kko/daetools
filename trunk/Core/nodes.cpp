@@ -365,6 +365,50 @@ bool adNodeImpl::IsFunctionOfVariables(void) const
 	return true;
 }
 
+bool adNodeImpl::IsDifferential(void) const
+{
+    return false;
+}
+
+daeeEquationType DetectEquationType(adNodePtr node)
+{
+    adNode* n = node.get();
+    daeeEquationType eMode = eETUnknown;
+    
+    if(n->IsDifferential())
+    {
+        eMode = eImplicitODE;
+        
+        if(typeid(n) == typeid(adSetupTimeDerivativeNode*))
+        {
+            eMode = eExplicitODE;
+        }
+        else if(typeid(n) == typeid(adUnaryNode*))
+        {
+            adUnaryNode* un = dynamic_cast<adUnaryNode*>(n);
+            if(un->eFunction == eSign && typeid(un->node.get()) == typeid(adSetupTimeDerivativeNode*))
+                eMode = eExplicitODE;       
+        }
+        else if(typeid(n) == typeid(adBinaryNode*))
+        {
+            adBinaryNode* bn = dynamic_cast<adBinaryNode*>(n);
+            if(bn->eFunction == ePlus || bn->eFunction == eMinus)
+            {
+                adNode* left  = bn->left.get();
+                adNode* right = bn->right.get();
+                if(typeid(left) == typeid(adSetupTimeDerivativeNode*) && !right->IsDifferential())
+                    eMode = eExplicitODE;               
+            }
+        }
+    }
+    else
+    {
+        eMode = eAlgebraic;
+    }
+    
+    return eMode;
+}
+
 /*********************************************************************************************
 	adConstantNode
 **********************************************************************************************/
@@ -1323,6 +1367,11 @@ void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& m
 	mapIndexes.insert(mapPair);
 }
 
+bool adRuntimeTimeDerivativeNode::IsDifferential(void) const
+{
+    return true;
+}
+
 /*********************************************************************************************
 	adRuntimePartialDerivativeNode
 **********************************************************************************************/
@@ -2251,6 +2300,13 @@ bool adUnaryNode::IsFunctionOfVariables(void) const
 	return node->IsFunctionOfVariables();
 }
 
+bool adUnaryNode::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsDifferential();
+}
+
 /*********************************************************************************************
 	adBinaryNode
 **********************************************************************************************/
@@ -2865,7 +2921,17 @@ bool adBinaryNode::IsFunctionOfVariables(void) const
 		daeDeclareAndThrowException(exInvalidPointer);
 	
 // If ANY of these two nodes is a function of variables return true
-	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables() );
+	return (left->IsFunctionOfVariables() || right->IsFunctionOfVariables());
+}
+
+bool adBinaryNode::IsDifferential(void) const
+{
+    if(!left)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!right)
+		daeDeclareAndThrowException(exInvalidPointer);
+    
+    return (left->IsDifferential() || right->IsDifferential());
 }
 
 

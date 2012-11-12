@@ -46,6 +46,7 @@ public:
 	
 	bool IsLinear(void) const;
 	bool IsFunctionOfVariables(void) const;
+    bool IsDifferential(void) const;
 	
 	virtual void GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
 };
@@ -349,7 +350,8 @@ public:
 	virtual bool			IsFunctionOfVariables(void) const;
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
-
+    virtual bool            IsDifferential(void) const;
+    
 public:
 	adNodeArrayPtr      node;
 	daeeUnaryFunctions	eFunction;
@@ -381,6 +383,7 @@ public:
 	virtual bool			IsFunctionOfVariables(void) const;
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
+    virtual bool            IsDifferential(void) const;
 
 public:
 	adNodeArrayPtr          left;
@@ -413,6 +416,7 @@ public:
 	virtual bool	IsFunctionOfVariables(void) const;
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
 public:
 	adNodeArrayPtr              node;
@@ -441,6 +445,7 @@ public:
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
 protected:
 	adNodePtr calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
@@ -507,6 +512,7 @@ public:
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
 
 public:
 	adNodeArrayPtr          node;
@@ -539,7 +545,8 @@ public:
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
-
+    virtual bool            IsDifferential(void) const;
+    
 public:
 	adNodePtr	node;
 };
@@ -632,6 +639,7 @@ public:
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;
+    virtual bool            IsDifferential(void) const;
 
 public:
 	daeVariable*                m_pVariable;

@@ -502,6 +502,11 @@ void adSetupTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& map
 	daeDeclareAndThrowException(exInvalidCall)
 }
 
+bool adSetupTimeDerivativeNode::IsDifferential(void) const
+{
+    return true;
+}
+
 /*********************************************************************************************
 	adSetupPartialDerivativeNode
 **********************************************************************************************/

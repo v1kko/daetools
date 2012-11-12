@@ -494,7 +494,19 @@ public:
 		BTF = NULL;
 	}
 	
-	real_t GetItem(size_t i, size_t j) const
+    FLOAT& operator()(size_t i, size_t j)
+	{
+		INT index = CalcIndex(i, j);
+        if(index < 0)
+		{
+			daeDeclareException(exMiscellanous);
+			e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
+			throw e;
+		}
+    	return A[index];
+	}
+	
+    FLOAT GetItem(size_t i, size_t j) const
 	{
 		INT index = CalcIndex(i, j);
 		if(index < 0)
@@ -503,7 +515,7 @@ public:
 			return A[index];
 	}
 	
-	void SetItem(size_t i, size_t j, real_t val)
+	void SetItem(size_t i, size_t j, FLOAT val)
 	{
 		INT index = CalcIndex(i, j);
 		if(index < 0)
@@ -563,7 +575,7 @@ public:
 	void Print(bool bStructureOnly = false) const
 	{
 		INT n, i, k;
-		real_t value;
+		FLOAT value;
 		
 		std::cout << "N     = " << N   << std::endl;
 		std::cout << "NNZ   = " << NNZ << std::endl;
