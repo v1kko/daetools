@@ -1,6 +1,3 @@
-#include "dealii_equation_generator.h"
-using dae::core::adouble;
-
 #include <deal.II/grid/tria.h>
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/grid/grid_generator.h>
@@ -28,6 +25,7 @@ using dae::core::adouble;
 #include <deal.II/base/logstream.h>
 using namespace dealii;
 
+
 template <int dim>
 class Step4
 {
@@ -51,11 +49,6 @@ private:
     
     Vector<double>       solution;
     Vector<double>       system_rhs;
-    
-    
-    adoubleCSRMatrix     A;
-    std::vector<adouble> x;
-    std::vector<adouble> b;
 };
 
 template <int dim>
@@ -137,28 +130,8 @@ void Step4<dim>::setup_system ()
     solution.reinit (dof_handler.n_dofs());
     system_rhs.reinit (dof_handler.n_dofs());
     
-//    std::ofstream out ("sparsity_pattern.1");
-//    sparsity_pattern.print_gnuplot (out);
-    
-    
-    std::map<size_t, size_t> mapIndexes;
-    size_t nrows = system_matrix.m();
-    size_t nnz = sparsity_pattern.n_nonzero_elements();
-    
-    b.resize(nrows);
-    A.Reset(nrows, nnz, CSR_C_STYLE);
-    A.ResetCounters();
-    
-    for(size_t row = 0; row < nrows; row++)
-    {
-        mapIndexes.clear();
-        for(SparsityPattern::row_iterator iter = sparsity_pattern.row_begin(row); iter != sparsity_pattern.row_end(row); iter++)
-            mapIndexes.insert(std::make_pair(mapIndexes.size(), *iter));
-        
-        A.AddRow(mapIndexes);
-    }
-    A.Sort();
-    //A.Print(true);
+    std::ofstream out ("sparsity_pattern.1");
+    sparsity_pattern.print_gnuplot (out);
 }
 
 template <int dim>
@@ -211,46 +184,16 @@ void Step4<dim>::assemble_system ()
                 system_matrix.add (local_dof_indices[i],
                                    local_dof_indices[j],
                                    cell_matrix(i,j));
-                if(!A(local_dof_indices[i], local_dof_indices[j]).node)
-                    A(local_dof_indices[i], local_dof_indices[j]) = adouble_(cell_matrix(i,j));
-                else
-                    A(local_dof_indices[i], local_dof_indices[j]) += adouble_(cell_matrix(i,j));
-                
             }
             system_rhs(local_dof_indices[i]) += cell_rhs(i);
-            if(!b[local_dof_indices[i]].node)
-                b[local_dof_indices[i]] = adouble_(cell_rhs(i));
-            else
-                b[local_dof_indices[i]] += adouble_(cell_rhs(i));
         }
     }
-    
-    //daeNodeSaveAsContext c;
-    //std::cout << A(0, 0).node->SaveAsLatex(&c) << std::endl;    
-    //A.Print();
 
     std::map<unsigned int,double> boundary_values;
     VectorTools::interpolate_boundary_values (dof_handler,
                                               0,
                                               BoundaryValues<dim>(),
                                               boundary_values);
-    for(std::map<unsigned int,double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
-    {
-        //std::cout << (boost::format("dof[%1%] = %2%") % it->first % it->second).str() << std::endl;
-       
-        size_t index = it->first;
-        double value = it->second;
-        // 1. Set all elements of the row 'index' to zero
-        for(int k = A.IA[index]; k < A.IA[index+1]; k++)
-            A.A[k] = 0; // To avoid adding the item to the equation adouble must not have a node!!! 
-        
-        // 2. Set the diagonal matrix item to one 
-        A(index, index) = adouble_(1);
-        
-        // 3. Set the right hand side to 'value'
-        b[index] = adouble_(value);
-    }
-    
     MatrixTools::apply_boundary_values (boundary_values,
                                         system_matrix,
                                         solution,
@@ -286,7 +229,7 @@ void Step4<dim>::output_results () const
     data_out.write_vtk (output);
     
     for(size_t i = 0; i < solution.size(); i++)
-        std::cout << (boost::format("T[%1%] = %2%") % i % solution[i]).str() << std::endl;
+        std::cout << "solution[" << i << "] = " << solution[i] << std::endl;
 }
 
 
@@ -295,56 +238,14 @@ void Step4<dim>::run ()
 {
     std::cout << "Solving problem in " << dim << " space dimensions." << std::endl;
     
-    try
-    {
-        make_grid();
-        setup_system ();
-        assemble_system ();
-        solve ();
-        output_results ();
-
-        boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial1(A.N, A, x, b));  
-        boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
-        boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
-        boost::scoped_ptr<daeLog_t>				pLog(daeCreateStdOutLog());
-        
-        if(!pSimulation)
-            daeDeclareAndThrowException(exInvalidPointer); 
-        if(!pDataReporter)
-            daeDeclareAndThrowException(exInvalidPointer); 
-        if(!pDAESolver)
-            daeDeclareAndThrowException(exInvalidPointer); 
-        if(!pLog)
-            daeDeclareAndThrowException(exInvalidPointer); 
-    
-        time_t rawtime;
-        struct tm* timeinfo;
-        char buffer[80];
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);	  
-        strftime (buffer, 80, " [%d.%m.%Y %H:%M:%S]", timeinfo);
-        string simName = pSimulation->GetModel()->GetName() + buffer;
-        if(!pDataReporter->Connect(string(""), simName))
-            daeDeclareAndThrowException(exInvalidCall); 
-    
-        pSimulation->SetReportingInterval(10);
-        pSimulation->SetTimeHorizon(1000);
-        pSimulation->GetModel()->SetReportingOn(true);
-        
-        pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
-        
-        pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");
-        //pSimulation->GetModel()->SaveRuntimeModelReport(pSimulation->GetModel()->GetName() + "-rt.xml");
-      
-        pSimulation->SolveInitial();
-        //pSimulation->Run();
-        pSimulation->Finalize();
-    }
-    catch(std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+    make_grid();
+    setup_system ();
+    assemble_system ();
+    solve ();
+    output_results ();
 }
+
+extern void run_dealii_poisson_test();
 
 int main ()
 {
@@ -359,5 +260,7 @@ int main ()
 //        laplace_problem_3d.run ();
 //    }
     
+    run_dealii_poisson_test();
+
     return 0;
 }

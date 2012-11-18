@@ -1,5 +1,5 @@
-#ifndef DAE_DEALII_AUX_H
-#define DAE_DEALII_AUX_H
+#ifndef DAE_FEM_COMMON_H
+#define DAE_FEM_COMMON_H
 
 #include "../dae_develop.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"

@@ -29,6 +29,6 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BLAS_LAPACK_LIBS} \
         $${RT} -lbtf
 
-SOURCES += step-7.cpp dealii_equation_generator.cpp
+SOURCES += step-4.cpp fem_common.cpp dealii_poisson_test.cpp
 
-HEADERS += dealii_equation_generator.h
+HEADERS += fem_common.h dealii_poisson.h

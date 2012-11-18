@@ -1,4 +1,4 @@
-#include "dealii_equation_generator.h"
+#include "fem_common.h"
 #include "../Core/nodes.h"
 
 adouble adouble_(double val)

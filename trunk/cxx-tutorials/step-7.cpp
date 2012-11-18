@@ -420,7 +420,7 @@ void HelmholtzProblem<dim>::assemble_system ()
         // 3. Set the right hand side to 'value'
         b[index] = adouble_(value);
     }
-    A.Print(true);
+    //A.Print(true);
     
     MatrixTools::apply_boundary_values (boundary_values,
                                         system_matrix,
