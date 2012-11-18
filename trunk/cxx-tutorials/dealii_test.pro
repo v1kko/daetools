@@ -21,12 +21,14 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${DAE_DATAREPORTING_LIB} \
         $${DAE_CORE_LIB} \
         $${DAE_IDAS_SOLVER_LIB} \
+        $${DAE_SUPERLU_SOLVER_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_LIBS} \
         $${DAE_UNITS_LIB} \
+        $${SUPERLU_LIBS} \
         $${BLAS_LAPACK_LIBS} \
-        $${RT}
+        $${RT} -lbtf
 
-SOURCES += step-4.cpp dealii_equation_generator.cpp
+SOURCES += step-7.cpp dealii_equation_generator.cpp
 
 HEADERS += dealii_equation_generator.h

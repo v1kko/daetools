@@ -85,7 +85,7 @@ public:
 	
 public:
 	simTutorial1(size_t _Np, adoubleCSRMatrix& _A, std::vector<adouble>& _x, std::vector<adouble>& _b) 
-        : M(_Np, _A, _x, _b, "dealii")
+        : M(_Np, _A, _x, _b, "dealii7")
 	{
 		SetModel(&M);
         M.SetDescription("dealii description");
