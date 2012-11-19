@@ -8,9 +8,9 @@ class modTutorial1 : public daeModel
 {
 daeDeclareDynamicClass(modTutorial1)
 public:
-    daeDomain                   xyz;
-    daeVariable                 T;
-    dae::fe::daeFEM_dealII<2>   fem;
+    daeDomain                       xyz;
+    daeVariable                     T;
+    dae::fe::dae_dealII_Poisson<2>  fem;
 
     modTutorial1(string strName, daeModel* pParent = NULL, string strDescription = "") 
       : daeModel(strName, pParent, strDescription),

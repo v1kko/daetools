@@ -343,7 +343,7 @@ void HelmholtzProblem<dim>::assemble_system ()
                                           +
                                           fe_values.shape_value(i,q_point) *
                                           fe_values.shape_value(j,q_point)) *
-                                         fe_values.JxW(q_point));
+                                          fe_values.JxW(q_point));
                 }
                 
                 cell_rhs(i) += (fe_values.shape_value(i,q_point) *

@@ -21,6 +21,7 @@
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/precondition.h>
 
+#include <deal.II/grid/grid_in.h>
 #include <deal.II/numerics/data_out.h>
 #include <fstream>
 #include <iostream>
@@ -35,15 +36,60 @@ namespace fe
 {
 using namespace dealii;
 
+// Poisson:                        ΔΨ = f
+// Transient diffusion:            a(∂Ψ/∂t) = ∇D∇Ψ + g(Ψ)
+// Transient convection-diffusion: a(∂Ψ/∂t) = ∇D∇Ψ - ∇.(uΨ) + g(Ψ)
+
 /**************************************************************
- daeFEM_dealII<dim>
- nabla D nabla U = f
+  daeFEM: base Finite Elements class
 ***************************************************************/
-template <int dim>
-class daeFEM_dealII
+class daeFEM
 {
 public:
-    daeFEM_dealII(daeModel& _parent, daeDomain&  _xyz, daeVariable& _u);
+    virtual ~daeFEM() {}
+    
+    virtual void Initialize() = 0;
+    virtual void SetUpParametersAndDomains() = 0;
+    virtual void DeclareEquations(void) = 0;
+};
+
+class bcDirichlet
+{
+public:
+    bcDirichlet(int _id, adouble _value)
+    {
+        id    = _id;
+        value = _value;
+    }
+    
+public:
+    int     id;
+    adouble value;
+};
+
+class bcNeumann
+{
+public:
+    bcNeumann(int _id, adouble _value)
+    {
+        id    = _id;
+        value = _value;
+    }
+    
+public:
+    int     id;
+    adouble value;
+};
+
+/**************************************************************
+  dae_dealII_Poisson
+  ΔΨ = f
+***************************************************************/
+template <int dim>
+class dae_dealII_Poisson : public daeFEM
+{
+public:
+    dae_dealII_Poisson(daeModel& _parent, daeDomain&  _xyz, daeVariable& _u);
     
     void Initialize();
     void SetUpParametersAndDomains();
@@ -102,20 +148,50 @@ class BoundaryValues : public Function<dim>
 };
 
 template<int dim>
-daeFEM_dealII<dim>::daeFEM_dealII(daeModel& _parent, daeDomain&  _xyz, daeVariable& _u) 
+dae_dealII_Poisson<dim>::dae_dealII_Poisson(daeModel& _parent, daeDomain&  _xyz, daeVariable& _u) 
                   : xyz(_xyz), u(_u), parent(_parent),
                     fe(1), dof_handler(triangulation)
 {
 }
     
 template <int dim>
-void daeFEM_dealII<dim>::Initialize()
+void dae_dealII_Poisson<dim>::Initialize()
 {
 // 1. Create grid
     GridGenerator::hyper_cube (triangulation, -1, 1);
     triangulation.refine_global (4);
-
+    
+    {
+        typename Triangulation<dim>::cell_iterator cell = triangulation.begin (),
+                                                   endc = triangulation.end();
+        for(; cell!=endc; ++cell)
+        {
+            for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+            {
+                if(cell->face(face)->center()(0) == -1)
+                {
+                    cell->face(face)->set_boundary_indicator (1);
+                }
+            }
+        }
+    }
+    /* Reading from a file:
+     GridIn<dim> grid;
+     grid.attach_triangulation(triangulation);
+     std::fstream mesh('filename', ios_base::in);
+     grid.read(mesh);
+    */
+    std::cout << "   Number of active cells: "
+              << triangulation.n_active_cells()
+              << std::endl
+              << "   Total number of cells: "
+              << triangulation.n_cells()
+              << std::endl;
+    
     dof_handler.distribute_dofs (fe);
+    std::cout << "   Number of degrees of freedom: "
+              << dof_handler.n_dofs()
+              << std::endl;
   
 // 2. Setup system      
     CompressedSparsityPattern c_sparsity(dof_handler.n_dofs());
@@ -150,6 +226,7 @@ void daeFEM_dealII<dim>::Initialize()
 
 // 4. Assemble system matrix and rhs
     QGauss<dim>  quadrature_formula(2);
+    QGauss<dim-1> face_quadrature_formula(2);
     
     const RightHandSide<dim> right_hand_side;
     
@@ -157,8 +234,13 @@ void daeFEM_dealII<dim>::Initialize()
                              update_values   | update_gradients |
                              update_quadrature_points | update_JxW_values);
     
+    FEFaceValues<dim> fe_face_values (fe, face_quadrature_formula,
+                                      update_values         | update_quadrature_points  |
+                                      update_normal_vectors | update_JxW_values);
+    
     const unsigned int   dofs_per_cell = fe.dofs_per_cell;
     const unsigned int   n_q_points    = quadrature_formula.size();
+    const unsigned int n_face_q_points = face_quadrature_formula.size();
     
     FullMatrix<double>   cell_matrix(dofs_per_cell, dofs_per_cell);
     Vector<double>       cell_rhs(dofs_per_cell);
@@ -188,6 +270,26 @@ void daeFEM_dealII<dim>::Initialize()
                 cell_rhs(i) += (fe_values.shape_value (i, q_point) *
                                 right_hand_side.value (fe_values.quadrature_point (q_point)) *
                                 fe_values.JxW (q_point));
+            }
+        }
+        
+        for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+        {
+            if(cell->face(face)->at_boundary() && cell->face(face)->boundary_indicator() == 1)
+            {
+                fe_face_values.reinit (cell, face);
+                
+                for(unsigned int q_point=0; q_point<n_face_q_points; ++q_point)
+                {
+                    const double neumann_value = 1;
+                    
+                    for(unsigned int i=0; i<dofs_per_cell; ++i)
+                    {
+                        cell_rhs(i) += (neumann_value *
+                                        fe_face_values.shape_value(i,q_point) *
+                                        fe_face_values.JxW(q_point));
+                    }
+                }
             }
         }
         
@@ -240,13 +342,13 @@ void daeFEM_dealII<dim>::Initialize()
 }
 
 template<int dim>
-void daeFEM_dealII<dim>::SetUpParametersAndDomains()
+void dae_dealII_Poisson<dim>::SetUpParametersAndDomains()
 {
     xyz.CreateArray(Np);
 }
 
 template<int dim>
-void daeFEM_dealII<dim>::DeclareEquations(void)
+void dae_dealII_Poisson<dim>::DeclareEquations(void)
 {
     int counter;
     daeEquation* eq;
@@ -261,6 +363,11 @@ void daeFEM_dealII<dim>::DeclareEquations(void)
         for(int k = kij.IA[i]; k < kij.IA[i+1]; k++)
         {
             //std::cout << (boost::format("JA[%1%] = %2%") % k % A.JA[k]).str() << std::endl;
+            
+        // If node is NULL the values is zero; therefore, skip the item
+            if(!kij.A[k].node)
+                continue;
+            
             if(counter == 0)
                 res = kij.A[k] * u(kij.JA[k]);
             else

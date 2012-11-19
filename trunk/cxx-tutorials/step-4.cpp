@@ -18,6 +18,7 @@
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/precondition.h>
 
+#include <deal.II/grid/grid_in.h>
 #include <deal.II/numerics/data_out.h>
 #include <fstream>
 #include <iostream>
@@ -104,6 +105,19 @@ void Step4<dim>::make_grid ()
     GridGenerator::hyper_cube (triangulation, -1, 1);
     triangulation.refine_global (4);
     
+    typename Triangulation<dim>::cell_iterator cell = triangulation.begin (),
+                                               endc = triangulation.end();
+    for(; cell!=endc; ++cell)
+    {
+        for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+        {
+            if(cell->face(face)->center()(0) == -1)
+            {
+                cell->face(face)->set_boundary_indicator (1);
+            }
+        }
+    }
+    
     std::cout << "   Number of active cells: "
               << triangulation.n_active_cells()
               << std::endl
@@ -138,6 +152,7 @@ template <int dim>
 void Step4<dim>::assemble_system ()
 {
     QGauss<dim>  quadrature_formula(2);
+    QGauss<dim-1> face_quadrature_formula(2);
     
     const RightHandSide<dim> right_hand_side;
     
@@ -145,8 +160,13 @@ void Step4<dim>::assemble_system ()
                              update_values   | update_gradients |
                              update_quadrature_points | update_JxW_values);
     
+    FEFaceValues<dim> fe_face_values (fe, face_quadrature_formula,
+                                      update_values         | update_quadrature_points  |
+                                      update_normal_vectors | update_JxW_values);
+    
     const unsigned int   dofs_per_cell = fe.dofs_per_cell;
     const unsigned int   n_q_points    = quadrature_formula.size();
+    const unsigned int n_face_q_points = face_quadrature_formula.size();
     
     FullMatrix<double>   cell_matrix(dofs_per_cell, dofs_per_cell);
     Vector<double>       cell_rhs(dofs_per_cell);
@@ -175,6 +195,26 @@ void Step4<dim>::assemble_system ()
                               right_hand_side.value (fe_values.quadrature_point (q_point)) *
                               fe_values.JxW (q_point));
             }
+        
+        for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+        {
+            if(cell->face(face)->at_boundary() && cell->face(face)->boundary_indicator() == 1)
+            {
+                fe_face_values.reinit (cell, face);
+                
+                for(unsigned int q_point=0; q_point<n_face_q_points; ++q_point)
+                {
+                    const double neumann_value = 1;
+                    
+                    for(unsigned int i=0; i<dofs_per_cell; ++i)
+                    {
+                        cell_rhs(i) += (neumann_value *
+                                        fe_face_values.shape_value(i,q_point) *
+                                        fe_face_values.JxW(q_point));
+                    }
+                }
+            }
+        }
         
         cell->get_dof_indices (local_dof_indices);
         for (unsigned int i=0; i<dofs_per_cell; ++i)
