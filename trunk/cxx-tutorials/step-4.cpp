@@ -300,7 +300,7 @@ int main ()
 //        laplace_problem_3d.run ();
 //    }
     
-    run_dealii_poisson_test();
+    run_dealii_transient_diffusion_test();
 
     return 0;
 }

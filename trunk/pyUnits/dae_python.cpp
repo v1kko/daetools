@@ -13,6 +13,15 @@ BOOST_PYTHON_MODULE(pyUnits)
 	base_unit
 ***************************************************************/
 	class_<base_unit>("base_unit")
+        .def_readonly("L", &base_unit::L)
+        .def_readonly("M", &base_unit::M)
+        .def_readonly("T", &base_unit::T)
+        .def_readonly("C", &base_unit::C)
+        .def_readonly("I", &base_unit::I)
+        .def_readonly("O", &base_unit::O)
+        .def_readonly("N", &base_unit::N)
+        .def_readonly("multiplier", &base_unit::multiplier)
+
         .def("__init__",	make_constructor(daepython::__init__base_unit))
         .def("__str__",		&daepython::base_unit__str__)
 		.def("__repr__",	&daepython::base_unit__repr__) 

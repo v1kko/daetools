@@ -29,6 +29,6 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BLAS_LAPACK_LIBS} \
         $${RT} -lbtf
 
-SOURCES += step-4.cpp fem_common.cpp dealii_poisson_test.cpp
+SOURCES += step-4.cpp fem_common.cpp dealii_transient_diffusion_test.cpp
 
-HEADERS += fem_common.h dealii_poisson.h
+HEADERS += fem_common.h dealii_transient_diffusion.h
