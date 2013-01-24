@@ -1,4 +1,4 @@
-import os, shutil, sys, numpy, math, traceback, uuid
+import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile
 from daetools.pyDAE import *
 from ansi_c import daeCodeGenerator_ANSI_C
 from fmi_xml_support import *
@@ -8,87 +8,113 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         fmiModelDescription.__init__(self)        
     
     def generateSimulation(self, simulation, **kwargs):
-        directory  = kwargs.get('projectDirectory', None)
-        filename   = os.path.join(directory, 'modelDescription.fmu')
-        source_dir = os.path.join(directory, 'sources')
+        try:
+            fmu_directory = kwargs.get('projectDirectory', None)
+            if not os.path.isdir(fmu_directory):
+                raise RuntimeError('Invalid project directory: {0}'.format(fmu_directory))
+            if not simulation:
+                raise RuntimeError('Invalid simulation object')
+            
+            tmp_folder               = tempfile.mkdtemp(prefix = 'daetools-fmu-')
+            xml_description_filename = os.path.join(tmp_folder, 'modelDescription.xml')
+            source_dir               = os.path.join(tmp_folder, 'sources')
+            fmu_filename             = os.path.join(fmu_directory, simulation.m.Name + '.fmu')
 
-        folder = directory
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'documentation')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'sources')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'resources')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/win32')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/win64')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/linux32')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/linux64')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/darwin32')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        folder = os.path.join(directory, 'binaries/darwin64')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+            folder = tmp_folder
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'documentation')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'sources')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'resources')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/win32')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/win64')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/linux32')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/linux64')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/darwin32')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            folder = os.path.join(tmp_folder, 'binaries/darwin64')
+            if not os.path.exists(folder):
+                os.makedirs(folder)
 
-        cgANSI_C = daeCodeGenerator_ANSI_C()
-        cgANSI_C.generateSimulation(simulation, projectDirectory = source_dir)
+            cgANSI_C = daeCodeGenerator_ANSI_C()
+            cgANSI_C.generateSimulation(simulation, projectDirectory = source_dir)
 
-        self.modelName                  = '' #*
-        self.guid                       = uuid.uuid1() #*
-        self.description                = ''
-        self.author                     = ''
-        self.version                    = ''
-        self.copyright                  = ''
-        self.license                    = ''
-        self.generationTool             = 'DAE Tools'
-        self.generationDateAndTime      = ''
-        self.variableNamingConvention   = fmiModelDescription.variableNamingConventionStructured
-        self.numberOfEventIndicators    = 0
+            self.modelName                  = '' #*
+            self.guid                       = uuid.uuid1() #*
+            self.description                = ''
+            self.author                     = ''
+            self.version                    = ''
+            self.copyright                  = ''
+            self.license                    = ''
+            self.generationTool             = 'DAE Tools'
+            self.generationDateAndTime      = ''
+            self.variableNamingConvention   = fmiModelDescription.variableNamingConventionStructured
+            self.numberOfEventIndicators    = 0
 
-        self.CoSimulation = fmiCoSimulation()
-        self.CoSimulation.modelIdentifier                        = '' #*
-        self.CoSimulation.needsExecutionTool                     = False
-        self.CoSimulation.canHandleVariableCommunicationStepSize = True
-        self.CoSimulation.canHandleEvents                        = True
-        self.CoSimulation.canInterpolateInputs                   = False
-        self.CoSimulation.maxOutputDerivativeOrder               = 1
-        self.CoSimulation.canRunAsynchronuously                  = False
-        self.CoSimulation.canSignalEvents                        = True
-        self.CoSimulation.canBeInstantiatedOnlyOncePerProcess    = False
-        self.CoSimulation.canNotUseMemoryManagementFunctions     = True
-        self.CoSimulation.canGetAndSetFMUstate                   = False
-        self.CoSimulation.canSerializeFMUstate                   = False
-        self.CoSimulation.providesPartialDerivativesOf_DerivativeFunction_wrt_States = False
-        self.CoSimulation.providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs = False
-        self.CoSimulation.providesPartialDerivativesOf_OutputFunction_wrt_States     = False
-        self.CoSimulation.providesPartialDerivativesOf_OutputFunction_wrt_Inputs     = False
+            self.CoSimulation = fmiCoSimulation()
+            self.CoSimulation.modelIdentifier                        = '' #*
+            self.CoSimulation.needsExecutionTool                     = False
+            self.CoSimulation.canHandleVariableCommunicationStepSize = True
+            self.CoSimulation.canHandleEvents                        = True
+            self.CoSimulation.canInterpolateInputs                   = False
+            self.CoSimulation.maxOutputDerivativeOrder               = 1
+            self.CoSimulation.canRunAsynchronuously                  = False
+            self.CoSimulation.canSignalEvents                        = True
+            self.CoSimulation.canBeInstantiatedOnlyOncePerProcess    = False
+            self.CoSimulation.canNotUseMemoryManagementFunctions     = True
+            self.CoSimulation.canGetAndSetFMUstate                   = False
+            self.CoSimulation.canSerializeFMUstate                   = False
+            self.CoSimulation.providesPartialDerivativesOf_DerivativeFunction_wrt_States = False
+            self.CoSimulation.providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs = False
+            self.CoSimulation.providesPartialDerivativesOf_OutputFunction_wrt_States     = False
+            self.CoSimulation.providesPartialDerivativesOf_OutputFunction_wrt_Inputs     = False
 
-        self.ModelStructure    = fmiModelStructure()
-        self.ModelVariables    = []
-        self.UnitDefinitions   = []
-        self.TypeDefinitions   = []
-        self.VendorAnnotations = []   # [fmiVendorAnnotation()]
-        self.DefaultExperiment = None # fmiDefaultExperiment()
+            self.ModelStructure    = fmiModelStructure()
+            self.ModelVariables    = []
+            self.UnitDefinitions   = []
+            self.TypeDefinitions   = []
+            self.VendorAnnotations = []   # [fmiVendorAnnotation()]
+            self.DefaultExperiment = None # fmiDefaultExperiment()
 
-        self._addParameter('Param', 0, '')
+            self._addParameter('Param', 0, '')
 
-        self.to_xml(filename)
+            # Save model description xml file
+            self.to_xml(xml_description_filename)
+
+            files_to_zip = []
+            for root, dirs, files in os.walk(tmp_folder):
+                for file in files:
+                    filename      = os.path.join(root, file)
+                    relative_path = os.path.relpath(filename, tmp_folder)
+                    files_to_zip.append( (filename, relative_path) )
+
+            zip = zipfile.ZipFile(fmu_filename, "w")
+            for filename, relative_path in files_to_zip:
+                zip.write(filename, relative_path)
+            zip.close()
+
+        finally:
+            # Remove temporary directory
+            if os.path.isdir(tmp_folder):
+                shutil.rmtree(tmp_folder)
 
     def _addInput(self, name, value_ref):
         i = fmiInput()
