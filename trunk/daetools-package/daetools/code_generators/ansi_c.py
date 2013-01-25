@@ -40,32 +40,9 @@ extern "C" {
 #define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   _adouble_(_current_time_, 0.0)
 
-void initial_conditions();
-int residuals(real_t _current_time_,
-              real_t* _values_,
-              real_t* _time_derivatives_,
-              real_t* _residuals_);
-int jacobian(long int _number_of_equations_,
-             real_t _current_time_,
-             real_t _inverse_time_step_,
-             real_t* _values_,
-             real_t* _time_derivatives_,
-             real_t* _residuals_,
-             matrix_t _jacobian_matrix_);
-int number_of_roots();
-int roots(real_t _current_time_,
-          real_t* _values_,
-          real_t* _time_derivatives_,
-          real_t* _roots_);
-bool check_for_discontinuities(real_t _current_time_,
-                               real_t* _values_,
-                               real_t* _time_derivatives_);
-bool execute_actions(real_t _current_time_,
-                     real_t* _values_,
-                     real_t* _time_derivatives_);
-
-/* General info */          
-%(model)s
+typedef struct
+{
+%(valuesReferences)s
 
 /* Domains and parameters */
 %(parameters)s
@@ -75,14 +52,54 @@ bool execute_actions(real_t _current_time_,
 
 /* Assigned variables */
 %(assignedVariables)s
+}daetools_model_t;
 
-void initial_conditions()
+void initialize_model(daetools_model_t* _m_);
+void set_initial_conditions(real_t* values);
+int residuals(daetools_model_t* _m_,
+              real_t _current_time_,
+              real_t* _values_,
+              real_t* _time_derivatives_,
+              real_t* _residuals_);
+int jacobian(daetools_model_t* _m_,
+             long int _number_of_equations_,
+             real_t _current_time_,
+             real_t _inverse_time_step_,
+             real_t* _values_,
+             real_t* _time_derivatives_,
+             real_t* _residuals_,
+             matrix_t _jacobian_matrix_);
+int number_of_roots(daetools_model_t* _m_);
+int roots(daetools_model_t* _m_,
+          real_t _current_time_,
+          real_t* _values_,
+          real_t* _time_derivatives_,
+          real_t* _roots_);
+bool check_for_discontinuities(daetools_model_t* _m_,
+                               real_t _current_time_,
+                               real_t* _values_,
+                               real_t* _time_derivatives_);
+bool execute_actions(daetools_model_t* _m_,
+                     real_t _current_time_,
+                     real_t* _values_,
+                     real_t* _time_derivatives_);
+
+/* General info */          
+%(model)s
+
+void initialize_model(daetools_model_t* _m_)
+{
+  %(parametersInits)s
+}
+
+void set_initial_conditions(real_t* values)
 {
 /* Initial conditions */
 %(initialConditions)s
 }
 
-int residuals(real_t _current_time_,
+int residuals(daetools_model_t* _m_,
+              real_t _current_time_,
               real_t* _values_,
               real_t* _time_derivatives_,
               real_t* _residuals_)
@@ -100,7 +117,8 @@ int residuals(real_t _current_time_,
     return 0;
 }
 
-int jacobian(long int _number_of_equations_,
+int jacobian(daetools_model_t* _m_,
+             long int _number_of_equations_,
              real_t _current_time_,
              real_t _inverse_time_step_,
              real_t* _values_,
@@ -120,7 +138,7 @@ int jacobian(long int _number_of_equations_,
     return 0;
 }
 
-int number_of_roots()
+int number_of_roots(daetools_model_t* _m_)
 {
     int _noRoots_;
 
@@ -131,7 +149,8 @@ int number_of_roots()
     return _noRoots_;
 }
 
-int roots(real_t _current_time_,
+int roots(daetools_model_t* _m_,
+          real_t _current_time_,
           real_t* _values_,
           real_t* _time_derivatives_,
           real_t* _roots_)
@@ -149,7 +168,8 @@ int roots(real_t _current_time_,
     return 0;
 }
 
-bool check_for_discontinuities(real_t _current_time_,
+bool check_for_discontinuities(daetools_model_t* _m_,
+                               real_t _current_time_,
                                real_t* _values_,
                                real_t* _time_derivatives_)
 {
@@ -167,7 +187,8 @@ bool check_for_discontinuities(real_t _current_time_,
     return foundDiscontinuity;
 }
 
-bool execute_actions(real_t _current_time_,
+bool execute_actions(daetools_model_t* _m_,
+                     real_t _current_time_,
                      real_t* _values_,
                      real_t* _time_derivatives_)
 {
@@ -204,9 +225,9 @@ class daeANSICExpressionFormatter(daeExpressionFormatter):
         self.useRelativeNames         = True
         self.flattenIdentifiers       = True
 
-        self.domain                   = '_adouble_({domain}[{index}], 0)'
+        self.domain                   = '_adouble_(_m_->{domain}[{index}], 0)'
 
-        self.parameter                = '_adouble_({parameter}{indexes}, 0)'
+        self.parameter                = '_adouble_(_m_->{parameter}{indexes}, 0)'
         self.parameterIndexStart      = '['
         self.parameterIndexEnd        = ']'
         self.parameterIndexDelimiter  = ']['
@@ -216,7 +237,7 @@ class daeANSICExpressionFormatter(daeExpressionFormatter):
         self.variableIndexEnd         = ''
         self.variableIndexDelimiter   = ''
 
-        self.assignedVariable         = '_adouble_({variable}, 0)'
+        self.assignedVariable         = '_adouble_(_m_->{variable}, 0)'
 
         self.derivative               = '_dt_({blockIndex})'
         self.derivativeIndexStart     = ''
@@ -292,6 +313,9 @@ class daeCodeGenerator_ANSI_C(object):
         self.initiallyActiveStates   = []
         self.modelDef                = []
         self.parametersDefs          = []
+        self.parametersInits         = []
+        self.floatValuesReferences   = []
+        self.stringValuesReferences  = []
         self.residuals               = []
         self.jacobians               = []
         self.checkForDiscontinuities = []
@@ -299,6 +323,8 @@ class daeCodeGenerator_ANSI_C(object):
         self.numberOfRoots           = []
         self.rootFunctions           = []
         self.variableNames           = []
+
+        self.fmiInterface            = []
 
         self.exprFormatter = daeANSICExpressionFormatter()
         self.analyzer      = daeCodeGeneratorAnalyzer()
@@ -314,6 +340,9 @@ class daeCodeGenerator_ANSI_C(object):
         self.initiallyActiveStates   = []
         self.modelDef                = []
         self.parametersDefs          = []
+        self.parametersInits         = []
+        self.floatValuesReferences   = []
+        self.stringValuesReferences  = []
         self.residuals               = []
         self.jacobians               = []
         self.checkForDiscontinuities = []
@@ -342,6 +371,7 @@ class daeCodeGenerator_ANSI_C(object):
 
         modelDef       = '\n'.join(self.modelDef)
         paramsDef      = '\n'.join(self.parametersDefs)
+        paramsInits    = '\n  '.join(self.parametersInits)
         stnDef         = '\n'.join(self.initiallyActiveStates)
         assignedVars   = '\n'.join(self.assignedVariables)
         initConds      = '\n'.join(self.initialConditions)
@@ -353,9 +383,13 @@ class daeCodeGenerator_ANSI_C(object):
         noRootsDef     = '\n'.join(self.numberOfRoots)
         warnings       = '\n'.join(self.warnings)
 
+        valuesReferences = ''
+
         dictInfo = {
                         'model' : modelDef,
                         'parameters' : paramsDef,
+                        'parametersInits' : paramsInits,
+                        'valuesReferences' : valuesReferences,
                         'activeStates' : stnDef,
                         'assignedVariables' : assignedVars,
                         'initialConditions' : initConds,
@@ -752,17 +786,20 @@ class daeCodeGenerator_ANSI_C(object):
                 blockInitDerivatives[bi] = initDerivatives[oi]
                 absTolerances[bi]        = absoluteTolerances[oi]
 
-        strIDs = 'int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
+        strIDs = 'const int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
         self.modelDef.append(strIDs)
             
-        strInitValues = 'real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
+        strInitValues = 'const real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
         self.modelDef.append(strInitValues)
 
-        strInitDerivs = 'real_t _initDerivatives_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitDerivatives))
+        strInitDerivs = 'const real_t _initDerivatives_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitDerivatives))
         self.modelDef.append(strInitDerivs)
 
-        strAbsTol = 'real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
+        strAbsTol = 'const real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
         self.modelDef.append(strAbsTol)
+
+        # Needed for FMI code generator
+        value_ref = 0
 
         for domain in runtimeInformation['Domains']:
             relativeName = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
@@ -773,40 +810,76 @@ class daeCodeGenerator_ANSI_C(object):
             domains        = '[' + str(domain['NumberOfPoints']) + ']'
             points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
 
-            domTemplate   = 'const int {name}_np = {numberOfPoints}; /* Number of points in domain {name} */'
-            paramTemplate = 'real_t {name}{domains} = {points}; /* {description} */ \n'
-
-            self.parametersDefs.append(domTemplate.format(name = name,
-                                                          numberOfPoints = numberOfPoints))
+            domTemplate   = 'int {name}_np; /* Number of points in domain {name} */'
+            paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
+            self.parametersDefs.append(domTemplate.format(name = name))
             self.parametersDefs.append(paramTemplate.format(name = name,
+                                                            domains = domains,
+                                                            description = description))
+
+            domTemplate   = 'const int {name}_np = {numberOfPoints};'
+            paramTemplate = 'real_t {name}{domains} = {points};'
+            self.parametersInits.append(domTemplate.format(name = name,
+                                                           numberOfPoints = numberOfPoints))
+            self.parametersInits.append(paramTemplate.format(name = name,
                                                             domains = domains,
                                                             points = points,
                                                             description = description))
+
+            domTemplate   = '_m_->{name}_np = {name}_np;'
+            paramTemplate = 'memcpy(&_m_->{name}, &{name}, {numberOfPoints} * sizeof(real_t));\n'
+            self.parametersInits.append(domTemplate.format(name = name))
+            self.parametersInits.append(paramTemplate.format(name = name,
+                                                             numberOfPoints = numberOfPoints))
+           
+            #self.fmiInterface.append( ('domainPoint', name, value_ref) )
+            #value_ref += 1
             
         for parameter in runtimeInformation['Parameters']:
             relativeName   = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
             relativeName   = self.exprFormatter.formatIdentifier(relativeName)
             name           = self.exprFormatter.flattenIdentifier(relativeName)
             description    = parameter['Description']
+            numberOfPoints = int(parameter['NumberOfPoints'])
             values         = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
             domains = ''
             if len(parameter['Domains']) > 0:
                 domains = '[{0}]'.format(']['.join(str(np) for np in parameter['Domains']))
 
-            paramTemplate = 'real_t {name}{domains} = {values}; /* {description} */ \n'
-
+            paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
             self.parametersDefs.append(paramTemplate.format(name = name,
                                                             domains = domains,
-                                                            values = values,
                                                             description = description))
 
-        for variable in runtimeInformation['Variables']:
-            relativeName  = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
-            formattedName = self.exprFormatter.formatIdentifier(relativeName)
-            name          = self.exprFormatter.flattenIdentifier(formattedName)
+            paramTemplate = 'real_t {name}{domains} = {values};'
+            self.parametersInits.append(paramTemplate.format(name = name,
+                                                             domains = domains,
+                                                             values = values))
 
-            n = variable['NumberOfPoints']
-            if n == 1:
+            paramTemplate = 'memcpy(&_m_->{name}, &{name}, {numberOfPoints} * sizeof(real_t));\n'
+            self.parametersInits.append(paramTemplate.format(name = name,
+                                                             numberOfPoints = numberOfPoints))
+
+                                                             
+            if numberOfPoints == 1:
+                self.floatValuesReferences.append( ('parameter', name, value_ref) )
+                value_ref += 1
+
+            else:
+                for i in range(0, numberOfPoints):
+                    _name = '{0}[{1}]'.format(name, i)
+                    self.floatValuesReferences.append( ('parameter', _name, value_ref) )
+                    value_ref += 1                
+
+        print self.floatValuesReferences
+        
+        for variable in runtimeInformation['Variables']:
+            relativeName   = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
+            formattedName  = self.exprFormatter.formatIdentifier(relativeName)
+            name           = self.exprFormatter.flattenIdentifier(formattedName)
+            numberOfPoints = variable['NumberOfPoints']
+
+            if numberOfPoints == 1:
                 ID           = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
                 value        = float(variable['Values'])   # numpy float
                 overallIndex = variable['OverallIndex']
@@ -814,7 +887,7 @@ class daeCodeGenerator_ANSI_C(object):
 
                 if ID == cnDifferential:
                     blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
-                    name_ = '_initValues_[{0}]'.format(blockIndex)
+                    name_ = 'values[{0}]'.format(blockIndex)
                     temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                     self.initialConditions.append(temp)
 
@@ -827,7 +900,7 @@ class daeCodeGenerator_ANSI_C(object):
                     self.variableNames[blockIndex] = fullName
 
             else:
-                for i in range(0, n):
+                for i in range(0, numberOfPoints):
                     domIndexes   = tuple(variable['DomainsIndexesMap'][i])  # list of integers
                     ID           = int(variable['IDs'][domIndexes])         # cnDifferential, cnAssigned or cnAlgebraic
                     value        = float(variable['Values'][domIndexes])    # numpy float
@@ -836,7 +909,7 @@ class daeCodeGenerator_ANSI_C(object):
 
                     if ID == cnDifferential:
                         blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
-                        name_ = '_initValues_[{0}]'.format(blockIndex)
+                        name_ = 'values[{0}]'.format(blockIndex)
                         temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                         self.initialConditions.append(temp)
 
@@ -849,7 +922,7 @@ class daeCodeGenerator_ANSI_C(object):
                         self.variableNames[blockIndex] = fullName
 
         varNames = ['"' + name_ + '"' for name_ in self.variableNames]
-        strVariableNames = 'char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
+        strVariableNames = 'const char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
         self.modelDef.append(strVariableNames)
 
         indent = 1

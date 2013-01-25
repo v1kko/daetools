@@ -61,12 +61,14 @@ int main(int argc, char *argv[])
     N_Vector yy, yp, avtol, ids;
     realtype rtol, *yval, *ypval, *atval, *idsval;
     realtype t, t0, tend, tret, treport;
+    daetools_model_t model;
+    memset(&model, 0, sizeof(daetools_model_t));
 
     mem = NULL;
     yy = yp = avtol = NULL;
     yval = ypval = atval = NULL;
 
-    initial_conditions();
+    initialize_model(&model);
 
     /* Allocate N-vectors. */
     yy = N_VNew_Serial(_Neqns_);
@@ -87,9 +89,11 @@ int main(int argc, char *argv[])
 
     /* Create and initialize  y, y', and absolute tolerance vectors. */
     yval  = NV_DATA_S(yy);
+    /* First copy default values and then set initial conditions */
     for(i = 0; i < _Neqns_; i++)
         yval[i] = _initValues_[i];
-
+    set_initial_conditions(yval);
+    
     ypval = NV_DATA_S(yp);
     for(i = 0; i < _Neqns_; i++)
         ypval[i] = _initDerivatives_[i];
@@ -130,18 +134,22 @@ int main(int argc, char *argv[])
     N_VDestroy_Serial(avtol);
     N_VDestroy_Serial(ids);
 
+    retval = IDASetUserData(mem, &model);
+    if(check_flag(&retval, "IDASetUserData", 1))
+        return(1);
+
     /* For IF state transition network we do not know which state is initially active.
      * Therefore, we have to call check_for_discontinuities() which will check if
      * there should be any change in active states. If there is, we have to call
      * function execute_actions() which will activate correct states. */
-    discontinuity_found = check_for_discontinuities(t0, yval, ypval);
+    discontinuity_found = check_for_discontinuities(&model, t0, yval, ypval);
     if(discontinuity_found)
         copy_to_solver = execute_actions(tret, yval, ypval);
     
     /* Now when we obtained correct active states we have to get the number of roots
      * and call specify IDARootInit to set the root function and number of roots. */
-    no_roots = number_of_roots();
-    retval = IDARootInit(mem, no_roots, root);
+    no_roots = number_of_roots(&model);
+    retval = IDARootInit(&model, mem, no_roots, root);
     if (check_flag(&retval, "IDARootInit", 1))
          return(1);
 
@@ -176,7 +184,7 @@ int main(int argc, char *argv[])
 
         if(retval == IDA_ROOT_RETURN)
         {
-            discontinuity_found = check_for_discontinuities(tret, yval, ypval);
+            discontinuity_found = check_for_discontinuities(&model, tret, yval, ypval);
             if(discontinuity_found)
             {
                 printf("**************************************\n");
@@ -189,10 +197,10 @@ int main(int argc, char *argv[])
                 /* Execute ON_CONDITION actions
                  * Here some actions write directly into the yval array and we do not need
                  * to copy values to the solver (it will be done during the IDAReInit() call) */
-                copy_to_solver = execute_actions(tret, yval, ypval);
+                copy_to_solver = execute_actions(&model, tret, yval, ypval);
 
                 /* Find the number of root functions and inform ida */
-                no_roots = number_of_roots();
+                no_roots = number_of_roots(&model);
                 retval = IDARootInit(mem, no_roots, root);
                 if (check_flag(&retval, "IDARootInit", 1))
                      return(1);
@@ -248,8 +256,10 @@ int resid(realtype tres,
     realtype* yval   = NV_DATA_S(yy);
     realtype* ypval  = NV_DATA_S(yp);
     realtype* res    = NV_DATA_S(resval);
+    
+    daetools_model_t* model = (daetools_model_t*)user_data;
 
-    return residuals(tres, yval, ypval, res);
+    return residuals(model, tres, yval, ypval, res);
 }
 
 int root(realtype t,
@@ -261,7 +271,9 @@ int root(realtype t,
     realtype* yval   = NV_DATA_S(yy);
     realtype* ypval  = NV_DATA_S(yp);
 
-    return roots(t, yval, ypval, gout);
+    daetools_model_t* model = (daetools_model_t*)user_data;
+
+    return roots(model, t, yval, ypval, gout);
 }
 
 int jacob(long int Neq,
@@ -281,7 +293,9 @@ int jacob(long int Neq,
     realtype* res    = NV_DATA_S(resvec);
     realtype** jacob = JACOBIAN(JJ);
 
-    return jacobian(Neq, tt,  cj, yval, ypval, res, jacob);
+    daetools_model_t* model = (daetools_model_t*)user_data;
+
+    return jacobian(model, Neq, tt,  cj, yval, ypval, res, jacob);
 }
 
 static void print_final_stats(void *mem)

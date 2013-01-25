@@ -36,17 +36,16 @@ class daeCodeGeneratorAnalyzer(object):
 
         for port_class, dict_port in self.ports:
             data = self.analyzePort(dict_port['port'])
-
+            # Update dict_port
             dict_port['data'] = data
 
         for model_class, dict_model in self.models:
             data = self.analyzeModel(dict_model['model'])
-
+            # Update dict_model
             dict_model['data'] = data
 
         self.runtimeInformation['ModelType']              = self._simulation.m.ModelType
         self.runtimeInformation['IsModelDynamic']         = self._simulation.m.IsModelDynamic
-        print '\n\nSystem is: ', self.runtimeInformation['ModelType']
         self.runtimeInformation['TotalNumberOfVariables'] = self._simulation.TotalNumberOfVariables
         self.runtimeInformation['NumberOfEquations']      = self._simulation.NumberOfEquations
         self.runtimeInformation['IDs']                    = self._simulation.VariableTypes

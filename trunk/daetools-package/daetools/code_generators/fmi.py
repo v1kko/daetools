@@ -56,6 +56,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
             cgANSI_C = daeCodeGenerator_ANSI_C()
             cgANSI_C.generateSimulation(simulation, projectDirectory = source_dir)
+            self.wrapperInstanceName = simulation.m.Name
 
             self.modelName                  = '' #*
             self.guid                       = uuid.uuid1() #*
@@ -91,10 +92,51 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.ModelVariables    = []
             self.UnitDefinitions   = []
             self.TypeDefinitions   = []
-            self.VendorAnnotations = []   # [fmiVendorAnnotation()]
-            self.DefaultExperiment = None # fmiDefaultExperiment()
+            self.VendorAnnotations = []
+            self.DefaultExperiment = fmiDefaultExperiment()
 
+            # Setup a default experiment
+            self.DefaultExperiment.startTime = 0.0
+            self.DefaultExperiment.stopTime  = simulation.TimeHorizon
+            self.DefaultExperiment.tolerance = simulation.DAESolver.RelativeTolerance
+
+            # Add unit definitions
+
+            # Add variable types
+            
+            # Add model structure (inputs/outputs)
+            
+            # Add model variables
             self._addParameter('Param', 0, '')
+            for domain in cgANSI_C.analyzer.runtimeInformation['Domains']:
+                relativeName   = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
+                relativeName   = cgANSI_C.exprFormatter.formatIdentifier(relativeName)
+                name           = cgANSI_C.exprFormatter.flattenIdentifier(relativeName)
+                description    = domain['Description']
+                numberOfPoints = domain['NumberOfPoints']
+                domains        = '[' + str(domain['NumberOfPoints']) + ']'
+                points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
+
+            for parameter in cgANSI_C.analyzer.runtimeInformation['Parameters']:
+                relativeName   = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
+                relativeName   = self.exprFormatter.formatIdentifier(relativeName)
+                name           = self.exprFormatter.flattenIdentifier(relativeName)
+                description    = parameter['Description']
+                values         = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
+
+            for variable in cgANSI_C.analyzer.runtimeInformation['Variables']:
+                relativeName  = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
+                formattedName = self.exprFormatter.formatIdentifier(relativeName)
+                name          = self.exprFormatter.flattenIdentifier(formattedName)
+
+            for stn in cgANSI_C.analyzer.runtimeInformation['STNs']:
+                if stn['Class'] == 'daeSTN':
+                    relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
+                    relativeName    = self.exprFormatter.formatIdentifier(relativeName)
+                    stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_stn'
+                    description     = stn['Description']
+                    states          = ', '.join(st['Name'] for st in stn['States'])
+                    activeState     = stn['ActiveState']
 
             # Save model description xml file
             self.to_xml(xml_description_filename)
@@ -114,7 +156,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         finally:
             # Remove temporary directory
             if os.path.isdir(tmp_folder):
-                shutil.rmtree(tmp_folder)
+                #shutil.rmtree(tmp_folder)
+                pass
 
     def _addInput(self, name, value_ref):
         i = fmiInput()

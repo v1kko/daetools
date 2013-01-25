@@ -15,6 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #ifndef real_t
 #define real_t double
