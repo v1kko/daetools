@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "python_wraps.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+#include <boost/python/docstring_options.hpp>
+#include "docstrings.h"
 #include <noprefix.h>
 using namespace boost::python;
 
@@ -13,6 +15,8 @@ BOOST_PYTHON_MODULE(pyIPOPT)
 {
     import_array();
     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+    
+    docstring_options doc_options(true, true, false);
 
 	class_<daepython::daeNLPSolverWrapper, boost::noncopyable>("daeNLPSolver_t", no_init)
         .def("Initialize",               pure_virtual(&daeNLPSolver_t::Initialize))

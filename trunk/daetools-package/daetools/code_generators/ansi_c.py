@@ -29,7 +29,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-/* CODE GENERATOR WARNINGS!!!
+/* ANSI C CODE GENERATOR WARNINGS!!!
 %(warnings)s
 */
 
@@ -42,20 +42,30 @@ extern "C" {
 
 typedef struct
 {
-%(valuesReferences)s
+    real_t* values;
+    real_t* timeDerivatives;
+    %(floatValuesReferences)s
+    %(stringValuesReferences)s
 
-/* Domains and parameters */
-%(parameters)s
+    /* Domains and parameters */
+    %(parameters)s
 
-/* StateTransitionNetworks */
-%(activeStates)s
+    /* Assigned variables */
+    %(assignedVariablesDefs)s
 
-/* Assigned variables */
-%(assignedVariables)s
-}daetools_model_t;
+    /* StateTransitionNetworks */
+    %(activeStates)s
+
+} daetools_model_t;
 
 void initialize_model(daetools_model_t* _m_);
+void initialize_values_references(daetools_model_t* _m_);
 void set_initial_conditions(real_t* values);
+void get_float_value(daetools_model_t* _m_, int index, real_t* value);
+void set_float_value(daetools_model_t* _m_, int index, real_t value);
+void get_string_value(daetools_model_t* _m_, int index, char* value);
+void set_string_value(daetools_model_t* _m_, int index, const char* value);
+
 int residuals(daetools_model_t* _m_,
               real_t _current_time_,
               real_t* _values_,
@@ -89,13 +99,13 @@ bool execute_actions(daetools_model_t* _m_,
 
 void initialize_model(daetools_model_t* _m_)
 {
-  %(parametersInits)s
+    %(parametersInits)s
+    %(assignedVariablesInits)s
 }
 
 void set_initial_conditions(real_t* values)
 {
-/* Initial conditions */
-%(initialConditions)s
+    %(initialConditions)s
 }
 
 int residuals(daetools_model_t* _m_,
@@ -206,6 +216,36 @@ bool execute_actions(daetools_model_t* _m_,
     return _copy_values_to_solver_;
 }
 
+void initialize_values_references(daetools_model_t* _m_)
+{
+    /*
+    Values references is an array of pointers that point to the values
+    of parametere/variables in the daetools_model_t structure.
+    Can be uset to set/get values from the model (ie. for FMI).
+    */
+    %(valuesReferencesInit)s
+}
+
+void get_float_value(daetools_model_t* _m_, int index, real_t* value)
+{
+    *value = *_m_->floatValuesReferences[index];
+}
+
+void set_float_value(daetools_model_t* _m_, int index, real_t value)
+{
+    *_m_->floatValuesReferences[index] = value;
+}
+
+void get_string_value(daetools_model_t* _m_, int index, char* value)
+{
+    *value = _m_->stringValuesReferences[index];
+}
+
+void set_string_value(daetools_model_t* _m_, int index, const char* value)
+{
+    _m_->stringValuesReferences[index] = value;
+}
+
 #ifdef __cplusplus
 }
 #endif
@@ -308,7 +348,8 @@ class daeCodeGenerator_ANSI_C(object):
         self.simulation              = None
         self.equationGenerationMode  = ''
         
-        self.assignedVariables       = []
+        self.assignedVariablesDefs   = []
+        self.assignedVariablesInits  = []
         self.initialConditions       = []
         self.initiallyActiveStates   = []
         self.modelDef                = []
@@ -335,7 +376,8 @@ class daeCodeGenerator_ANSI_C(object):
 
         directory = kwargs.get('projectDirectory', None)
 
-        self.assignedVariables       = []
+        self.assignedVariablesDefs   = []
+        self.assignedVariablesInits  = []
         self.initialConditions       = []
         self.initiallyActiveStates   = []
         self.modelDef                = []
@@ -369,29 +411,68 @@ class daeCodeGenerator_ANSI_C(object):
 
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-        modelDef       = '\n'.join(self.modelDef)
-        paramsDef      = '\n'.join(self.parametersDefs)
-        paramsInits    = '\n  '.join(self.parametersInits)
-        stnDef         = '\n'.join(self.initiallyActiveStates)
-        assignedVars   = '\n'.join(self.assignedVariables)
-        initConds      = '\n'.join(self.initialConditions)
-        eqnsRes        = '\n'.join(self.residuals)
-        jacobRes       = '\n'.join(self.jacobians)
-        rootsDef       = '\n'.join(self.rootFunctions)
-        checkDiscont   = '\n'.join(self.checkForDiscontinuities)
-        execActionsDef = '\n'.join(self.executeActions)
-        noRootsDef     = '\n'.join(self.numberOfRoots)
-        warnings       = '\n'.join(self.warnings)
+        modelDef          = '\n'.join(self.modelDef)
+        paramsDef         = '\n    '.join(self.parametersDefs)
+        paramsInits       = '\n    '.join(self.parametersInits)
+        stnDef            = '\n    '.join(self.initiallyActiveStates)
+        assignedVarsDefs  = '\n    '.join(self.assignedVariablesDefs)
+        assignedVarsInits = '\n    '.join(self.assignedVariablesInits)
+        initConds         = '\n    '.join(self.initialConditions)
+        eqnsRes           = '\n'.join(self.residuals)
+        jacobRes          = '\n'.join(self.jacobians)
+        rootsDef          = '\n'.join(self.rootFunctions)
+        checkDiscont      = '\n'.join(self.checkForDiscontinuities)
+        execActionsDef    = '\n'.join(self.executeActions)
+        noRootsDef        = '\n'.join(self.numberOfRoots)
+        warnings          = '\n'.join(self.warnings)
 
-        valuesReferences = ''
+        if len(self.floatValuesReferences) > 0:
+            floatValuesReferences = 'real_t* floatValuesReferences[{0}];'.format(len(self.floatValuesReferences))
+        else:
+            floatValuesReferences = 'real_t* floatValuesReferences[1];' # dummy array
 
+        # FMI: initialize value references tuple: (ref_type, name)
+        valRefInit = []
+        for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(self.floatValuesReferences):
+            if ref_type == 'Assigned':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+
+            elif ref_type == 'Algebraic' or ref_type == 'Differential':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->values[{1}];'.format(i, block_index)
+
+            elif ref_type == 'Differential':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->values[{1}];'.format(i, block_index)
+
+            elif ref_type == 'Parameter':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+
+            elif ref_type == 'NumberOfPointsInDomain':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+
+            elif ref_type == 'DomainPoints':
+                init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+
+            else:
+                raise RuntimeError('Invalid variable reference type')
+            
+            valRefInit.append(init)            
+        valuesReferencesInit = '\n    '.join(valRefInit)
+        
+        if len(self.stringValuesReferences) > 0:
+            stringValuesReferences = 'real_t* stringValuesReferences[{0}];'.format(len(self.stringValuesReferences))
+        else:
+            stringValuesReferences = 'real_t* stringValuesReferences[1];' # dummy array
+            
         dictInfo = {
                         'model' : modelDef,
                         'parameters' : paramsDef,
                         'parametersInits' : paramsInits,
-                        'valuesReferences' : valuesReferences,
+                        'valuesReferencesInit' : valuesReferencesInit,
+                        'floatValuesReferences' : floatValuesReferences,
+                        'stringValuesReferences' : stringValuesReferences,
                         'activeStates' : stnDef,
-                        'assignedVariables' : assignedVars,
+                        'assignedVariablesDefs' : assignedVarsDefs,
+                        'assignedVariablesInits' : assignedVarsInits,
                         'initialConditions' : initConds,
                         'residuals' : eqnsRes,
                         'jacobian' : jacobRes,
@@ -798,13 +879,10 @@ class daeCodeGenerator_ANSI_C(object):
         strAbsTol = 'const real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
         self.modelDef.append(strAbsTol)
 
-        # Needed for FMI code generator
-        value_ref = 0
-
         for domain in runtimeInformation['Domains']:
-            relativeName = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
-            relativeName   = self.exprFormatter.formatIdentifier(relativeName)
-            name           = self.exprFormatter.flattenIdentifier(relativeName)
+            relativeName   = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
+            formattedName  = self.exprFormatter.formatIdentifier(relativeName)
+            name           = self.exprFormatter.flattenIdentifier(formattedName)
             description    = domain['Description']
             numberOfPoints = domain['NumberOfPoints']
             domains        = '[' + str(domain['NumberOfPoints']) + ']'
@@ -831,48 +909,72 @@ class daeCodeGenerator_ANSI_C(object):
             self.parametersInits.append(domTemplate.format(name = name))
             self.parametersInits.append(paramTemplate.format(name = name,
                                                              numberOfPoints = numberOfPoints))
-           
-            #self.fmiInterface.append( ('domainPoint', name, value_ref) )
-            #value_ref += 1
+
+            struct_name = formattedName + '_np'
+            flat_name   = name + '_np'
+            self.floatValuesReferences.append( ('NumberOfPointsInDomain', struct_name, flat_name, None) )
+            for i in range(len(domain['Points'])):
+                struct_name = '{0}[{1}]'.format(formattedName, i)
+                flat_name   = '{0}[{1}]'.format(name, i)
+                self.floatValuesReferences.append( ('DomainPoints', struct_name, flat_name, None) )
             
         for parameter in runtimeInformation['Parameters']:
-            relativeName   = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
-            relativeName   = self.exprFormatter.formatIdentifier(relativeName)
-            name           = self.exprFormatter.flattenIdentifier(relativeName)
-            description    = parameter['Description']
-            numberOfPoints = int(parameter['NumberOfPoints'])
-            values         = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
-            domains = ''
-            if len(parameter['Domains']) > 0:
+            relativeName    = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
+            formattedName   = self.exprFormatter.formatIdentifier(relativeName)
+            name            = self.exprFormatter.flattenIdentifier(formattedName)
+            description     = parameter['Description']
+            numberOfPoints  = int(parameter['NumberOfPoints'])
+            values          = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
+            numberOfDomains = len(parameter['Domains'])
+            domains         = ''
+            if numberOfDomains > 0:
                 domains = '[{0}]'.format(']['.join(str(np) for np in parameter['Domains']))
 
-            paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
-            self.parametersDefs.append(paramTemplate.format(name = name,
-                                                            domains = domains,
-                                                            description = description))
+                paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
+                self.parametersDefs.append(paramTemplate.format(name = name,
+                                                                domains = domains,
+                                                                description = description))
 
-            paramTemplate = 'real_t {name}{domains} = {values};'
-            self.parametersInits.append(paramTemplate.format(name = name,
-                                                             domains = domains,
-                                                             values = values))
+                paramTemplate = 'real_t {name}{domains} = {values};'
+                self.parametersInits.append(paramTemplate.format(name = name,
+                                                                domains = domains,
+                                                                values = values))
 
-            paramTemplate = 'memcpy(&_m_->{name}, &{name}, {numberOfPoints} * sizeof(real_t));\n'
-            self.parametersInits.append(paramTemplate.format(name = name,
-                                                             numberOfPoints = numberOfPoints))
-
-                                                             
-            if numberOfPoints == 1:
-                self.floatValuesReferences.append( ('parameter', name, value_ref) )
-                value_ref += 1
-
+                paramTemplate = 'memcpy(&_m_->{name}, &{name}, {numberOfPoints} * sizeof(real_t));\n'
+                self.parametersInits.append(paramTemplate.format(name = name,
+                                                                numberOfPoints = numberOfPoints))
             else:
-                for i in range(0, numberOfPoints):
-                    _name = '{0}[{1}]'.format(name, i)
-                    self.floatValuesReferences.append( ('parameter', _name, value_ref) )
-                    value_ref += 1                
+                paramTemplate = 'real_t {name}; /* {description} */ \n'
+                self.parametersDefs.append(paramTemplate.format(name = name,
+                                                                description = description))
 
-        print self.floatValuesReferences
-        
+                paramTemplate = '_m_->{name} = {value};\n'
+                self.parametersInits.append(paramTemplate.format(name = name,
+                                                                 value = values))
+                
+            if numberOfDomains == 0:
+                struct_name = formattedName
+                flat_name   = self.exprFormatter.flattenIdentifier(struct_name)
+                self.floatValuesReferences.append( ('Parameter', struct_name, flat_name, None) )
+            else:
+                domainsIndexesMap = parameter['DomainsIndexesMap']
+                for i in range(0, numberOfPoints):
+                    domIndexes = tuple(domainsIndexesMap[i])  # list of integers
+                    struct_name = '{0}[{1}]'.format(formattedName,  ']['.join(str(index) for index in domIndexes))
+                    flat_name   = '{0}[{1}]'.format(name,           ']['.join(str(index) for index in domIndexes))
+                    self.floatValuesReferences.append( ('Parameter', struct_name, flat_name, None) )
+
+                """
+                it = numpy.nditer(parameter['Values'], flags=['c_index', 'multi_index'])
+                while not it.finished:
+                    #print name + "%s = %d" % (it.multi_index, it[0])
+                    p_name = '{0}[{1}]'.format(name,  ']['.join(str(index) for index in it.multi_index))
+                    self.floatValuesReferences.append( ('Parameter', p_name, value_ref) )
+                    print p_name
+                    value_ref += 1
+                    it.iternext()
+                """
+                
         for variable in runtimeInformation['Variables']:
             relativeName   = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
             formattedName  = self.exprFormatter.formatIdentifier(relativeName)
@@ -885,45 +987,78 @@ class daeCodeGenerator_ANSI_C(object):
                 overallIndex = variable['OverallIndex']
                 fullName     = relativeName
 
-                if ID == cnDifferential:
-                    blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
-                    name_ = 'values[{0}]'.format(blockIndex)
-                    temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
-                    self.initialConditions.append(temp)
-
-                elif ID == cnAssigned:
-                    temp = 'real_t {name} = {value}; /* {fullName} */'.format(name = name, value = value, fullName = fullName)
-                    self.assignedVariables.append(temp)
-
+                blockIndex = None
                 if ID != cnAssigned:
                     blockIndex = indexMappings[overallIndex] + self.exprFormatter.indexBase
                     self.variableNames[blockIndex] = fullName
 
+                if ID == cnDifferential:
+                    name_ = 'values[{0}]'.format(blockIndex)
+                    temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
+                    self.initialConditions.append(temp)
+                elif ID == cnAssigned:
+                    temp = 'real_t {name}; /* {fullName} */'.format(name = name, fullName = fullName)
+                    self.assignedVariablesDefs.append(temp)
+                    temp = '_m_->{name} = {value};'.format(name = name, value = value)
+                    self.assignedVariablesInits.append(temp)
+                    
+                if ID == cnAssigned:
+                    ref_type = 'Assigned'
+                elif ID == cnDifferential:
+                    ref_type = 'Differential'
+                else:
+                    ref_type = 'Algebraic'
+
+                struct_name = formattedName
+                flat_name   = self.exprFormatter.flattenIdentifier(struct_name)
+                self.floatValuesReferences.append( (ref_type, struct_name, flat_name, blockIndex) )
+
             else:
+                domainsIndexesMap = variable['DomainsIndexesMap']
                 for i in range(0, numberOfPoints):
-                    domIndexes   = tuple(variable['DomainsIndexesMap'][i])  # list of integers
+                    domIndexes   = tuple(domainsIndexesMap[i])              # list of integers
                     ID           = int(variable['IDs'][domIndexes])         # cnDifferential, cnAssigned or cnAlgebraic
                     value        = float(variable['Values'][domIndexes])    # numpy float
                     overallIndex = variable['OverallIndex'] + i
                     fullName     = relativeName + '(' + ','.join(str(di) for di in domIndexes) + ')'
 
-                    if ID == cnDifferential:
-                        blockIndex   = indexMappings[overallIndex] + self.exprFormatter.indexBase
-                        name_ = 'values[{0}]'.format(blockIndex)
-                        temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
-                        self.initialConditions.append(temp)
-
-                    elif ID == cnAssigned:
-                        temp = 'real_t {name} = {value}; /* {fullName} */'.format(name = name, value = value, fullName = fullName)
-                        self.assignedVariables.append(temp)
-
+                    blockIndex = None
                     if ID != cnAssigned:
                         blockIndex = indexMappings[overallIndex] + self.exprFormatter.indexBase
                         self.variableNames[blockIndex] = fullName
 
+                    if ID == cnDifferential:
+                        name_ = 'values[{0}]'.format(blockIndex)
+                        temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
+                        self.initialConditions.append(temp)
+                    elif ID == cnAssigned:
+                        raise RuntimeError('')
+                    
+                        name_ = formattedName + '_' + '_'.join(str(di) for di in domIndexes)
+                        temp = 'real_t {name}; /* {fullName} */'.format(name = name, fullName = fullName)
+                        self.assignedVariablesDefs.append(temp)
+
+                        temp = '{name} = {value};'.format(name = name, value = value)
+                        self.assignedVariablesInits.append(temp)
+
+                    if ID == cnAssigned:
+                        ref_type = 'Assigned'
+                    elif ID == cnDifferential:
+                        ref_type = 'Differential'
+                    else:
+                        ref_type = 'Algebraic'
+
+                    struct_name = '{0}[{1}]'.format(formattedName,  ']['.join(str(di) for di in domIndexes))
+                    flat_name   = self.exprFormatter.flattenIdentifier(struct_name)
+                    self.floatValuesReferences.append( (ref_type, struct_name, flat_name, blockIndex) )
+
         varNames = ['"' + name_ + '"' for name_ in self.variableNames]
         strVariableNames = 'const char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
         self.modelDef.append(strVariableNames)
+
+        import pprint
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(self.floatValuesReferences)
 
         indent = 1
         s_indent = indent * self.defaultIndent

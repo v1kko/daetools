@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
+#include "docstrings.h"
 #include "../LA_SuperLU/superlu_la_solver.h"
 using namespace boost::python;
 using namespace dae::solver;
@@ -20,6 +21,8 @@ BOOST_PYTHON_MODULE(pySuperLU_MT)
 BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 #endif
 {
+    docstring_options doc_options(true, true, false);
+    
 /**************************************************************
 	LA Solver
 ***************************************************************/

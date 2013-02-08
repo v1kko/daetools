@@ -21,6 +21,7 @@ SOURCES += dllmain.cpp \
     dae_python.cpp
 
 HEADERS += stdafx.h \
+    docstrings.h \
     python_wraps.h
 
 #######################################################

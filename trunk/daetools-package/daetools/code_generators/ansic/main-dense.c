@@ -98,6 +98,10 @@ int main(int argc, char *argv[])
     for(i = 0; i < _Neqns_; i++)
         ypval[i] = _initDerivatives_[i];
 
+    model.values          = yval;
+    model.timeDerivatives = ypval;
+    initialize_values_references(&model);
+
     rtol = _relative_tolerance_;
 
     atval = NV_DATA_S(avtol);
@@ -144,12 +148,12 @@ int main(int argc, char *argv[])
      * function execute_actions() which will activate correct states. */
     discontinuity_found = check_for_discontinuities(&model, t0, yval, ypval);
     if(discontinuity_found)
-        copy_to_solver = execute_actions(tret, yval, ypval);
+        copy_to_solver = execute_actions(&model, tret, yval, ypval);
     
     /* Now when we obtained correct active states we have to get the number of roots
      * and call specify IDARootInit to set the root function and number of roots. */
     no_roots = number_of_roots(&model);
-    retval = IDARootInit(&model, mem, no_roots, root);
+    retval = IDARootInit(mem, no_roots, root);
     if (check_flag(&retval, "IDARootInit", 1))
          return(1);
 

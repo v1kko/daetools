@@ -306,21 +306,21 @@ def consoleRun():
     #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
     #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
-    import os
-    from ansi_c import daeCodeGenerator_ANSI_C
-    cg = daeCodeGenerator_ANSI_C()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, projectDirectory = folder)
-
     #import os
-    #from fmi import daeCodeGenerator_FMI
-    #cg = daeCodeGenerator_FMI()
+    #from ansi_c import daeCodeGenerator_ANSI_C
+    #cg = daeCodeGenerator_ANSI_C()
     #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
     #cg.generateSimulation(simulation, projectDirectory = folder)
 
+    import os
+    from fmi import daeCodeGenerator_FMI
+    cg = daeCodeGenerator_FMI()
+    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    cg.generateSimulation(simulation, projectDirectory = folder)
+
     # Run
-    #simulation.Run()
-    #simulation.Finalize()
+    simulation.Run()
+    simulation.Finalize()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

@@ -21,7 +21,8 @@ SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp
 
-HEADERS += stdafx.h
+HEADERS += stdafx.h \
+    docstrings.h
 
 #######################################################
 #                Install files

@@ -1194,20 +1194,20 @@ public:
 						   ptrarrUserDefinedActions);
     }
 	
-	daeEquation* CreateEquation1(string strName, string strDescription, real_t dScaling)
-	{
-		return daeModel::CreateEquation(strName, strDescription, dScaling);
-	}
+//	daeEquation* CreateEquation1(string strName, string strDescription, real_t dScaling)
+//	{
+//		return daeModel::CreateEquation(strName, strDescription, dScaling);
+//	}
 
-	daeEquation* CreateEquation2(string strName, string strDescription)
-	{
-		return daeModel::CreateEquation(strName, strDescription);
-	}
+//	daeEquation* CreateEquation2(string strName, string strDescription)
+//	{
+//		return daeModel::CreateEquation(strName, strDescription);
+//	}
 
-	daeEquation* CreateEquation3(string strName)
-	{
-		return daeModel::CreateEquation(strName);
-	}
+//	daeEquation* CreateEquation3(string strName)
+//	{
+//		return daeModel::CreateEquation(strName);
+//	}
 
 	void DeclareData()
 	{

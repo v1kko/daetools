@@ -58,7 +58,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             cgANSI_C.generateSimulation(simulation, projectDirectory = source_dir)
             self.wrapperInstanceName = simulation.m.Name
 
-            self.modelName                  = '' #*
+            self.modelName                  = simulation.m.Name #*
             self.guid                       = uuid.uuid1() #*
             self.description                = ''
             self.author                     = ''
@@ -71,7 +71,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.numberOfEventIndicators    = 0
 
             self.CoSimulation = fmiCoSimulation()
-            self.CoSimulation.modelIdentifier                        = '' #*
+            self.CoSimulation.modelIdentifier                        = simulation.m.Name #*
             self.CoSimulation.needsExecutionTool                     = False
             self.CoSimulation.canHandleVariableCommunicationStepSize = True
             self.CoSimulation.canHandleEvents                        = True
@@ -107,36 +107,27 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Add model structure (inputs/outputs)
             
             # Add model variables
-            self._addParameter('Param', 0, '')
-            for domain in cgANSI_C.analyzer.runtimeInformation['Domains']:
-                relativeName   = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
-                relativeName   = cgANSI_C.exprFormatter.formatIdentifier(relativeName)
-                name           = cgANSI_C.exprFormatter.flattenIdentifier(relativeName)
-                description    = domain['Description']
-                numberOfPoints = domain['NumberOfPoints']
-                domains        = '[' + str(domain['NumberOfPoints']) + ']'
-                points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
+            for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(cgANSI_C.floatValuesReferences):
+                if ref_type == 'Assigned':
+                    self._addAssignedVariable(ref_name, i, '')
 
-            for parameter in cgANSI_C.analyzer.runtimeInformation['Parameters']:
-                relativeName   = daeGetRelativeName(self.wrapperInstanceName, parameter['CanonicalName'])
-                relativeName   = self.exprFormatter.formatIdentifier(relativeName)
-                name           = self.exprFormatter.flattenIdentifier(relativeName)
-                description    = parameter['Description']
-                values         = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
+                elif ref_type == 'Algebraic':
+                    self._addAlgebraicVariable(ref_name, i, '')
 
-            for variable in cgANSI_C.analyzer.runtimeInformation['Variables']:
-                relativeName  = daeGetRelativeName(self.wrapperInstanceName, variable['CanonicalName'])
-                formattedName = self.exprFormatter.formatIdentifier(relativeName)
-                name          = self.exprFormatter.flattenIdentifier(formattedName)
+                elif ref_type == 'Differential':
+                    self._addDifferentialVariable(ref_name, i, '')
 
-            for stn in cgANSI_C.analyzer.runtimeInformation['STNs']:
-                if stn['Class'] == 'daeSTN':
-                    relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
-                    relativeName    = self.exprFormatter.formatIdentifier(relativeName)
-                    stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_stn'
-                    description     = stn['Description']
-                    states          = ', '.join(st['Name'] for st in stn['States'])
-                    activeState     = stn['ActiveState']
+                elif ref_type == 'Parameter':
+                    self._addParameter(ref_name, i, '')
+
+                elif ref_type == 'NumberOfPointsInDomain':
+                    self._addNumberOfPointsInDomain(ref_name, i, '')
+
+                elif ref_type == 'DomainPoints':
+                    self._addDomainPoints(ref_name, i, '')
+
+                else:
+                    raise RuntimeError('Invalid variable reference type')
 
             # Save model description xml file
             self.to_xml(xml_description_filename)

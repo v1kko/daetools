@@ -30,6 +30,7 @@ SOURCES += stdafx.cpp \
     python_wraps.cpp
 
 HEADERS += stdafx.h \
+    docstrings.h \
     python_wraps.h
 
 #######################################################

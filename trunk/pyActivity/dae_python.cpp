@@ -2,12 +2,15 @@
 #include "python_wraps.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <noprefix.h>
+#include "docstrings.h"
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pyActivity)
 {
     import_array(); 
     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+    
+    docstring_options doc_options(true, true, false);
  
 /**************************************************************
     Enums

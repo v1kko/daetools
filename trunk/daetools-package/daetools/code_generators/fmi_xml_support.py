@@ -32,7 +32,7 @@ def addObjects(element, name, objects, required = False):
         obj.to_xml(obj_elem)
 
 class fmiModelDescription(object):
-    xmlTagName = 'ModelDescription'
+    xmlTagName = 'fmiModelDescription'
 
     variableNamingConventionFlat       = 'flat'
     variableNamingConventionStructured = 'structured'

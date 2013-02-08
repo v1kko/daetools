@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "python_wraps.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+#include "docstrings.h"
 #include <noprefix.h>
 using namespace boost::python;
 
@@ -8,6 +9,8 @@ BOOST_PYTHON_MODULE(pyCore)
 {
 	import_array();
 	boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
+    docstring_options doc_options(true, true, false);
 
 /**************************************************************
     Enums
@@ -1101,7 +1104,7 @@ BOOST_PYTHON_MODULE(pyCore)
         //.add_property("AbsTolerance", &daeMeasuredVariable::GetAbsTolerance, &daeMeasuredVariable::SetAbsTolerance)
         ;
 
-	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel")
+	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel", DOCSTR_daeModel)
 		.def(init<string, optional<daeModel*, string> >())
 
 		.add_property("Domains",				&daepython::daeModelWrapper::GetDomains)
@@ -1121,9 +1124,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ModelType",	   		    &daeModel::GetModelType)
 
 		.def("__str__",          &daepython::daeModel_str)  
-		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation1, return_internal_reference<>())
-		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation2, return_internal_reference<>())
-        .def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation3, return_internal_reference<>())
+        .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(), 
+             ( arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_CreateEquation)
+//		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation2, return_internal_reference<>(), 
+//                        ( arg("self"), arg("name"), arg("description") ), "doc string")
+//        .def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation3, return_internal_reference<>(), 
+//                        ( arg("self"), arg("name") ), "doc string")
 		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations)
 		.def("ConnectPorts",     &daeModel::ConnectPorts)
 		.def("ConnectEventPorts",&daeModel::ConnectEventPorts)
