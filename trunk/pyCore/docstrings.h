@@ -14,7 +14,7 @@ const char* DOCSTR_Template = ". \n\n"
     "    object \n\n"
     "*Raises:* \n"
     "    RuntimeError \n";
-    
+
 Code snippet:
     "    documentation:: \n\n"
     "        def any(iterable): \n"
