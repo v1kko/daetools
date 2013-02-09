@@ -230,15 +230,18 @@ void daeIndexRange::GetPoints(vector<size_t>& narrCustomPoints) const
 	{
 		if(m_iStartIndex < 0 || m_iStartIndex >= (int)m_pDomain->GetNumberOfPoints())
 			daeDeclareAndThrowException(exOutOfBounds);
-		if(m_iEndIndex >= (int)m_pDomain->GetNumberOfPoints())
-			daeDeclareAndThrowException(exOutOfBounds);
 		
 		int iEnd = (m_iEndIndex == -1 ? m_pDomain->GetNumberOfPoints() : m_iEndIndex);
 
 		narrCustomPoints.clear();
 		for(int i = m_iStartIndex; i < iEnd; i += m_iStride)
-			narrCustomPoints.push_back((size_t)i);
-		
+		{
+            if(i >= (int)m_pDomain->GetNumberOfPoints())
+                daeDeclareAndThrowException(exOutOfBounds);
+            
+            narrCustomPoints.push_back((size_t)i);
+        }		
+        
 		if(narrCustomPoints.empty())
 		{
 			daeDeclareException(exInvalidCall);
@@ -251,7 +254,11 @@ void daeIndexRange::GetPoints(vector<size_t>& narrCustomPoints) const
 		if(m_narrCustomPoints.size() == 0)
 			daeDeclareAndThrowException(exInvalidCall);
 
-		narrCustomPoints = m_narrCustomPoints;
+        for(size_t i = 0; i < m_narrCustomPoints.size(); i++)
+            if(m_narrCustomPoints[i] >= (int)m_pDomain->GetNumberOfPoints())
+                daeDeclareAndThrowException(exOutOfBounds);
+
+        narrCustomPoints = m_narrCustomPoints;
 	}
 	else
 	{

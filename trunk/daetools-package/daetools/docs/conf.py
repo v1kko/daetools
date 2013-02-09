@@ -13,6 +13,7 @@
 
 import sys, os, platform, numpy
 
+"""
 # Python version
 python_version_major = str(sys.version_info[0])
 python_version_minor = str(sys.version_info[1])
@@ -51,6 +52,9 @@ solvers_sodir = os.path.join(daetools_dir, 'solvers', '{0}_{1}_py{2}{3}_numpy{4}
 sys.path.insert(0, solvers_sodir)
 #sys.path.insert(0, os.path.abspath('../'))
 #print sys.path
+"""
+sys.path.insert(0, os.path.abspath('../../'))
+from daetools import *
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

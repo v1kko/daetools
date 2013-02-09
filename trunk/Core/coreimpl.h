@@ -222,6 +222,7 @@ protected:
 	friend class daePortConnection;
 };
 
+bool   daeIsValidObjectName(const string& strName);
 string daeGetRelativeName(const daeObject* parent, const daeObject* child);
 string daeGetRelativeName(const string& strParent, const string& strChild);
 string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child);
@@ -2132,9 +2133,6 @@ protected:
 	daeDomain*		FindDomain(unsigned long nID) const;
 
 protected:
-	void			SetModelAndCanonicalName(daeObject* pObject);
-
-protected:
 	daeePortType				m_ePortType;
 	daePtrVector<daeVariable*>	m_ptrarrVariables;
 	daePtrVector<daeDomain*>	m_ptrarrDomains;
@@ -2331,7 +2329,6 @@ public:
 
 protected:
 	void CreateEquations(void);
-	void SetModelAndCanonicalName(daeObject* pObject);
 
 protected:
 	daePort*					m_pPortFrom;
@@ -2368,9 +2365,6 @@ public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	void Clone(const daePortConnection& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-
-protected:
-	void SetModelAndCanonicalName(daeObject* pObject);
 
 protected:
 	boost::shared_ptr<daeRemoteEventReceiver> receiver;
@@ -2607,7 +2601,6 @@ protected:
 	void		CollectAllSTNs(std::vector<daeSTN*>& ptrarrSTNs) const;
 	void		CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	void		CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
-	void		SetModelAndCanonicalName(daeObject* pObject);
 	bool		DetectObject(string& strShortName, std::vector<size_t>& narrDomains, daeeObjectType& eType, daeObject_t** ppObject);
 	
 // Used to nest States
@@ -2880,7 +2873,6 @@ protected:
 	daeSTN*	GetSTN(void) const;
 	void	SetSTN(daeSTN* pSTN);
 
-	void	SetModelAndCanonicalName(daeObject* pObject);
 	void	AddIndexesFromAllEquations(std::vector< std::map<size_t, size_t> >& arrIndexes, size_t& nCurrentEquaton);
 
 protected:
@@ -3116,7 +3108,6 @@ protected:
 	void SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock);
 	
 	void SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
-	void SetModelAndCanonicalName(daeObject* pObject);
     
 protected:
 	real_t												m_dScaling;

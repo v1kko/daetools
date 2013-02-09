@@ -599,6 +599,11 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
     class_<daeObject, boost::noncopyable>("daeObject", no_init)
+        // daeSerializable part
+        .add_property("ID",             &daeObject::GetID)
+        .add_property("Version",        &daeObject::GetVersion)
+        .add_property("Library",        &daeObject::GetLibrary)
+        // daeObject part
         .add_property("Name",           &daeObject::GetName, &daeObject::SetName)
         .add_property("Description",    &daeObject::GetDescription, &daeObject::SetDescription)
         .add_property("CanonicalName",  &daeObject::GetCanonicalName)
@@ -608,6 +613,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("GetStrippedName",                         &daeObject::GetStrippedName)
         .def("GetStrippedNameRelativeToParentModel",    &daeObject::GetStrippedNameRelativeToParentModel)
         ;
+    def("daeIsValidObjectName",          &daeIsValidObjectName);
 	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1); 
 	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2);
 	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName);
@@ -632,8 +638,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(init<daeDomain*, size_t, size_t,size_t>())
 
 		.add_property("NoPoints",	&daeIndexRange::GetNoPoints)
-
-		.def_readonly("Domain",		&daeIndexRange::m_pDomain)
+		.add_property("Domain",		make_function(&daepython::daeIndexRange_GetDomain, return_internal_reference<>()))
 		.def_readonly("Type",		&daeIndexRange::m_eType)
 		.def_readonly("StartIndex",	&daeIndexRange::m_iStartIndex)
 		.def_readonly("EndIndex",	&daeIndexRange::m_iEndIndex)
@@ -672,10 +677,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("CreateArray",						&daeDomain::CreateArray)
 		.def("CreateDistributed",				&daeDomain::CreateDistributed)
 		.def("__getitem__",						&daeDomain::operator[])
-        .def("__call__",						&daeDomain::operator())
-//		.def("__call__",						&daepython::FunctionCallDomain1)
-//		.def("__call__",						&daepython::FunctionCallDomain2)
-//		.def("__call__",						&daepython::FunctionCallDomain3)  
+        .def("__call__",						&daeDomain::operator()) 
 		//.def("array",							&daepython::DomainArray1)
 		//.def("array",							&daepython::DomainArray2)
 		; 

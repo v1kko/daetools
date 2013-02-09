@@ -28,8 +28,6 @@ public:
 	{
 		if(!pObject)
 			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
 
 		pObject->SetModel(m_pModel);
 	}

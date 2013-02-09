@@ -227,6 +227,7 @@ boost::python::list GetDomainPoints(daeDomain& domain);
 void SetDomainPoints(daeDomain& domain, boost::python::list l);
 
 daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list CustomPoints);
+daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);
 
 /*******************************************************
 	daeParameter

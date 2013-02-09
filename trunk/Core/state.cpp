@@ -275,22 +275,10 @@ void daeState::SetSTN(daeSTN* pSTN)
 	m_pSTN = pSTN;
 }
 
-void daeState::SetModelAndCanonicalName(daeObject* pObject)
-{
-	if(!pObject)
-		daeDeclareAndThrowException(exInvalidPointer);
-//	string strName;
-//	strName = m_strCanonicalName + "." + pObject->m_strShortName;
-//	pObject->m_strCanonicalName = strName;
-
-	pObject->m_pModel = m_pModel;
-}
-
 void daeState::AddEquation(daeEquation* pEquation)
 {
-	if(!pEquation)
-		daeDeclareAndThrowException(exInvalidPointer);
-	SetModelAndCanonicalName(pEquation);
+    pEquation->SetModel(m_pModel);
+	//SetModelAndCanonicalName(pEquation);
 	pEquation->m_pParentState = this;
 	dae_push_back(m_ptrarrEquations, pEquation);
 }
@@ -299,15 +287,10 @@ void daeState::AddOnEventAction(daeOnEventActions& rOnEventAction, const string&
 {
 	rOnEventAction.SetName(strName);
 	rOnEventAction.SetDescription(strDescription);
-    SetModelAndCanonicalName(&rOnEventAction);
+    rOnEventAction.SetModel(m_pModel);
+    //SetModelAndCanonicalName(&rOnEventAction);
 	rOnEventAction.m_pParentState = this;
 	
-	if(strName.empty())
-	{
-		daeDeclareException(exInvalidCall);
-		e << "OnEventAction name cannot be empty";
-		throw e;
-	}
 	if(CheckName(m_ptrarrOnEventActions, strName))
 	{
 		daeDeclareException(exInvalidCall); 
@@ -369,18 +352,16 @@ size_t daeState::GetNumberOfSTNs(void) const
 
 void daeState::AddNestedSTN(daeSTN* pSTN)
 {
-	if(!pSTN)
-		daeDeclareAndThrowException(exInvalidPointer);
-	SetModelAndCanonicalName(pSTN);
+	//SetModelAndCanonicalName(pSTN);
+    pSTN->SetModel(m_pModel);
 	pSTN->SetParentState(this);
 	dae_push_back(m_ptrarrSTNs, pSTN);
 }
 
 void daeState::AddStateTransition(daeStateTransition* pStateTransition)
 {
-	if(!pStateTransition)
-		daeDeclareAndThrowException(exInvalidPointer);
-	SetModelAndCanonicalName(pStateTransition);
+	//SetModelAndCanonicalName(pStateTransition);
+    pStateTransition->SetModel(m_pModel);
 	dae_push_back(m_ptrarrStateTransitions, pStateTransition);
 }
 	

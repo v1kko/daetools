@@ -238,9 +238,9 @@ protected:
 	        Memory/speed aware vector operations
 **********************************************************************************************
 a) dae_push_back 
-   Since the logarithmic resize of a std::vector while items are added with push_back, many times 
+   Becaus of the logarithmic resize of a std::vector while items are added with push_back, many times 
    we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for 
-   the item to add it calls reserve(2*size) so we may end up with a lot of memory wasted).
+   the item to add it calls reserve(2*size) - thus a lot of memory is wasted).
    Therefore, we may use generally slower but more memory conservative function that does not 
    reserve memory for items that do not exist (yet).
 b) dae_add_vector, dae_set_vector 

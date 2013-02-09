@@ -22,6 +22,14 @@ daeDomain::daeDomain()
 
 daeDomain::daeDomain(string strName, daeModel* pModel, const unit& units, string strDescription)
 {
+    if(!pModel)
+    {
+        daeDeclareException(exInvalidPointer);
+        string msg = "Cannot create the domain [%s]: the parent model object is a NULL pointer/reference";
+        e << (boost::format(msg) % strName).str();
+		throw e;
+    }
+    
 	m_Unit					= units;
 	m_dLowerBound			= 0;
 	m_dUpperBound			= 0;
@@ -32,13 +40,19 @@ daeDomain::daeDomain(string strName, daeModel* pModel, const unit& units, string
 	m_eDiscretizationMethod	= eDMUnknown;
 	m_pParentPort           = NULL;
 
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
 	pModel->AddDomain(*this, strName, units, strDescription);
 }
 
 daeDomain::daeDomain(string strName, daePort* pPort, const unit& units, string strDescription)
 {
+    if(!pPort)
+    {
+        daeDeclareException(exInvalidPointer);
+        string msg = "Cannot create the domain [%s]: the parent port object is a NULL pointer/reference";
+        e << (boost::format(msg) % strName).str();
+		throw e;
+    }
+    
 	m_Unit					= units;
 	m_dLowerBound			= 0;
 	m_dUpperBound			= 0;
@@ -49,8 +63,6 @@ daeDomain::daeDomain(string strName, daePort* pPort, const unit& units, string s
 	m_eDiscretizationMethod	= eDMUnknown;
 	m_pParentPort           = pPort;
 
-	if(!pPort)
-		daeDeclareAndThrowException(exInvalidPointer);
 	pPort->AddDomain(*this, strName, units, strDescription);
 }
 
@@ -60,14 +72,14 @@ daeDomain::~daeDomain()
 
 void daeDomain::Clone(const daeDomain& rObject)
 {
-	m_dLowerBound			= rObject.m_dLowerBound;
-	m_dUpperBound			= rObject.m_dUpperBound;
-	m_nNumberOfIntervals	= rObject.m_nNumberOfIntervals;
-	m_nNumberOfPoints		= rObject.m_nNumberOfPoints;
-	m_eDomainType			= rObject.m_eDomainType;
-	m_nDiscretizationOrder  = rObject.m_nDiscretizationOrder;
-	m_eDiscretizationMethod	= rObject.m_eDiscretizationMethod;
-	m_darrPoints			= rObject.m_darrPoints;
+//	m_dLowerBound			= rObject.m_dLowerBound;
+//	m_dUpperBound			= rObject.m_dUpperBound;
+//	m_nNumberOfIntervals	= rObject.m_nNumberOfIntervals;
+//	m_nNumberOfPoints		= rObject.m_nNumberOfPoints;
+//	m_eDomainType			= rObject.m_eDomainType;
+//	m_nDiscretizationOrder  = rObject.m_nDiscretizationOrder;
+//	m_eDiscretizationMethod	= rObject.m_eDiscretizationMethod;
+//	m_darrPoints			= rObject.m_darrPoints;
 }
 
 void daeDomain::Open(io::xmlTag_t* pTag)
@@ -213,24 +225,35 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
 								  real_t dLB, 
 								  real_t dUB)
 {
-	if(nNoIntervals == 0)
-	{	
+    if(eMethod != eCFDM)
+	{
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be zero";
+        string msg = "Cannot create a distributed domain [%s]: the only supported discretization method is [eCFDM]";
+        e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
 
-	if(nNoIntervals < 2)
+    if(nOrder != 2)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be less than 2";
+        string msg = "Cannot create a distributed domain [%s]: the only supported discretization order is 2";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+		throw e;
+	}
+
+    if(nNoIntervals < 2)
+	{
+		daeDeclareException(exInvalidCall);
+        string msg = "Cannot create a distributed domain [%s]: the number of intervals is less than 2 (%d)";
+        e << (boost::format(msg) % GetCanonicalName() % nNoIntervals).str();
 		throw e;
 	}
 
 	if(dLB >= dUB)
 	{
 		daeDeclareException(exInvalidCall);
-		e << "The lower bound is greater than the upper one in domain [" << GetCanonicalName();
+        string msg = "Cannot create a distributed domain [%s]: the lower bound is greater than or equal the upper bound (%f >= %f)";
+        e << (boost::format(msg) % GetCanonicalName() % dLB % dUB).str();
 		throw e;
 	}
 
@@ -249,7 +272,8 @@ void daeDomain::CreateArray(size_t nNoIntervals)
 	if(nNoIntervals == 0)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Number of intervals in domain [" << GetCanonicalName() << "] cannot be zero";
+        string msg = "Cannot create an array domain [%s]: the number of intervals is 0";
+        e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
 
@@ -273,8 +297,13 @@ string daeDomain::GetCanonicalName(void) const
 
 adouble daeDomain::partial(daePartialDerivativeVariable& pdv) const
 {
-	if(m_eDomainType != eDistributed)
-		daeDeclareAndThrowException(exInvalidCall); 
+    if(m_eDomainType != eDistributed)
+    {	
+		daeDeclareException(exInvalidCall);
+        string msg = "Cannot calculate partial per domain [%s]: domain not initialized with a CreateArray/CreateDistributed call";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+		throw e;
+	}
 
 	if(m_eDiscretizationMethod == eBFDM)
 		return pd_BFD(pdv);
@@ -391,13 +420,16 @@ void daeDomain::SetPoints(const vector<real_t>& darrPoints)
 	if(m_eDomainType == eArray)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Cannot reset an array, domain [" << GetCanonicalName() << "]";
+        string msg = "Cannot reset the points of the domain [%s]: a domain is not a distributed domain";
+        e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
 	if(m_nNumberOfPoints != darrPoints.size())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid number of points in domain [" << GetCanonicalName() << "]";
+        string msg = "Cannot reset the points of the domain [%s]: the number of points is illegal "
+                     "(required: %d, sent: %d)";
+        e << (boost::format(msg) % GetCanonicalName() % m_darrPoints.size() % darrPoints.size()).str();
 		throw e;
 	}
 
@@ -411,13 +443,6 @@ void daeDomain::CreatePoints()
 {
 	size_t i;
 	real_t dInterval;
-
-	if(m_nNumberOfIntervals == 0)
-	{	
-		daeDeclareException(exInvalidCall);
-		e << "Invalid number of intervals in domain [" << GetCanonicalName() << "]";
-		throw e;
-	}
 
 	m_darrPoints.clear();
 
@@ -433,8 +458,12 @@ void daeDomain::CreatePoints()
 		switch(m_eDiscretizationMethod)
 		{
 		case eFFDM:
-		case eBFDM:
-		case eCFDM:
+            daeDeclareAndThrowException(exNotImplemented); 
+		
+        case eBFDM:
+            daeDeclareAndThrowException(exNotImplemented); 
+		
+        case eCFDM:
 			m_nNumberOfPoints = m_nNumberOfIntervals+1;
 			m_darrPoints.resize(m_nNumberOfPoints);
 			dInterval = (m_dUpperBound - m_dLowerBound) / (m_nNumberOfIntervals);
@@ -552,11 +581,9 @@ adouble daeDomain::operator()(size_t nIndex) const
 
 adouble daeDomain::operator[](size_t nIndex) const
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-
 	adouble tmp;
-	adDomainIndexNode* node = new adDomainIndexNode(const_cast<daeDomain*>(this), nIndex, const_cast<real_t*>(&(m_darrPoints[nIndex])));
+    real_t* pdPoint = const_cast<real_t*>(GetPoint(nIndex));
+	adDomainIndexNode* node = new adDomainIndexNode(const_cast<daeDomain*>(this), nIndex, pdPoint);
 	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
 
@@ -565,10 +592,22 @@ adouble daeDomain::operator[](size_t nIndex) const
 
 const real_t* daeDomain::GetPoint(size_t nIndex) const
 {
+    if(m_darrPoints.empty())
+    {	
+		daeDeclareException(exInvalidCall);
+        string msg = "Cannot get a point from the domain [%s]: domain not initialized with a CreateArray/CreateDistributed call";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+		throw e;
+	}
 	if(nIndex >= m_darrPoints.size())
-		daeDeclareAndThrowException(exOutOfBounds); 
+    {	
+		daeDeclareException(exOutOfBounds);
+        string msg = "Cannot get a point from the domain [%s]: index out of bounds (%d >= %d)";
+        e << (boost::format(msg) % GetCanonicalName() % nIndex % m_darrPoints.size()).str();
+		throw e;
+	}
 
-	return &m_darrPoints[nIndex];
+	return &(m_darrPoints[nIndex]);
 }
 
 bool daeDomain::CheckObject(vector<string>& strarrErrors) const

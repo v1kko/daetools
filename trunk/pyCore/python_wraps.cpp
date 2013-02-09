@@ -905,6 +905,11 @@ daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list Cus
 	return new daeIndexRange(pDomain, narrCustomPoints);
 }
 
+daeDomain* daeIndexRange_GetDomain(daeIndexRange& self)
+{
+    return self.m_pDomain;
+}
+
 /*
 daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step)
 {

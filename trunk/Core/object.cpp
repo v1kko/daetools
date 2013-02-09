@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include <typeinfo>
+#include <map>
 #include "xmlfunctions.h"
 
 namespace dae 
@@ -23,7 +24,6 @@ daeObject::~daeObject(void)
 void daeObject::Clone(const daeObject& rObject)
 {
 	m_pModel           = NULL;
-//	m_strCanonicalName = rObject.m_strCanonicalName;
 	m_strShortName     = rObject.m_strShortName;
 	m_strDescription   = rObject.m_strDescription;
 }
@@ -36,7 +36,6 @@ void daeObject::Open(io::xmlTag_t* pTag)
 
 	strName = "Name";
 	pTag->Open(strName, m_strShortName);
-//	m_strCanonicalName = m_strShortName;
 	
 	strName = "Description";
 	pTag->Open(strName, m_strDescription);
@@ -139,17 +138,6 @@ string daeObject::GetCanonicalName(void) const
 		return m_strShortName;
 }
 
-//void daeObject::SetCanonicalName(const string& strCanonicalName)
-//{
-//	if(strCanonicalName.empty())
-//	{	
-//		daeDeclareException(exInvalidCall);
-//		e << "The name cannot be empty";
-//		throw e;
-//	}
-//	m_strCanonicalName = strCanonicalName;
-//}
-
 string daeObject::GetDescription(void) const
 {
 	return m_strDescription;
@@ -213,6 +201,72 @@ string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* chil
 	return strStrippedName;
 }
 
+bool daeIsValidObjectName(const string& strName)
+{
+/*
+    Rules:
+     - The object name must not be empty.
+     - The first letter of the object name must be a letter or '&' character.
+     - The rest can be a combination of alphanumeric and '_,&;()' characters.
+*/
+    if(strName.empty())
+        return false;
+	
+    int semicolon = 0;
+    int ampersend = 0;
+	for(size_t i = 0; i < strName.size(); i++)
+	{
+        if(strName[i] == '&')
+            ampersend++;
+        else if(strName[i] == ';')
+            semicolon++;
+		
+        if(i == 0)
+		{
+			if((!::isalpha(strName[0])) && (strName[0] != '&') && (strName[0] != ';'))
+                return false;
+        }
+		else
+		{ 
+			if(!(::isalnum(strName[i]) || strName[i] == '_'
+                                       || strName[i] == ',' 
+                                       || strName[i] == '&' 
+                                       || strName[i] == ';' 
+                                       || strName[i] == '(' 
+                                       || strName[i] == ')' ))
+                return false;
+		}
+	}  
+    
+    // There may be only equal number of '&' and ';'
+    if(semicolon != ampersend)
+        return false;
+    else if(semicolon == 0 && ampersend > 0)
+        return false;
+    else if(semicolon > 0 && ampersend == 0)
+        return false;
+    
+    // Check for something like ';&' or ';name&'
+    size_t current = 0;
+    size_t amperFound = strName.find('&', current);
+    size_t semiFound  = strName.find(';', current);
+    while(semiFound != std::string::npos && amperFound != std::string::npos)
+    {
+        if(amperFound == semiFound+1) // ';&'
+            return false;
+        else if(amperFound+1 == semiFound) // '&;'
+            return false;
+        else if(amperFound > semiFound) // ';name&'
+            return false;
+        
+        current = std::max(amperFound, semiFound) + 1;
+        amperFound = strName.find('&', current);
+        semiFound  = strName.find(';', current);
+    }
+    
+    return true;
+}
+
 string daeObject::GetName(void) const
 {
 	return m_strShortName;
@@ -220,39 +274,20 @@ string daeObject::GetName(void) const
 	
 void daeObject::SetName(const string& strName)
 {
-//	if(m_strCanonicalName.empty() || m_strCanonicalName == "")
-//	{
-//		m_strCanonicalName = strName;
-//	}
-//	else
-//	{
-//		std::vector<std::string> strarrNames = ParseString(m_strCanonicalName, '.');
-//		size_t n = strarrNames.size();
-//		if(n == 1)
-//		{
-//			m_strCanonicalName = strName;
-//		}
-//		else
-//		{
-//			strarrNames.pop_back();
-//			strarrNames.push_back(strName);
-//			m_strCanonicalName.clear();
-//			for(size_t i = 0; i < n; i++)
-//			{
-//				if(i == 0)
-//				{
-//					m_strCanonicalName = strarrNames[i];
-//				}
-//				else
-//				{
-//					m_strCanonicalName += ".";
-//					m_strCanonicalName += strarrNames[i];
-//				}
-//			}
-//		}
-//	}
-	
-	m_strShortName = strName;
+    if(!daeIsValidObjectName(strName))
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Cannot set the name of the object [%s]: invalid characters found. \n";
+        e << (boost::format(msg) % strName).str();
+        e <<  "The naming convention is: \n";
+        e << " - the object name must not be empty \n";
+        e << " - the name can contain HTML codes for Greek letters such as '&alpha;' etc \n";
+        e << " - the first character must be a letter or '&' character \n";
+        e << " - the rest can be a combination of the alphanumeric and '_,&;()' characters";
+		throw e;
+    }
+    
+    m_strShortName = strName;
 }
 
 daeModel_t* daeObject::GetModel(void) const
@@ -262,7 +297,15 @@ daeModel_t* daeObject::GetModel(void) const
 	
 void daeObject::SetModel(daeModel* pModel)
 {
-	m_pModel = pModel;
+    if(!pModel)
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Cannot set the parent model of the object [%s]: the model is a NULL pointer/reference";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+		throw e;
+    }
+
+    m_pModel = pModel;
 }
 
 void daeObject::LogMessage(const string& strMessage, size_t nSeverity) const
@@ -286,49 +329,12 @@ bool daeObject::CheckObject(vector<string>& strarrErrors) const
 	}
 
 // Check name
-	if(m_strShortName.empty())
+    if(!daeIsValidObjectName(m_strShortName))
 	{	
-		strError = "Object name is empty in object [" + GetCanonicalName() + "]";
+		strError = "Invalid name of the object [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}
-	
-	for(size_t i = 0; i < m_strShortName.size(); i++)
-	{
-		if(i == 0)
-		{
-			if((!::isalpha(m_strShortName[0])) && (m_strShortName[0] != '_') && (m_strShortName[0] != '&') && (m_strShortName[0] != ';'))
-			{
-				strError = "The first letter of the object name must be _ or alphanumeric character in object [" + GetCanonicalName() + "]";
-				strarrErrors.push_back(strError);
-				bCheck = false;
-				continue;
-			}
-		}
-		else
-		{ 
-			if(!(::isalnum(m_strShortName[i]) || m_strShortName[i] == '_'
-											  || m_strShortName[i] == ',' 
-											  || m_strShortName[i] == '&' 
-											  || m_strShortName[i] == ';' 
-											  || m_strShortName[i] == '(' 
-											  || m_strShortName[i] == ')' ))
-			{	
-				strError = "Object name contains invalid characters in object [" + GetCanonicalName() + "]";
-				strarrErrors.push_back(strError);
-				bCheck = false;
-				continue;
-			}
-		}
-	}
-
-// Check cannonical name
-//	if(m_strCanonicalName.empty())
-//	{	
-//		strError = "Object cannonical name is empty in object [" + GetCanonicalName() + "]";
-//		strarrErrors.push_back(strError);
-//		bCheck = false;
-//	}
 	
 	return bCheck;
 }

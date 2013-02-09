@@ -658,18 +658,18 @@ daeEquation::~daeEquation()
 
 void daeEquation::Clone(const daeEquation& rObject)
 {
-	m_pResidualNode	= rObject.m_pResidualNode;
+//	m_pResidualNode	= rObject.m_pResidualNode;
 	
-	for(size_t i = 0; i < rObject.m_ptrarrDistributedEquationDomainInfos.size(); i++)
-	{
-		daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo();
-		pDEDI->SetName(rObject.m_ptrarrDistributedEquationDomainInfos[i]->m_strShortName);
-		SetModelAndCanonicalName(pDEDI);
-		dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
-		pDEDI->m_pModel    = m_pModel;
-		pDEDI->m_pEquation = this;
-		pDEDI->Clone(*rObject.m_ptrarrDistributedEquationDomainInfos[i]);
-	}
+//	for(size_t i = 0; i < rObject.m_ptrarrDistributedEquationDomainInfos.size(); i++)
+//	{
+//		daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo();
+//		pDEDI->SetName(rObject.m_ptrarrDistributedEquationDomainInfos[i]->m_strShortName);
+//		SetModelAndCanonicalName(pDEDI);
+//		dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
+//		pDEDI->m_pModel    = m_pModel;
+//		pDEDI->m_pEquation = this;
+//		pDEDI->Clone(*rObject.m_ptrarrDistributedEquationDomainInfos[i]);
+//	}
 }
 
 void daeEquation::Open(io::xmlTag_t* pTag)
@@ -1166,7 +1166,8 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eD
 {
 	daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo(this, &rDomain, eDomainBounds);
 	pDEDI->SetName(/*GetCanonicalName() + "." +*/ rDomain.GetName());
-	SetModelAndCanonicalName(pDEDI);
+    pDEDI->SetModel(m_pModel);
+	//SetModelAndCanonicalName(pDEDI);
 	dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
 	return pDEDI;
 }
@@ -1175,7 +1176,8 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const vector<size_t
 {
 	daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo(this, &rDomain, narrDomainIndexes);
 	pDEDI->SetName(/*GetCanonicalName() + "." +*/ rDomain.GetName());
-	SetModelAndCanonicalName(pDEDI);
+    pDEDI->SetModel(m_pModel);
+	//SetModelAndCanonicalName(pDEDI);
 	dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
 	return pDEDI;
 }
@@ -1201,18 +1203,6 @@ void daeEquation::GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo
 {
 	ptrarrEquationExecutionInfos.clear();
 	dae_set_vector(m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfos);
-}
-
-void daeEquation::SetModelAndCanonicalName(daeObject* pObject)
-{
-	if(!pObject)
-		daeDeclareAndThrowException(exInvalidPointer);
-	
-//	string strCanonicalName;
-//	strCanonicalName = this->GetCanonicalName() + "." + pObject->GetName();
-//	pObject->SetCanonicalName(strCanonicalName);
-	
-	pObject->SetModel(m_pModel);
 }
 
 void daeEquation::SetResidual(adouble res)

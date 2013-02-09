@@ -746,7 +746,8 @@ void daeModel::AddDomain(daeDomain* pDomain)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pDomain);
+    //SetModelAndCanonicalName(pDomain);
+    pDomain->SetModel(this);
 	dae_push_back(m_ptrarrDomains, pDomain);
 }
 
@@ -766,7 +767,8 @@ void daeModel::AddVariable(daeVariable* pVariable)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pVariable);
+    //SetModelAndCanonicalName(pVariable);
+    pVariable->SetModel(this);
 	dae_push_back(m_ptrarrVariables, pVariable);
 }
 
@@ -786,7 +788,8 @@ void daeModel::AddParameter(daeParameter* pParameter)
 		throw e;
 	}
 	
-    SetModelAndCanonicalName(pParameter);
+    //SetModelAndCanonicalName(pParameter);
+    pParameter->SetModel(this);
 	dae_push_back(m_ptrarrParameters, pParameter);
 }
 
@@ -806,7 +809,8 @@ void daeModel::AddModel(daeModel* pModel)
 //		throw e;
 //	}
 
-    SetModelAndCanonicalName(pModel);
+    //SetModelAndCanonicalName(pModel);
+    pModel->SetModel(this);
 	dae_push_back(m_ptrarrComponents, pModel);
 }
 
@@ -826,7 +830,8 @@ void daeModel::AddPort(daePort* pPort)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pPort);
+    //SetModelAndCanonicalName(pPort);
+    pPort->SetModel(this);
 	dae_push_back(m_ptrarrPorts, pPort);
 }
 
@@ -836,17 +841,18 @@ void daeModel::AddEventPort(daeEventPort* pPort)
 	if(strName.empty())
 	{
 		daeDeclareException(exInvalidCall);
-		e << "EventPor name cannot be empty";
+		e << "EventPort name cannot be empty";
 		throw e;
 	}
 	if(CheckName(m_ptrarrEventPorts, strName))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "EventPor [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+		e << "EventPort [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pPort);
+    //SetModelAndCanonicalName(pPort);
+    pPort->SetModel(this);
 	dae_push_back(m_ptrarrEventPorts, pPort);
 }
 
@@ -866,19 +872,22 @@ void daeModel::AddOnEventAction(daeOnEventActions* pOnEventAction)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pOnEventAction);
+    //SetModelAndCanonicalName(pOnEventAction);
+    pOnEventAction->SetModel(this);
 	dae_push_back(m_ptrarrOnEventActions, pOnEventAction);
 }
 
 void daeModel::AddPortConnection(daePortConnection* pPortConnection)
 {
-    SetModelAndCanonicalName(pPortConnection);
+    //SetModelAndCanonicalName(pPortConnection);
+    pPortConnection->SetModel(this);
 	dae_push_back(m_ptrarrPortConnections, pPortConnection);
 }
 
 void daeModel::AddEventPortConnection(daeEventPortConnection* pEventPortConnection)
 {
-    SetModelAndCanonicalName(pEventPortConnection);
+    //SetModelAndCanonicalName(pEventPortConnection);
+    pEventPortConnection->SetModel(this);
 	dae_push_back(m_ptrarrEventPortConnections, pEventPortConnection);
 }
 
@@ -898,7 +907,8 @@ void daeModel::AddPortArray(daePortArray* pPortArray)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pPortArray);
+    //SetModelAndCanonicalName(pPortArray);
+    pPortArray->SetModel(this);
 	dae_push_back(m_ptrarrPortArrays, pPortArray);
 }
 
@@ -918,19 +928,21 @@ void daeModel::AddModelArray(daeModelArray* pModelArray)
 		throw e;
 	}
 
-    SetModelAndCanonicalName(pModelArray);
+    //SetModelAndCanonicalName(pModelArray);
+    pModelArray->SetModel(this);
 	dae_push_back(m_ptrarrComponentArrays, pModelArray);
 }
 
 void daeModel::AddExternalFunction(daeExternalFunction_t* pExternalFunction)
 {
-    //SetModelAndCanonicalName(pExternalFunction);
+    //pExternalFunction->SetModel(this);
 	dae_push_back(m_ptrarrExternalFunctions, pExternalFunction);
 }
 
 void daeModel::AddEquation(daeEquation* pEquation)
 {
-    SetModelAndCanonicalName(pEquation);
+    //SetModelAndCanonicalName(pEquation);
+    pEquation->SetModel(this);
 	dae_push_back(m_ptrarrEquations, pEquation);
 }
 
@@ -977,7 +989,8 @@ daeSTN* daeModel::AddSTN(const string& strName)
 	daeState* pParentState = GetStateFromStack();
 
 	pSTN->SetName(strName);
-	SetModelAndCanonicalName(pSTN);
+    pSTN->SetModel(this);
+	//SetModelAndCanonicalName(pSTN);
 
 	if(!pParentState)
 	{
@@ -1012,8 +1025,10 @@ daeIF* daeModel::AddIF(const string& strCondition)
 		pIF->m_pParentState = pParentState;
 		pParentState->AddNestedSTN(pIF);
 	}
+    
 	pIF->SetName(strName);
-	SetModelAndCanonicalName(pIF);
+    pIF->SetModel(this);
+	//SetModelAndCanonicalName(pIF);
 
 	return pIF;
 }
@@ -3811,17 +3826,6 @@ size_t daeModel::GetVariablesStartingIndex(void) const
 void daeModel::SetVariablesStartingIndex(size_t nVariablesStartingIndex)
 {
 	m_nVariablesStartingIndex = nVariablesStartingIndex;
-}
-
-void daeModel::SetModelAndCanonicalName(daeObject* pObject)
-{
-	if(!pObject)
-		daeDeclareAndThrowException(exInvalidPointer);
-//	string strName;
-//	strName = m_strCanonicalName + "." + pObject->m_strShortName;
-//	pObject->m_strCanonicalName = strName;
-	
-	pObject->m_pModel = this;
 }
 
 const std::vector<daePort*>& daeModel::Ports() const
