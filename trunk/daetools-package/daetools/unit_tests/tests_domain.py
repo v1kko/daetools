@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os, sys, numpy, unittest
-sys.path.insert(0, os.path.abspath('../../'))
+daetools_root = os.path.abspath('../../')
+if not daetools_root in sys.path:
+    sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
 import tests_object
 
@@ -14,22 +16,34 @@ Tests for:
 """
 
 class case_daeDomain(unittest.TestCase):
-    def setUp(self):
-        self._printExceptions = True
-
     def _createDomain(self):
         name      = 'Domain'
         descr     = 'Domain description'
         canonName = 'Model.Domain'
         unit      = (pyUnits.m**2)*(pyUnits.s**-2) / (pyUnits.kg**1)
-        parent    = daeModel('Model', None, '')
+        parent    = daeModel('Model')
         domain    = daeDomain(name, parent, unit, descr)
 
         return domain, name, canonName, descr, parent, unit
 
+    def _createDomain2(self):
+        name      = 'Domain'
+        descr     = 'Domain description'
+        canonName = 'Model.Port.Domain'
+        unit      = (pyUnits.m**2)*(pyUnits.s**-2) / (pyUnits.kg**1)
+        model     = daeModel('Model')
+        parent    = daePort('Port', eInletPort, model)
+        domain    = daeDomain(name, parent, unit, descr)
+
+        return domain, name, canonName, descr, model, parent, unit
+
     def test_daeObject(self):
         d, name, canonName, descr, parent, unit = self._createDomain()
         tests_object.test_daeObjectInterface(self, d, name, canonName, descr, parent)
+
+    def test_daeObject2(self):
+        d, name, canonName, descr, model, parent, unit = self._createDomain2()
+        tests_object.test_daeObjectInterface(self, d, name, canonName, descr, model)
 
     def test_Distributed(self):
         d, name, canonName, descr, parent, unit = self._createDomain()
@@ -46,37 +60,37 @@ class case_daeDomain(unittest.TestCase):
         with self.assertRaises(RuntimeError) as context:
             x = d[0]
         
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             x = d(0)
             
         # Discr. method must be eCFDM!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateDistributed(eFFDM, order, noIntervals, lb,  ub)
 
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateDistributed(eBFDM, order, noIntervals, lb,  ub)
 
         # Discr. order must be 2!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateDistributed(discrMethod, 3, noIntervals, lb,  ub)
 
         # Lower bound must be less than the upper bound!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateDistributed(discrMethod, order, noIntervals, 1.0,  1.0)
 
         # The number of intervals must be greater than or equal 2!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateDistributed(discrMethod, order, 1, lb,  ub)
 
         # Initialize domain
         d.CreateDistributed(discrMethod, order, noIntervals, lb,  ub)
 
         # Out of bounds index!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             x = d[100]
 
         # Setting the point value directly (not through Points attribute) must be illegal!
-        with self.assertRaises(TypeError) as context:
+        with self.assertRaises(TypeError):
             d[0] = 0.0
 
         self.assertEqual(d.Type,                 eDistributed)
@@ -157,25 +171,25 @@ class case_daeDomain(unittest.TestCase):
         ub          = 10.0
 
         # Not initialized yet!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             x = d[0]
 
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             x = d(0)
 
         # The number of intervals must not be 0!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.CreateArray(0)
 
         # Initialize domain
         d.CreateArray(noIntervals)
 
         # Out of bounds index!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             x = d[100]
 
         # Setting the point value directly (not through Points attribute) must be illegal!
-        with self.assertRaises(TypeError) as context:
+        with self.assertRaises(TypeError):
             d[0] = 0.0
 
         self.assertEqual(d.Type,                 eArray)
@@ -207,7 +221,7 @@ class case_daeDomain(unittest.TestCase):
         points[index] = new_value
 
         # This is forbidden for arrays!
-        with self.assertRaises(RuntimeError) as context:
+        with self.assertRaises(RuntimeError):
             d.Points = points
 
         # Node's value points to the list of domain's points

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys, unittest
-sys.path.insert(0, os.path.abspath('../../'))
+daetools_root = os.path.abspath('../../')
+if not daetools_root in sys.path:
+    sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
 
 def test_daeObjectInterface(ut, obj, expName, expCanonicalName, expDescription, expParentModel):

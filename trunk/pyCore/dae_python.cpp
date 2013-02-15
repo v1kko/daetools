@@ -751,7 +751,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	        
         .def("GetDomainsIndexesMap",    &daepython::daeParameterWrapper::GetDomainsIndexesMap1)
             
-		.def("__call__", &daepython::FunctionCallParameter0)
+		.def("__call__", &daepython::FunctionCallParameter0) 
 		.def("__call__", &daepython::FunctionCallParameter1)
 		.def("__call__", &daepython::FunctionCallParameter2)
 		.def("__call__", &daepython::FunctionCallParameter3)

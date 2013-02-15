@@ -300,7 +300,7 @@ adouble daeDomain::partial(daePartialDerivativeVariable& pdv) const
     if(m_eDomainType != eDistributed)
     {	
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot calculate partial per domain [%s]: domain not initialized with a CreateArray/CreateDistributed call";
+        string msg = "Cannot calculate partial derivative per domain [%s]: domain not initialized with a CreateArray/CreateDistributed call";
         e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
@@ -349,7 +349,7 @@ adouble daeDomain::pd_CFD(daePartialDerivativeVariable& pdv) const
 		if(N < 3)
 		{	
 			daeDeclareException(exInvalidCall);
-			e << "Number of points in domain [" << d.GetCanonicalName() << "] cannot be less than 3";
+			e << "Cannot evaluate partial derivative per domain [" << d.GetCanonicalName() << "]: the number of points cannot be less than 3";
 			throw e;
 		}
 

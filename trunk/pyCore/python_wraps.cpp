@@ -35,7 +35,7 @@ daeDomainIndex CreateDomainIndex(object& o)
 	else
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid argument" ;
+		e << "Invalid argument (must be integer, daeDomainIndex or daeDEDI object)" ;
 		throw e;
 		return daeDomainIndex();
 	}
@@ -113,7 +113,7 @@ daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
 		int end   = get_end.check()   ? get_end()   : pDomain->GetNumberOfPoints()-1;
 		int step  = get_step.check()  ? get_step()  : 1;
 		
-		std::cout << (boost::format("slice(%1%, %2%, %3%)") % start % end % step).str() << std::endl;
+		//std::cout << (boost::format("slice(%1%, %2%, %3%)") % start % end % step).str() << std::endl;
 		
 		daeIndexRange ir(pDomain, start, end, step);
 		return daeArrayRange(ir);
@@ -131,14 +131,14 @@ daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
 		else
 		{
 			daeDeclareException(exInvalidCall);
-			e << "Invalid argument [" << cIndex << "] for Array function";
+            e << "Invalid string argument " << cIndex << " in the array_xxx() function call (can only be '*')";
 			throw e;
 		}
 	}
 	else
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid argument" ;
+        e << "Invalid argument of the array_xxx function call (must be integer, daeDEDI object, slice, list of integers, or '*' character)" ;
 		throw e;
 	}
 	return daeArrayRange();
@@ -585,7 +585,7 @@ const adouble_array adarr_Array(boost::python::list Values)
 		else
 		{
 			daeDeclareException(exInvalidCall);
-			e << "Invalid item for Vector function";
+			e << "Invalid item for Vector function (must be a floating point value or a quantity object)";
 			throw e;
 		}
 	}
