@@ -240,7 +240,7 @@ const quantity quantity::scaleTo(const quantity& referrer) const
 
 const quantity quantity::scaleTo(const unit& referrer) const
 {
-	if(not _units.getBaseUnit().areDimensionsEqual(referrer.getBaseUnit()))
+	if(!_units.getBaseUnit().areDimensionsEqual(referrer.getBaseUnit()))
 		throw units_error((boost::format("Units not consistent: scale from %1% to %2%") % _units % referrer).str());
 
 	quantity tmp;

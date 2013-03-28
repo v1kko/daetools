@@ -7,6 +7,9 @@ Installation instructions
 
 - Windows (.exe):
   python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py
+
+Create .tar.gz under GNU/Linux:
+  python setup.py sdist --formats=gztar
 """
 
 import os, sys, platform, shutil, numpy
@@ -127,7 +130,7 @@ elif platform.system() == 'Darwin':
 #print 'solibs = ', solibs
 
 setup(name = 'daetools',
-      version = '1.2.1',
+      version = '1.3.1',
       description = 'DAE Tools',
       long_description = 'A cross-platform equation-oriented process modelling, simulation and optimization software (pyDAE modules).',
       author = 'Dragan Nikolic',
@@ -138,19 +141,22 @@ setup(name = 'daetools',
                    'daetools',
                    'daetools.pyDAE',
                    'daetools.solvers',
+                   'daetools.code_generators',
                    'daetools.daePlotter',
                    'daetools.daeSimulator',
                    'daetools.examples',
                    'daetools.parsers',
-                   'daetools.model_library'
+                   'daetools.model_library',
+                   'daetools.unit_tests'
                  ],
       package_data = {
-                       'daetools':              ['*.txt', 'docs/*.html', 'docs/*.pdf'],
-                       'daetools.pyDAE':        solibs,
-                       'daetools.solvers':      solibs,
-                       'daetools.daePlotter':   ['images/*.png'],
-                       'daetools.daeSimulator': ['images/*.png'],
-                       'daetools.examples' :    ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
+                       'daetools':                 ['*.txt', 'docs/*.html', 'docs/*.pdf'],
+                       'daetools.pyDAE':           solibs,
+                       'daetools.solvers':         solibs,
+                       'daetools.daePlotter':      ['images/*.png'],
+                       'daetools.code_generators': ['ansic/*.h', 'ansic/*.c', 'ansic/*.pro', 'fmi/*.h', 'fmi/*.c'],
+                       'daetools.daeSimulator':    ['images/*.png'],
+                       'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
                      },
       data_files = data_files,
       scripts = ['scripts/daetools_win_install.py'],

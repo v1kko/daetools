@@ -16,7 +16,7 @@ public:
       : daeModel(strName, pParent, strDescription),
         xyz("fem", this, unit(),   "FEM domain"),
         T("T",   vt::no_t, this, "Temperature of the plate, -", &xyz),
-        fem(*this, xyz, T)
+        fem(*this, xyz, T, 1)
     {
         fem.Initialize();
     }

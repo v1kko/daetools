@@ -91,6 +91,7 @@ DAE_MACHINE = $$system(python -c \"$${MACHINE_COMMAND}\")
 ####################################################################################
 win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
+win32::QMAKE_CXXFLAGS += /bigobj
 
 QMAKE_CXXFLAGS_DEBUG += -fno-default-inline
 

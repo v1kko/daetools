@@ -47,7 +47,7 @@ CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
 LIBS += $${DAE_SUPERLU_SOLVER_LIB} \
-        $${SUPERLU_LIBS} $${BLAS_LAPACK_LIBS} -lbtf
+        $${SUPERLU_LIBS} $${BLAS_LAPACK_LIBS} #-lbtf
 INCLUDEPATH += $${SUPERLU_INCLUDE}
 pyObject = pySuperLU
 message(SUPERLU_LIBS: $${SUPERLU_LIBS})
