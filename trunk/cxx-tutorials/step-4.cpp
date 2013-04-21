@@ -285,7 +285,7 @@ void Step4<dim>::run ()
     output_results ();
 }
 
-extern void run_dealii_poisson_test();
+extern void run_dealii_transient_diffusion_test();
 
 int main ()
 {

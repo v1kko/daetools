@@ -1986,7 +1986,8 @@ void daeVariableWrapper::Initialize(daeVariable* pVariable, std::string strName,
 */	
 	if(strName.empty())
 	{
-		m_strName = pVariable->GetCanonicalName();
+        m_strName = ReplaceAll(pVariable->GetCanonicalName(), '.', '_');
+        
 		if(!narrDomainIndexes.empty())
 			m_strName += "(" + toString(narrDomainIndexes, string(",")) + ")";
 	}

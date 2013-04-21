@@ -68,9 +68,11 @@ class modTutorial(daeModel):
         self.Power     = daeVariable("Power",      power_t,       self, "Power")
         self.Power_ext = daeVariable("Power_ext",  power_t,       self, "Power")
         
+    def DeclareEquations(self):
+        # Create external function
+        # It has to be created in DeclareEquations since it accesses the params/vars values
         self.Pext = extfnPower("Power", self, W, self.m(), self.cp(), self.T.dt())
 
-    def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 

@@ -1645,7 +1645,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "sin(";
 		else if(eLanguage == ePYDAE)
-			strContent += "sin(";
+			strContent += "Sin(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1655,7 +1655,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "cos(";
 		else if(eLanguage == ePYDAE)
-			strContent += "cos(";
+			strContent += "Cos(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1665,7 +1665,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "tan(";
 		else if(eLanguage == ePYDAE)
-			strContent += "tan(";
+			strContent += "Tan(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1675,7 +1675,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "asin(";
 		else if(eLanguage == ePYDAE)
-			strContent += "asin(";
+			strContent += "ASin(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1685,7 +1685,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "acos(";
 		else if(eLanguage == ePYDAE)
-			strContent += "acos(";
+			strContent += "ACos(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1695,7 +1695,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "atan(";
 		else if(eLanguage == ePYDAE)
-			strContent += "atan(";
+			strContent += "ATan(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1705,7 +1705,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "sqrt(";
 		else if(eLanguage == ePYDAE)
-			strContent += "sqrt(";
+			strContent += "Sqrt(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1715,7 +1715,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "exp(";
 		else if(eLanguage == ePYDAE)
-			strContent += "exp(";
+			strContent += "Exp(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1725,7 +1725,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "log(";
 		else if(eLanguage == ePYDAE)
-			strContent += "log(";
+			strContent += "Log(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1735,7 +1735,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "log10(";
 		else if(eLanguage == ePYDAE)
-			strContent += "log10(";
+			strContent += "Log10(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1745,7 +1745,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "abs(";
 		else if(eLanguage == ePYDAE)
-			strContent += "abs(";
+			strContent += "Abs(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1755,7 +1755,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "ceil(";
 		else if(eLanguage == ePYDAE)
-			strContent += "ceil(";
+			strContent += "Ceil(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -1765,7 +1765,7 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		if(eLanguage == eCDAE)
 			strContent += "floor(";
 		else if(eLanguage == ePYDAE)
-			strContent += "floor(";
+			strContent += "Floor(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		node->Export(strContent, eLanguage, c);
@@ -2451,7 +2451,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		if(eLanguage == eCDAE)
 			strContent += "min(";
 		else if(eLanguage == ePYDAE)
-			strContent += "min(";
+			strContent += "Min(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		strContent += strLeft;
@@ -2463,7 +2463,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		if(eLanguage == eCDAE)
 			strContent += "max(";
 		else if(eLanguage == ePYDAE)
-			strContent += "max(";
+			strContent += "Max(";
 		else
 			daeDeclareAndThrowException(exNotImplemented);
 		strContent += strLeft;

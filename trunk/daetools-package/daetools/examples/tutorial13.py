@@ -40,6 +40,7 @@ class simpleUserAction(daeAction):
     def __init__(self, eventPort):
         daeAction.__init__(self)
         self.eventPort = eventPort
+        print self.Name
 
     def Execute(self):
         # The floating point value of the data sent with the event can be retrieved 
@@ -100,12 +101,12 @@ class modTutorial(daeModel):
              will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
           - 'userDefinedActions' is a list of user defined daeAction-derived objects
         """
-        self.ON_CONDITION(self.T() > Constant(340*K),    switchTo           = 'Cooling',
+        self.ON_CONDITION(self.T() > Constant(340*K),    switchToState      = 'Cooling',
                                                          setVariableValues  = [ (self.event, 100) ], # event variable is dimensionless
                                                          triggerEvents      = [],
                                                          userDefinedActions = [] )
 
-        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+        self.ON_CONDITION(Time() > Constant(350*s), switchToState      = 'HeaterOff',
                                                     setVariableValues  = [],
                                                     triggerEvents      = [ (self.epOut, self.T() + Constant(5.0*K)) ],
                                                     userDefinedActions = [] )
@@ -115,12 +116,12 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.ON_CONDITION(self.T() < Constant(320*K),    switchTo           = 'Heating',
+        self.ON_CONDITION(self.T() < Constant(320*K),    switchToState      = 'Heating',
                                                          setVariableValues  = [ (self.event, 200) ], # event variable is dimensionless
                                                          triggerEvents      = [],
                                                          userDefinedActions = [] )
 
-        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+        self.ON_CONDITION(Time() > Constant(350*s), switchToState      = 'HeaterOff',
                                                     setVariableValues  = [],
                                                     triggerEvents      = [ (self.epOut, self.T() + Constant(6.0*K)) ],
                                                     userDefinedActions = [] )

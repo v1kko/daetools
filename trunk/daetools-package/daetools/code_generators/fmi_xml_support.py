@@ -31,74 +31,177 @@ def addObjects(element, name, objects, required = False):
         obj_elem = etree.SubElement(parent_element, obj.xmlTagName)
         obj.to_xml(obj_elem)
 
-class fmiModelDescription(object):
+fmiDefaultVersion = '2.0'
+
+class fmiObject(object):
+    fmiSupportedVersions = ['1.0', '2.0']
+
+    def __init__(self, fmiVersion = fmiDefaultVersion):
+        if not fmiVersion in self.fmiSupportedVersions:
+            raise RuntimeError('Unsypported FMI version (%s)' % version)
+
+        self.fmiVersion = str(fmiVersion) # string
+        
+class fmiModelDescription(fmiObject):
     xmlTagName = 'fmiModelDescription'
 
     variableNamingConventionFlat       = 'flat'
     variableNamingConventionStructured = 'structured'
 
-    def __init__(self):
-        # Required attributes
-        self.fmiVersion        = "2.0" # string
-        self.modelName         = ''    # string
-        self.guid              = ''    # string
+    def __init__(self, fmiVersion = fmiDefaultVersion):
+        fmiObject.__init__(self, fmiVersion)
 
-        # Required elements
-        self.ModelStructure    = None # fmiModelStructure
-        self.ModelVariables    = []   # array of fmiScalarVariable
-        self.CoSimulation      = None # fmiCoSimulation
+        # fmiVersion is required and located in fmiObject class
+        if self.fmiVersion == "1.0":
+            # Required attributes
+            self.modelName                  = ''   # string
+            self.guid                       = ''   # string
+            self.modelIdentifier            = ''   # string
+            self.numberOfEventIndicators    = None # int
+            self.numberOfContinuousStates   = None # int
 
-        # Optional attributes
-        self.description                = None # string
-        self.author                     = None # string
-        self.version                    = None # string
-        self.copyright                  = None # string
-        self.license                    = None # string
-        self.generationTool             = None # string
-        self.generationDateAndTime      = None # string
-        self.variableNamingConvention   = None # enum
-        self.numberOfEventIndicators    = None # int
+            # Optional attributes
+            self.description                = None # string
+            self.author                     = None # string
+            self.version                    = None # string
+            self.generationTool             = None # string
+            self.generationDateAndTime      = None # string
+            self.variableNamingConvention   = None # enum
 
-        # Optional elements
-        self.DefaultExperiment = None        
-        self.TypeDefinitions   = []
-        self.UnitDefinitions   = []
-        self.LogCategories     = []
-        self.VendorAnnotations = []
-    
+            # Required elements
+            self.ModelVariables = []   # array of fmiScalarVariable
+            self.Implementation = None # fmiImplementation
+
+            # Optional elements
+            self.DefaultExperiment = None
+            self.TypeDefinitions   = []
+            self.UnitDefinitions   = []
+            self.VendorAnnotations = []
+
+        elif self.fmiVersion == '2.0':
+            # Required attributes
+            self.modelName         = ''    # string
+            self.guid              = ''    # string
+
+            # Optional attributes
+            self.description                = None # string
+            self.author                     = None # string
+            self.version                    = None # string
+            self.copyright                  = None # string
+            self.license                    = None # string
+            self.generationTool             = None # string
+            self.generationDateAndTime      = None # string
+            self.variableNamingConvention   = None # enum
+            self.numberOfEventIndicators    = None # int
+
+            # Required elements
+            self.ModelStructure    = None # fmiModelStructure
+            self.ModelVariables    = []   # array of fmiScalarVariable
+            self.CoSimulation      = None # fmiCoSimulation
+
+            # Optional elements
+            self.DefaultExperiment = None
+            self.TypeDefinitions   = []
+            self.UnitDefinitions   = []
+            self.LogCategories     = []
+            self.VendorAnnotations = []
+
+        else:
+            raise RuntimeError('Unsupported FMI version %s' % self.fmiVersion)
+            
     def to_xml(self, filename):
         fmi_root = etree.Element(self.xmlTagName)
-        addAttribute(fmi_root, 'fmiVersion',                 self.fmiVersion, required = True)
-        addAttribute(fmi_root, 'modelName',                  self.modelName, required = True)
-        addAttribute(fmi_root, 'guid',                       self.guid, required = True)
 
-        addAttribute(fmi_root, 'description',                self.description)
-        addAttribute(fmi_root, 'author',                     self.author)
-        addAttribute(fmi_root, 'version',                    self.version)
-        addAttribute(fmi_root, 'copyright',                  self.copyright)
-        addAttribute(fmi_root, 'license',                    self.license)
-        addAttribute(fmi_root, 'generationTool',             self.generationTool)
-        addAttribute(fmi_root, 'generationDateAndTime',      self.generationDateAndTime)
-        addAttribute(fmi_root, 'variableNamingConvention',   self.variableNamingConvention)
-        addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators)
+        if self.fmiVersion == "1.0":
+            addAttribute(fmi_root, 'fmiVersion',                 self.fmiVersion, required = True)
+            addAttribute(fmi_root, 'modelName',                  self.modelName, required = True)
+            addAttribute(fmi_root, 'modelIdentifier',            self.modelIdentifier, required = True)
+            addAttribute(fmi_root, 'guid',                       self.guid, required = True)
+            addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators, required = True)
+            addAttribute(fmi_root, 'numberOfContinuousStates',   self.numberOfContinuousStates, required = True)
 
-        addObject(fmi_root, self.CoSimulation, required = True)
-        addObject(fmi_root, self.ModelStructure, required = True)
-        addObject(fmi_root, self.DefaultExperiment)
+            addAttribute(fmi_root, 'description',                self.description)
+            addAttribute(fmi_root, 'author',                     self.author)
+            addAttribute(fmi_root, 'version',                    self.version)
+            addAttribute(fmi_root, 'generationTool',             self.generationTool)
+            addAttribute(fmi_root, 'generationDateAndTime',      self.generationDateAndTime)
+            addAttribute(fmi_root, 'variableNamingConvention',   self.variableNamingConvention)
 
-        addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
-        addObjects(fmi_root, 'UnitDefinitions',   self.UnitDefinitions)
-        addObjects(fmi_root, 'LogCategories',     self.LogCategories)
-        addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
-        addObjects(fmi_root, 'ModelVariables',    self.ModelVariables, required = True)
-        
+            addObject(fmi_root, self.Implementation, required = True)
+            addObjects(fmi_root, 'ModelVariables',    self.ModelVariables, required = True)
+            addObject(fmi_root, self.DefaultExperiment)
+            addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
+            addObjects(fmi_root, 'UnitDefinitions',   self.UnitDefinitions)
+            addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
+
+        elif self.fmiVersion == "2.0":
+            addAttribute(fmi_root, 'fmiVersion',                 self.fmiVersion, required = True)
+            addAttribute(fmi_root, 'modelName',                  self.modelName, required = True)
+            addAttribute(fmi_root, 'guid',                       self.guid, required = True)
+
+            addAttribute(fmi_root, 'description',                self.description)
+            addAttribute(fmi_root, 'author',                     self.author)
+            addAttribute(fmi_root, 'version',                    self.version)
+            addAttribute(fmi_root, 'copyright',                  self.copyright)
+            addAttribute(fmi_root, 'license',                    self.license)
+            addAttribute(fmi_root, 'generationTool',             self.generationTool)
+            addAttribute(fmi_root, 'generationDateAndTime',      self.generationDateAndTime)
+            addAttribute(fmi_root, 'variableNamingConvention',   self.variableNamingConvention)
+            addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators)
+
+            addObject(fmi_root, self.CoSimulation, required = True)
+            addObject(fmi_root, self.ModelStructure, required = True)
+            addObjects(fmi_root, 'ModelVariables',    self.ModelVariables, required = True)
+
+            addObject(fmi_root, self.DefaultExperiment)
+            addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
+            addObjects(fmi_root, 'UnitDefinitions',   self.UnitDefinitions)
+            addObjects(fmi_root, 'LogCategories',     self.LogCategories)
+            addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
+
+        else:
+            raise RuntimeError('Unsupported FMI version %s' % self.fmiVersion)
+            
         etree.ElementTree(fmi_root).write(filename, encoding="utf-8", pretty_print=True, xml_declaration=True)
         
     @classmethod
     def from_xml(cls, filename):
         pass
 
+class fmiImplementation_CoSimulation_Tool(object):
+    # Version 1.0 only
+
+    xmlTagName = 'CoSimulation_Tool'
+
+    def __init__(self):
+        self.canHandleVariableCommunicationStepSize = None # bool
+        self.canHandleEvents                        = None # bool
+        self.canRejectSteps                         = None # bool
+        self.canInterpolateInputs                   = None # bool
+        self.maxOutputDerivativeOrder               = None # unsigned int
+        self.canRunAsynchronuously                  = None # bool
+        self.canSignalEvents                        = None # bool
+        self.canBeInstantiatedOnlyOncePerProcess    = None # bool
+        self.canNotUseMemoryManagementFunctions     = None # bool
+
+    def to_xml(self, tag):
+        addAttribute(tag, 'canHandleVariableCommunicationStepSize', self.canHandleVariableCommunicationStepSize)
+        addAttribute(tag, 'canHandleEvents',                        self.canHandleEvents)
+        addAttribute(tag, 'canRejectSteps',                         self.canRejectSteps)
+        addAttribute(tag, 'canInterpolateInputs',                   self.canInterpolateInputs)
+        addAttribute(tag, 'maxOutputDerivativeOrder',               self.maxOutputDerivativeOrder)
+        addAttribute(tag, 'canRunAsynchronuously',                  self.canRunAsynchronuously)
+        addAttribute(tag, 'canSignalEvents',                        self.canSignalEvents)
+        addAttribute(tag, 'canBeInstantiatedOnlyOncePerProcess',    self.canBeInstantiatedOnlyOncePerProcess)
+        addAttribute(tag, 'canNotUseMemoryManagementFunctions',     self.canNotUseMemoryManagementFunctions)
+
+    @classmethod
+    def from_xml(cls, tag):
+        pass
+    
 class fmiCoSimulation(object):
+    # Version 2.0 only
+
     xmlTagName = 'CoSimulation'
 
     def __init__(self):
@@ -120,8 +223,6 @@ class fmiCoSimulation(object):
         self.providesPartialDerivativesOf_OutputFunction_wrt_Inputs     = None # bool
         
     def to_xml(self, tag):
-        addAttribute(tag, 'modelIdentifier',                        self.modelIdentifier, required = True)
-        addAttribute(tag, 'needsExecutionTool',                     self.needsExecutionTool)
         addAttribute(tag, 'canHandleVariableCommunicationStepSize', self.canHandleVariableCommunicationStepSize)
         addAttribute(tag, 'canHandleEvents',                        self.canHandleEvents)
         addAttribute(tag, 'canInterpolateInputs',                   self.canInterpolateInputs)
@@ -130,6 +231,9 @@ class fmiCoSimulation(object):
         addAttribute(tag, 'canSignalEvents',                        self.canSignalEvents)
         addAttribute(tag, 'canBeInstantiatedOnlyOncePerProcess',    self.canBeInstantiatedOnlyOncePerProcess)
         addAttribute(tag, 'canNotUseMemoryManagementFunctions',     self.canNotUseMemoryManagementFunctions)
+
+        addAttribute(tag, 'modelIdentifier',                        self.modelIdentifier, required = True)
+        addAttribute(tag, 'needsExecutionTool',                     self.needsExecutionTool)
         addAttribute(tag, 'canGetAndSetFMUstate',                   self.canGetAndSetFMUstate)
         addAttribute(tag, 'canSerializeFMUstate',                   self.canSerializeFMUstate)
         addAttribute(tag, 'providesPartialDerivativesOf_DerivativeFunction_wrt_States', self.providesPartialDerivativesOf_DerivativeFunction_wrt_States)
@@ -455,22 +559,11 @@ class fmiOutput(object):
     def from_xml(cls, tag):
         pass
 
-'''
-class fmi(object):
-    xmlTagName = ''
+def test_fmi1():
+    pass
 
-    def __init__(self):
-        pass
-
-    def to_xml(self, tag):
-        pass
-
-    @classmethod
-    def from_xml(cls, tag):
-        pass
-'''
-if __name__ == "__main__":
-    fmi_model = fmiModelDescription()
+def test_fmi2():
+    fmi_model = fmiModelDescription(fmiVersion = '2.0')
 
     # Required
     fmi_model.modelName                  = 'name' #*
@@ -670,3 +763,7 @@ if __name__ == "__main__":
     #fmi_model_copy = fmiModelDescription.from_xml(filename)
     #filename2 = 'sample_fmi - copy.xml'
     #fmi_model_copy.to_xml(filename2)
+
+if __name__ == "__main__":
+    test_fmi2()
+    

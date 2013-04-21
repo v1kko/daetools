@@ -1,0 +1,3033 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module pyCore &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="Module pyActivity" href="activity.html" />
+    <link rel="prev" title="Contents" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="activity.html" title="Module pyActivity"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pyCore">
+<span id="module-pycore"></span><h1>Module pyCore<a class="headerlink" href="#module-pyCore" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Trt mrt.</p>
+</div>
+<div class="section" id="autodifferentiation-and-equation-evaluation-tree-support">
+<h2>Autodifferentiation and equation evaluation tree support<a class="headerlink" href="#autodifferentiation-and-equation-evaluation-tree-support" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-obj docutils literal"><span class="pre">adouble</span></tt></a></td>
+<td>Class adouble operates on values/derivatives of domains, parameters and variables.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-obj docutils literal"><span class="pre">adouble_array</span></tt></a></td>
+<td>Class adouble_array operates on arrays of values/derivatives of domains, parameters and variables.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeCondition" title="pyCore.daeCondition"><tt class="xref py py-obj docutils literal"><span class="pre">daeCondition</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyCore.adouble">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">adouble</tt><a class="headerlink" href="#pyCore.adouble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<p>Class adouble operates on values/derivatives of domains, parameters and variables. It supports basic mathematical operators (+, -, <em>, /, *</em>), comparison operators (&lt;, &lt;=, &gt;, &gt;=, ==, !=), and logical operators (and, or, not). Operands can be instances of adouble or float values.</p>
+<dl class="attribute">
+<dt id="pyCore.adouble.Derivative">
+<tt class="descname">Derivative</tt><a class="headerlink" href="#pyCore.adouble.Derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derivative</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.adouble.GatherInfo">
+<tt class="descname">GatherInfo</tt><a class="headerlink" href="#pyCore.adouble.GatherInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internally used by the framework.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.adouble.Node">
+<tt class="descname">Node</tt><a class="headerlink" href="#pyCore.adouble.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the equation evaluation node.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.adouble.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.adouble.Value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.adouble_array">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">adouble_array</tt><a class="headerlink" href="#pyCore.adouble_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<p>Class adouble_array operates on arrays of values/derivatives of domains, parameters and variables. It supports basic mathematical operators (+, -, <em>, /, *</em>). Operands can be instances of adouble_array, adouble or float values.</p>
+<dl class="method">
+<dt id="pyCore.adouble_array.__len__">
+<tt class="descname">__len__</tt><big>(</big><em>(adouble_array)self</em><big>)</big> &rarr; int :<a class="headerlink" href="#pyCore.adouble_array.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the adouble_array object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.adouble_array.__getitem__">
+<tt class="descname">__getitem__</tt><big>(</big><em>(adouble_array)self</em>, <em>(int)index</em><big>)</big> &rarr; adouble :<a class="headerlink" href="#pyCore.adouble_array.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an adouble object at the specified index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.adouble_array.__setitem__">
+<tt class="descname">__setitem__</tt><big>(</big><em>(adouble_array)self</em>, <em>(int)index</em>, <em>(adouble)value</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.adouble_array.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets an adouble object at the specified index.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.adouble_array.GatherInfo">
+<tt class="descname">GatherInfo</tt><a class="headerlink" href="#pyCore.adouble_array.GatherInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used internally by the framework.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.adouble_array.Node">
+<tt class="descname">Node</tt><a class="headerlink" href="#pyCore.adouble_array.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the equation evaluation node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.adouble_array.Resize">
+<tt class="descname">Resize</tt><big>(</big><em>(adouble_array)self</em>, <em>(int)newSize</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.adouble_array.Resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resizes the adouble_array object to the new size.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.adouble_array.items">
+<tt class="descname">items</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; object :<a class="headerlink" href="#pyCore.adouble_array.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator over adouble items in adouble_array object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeCondition">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeCondition</tt><a class="headerlink" href="#pyCore.daeCondition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeCondition.__or__">
+<tt class="descname">__or__</tt><big>(</big><em>(daeCondition)self</em>, <em>(daeCondition)right</em><big>)</big> &rarr; daeCondition<a class="headerlink" href="#pyCore.daeCondition.__or__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Logical operator <tt class="docutils literal"><span class="pre">or</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeCondition.__and__">
+<tt class="descname">__and__</tt><big>(</big><em>(daeCondition)self</em>, <em>(daeCondition)right</em><big>)</big> &rarr; daeCondition<a class="headerlink" href="#pyCore.daeCondition.__and__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Logical operator <tt class="docutils literal"><span class="pre">and</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeCondition.EventTolerance">
+<tt class="descname">EventTolerance</tt><a class="headerlink" href="#pyCore.daeCondition.EventTolerance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeCondition.Expressions">
+<tt class="descname">Expressions</tt><a class="headerlink" href="#pyCore.daeCondition.Expressions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeCondition.RuntimeNode">
+<tt class="descname">RuntimeNode</tt><a class="headerlink" href="#pyCore.daeCondition.RuntimeNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeCondition.SetupNode">
+<tt class="descname">SetupNode</tt><a class="headerlink" href="#pyCore.daeCondition.SetupNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mathematical-functions">
+<h3>Mathematical functions<a class="headerlink" href="#mathematical-functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Exp" title="pyCore.Exp"><tt class="xref py py-obj docutils literal"><span class="pre">Exp</span></tt></a></td>
+<td>Exp( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Log" title="pyCore.Log"><tt class="xref py py-obj docutils literal"><span class="pre">Log</span></tt></a></td>
+<td>Log( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Log10" title="pyCore.Log10"><tt class="xref py py-obj docutils literal"><span class="pre">Log10</span></tt></a></td>
+<td>Log10( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Sqrt" title="pyCore.Sqrt"><tt class="xref py py-obj docutils literal"><span class="pre">Sqrt</span></tt></a></td>
+<td>Sqrt( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Sin" title="pyCore.Sin"><tt class="xref py py-obj docutils literal"><span class="pre">Sin</span></tt></a></td>
+<td>Sin( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Cos" title="pyCore.Cos"><tt class="xref py py-obj docutils literal"><span class="pre">Cos</span></tt></a></td>
+<td>Cos( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Tan" title="pyCore.Tan"><tt class="xref py py-obj docutils literal"><span class="pre">Tan</span></tt></a></td>
+<td>Tan( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.ASin" title="pyCore.ASin"><tt class="xref py py-obj docutils literal"><span class="pre">ASin</span></tt></a></td>
+<td>ASin( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.ACos" title="pyCore.ACos"><tt class="xref py py-obj docutils literal"><span class="pre">ACos</span></tt></a></td>
+<td>ACos( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.ATan" title="pyCore.ATan"><tt class="xref py py-obj docutils literal"><span class="pre">ATan</span></tt></a></td>
+<td>ATan( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Sinh" title="pyCore.Sinh"><tt class="xref py py-obj docutils literal"><span class="pre">Sinh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Cosh" title="pyCore.Cosh"><tt class="xref py py-obj docutils literal"><span class="pre">Cosh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Tanh" title="pyCore.Tanh"><tt class="xref py py-obj docutils literal"><span class="pre">Tanh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.ASinh" title="pyCore.ASinh"><tt class="xref py py-obj docutils literal"><span class="pre">ASinh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.ACosh" title="pyCore.ACosh"><tt class="xref py py-obj docutils literal"><span class="pre">ACosh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.ATanh" title="pyCore.ATanh"><tt class="xref py py-obj docutils literal"><span class="pre">ATanh</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.ATan2" title="pyCore.ATan2"><tt class="xref py py-obj docutils literal"><span class="pre">ATan2</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Ceil" title="pyCore.Ceil"><tt class="xref py py-obj docutils literal"><span class="pre">Ceil</span></tt></a></td>
+<td>Ceil( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Floor" title="pyCore.Floor"><tt class="xref py py-obj docutils literal"><span class="pre">Floor</span></tt></a></td>
+<td>Floor( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Pow" title="pyCore.Pow"><tt class="xref py py-obj docutils literal"><span class="pre">Pow</span></tt></a></td>
+<td>Pow( (adouble)arg1, (adouble)arg2) -&gt; adouble</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Abs" title="pyCore.Abs"><tt class="xref py py-obj docutils literal"><span class="pre">Abs</span></tt></a></td>
+<td>Abs( (adouble_array)arg1) -&gt; adouble_array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Min" title="pyCore.Min"><tt class="xref py py-obj docutils literal"><span class="pre">Min</span></tt></a></td>
+<td>Min( (float)arg1, (adouble)arg2) -&gt; adouble</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Max" title="pyCore.Max"><tt class="xref py py-obj docutils literal"><span class="pre">Max</span></tt></a></td>
+<td>Max( (float)arg1, (adouble)arg2) -&gt; adouble</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyCore.Exp">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Exp</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exp( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Log">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Log</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Log10">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Log10</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Log10" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log10( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Sqrt">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Sqrt</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Sqrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sqrt( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Sin">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Sin</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Sin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sin( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Cos">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Cos</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Cos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cos( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Tan">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Tan</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Tan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tan( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ASin">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ASin</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ASin" title="Permalink to this definition">¶</a></dt>
+<dd><p>ASin( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ACos">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ACos</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ACos" title="Permalink to this definition">¶</a></dt>
+<dd><p>ACos( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ATan">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ATan</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ATan" title="Permalink to this definition">¶</a></dt>
+<dd><p>ATan( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Sinh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Sinh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Sinh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Cosh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Cosh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Cosh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Tanh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Tanh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Tanh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ASinh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ASinh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ASinh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ACosh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ACosh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ACosh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ATanh">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ATanh</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ATanh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.ATan2">
+<tt class="descclassname">pyCore.</tt><tt class="descname">ATan2</tt><big>(</big><em>(adouble)arg1</em>, <em>(adouble)arg2</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.ATan2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Ceil">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Ceil</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Ceil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ceil( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Floor">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Floor</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Floor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Floor( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Pow">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Pow</tt><big>(</big><em>(adouble)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Pow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pow( (adouble)arg1, (adouble)arg2) -&gt; adouble</p>
+<p>Pow( (float)arg1, (adouble)arg2) -&gt; adouble</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Abs">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Abs</tt><big>(</big><em>(adouble)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Abs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abs( (adouble_array)arg1) -&gt; adouble_array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Min">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Min</tt><big>(</big><em>(adouble)arg1</em>, <em>(adouble)arg2</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Min( (float)arg1, (adouble)arg2) -&gt; adouble</p>
+<p>Min( (adouble)arg1, (float)arg2) -&gt; adouble</p>
+<p>Min( (adouble_array)adarray) -&gt; adouble</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Max">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Max</tt><big>(</big><em>(adouble)arg1</em>, <em>(adouble)arg2</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max( (float)arg1, (adouble)arg2) -&gt; adouble</p>
+<p>Max( (adouble)arg1, (float)arg2) -&gt; adouble</p>
+<p>Max( (adouble_array)adarray) -&gt; adouble</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="modelling-concepts">
+<h2>Modelling concepts<a class="headerlink" href="#modelling-concepts" title="Permalink to this headline">¶</a></h2>
+<p>...</p>
+<div class="section" id="enumerations">
+<h3>Enumerations<a class="headerlink" href="#enumerations" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeDomainType" title="pyCore.daeeDomainType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeDomainType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeParameterType" title="pyCore.daeeParameterType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeParameterType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeePortType" title="pyCore.daeePortType"><tt class="xref py py-obj docutils literal"><span class="pre">daeePortType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeDiscretizationMethod" title="pyCore.daeeDiscretizationMethod"><tt class="xref py py-obj docutils literal"><span class="pre">daeeDiscretizationMethod</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeDomainBounds" title="pyCore.daeeDomainBounds"><tt class="xref py py-obj docutils literal"><span class="pre">daeeDomainBounds</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeInitialConditionMode" title="pyCore.daeeInitialConditionMode"><tt class="xref py py-obj docutils literal"><span class="pre">daeeInitialConditionMode</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeDomainIndexType" title="pyCore.daeeDomainIndexType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeDomainIndexType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeRangeType" title="pyCore.daeeRangeType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeRangeType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeIndexRangeType" title="pyCore.daeIndexRangeType"><tt class="xref py py-obj docutils literal"><span class="pre">daeIndexRangeType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeOptimizationVariableType" title="pyCore.daeeOptimizationVariableType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeOptimizationVariableType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeModelLanguage" title="pyCore.daeeModelLanguage"><tt class="xref py py-obj docutils literal"><span class="pre">daeeModelLanguage</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeConstraintType" title="pyCore.daeeConstraintType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeConstraintType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeUnaryFunctions" title="pyCore.daeeUnaryFunctions"><tt class="xref py py-obj docutils literal"><span class="pre">daeeUnaryFunctions</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeBinaryFunctions" title="pyCore.daeeBinaryFunctions"><tt class="xref py py-obj docutils literal"><span class="pre">daeeBinaryFunctions</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeSpecialUnaryFunctions" title="pyCore.daeeSpecialUnaryFunctions"><tt class="xref py py-obj docutils literal"><span class="pre">daeeSpecialUnaryFunctions</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeLogicalUnaryOperator" title="pyCore.daeeLogicalUnaryOperator"><tt class="xref py py-obj docutils literal"><span class="pre">daeeLogicalUnaryOperator</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeLogicalBinaryOperator" title="pyCore.daeeLogicalBinaryOperator"><tt class="xref py py-obj docutils literal"><span class="pre">daeeLogicalBinaryOperator</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeConditionType" title="pyCore.daeeConditionType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeConditionType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeActionType" title="pyCore.daeeActionType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeActionType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeeEquationType" title="pyCore.daeeEquationType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeEquationType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeeModelType" title="pyCore.daeeModelType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeModelType</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyCore.daeeDomainType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeDomainType</tt><a class="headerlink" href="#pyCore.daeeDomainType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeDomainType.eArray">
+<tt class="descname">eArray</tt><em class="property"> = pyCore.daeeDomainType.eArray</em><a class="headerlink" href="#pyCore.daeeDomainType.eArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainType.eDTUnknown">
+<tt class="descname">eDTUnknown</tt><em class="property"> = pyCore.daeeDomainType.eDTUnknown</em><a class="headerlink" href="#pyCore.daeeDomainType.eDTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainType.eDistributed">
+<tt class="descname">eDistributed</tt><em class="property"> = pyCore.daeeDomainType.eDistributed</em><a class="headerlink" href="#pyCore.daeeDomainType.eDistributed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeParameterType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeParameterType</tt><a class="headerlink" href="#pyCore.daeeParameterType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeParameterType.eBool">
+<tt class="descname">eBool</tt><em class="property"> = pyCore.daeeParameterType.eBool</em><a class="headerlink" href="#pyCore.daeeParameterType.eBool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeParameterType.eInteger">
+<tt class="descname">eInteger</tt><em class="property"> = pyCore.daeeParameterType.eInteger</em><a class="headerlink" href="#pyCore.daeeParameterType.eInteger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeParameterType.ePTUnknown">
+<tt class="descname">ePTUnknown</tt><em class="property"> = pyCore.daeeParameterType.ePTUnknown</em><a class="headerlink" href="#pyCore.daeeParameterType.ePTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeParameterType.eReal">
+<tt class="descname">eReal</tt><em class="property"> = pyCore.daeeParameterType.eReal</em><a class="headerlink" href="#pyCore.daeeParameterType.eReal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeePortType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeePortType</tt><a class="headerlink" href="#pyCore.daeePortType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeePortType.eInletPort">
+<tt class="descname">eInletPort</tt><em class="property"> = pyCore.daeePortType.eInletPort</em><a class="headerlink" href="#pyCore.daeePortType.eInletPort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeePortType.eOutletPort">
+<tt class="descname">eOutletPort</tt><em class="property"> = pyCore.daeePortType.eOutletPort</em><a class="headerlink" href="#pyCore.daeePortType.eOutletPort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeePortType.eUnknownPort">
+<tt class="descname">eUnknownPort</tt><em class="property"> = pyCore.daeePortType.eUnknownPort</em><a class="headerlink" href="#pyCore.daeePortType.eUnknownPort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeDiscretizationMethod">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeDiscretizationMethod</tt><a class="headerlink" href="#pyCore.daeeDiscretizationMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeDiscretizationMethod.eBFDM">
+<tt class="descname">eBFDM</tt><em class="property"> = pyCore.daeeDiscretizationMethod.eBFDM</em><a class="headerlink" href="#pyCore.daeeDiscretizationMethod.eBFDM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDiscretizationMethod.eCFDM">
+<tt class="descname">eCFDM</tt><em class="property"> = pyCore.daeeDiscretizationMethod.eCFDM</em><a class="headerlink" href="#pyCore.daeeDiscretizationMethod.eCFDM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDiscretizationMethod.eCustomDM">
+<tt class="descname">eCustomDM</tt><em class="property"> = pyCore.daeeDiscretizationMethod.eCustomDM</em><a class="headerlink" href="#pyCore.daeeDiscretizationMethod.eCustomDM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDiscretizationMethod.eDMUnknown">
+<tt class="descname">eDMUnknown</tt><em class="property"> = pyCore.daeeDiscretizationMethod.eDMUnknown</em><a class="headerlink" href="#pyCore.daeeDiscretizationMethod.eDMUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDiscretizationMethod.eFFDM">
+<tt class="descname">eFFDM</tt><em class="property"> = pyCore.daeeDiscretizationMethod.eFFDM</em><a class="headerlink" href="#pyCore.daeeDiscretizationMethod.eFFDM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeDomainBounds">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeDomainBounds</tt><a class="headerlink" href="#pyCore.daeeDomainBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eClosedClosed">
+<tt class="descname">eClosedClosed</tt><em class="property"> = pyCore.daeeDomainBounds.eClosedClosed</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eClosedClosed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eClosedOpen">
+<tt class="descname">eClosedOpen</tt><em class="property"> = pyCore.daeeDomainBounds.eClosedOpen</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eClosedOpen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eDBUnknown">
+<tt class="descname">eDBUnknown</tt><em class="property"> = pyCore.daeeDomainBounds.eDBUnknown</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eDBUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eLowerBound">
+<tt class="descname">eLowerBound</tt><em class="property"> = pyCore.daeeDomainBounds.eLowerBound</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eLowerBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eOpenClosed">
+<tt class="descname">eOpenClosed</tt><em class="property"> = pyCore.daeeDomainBounds.eOpenClosed</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eOpenClosed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eOpenOpen">
+<tt class="descname">eOpenOpen</tt><em class="property"> = pyCore.daeeDomainBounds.eOpenOpen</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eOpenOpen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainBounds.eUpperBound">
+<tt class="descname">eUpperBound</tt><em class="property"> = pyCore.daeeDomainBounds.eUpperBound</em><a class="headerlink" href="#pyCore.daeeDomainBounds.eUpperBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeInitialConditionMode">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeInitialConditionMode</tt><a class="headerlink" href="#pyCore.daeeInitialConditionMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeInitialConditionMode.eAlgebraicValuesProvided">
+<tt class="descname">eAlgebraicValuesProvided</tt><em class="property"> = pyCore.daeeInitialConditionMode.eAlgebraicValuesProvided</em><a class="headerlink" href="#pyCore.daeeInitialConditionMode.eAlgebraicValuesProvided" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeInitialConditionMode.eDifferentialValuesProvided">
+<tt class="descname">eDifferentialValuesProvided</tt><em class="property"> = pyCore.daeeInitialConditionMode.eDifferentialValuesProvided</em><a class="headerlink" href="#pyCore.daeeInitialConditionMode.eDifferentialValuesProvided" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeInitialConditionMode.eICTUnknown">
+<tt class="descname">eICTUnknown</tt><em class="property"> = pyCore.daeeInitialConditionMode.eICTUnknown</em><a class="headerlink" href="#pyCore.daeeInitialConditionMode.eICTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeInitialConditionMode.eQuasySteadyState">
+<tt class="descname">eQuasySteadyState</tt><em class="property"> = pyCore.daeeInitialConditionMode.eQuasySteadyState</em><a class="headerlink" href="#pyCore.daeeInitialConditionMode.eQuasySteadyState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeDomainIndexType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeDomainIndexType</tt><a class="headerlink" href="#pyCore.daeeDomainIndexType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeDomainIndexType.eConstantIndex">
+<tt class="descname">eConstantIndex</tt><em class="property"> = pyCore.daeeDomainIndexType.eConstantIndex</em><a class="headerlink" href="#pyCore.daeeDomainIndexType.eConstantIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainIndexType.eDITUnknown">
+<tt class="descname">eDITUnknown</tt><em class="property"> = pyCore.daeeDomainIndexType.eDITUnknown</em><a class="headerlink" href="#pyCore.daeeDomainIndexType.eDITUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainIndexType.eDomainIterator">
+<tt class="descname">eDomainIterator</tt><em class="property"> = pyCore.daeeDomainIndexType.eDomainIterator</em><a class="headerlink" href="#pyCore.daeeDomainIndexType.eDomainIterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeDomainIndexType.eIncrementedDomainIterator">
+<tt class="descname">eIncrementedDomainIterator</tt><em class="property"> = pyCore.daeeDomainIndexType.eIncrementedDomainIterator</em><a class="headerlink" href="#pyCore.daeeDomainIndexType.eIncrementedDomainIterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeRangeType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeRangeType</tt><a class="headerlink" href="#pyCore.daeeRangeType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeRangeType.eRaTUnknown">
+<tt class="descname">eRaTUnknown</tt><em class="property"> = pyCore.daeeRangeType.eRaTUnknown</em><a class="headerlink" href="#pyCore.daeeRangeType.eRaTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeRangeType.eRange">
+<tt class="descname">eRange</tt><em class="property"> = pyCore.daeeRangeType.eRange</em><a class="headerlink" href="#pyCore.daeeRangeType.eRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeRangeType.eRangeDomainIndex">
+<tt class="descname">eRangeDomainIndex</tt><em class="property"> = pyCore.daeeRangeType.eRangeDomainIndex</em><a class="headerlink" href="#pyCore.daeeRangeType.eRangeDomainIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeIndexRangeType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeIndexRangeType</tt><a class="headerlink" href="#pyCore.daeIndexRangeType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeIndexRangeType.eAllPointsInDomain">
+<tt class="descname">eAllPointsInDomain</tt><em class="property"> = pyCore.daeIndexRangeType.eAllPointsInDomain</em><a class="headerlink" href="#pyCore.daeIndexRangeType.eAllPointsInDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRangeType.eCustomRange">
+<tt class="descname">eCustomRange</tt><em class="property"> = pyCore.daeIndexRangeType.eCustomRange</em><a class="headerlink" href="#pyCore.daeIndexRangeType.eCustomRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRangeType.eIRTUnknown">
+<tt class="descname">eIRTUnknown</tt><em class="property"> = pyCore.daeIndexRangeType.eIRTUnknown</em><a class="headerlink" href="#pyCore.daeIndexRangeType.eIRTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRangeType.eRangeOfIndexes">
+<tt class="descname">eRangeOfIndexes</tt><em class="property"> = pyCore.daeIndexRangeType.eRangeOfIndexes</em><a class="headerlink" href="#pyCore.daeIndexRangeType.eRangeOfIndexes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeOptimizationVariableType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeOptimizationVariableType</tt><a class="headerlink" href="#pyCore.daeeOptimizationVariableType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeOptimizationVariableType.eBinaryVariable">
+<tt class="descname">eBinaryVariable</tt><em class="property"> = pyCore.daeeOptimizationVariableType.eBinaryVariable</em><a class="headerlink" href="#pyCore.daeeOptimizationVariableType.eBinaryVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeOptimizationVariableType.eContinuousVariable">
+<tt class="descname">eContinuousVariable</tt><em class="property"> = pyCore.daeeOptimizationVariableType.eContinuousVariable</em><a class="headerlink" href="#pyCore.daeeOptimizationVariableType.eContinuousVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeOptimizationVariableType.eIntegerVariable">
+<tt class="descname">eIntegerVariable</tt><em class="property"> = pyCore.daeeOptimizationVariableType.eIntegerVariable</em><a class="headerlink" href="#pyCore.daeeOptimizationVariableType.eIntegerVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeModelLanguage">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeModelLanguage</tt><a class="headerlink" href="#pyCore.daeeModelLanguage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeModelLanguage.eCDAE">
+<tt class="descname">eCDAE</tt><em class="property"> = pyCore.daeeModelLanguage.eCDAE</em><a class="headerlink" href="#pyCore.daeeModelLanguage.eCDAE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeModelLanguage.eMLNone">
+<tt class="descname">eMLNone</tt><em class="property"> = pyCore.daeeModelLanguage.eMLNone</em><a class="headerlink" href="#pyCore.daeeModelLanguage.eMLNone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeModelLanguage.ePYDAE">
+<tt class="descname">ePYDAE</tt><em class="property"> = pyCore.daeeModelLanguage.ePYDAE</em><a class="headerlink" href="#pyCore.daeeModelLanguage.ePYDAE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeConstraintType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeConstraintType</tt><a class="headerlink" href="#pyCore.daeeConstraintType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeConstraintType.eEqualityConstraint">
+<tt class="descname">eEqualityConstraint</tt><em class="property"> = pyCore.daeeConstraintType.eEqualityConstraint</em><a class="headerlink" href="#pyCore.daeeConstraintType.eEqualityConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConstraintType.eInequalityConstraint">
+<tt class="descname">eInequalityConstraint</tt><em class="property"> = pyCore.daeeConstraintType.eInequalityConstraint</em><a class="headerlink" href="#pyCore.daeeConstraintType.eInequalityConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeUnaryFunctions">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeUnaryFunctions</tt><a class="headerlink" href="#pyCore.daeeUnaryFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eAbs">
+<tt class="descname">eAbs</tt><em class="property"> = pyCore.daeeUnaryFunctions.eAbs</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eAbs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eArcCos">
+<tt class="descname">eArcCos</tt><em class="property"> = pyCore.daeeUnaryFunctions.eArcCos</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eArcCos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eArcSin">
+<tt class="descname">eArcSin</tt><em class="property"> = pyCore.daeeUnaryFunctions.eArcSin</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eArcSin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eArcTan">
+<tt class="descname">eArcTan</tt><em class="property"> = pyCore.daeeUnaryFunctions.eArcTan</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eArcTan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eCeil">
+<tt class="descname">eCeil</tt><em class="property"> = pyCore.daeeUnaryFunctions.eCeil</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eCeil" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eCos">
+<tt class="descname">eCos</tt><em class="property"> = pyCore.daeeUnaryFunctions.eCos</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eCos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eExp">
+<tt class="descname">eExp</tt><em class="property"> = pyCore.daeeUnaryFunctions.eExp</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eExp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eFloor">
+<tt class="descname">eFloor</tt><em class="property"> = pyCore.daeeUnaryFunctions.eFloor</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eFloor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eLn">
+<tt class="descname">eLn</tt><em class="property"> = pyCore.daeeUnaryFunctions.eLn</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eLn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eLog">
+<tt class="descname">eLog</tt><em class="property"> = pyCore.daeeUnaryFunctions.eLog</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eLog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eSign">
+<tt class="descname">eSign</tt><em class="property"> = pyCore.daeeUnaryFunctions.eSign</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eSign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eSin">
+<tt class="descname">eSin</tt><em class="property"> = pyCore.daeeUnaryFunctions.eSin</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eSin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eSqrt">
+<tt class="descname">eSqrt</tt><em class="property"> = pyCore.daeeUnaryFunctions.eSqrt</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eSqrt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eTan">
+<tt class="descname">eTan</tt><em class="property"> = pyCore.daeeUnaryFunctions.eTan</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eTan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeUnaryFunctions.eUFUnknown">
+<tt class="descname">eUFUnknown</tt><em class="property"> = pyCore.daeeUnaryFunctions.eUFUnknown</em><a class="headerlink" href="#pyCore.daeeUnaryFunctions.eUFUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeBinaryFunctions">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeBinaryFunctions</tt><a class="headerlink" href="#pyCore.daeeBinaryFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eBFUnknown">
+<tt class="descname">eBFUnknown</tt><em class="property"> = pyCore.daeeBinaryFunctions.eBFUnknown</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eBFUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eDivide">
+<tt class="descname">eDivide</tt><em class="property"> = pyCore.daeeBinaryFunctions.eDivide</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eDivide" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eMax">
+<tt class="descname">eMax</tt><em class="property"> = pyCore.daeeBinaryFunctions.eMax</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eMax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eMin">
+<tt class="descname">eMin</tt><em class="property"> = pyCore.daeeBinaryFunctions.eMin</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eMin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eMinus">
+<tt class="descname">eMinus</tt><em class="property"> = pyCore.daeeBinaryFunctions.eMinus</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eMinus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.eMulti">
+<tt class="descname">eMulti</tt><em class="property"> = pyCore.daeeBinaryFunctions.eMulti</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.eMulti" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.ePlus">
+<tt class="descname">ePlus</tt><em class="property"> = pyCore.daeeBinaryFunctions.ePlus</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.ePlus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeBinaryFunctions.ePower">
+<tt class="descname">ePower</tt><em class="property"> = pyCore.daeeBinaryFunctions.ePower</em><a class="headerlink" href="#pyCore.daeeBinaryFunctions.ePower" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeSpecialUnaryFunctions">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeSpecialUnaryFunctions</tt><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eAverage">
+<tt class="descname">eAverage</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eAverage</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eAverage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eMaxInArray">
+<tt class="descname">eMaxInArray</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eMaxInArray</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eMaxInArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eMinInArray">
+<tt class="descname">eMinInArray</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eMinInArray</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eMinInArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eProduct">
+<tt class="descname">eProduct</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eProduct</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eProduct" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eSUFUnknown">
+<tt class="descname">eSUFUnknown</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eSUFUnknown</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eSUFUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeSpecialUnaryFunctions.eSum">
+<tt class="descname">eSum</tt><em class="property"> = pyCore.daeeSpecialUnaryFunctions.eSum</em><a class="headerlink" href="#pyCore.daeeSpecialUnaryFunctions.eSum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeLogicalUnaryOperator">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeLogicalUnaryOperator</tt><a class="headerlink" href="#pyCore.daeeLogicalUnaryOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeLogicalUnaryOperator.eNot">
+<tt class="descname">eNot</tt><em class="property"> = pyCore.daeeLogicalUnaryOperator.eNot</em><a class="headerlink" href="#pyCore.daeeLogicalUnaryOperator.eNot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeLogicalUnaryOperator.eUOUnknown">
+<tt class="descname">eUOUnknown</tt><em class="property"> = pyCore.daeeLogicalUnaryOperator.eUOUnknown</em><a class="headerlink" href="#pyCore.daeeLogicalUnaryOperator.eUOUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeLogicalBinaryOperator">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeLogicalBinaryOperator</tt><a class="headerlink" href="#pyCore.daeeLogicalBinaryOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeLogicalBinaryOperator.eAnd">
+<tt class="descname">eAnd</tt><em class="property"> = pyCore.daeeLogicalBinaryOperator.eAnd</em><a class="headerlink" href="#pyCore.daeeLogicalBinaryOperator.eAnd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeLogicalBinaryOperator.eBOUnknown">
+<tt class="descname">eBOUnknown</tt><em class="property"> = pyCore.daeeLogicalBinaryOperator.eBOUnknown</em><a class="headerlink" href="#pyCore.daeeLogicalBinaryOperator.eBOUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeLogicalBinaryOperator.eOr">
+<tt class="descname">eOr</tt><em class="property"> = pyCore.daeeLogicalBinaryOperator.eOr</em><a class="headerlink" href="#pyCore.daeeLogicalBinaryOperator.eOr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeConditionType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeConditionType</tt><a class="headerlink" href="#pyCore.daeeConditionType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eCTUnknown">
+<tt class="descname">eCTUnknown</tt><em class="property"> = pyCore.daeeConditionType.eCTUnknown</em><a class="headerlink" href="#pyCore.daeeConditionType.eCTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eEQ">
+<tt class="descname">eEQ</tt><em class="property"> = pyCore.daeeConditionType.eEQ</em><a class="headerlink" href="#pyCore.daeeConditionType.eEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eGT">
+<tt class="descname">eGT</tt><em class="property"> = pyCore.daeeConditionType.eGT</em><a class="headerlink" href="#pyCore.daeeConditionType.eGT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eGTEQ">
+<tt class="descname">eGTEQ</tt><em class="property"> = pyCore.daeeConditionType.eGTEQ</em><a class="headerlink" href="#pyCore.daeeConditionType.eGTEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eLT">
+<tt class="descname">eLT</tt><em class="property"> = pyCore.daeeConditionType.eLT</em><a class="headerlink" href="#pyCore.daeeConditionType.eLT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eLTEQ">
+<tt class="descname">eLTEQ</tt><em class="property"> = pyCore.daeeConditionType.eLTEQ</em><a class="headerlink" href="#pyCore.daeeConditionType.eLTEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeConditionType.eNotEQ">
+<tt class="descname">eNotEQ</tt><em class="property"> = pyCore.daeeConditionType.eNotEQ</em><a class="headerlink" href="#pyCore.daeeConditionType.eNotEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeActionType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeActionType</tt><a class="headerlink" href="#pyCore.daeeActionType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeActionType.eChangeState">
+<tt class="descname">eChangeState</tt><em class="property"> = pyCore.daeeActionType.eChangeState</em><a class="headerlink" href="#pyCore.daeeActionType.eChangeState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeActionType.eReAssignOrReInitializeVariable">
+<tt class="descname">eReAssignOrReInitializeVariable</tt><em class="property"> = pyCore.daeeActionType.eReAssignOrReInitializeVariable</em><a class="headerlink" href="#pyCore.daeeActionType.eReAssignOrReInitializeVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeActionType.eSendEvent">
+<tt class="descname">eSendEvent</tt><em class="property"> = pyCore.daeeActionType.eSendEvent</em><a class="headerlink" href="#pyCore.daeeActionType.eSendEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeActionType.eUnknownAction">
+<tt class="descname">eUnknownAction</tt><em class="property"> = pyCore.daeeActionType.eUnknownAction</em><a class="headerlink" href="#pyCore.daeeActionType.eUnknownAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeActionType.eUserDefinedAction">
+<tt class="descname">eUserDefinedAction</tt><em class="property"> = pyCore.daeeActionType.eUserDefinedAction</em><a class="headerlink" href="#pyCore.daeeActionType.eUserDefinedAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeEquationType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeEquationType</tt><a class="headerlink" href="#pyCore.daeeEquationType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeEquationType.eAlgebraic">
+<tt class="descname">eAlgebraic</tt><em class="property"> = pyCore.daeeEquationType.eAlgebraic</em><a class="headerlink" href="#pyCore.daeeEquationType.eAlgebraic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeEquationType.eETUnknown">
+<tt class="descname">eETUnknown</tt><em class="property"> = pyCore.daeeEquationType.eETUnknown</em><a class="headerlink" href="#pyCore.daeeEquationType.eETUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeEquationType.eExplicitODE">
+<tt class="descname">eExplicitODE</tt><em class="property"> = pyCore.daeeEquationType.eExplicitODE</em><a class="headerlink" href="#pyCore.daeeEquationType.eExplicitODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeEquationType.eImplicitODE">
+<tt class="descname">eImplicitODE</tt><em class="property"> = pyCore.daeeEquationType.eImplicitODE</em><a class="headerlink" href="#pyCore.daeeEquationType.eImplicitODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeeModelType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeeModelType</tt><a class="headerlink" href="#pyCore.daeeModelType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeeModelType.eDAE">
+<tt class="descname">eDAE</tt><em class="property"> = pyCore.daeeModelType.eDAE</em><a class="headerlink" href="#pyCore.daeeModelType.eDAE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeModelType.eMTUnknown">
+<tt class="descname">eMTUnknown</tt><em class="property"> = pyCore.daeeModelType.eMTUnknown</em><a class="headerlink" href="#pyCore.daeeModelType.eMTUnknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeModelType.eODE">
+<tt class="descname">eODE</tt><em class="property"> = pyCore.daeeModelType.eODE</em><a class="headerlink" href="#pyCore.daeeModelType.eODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeeModelType.eSteadyState">
+<tt class="descname">eSteadyState</tt><em class="property"> = pyCore.daeeModelType.eSteadyState</em><a class="headerlink" href="#pyCore.daeeModelType.eSteadyState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>Classes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeVariableType" title="pyCore.daeVariableType"><tt class="xref py py-obj docutils literal"><span class="pre">daeVariableType</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-obj docutils literal"><span class="pre">daeDomain</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeParameter" title="pyCore.daeParameter"><tt class="xref py py-obj docutils literal"><span class="pre">daeParameter</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeVariable" title="pyCore.daeVariable"><tt class="xref py py-obj docutils literal"><span class="pre">daeVariable</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-obj docutils literal"><span class="pre">daeModel</span></tt></a></td>
+<td>Base model class.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeSTN" title="pyCore.daeSTN"><tt class="xref py py-obj docutils literal"><span class="pre">daeSTN</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeIF" title="pyCore.daeIF"><tt class="xref py py-obj docutils literal"><span class="pre">daeIF</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeEquation" title="pyCore.daeEquation"><tt class="xref py py-obj docutils literal"><span class="pre">daeEquation</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeState" title="pyCore.daeState"><tt class="xref py py-obj docutils literal"><span class="pre">daeState</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeStateTransition" title="pyCore.daeStateTransition"><tt class="xref py py-obj docutils literal"><span class="pre">daeStateTransition</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daePort" title="pyCore.daePort"><tt class="xref py py-obj docutils literal"><span class="pre">daePort</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeEventPort" title="pyCore.daeEventPort"><tt class="xref py py-obj docutils literal"><span class="pre">daeEventPort</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daePortConnection" title="pyCore.daePortConnection"><tt class="xref py py-obj docutils literal"><span class="pre">daePortConnection</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeScalarExternalFunction" title="pyCore.daeScalarExternalFunction"><tt class="xref py py-obj docutils literal"><span class="pre">daeScalarExternalFunction</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeVectorExternalFunction" title="pyCore.daeVectorExternalFunction"><tt class="xref py py-obj docutils literal"><span class="pre">daeVectorExternalFunction</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeDomainIndex" title="pyCore.daeDomainIndex"><tt class="xref py py-obj docutils literal"><span class="pre">daeDomainIndex</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeIndexRange" title="pyCore.daeIndexRange"><tt class="xref py py-obj docutils literal"><span class="pre">daeIndexRange</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeArrayRange" title="pyCore.daeArrayRange"><tt class="xref py py-obj docutils literal"><span class="pre">daeArrayRange</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeDEDI" title="pyCore.daeDEDI"><tt class="xref py py-obj docutils literal"><span class="pre">daeDEDI</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeAction" title="pyCore.daeAction"><tt class="xref py py-obj docutils literal"><span class="pre">daeAction</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeOptimizationVariable" title="pyCore.daeOptimizationVariable"><tt class="xref py py-obj docutils literal"><span class="pre">daeOptimizationVariable</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeObjectiveFunction" title="pyCore.daeObjectiveFunction"><tt class="xref py py-obj docutils literal"><span class="pre">daeObjectiveFunction</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeOptimizationConstraint" title="pyCore.daeOptimizationConstraint"><tt class="xref py py-obj docutils literal"><span class="pre">daeOptimizationConstraint</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeMeasuredVariable" title="pyCore.daeMeasuredVariable"><tt class="xref py py-obj docutils literal"><span class="pre">daeMeasuredVariable</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeEquationExecutionInfo" title="pyCore.daeEquationExecutionInfo"><tt class="xref py py-obj docutils literal"><span class="pre">daeEquationExecutionInfo</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyCore.daeVariableType">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeVariableType</tt><a class="headerlink" href="#pyCore.daeVariableType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeVariableType.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariableType.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (str)name, (object)units, (float)lowerBound, (float)upperBound, (float)initialGuess, (float)absTolerance) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.AbsoluteTolerance">
+<tt class="descname">AbsoluteTolerance</tt><a class="headerlink" href="#pyCore.daeVariableType.AbsoluteTolerance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.InitialGuess">
+<tt class="descname">InitialGuess</tt><a class="headerlink" href="#pyCore.daeVariableType.InitialGuess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.LowerBound">
+<tt class="descname">LowerBound</tt><a class="headerlink" href="#pyCore.daeVariableType.LowerBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeVariableType.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.Units">
+<tt class="descname">Units</tt><a class="headerlink" href="#pyCore.daeVariableType.Units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableType.UpperBound">
+<tt class="descname">UpperBound</tt><a class="headerlink" href="#pyCore.daeVariableType.UpperBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeObject">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeObject</tt><a class="headerlink" href="#pyCore.daeObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeObject.CanonicalName">
+<tt class="descname">CanonicalName</tt><a class="headerlink" href="#pyCore.daeObject.CanonicalName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.Description">
+<tt class="descname">Description</tt><a class="headerlink" href="#pyCore.daeObject.Description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeObject.GetNameRelativeToParentModel">
+<tt class="descname">GetNameRelativeToParentModel</tt><big>(</big><em>(daeObject)self</em><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeObject.GetNameRelativeToParentModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeObject.GetStrippedName">
+<tt class="descname">GetStrippedName</tt><big>(</big><em>(daeObject)self</em><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeObject.GetStrippedName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeObject.GetStrippedNameRelativeToParentModel">
+<tt class="descname">GetStrippedNameRelativeToParentModel</tt><big>(</big><em>(daeObject)self</em><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeObject.GetStrippedNameRelativeToParentModel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.ID">
+<tt class="descname">ID</tt><a class="headerlink" href="#pyCore.daeObject.ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.Library">
+<tt class="descname">Library</tt><a class="headerlink" href="#pyCore.daeObject.Library" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.Model">
+<tt class="descname">Model</tt><a class="headerlink" href="#pyCore.daeObject.Model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeObject.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObject.Version">
+<tt class="descname">Version</tt><a class="headerlink" href="#pyCore.daeObject.Version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeDomain">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeDomain</tt><a class="headerlink" href="#pyCore.daeDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeDomain.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomain.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (str)name, (daeModel)parentModel, (object)units [, (str)description=&#8217;&#8216;]) -&gt; None</p>
+<p>__init__( (object)self, (str)name, (daePort)parentPort, (object)units [, (str)description=&#8217;&#8216;]) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDomain.__getitem__">
+<tt class="descname">__getitem__</tt><big>(</big><em>(daeDomain)self</em>, <em>(int)index</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeDomain.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDomain.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeDomain)self</em>, <em>(int)index</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeDomain.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDomain.CreateArray">
+<tt class="descname">CreateArray</tt><big>(</big><em>(daeDomain)self</em>, <em>(int)noIntervals</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomain.CreateArray" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDomain.CreateDistributed">
+<tt class="descname">CreateDistributed</tt><big>(</big><em>(daeDomain)self</em>, <em>(daeeDiscretizationMethod)discretizationMethod</em>, <em>(int)discretizationOrder</em>, <em>(int)numberOfIntervals</em>, <em>(float)lowerBound</em>, <em>(float)upperBound</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomain.CreateDistributed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.DiscretizationMethod">
+<tt class="descname">DiscretizationMethod</tt><a class="headerlink" href="#pyCore.daeDomain.DiscretizationMethod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.DiscretizationOrder">
+<tt class="descname">DiscretizationOrder</tt><a class="headerlink" href="#pyCore.daeDomain.DiscretizationOrder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.LowerBound">
+<tt class="descname">LowerBound</tt><a class="headerlink" href="#pyCore.daeDomain.LowerBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.NumberOfIntervals">
+<tt class="descname">NumberOfIntervals</tt><a class="headerlink" href="#pyCore.daeDomain.NumberOfIntervals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyCore.daeDomain.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.Points">
+<tt class="descname">Points</tt><a class="headerlink" href="#pyCore.daeDomain.Points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeDomain.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.Units">
+<tt class="descname">Units</tt><a class="headerlink" href="#pyCore.daeDomain.Units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.UpperBound">
+<tt class="descname">UpperBound</tt><a class="headerlink" href="#pyCore.daeDomain.UpperBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomain.npyPoints">
+<tt class="descname">npyPoints</tt><a class="headerlink" href="#pyCore.daeDomain.npyPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeParameter">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeParameter</tt><a class="headerlink" href="#pyCore.daeParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeParameter.GetValue">
+<tt class="descname">GetValue</tt><big>(</big><em>(daeParameter)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; float<a class="headerlink" href="#pyCore.daeParameter.GetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the parameter at the specified domain indexes. How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the parameter is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.GetQuantity">
+<tt class="descname">GetQuantity</tt><big>(</big><em>(daeParameter)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; quantity<a class="headerlink" href="#pyCore.daeParameter.GetQuantity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the parameter at the specified domain indexes as the <tt class="docutils literal"><span class="pre">quantity</span></tt> object (with value and units).
+How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the parameter is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.SetValue">
+<tt class="descname">SetValue</tt><big>(</big><em>(daeParameter)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeParameter.SetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value of the parameter at the specified domain indexes (as <tt class="docutils literal"><span class="pre">float</span></tt> or <tt class="docutils literal"><span class="pre">quantity</span></tt>). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the parameter is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.SetValues">
+<tt class="descname">SetValues</tt><big>(</big><em>(daeParameter)self</em>, <em>(float)values</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeParameter.SetValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets all values of the parameter (as <tt class="docutils literal"><span class="pre">float</span></tt> or <tt class="docutils literal"><span class="pre">quantity</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.array">
+<tt class="descname">array</tt><big>(</big><em>(daeParameter)self</em><span class="optional">[</span>, <em>(object)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(object)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeParameter.array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the array of parameter&#8217;s values at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the parameter is distributed on. Argument types can be
+one of the following:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#pyCore.daeIndexRange" title="pyCore.daeIndexRange"><tt class="xref py py-class docutils literal"><span class="pre">daeIndexRange</span></tt></a> object</li>
+<li>plain integer (to select a single index from a domain)</li>
+<li>python <tt class="docutils literal"><span class="pre">list</span></tt> (to select a list of indexes from a domain)</li>
+<li>python <tt class="docutils literal"><span class="pre">slice</span></tt> (to select a range of indexes from a domain: start_index, end_index, step)</li>
+<li>character <tt class="docutils literal"><span class="pre">'*'</span></tt> (to select all points from a domain)</li>
+<li>integer <tt class="docutils literal"><span class="pre">-1</span></tt> (to select all points from a domain)</li>
+<li>empty python list <tt class="docutils literal"><span class="pre">[]</span></tt> (to select all points from a domain)</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeParameter)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeParameter.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the parameter at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1</span></tt>, ..., <tt class="docutils literal"><span class="pre">index8</span></tt> are used
+depends on the number of domains that the parameter is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.DistributeOnDomain">
+<tt class="descname">DistributeOnDomain</tt><big>(</big><em>(daeParameter)self</em>, <em>(daeDomain)domain</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeParameter.DistributeOnDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeParameter.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyCore.daeParameter.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeParameter.GetDomainsIndexesMap">
+<tt class="descname">GetDomainsIndexesMap</tt><big>(</big><em>(daeParameter)self</em>, <em>(int)indexBase</em><big>)</big> &rarr; dict<a class="headerlink" href="#pyCore.daeParameter.GetDomainsIndexesMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeParameter.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyCore.daeParameter.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeParameter.ReportingOn">
+<tt class="descname">ReportingOn</tt><a class="headerlink" href="#pyCore.daeParameter.ReportingOn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeParameter.Units">
+<tt class="descname">Units</tt><a class="headerlink" href="#pyCore.daeParameter.Units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeParameter.npyValues">
+<tt class="descname">npyValues</tt><a class="headerlink" href="#pyCore.daeParameter.npyValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeVariable">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeVariable</tt><a class="headerlink" href="#pyCore.daeVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeVariable.GetValue">
+<tt class="descname">GetValue</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; float<a class="headerlink" href="#pyCore.daeVariable.GetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the variable at the specified domain indexes. How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.GetQuantity">
+<tt class="descname">GetQuantity</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; quantity<a class="headerlink" href="#pyCore.daeVariable.GetQuantity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the variable at the specified domain indexes as the <tt class="docutils literal"><span class="pre">quantity</span></tt> object (with value and units).
+How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetValue">
+<tt class="descname">SetValue</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value of the variable at the specified domain indexes (as <tt class="docutils literal"><span class="pre">float</span></tt> or <tt class="docutils literal"><span class="pre">quantity</span></tt>). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetValues">
+<tt class="descname">SetValues</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)values</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets all values of the variable (as <tt class="docutils literal"><span class="pre">float</span></tt> or <tt class="docutils literal"><span class="pre">quantity</span></tt>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.AssignValue">
+<tt class="descname">AssignValue</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.AssignValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.AssignValues">
+<tt class="descname">AssignValues</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)values</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.AssignValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.ReAssignValue">
+<tt class="descname">ReAssignValue</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.ReAssignValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.ReAssignValues">
+<tt class="descname">ReAssignValues</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)values</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.ReAssignValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetInitialCondition">
+<tt class="descname">SetInitialCondition</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)initialCondition</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetInitialCondition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetInitialConditions">
+<tt class="descname">SetInitialConditions</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)initialConditions</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetInitialConditions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.ReSetInitialCondition">
+<tt class="descname">ReSetInitialCondition</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)initialCondition</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.ReSetInitialCondition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.ReSetInitialConditions">
+<tt class="descname">ReSetInitialConditions</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)initialConditions</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.ReSetInitialConditions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetInitialGuess">
+<tt class="descname">SetInitialGuess</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span>, <em>(object)initialGuess</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetInitialGuess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetInitialGuesses">
+<tt class="descname">SetInitialGuesses</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)initialGuesses</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetInitialGuesses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.SetAbsoluteTolerances">
+<tt class="descname">SetAbsoluteTolerances</tt><big>(</big><em>(daeVariable)self</em>, <em>(object)tolerances</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.SetAbsoluteTolerances" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.array">
+<tt class="descname">array</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(object)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(object)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeVariable.array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the array of variable&#8217;s values at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on. Argument types are the same
+as those described in <a class="reference internal" href="#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.d_array">
+<tt class="descname">d_array</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(object)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(object)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeVariable.d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the array of partial derivatives at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on. Argument types are the same
+as those described in <a class="reference internal" href="#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.array()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.d2_array">
+<tt class="descname">d2_array</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(object)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(object)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeVariable.d2_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the array of partial derivatives of the second order at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on. Argument types are the same
+as those described in <a class="reference internal" href="#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.array()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.dt_array">
+<tt class="descname">dt_array</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(object)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(object)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeVariable.dt_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the array of time derivatives at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1,</span> <span class="pre">...,</span> <span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on. Argument types are the same
+as those described in <a class="reference internal" href="#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.array()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeVariable.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the value of the variable at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1</span></tt>, ..., <tt class="docutils literal"><span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.d">
+<tt class="descname">d</tt><big>(</big><em>(daeVariable)self</em>, <em>(daeDomain)domain</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeVariable.d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the partial derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1</span></tt>, ..., <tt class="docutils literal"><span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.d2">
+<tt class="descname">d2</tt><big>(</big><em>(daeVariable)self</em>, <em>(daeDomain)domain</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeVariable.d2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the partial derivative of second order of the variable at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1</span></tt>, ..., <tt class="docutils literal"><span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.dt">
+<tt class="descname">dt</tt><big>(</big><em>(daeVariable)self</em><span class="optional">[</span>, <em>(int)index1</em><span class="optional">[</span>, <em>...</em><span class="optional">[</span>, <em>(int)index8</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeVariable.dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the time derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments <tt class="docutils literal"><span class="pre">index1</span></tt>, ..., <tt class="docutils literal"><span class="pre">index8</span></tt> are used
+depends on the number of domains that the variable is distributed on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.DistributeOnDomain">
+<tt class="descname">DistributeOnDomain</tt><big>(</big><em>(daeVariable)self</em>, <em>(daeDomain)domain</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariable.DistributeOnDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyCore.daeVariable.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVariable.GetDomainsIndexesMap">
+<tt class="descname">GetDomainsIndexesMap</tt><big>(</big><em>(daeVariable)arg1</em>, <em>(int)self</em><big>)</big> &rarr; dict<a class="headerlink" href="#pyCore.daeVariable.GetDomainsIndexesMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyCore.daeVariable.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.OverallIndex">
+<tt class="descname">OverallIndex</tt><a class="headerlink" href="#pyCore.daeVariable.OverallIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.ReportingOn">
+<tt class="descname">ReportingOn</tt><a class="headerlink" href="#pyCore.daeVariable.ReportingOn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.VariableType">
+<tt class="descname">VariableType</tt><a class="headerlink" href="#pyCore.daeVariable.VariableType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.npyIDs">
+<tt class="descname">npyIDs</tt><a class="headerlink" href="#pyCore.daeVariable.npyIDs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariable.npyValues">
+<tt class="descname">npyValues</tt><a class="headerlink" href="#pyCore.daeVariable.npyValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeModel">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeModel</tt><a class="headerlink" href="#pyCore.daeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<p>Base model class.</p>
+<dl class="method">
+<dt id="pyCore.daeModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)self, (str)name [, (daeModel)parent=0 [, (str)description=&#8217;&#8216;]]) -&gt; None :</dt>
+<dd>Constructor...</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.ComponentArrays">
+<tt class="descname">ComponentArrays</tt><a class="headerlink" href="#pyCore.daeModel.ComponentArrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of arrays of components in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Components">
+<tt class="descname">Components</tt><a class="headerlink" href="#pyCore.daeModel.Components" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of components in the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ConnectEventPorts">
+<tt class="descname">ConnectEventPorts</tt><big>(</big><em>(daeModel)self</em>, <em>(daeEventPort)portFrom</em>, <em>(daeEventPort)portTo</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ConnectEventPorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects two event ports.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ConnectPorts">
+<tt class="descname">ConnectPorts</tt><big>(</big><em>(daeModel)self</em>, <em>(daePort)portFrom</em>, <em>(daePort)portTo</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ConnectPorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects two ports.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.CreateEquation">
+<tt class="descname">CreateEquation</tt><big>(</big><em>(daeModel)self</em>, <em>(str)name</em><span class="optional">[</span>, <em>(str)description=''</em><span class="optional">[</span>, <em>(float)scaling=1.0</em><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; daeEquation :<a class="headerlink" href="#pyCore.daeModel.CreateEquation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new equation. Used to add equations to models or states in state transition networks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.DeclareEquations">
+<tt class="descname">DeclareEquations</tt><big>(</big><em>(daeModel)self</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.DeclareEquations" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>User-defined function where all model equations ans state transition networks are declared. Must be always implemented in derived classes.</div></blockquote>
+<p>DeclareEquations( (daeModel)self) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyCore.daeModel.Domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of domains in the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ELSE">
+<tt class="descname">ELSE</tt><big>(</big><em>(daeModel)self</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ELSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the last state to a reversible state transition network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ELSE_IF">
+<tt class="descname">ELSE_IF</tt><big>(</big><em>(daeModel)self</em>, <em>(daeCondition)condition</em><span class="optional">[</span>, <em>(float)eventTolerance=0.0</em><span class="optional">]</span><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ELSE_IF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new state to a reversible state transition network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.END_IF">
+<tt class="descname">END_IF</tt><big>(</big><em>(daeModel)self</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.END_IF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finalises a reversible state transition network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.END_STN">
+<tt class="descname">END_STN</tt><big>(</big><em>(daeModel)self</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.END_STN" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Equations">
+<tt class="descname">Equations</tt><a class="headerlink" href="#pyCore.daeModel.Equations" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of equations in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.EventPorts">
+<tt class="descname">EventPorts</tt><a class="headerlink" href="#pyCore.daeModel.EventPorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of event ports in the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.Export">
+<tt class="descname">Export</tt><big>(</big><em>(daeModel)self</em>, <em>(str)content</em>, <em>(daeeModelLanguage)language</em>, <em>(daeModelExportContext)modelExportContext</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.Export" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ExportObjects">
+<tt class="descname">ExportObjects</tt><big>(</big><em>(daeModel)self</em>, <em>(list)objects</em>, <em>(daeeModelLanguage)language</em><big>)</big> &rarr; str :<a class="headerlink" href="#pyCore.daeModel.ExportObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.IF">
+<tt class="descname">IF</tt><big>(</big><em>(daeModel)self</em>, <em>(daeCondition)condition</em><span class="optional">[</span>, <em>(float)eventTolerance=0.0</em><span class="optional">]</span><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.IF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a reversible state transition network and adds the first state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.InitialConditionMode">
+<tt class="descname">InitialConditionMode</tt><a class="headerlink" href="#pyCore.daeModel.InitialConditionMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>A mode used to calculate initial conditions ...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.IsModelDynamic">
+<tt class="descname">IsModelDynamic</tt><a class="headerlink" href="#pyCore.daeModel.IsModelDynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean flag that determines whether the model is synamic or steady-state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.ModelType">
+<tt class="descname">ModelType</tt><a class="headerlink" href="#pyCore.daeModel.ModelType" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type of the model ().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ON_CONDITION">
+<tt class="descname">ON_CONDITION</tt><big>(</big><em>(daeModel)self</em>, <em>(daeCondition)condition</em><span class="optional">[</span>, <em>(str)switchTo=''</em><span class="optional">[</span>, <em>(list)setVariableValues=[]</em><span class="optional">[</span>, <em>(list)triggerEvents=[]</em><span class="optional">[</span>, <em>(list)userDefinedActions=[]</em><span class="optional">[</span>, <em>(float)eventTolerance=0.0</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ON_CONDITION" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.ON_EVENT">
+<tt class="descname">ON_EVENT</tt><big>(</big><em>(daeModel)self</em>, <em>(daeEventPort)eventPort</em><span class="optional">[</span>, <em>(list)switchToStates=[]</em><span class="optional">[</span>, <em>(list)setVariableValues=[]</em><span class="optional">[</span>, <em>(list)triggerEvents=[]</em><span class="optional">[</span>, <em>(list)userDefinedActions=</em><span class="optional">[</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.ON_EVENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.OnEventActions">
+<tt class="descname">OnEventActions</tt><a class="headerlink" href="#pyCore.daeModel.OnEventActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of OnEvent actions in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Parameters">
+<tt class="descname">Parameters</tt><a class="headerlink" href="#pyCore.daeModel.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of parameters in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.PortArrays">
+<tt class="descname">PortArrays</tt><a class="headerlink" href="#pyCore.daeModel.PortArrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of arrays of ports in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.PortConnections">
+<tt class="descname">PortConnections</tt><a class="headerlink" href="#pyCore.daeModel.PortConnections" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of port connections in the model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Ports">
+<tt class="descname">Ports</tt><a class="headerlink" href="#pyCore.daeModel.Ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of ports in the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.STATE">
+<tt class="descname">STATE</tt><big>(</big><em>(daeModel)self</em>, <em>(str)stateName</em><big>)</big> &rarr; daeState :<a class="headerlink" href="#pyCore.daeModel.STATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.STN">
+<tt class="descname">STN</tt><big>(</big><em>(daeModel)self</em>, <em>(str)stnName</em><big>)</big> &rarr; daeSTN :<a class="headerlink" href="#pyCore.daeModel.STN" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.STNs">
+<tt class="descname">STNs</tt><a class="headerlink" href="#pyCore.daeModel.STNs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of state transition networks in the model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.SWITCH_TO">
+<tt class="descname">SWITCH_TO</tt><big>(</big><em>(daeModel)self</em>, <em>(str)targetState</em>, <em>(daeCondition)condition</em><span class="optional">[</span>, <em>(float)eventTolerance=0.0</em><span class="optional">]</span><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.SWITCH_TO" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.SaveModelReport">
+<tt class="descname">SaveModelReport</tt><big>(</big><em>(daeModel)self</em>, <em>(str)xmlFilename</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.SaveModelReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.SaveRuntimeModelReport">
+<tt class="descname">SaveRuntimeModelReport</tt><big>(</big><em>(daeModel)self</em>, <em>(str)xmlFilename</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.SaveRuntimeModelReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeModel.SetReportingOn">
+<tt class="descname">SetReportingOn</tt><big>(</big><em>(daeModel)self</em>, <em>(bool)reportingOn</em><big>)</big> &rarr; None :<a class="headerlink" href="#pyCore.daeModel.SetReportingOn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switches the reporting of the model variables/parameters to the data reporter on or off.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeModel.Variables">
+<tt class="descname">Variables</tt><a class="headerlink" href="#pyCore.daeModel.Variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of variables in the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeSTN">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeSTN</tt><a class="headerlink" href="#pyCore.daeSTN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daeSTN.ActiveState">
+<tt class="descname">ActiveState</tt><a class="headerlink" href="#pyCore.daeSTN.ActiveState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeSTN.States">
+<tt class="descname">States</tt><a class="headerlink" href="#pyCore.daeSTN.States" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeIF">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeIF</tt><a class="headerlink" href="#pyCore.daeIF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeSTN" title="pyCore.daeSTN"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeSTN</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeEquation">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeEquation</tt><a class="headerlink" href="#pyCore.daeEquation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeEquation.DistributeOnDomain">
+<tt class="descname">DistributeOnDomain</tt><big>(</big><em>(daeEquation)arg1</em>, <em>(daeDomain)arg2</em>, <em>(daeeDomainBounds)arg3</em><big>)</big> &rarr; daeDEDI<a class="headerlink" href="#pyCore.daeEquation.DistributeOnDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>DistributeOnDomain( (daeEquation)arg1, (daeDomain)arg2, (list)arg3) -&gt; daeDEDI</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquation.DistributedEquationDomainInfos">
+<tt class="descname">DistributedEquationDomainInfos</tt><a class="headerlink" href="#pyCore.daeEquation.DistributedEquationDomainInfos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquation.EquationExecutionInfos">
+<tt class="descname">EquationExecutionInfos</tt><a class="headerlink" href="#pyCore.daeEquation.EquationExecutionInfos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquation.EquationType">
+<tt class="descname">EquationType</tt><a class="headerlink" href="#pyCore.daeEquation.EquationType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquation.Residual">
+<tt class="descname">Residual</tt><a class="headerlink" href="#pyCore.daeEquation.Residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquation.Scaling">
+<tt class="descname">Scaling</tt><a class="headerlink" href="#pyCore.daeEquation.Scaling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeState">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeState</tt><a class="headerlink" href="#pyCore.daeState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daeState.Equations">
+<tt class="descname">Equations</tt><a class="headerlink" href="#pyCore.daeState.Equations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeState.NestedSTNs">
+<tt class="descname">NestedSTNs</tt><a class="headerlink" href="#pyCore.daeState.NestedSTNs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeState.StateTransitions">
+<tt class="descname">StateTransitions</tt><a class="headerlink" href="#pyCore.daeState.StateTransitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeStateTransition">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeStateTransition</tt><a class="headerlink" href="#pyCore.daeStateTransition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daeStateTransition.Actions">
+<tt class="descname">Actions</tt><a class="headerlink" href="#pyCore.daeStateTransition.Actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeStateTransition.Condition">
+<tt class="descname">Condition</tt><a class="headerlink" href="#pyCore.daeStateTransition.Condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daePort">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daePort</tt><a class="headerlink" href="#pyCore.daePort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daePort.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyCore.daePort.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daePort.Export">
+<tt class="descname">Export</tt><big>(</big><em>(daePort)arg1</em>, <em>(str)arg2</em>, <em>(daeeModelLanguage)arg3</em>, <em>(daeModelExportContext)arg4</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daePort.Export" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daePort.Parameters">
+<tt class="descname">Parameters</tt><a class="headerlink" href="#pyCore.daePort.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daePort.SetReportingOn">
+<tt class="descname">SetReportingOn</tt><big>(</big><em>(daePort)arg1</em>, <em>(bool)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daePort.SetReportingOn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daePort.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daePort.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daePort.Variables">
+<tt class="descname">Variables</tt><a class="headerlink" href="#pyCore.daePort.Variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeEventPort">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeEventPort</tt><a class="headerlink" href="#pyCore.daeEventPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daeEventPort.EventData">
+<tt class="descname">EventData</tt><a class="headerlink" href="#pyCore.daeEventPort.EventData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEventPort.Events">
+<tt class="descname">Events</tt><a class="headerlink" href="#pyCore.daeEventPort.Events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeEventPort.ReceiveEvent">
+<tt class="descname">ReceiveEvent</tt><big>(</big><em>(daeEventPort)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeEventPort.ReceiveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEventPort.RecordEvents">
+<tt class="descname">RecordEvents</tt><a class="headerlink" href="#pyCore.daeEventPort.RecordEvents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeEventPort.SendEvent">
+<tt class="descname">SendEvent</tt><big>(</big><em>(daeEventPort)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeEventPort.SendEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEventPort.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeEventPort.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daePortConnection">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daePortConnection</tt><a class="headerlink" href="#pyCore.daePortConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyCore.daePortConnection.Equations">
+<tt class="descname">Equations</tt><a class="headerlink" href="#pyCore.daePortConnection.Equations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daePortConnection.PortFrom">
+<tt class="descname">PortFrom</tt><a class="headerlink" href="#pyCore.daePortConnection.PortFrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daePortConnection.PortTo">
+<tt class="descname">PortTo</tt><a class="headerlink" href="#pyCore.daePortConnection.PortTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeScalarExternalFunction">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeScalarExternalFunction</tt><a class="headerlink" href="#pyCore.daeScalarExternalFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeScalarExternalFunction.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeScalarExternalFunction)arg1</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeScalarExternalFunction.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeScalarExternalFunction.Calculate">
+<tt class="descname">Calculate</tt><big>(</big><em>(daeScalarExternalFunction)arg1</em>, <em>(tuple)arg2</em>, <em>(dict)arg3</em><big>)</big> &rarr; object<a class="headerlink" href="#pyCore.daeScalarExternalFunction.Calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate( (daeScalarExternalFunction)arg1, (tuple)arg2, (dict)arg3) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeScalarExternalFunction.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeScalarExternalFunction.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeVectorExternalFunction">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeVectorExternalFunction</tt><a class="headerlink" href="#pyCore.daeVectorExternalFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeVectorExternalFunction.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeVectorExternalFunction)arg1</em><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.daeVectorExternalFunction.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeVectorExternalFunction.Calculate">
+<tt class="descname">Calculate</tt><big>(</big><em>(daeVectorExternalFunction)arg1</em>, <em>(tuple)arg2</em>, <em>(dict)arg3</em><big>)</big> &rarr; list<a class="headerlink" href="#pyCore.daeVectorExternalFunction.Calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate( (daeVectorExternalFunction)arg1, (tuple)arg2, (dict)arg3) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVectorExternalFunction.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeVectorExternalFunction.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeDomainIndex">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeDomainIndex</tt><a class="headerlink" href="#pyCore.daeDomainIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeDomainIndex.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomainIndex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (int)index) -&gt; None</p>
+<p>__init__( (object)self, (daeDEDI)dedi) -&gt; None</p>
+<p>__init__( (object)self, (daeDEDI)dedi, (int)increment) -&gt; None</p>
+<p>__init__( (object)self, (daeDomainIndex)domainIndex) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomainIndex.DEDI">
+<tt class="descname">DEDI</tt><a class="headerlink" href="#pyCore.daeDomainIndex.DEDI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomainIndex.Increment">
+<tt class="descname">Increment</tt><a class="headerlink" href="#pyCore.daeDomainIndex.Increment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomainIndex.Index">
+<tt class="descname">Index</tt><a class="headerlink" href="#pyCore.daeDomainIndex.Index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDomainIndex.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeDomainIndex.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeIndexRange">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeIndexRange</tt><a class="headerlink" href="#pyCore.daeIndexRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeIndexRange.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeIndexRange.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (daeDomain)domain) -&gt; None</p>
+<p>__init__( (object)arg1, (daeDomain)arg2, (list)arg3) -&gt; object</p>
+<p>__init__( (object)self, (daeDomain)domain, (int)startIndex, (int)endIndex, (int)step) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.Domain">
+<tt class="descname">Domain</tt><a class="headerlink" href="#pyCore.daeIndexRange.Domain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.EndIndex">
+<tt class="descname">EndIndex</tt><a class="headerlink" href="#pyCore.daeIndexRange.EndIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.NoPoints">
+<tt class="descname">NoPoints</tt><a class="headerlink" href="#pyCore.daeIndexRange.NoPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.StartIndex">
+<tt class="descname">StartIndex</tt><a class="headerlink" href="#pyCore.daeIndexRange.StartIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.Step">
+<tt class="descname">Step</tt><a class="headerlink" href="#pyCore.daeIndexRange.Step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeIndexRange.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeIndexRange.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeArrayRange">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeArrayRange</tt><a class="headerlink" href="#pyCore.daeArrayRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeArrayRange.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeArrayRange.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (daeDomainIndex)domainIndex) -&gt; None</p>
+<p>__init__( (object)self, (daeIndexRange)indexRange) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeArrayRange.DomainIndex">
+<tt class="descname">DomainIndex</tt><a class="headerlink" href="#pyCore.daeArrayRange.DomainIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeArrayRange.NoPoints">
+<tt class="descname">NoPoints</tt><a class="headerlink" href="#pyCore.daeArrayRange.NoPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeArrayRange.Range">
+<tt class="descname">Range</tt><a class="headerlink" href="#pyCore.daeArrayRange.Range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeArrayRange.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeArrayRange.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeDEDI">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeDEDI</tt><a class="headerlink" href="#pyCore.daeDEDI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeDEDI.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>(daeDEDI)self</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.daeDEDI.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDEDI.Domain">
+<tt class="descname">Domain</tt><a class="headerlink" href="#pyCore.daeDEDI.Domain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDEDI.DomainBounds">
+<tt class="descname">DomainBounds</tt><a class="headerlink" href="#pyCore.daeDEDI.DomainBounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDEDI.DomainPoints">
+<tt class="descname">DomainPoints</tt><a class="headerlink" href="#pyCore.daeDEDI.DomainPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeAction">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeAction</tt><a class="headerlink" href="#pyCore.daeAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeAction.Execute">
+<tt class="descname">Execute</tt><big>(</big><em>(daeAction)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeAction.Execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute( (daeAction)arg1) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.RuntimeNode">
+<tt class="descname">RuntimeNode</tt><a class="headerlink" href="#pyCore.daeAction.RuntimeNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.STN">
+<tt class="descname">STN</tt><a class="headerlink" href="#pyCore.daeAction.STN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.SendEventPort">
+<tt class="descname">SendEventPort</tt><a class="headerlink" href="#pyCore.daeAction.SendEventPort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.SetupNode">
+<tt class="descname">SetupNode</tt><a class="headerlink" href="#pyCore.daeAction.SetupNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.StateTo">
+<tt class="descname">StateTo</tt><a class="headerlink" href="#pyCore.daeAction.StateTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeAction.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeAction.VariableWrapper">
+<tt class="descname">VariableWrapper</tt><a class="headerlink" href="#pyCore.daeAction.VariableWrapper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeOptimizationVariable">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeOptimizationVariable</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeOptimizationVariable_t</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.LowerBound">
+<tt class="descname">LowerBound</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.LowerBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.StartingPoint">
+<tt class="descname">StartingPoint</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.StartingPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.UpperBound">
+<tt class="descname">UpperBound</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.UpperBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationVariable.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.daeOptimizationVariable.Value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeObjectiveFunction">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeObjectiveFunction</tt><a class="headerlink" href="#pyCore.daeObjectiveFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObjectiveFunction_t</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeObjectiveFunction.Gradients">
+<tt class="descname">Gradients</tt><a class="headerlink" href="#pyCore.daeObjectiveFunction.Gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObjectiveFunction.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeObjectiveFunction.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObjectiveFunction.Residual">
+<tt class="descname">Residual</tt><a class="headerlink" href="#pyCore.daeObjectiveFunction.Residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeObjectiveFunction.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.daeObjectiveFunction.Value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeOptimizationConstraint">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeOptimizationConstraint</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeOptimizationConstraint_t</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationConstraint.Gradients">
+<tt class="descname">Gradients</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint.Gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationConstraint.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationConstraint.Residual">
+<tt class="descname">Residual</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint.Residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationConstraint.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeOptimizationConstraint.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.daeOptimizationConstraint.Value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeMeasuredVariable">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeMeasuredVariable</tt><a class="headerlink" href="#pyCore.daeMeasuredVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeMeasuredVariable_t</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeMeasuredVariable.Gradients">
+<tt class="descname">Gradients</tt><a class="headerlink" href="#pyCore.daeMeasuredVariable.Gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeMeasuredVariable.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeMeasuredVariable.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeMeasuredVariable.Residual">
+<tt class="descname">Residual</tt><a class="headerlink" href="#pyCore.daeMeasuredVariable.Residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeMeasuredVariable.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.daeMeasuredVariable.Value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeEquationExecutionInfo">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeEquationExecutionInfo</tt><a class="headerlink" href="#pyCore.daeEquationExecutionInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyCore.daeEquationExecutionInfo.EquationType">
+<tt class="descname">EquationType</tt><a class="headerlink" href="#pyCore.daeEquationExecutionInfo.EquationType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquationExecutionInfo.Node">
+<tt class="descname">Node</tt><a class="headerlink" href="#pyCore.daeEquationExecutionInfo.Node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeEquationExecutionInfo.VariableIndexes">
+<tt class="descname">VariableIndexes</tt><a class="headerlink" href="#pyCore.daeEquationExecutionInfo.VariableIndexes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="logging">
+<h3>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeLog_t" title="pyCore.daeLog_t"><tt class="xref py py-obj docutils literal"><span class="pre">daeLog_t</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeBaseLog</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeFileLog" title="pyCore.daeFileLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeFileLog</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeStdOutLog" title="pyCore.daeStdOutLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeStdOutLog</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeTCPIPLog" title="pyCore.daeTCPIPLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLog</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeTCPIPLogServer" title="pyCore.daeTCPIPLogServer"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLogServer</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyCore.daeLog_t">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeLog_t</tt><a class="headerlink" href="#pyCore.daeLog_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeLog_t.DecreaseIndent">
+<tt class="descname">DecreaseIndent</tt><big>(</big><em>(daeLog_t)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeLog_t.DecreaseIndent" title="Permalink to this definition">¶</a></dt>
+<dd><p>DecreaseIndent( (daeLog_t)arg1, (int)arg2) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.ETA">
+<tt class="descname">ETA</tt><a class="headerlink" href="#pyCore.daeLog_t.ETA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.Enabled">
+<tt class="descname">Enabled</tt><a class="headerlink" href="#pyCore.daeLog_t.Enabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeLog_t.IncreaseIndent">
+<tt class="descname">IncreaseIndent</tt><big>(</big><em>(daeLog_t)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeLog_t.IncreaseIndent" title="Permalink to this definition">¶</a></dt>
+<dd><p>IncreaseIndent( (daeLog_t)arg1, (int)arg2) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.Indent">
+<tt class="descname">Indent</tt><a class="headerlink" href="#pyCore.daeLog_t.Indent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.IndentString">
+<tt class="descname">IndentString</tt><a class="headerlink" href="#pyCore.daeLog_t.IndentString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeLog_t.JoinMessages">
+<tt class="descname">JoinMessages</tt><big>(</big><em>(daeLog_t)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeLog_t.JoinMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>JoinMessages( (daeLog_t)arg1, (str)arg2) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeLog_t.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeLog_t)arg1</em>, <em>(str)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeLog_t.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeLog_t)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.PercentageDone">
+<tt class="descname">PercentageDone</tt><a class="headerlink" href="#pyCore.daeLog_t.PercentageDone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.PrintProgress">
+<tt class="descname">PrintProgress</tt><a class="headerlink" href="#pyCore.daeLog_t.PrintProgress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeLog_t.Progress">
+<tt class="descname">Progress</tt><a class="headerlink" href="#pyCore.daeLog_t.Progress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeBaseLog">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeBaseLog</tt><a class="headerlink" href="#pyCore.daeBaseLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeLog_t" title="pyCore.daeLog_t"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeLog_t</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeBaseLog.DecreaseIndent">
+<tt class="descname">DecreaseIndent</tt><big>(</big><em>(daeBaseLog)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeBaseLog.DecreaseIndent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeBaseLog.IncreaseIndent">
+<tt class="descname">IncreaseIndent</tt><big>(</big><em>(daeBaseLog)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeBaseLog.IncreaseIndent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeBaseLog.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeBaseLog)arg1</em>, <em>(str)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeBaseLog.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeBaseLog)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeBaseLog.SetProgress">
+<tt class="descname">SetProgress</tt><big>(</big><em>(daeBaseLog)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeBaseLog.SetProgress" title="Permalink to this definition">¶</a></dt>
+<dd><p>SetProgress( (daeBaseLog)arg1, (float)arg2) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeFileLog">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeFileLog</tt><a class="headerlink" href="#pyCore.daeFileLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeFileLog.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeFileLog)arg1</em>, <em>(str)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeFileLog.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeFileLog)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeStdOutLog">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeStdOutLog</tt><a class="headerlink" href="#pyCore.daeStdOutLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeStdOutLog.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeStdOutLog)arg1</em>, <em>(str)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeStdOutLog.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeStdOutLog)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeTCPIPLog">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeTCPIPLog</tt><a class="headerlink" href="#pyCore.daeTCPIPLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeTCPIPLog.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeTCPIPLog)arg1</em>, <em>(str)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLog.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeTCPIPLog)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeTCPIPLogServer">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeTCPIPLogServer</tt><a class="headerlink" href="#pyCore.daeTCPIPLogServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeTCPIPLogServer.MessageReceived">
+<tt class="descname">MessageReceived</tt><big>(</big><em>(daeTCPIPLogServer)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLogServer.MessageReceived" title="Permalink to this definition">¶</a></dt>
+<dd><p>MessageReceived( (daeTCPIPLogServer)arg1, (str)arg2) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.d" title="pyCore.d"><tt class="xref py py-obj docutils literal"><span class="pre">d</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.dt" title="pyCore.dt"><tt class="xref py py-obj docutils literal"><span class="pre">dt</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Time" title="pyCore.Time"><tt class="xref py py-obj docutils literal"><span class="pre">Time</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Constant" title="pyCore.Constant"><tt class="xref py py-obj docutils literal"><span class="pre">Constant</span></tt></a></td>
+<td>Constant( (object)value) -&gt; adouble</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Array" title="pyCore.Array"><tt class="xref py py-obj docutils literal"><span class="pre">Array</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Sum" title="pyCore.Sum"><tt class="xref py py-obj docutils literal"><span class="pre">Sum</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Product" title="pyCore.Product"><tt class="xref py py-obj docutils literal"><span class="pre">Product</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.Integral" title="pyCore.Integral"><tt class="xref py py-obj docutils literal"><span class="pre">Integral</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.Average" title="pyCore.Average"><tt class="xref py py-obj docutils literal"><span class="pre">Average</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyCore.d">
+<tt class="descclassname">pyCore.</tt><tt class="descname">d</tt><big>(</big><em>(adouble)arg1</em>, <em>(daeDomain)ad</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.dt">
+<tt class="descclassname">pyCore.</tt><tt class="descname">dt</tt><big>(</big><em>(adouble)ad</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.dt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Time">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Time</tt><big>(</big><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Constant">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Constant</tt><big>(</big><em>(float)value</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant( (object)value) -&gt; adouble</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Array">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Array</tt><big>(</big><em>(list)values</em><big>)</big> &rarr; adouble_array<a class="headerlink" href="#pyCore.Array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Sum">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Sum</tt><big>(</big><em>(adouble_array)adarray</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Sum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Product">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Product</tt><big>(</big><em>(adouble_array)adarray</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Product" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Integral">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Integral</tt><big>(</big><em>(adouble_array)adarray</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Integral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.Average">
+<tt class="descclassname">pyCore.</tt><tt class="descname">Average</tt><big>(</big><em>(adouble_array)adarray</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Average" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="auxiliary-classes">
+<h3>Auxiliary classes<a class="headerlink" href="#auxiliary-classes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeVariableWrapper" title="pyCore.daeVariableWrapper"><tt class="xref py py-obj docutils literal"><span class="pre">daeVariableWrapper</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeConfig" title="pyCore.daeConfig"><tt class="xref py py-obj docutils literal"><span class="pre">daeConfig</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyCore.daeVariableWrapper">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeVariableWrapper</tt><a class="headerlink" href="#pyCore.daeVariableWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeVariableWrapper.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(daeVariable)variable</em><span class="optional">[</span>, <em>(str)name=''</em><span class="optional">]</span><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariableWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (adouble)ad [, (str)name=&#8217;&#8216;]) -&gt; None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.DomainIndexes">
+<tt class="descname">DomainIndexes</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.DomainIndexes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.OverallIndex">
+<tt class="descname">OverallIndex</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.OverallIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.Value">
+<tt class="descname">Value</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.Value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.Variable">
+<tt class="descname">Variable</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.Variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeVariableWrapper.VariableType">
+<tt class="descname">VariableType</tt><a class="headerlink" href="#pyCore.daeVariableWrapper.VariableType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyCore.daeConfig">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeConfig</tt><a class="headerlink" href="#pyCore.daeConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyCore.daeConfig.__contains__">
+<tt class="descname">__contains__</tt><big>(</big><em>(daeConfig)self</em>, <em>(object)propertyPath</em><big>)</big> &rarr; object<a class="headerlink" href="#pyCore.daeConfig.__contains__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.__getitem__">
+<tt class="descname">__getitem__</tt><big>(</big><em>(daeConfig)self</em>, <em>(object)propertyPath</em><big>)</big> &rarr; object<a class="headerlink" href="#pyCore.daeConfig.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.__setitem__">
+<tt class="descname">__setitem__</tt><big>(</big><em>(daeConfig)self</em>, <em>(object)propertyPath</em>, <em>(object)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.GetBoolean">
+<tt class="descname">GetBoolean</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em><span class="optional">[</span>, <em>(bool)defaultValue</em><span class="optional">]</span><big>)</big> &rarr; bool<a class="headerlink" href="#pyCore.daeConfig.GetBoolean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.GetFloat">
+<tt class="descname">GetFloat</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em><span class="optional">[</span>, <em>(float)defaultValue</em><span class="optional">]</span><big>)</big> &rarr; float<a class="headerlink" href="#pyCore.daeConfig.GetFloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.GetInteger">
+<tt class="descname">GetInteger</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em><span class="optional">[</span>, <em>(int)defaultValue</em><span class="optional">]</span><big>)</big> &rarr; int<a class="headerlink" href="#pyCore.daeConfig.GetInteger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.GetString">
+<tt class="descname">GetString</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em><span class="optional">[</span>, <em>(str)defaultValue</em><span class="optional">]</span><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeConfig.GetString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.Reload">
+<tt class="descname">Reload</tt><big>(</big><em>(daeConfig)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.Reload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.SetBoolean">
+<tt class="descname">SetBoolean</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em>, <em>(bool)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.SetBoolean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.SetFloat">
+<tt class="descname">SetFloat</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em>, <em>(float)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.SetFloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.SetInteger">
+<tt class="descname">SetInteger</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em>, <em>(int)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.SetInteger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.SetString">
+<tt class="descname">SetString</tt><big>(</big><em>(daeConfig)self</em>, <em>(str)propertyPath</em>, <em>(str)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeConfig.SetString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeConfig.has_key">
+<tt class="descname">has_key</tt><big>(</big><em>(daeConfig)self</em>, <em>(object)propertyPath</em><big>)</big> &rarr; object<a class="headerlink" href="#pyCore.daeConfig.has_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="auxiliary-functions">
+<h3>Auxiliary functions<a class="headerlink" href="#auxiliary-functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeGetConfig" title="pyCore.daeGetConfig"><tt class="xref py py-obj docutils literal"><span class="pre">daeGetConfig</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeVersion" title="pyCore.daeVersion"><tt class="xref py py-obj docutils literal"><span class="pre">daeVersion</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeVersionMajor" title="pyCore.daeVersionMajor"><tt class="xref py py-obj docutils literal"><span class="pre">daeVersionMajor</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeVersionMinor" title="pyCore.daeVersionMinor"><tt class="xref py py-obj docutils literal"><span class="pre">daeVersionMinor</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeVersionBuild" title="pyCore.daeVersionBuild"><tt class="xref py py-obj docutils literal"><span class="pre">daeVersionBuild</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyCore.daeGetConfig">
+<tt class="descclassname">pyCore.</tt><tt class="descname">daeGetConfig</tt><big>(</big><big>)</big> &rarr; object<a class="headerlink" href="#pyCore.daeGetConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.daeVersion">
+<tt class="descclassname">pyCore.</tt><tt class="descname">daeVersion</tt><big>(</big><span class="optional">[</span><em>(bool)includeBuild=False</em><span class="optional">]</span><big>)</big> &rarr; str<a class="headerlink" href="#pyCore.daeVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.daeVersionMajor">
+<tt class="descclassname">pyCore.</tt><tt class="descname">daeVersionMajor</tt><big>(</big><big>)</big> &rarr; int<a class="headerlink" href="#pyCore.daeVersionMajor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.daeVersionMinor">
+<tt class="descclassname">pyCore.</tt><tt class="descname">daeVersionMinor</tt><big>(</big><big>)</big> &rarr; int<a class="headerlink" href="#pyCore.daeVersionMinor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyCore.daeVersionBuild">
+<tt class="descclassname">pyCore.</tt><tt class="descname">daeVersionBuild</tt><big>(</big><big>)</big> &rarr; int<a class="headerlink" href="#pyCore.daeVersionBuild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="global-constants">
+<h3>Global constants<a class="headerlink" href="#global-constants" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.cnAlgebraic" title="pyCore.cnAlgebraic"><tt class="xref py py-obj docutils literal"><span class="pre">cnAlgebraic</span></tt></a></td>
+<td>int(x[, base]) -&gt; integer</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.cnDifferential" title="pyCore.cnDifferential"><tt class="xref py py-obj docutils literal"><span class="pre">cnDifferential</span></tt></a></td>
+<td>int(x[, base]) -&gt; integer</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.cnAssigned" title="pyCore.cnAssigned"><tt class="xref py py-obj docutils literal"><span class="pre">cnAssigned</span></tt></a></td>
+<td>int(x[, base]) -&gt; integer</td>
+</tr>
+</tbody>
+</table>
+<dl class="data">
+<dt id="pyCore.cnAlgebraic">
+<tt class="descclassname">pyCore.</tt><tt class="descname">cnAlgebraic</tt><em class="property"> = 0</em><a class="headerlink" href="#pyCore.cnAlgebraic" title="Permalink to this definition">¶</a></dt>
+<dd><p>int(x[, base]) -&gt; integer</p>
+<p>Convert a string or number to an integer, if possible.  A floating point
+argument will be truncated towards zero (this does not include a string
+representation of a floating point number!)  When converting a string, use
+the optional base.  It is an error to supply a base when converting a
+non-string.  If base is zero, the proper base is guessed based on the
+string content.  If the argument is outside the integer range a
+long object will be returned instead.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="pyCore.cnDifferential">
+<tt class="descclassname">pyCore.</tt><tt class="descname">cnDifferential</tt><em class="property"> = 1</em><a class="headerlink" href="#pyCore.cnDifferential" title="Permalink to this definition">¶</a></dt>
+<dd><p>int(x[, base]) -&gt; integer</p>
+<p>Convert a string or number to an integer, if possible.  A floating point
+argument will be truncated towards zero (this does not include a string
+representation of a floating point number!)  When converting a string, use
+the optional base.  It is an error to supply a base when converting a
+non-string.  If base is zero, the proper base is guessed based on the
+string content.  If the argument is outside the integer range a
+long object will be returned instead.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="pyCore.cnAssigned">
+<tt class="descclassname">pyCore.</tt><tt class="descname">cnAssigned</tt><em class="property"> = 2</em><a class="headerlink" href="#pyCore.cnAssigned" title="Permalink to this definition">¶</a></dt>
+<dd><p>int(x[, base]) -&gt; integer</p>
+<p>Convert a string or number to an integer, if possible.  A floating point
+argument will be truncated towards zero (this does not include a string
+representation of a floating point number!)  When converting a string, use
+the optional base.  It is an error to supply a base when converting a
+non-string.  If base is zero, the proper base is guessed based on the
+string content.  If the argument is outside the integer range a
+long object will be returned instead.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Module pyCore</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#autodifferentiation-and-equation-evaluation-tree-support">Autodifferentiation and equation evaluation tree support</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#mathematical-functions">Mathematical functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modelling-concepts">Modelling concepts</a><ul>
+<li><a class="reference internal" href="#enumerations">Enumerations</a></li>
+<li><a class="reference internal" href="#id1">Classes</a></li>
+<li><a class="reference internal" href="#logging">Logging</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#auxiliary-classes">Auxiliary classes</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary functions</a></li>
+<li><a class="reference internal" href="#global-constants">Global constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Contents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="activity.html"
+                        title="next chapter">Module pyActivity</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/core.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="activity.html" title="Module pyActivity"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Dragan Nikolic.
+      Last updated on Apr 21, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

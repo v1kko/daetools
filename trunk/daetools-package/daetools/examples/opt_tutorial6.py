@@ -44,7 +44,7 @@ class modTutorial(daeModel):
 
     def DeclareEquations(self):
         eq = self.CreateEquation("y")
-        eq.Residual = self.y() - self.A() * sin(2 * numpy.pi * self.k() * self.x() + self.theta())
+        eq.Residual = self.y() - self.A() * Sin(2 * numpy.pi * self.k() * self.x() + self.theta())
 
 class simTutorial(daeSimulation):
     def __init__(self):

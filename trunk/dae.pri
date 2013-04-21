@@ -281,7 +281,7 @@ win32::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
-                         -ldl -lz
+                         -ldl -lz -lbz2
 macx-g++::BONMIN_LIBS  = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \

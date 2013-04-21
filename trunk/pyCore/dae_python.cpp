@@ -201,17 +201,12 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
 	Global functions
 ***************************************************************/
-	def("daeGetConfig",		&daepython::daeGetConfig); 
-	def("daeVersion",		&dae::daeVersion);
-	def("daeVersionMajor",  &dae::daeVersionMajor);
-	def("daeVersionMinor",  &dae::daeVersionMinor);
-	def("daeVersionBuild",  &dae::daeVersionBuild);
+	def("daeGetConfig",		&daepython::daeGetConfig, DOCSTR_global_daeGetConfig); 
+    def("daeVersion",		&dae::daeVersion, ( arg("includeBuild") = false ), DOCSTR_global_daeVersion);
+	def("daeVersionMajor",  &dae::daeVersionMajor, DOCSTR_global_daeVersionMajor);
+	def("daeVersionMinor",  &dae::daeVersionMinor, DOCSTR_global_daeVersionMinor);
+	def("daeVersionBuild",  &dae::daeVersionBuild, DOCSTR_global_daeVersionBuild);
 
-//	def("daeBoostVersion",				&dae::daeBoostVersion);
-//	def("daeBoostVersionMajor",			&dae::daeBoostVersionMajor);
-//	def("daeBoostVersionMinor",			&dae::daeBoostVersionMinor);
-//	def("daeBoostVersionBuild",			&dae::daeBoostVersionBuild);
-	
 /**************************************************************
     Global constants
 ***************************************************************/
@@ -222,60 +217,47 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
 	Classes
 ***************************************************************/
-	class_<daeVariableWrapper>("daeVariableWrapper", no_init)
-		.def(init<daeVariable&, optional<string> >())
-		.def(init<adouble&, optional<string> >())
+	class_<daeVariableWrapper>("daeVariableWrapper", DOCSTR_daeVariableWrapper_, no_init)
+        .def(init<daeVariable&, optional<string> >(( arg("self"), arg("variable"), arg("name") = "" ),  DOCSTR_daeVariableWrapper_))
+        .def(init<adouble&, optional<string> >    (( arg("self"), arg("ad"), arg("name") = "" ),        DOCSTR_daeVariableWrapper_))
 
-		.def_readwrite("Name",         &daeVariableWrapper::m_strName)  
-		.add_property("Value",         &daeVariableWrapper::GetValue, &daeVariableWrapper::SetValue)
-        .add_property("OverallIndex",  &daeVariableWrapper::GetOverallIndex)
-        .add_property("VariableType",  &daeVariableWrapper::GetVariableType)
-        .add_property("DomainIndexes", &daepython::daeVariableWrapper_GetDomainIndexes)
-        .add_property("Variable",      make_function(&daepython::daeVariableWrapper_GetVariable, return_internal_reference<>()))
+		.def_readwrite("Name",         &daeVariableWrapper::m_strName,                                  DOCSTR_daeVariableWrapper_)  
+		.add_property("Value",         &daeVariableWrapper::GetValue, &daeVariableWrapper::SetValue,    DOCSTR_daeVariableWrapper_)
+        .add_property("OverallIndex",  &daeVariableWrapper::GetOverallIndex,                            DOCSTR_daeVariableWrapper_)
+        .add_property("VariableType",  &daeVariableWrapper::GetVariableType,                            DOCSTR_daeVariableWrapper_)
+        .add_property("DomainIndexes", &daepython::daeVariableWrapper_GetDomainIndexes,                 DOCSTR_daeVariableWrapper_)
+        .add_property("Variable",      make_function(&daepython::daeVariableWrapper_GetVariable, return_internal_reference<>()), DOCSTR_daeVariableWrapper_)
 	;
 
-	class_<daeConfig>("daeConfig")
-		.def("GetBoolean",	   &daepython::GetBoolean1)
-		.def("GetFloat",	   &daepython::GetFloat1)
-		.def("GetInteger",	   &daepython::GetInteger1)
-		.def("GetString",	   &daepython::GetString1)
+    class_<daeConfig>("daeConfig", DOCSTR_daeConfig_)
+		.def("GetBoolean",	   &daepython::GetBoolean1, ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
+		.def("GetFloat",	   &daepython::GetFloat1,   ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
+		.def("GetInteger",	   &daepython::GetInteger1, ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
+		.def("GetString",	   &daepython::GetString1,  ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
 	  
-		.def("GetBoolean",	   &daepython::GetBoolean)
-		.def("GetFloat",	   &daepython::GetFloat)
-		.def("GetInteger",	   &daepython::GetInteger)
-		.def("GetString",	   &daepython::GetString)
+		.def("GetBoolean",	   &daepython::GetBoolean, ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+		.def("GetFloat",	   &daepython::GetFloat,   ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+		.def("GetInteger",	   &daepython::GetInteger, ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+		.def("GetString",	   &daepython::GetString,  ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
 
-		.def("SetBoolean",	   &daepython::SetBoolean)
-		.def("SetFloat",	   &daepython::SetFloat)
-		.def("SetInteger",	   &daepython::SetInteger)
-		.def("SetString",	   &daepython::SetString) 
+		.def("SetBoolean",	   &daepython::SetBoolean, ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_)
+		.def("SetFloat",	   &daepython::SetFloat,   ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_)
+		.def("SetInteger",	   &daepython::SetInteger, ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_)
+		.def("SetString",	   &daepython::SetString,  ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_) 
 
-	    .def("Reload",		   &daeConfig::Reload)
+	    .def("Reload",		   &daeConfig::Reload, ( arg("self") ), DOCSTR_daeConfig_)
         
-        .def("has_key",		   &daepython::daeConfig_has_key)
-	    .def("__contains__",   &daepython::daeConfig__contains__)
-        .def("__getitem__",	   &daepython::daeConfig__getitem__)
-        .def("__setitem__",	   &daepython::daeConfig__setitem__)
+        .def("has_key",		   &daepython::daeConfig_has_key,     ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+	    .def("__contains__",   &daepython::daeConfig__contains__, ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+        .def("__getitem__",	   &daepython::daeConfig__getitem__,  ( arg("self"), arg("propertyPath") ), DOCSTR_daeConfig_)
+        .def("__setitem__",	   &daepython::daeConfig__setitem__,  ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_)
 	        
         .def("__str__",		   &daepython::daeConfig__str__)
 	;
-/*
-  .def("GetBoolean",	   &daepython::GetBoolean1)
-  .def("GetFloat",	   &daepython::GetFloat1)
-  .def("GetInteger",	   &daepython::GetInteger1)
-  .def("GetString",	   &daepython::GetString1)
-
-  .def("GetBoolean",	   &daepython::GetBoolean)
-  .def("GetFloat",	   &daepython::GetFloat)
-  .def("GetInteger",	   &daepython::GetInteger)
-  .def("GetString",	   &daepython::GetString)
-
-  .def("PutBoolean",	   &daepython::PutBoolean)
-  .def("PutFloat",	   &daepython::PutFloat)
-  .def("PutInteger",	   &daepython::PutInteger)
-  .def("PutString",	   &daepython::PutString)
-*/
         
+    /*******************************
+     * Nodes
+     *******************************/
     class_<daeNodeSaveAsContext>("daeNodeSaveAsContext")
         .def(init<daeModel*>())
         .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel)
@@ -430,22 +412,22 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("RNode",          make_function(&condExpressionNode::getRightRawPtr, return_internal_reference<>()))
     ;
     
-    class_<daeCondition>("daeCondition")
-		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance)
-        .add_property("SetupNode",      make_function(&daeCondition::getSetupNodeRawPtr, return_internal_reference<>()))
-        .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()))
-        .add_property("Expressions",    &daepython::daeCondition_GetExpressions)
+    class_<daeCondition>("daeCondition", DOCSTR_daeCondition)
+		.add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance,                DOCSTR_daeCondition_EventTolerance)
+        .add_property("SetupNode",      make_function(&daeCondition::getSetupNodeRawPtr, return_internal_reference<>()),   DOCSTR_daeCondition_SetupNode)
+        .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()), DOCSTR_daeCondition_RuntimeNode)
+        .add_property("Expressions",    &daepython::daeCondition_GetExpressions,                                           DOCSTR_daeCondition_Expressions)
             
 		//.def(!self)
 		.def(self | self)
 		.def(self & self)
 	;
 
-	class_<adouble>("adouble")
-		.add_property("Value",		&adouble::getValue,      &adouble::setValue)
-		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative) 
-        .add_property("Node",       make_function(&adouble::getNodeRawPtr, return_internal_reference<>()))
-        .add_property("GatherInfo",	&adouble::getGatherInfo, &adouble::setGatherInfo)
+	class_<adouble>("adouble", DOCSTR_adouble)
+		.add_property("Value",		&adouble::getValue,      &adouble::setValue, DOCSTR_adouble_Value)
+		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative, DOCSTR_adouble_Derivative) 
+        .add_property("Node",       make_function(&adouble::getNodeRawPtr, return_internal_reference<>()), DOCSTR_adouble_Node)
+        .add_property("GatherInfo",	&adouble::getGatherInfo, &adouble::setGatherInfo, DOCSTR_adouble_GatherInfo)
 
         .def("__repr__",     &daepython::adouble_repr)
 
@@ -488,57 +470,58 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(real_t() >= self)
 		.def(real_t() != self)
 		;
-	def("exp",   &daepython::ad_exp);
-	def("log",   &daepython::ad_log);
-	def("sqrt",  &daepython::ad_sqrt);
-	def("sin",   &daepython::ad_sin);
-	def("cos",   &daepython::ad_cos);
-	def("tan",   &daepython::ad_tan);
-	def("asin",  &daepython::ad_asin);
-	def("acos",  &daepython::ad_acos);
-	def("atan",  &daepython::ad_atan);
+	def("Exp",   &daepython::ad_exp);
+	def("Log",   &daepython::ad_log);
+	def("Sqrt",  &daepython::ad_sqrt);
+	def("Sin",   &daepython::ad_sin);
+	def("Cos",   &daepython::ad_cos);
+	def("Tan",   &daepython::ad_tan);
+	def("ASin",  &daepython::ad_asin);
+	def("ACos",  &daepython::ad_acos);
+	def("ATan",  &daepython::ad_atan);
 
-	def("sinh",  &daepython::ad_sinh);
-	def("cosh",  &daepython::ad_cosh);
-	def("tanh",  &daepython::ad_tanh);
-	def("asinh", &daepython::ad_asinh);
-	def("acosh", &daepython::ad_acosh);
-	def("atanh", &daepython::ad_atanh);
-	def("atan2", &daepython::ad_atan2);
+	def("Sinh",  &daepython::ad_sinh);
+	def("Cosh",  &daepython::ad_cosh);
+	def("Tanh",  &daepython::ad_tanh);
+	def("ASinh", &daepython::ad_asinh);
+	def("ACosh", &daepython::ad_acosh);
+	def("ATanh", &daepython::ad_atanh);
+	def("ATan2", &daepython::ad_atan2);
 
-	def("log10", &daepython::ad_log10);
-	def("ceil",  &daepython::ad_ceil);
-	def("floor", &daepython::ad_floor);
-	def("pow",   &daepython::ad_pow1);
-	def("pow",   &daepython::ad_pow2);
-	def("pow",   &daepython::ad_pow3);
+	def("Log10", &daepython::ad_log10);
+	def("Ceil",  &daepython::ad_ceil);
+	def("Floor", &daepython::ad_floor);
+	def("Pow",   &daepython::ad_pow1);
+	def("Pow",   &daepython::ad_pow2);
+	def("Pow",   &daepython::ad_pow3);
     
 // Python built-in functions
-    def("abs",   &daepython::ad_abs);
-    def("min",   &daepython::ad_min1);
-	def("min",   &daepython::ad_min2);
-	def("min",   &daepython::ad_min3);
-	def("max",   &daepython::ad_max1);
-	def("max",   &daepython::ad_max2);
-	def("max",   &daepython::ad_max3);
+    def("Abs",   &daepython::ad_abs);
+    def("Min",   &daepython::ad_min1);
+	def("Min",   &daepython::ad_min2);
+	def("Min",   &daepython::ad_min3);
+	def("Max",   &daepython::ad_max1);
+	def("Max",   &daepython::ad_max2);
+	def("Max",   &daepython::ad_max3);
     
-    def("dt",	 &daepython::ad_dt);
-    def("d",	 &daepython::ad_d);
+    def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
+    def("d",	 &daepython::ad_d,  (arg("ad")), DOCSTR_d);
 
-	def("Time",			&Time);
-	def("Constant",		&daepython::ad_Constant_c);
-	def("Constant",		&daepython::ad_Constant_q);
-	def("Array",		&daepython::adarr_Array);  
+	def("Time",			&Time, DOCSTR_Time);
+	def("Constant",		&daepython::ad_Constant_c, (arg("value")),  DOCSTR_Constant_c);
+	def("Constant",		&daepython::ad_Constant_q, (arg("value")),  DOCSTR_Constant_q);
+	def("Array",		&daepython::adarr_Array,   (arg("values")), DOCSTR_Array);  
 	
-	class_<adouble_array>("adouble_array")
-        .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo)
-        .add_property("Node",        make_function(&adouble_array::getNodeRawPtr, return_internal_reference<>()))
+	class_<adouble_array>("adouble_array", DOCSTR_adouble_array)
+        .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo,                DOCSTR_adouble_array_GatherInfo)
+        .add_property("Node",        make_function(&adouble_array::getNodeRawPtr, return_internal_reference<>()), DOCSTR_adouble_array_Node)
         
-        .def("Resize",      &adouble_array::Resize)
-        .def("__len__",     &adouble_array::GetSize)
-		.def("__getitem__", &adouble_array::GetItem)
-        .def("__setitem__", &adouble_array::SetItem)
-        .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end))
+        .def("Resize",      &adouble_array::Resize, ( arg("self"), arg("newSize") ),                DOCSTR_adouble_array_Resize)
+        .def("__len__",     &adouble_array::GetSize, ( arg("self") ),                               DOCSTR_adouble_array_len)
+		.def("__getitem__", &adouble_array::GetItem, ( arg("self"), arg("index") ),                 DOCSTR_adouble_array_getitem)
+        .def("__setitem__", &adouble_array::SetItem, ( arg("self"), arg("index"), arg("value") ),   DOCSTR_adouble_array_setitem)
+        .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end), 
+                            DOCSTR_adouble_array_items)
 
         .def(- self)
 		.def(self + self)
@@ -564,147 +547,188 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(adouble() * self)
 		.def(adouble() / self)
 		;
-	def("exp",		&daepython::adarr_exp);
-	def("log",		&daepython::adarr_log);
-	def("sqrt",		&daepython::adarr_sqrt);
-	def("sin",		&daepython::adarr_sin);
-	def("cos",		&daepython::adarr_cos);
-	def("tan",		&daepython::adarr_tan);
-	def("asin",		&daepython::adarr_asin);
-	def("acos",		&daepython::adarr_acos);
-	def("atan",		&daepython::adarr_atan);
-	def("log10",	&daepython::adarr_log10);
-	def("abs",		&daepython::adarr_abs);
-	def("ceil",		&daepython::adarr_ceil);
-	def("floor",	&daepython::adarr_floor);
+	def("Exp",		&daepython::adarr_exp);
+	def("Log",		&daepython::adarr_log);
+	def("Sqrt",		&daepython::adarr_sqrt);
+	def("Sin",		&daepython::adarr_sin);
+	def("Cos",		&daepython::adarr_cos);
+	def("Tan",		&daepython::adarr_tan);
+	def("ASin",		&daepython::adarr_asin);
+	def("ACos",		&daepython::adarr_acos);
+	def("ATan",		&daepython::adarr_atan);
+	def("Log10",	&daepython::adarr_log10);
+	def("Abs",		&daepython::adarr_abs);
+	def("Ceil",		&daepython::adarr_ceil);
+	def("Floor",	&daepython::adarr_floor);
       
-    def("Sum",		 &daepython::adarr_sum);
-    def("Product",   &daepython::adarr_product); 
-    def("Integral",  &daepython::adarr_integral);
-    def("Min",		 &daepython::adarr_min);
-    def("Max",		 &daepython::adarr_max);
-    def("Average",	 &daepython::adarr_average);
+    def("Sum",		 &daepython::adarr_sum,      (arg("adarray")), DOCSTR_Sum);
+    def("Product",   &daepython::adarr_product,  (arg("adarray")), DOCSTR_Product); 
+    def("Integral",  &daepython::adarr_integral, (arg("adarray")), DOCSTR_Integral);
+    def("Min",		 &daepython::adarr_min,      (arg("adarray")), DOCSTR_Min_adarr);
+    def("Max",		 &daepython::adarr_max,      (arg("adarray")), DOCSTR_Max_adarr);
+    def("Average",	 &daepython::adarr_average,  (arg("adarray")), DOCSTR_Average);
 
-	class_<daeVariableType>("daeVariableType")
-		.def(init<string, unit, real_t, real_t, real_t, real_t>())
+	class_<daeVariableType>("daeVariableType", DOCSTR_daeVariableType)
+            .def(init<string, unit, real_t, real_t, real_t, real_t>( ( arg("self"), 
+                                                                       arg("name"), 
+                                                                       arg("units"), 
+                                                                       arg("lowerBound"), 
+                                                                       arg("upperBound"), 
+                                                                       arg("initialGuess"), 
+                                                                       arg("absTolerance") 
+                                                                      ), DOCSTR_daeVariableType_init))
 
-		.add_property("Name",				&daeVariableType::GetName,				&daeVariableType::SetName)
-		.add_property("Units",				&daeVariableType::GetUnits,				&daeVariableType::SetUnits)
-		.add_property("LowerBound",			&daeVariableType::GetLowerBound,		&daeVariableType::SetLowerBound)
-		.add_property("UpperBound",			&daeVariableType::GetUpperBound,		&daeVariableType::SetUpperBound)
-		.add_property("InitialGuess",		&daeVariableType::GetInitialGuess,		&daeVariableType::SetInitialGuess)
-		.add_property("AbsoluteTolerance",	&daeVariableType::GetAbsoluteTolerance, &daeVariableType::SetAbsoluteTolerance)
+		.add_property("Name",				&daeVariableType::GetName,				&daeVariableType::SetName,              DOCSTR_daeVariableType_Name)
+		.add_property("Units",				&daeVariableType::GetUnits,				&daeVariableType::SetUnits,             DOCSTR_daeVariableType_Units)
+		.add_property("LowerBound",			&daeVariableType::GetLowerBound,		&daeVariableType::SetLowerBound,        DOCSTR_daeVariableType_LowerBound)
+		.add_property("UpperBound",			&daeVariableType::GetUpperBound,		&daeVariableType::SetUpperBound,        DOCSTR_daeVariableType_UpperBound)
+		.add_property("InitialGuess",		&daeVariableType::GetInitialGuess,		&daeVariableType::SetInitialGuess,      DOCSTR_daeVariableType_InitialGuess)
+		.add_property("AbsoluteTolerance",	&daeVariableType::GetAbsoluteTolerance, &daeVariableType::SetAbsoluteTolerance, DOCSTR_daeVariableType_AbsoluteTolerance)
 
 		.def("__str__",						&daepython::daeVariableType_str)
 		;
 
-    class_<daeObject, boost::noncopyable>("daeObject", no_init)
+    class_<daeObject, boost::noncopyable>("daeObject", DOCSTR_daeObject, no_init)
         // daeSerializable part
-        .add_property("ID",             &daeObject::GetID)
-        .add_property("Version",        &daeObject::GetVersion)
-        .add_property("Library",        &daeObject::GetLibrary)
+        .add_property("ID",             &daeObject::GetID,      DOCSTR_daeObject_ID)
+        .add_property("Version",        &daeObject::GetVersion, DOCSTR_daeObject_Version)
+        .add_property("Library",        &daeObject::GetLibrary, DOCSTR_daeObject_Library)
         // daeObject part
-        .add_property("Name",           &daeObject::GetName, &daeObject::SetName)
-        .add_property("Description",    &daeObject::GetDescription, &daeObject::SetDescription)
-        .add_property("CanonicalName",  &daeObject::GetCanonicalName)
-        .add_property("Model",          make_function(&daepython::daeObject_GetModel, return_internal_reference<>()))
+        .add_property("Name",           &daeObject::GetName, &daeObject::SetName,               DOCSTR_daeObject_Name)
+        .add_property("Description",    &daeObject::GetDescription, &daeObject::SetDescription, DOCSTR_daeObject_Description)
+        .add_property("CanonicalName",  &daeObject::GetCanonicalName,                           DOCSTR_daeObject_CanonicalName)
+        .add_property("Model",          make_function(&daepython::daeObject_GetModel, return_internal_reference<>()), 
+                                        DOCSTR_daeObject_Model)
 
-        .def("GetNameRelativeToParentModel",            &daeObject::GetNameRelativeToParentModel)
-        .def("GetStrippedName",                         &daeObject::GetStrippedName)
-        .def("GetStrippedNameRelativeToParentModel",    &daeObject::GetStrippedNameRelativeToParentModel)
+        .def("GetNameRelativeToParentModel",            &daeObject::GetNameRelativeToParentModel,         (arg("self")), DOCSTR_daeObject_GetNameRelativeToParentModel)
+        .def("GetStrippedName",                         &daeObject::GetStrippedName,                      (arg("self")), DOCSTR_daeObject_GetStrippedName)
+        .def("GetStrippedNameRelativeToParentModel",    &daeObject::GetStrippedNameRelativeToParentModel, (arg("self")), DOCSTR_daeObject_GetStrippedNameRelativeToParentModel)
         ;
-    def("daeIsValidObjectName",          &daeIsValidObjectName);
-	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1); 
-	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2);
-	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName);
+    def("daeIsValidObjectName",          &daeIsValidObjectName,            (arg("name")),                 DOCSTR_global_daeIsValidObjectName);
+	def("daeGetRelativeName",            &daepython::daeGetRelativeName_1, (arg("parent"), arg("child")), DOCSTR_global_daeGetRelativeName1); 
+	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2, (arg("parent"), arg("child")), DOCSTR_global_daeGetRelativeName2);
+	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName,      (arg("parent"), arg("child")), DOCSTR_global_daeGetStrippedRelativeName);
 
-	class_<daeDomainIndex>("daeDomainIndex")
-		.def(init<size_t>())
-		.def(init<daeDistributedEquationDomainInfo*>())
-		.def(init<daeDistributedEquationDomainInfo*, int>())
-		.def(init<daeDomainIndex>())
+	class_<daeDomainIndex>("daeDomainIndex", DOCSTR_daeDomainIndex)
+		.def(init<size_t>(( arg("self"), arg("index") ), DOCSTR_daeDomainIndex_init1))
+		.def(init<daeDistributedEquationDomainInfo*>(( arg("self"), arg("dedi") ), DOCSTR_daeDomainIndex_init2))
+		.def(init<daeDistributedEquationDomainInfo*, int>(( arg("self"), arg("dedi"), arg("increment") ), DOCSTR_daeDomainIndex_init3))
+		.def(init<daeDomainIndex>(( arg("self"), arg("domainIndex") ), DOCSTR_daeDomainIndex_init4))
 
-		.def_readonly("Type",		&daeDomainIndex::m_eType)
-		.def_readonly("Index",		&daeDomainIndex::m_nIndex)
-		.def_readonly("DEDI",		&daeDomainIndex::m_pDEDI)
-		.def_readonly("Increment",	&daeDomainIndex::m_iIncrement)
+		.def_readonly("Type",		&daeDomainIndex::m_eType,      DOCSTR_daeDomainIndex_Type)
+		.def_readonly("Index",		&daeDomainIndex::m_nIndex,     DOCSTR_daeDomainIndex_Index)
+		.def_readonly("DEDI",		&daeDomainIndex::m_pDEDI,      DOCSTR_daeDomainIndex_DEDI)
+		.def_readonly("Increment",	&daeDomainIndex::m_iIncrement, DOCSTR_daeDomainIndex_Increment)
 
         .def("__str__",				&daeDomainIndex::GetIndexAsString)
 		;
 
-	class_<daeIndexRange>("daeIndexRange")
-		.def(init<daeDomain*>())
-		.def ("__init__", make_constructor(daepython::__init__daeIndexRange))
-		.def(init<daeDomain*, size_t, size_t,size_t>())
+	class_<daeIndexRange>("daeIndexRange", DOCSTR_daeIndexRange)
+		.def(init<daeDomain*>(( arg("self"), arg("domain") ), DOCSTR_daeIndexRange_init1))
+		.def ("__init__", make_constructor(daepython::__init__daeIndexRange), DOCSTR_daeIndexRange_init2)
+		.def(init<daeDomain*, size_t, size_t,size_t>(( arg("self"), arg("domain"), arg("startIndex"), arg("endIndex"), arg("step") ), DOCSTR_daeIndexRange_init3))
 
-		.add_property("NoPoints",	&daeIndexRange::GetNoPoints)
-		.add_property("Domain",		make_function(&daepython::daeIndexRange_GetDomain, return_internal_reference<>()))
-		.def_readonly("Type",		&daeIndexRange::m_eType)
-		.def_readonly("StartIndex",	&daeIndexRange::m_iStartIndex)
-		.def_readonly("EndIndex",	&daeIndexRange::m_iEndIndex)
-		.def_readonly("Step",		&daeIndexRange::m_iStride)
+        .add_property("Domain",		make_function(&daepython::daeIndexRange_GetDomain, return_internal_reference<>()), 
+                                    DOCSTR_daeIndexRange_Domain)
+		.add_property("NoPoints",	&daeIndexRange::GetNoPoints,   DOCSTR_daeIndexRange_NoPoints)
+		.def_readonly("Type",		&daeIndexRange::m_eType,       DOCSTR_daeIndexRange_Type)
+		.def_readonly("StartIndex",	&daeIndexRange::m_iStartIndex, DOCSTR_daeIndexRange_StartIndex)
+		.def_readonly("EndIndex",	&daeIndexRange::m_iEndIndex,   DOCSTR_daeIndexRange_EndIndex)
+		.def_readonly("Step",		&daeIndexRange::m_iStride,     DOCSTR_daeIndexRange_Step)
 
         .def("__str__",				&daeIndexRange::ToString)
 		;
 
-	class_<daeArrayRange>("daeArrayRange")
-		.def(init<daeDomainIndex>())
-		.def(init<daeIndexRange>())
+	class_<daeArrayRange>("daeArrayRange", DOCSTR_daeArrayRange)
+		.def(init<daeDomainIndex>(( arg("self"), arg("domainIndex") ), DOCSTR_daeArrayRange_init1))
+		.def(init<daeIndexRange>(( arg("self"), arg("indexRange") ), DOCSTR_daeArrayRange_init2))
 
-		.add_property("NoPoints",		&daeArrayRange::GetNoPoints)
+		.add_property("NoPoints",		&daeArrayRange::GetNoPoints,   DOCSTR_daeArrayRange_NoPoints)
 
-		.def_readonly("Type",			&daeArrayRange::m_eType)
-		.def_readonly("Range",			&daeArrayRange::m_Range)
-		.def_readonly("DomainIndex",	&daeArrayRange::m_domainIndex)
+		.def_readonly("Type",			&daeArrayRange::m_eType,       DOCSTR_daeArrayRange_Type)
+		.def_readonly("Range",			&daeArrayRange::m_Range,       DOCSTR_daeArrayRange_Range)
+		.def_readonly("DomainIndex",	&daeArrayRange::m_domainIndex, DOCSTR_daeArrayRange_DomainIndex)
 		;
 
-	class_<daeDomain, bases<daeObject> , boost::noncopyable>("daeDomain")
-		.def(init<string, daeModel*, const unit&, optional<string> >())
-		.def(init<string, daePort*, const unit&, optional<string> >())
+	class_<daeDomain, bases<daeObject>, boost::noncopyable>("daeDomain", DOCSTR_daeDomain)
+        .def(init<string, daeModel*, const unit&, optional<string> >(( arg("self"), 
+                                                                       arg("name"), 
+                                                                       arg("parentModel"), 
+                                                                       arg("units"),
+                                                                       arg("description") = "" 
+                                                                     ), DOCSTR_daeDomain_init1))
+		.def(init<string, daePort*, const unit&, optional<string> >((  arg("self"), 
+                                                                       arg("name"), 
+                                                                       arg("parentPort"),  
+                                                                       arg("units"), 
+                                                                       arg("description") = "" 
+                                                                    ), DOCSTR_daeDomain_init2))
 
-		.add_property("Type",					&daeDomain::GetType)
-		.add_property("NumberOfIntervals",		&daeDomain::GetNumberOfIntervals)
-		.add_property("NumberOfPoints",			&daeDomain::GetNumberOfPoints)
-		.add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod)
-		.add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder)
-		.add_property("LowerBound",				&daeDomain::GetLowerBound)
-		.add_property("UpperBound",				&daeDomain::GetUpperBound)    
-		.add_property("Points",					&daepython::GetDomainPoints, &daepython::SetDomainPoints)
-        .add_property("npyPoints",              &daepython::GetNumPyArrayDomain)
-        .add_property("Units",					&daeDomain::GetUnits)
+		.add_property("Type",					&daeDomain::GetType,                DOCSTR_daeDomain_Type)
+		.add_property("NumberOfIntervals",		&daeDomain::GetNumberOfIntervals,   DOCSTR_daeDomain_NumberOfIntervals)
+		.add_property("NumberOfPoints",			&daeDomain::GetNumberOfPoints,      DOCSTR_daeDomain_NumberOfPoints)
+		.add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod, DOCSTR_daeDomain_DiscretizationMethod)
+		.add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder, DOCSTR_daeDomain_DiscretizationOrder)
+		.add_property("LowerBound",				&daeDomain::GetLowerBound,          DOCSTR_daeDomain_LowerBound)
+		.add_property("UpperBound",				&daeDomain::GetUpperBound,          DOCSTR_daeDomain_UpperBound) 
+        .add_property("Units",					&daeDomain::GetUnits,               DOCSTR_daeDomain_Units)
+        .add_property("npyPoints",              &daepython::GetNumPyArrayDomain,    DOCSTR_daeDomain_npyPoints)
+        .add_property("Points",					&daepython::GetDomainPoints, 
+                                                &daepython::SetDomainPoints, DOCSTR_daeDomain_Points)
 
 		.def("__str__",							&daepython::daeDomain_str)
-		.def("CreateArray",						&daeDomain::CreateArray)
-		.def("CreateDistributed",				&daeDomain::CreateDistributed)
-		.def("__getitem__",						&daeDomain::operator[])
-        .def("__call__",						&daeDomain::operator()) 
+		
+        .def("CreateArray",						&daeDomain::CreateArray, ( arg("self"), 
+                                                                           arg("noIntervals") 
+                                                                         ), DOCSTR_daeDomain_CreateArray)
+		.def("CreateDistributed",				&daeDomain::CreateDistributed, ( arg("self"),
+                                                                                 arg("discretizationMethod"), 
+                                                                                 arg("discretizationOrder"), 
+                                                                                 arg("numberOfIntervals"),
+                                                                                 arg("lowerBound"),
+                                                                                 arg("upperBound")
+                                                                                ), DOCSTR_daeDomain_CreateDistributed)
+		.def("__getitem__",						&daeDomain::operator[], ( arg("self"), arg("index") ), DOCSTR_daeDomain_getitem)
+        .def("__call__",						&daeDomain::operator(), ( arg("self"), arg("index") ), DOCSTR_daeDomain_call) 
 		//.def("array",							&daepython::DomainArray1)
 		//.def("array",							&daepython::DomainArray2)
 		; 
     
-    class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", no_init)
-        .add_property("Domain",			make_function(&daepython::daeDEDI_GetDomain, return_internal_reference<>()))
-        .add_property("DomainPoints",	&daepython::daeDEDI_GetDomainPoints)
-        .add_property("DomainBounds",	&daeDEDI::GetDomainBounds)
+    class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", DOCSTR_daeDEDI, no_init)
+        .add_property("Domain",			make_function(&daepython::daeDEDI_GetDomain, return_internal_reference<>()), DOCSTR_daeDEDI_Domain)
+        .add_property("DomainPoints",	&daepython::daeDEDI_GetDomainPoints, DOCSTR_daeDEDI_DomainPoints)
+        .add_property("DomainBounds",	&daeDEDI::GetDomainBounds, DOCSTR_daeDEDI_DomainBounds)
 		
         .def("__str__",		&daepython::daeDEDI_str)
-		.def("__call__",	&daeDEDI::operator())
+		.def("__call__",	&daeDEDI::operator(), ( arg("self") ), DOCSTR_daeDEDI_call)
 		.def(self + size_t())
 		.def(self - size_t())  
 		;
 
-	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter")
-		.def(init<string, const unit&, daePort*, optional<string, boost::python::list> >())
-		.def(init<string, const unit&, daeModel*, optional<string, boost::python::list> >())
+	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter", DOCSTR_daeParameter)
+		.def(init<string, const unit&, daePort*, optional<string, boost::python::list> >(( arg("self"), 
+                                                                                           arg("name"), 
+                                                                                           arg("units"), 
+                                                                                           arg("parentPort"),  
+                                                                                           arg("description") = "", 
+                                                                                           arg("domains") =  boost::python::list()
+                                                                                         ), DOCSTR_daeParameter_init1))
+		.def(init<string, const unit&, daeModel*, optional<string, boost::python::list> >(( arg("self"), 
+                                                                                            arg("name"), 
+                                                                                            arg("units"), 
+                                                                                            arg("parentModel"),  
+                                                                                            arg("description") = "", 
+                                                                                            arg("domains") =  boost::python::list()
+                                                                                          ), DOCSTR_daeParameter_init2))
 
-		.add_property("Units",			&daeParameter::GetUnits)
-		.add_property("Domains",		&daepython::daeParameterWrapper::GetDomains)
-        .add_property("ReportingOn",	&daeParameter::GetReportingOn,	&daeParameter::SetReportingOn)
-        .add_property("npyValues",      &daepython::GetNumPyArrayParameter)
-        .add_property("NumberOfPoints", &daeParameter::GetNumberOfPoints)
+		.add_property("Units",			&daeParameter::GetUnits, DOCSTR_daeParameter_Units)
+		.add_property("Domains",		&daepython::daeParameterWrapper::GetDomains, DOCSTR_daeParameter_Domains)
+        .add_property("ReportingOn",	&daeParameter::GetReportingOn,	&daeParameter::SetReportingOn, DOCSTR_daeParameter_ReportingOn)
+        .add_property("npyValues",      &daepython::GetNumPyArrayParameter, DOCSTR_daeParameter_npyValues)
+        .add_property("NumberOfPoints", &daeParameter::GetNumberOfPoints, DOCSTR_daeParameter_NumberOfPoints)
 
 		.def("__str__",				&daepython::daeParameter_str)  
-		.def("DistributeOnDomain",	&daeParameter::DistributeOnDomain)
+		.def("DistributeOnDomain",	&daeParameter::DistributeOnDomain, ( arg("self"), arg("domain") ), DOCSTR_daeParameter_DistributeOnDomain)
 
 		.def("GetValue", &daepython::daeParameterWrapper::GetParameterValue0)
 		.def("GetValue", &daepython::daeParameterWrapper::GetParameterValue1)
@@ -749,7 +773,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetValues", &daepython::SetParameterValues)
 		.def("SetValues", &daepython::qSetParameterValues)
 	        
-        .def("GetDomainsIndexesMap",    &daepython::daeParameterWrapper::GetDomainsIndexesMap1)
+        .def("GetDomainsIndexesMap", &daepython::daeParameterWrapper::GetDomainsIndexesMap1, 
+                                     ( arg("self"), arg("indexBase") ), DOCSTR_daeParameter_GetDomainsIndexesMap)
             
 		.def("__call__", &daepython::FunctionCallParameter0) 
 		.def("__call__", &daepython::FunctionCallParameter1)
@@ -771,20 +796,34 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("array", &daepython::ParameterArray8)
 		;    
 
-	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable")  
-		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >())
-		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >())
+	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable", DOCSTR_daeVariable)  
+		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >(( arg("self"), 
+                                                                                                       arg("name"), 
+                                                                                                       arg("variableType"), 
+                                                                                                       arg("parentPort"),  
+                                                                                                       arg("description") = "", 
+                                                                                                       arg("domains") =  boost::python::list()
+                                                                                                      ), DOCSTR_daeVariable_init1))
+		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >(( arg("self"), 
+                                                                                                      arg("name"), 
+                                                                                                      arg("variableType"), 
+                                                                                                      arg("parentModel"),  
+                                                                                                      arg("description") = "", 
+                                                                                                      arg("domains") =  boost::python::list()
+                                                                                                    ), DOCSTR_daeVariable_init2))
 		
-        .add_property("Domains",                    &daepython::daeVariable_Wrapper::GetDomains)
-		.add_property("VariableType",               make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()) )
-		.add_property("ReportingOn",                &daeVariable::GetReportingOn,	&daeVariable::SetReportingOn)
-        .add_property("OverallIndex",               &daeVariable::GetOverallIndex)
-        .add_property("NumberOfPoints",             &daeVariable::GetNumberOfPoints)
-        .add_property("npyValues",                  &daepython::daeVariable_Values)
-        .add_property("npyIDs",                     &daepython::daeVariable_IDs)
+        .add_property("Domains",        &daepython::daeVariable_Wrapper::GetDomains, DOCSTR_daeVariable_Domains)
+		.add_property("VariableType",   make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()),
+                                        DOCSTR_daeVariable_VariabeType)
+		.add_property("ReportingOn",    &daeVariable::GetReportingOn,	
+                                        &daeVariable::SetReportingOn,    DOCSTR_daeVariable_ReportingOn)
+        .add_property("OverallIndex",   &daeVariable::GetOverallIndex,   DOCSTR_daeVariable_OverallIndex)
+        .add_property("NumberOfPoints", &daeVariable::GetNumberOfPoints, DOCSTR_daeVariable_NumberOfPoints)
+        .add_property("npyValues",      &daepython::daeVariable_Values,  DOCSTR_daeVariable_npyValues)
+        .add_property("npyIDs",         &daepython::daeVariable_IDs,     DOCSTR_daeVariable_npyIDs)
 
 		.def("__str__",					&daepython::daeVariable_str) 
-		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain)
+		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain, ( arg("self"), arg("domain") ), DOCSTR_daeVariable_DistributeOnDomain)
 
 		.def("__call__", &daepython::VariableFunctionCall0)
 		.def("__call__", &daepython::VariableFunctionCall1)
@@ -950,7 +989,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		
 	    .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
          
-        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetDomainsIndexesMap1)
+        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetDomainsIndexesMap1, ( arg("self"), arg("indexBase") ), DOCSTR_daeVariable_GetDomainIndexesMap)
 
 		.def("dt", &daepython::Get_dt0)
 		.def("dt", &daepython::Get_dt1)
@@ -1107,59 +1146,83 @@ BOOST_PYTHON_MODULE(pyCore)
         ;
 
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel", DOCSTR_daeModel)
-		.def(init<string, optional<daeModel*, string> >())
+		.def(init<string, optional<daeModel*, string> >(( arg("self"), arg("name"), arg("parent") = NULL, arg("description") = "" ), DOCSTR_daeModel_init))
 
-		.add_property("Domains",				&daepython::daeModelWrapper::GetDomains)
-		.add_property("Parameters",				&daepython::daeModelWrapper::GetParameters)
-		.add_property("Variables",				&daepython::daeModelWrapper::GetVariables)
-		.add_property("Equations",				&daepython::daeModelWrapper::GetEquations)
-		.add_property("Ports",					&daepython::daeModelWrapper::GetPorts)
-		.add_property("EventPorts",				&daepython::daeModelWrapper::GetEventPorts)
-		.add_property("OnEventActions",			&daepython::daeModelWrapper::GetOnEventActions)
-        .add_property("STNs",					&daepython::daeModelWrapper::GetSTNs)
-		.add_property("Components",				&daepython::daeModelWrapper::GetComponents)
-		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays)
-		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays)
-        .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections)
-		.add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode)
-		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic)
-        .add_property("ModelType",	   		    &daeModel::GetModelType)
+		.add_property("Domains",				&daepython::daeModelWrapper::GetDomains,        DOCSTR_daeModel_Domains)
+		.add_property("Parameters",				&daepython::daeModelWrapper::GetParameters,     DOCSTR_daeModel_Parameters)
+		.add_property("Variables",				&daepython::daeModelWrapper::GetVariables,      DOCSTR_daeModel_Variables)
+		.add_property("Equations",				&daepython::daeModelWrapper::GetEquations,      DOCSTR_daeModel_Equations)
+		.add_property("Ports",					&daepython::daeModelWrapper::GetPorts,          DOCSTR_daeModel_Ports)
+		.add_property("EventPorts",				&daepython::daeModelWrapper::GetEventPorts,     DOCSTR_daeModel_EventPorts)
+		.add_property("OnEventActions",			&daepython::daeModelWrapper::GetOnEventActions, DOCSTR_daeModel_OnEventActions)
+        .add_property("STNs",					&daepython::daeModelWrapper::GetSTNs,           DOCSTR_daeModel_STNs)
+		.add_property("Components",				&daepython::daeModelWrapper::GetComponents,     DOCSTR_daeModel_Components)
+		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays,     DOCSTR_daeModel_PortArrays)
+		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays,DOCSTR_daeModel_ComponentArrays)
+        .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections,DOCSTR_daeModel_PortConnections)
+		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                      DOCSTR_daeModel_IsModelDynamic)
+        .add_property("ModelType",	   		    &daeModel::GetModelType,                        DOCSTR_daeModel_ModelType)
+        .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
 
-		.def("__str__",          &daepython::daeModel_str)  
+        .def("__str__",          &daepython::daeModel_str, ( arg("self") ), "str info")  
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(), 
-             ( arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_CreateEquation)
-//		.def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation2, return_internal_reference<>(), 
-//                        ( arg("self"), arg("name"), arg("description") ), "doc string")
-//        .def("CreateEquation",   &daepython::daeModelWrapper::CreateEquation3, return_internal_reference<>(), 
-//                        ( arg("self"), arg("name") ), "doc string")
-		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations)
-		.def("ConnectPorts",     &daeModel::ConnectPorts)
-		.def("ConnectEventPorts",&daeModel::ConnectEventPorts)
-		.def("SetReportingOn",	 &daeModel::SetReportingOn)
+                                 ( arg("self"), arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_daeModel_CreateEquation)
+		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations,
+                                 ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
+		.def("ConnectPorts",     &daeModel::ConnectPorts, 
+                                 ( arg("self"), arg("portFrom"), arg("portTo") ), DOCSTR_daeModel_ConnectPorts)
+		.def("ConnectEventPorts",&daeModel::ConnectEventPorts, 
+                                 ( arg("self"), arg("portFrom"), arg("portTo") ), DOCSTR_daeModel_ConnectEventPorts)
+		.def("SetReportingOn",	 &daeModel::SetReportingOn, 
+                                 ( arg("self"), arg("reportingOn") ), DOCSTR_daeModel_SetReportingOn)
 
-		.def("IF",				&daepython::daeModelWrapper::IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
-		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, ( boost::python::arg("eventTolerance") = 0.0 ) )
-		.def("ELSE",			&daepython::daeModelWrapper::ELSE)
-		.def("END_IF",			&daepython::daeModelWrapper::END_IF) 
+		.def("IF",				&daepython::daeModelWrapper::IF, 
+                                ( arg("self"), arg("condition"), arg("eventTolerance") = 0.0 ), DOCSTR_daeModel_IF)
+		.def("ELSE_IF",			&daepython::daeModelWrapper::ELSE_IF, 
+                                ( arg("self"), arg("condition"), arg("eventTolerance") = 0.0 ), DOCSTR_daeModel_ELSE_IF)
+		.def("ELSE",			&daepython::daeModelWrapper::ELSE,
+                                ( arg("self") ), DOCSTR_daeModel_ELSE)
+		.def("END_IF",			&daepython::daeModelWrapper::END_IF,
+                                ( arg("self") ), DOCSTR_daeModel_END_IF) 
 
-		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>())
-		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>())
-		.def("END_STN",			&daepython::daeModelWrapper::END_STN)
-		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, ( boost::python::arg("eventTolerance") = 0.0 ) )
-        .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, ( boost::python::arg("switchTo")           = string(),
-	                                                                         boost::python::arg("setVariableValues")  = boost::python::list(),
-                                                                             boost::python::arg("triggerEvents")      = boost::python::list(),
-                                                                             boost::python::arg("userDefinedActions") = boost::python::list(),
-                                                                             boost::python::arg("eventTolerance")     = 0.0) )
-        .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT, ( boost::python::arg("switchToStates")     = boost::python::list(),
-	                                                                     boost::python::arg("setVariableValues")  = boost::python::list(),
-																		 boost::python::arg("triggerEvents")      = boost::python::list(),
-																		 boost::python::arg("userDefinedActions") = boost::python::list()) )
+		.def("STN",				&daepython::daeModelWrapper::STN, return_internal_reference<>(),
+                                ( arg("self"), arg("stnName") ), DOCSTR_daeModel_STN)
+		.def("STATE",			&daepython::daeModelWrapper::STATE, return_internal_reference<>(),
+                                ( arg("self"), arg("stateName") ), DOCSTR_daeModel_STATE)
+		.def("END_STN",			&daepython::daeModelWrapper::END_STN,
+                                ( arg("self") ), DOCSTR_daeModel_END_STN)
+		.def("SWITCH_TO",		&daepython::daeModelWrapper::SWITCH_TO, 
+                                ( arg("self"), 
+                                  arg("targetState"), 
+                                  arg("condition"), 
+                                  arg("eventTolerance") = 0.0 
+                                ), DOCSTR_daeModel_SWITCH_TO)
+        .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, 
+                                ( arg("self"), 
+                                  arg("condition"), 
+                                  arg("switchTo")           = string(), 
+                                  arg("setVariableValues")  = boost::python::list(),
+                                  arg("triggerEvents")      = boost::python::list(),
+                                  arg("userDefinedActions") = boost::python::list(),
+                                  arg("eventTolerance")     = 0.0
+                                ), DOCSTR_daeModel_ON_CONDITION)
+        .def("ON_EVENT",		&daepython::daeModelWrapper::ON_EVENT,
+                                ( arg("self"),
+                                  arg("eventPort"),
+                                  arg("switchToStates")     = boost::python::list(),
+	                              arg("setVariableValues")  = boost::python::list(),
+								  arg("triggerEvents")      = boost::python::list(),
+								  arg("userDefinedActions") = boost::python::list() 
+                                ), DOCSTR_daeModel_ON_EVENT )
 		
-		.def("SaveModelReport",			&daeModel::SaveModelReport)
-		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport)
-		.def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects)
-		.def("Export",					&daeModel::Export)
+		.def("SaveModelReport",			&daeModel::SaveModelReport, 
+                                        ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveModelReport)
+		.def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport, 
+                                        ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveRuntimeModelReport)
+		.def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects, 
+                                        ( arg("self"), arg("objects"), arg("language") ), DOCSTR_daeModel_ExportObjects)
+		.def("Export",					&daeModel::Export,
+                                        ( arg("self"), arg("content"), arg("language"), arg("modelExportContext") ), DOCSTR_daeModel_Export)
 		;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", no_init)

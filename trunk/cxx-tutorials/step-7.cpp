@@ -45,6 +45,8 @@ using dae::core::adouble;
 #include <fstream>
 #include <iostream>
 
+extern void run_dealii_poisson_test();
+
 namespace Step7
 {
 using namespace dealii;
@@ -541,7 +543,6 @@ void HelmholtzProblem<dim>::process_solution (const unsigned int cycle)
 }
 
 
-
 template <int dim>
 void HelmholtzProblem<dim>::run ()
 {
@@ -719,6 +720,9 @@ void HelmholtzProblem<dim>::run ()
             convergence_table.write_tex(table_file);
         }
         
+        run_dealii_poisson_test();
+        
+/*        
         boost::scoped_ptr<daeSimulation_t>		pSimulation(new simTutorial1(A.N, A, x, b));  
         boost::scoped_ptr<daeDataReporter_t>	pDataReporter(daeCreateTCPIPDataReporter());
         boost::scoped_ptr<daeIDASolver>			pDAESolver(new daeIDASolver());
@@ -761,7 +765,8 @@ void HelmholtzProblem<dim>::run ()
         
         //pSimulation->Run();
         pSimulation->Finalize();
-    }
+*/
+     }
     catch(std::exception& e)
     {
         std::cout << e.what() << std::endl;
