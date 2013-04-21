@@ -2,13 +2,11 @@ Contents
 =========
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
 
-   core
-   activity
-   data_reporting
-   dae_solver
-   units
+   getting_started
+   pyDAE_user_guide
+   pyDAE_api_ref
 
 Indices and tables
 ==================

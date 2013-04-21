@@ -13,46 +13,6 @@
 
 import sys, os, platform, numpy
 
-"""
-# Python version
-python_version_major = str(sys.version_info[0])
-python_version_minor = str(sys.version_info[1])
-
-# Numpy version
-numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
-
-# System := {'Linux', 'Windows', 'Darwin'}
-daetools_system = str(platform.system())
-
-# Machine := {'i386', ..., 'i686', 'x86_64'}
-if platform.system() == 'Darwin':
-    daetools_machine = 'universal'
-elif platform.system() == 'Windows':
-    daetools_machine = 'win32'
-else:
-    daetools_machine = str(platform.machine())
-
-# daetools root directory
-daetools_dir = os.path.join(os.path.abspath('../'))
-
-# pyDAE platform-dependant extension modules directory
-pydae_sodir = os.path.join(daetools_dir, 'pyDAE', '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, 
-                                                                                     daetools_machine, 
-                                                                                     python_version_major, 
-                                                                                     python_version_minor,
-                                                                                     numpy_version))
-sys.path.insert(0, pydae_sodir)
-
-# solvers platform-dependant extension modules directory
-solvers_sodir = os.path.join(daetools_dir, 'solvers', '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system,
-                                                                                         daetools_machine, 
-                                                                                         python_version_major,
-                                                                                         python_version_minor,
-                                                                                         numpy_version))
-sys.path.insert(0, solvers_sodir)
-#sys.path.insert(0, os.path.abspath('../'))
-#print sys.path
-"""
 sys.path.insert(0, os.path.abspath('../../'))
 from daetools import *
 
@@ -90,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'DAE Tools Project'
-copyright = u'2013, Dragan Nikolic'
+copyright = u'2008-2013, Dragan Nikolic'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -142,13 +102,6 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 
 html_theme = 'nature'
-
-"""
-# import Cloud
-import cloud_sptheme as csp
-html_theme = 'cloud' # 'nature'
-html_theme_path = [csp.get_theme_dir()]
-"""
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -228,10 +181,10 @@ htmlhelp_basename = 'DAEToolsProjectdoc'
 
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+'papersize': 'a4paper',
 
 # The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
@@ -241,12 +194,12 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'DAEToolsProject.tex', u'DAE Tools Project Documentation',
-   u'Dragan Nikolic', 'manual'),
+   u'by Dragan Nikolic', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = '[d][a][e]_Tools_project_latex.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -284,8 +237,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'DAEToolsProject', u'DAE Tools Project Documentation',
-   u'Dragan Nikolic', 'DAEToolsProject', 'One line description of project.',
+  ('index', 'DAE Tools Project', u'DAE Tools Project Documentation',
+   u'Dragan Nikolic', 'DAE Tools Project', 'A cross-platform equation-oriented process modelling, simulation and optimization software.',
    'Miscellaneous'),
 ]
 
