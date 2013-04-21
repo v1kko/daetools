@@ -380,19 +380,19 @@ Classes
 
         Gets the array of partial derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
         depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeVariable.array`.
+        as those described in :py:meth:`pyCore.daeParameter.array`.
 
     .. method:: d2_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
 
         Gets the array of partial derivatives of the second order at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
         depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeVariable.array`.
+        as those described in :py:meth:`pyCore.daeParameter.array`.
 
     .. method:: dt_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
 
         Gets the array of time derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
         depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeVariable.array`.
+        as those described in :py:meth:`pyCore.daeParameter.array`.
 
     .. method:: __call__((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
 

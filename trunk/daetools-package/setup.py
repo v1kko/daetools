@@ -150,7 +150,7 @@ setup(name = 'daetools',
                    'daetools.unit_tests'
                  ],
       package_data = {
-                       'daetools':                 ['*.txt', 'docs/*.html', 'docs/*.pdf'],
+                       'daetools':                 ['*.txt', 'docs/html/*.*', 'docs/html/_static/*.*', 'docs/html/_sources/*.*', 'docs/html/_modules/*.*'],
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.daePlotter':      ['images/*.png'],
