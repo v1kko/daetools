@@ -36,6 +36,7 @@ const char* DOCSTR_daeConfig_ = "";
 const char* DOCSTR_adouble = "Class adouble operates on values/derivatives of domains, parameters and variables. "
          "It supports basic mathematical operators (+, -, *, /, **), comparison operators (<, <=, >, >=, ==, !=), " 
          "and logical operators (and, or, not). Operands can be instances of adouble or float values.";
+    const char* DOCSTR_adouble_init = "";
     const char* DOCSTR_adouble_Value = "Value";
     const char* DOCSTR_adouble_Derivative = "Derivative";
     const char* DOCSTR_adouble_GatherInfo = "Internally used by the framework.";
@@ -43,6 +44,7 @@ const char* DOCSTR_adouble = "Class adouble operates on values/derivatives of do
 
 const char* DOCSTR_adouble_array = "Class adouble_array operates on arrays of values/derivatives of domains, parameters and variables. "
          "It supports basic mathematical operators (+, -, *, /, **). Operands can be instances of adouble_array, adouble or float values.";
+    const char* DOCSTR_adouble_array_init = "";
     const char* DOCSTR_adouble_array_GatherInfo = "Used internally by the framework.";
     const char* DOCSTR_adouble_array_Node = "Contains the equation evaluation node.";
     const char* DOCSTR_adouble_array_Resize = "Resizes the adouble_array object to the new size.";
@@ -128,6 +130,7 @@ const char* DOCSTR_daeArrayRange = "";
     const char* DOCSTR_daeArrayRange_DomainIndex = "";  
 
 const char* DOCSTR_daeDomain = "";  
+    const char* DOCSTR_daeDomain_init = "";  
     const char* DOCSTR_daeDomain_init1 = "";  
     const char* DOCSTR_daeDomain_init2 = "";  
     const char* DOCSTR_daeDomain_Type = "";  
@@ -152,6 +155,7 @@ const char* DOCSTR_daeDEDI = "";
     const char* DOCSTR_daeDEDI_call = "";  
 
 const char* DOCSTR_daeParameter = "";  
+    const char* DOCSTR_daeParameter_init = "";  
     const char* DOCSTR_daeParameter_init1 = "";  
     const char* DOCSTR_daeParameter_init2 = "";  
     const char* DOCSTR_daeParameter_Units = "";  
@@ -163,6 +167,7 @@ const char* DOCSTR_daeParameter = "";
     const char* DOCSTR_daeParameter_GetDomainsIndexesMap = "";  
 
 const char* DOCSTR_daeVariable = "";  
+    const char* DOCSTR_daeVariable_init = "";  
     const char* DOCSTR_daeVariable_init1 = "";  
     const char* DOCSTR_daeVariable_init2 = "";  
     const char* DOCSTR_daeVariable_Domains = "";  
@@ -175,6 +180,75 @@ const char* DOCSTR_daeVariable = "";
     const char* DOCSTR_daeVariable_DistributeOnDomain = "";  
     const char* DOCSTR_daeVariable_GetDomainIndexesMap = "";  
 
+const char* DOCSTR_daeModelExportContext = "";  
+    const char* DOCSTR_daeModelExportContext_init = "";  
+    const char* DOCSTR_daeModelExportContext_PythonIndentLevel = "";  
+    const char* DOCSTR_daeModelExportContext_ExportDefinition = "";  
+
+const char* DOCSTR_daePort = "";  
+    const char* DOCSTR_daePort_init = "";  
+    const char* DOCSTR_daePort_Type = "";  
+    const char* DOCSTR_daePort_Domains = "";  
+    const char* DOCSTR_daePort_Parameters = "";  
+    const char* DOCSTR_daePort_Variables = "";  
+    const char* DOCSTR_daePort_SetReportingOn = "";  
+    const char* DOCSTR_daePort_Export = "";  
+    
+const char* DOCSTR_daeEventPort = "";  
+    const char* DOCSTR_daeEventPort_init = "";  
+    const char* DOCSTR_daeEventPort_Type = "";  
+    const char* DOCSTR_daeEventPort_EventData = "";  
+    const char* DOCSTR_daeEventPort_RecordEvents = "";  
+    const char* DOCSTR_daeEventPort_Events = "";  
+    const char* DOCSTR_daeEventPort_call = "";  
+    const char* DOCSTR_daeEventPort_SendEvent = "";  
+    const char* DOCSTR_daeEventPort_ReceiveEvent = "";  
+
+const char* DOCSTR_daeAction = "";  
+    const char* DOCSTR_daeAction_init = "";  
+    const char* DOCSTR_daeAction_Type = "";  
+    const char* DOCSTR_daeAction_STN = "";  
+    const char* DOCSTR_daeAction_StateTo = "";  
+    const char* DOCSTR_daeAction_SendEventPort = "";  
+    const char* DOCSTR_daeAction_VariableWrapper = "";  
+    const char* DOCSTR_daeAction_SetupNode = "";  
+    const char* DOCSTR_daeAction_RuntimeNode = "";  
+    const char* DOCSTR_daeAction_Execute = "";  
+
+const char* DOCSTR_daeOptimizationVariable = "";  
+    const char* DOCSTR_daeOptimizationVariable_init = "";  
+    const char* DOCSTR_daeOptimizationVariable_Name = "";  
+    const char* DOCSTR_daeOptimizationVariable_Type = "";  
+    const char* DOCSTR_daeOptimizationVariable_Value = "";  
+    const char* DOCSTR_daeOptimizationVariable_LowerBound = "";  
+    const char* DOCSTR_daeOptimizationVariable_UpperBound = "";  
+    const char* DOCSTR_daeOptimizationVariable_StartingPoint = "";  
+
+const char* DOCSTR_daeObjectiveFunction = "";  
+    const char* DOCSTR_daeObjectiveFunction_init = "";  
+    const char* DOCSTR_daeObjectiveFunction_Name = "";  
+    const char* DOCSTR_daeObjectiveFunction_Residual = "";  
+    const char* DOCSTR_daeObjectiveFunction_Value = "";  
+    const char* DOCSTR_daeObjectiveFunction_Gradients = "";  
+    const char* DOCSTR_daeObjectiveFunction_AbsTolerance = "";  
+
+const char* DOCSTR_daeOptimizationConstraint = "";  
+    const char* DOCSTR_daeOptimizationConstraint_init = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Name = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Type = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Residual = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Value = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Gradients = "";  
+    const char* DOCSTR_daeOptimizationConstraint_AbsTolerance = "";  
+
+const char* DOCSTR_daeMeasuredVariable = "";  
+    const char* DOCSTR_daeMeasuredVariable_init = "";  
+    const char* DOCSTR_daeMeasuredVariable_Name = "";  
+    const char* DOCSTR_daeMeasuredVariable_Residual = "";  
+    const char* DOCSTR_daeMeasuredVariable_Value = "";  
+    const char* DOCSTR_daeMeasuredVariable_Gradients = "";  
+    const char* DOCSTR_daeMeasuredVariable_AbsTolerance = "";  
+    
 const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_init = "Constructor...";
     const char* DOCSTR_daeModel_Domains = "A list of domains in the model.";
@@ -215,5 +289,98 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_SaveRuntimeModelReport = ".";
     const char* DOCSTR_daeModel_ExportObjects = ".";
     const char* DOCSTR_daeModel_Export = ".";
+
+const char* DOCSTR_daeEquationExecutionInfo = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_Node = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_VariableIndexes = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_EquationType = "";  
+
+const char* DOCSTR_daeEquation = "";  
+    const char* DOCSTR_daeEquation_init = "";  
+    const char* DOCSTR_daeEquation_Residual = "";  
+    const char* DOCSTR_daeEquation_Scaling = "";  
+    const char* DOCSTR_daeEquation_EquationExecutionInfos = "";  
+    const char* DOCSTR_daeEquation_DistributedEquationDomainInfos = "";  
+    const char* DOCSTR_daeEquation_EquationType = "";  
+    const char* DOCSTR_daeEquation_DistributeOnDomain1 = "";  
+    const char* DOCSTR_daeEquation_DistributeOnDomain2 = "";  
+
+const char* DOCSTR_daePortConnection = "";  
+    const char* DOCSTR_daePortConnection_PortFrom = "";  
+    const char* DOCSTR_daePortConnection_PortTo = "";  
+    const char* DOCSTR_daePortConnection_Equations = "";  
+
+const char* DOCSTR_daeEventPortConnection = "";  
+    const char* DOCSTR_daeEventPortConnection_PortFrom = "";  
+    const char* DOCSTR_daeEventPortConnection_PortTo = "";  
+
+const char* DOCSTR_daeState = "";  
+    const char* DOCSTR_daeState_init = "";  
+    const char* DOCSTR_daeState_Equations = "";  
+    const char* DOCSTR_daeState_StateTransitions = "";  
+    const char* DOCSTR_daeState_NestedSTNs = "";  
+    const char* DOCSTR_daeState_OnConditionActions = "";  
+
+const char* DOCSTR_daeStateTransition = "";  
+    const char* DOCSTR_daeStateTransition_init = "";  
+    const char* DOCSTR_daeStateTransition_Condition = "";  
+    const char* DOCSTR_daeStateTransition_Actions = "";  
+
+const char* DOCSTR_daeSTN = "";  
+    const char* DOCSTR_daeSTN_init = "";  
+    const char* DOCSTR_daeSTN_ActiveState = "";  
+    const char* DOCSTR_daeSTN_States = "";  
+
+const char* DOCSTR_daeIF = "";  
+    const char* DOCSTR_daeIF_init = "";  
+
+const char* DOCSTR_daeScalarExternalFunction = "";  
+    const char* DOCSTR_daeScalarExternalFunction_init = "";  
+    const char* DOCSTR_daeScalarExternalFunction_Name = "";  
+    const char* DOCSTR_daeScalarExternalFunction_Calculate = "";  
+    const char* DOCSTR_daeScalarExternalFunction_call = "";  
+
+const char* DOCSTR_daeVectorExternalFunction = "";  
+    const char* DOCSTR_daeVectorExternalFunction_init = "";  
+    const char* DOCSTR_daeVectorExternalFunction_Name = "";  
+    const char* DOCSTR_daeVectorExternalFunction_Calculate = "";  
+    const char* DOCSTR_daeVectorExternalFunction_call = "";  
+
+const char* DOCSTR_daeLog_t = "";  
+    const char* DOCSTR_daeLog_t_Enabled = "";  
+    const char* DOCSTR_daeLog_t_PrintProgress = "";  
+    const char* DOCSTR_daeLog_t_Indent = "";  
+    const char* DOCSTR_daeLog_t_Progress = "";  
+    const char* DOCSTR_daeLog_t_IndentString = "";  
+    const char* DOCSTR_daeLog_t_PercentageDone = "";  
+    const char* DOCSTR_daeLog_t_ETA = "";  
+    const char* DOCSTR_daeLog_t_Message = "";  
+    const char* DOCSTR_daeLog_t_JoinMessages = "";  
+    const char* DOCSTR_daeLog_t_IncreaseIndent = "";  
+    const char* DOCSTR_daeLog_t_DecreaseIndent = "";  
+
+const char* DOCSTR_daeBaseLog = "";  
+    const char* DOCSTR_daeBaseLog_init = "";
+    const char* DOCSTR_daeBaseLog_Message = "";  
+    const char* DOCSTR_daeBaseLog_SetProgress = "";  
+    const char* DOCSTR_daeBaseLog_IncreaseIndent = "";  
+    const char* DOCSTR_daeBaseLog_DecreaseIndent = "";  
+
+const char* DOCSTR_daeFileLog = "";  
+    const char* DOCSTR_daeFileLog_init = "";  
+    const char* DOCSTR_daeFileLog_Message = "";  
+
+const char* DOCSTR_daeStdOutLog = "";  
+    const char* DOCSTR_daeStdOutLog_init = "";  
+    const char* DOCSTR_daeStdOutLog_Message = "";  
+
+const char* DOCSTR_daeTCPIPLog = "";  
+    const char* DOCSTR_daeTCPIPLog_init = "";  
+    const char* DOCSTR_daeTCPIPLog_Message = "";  
+
+const char* DOCSTR_daeTCPIPLogServer = "";  
+    const char* DOCSTR_daeTCPIPLogServer_init = "";  
+    const char* DOCSTR_daeTCPIPLogServer_MessageReceived = "";  
+
 
 #endif

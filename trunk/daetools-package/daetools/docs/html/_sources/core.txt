@@ -6,8 +6,418 @@ Module pyCore
 .. py:currentmodule:: pyCore
 
 Overview
-==========
+========
 Trt mrt.
+
+
+Key modelling concepts
+======================
+...
+
+
+Classes
+--------
+.. autosummary::
+    daeVariableType
+    daeDomain
+    daeParameter
+    daeVariable
+    daeModel
+    daeSTN
+    daeIF
+    daeEquation
+    daeState
+    daeStateTransition
+    daePort
+    daeEventPort
+    daePortConnection
+    daeScalarExternalFunction
+    daeVectorExternalFunction
+    daeDomainIndex
+    daeIndexRange
+    daeArrayRange
+    daeDEDI
+    daeAction
+    daeOptimizationVariable
+    daeObjectiveFunction
+    daeOptimizationConstraint
+    daeMeasuredVariable
+    daeEquationExecutionInfo
+
+
+.. autoclass:: pyCore.daeVariableType
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    
+.. autoclass:: pyCore.daeObject
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeDomain
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    .. automethod:: __getitem__
+    .. automethod:: __call__
+
+.. autoclass:: pyCore.daeParameter
+    :members:
+    :undoc-members:
+    :exclude-members: GetValue, SetValue, GetQuantity, SetValues, __call__, array
+
+    .. automethod:: __init__
+
+    .. method:: GetValue((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> float
+
+        Gets the value of the parameter at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the parameter is distributed on.
+    
+    .. method:: GetQuantity((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> quantity
+
+        Gets the value of the parameter at the specified domain indexes as the ``quantity`` object (with value and units).
+        How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the parameter is distributed on.
+
+    .. method:: SetValue((daeParameter)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
+
+        Sets the value of the parameter at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the parameter is distributed on.
+
+    .. method:: SetValue((daeParameter)self, [(int)index1[, ...[, (int)index8]]], (quantity)value) -> None
+
+        Sets the value of the parameter at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the parameter is distributed on.
+
+    .. method:: SetValues((daeParameter)self, (float)values) -> None
+
+        Sets all values of the parameter.
+
+    .. method:: SetValues((daeParameter)self, (quantity)values) -> None
+
+        Sets all values of the parameter.
+    
+    .. method:: array((daeParameter)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
+
+        Gets the array of parameter's values at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the parameter is distributed on. Argument types can be
+        one of the following:
+
+        * :py:class:`~pyCore.daeIndexRange` object
+        * plain integer (to select a single index from a domain)
+        * python ``list`` (to select a list of indexes from a domain)
+        * python ``slice`` (to select a range of indexes from a domain: start_index, end_index, step)
+        * character ``'*'`` (to select all points from a domain)
+        * integer ``-1`` (to select all points from a domain)
+        * empty python list ``[]`` (to select all points from a domain)
+
+    .. method:: __call__((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
+
+        Gets the value of the parameter at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
+        depends on the number of domains that the parameter is distributed on.
+
+.. autoclass:: pyCore.daeVariable
+    :members:
+    :undoc-members:
+    :exclude-members: GetValue, SetValue, GetQuantity, SetValues, AssignValue, ReAssignValue, SetInitialGuess, SetInitialCondition, ReSetInitialCondition,
+                      AssignValues, ReAssignValues, SetInitialConditions, ReSetInitialConditions, SetInitialGuesses, SetAbsoluteTolerances,
+                      __call__, d, d2, dt, array, d_array, d2_array, dt_array
+
+    .. automethod:: __init__
+
+    .. method:: GetValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> float
+
+        Gets the value of the variable at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: GetQuantity((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> quantity
+
+        Gets the value of the variable at the specified domain indexes as the ``quantity`` object (with value and units).
+        How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: SetValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
+
+        Sets the value of the variable at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: SetValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)value) -> None
+
+        Sets the value of the variable at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: SetValues((daeVariable)self, (float)values) -> None
+
+        Sets all values of the variable.
+
+    .. method:: SetValues((daeVariable)self, (quantity)values) -> None
+
+        Sets all values of the variable.
+
+    .. method:: AssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
+
+    .. method:: AssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)value) -> None
+
+    .. method:: AssignValues((daeVariable)self, (float)values) -> None
+
+    .. method:: AssignValues((daeVariable)self, (quantity)values) -> None
+
+    .. method:: ReAssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
+
+    .. method:: ReAssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)value) -> None
+
+    .. method:: ReAssignValues((daeVariable)self, (float)values) -> None
+
+    .. method:: ReAssignValues((daeVariable)self, (quantity)values) -> None
+
+    .. method:: SetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialCondition) -> None
+
+    .. method:: SetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)initialCondition) -> None
+
+    .. method:: SetInitialConditions((daeVariable)self, (float)initialConditions) -> None
+
+    .. method:: SetInitialConditions((daeVariable)self, (quantity)initialConditions) -> None
+
+    .. method:: ReSetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialCondition) -> None
+
+    .. method:: ReSetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)initialCondition) -> None
+
+    .. method:: ReSetInitialConditions((daeVariable)self, (float)initialConditions) -> None
+
+    .. method:: ReSetInitialConditions((daeVariable)self, (quantity)initialConditions) -> None
+
+    .. method:: SetInitialGuess((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialGuess) -> None
+
+    .. method:: SetInitialGuess((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)initialGuess) -> None
+
+    .. method:: SetInitialGuesses((daeVariable)self, (float)initialGuesses) -> None
+
+    .. method:: SetInitialGuesses((daeVariable)self, (quantity)initialGuesses) -> None
+
+    .. method:: SetAbsoluteTolerances((daeVariable)self, (float)tolerances) -> None
+
+    .. method:: array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
+
+        Gets the array of variable's values at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on. Argument types are the same
+        as those described in :py:meth:`pyCore.daeParameter.array`
+
+    .. method:: d_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
+
+        Gets the array of partial derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on. Argument types are the same
+        as those described in :py:meth:`pyCore.daeParameter.array`.
+
+    .. method:: d2_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
+
+        Gets the array of partial derivatives of the second order at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on. Argument types are the same
+        as those described in :py:meth:`pyCore.daeParameter.array`.
+
+    .. method:: dt_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
+
+        Gets the array of time derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
+        depends on the number of domains that the variable is distributed on. Argument types are the same
+        as those described in :py:meth:`pyCore.daeParameter.array`.
+
+    .. method:: __call__((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
+
+        Gets the value of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: d((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
+
+        Gets the partial derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: d2((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
+
+        Gets the partial derivative of second order of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+    .. method:: dt((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
+
+        Gets the time derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
+        depends on the number of domains that the variable is distributed on.
+
+
+.. autoclass:: pyCore.daeModel
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    
+.. autoclass:: pyCore.daeSTN
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeIF
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeEquation
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeState
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeStateTransition
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daePort
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeEventPort
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daePortConnection
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeScalarExternalFunction
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    .. automethod:: __call__
+
+.. autoclass:: pyCore.daeVectorExternalFunction
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    .. automethod:: __call__
+
+.. autoclass:: pyCore.daeDomainIndex
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeIndexRange
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeArrayRange
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeDEDI
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+    .. automethod:: __call__
+
+.. autoclass:: pyCore.daeAction
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeOptimizationVariable
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeObjectiveFunction
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeOptimizationConstraint
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeMeasuredVariable
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeEquationExecutionInfo
+    :members:
+    :undoc-members:
+
+Functions
+---------
+.. autosummary::
+    :nosignatures:
+
+    d
+    dt
+    Time
+    Constant
+    Array
+    Sum
+    Product
+    Integral
+    Average
+
+.. autofunction:: pyCore.d
+.. autofunction:: pyCore.dt
+.. autofunction:: pyCore.Time
+.. autofunction:: pyCore.Constant
+.. autofunction:: pyCore.Array
+.. autofunction:: pyCore.Sum
+.. autofunction:: pyCore.Product
+.. autofunction:: pyCore.Integral
+.. autofunction:: pyCore.Average
+
+Logging support
+===============
+.. autosummary::
+    :nosignatures:
+
+    daeLog_t
+    daeBaseLog
+    daeFileLog
+    daeStdOutLog
+    daeTCPIPLog
+    daeTCPIPLogServer
+
+.. autoclass:: pyCore.daeLog_t
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeBaseLog
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFileLog
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeStdOutLog
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeTCPIPLog
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeTCPIPLogServer
+    :members:
+    :undoc-members:
 
 Autodifferentiation and equation evaluation tree support
 ========================================================
@@ -36,7 +446,7 @@ Classes
     .. method:: __or__((daeCondition)self, (daeCondition)right) -> daeCondition
 
     Logical operator ``or``
-    
+
     .. method:: __and__((daeCondition)self, (daeCondition)right) -> daeCondition
 
     Logical operator ``and``
@@ -94,12 +504,48 @@ Mathematical functions
 .. autofunction:: pyCore.Min
 .. autofunction:: pyCore.Max
 
-Modelling concepts
-====================
-...
+
+Auxiliary classes
+=================
+.. autosummary::
+    :nosignatures:
+
+    daeVariableWrapper
+    daeConfig
+
+.. autoclass:: pyCore.daeVariableWrapper
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeConfig
+    :members:
+    :undoc-members:
+
+    .. automethod:: __contains__
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
+
+Auxiliary functions
+===================
+.. autosummary::
+    :nosignatures:
+    
+    daeGetConfig
+    daeVersion
+    daeVersionMajor
+    daeVersionMinor
+    daeVersionBuild
+
+.. autofunction:: pyCore.daeGetConfig
+.. autofunction:: pyCore.daeVersion
+.. autofunction:: pyCore.daeVersionMajor
+.. autofunction:: pyCore.daeVersionMinor
+.. autofunction:: pyCore.daeVersionBuild
 
 Enumerations
-------------
+============
 .. autosummary::
     daeeDomainType
     daeeParameterType
@@ -228,395 +674,8 @@ Enumerations
     :undoc-members:
     :exclude-members: names, values
 
-   
-Classes
---------
-.. autosummary::
-    daeVariableType
-    daeDomain
-    daeParameter
-    daeVariable
-    daeModel
-    daeSTN
-    daeIF
-    daeEquation
-    daeState
-    daeStateTransition
-    daePort
-    daeEventPort
-    daePortConnection
-    daeScalarExternalFunction
-    daeVectorExternalFunction
-    daeDomainIndex
-    daeIndexRange
-    daeArrayRange
-    daeDEDI
-    daeAction
-    daeOptimizationVariable
-    daeObjectiveFunction
-    daeOptimizationConstraint
-    daeMeasuredVariable
-    daeEquationExecutionInfo
-
-
-.. autoclass:: pyCore.daeVariableType
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-    
-.. autoclass:: pyCore.daeObject
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeDomain
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-    .. automethod:: __getitem__
-    .. automethod:: __call__
-
-.. autoclass:: pyCore.daeParameter
-    :members:
-    :undoc-members:
-    :exclude-members: GetValue, SetValue, GetQuantity, SetValues, __call__, array
-
-    .. method:: GetValue((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> float
-
-        Gets the value of the parameter at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the parameter is distributed on.
-    
-    .. method:: GetQuantity((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> quantity
-
-        Gets the value of the parameter at the specified domain indexes as the ``quantity`` object (with value and units).
-        How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the parameter is distributed on.
-
-    .. method:: SetValue((daeParameter)self, [(int)index1[, ...[, (int)index8]]], (object)value) -> None
-
-        Sets the value of the parameter at the specified domain indexes (as ``float`` or ``quantity``). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the parameter is distributed on.
-
-    .. method:: SetValues((daeParameter)self, (float)values) -> None
-
-        Sets all values of the parameter (as ``float`` or ``quantity``).
-    
-    .. method:: array((daeParameter)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of parameter's values at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the parameter is distributed on. Argument types can be
-        one of the following:
-
-        * :py:class:`~pyCore.daeIndexRange` object
-        * plain integer (to select a single index from a domain)
-        * python ``list`` (to select a list of indexes from a domain)
-        * python ``slice`` (to select a range of indexes from a domain: start_index, end_index, step)
-        * character ``'*'`` (to select all points from a domain)
-        * integer ``-1`` (to select all points from a domain)
-        * empty python list ``[]`` (to select all points from a domain)
-
-    .. method:: __call__((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the value of the parameter at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the parameter is distributed on.
-
-.. autoclass:: pyCore.daeVariable
-    :members:
-    :undoc-members:
-    :exclude-members: GetValue, SetValue, GetQuantity, SetValues, AssignValue, ReAssignValue, SetInitialGuess, SetInitialCondition, ReSetInitialCondition,
-                      AssignValues, ReAssignValues, SetInitialConditions, ReSetInitialConditions, SetInitialGuesses, SetAbsoluteTolerances,
-                      __call__, d, d2, dt, array, d_array, d2_array, dt_array
-
-    .. method:: GetValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> float
-
-        Gets the value of the variable at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: GetQuantity((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> quantity
-
-        Gets the value of the variable at the specified domain indexes as the ``quantity`` object (with value and units).
-        How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: SetValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)value) -> None
-
-        Sets the value of the variable at the specified domain indexes (as ``float`` or ``quantity``). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: SetValues((daeVariable)self, (object)values) -> None
-
-        Sets all values of the variable (as ``float`` or ``quantity``).
-
-    .. method:: AssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)value) -> None
-
-    .. method:: AssignValues((daeVariable)self, (object)values) -> None
-
-    .. method:: ReAssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)value) -> None
-
-    .. method:: ReAssignValues((daeVariable)self, (object)values) -> None
-
-    .. method:: SetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)initialCondition) -> None
-
-    .. method:: SetInitialConditions((daeVariable)self, (object)initialConditions) -> None
-
-    .. method:: ReSetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)initialCondition) -> None
-
-    .. method:: ReSetInitialConditions((daeVariable)self, (object)initialConditions) -> None
-
-    .. method:: SetInitialGuess((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (object)initialGuess) -> None
-
-    .. method:: SetInitialGuesses((daeVariable)self, (object)initialGuesses) -> None
-
-    .. method:: SetAbsoluteTolerances((daeVariable)self, (object)tolerances) -> None
-
-    .. method:: array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of variable's values at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`
-
-    .. method:: d_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of partial derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: d2_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of partial derivatives of the second order at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: dt_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of time derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: __call__((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the value of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: d((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the partial derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: d2((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the partial derivative of second order of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: dt((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the time derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-
-.. autoclass:: pyCore.daeModel
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-    
-.. autoclass:: pyCore.daeSTN
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeIF
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeEquation
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeState
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeStateTransition
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daePort
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeEventPort
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daePortConnection
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeScalarExternalFunction
-    :members:
-    :undoc-members:
-
-    .. automethod:: __call__
-
-.. autoclass:: pyCore.daeVectorExternalFunction
-    :members:
-    :undoc-members:
-
-    .. automethod:: __call__
-
-.. autoclass:: pyCore.daeDomainIndex
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeIndexRange
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeArrayRange
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeDEDI
-    :members:
-    :undoc-members:
-
-    .. automethod:: __call__
-
-.. autoclass:: pyCore.daeAction
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeOptimizationVariable
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeObjectiveFunction
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeOptimizationConstraint
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeMeasuredVariable
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeEquationExecutionInfo
-    :members:
-    :undoc-members:
-
-
-Logging
---------
-.. autosummary::
-    :nosignatures:
-
-    daeLog_t
-    daeBaseLog
-    daeFileLog
-    daeStdOutLog
-    daeTCPIPLog
-    daeTCPIPLogServer
-
-.. autoclass:: pyCore.daeLog_t
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeBaseLog
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeFileLog
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeStdOutLog
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeTCPIPLog
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeTCPIPLogServer
-    :members:
-    :undoc-members:
-
-Functions
----------
-.. autosummary::
-    :nosignatures:
-
-    d
-    dt
-    Time
-    Constant
-    Array
-    Sum
-    Product
-    Integral
-    Average
-
-.. autofunction:: pyCore.d
-.. autofunction:: pyCore.dt
-.. autofunction:: pyCore.Time
-.. autofunction:: pyCore.Constant
-.. autofunction:: pyCore.Array
-.. autofunction:: pyCore.Sum
-.. autofunction:: pyCore.Product
-.. autofunction:: pyCore.Integral
-.. autofunction:: pyCore.Average
-
-
-Auxiliary classes
------------------
-.. autosummary::
-    :nosignatures:
-
-    daeVariableWrapper
-    daeConfig
-
-.. autoclass:: pyCore.daeVariableWrapper
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeConfig
-    :members:
-    :undoc-members:
-
-    .. automethod:: __contains__
-    .. automethod:: __getitem__
-    .. automethod:: __setitem__
-
-Auxiliary functions
-----------------------
-.. autosummary::
-    :nosignatures:
-    
-    daeGetConfig
-    daeVersion
-    daeVersionMajor
-    daeVersionMinor
-    daeVersionBuild
-
-.. autofunction:: pyCore.daeGetConfig
-.. autofunction:: pyCore.daeVersion
-.. autofunction:: pyCore.daeVersionMajor
-.. autofunction:: pyCore.daeVersionMinor
-.. autofunction:: pyCore.daeVersionBuild
-
 Global constants
-----------------------
+================
 .. autosummary::
     :nosignatures:
     
@@ -629,3 +688,9 @@ Global constants
 .. autodata:: pyCore.cnDifferential
 
 .. autodata:: pyCore.cnAssigned
+
+
+
+
+.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
+    :alt:

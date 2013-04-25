@@ -188,6 +188,8 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
+
+'tableofcontents' : '\setcounter{tocdepth}{2} \n\\tableofcontents'
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
