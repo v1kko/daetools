@@ -60,7 +60,7 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 		.def_readwrite("PrintStat",			&superlumt_options_t::PrintStat)
 		;
 	
-	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_MT_Solver")
 		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
@@ -71,7 +71,7 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 #endif
 	
 #ifdef daeSuperLU_CUDA
-	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_CUDA_Solver")
 		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
@@ -106,7 +106,7 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 		//.def_readwrite("Equil",				&superlu_options_t::Equil)
 		;
 
-	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLUSolver")
+	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_Solver")
 		.add_property("Name",			&daeSuperLUSolver::GetName)
 		.def("Create",					&daeSuperLUSolver::Create)
 		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)

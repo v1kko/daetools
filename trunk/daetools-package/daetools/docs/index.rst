@@ -7,6 +7,7 @@ Contents
    getting_started
    pyDAE_user_guide
    pyDAE_api_ref
+   solvers
    tutorials
 
 Indices and tables
