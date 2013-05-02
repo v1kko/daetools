@@ -8,6 +8,7 @@ Contents
    pyDAE_user_guide
    pyDAE_api_ref
    solvers
+   code_generators
    tutorials
 
 Indices and tables

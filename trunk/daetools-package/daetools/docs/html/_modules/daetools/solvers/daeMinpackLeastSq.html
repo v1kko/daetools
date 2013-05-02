@@ -1,0 +1,463 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.solvers.daeMinpackLeastSq &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.solvers.daeMinpackLeastSq</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;********************************************************************************</span>
+<span class="sd">                             daeMinpackLeastSq.py</span>
+<span class="sd">                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span class="sd">                 Copyright (C) Dragan Nikolic, 2010</span>
+<span class="sd">***********************************************************************************</span>
+<span class="sd">DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span class="sd">terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span class="sd">Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="sd">ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span class="sd">PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="sd">You should have received a copy of the GNU General Public License along with the</span>
+<span class="sd">DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">********************************************************************************&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">daetools.pyDAE</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">leastsq</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">cholesky</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">distributions</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Levenberg–Marquardt algorithm (LMA) provides a numerical solution to the problem of </span>
+<span class="sd">minimizing a function, generally nonlinear, over a space of parameters of the function.</span>
+<span class="sd">The main properties:</span>
+<span class="sd"> - LMA is a blend of Gradient descent and Gauss-Newton iteration</span>
+<span class="sd"> - LMA finds only a local minimum, not a global minimum</span>
+<span class="sd"> - It only optimises for residual errors in the dependant variable (y);</span>
+<span class="sd">   any errors in the independent variable are zero or considered to be negligible</span>
+<span class="sd"> - Fobj = sum[ (yi - f(xi, p))^2 ]; i = [1, m]</span>
+<span class="sd"> - Damping parameter λ (here given as argument called &#39;factor&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values</span>
+<span class="k">def</span> <span class="nf">Calculate</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">minpack</span><span class="p">,</span> <span class="n">calc_values</span><span class="p">):</span>
+    <span class="c"># col_deriv must be True</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">derivs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">Nparameters</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="n">r_values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">*</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">*</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">r_derivs</span> <span class="o">=</span> <span class="n">derivs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">Nparameters</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">*</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">*</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Set the reporting times:</span>
+        <span class="k">if</span> <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">IsModelDynamic</span><span class="p">:</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">ReportingTimes</span> <span class="o">=</span> <span class="n">times</span>
+            <span class="c"># print minpack.simulation.ReportingTimes</span>
+        
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">):</span>
+            <span class="c"># Set initial conditions, initial guesses, initially active states etc</span>
+            <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">SetUpVariables</span><span class="p">()</span>
+        
+            <span class="c"># Assign the input data for the simulation</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ninput_variables</span><span class="p">):</span>
+                <span class="n">minpack</span><span class="o">.</span><span class="n">x_input_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="c"># print minpack.x_input_variables[i].Name, minpack.x_input_variables[i].Value</span>
+            
+            <span class="c"># Set the parameters values</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nparameters</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">minpack</span><span class="o">.</span><span class="n">enforce_parameters_bounds</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">LowerBound</span><span class="p">:</span>
+                        <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">LowerBound</span>
+                    <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">UpperBound</span><span class="p">:</span>
+                        <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">UpperBound</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">minpack</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c"># print minpack.parameters[i].Name, minpack.parameters[i].Value</span>
+            
+            <span class="c"># Run the simulation</span>
+            <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Reset</span><span class="p">()</span>
+            <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">SolveInitial</span><span class="p">()</span>
+            <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">ReportData</span><span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">CurrentTime</span><span class="p">)</span>
+            
+            <span class="n">ct</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">IsModelDynamic</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">CurrentTime</span> <span class="o">&lt;</span> <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">TimeHorizon</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">NextReportingTime</span>
+                    <span class="c"># print &#39;Integrating from {0} to {1}...&#39;.format(minpack.simulation.CurrentTime, t)</span>
+
+                    <span class="c"># Do not stop at discontinuity and do not report data around discontinuities!!!</span>
+                    <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">IntegrateUntilTime</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">eDoNotStopAtDiscontinuity</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                    <span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">ReportData</span><span class="p">(</span><span class="n">minpack</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">CurrentTime</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">):</span>
+                        <span class="n">values</span><span class="p">[</span><span class="n">o</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">ct</span><span class="p">]</span>    <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">y_measured_variables</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">-</span> <span class="n">minpack</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">o</span><span class="p">][</span><span class="n">ct</span><span class="p">]</span>
+                        <span class="n">derivs</span><span class="p">[:,</span> <span class="n">o</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">ct</span><span class="p">]</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">y_measured_variables</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">Gradients</span>
+                        <span class="c">#print &#39;v =&#39;, values[o, e, ct]</span>
+                        <span class="c">#print &#39;d =&#39;, derivs[:, o, e, ct]</span>
+                    <span class="n">ct</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+                <span class="k">if</span> <span class="n">ct</span> <span class="o">!=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;ct = {0} while Ntime_points = {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ct</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minpack</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">):</span>
+                    <span class="n">values</span><span class="p">[</span><span class="n">o</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>    <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">y_measured_variables</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">Value</span> <span class="o">-</span> <span class="n">minpack</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">o</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">derivs</span><span class="p">[:,</span> <span class="n">o</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">minpack</span><span class="o">.</span><span class="n">y_measured_variables</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">Gradients</span>
+                    <span class="c">#print &#39;v =&#39;, values[o, e, 0]</span>
+                    <span class="c">#print &#39;d =&#39;, derivs[:, o, e, 0]</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Exception in function Calculate, for parameters values: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">minpack</span><span class="o">.</span><span class="n">print_residuals_and_jacobian</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Parameters:&#39;</span><span class="p">,</span> <span class="n">p</span>
+        <span class="k">if</span> <span class="n">calc_values</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;  Residuals:&#39;</span>
+            <span class="k">print</span> <span class="n">r_values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;  Derivatives:&#39;</span>
+            <span class="k">print</span> <span class="n">r_derivs</span>
+        
+    <span class="k">if</span> <span class="n">calc_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">r_values</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">r_derivs</span>
+        
+<span class="c"># Function to calculate residuals R = f(x_data, parameters) - y_data:</span>
+<span class="c">#   R[0], R[1], ..., R[n] </span>
+<span class="k">def</span> <span class="nf">Residuals</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="n">minpack</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Calculate</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">minpack</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    
+<span class="c"># Function to calculate Jacobian matrix for residuals R: </span>
+<span class="c"># | dR[0]/dp[0] dR[0]/dp[1] ... dR[0]/dp[n] |</span>
+<span class="c"># | dR[1]/dp[0] dR[1]/dp[1] ... dR[1]/dp[n] |</span>
+<span class="c"># | ...                                     |</span>
+<span class="c"># | dR[n]/dp[0] dR[n]/dp[1] ... dR[n]/dp[n] |</span>
+<span class="k">def</span> <span class="nf">Derivatives</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="n">minpack</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Calculate</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">minpack</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="daeMinpackLeastSq"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq">[docs]</a><span class="k">class</span> <span class="nc">daeMinpackLeastSq</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span>                 <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daesolver</span>                  <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datareporter</span>               <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span>                        <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>                 <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_input_variables</span>          <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_measured_variables</span>       <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p0</span>                         <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span>          <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x2</span>                         <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ndof</span>                       <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span>                      <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>                <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span>           <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span>        <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span>               <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span>               <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span>     <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_residuals_and_jacobian</span>  <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span>                 <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enforce_parameters_bounds</span>     <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c"># Results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span>                <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span>                      <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infodict</span>                   <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>                        <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ier</span>                        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> 
+
+<div class="viewcode-block" id="daeMinpackLeastSq.Initialize"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Initialize">[docs]</a>    <span class="k">def</span> <span class="nf">Initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span> <span class="n">daesolver</span><span class="p">,</span> <span class="n">datareporter</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># Get the inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span>   <span class="o">=</span> <span class="n">simulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daesolver</span>    <span class="o">=</span> <span class="n">daesolver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datareporter</span> <span class="o">=</span> <span class="n">datareporter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span>          <span class="o">=</span> <span class="n">log</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The simulation object cannot be None&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daesolver</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The daesolver object cannot be None&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datareporter</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The datareporter object cannot be None&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The log object cannot be None&#39;</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span>            <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;experimental_data&#39;</span><span class="p">,</span>              <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_residuals_and_jacobian</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;print_residuals_and_jacobian&#39;</span><span class="p">,</span>  <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span>    <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;minpack_leastsq_arguments&#39;</span><span class="p">,</span>        <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enforce_parameters_bounds</span>    <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;enforce_parameters_bounds&#39;</span><span class="p">,</span>     <span class="bp">False</span><span class="p">)</span>
+        
+        <span class="c"># Call simulation.Initialize (with eParameterEstimation mode)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">SimulationMode</span> <span class="o">=</span> <span class="n">eParameterEstimation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daesolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datareporter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">RegisterData</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="c"># Check the inputs</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The simulation object cannot be None&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The log object cannot be None&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span> <span class="o">==</span> <span class="bp">None</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Argument [experimental_data] has not been provided&#39;</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>           <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">ModelParameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_input_variables</span>    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">InputVariables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_measured_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">MeasuredVariables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>          <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_input_variables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_measured_variables</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The number of parameters is equal to zero&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The number of input variables is equal to zero&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;The number of measured variables is equal to zero&#39;</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;[experimental_data] must contain Nexperiments ({0}) number of tuples: ([times], [input_variables], [measured_variables])&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">3</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Each experiment in [experimental_data] must contain tuple: ([time points], [input_variables], [measured_variables])&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Each experiment in [experimental_data] must contain tuple: ([time points], [input_variables], [measured_variables])&#39;</span><span class="p">)</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">exp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">xin</span>   <span class="o">=</span> <span class="n">exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">yout</span>  <span class="o">=</span> <span class="n">exp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Number of time points in each experiment ({0}) must be {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">xin</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Number of input variables in each experiment must be {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">yout</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Number of measured variables in each experiment must be {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">yout</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Number of values in each measured variable must be equal to number of time intervals&#39;</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">StartingPoint</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span>      <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NoOfCalculateCalls</span> <span class="o">=</span> <span class="mi">0</span>
+        </div>
+<div class="viewcode-block" id="daeMinpackLeastSq.Run"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Run">[docs]</a>    <span class="k">def</span> <span class="nf">Run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq object has not been initialized&#39;</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span><span class="p">[</span><span class="s">&#39;full_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span><span class="p">[</span><span class="s">&#39;col_deriv&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">print</span> <span class="s">&#39;minpack.leastsq will proceed with the following arguments:&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;   &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span>
+        
+        <span class="c"># Call scipy.optimize.leastsq (Minpack wrapper)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">infodict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="n">Residuals</span><span class="p">,</span> 
+                                                                                  <span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">,</span> 
+                                                                                  <span class="n">Dfun</span> <span class="o">=</span> <span class="n">Derivatives</span><span class="p">,</span> 
+                                                                                  <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">],</span> 
+                                                                                  <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">minpack_leastsq_arguments</span><span class="p">)</span>
+        
+        <span class="c"># Check the info and calculate the least square statistics</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;MINPACK least square method failed ({0})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">x2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infodict</span><span class="p">[</span><span class="s">&#39;fvec&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ndof</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="daeMinpackLeastSq.Finalize"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Finalize">[docs]</a>    <span class="k">def</span> <span class="nf">Finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Finalize</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="daeMinpackLeastSq.getConfidenceCoefficient"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceCoefficient">[docs]</a>    <span class="k">def</span> <span class="nf">getConfidenceCoefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence</span><span class="p">):</span>
+        <span class="n">Np</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>
+        <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>
+        
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span> <span class="o">/</span> <span class="mf">100.0</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">distributions</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">,</span> <span class="n">Np</span><span class="p">,</span> <span class="n">Ndof</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span>
+        <span class="c"># print &#39;F(1-a = {0}, m = {1}, n = {2}) = {3}&#39;.format(1-alpha, Np, Ndof, k)</span>
+        <span class="k">return</span> <span class="n">k</span>
+        
+    <span class="c"># Returns tuple: [x], [y] coordinates of the ellipse and [x], [y] coordinates of the center (optimal point)</span>
+    <span class="c"># for the given parameter indexes</span></div>
+<div class="viewcode-block" id="daeMinpackLeastSq.getConfidenceEllipsoid"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceEllipsoid">[docs]</a>    <span class="k">def</span> <span class="nf">getConfidenceEllipsoid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_param_index</span><span class="p">,</span> <span class="n">y_param_index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq object has not been initialized&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infodict</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq Run has not been called&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">x_param_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">x_param_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [x_param_index] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">y_param_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y_param_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nparameters</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [y_param_index] argument&#39;</span><span class="p">)</span> 
+        
+        <span class="n">np</span>         <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;no_points&#39;</span><span class="p">,</span>   <span class="mi">100</span><span class="p">)</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;confidence&#39;</span><span class="p">,</span>   <span class="mi">95</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [np] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">confidence</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">confidence</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [confidence] argument&#39;</span><span class="p">)</span> 
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="p">))</span>
+        <span class="n">chol</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span><span class="p">)</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">chol</span><span class="p">[</span><span class="n">x_param_index</span><span class="p">,</span> <span class="n">x_param_index</span><span class="p">]</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">chol</span><span class="p">[</span><span class="n">x_param_index</span><span class="p">,</span> <span class="n">y_param_index</span><span class="p">]</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">chol</span><span class="p">[</span><span class="n">y_param_index</span><span class="p">,</span> <span class="n">x_param_index</span><span class="p">]</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">chol</span><span class="p">[</span><span class="n">y_param_index</span><span class="p">,</span> <span class="n">y_param_index</span><span class="p">]</span>
+        
+        <span class="n">fi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="p">))</span>
+        <span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span><span class="p">[</span><span class="n">x_param_index</span><span class="p">]</span>
+        <span class="n">M</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span><span class="p">[</span><span class="n">y_param_index</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getConfidenceCoefficient</span><span class="p">(</span><span class="n">confidence</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">M</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span><span class="p">[</span><span class="n">x_param_index</span><span class="p">]],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span><span class="p">[</span><span class="n">y_param_index</span><span class="p">]])</span>
+
+    <span class="c"># Returns tuple: [x], [y_fit] and [y_exp] coordinates for the given input_variable and measured_variable indexes</span></div>
+<div class="viewcode-block" id="daeMinpackLeastSq.getFit_SS"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_SS">[docs]</a>    <span class="k">def</span> <span class="nf">getFit_SS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_variable_index</span><span class="p">,</span> <span class="n">measured_variable_index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span> <span class="o">==</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq has not been initialized&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infodict</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq Run has not been called&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">measured_variable_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">measured_variable_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [measured_variable_index] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">input_variable_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">input_variable_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ninput_variables</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [input_variable_index] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;In order to call getFit_SS function the number of time points must be equal to 1&#39;</span><span class="p">)</span> 
+        
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infodict</span><span class="p">[</span><span class="s">&#39;fvec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+        
+        <span class="n">x_axis</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y_fit</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y_exp</span>  <span class="o">=</span> <span class="p">[]</span>        
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">):</span>
+            <span class="n">x_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">input_variable_index</span><span class="p">])</span>
+            <span class="n">y_fit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">measured_variable_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="n">measured_variable_index</span><span class="p">][</span><span class="n">e</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">y_exp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">measured_variable_index</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_exp</span><span class="p">,</span> <span class="n">y_fit</span>
+</div>
+<div class="viewcode-block" id="daeMinpackLeastSq.getFit_Dyn"><a class="viewcode-back" href="../../../solvers.html#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_Dyn">[docs]</a>    <span class="k">def</span> <span class="nf">getFit_Dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measured_variable_index</span><span class="p">,</span> <span class="n">experiment_index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IsInitialized</span> <span class="o">==</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq has not been initialized&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_estimated</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov_x</span> <span class="o">==</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infodict</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;daeMinpackLeastSq Run has not been called&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">measured_variable_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">measured_variable_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [measured_variable_index] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">experiment_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">experiment_index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid [experiment_index] argument&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;In order to call getFit_Dyn function the number of time points must be greater than 1&#39;</span><span class="p">)</span> 
+        
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infodict</span><span class="p">[</span><span class="s">&#39;fvec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmeasured_variables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nexperiments</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntime_points</span><span class="p">)</span> <span class="p">)</span>
+        
+        <span class="c"># x_axis = time points</span>
+        <span class="n">x_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_fit</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">measured_variable_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="n">measured_variable_index</span><span class="p">,</span> <span class="n">experiment_index</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">y_exp</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimental_data</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">measured_variable_index</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_exp</span><span class="p">,</span> <span class="n">y_fit</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 03, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -371,8 +371,48 @@
 </dd></dl>
 
 </div>
-<div class="section" id="module-solvers.daeMinpackLeastSq">
-<span id="parameter-estimation-solvers"></span><h2>4.3. Parameter estimation solvers<a class="headerlink" href="#module-solvers.daeMinpackLeastSq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="parameter-estimation-solvers">
+<h2>4.3. Parameter estimation solvers<a class="headerlink" href="#parameter-estimation-solvers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq">
+<em class="property">class </em><tt class="descclassname">daetools.solvers.daeMinpackLeastSq.</tt><tt class="descname">daeMinpackLeastSq</tt><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Finalize">
+<tt class="descname">Finalize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.Finalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Finalize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Initialize">
+<tt class="descname">Initialize</tt><big>(</big><em>simulation</em>, <em>daesolver</em>, <em>datareporter</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.Initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Run">
+<tt class="descname">Run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.Run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.Run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceCoefficient">
+<tt class="descname">getConfidenceCoefficient</tt><big>(</big><em>confidence</em><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.getConfidenceCoefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceCoefficient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceEllipsoid">
+<tt class="descname">getConfidenceEllipsoid</tt><big>(</big><em>x_param_index</em>, <em>y_param_index</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.getConfidenceEllipsoid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getConfidenceEllipsoid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_Dyn">
+<tt class="descname">getFit_Dyn</tt><big>(</big><em>measured_variable_index</em>, <em>experiment_index</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.getFit_Dyn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_Dyn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_SS">
+<tt class="descname">getFit_SS</tt><big>(</big><em>input_variable_index</em>, <em>measured_variable_index</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/solvers/daeMinpackLeastSq.html#daeMinpackLeastSq.getFit_SS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq.getFit_SS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
 </div>
 </div>
@@ -391,7 +431,7 @@
 <li><a class="reference internal" href="#">4. Third party solvers</a><ul>
 <li><a class="reference internal" href="#module-solvers.superlu.pySuperLU">4.1. Linear solvers</a></li>
 <li><a class="reference internal" href="#module-solvers.ipopt.pyIPOPT">4.2. Optimization solvers</a></li>
-<li><a class="reference internal" href="#module-solvers.daeMinpackLeastSq">4.3. Parameter estimation solvers</a></li>
+<li><a class="reference internal" href="#parameter-estimation-solvers">4.3. Parameter estimation solvers</a></li>
 </ul>
 </li>
 </ul>

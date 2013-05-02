@@ -1,0 +1,572 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.code_generators.analyzer &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.code_generators.analyzer</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">daetools.pyDAE</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="daeCodeGeneratorAnalyzer"><a class="viewcode-back" href="../../../code_generators.html#daetools.code_generators.analyzer.daeCodeGeneratorAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">daeCodeGeneratorAnalyzer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span>        <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ports</span>              <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dictPorts</span>          <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span>             <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dictModels</span>         <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="daeCodeGeneratorAnalyzer.analyzeSimulation"><a class="viewcode-back" href="../../../code_generators.html#daetools.code_generators.analyzer.daeCodeGeneratorAnalyzer.analyzeSimulation">[docs]</a>    <span class="k">def</span> <span class="nf">analyzeSimulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">simulation</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Invalid simulation object&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span>        <span class="o">=</span> <span class="n">simulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ports</span>              <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dictPorts</span>          <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span>             <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dictModels</span>         <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;Domains&#39;</span>         <span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s">&#39;Parameters&#39;</span>      <span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s">&#39;Variables&#39;</span>       <span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s">&#39;Equations&#39;</span>       <span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s">&#39;STNs&#39;</span>            <span class="p">:</span> <span class="p">[],</span>
+                                    <span class="s">&#39;PortConnections&#39;</span> <span class="p">:</span> <span class="p">[]</span>
+                                  <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collectObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="c">#print self.ports</span>
+        <span class="c">#print self.models</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">port_class</span><span class="p">,</span> <span class="n">dict_port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzePort</span><span class="p">(</span><span class="n">dict_port</span><span class="p">[</span><span class="s">&#39;port&#39;</span><span class="p">])</span>
+            <span class="c"># Update dict_port</span>
+            <span class="n">dict_port</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="k">for</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">dict_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzeModel</span><span class="p">(</span><span class="n">dict_model</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">])</span>
+            <span class="c"># Update dict_model</span>
+            <span class="n">dict_model</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;ModelType&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">ModelType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;IsModelDynamic&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">IsModelDynamic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;TotalNumberOfVariables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">TotalNumberOfVariables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;NumberOfEquations&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">NumberOfEquations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;IDs&#39;</span><span class="p">]</span>                    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">VariableTypes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;InitialValues&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">InitialValues</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;InitialDerivatives&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">InitialDerivatives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;IndexMappings&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">IndexMappings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;RelativeTolerance&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">RelativeTolerance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;AbsoluteTolerances&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">AbsoluteTolerances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;TimeHorizon&#39;</span><span class="p">]</span>            <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">TimeHorizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;ReportingInterval&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">ReportingInterval</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collectRuntimeInformationFromModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulation</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+       </div>
+<div class="viewcode-block" id="daeCodeGeneratorAnalyzer.analyzePort"><a class="viewcode-back" href="../../../code_generators.html#daetools.code_generators.analyzer.daeCodeGeneratorAnalyzer.analyzePort">[docs]</a>    <span class="k">def</span> <span class="nf">analyzePort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;Class&#39;</span>         <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;Parameters&#39;</span>    <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Domains&#39;</span>       <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Variables&#39;</span>     <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;VariableTypes&#39;</span> <span class="p">:</span> <span class="p">{}</span>
+                 <span class="p">}</span>
+                 
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">Domains</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Modelica ports cannot contain domains&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">Parameters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Modelica ports cannot contain domains&#39;</span><span class="p">)</span>
+
+        <span class="c"># Domains</span>
+        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Domains</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>                <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Units</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfIntervals&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfIntervals</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationMethod</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationOrder&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationOrder</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># Parameters</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Parameters</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>                <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Units</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">Domains</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Modelica ports cannot contain distributed variables&#39;</span><span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="p">[</span><span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Description</span>
+            <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">IDs</span> <span class="o">=</span> <span class="p">[</span><span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">IDs</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span>
+            <span class="k">if</span> <span class="n">cnDifferential</span> <span class="ow">in</span> <span class="n">IDs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;differential&#39;</span>
+            <span class="k">elif</span> <span class="n">cnAssigned</span> <span class="ow">in</span> <span class="n">IDs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;assigned&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;algebraic&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">]:</span>
+                <span class="n">vt_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Units</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;LowerBound&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">LowerBound</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;UpperBound&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">UpperBound</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;InitialGuess&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">InitialGuess</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;AbsoluteTolerance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">AbsoluteTolerance</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">]:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">][</span><span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vt_data</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Variables&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+    </div>
+<div class="viewcode-block" id="daeCodeGeneratorAnalyzer.analyzeModel"><a class="viewcode-back" href="../../../code_generators.html#daetools.code_generators.analyzer.daeCodeGeneratorAnalyzer.analyzeModel">[docs]</a>    <span class="k">def</span> <span class="nf">analyzeModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;Class&#39;</span>                <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;CanonicalName&#39;</span>        <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;VariableTypes&#39;</span>        <span class="p">:</span> <span class="p">{},</span>
+                   <span class="s">&#39;Parameters&#39;</span>           <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Domains&#39;</span>              <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Variables&#39;</span>            <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Ports&#39;</span>                <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Components&#39;</span>           <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;Equations&#39;</span>            <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;PortConnections&#39;</span>      <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;EventPortConnections&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+                   <span class="s">&#39;STNs&#39;</span>                 <span class="p">:</span> <span class="p">[]</span>
+                 <span class="p">}</span>
+ 
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">CanonicalName</span>
+        
+        <span class="c"># Domains</span>
+        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Domains</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>                <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Units</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfIntervals&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfIntervals</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationMethod</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationOrder&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationOrder</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># Parameters</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Parameters</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>                <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Units</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        
+        <span class="c"># Variables</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="p">[</span><span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Description</span>
+            <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">IDs</span> <span class="o">=</span> <span class="p">[</span><span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">IDs</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span>
+            <span class="k">if</span> <span class="n">cnDifferential</span> <span class="ow">in</span> <span class="n">IDs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;differential&#39;</span>
+            <span class="k">elif</span> <span class="n">cnAssigned</span> <span class="ow">in</span> <span class="n">IDs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;assigned&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;algebraic&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">]:</span>
+                <span class="n">vt_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;Units&#39;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Units</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;LowerBound&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">LowerBound</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;UpperBound&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">UpperBound</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;InitialGuess&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">InitialGuess</span>
+                <span class="n">vt_data</span><span class="p">[</span><span class="s">&#39;AbsoluteTolerance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">AbsoluteTolerance</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">]:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s">&#39;VariableTypes&#39;</span><span class="p">][</span><span class="n">variable</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vt_data</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Variables&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># PortConnections</span>
+        <span class="k">for</span> <span class="n">port_connection</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">PortConnections</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;PortFrom&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">port_connection</span><span class="o">.</span><span class="n">PortFrom</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;PortTo&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">port_connection</span><span class="o">.</span><span class="n">PortTo</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Equations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processEquations</span><span class="p">(</span><span class="n">port_connection</span><span class="o">.</span><span class="n">Equations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;PortConnections&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># Ports</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Ports</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Ports&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># equations</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;Equations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processEquations</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Equations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+        <span class="c"># StateTransitionNetworks</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;STNs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processSTNs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">STNs</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+        <span class="c"># Components</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Components</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">Description</span>
+
+            <span class="n">result</span><span class="p">[</span><span class="s">&#39;Components&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="k">def</span> <span class="nf">_collectObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dictModels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dictModels</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;model&#39;</span> <span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">})</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Ports</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">port</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dictPorts</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dictPorts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;port&#39;</span> <span class="p">:</span> <span class="n">port</span><span class="p">,</span> <span class="s">&#39;data&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">})</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Components</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collectObjects</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_processEquations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">eqns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">equation</span> <span class="ow">in</span> <span class="n">equations</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>                           <span class="o">=</span> <span class="n">equation</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Scaling&#39;</span><span class="p">]</span>                        <span class="o">=</span> <span class="n">equation</span><span class="o">.</span><span class="n">Scaling</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Residual&#39;</span><span class="p">]</span>                       <span class="o">=</span> <span class="n">equation</span><span class="o">.</span><span class="n">Residual</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>                    <span class="o">=</span> <span class="n">equation</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;EquationType&#39;</span><span class="p">]</span>                   <span class="o">=</span> <span class="n">equation</span><span class="o">.</span><span class="n">EquationType</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DistributedEquationDomainInfos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">dedi</span> <span class="ow">in</span> <span class="n">equation</span><span class="o">.</span><span class="n">DistributedEquationDomainInfos</span><span class="p">:</span>
+                <span class="n">dedi_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">dedi_data</span><span class="p">[</span><span class="s">&#39;Domain&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">dedi</span><span class="o">.</span><span class="n">Domain</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">dedi_data</span><span class="p">[</span><span class="s">&#39;DomainBounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dedi</span><span class="o">.</span><span class="n">DomainBounds</span><span class="p">)</span>
+                <span class="n">dedi_data</span><span class="p">[</span><span class="s">&#39;DomainPoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dedi</span><span class="o">.</span><span class="n">DomainPoints</span>
+                
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;DistributedEquationDomainInfos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dedi_data</span><span class="p">)</span>
+
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;EquationExecutionInfos&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">eeinfo</span> <span class="ow">in</span> <span class="n">equation</span><span class="o">.</span><span class="n">EquationExecutionInfos</span><span class="p">:</span>
+                <span class="n">eedata</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">eedata</span><span class="p">[</span><span class="s">&#39;ResidualRuntimeNode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eeinfo</span><span class="o">.</span><span class="n">Node</span>
+                <span class="n">eedata</span><span class="p">[</span><span class="s">&#39;VariableIndexes&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">eeinfo</span><span class="o">.</span><span class="n">VariableIndexes</span>
+                <span class="n">eedata</span><span class="p">[</span><span class="s">&#39;EquationType&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">eeinfo</span><span class="o">.</span><span class="n">EquationType</span><span class="p">)</span>
+
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;EquationExecutionInfos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eedata</span><span class="p">)</span>
+
+            <span class="n">eqns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">eqns</span>
+                    
+    <span class="k">def</span> <span class="nf">_processSTNs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">STNs</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">stns</span>  <span class="o">=</span> <span class="p">[]</span>        
+        <span class="k">for</span> <span class="n">stn</span> <span class="ow">in</span> <span class="n">STNs</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stn</span><span class="p">,</span> <span class="n">daeIF</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;daeIF&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;Class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;daeSTN&#39;</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">stn</span><span class="o">.</span><span class="n">Name</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stn</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">stn</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;ActiveState&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">stn</span><span class="o">.</span><span class="n">ActiveState</span>
+            <span class="n">stateMap</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stn</span><span class="o">.</span><span class="n">States</span><span class="p">):</span>
+                <span class="n">stateMap</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;StateMap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stateMap</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;States&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stn</span><span class="o">.</span><span class="n">States</span><span class="p">):</span>
+                <span class="n">state_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">state_data</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">state_data</span><span class="p">[</span><span class="s">&#39;Equations&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processEquations</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">Equations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+                <span class="n">state_data</span><span class="p">[</span><span class="s">&#39;NestedSTNs&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processSTNs</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">NestedSTNs</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+                <span class="n">state_data</span><span class="p">[</span><span class="s">&#39;StateTransitions&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">state_transition</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">StateTransitions</span><span class="p">:</span>
+                    <span class="n">st_data</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">st_data</span><span class="p">[</span><span class="s">&#39;ConditionSetupNode&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">state_transition</span><span class="o">.</span><span class="n">Condition</span><span class="o">.</span><span class="n">SetupNode</span>
+                    <span class="n">st_data</span><span class="p">[</span><span class="s">&#39;ConditionRuntimeNode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_transition</span><span class="o">.</span><span class="n">Condition</span><span class="o">.</span><span class="n">RuntimeNode</span>
+                    <span class="n">st_data</span><span class="p">[</span><span class="s">&#39;EventTolerance&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">state_transition</span><span class="o">.</span><span class="n">Condition</span><span class="o">.</span><span class="n">EventTolerance</span>
+                    <span class="n">st_data</span><span class="p">[</span><span class="s">&#39;Expressions&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">state_transition</span><span class="o">.</span><span class="n">Condition</span><span class="o">.</span><span class="n">Expressions</span>
+                    <span class="n">st_data</span><span class="p">[</span><span class="s">&#39;Actions&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processActions</span><span class="p">(</span><span class="n">state_transition</span><span class="o">.</span><span class="n">Actions</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+                    <span class="n">state_data</span><span class="p">[</span><span class="s">&#39;StateTransitions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st_data</span><span class="p">)</span>
+
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;States&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_data</span><span class="p">)</span>
+
+            <span class="n">stns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">stns</span>
+
+    <span class="k">def</span> <span class="nf">_processActions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">sActions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">eChangeState</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;STN&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">STN</span><span class="o">.</span><span class="n">Name</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;STNCanonicalName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">STN</span><span class="o">.</span><span class="n">CanonicalName</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;StateTo&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">StateTo</span><span class="o">.</span><span class="n">Name</span>
+
+            <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">eSendEvent</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;SendEventPort&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">daeGetRelativeName</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">action</span><span class="o">.</span><span class="n">SendEventPort</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;VariableWrapper&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span>
+
+            <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">eReAssignOrReInitializeVariable</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;VariableWrapper&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;SetupNode&#39;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">SetupNode</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;RuntimeNode&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">RuntimeNode</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;DomainIndexes&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span><span class="o">.</span><span class="n">DomainIndexes</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;VariableCanonicalName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span><span class="o">.</span><span class="n">Variable</span><span class="o">.</span><span class="n">CanonicalName</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;OverallIndex&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span><span class="o">.</span><span class="n">OverallIndex</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;ID&#39;</span><span class="p">]</span>                    <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">VariableWrapper</span><span class="o">.</span><span class="n">VariableType</span>
+
+            <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="n">eUserDefinedAction</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;User defined actions are not supported&#39;</span><span class="p">)</span>
+       
+            <span class="n">sActions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sActions</span>
+
+    <span class="k">def</span> <span class="nf">_collectRuntimeInformationFromModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Domains</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfIntervals&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfIntervals</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationMethod</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationOrder&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationOrder</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Points&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">npyPoints</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Parameters</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Values&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">npyValues</span>                <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DomainsIndexesMap&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">GetDomainsIndexesMap</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># {index : [domains indexes]}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;ReportingOn&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">ReportingOn</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;OverallIndex&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">OverallIndex</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Values&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyValues</span>                <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;IDs&#39;</span><span class="p">]</span>                  <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span>                   <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DomainsIndexesMap&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">GetDomainsIndexesMap</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># {index : [domains indexes]}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;ReportingOn&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">ReportingOn</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Variables&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Ports</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collectRuntimeInformationFromPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">port_connection</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">PortConnections</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;PortFrom&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">port_connection</span><span class="o">.</span><span class="n">PortFrom</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;PortTo&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">port_connection</span><span class="o">.</span><span class="n">PortTo</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Equations&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processEquations</span><span class="p">(</span><span class="n">port_connection</span><span class="o">.</span><span class="n">Equations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;PortConnections&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># OLD</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        for stn in model.STNs:</span>
+<span class="sd">            if isinstance(stn, daeSTN):</span>
+<span class="sd">                data = {}</span>
+<span class="sd">                if isinstance(stn, daeIF):</span>
+<span class="sd">                    data[&#39;Class&#39;] = &#39;daeIF&#39;</span>
+<span class="sd">                else:</span>
+<span class="sd">                    data[&#39;Class&#39;] = &#39;daeSTN&#39;</span>
+<span class="sd">                data[&#39;CanonicalName&#39;]   = stn.CanonicalName</span>
+<span class="sd">                data[&#39;ActiveState&#39;]     = stn.ActiveState</span>
+<span class="sd">                stateMap = {}</span>
+<span class="sd">                for i, state in enumerate(stn.States):</span>
+<span class="sd">                    stateMap[state.Name] = i</span>
+<span class="sd">                data[&#39;StateMap&#39;]        = stateMap</span>
+
+<span class="sd">                self.runtimeInformation[&#39;STNs&#39;].append(data)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># equations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Equations&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processEquations</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Equations</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c"># StateTransitionNetworks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;STNs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processSTNs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">STNs</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Components</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collectRuntimeInformationFromModel</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_collectRuntimeInformationFromPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Domains</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Type&#39;</span><span class="p">]</span>                 <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfIntervals&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfIntervals</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationMethod</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DiscretizationOrder&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">DiscretizationOrder</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Points&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">npyPoints</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Parameters</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">parameter</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Values&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">npyValues</span>                <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DomainsIndexesMap&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">GetDomainsIndexesMap</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># {index : [domains indexes]}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;ReportingOn&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">ReportingOn</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;CanonicalName&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">CanonicalName</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Description&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">Description</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Domains&#39;</span><span class="p">]</span>              <span class="o">=</span> <span class="p">[</span><span class="n">domain</span><span class="o">.</span><span class="n">NumberOfPoints</span> <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">Domains</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;NumberOfPoints&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">NumberOfPoints</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;OverallIndex&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">OverallIndex</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Values&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyValues</span>                <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;IDs&#39;</span><span class="p">]</span>                  <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">npyIDs</span>                   <span class="c"># nd_array[d1][d2]...[dn] or float if no domains</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;DomainsIndexesMap&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">GetDomainsIndexesMap</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># {index : [domains indexes]}</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;ReportingOn&#39;</span><span class="p">]</span>          <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">ReportingOn</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runtimeInformation</span><span class="p">[</span><span class="s">&#39;Variables&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 03, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
