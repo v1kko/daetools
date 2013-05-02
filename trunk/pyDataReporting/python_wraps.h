@@ -24,6 +24,17 @@
 
 namespace daepython
 {
+template<typename ITEM>
+boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(boost::ref(arrItems[i]));
+
+    return l;
+}
+
 /*******************************************************
 	daeDataReporter
 *******************************************************/
@@ -471,6 +482,11 @@ public:
 	daeDelegateDataReporterWrapper(void)
 	{
 	}
+    
+    boost::python::list GetDataReporters()
+    {
+        return getListFromVector(m_ptrarrDataReporters);        
+    }
 
 	bool Connect(const string& strConnectString, const string& strProcessName)
 	{
@@ -889,7 +905,7 @@ public:
 		return this->get_override("Stop")();
 	}
 	
-	daeDataReporterProcess*	GetProcess(void)
+	daeDataReceiverProcess*	GetProcess(void)
 	{
 		return this->get_override("GetProcess")();
 	}
@@ -935,14 +951,14 @@ public:
         return this->daeTCPIPDataReceiver::Stop();
 	}
 
-	daeDataReporterProcess* GetProcess()
+	daeDataReceiverProcess* GetProcess()
 	{
         if(boost::python::override f = this->get_override("GetProcess"))
             return f();
 		else
 			return this->daeTCPIPDataReceiver::GetProcess();
 	}
-	daeDataReporterProcess* def_GetProcess()
+	daeDataReceiverProcess* def_GetProcess()
 	{
         return this->daeTCPIPDataReceiver::GetProcess();
 	}
@@ -999,7 +1015,7 @@ public:
 		return m_ptrarrDataReceivers.size();
 	}
 	
-	daeDataReporterProcess* GetProcess(size_t nIndex)
+	daeDataReceiverProcess* GetProcess(size_t nIndex)
 	{
 		return m_ptrarrDataReceivers[nIndex]->GetProcess();
 	}
@@ -1009,7 +1025,7 @@ public:
 		boost::python::list l;
 		boost::python::object o;
 		daeTCPIPDataReceiver* pDataReceiver;
-		daeDataReporterProcess* obj;
+		daeDataReceiverProcess* obj;
 	
 		for(size_t i = 0; i < m_ptrarrDataReceivers.size(); i++)
 		{
@@ -1021,170 +1037,170 @@ public:
 	}
 };	
 
-class daeHybridDataReporterReceiverWrapper : public daeHybridDataReporterReceiver,
-	                                         public boost::python::wrapper<daeHybridDataReporterReceiver>
-{
-public:
-	daeHybridDataReporterReceiverWrapper(void)
-	{
-	}
+//class daeHybridDataReporterReceiverWrapper : public daeHybridDataReporterReceiver,
+//	                                         public boost::python::wrapper<daeHybridDataReporterReceiver>
+//{
+//public:
+//	daeHybridDataReporterReceiverWrapper(void)
+//	{
+//	}
 
-	bool Connect(const string& strConnectString, const string& strProcessName)
-	{
-        if(boost::python::override f = this->get_override("Connect"))
-            return f(strConnectString, strProcessName);
-		else
-			return this->daeHybridDataReporterReceiver::Connect(strConnectString, strProcessName);
-	}
-	bool def_Connect(const string& strConnectString, const string& strProcessName)
-	{
-        return this->daeHybridDataReporterReceiver::Connect(strConnectString, strProcessName);
-	}
+//	bool Connect(const string& strConnectString, const string& strProcessName)
+//	{
+//        if(boost::python::override f = this->get_override("Connect"))
+//            return f(strConnectString, strProcessName);
+//		else
+//			return this->daeHybridDataReporterReceiver::Connect(strConnectString, strProcessName);
+//	}
+//	bool def_Connect(const string& strConnectString, const string& strProcessName)
+//	{
+//        return this->daeHybridDataReporterReceiver::Connect(strConnectString, strProcessName);
+//	}
 
-	bool Disconnect(void)
-	{
-        if(boost::python::override f = this->get_override("Disconnect"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::Disconnect();
-	}
-	bool def_Disconnect(void)
-	{
-        return this->daeHybridDataReporterReceiver::Disconnect();
-	}
+//	bool Disconnect(void)
+//	{
+//        if(boost::python::override f = this->get_override("Disconnect"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::Disconnect();
+//	}
+//	bool def_Disconnect(void)
+//	{
+//        return this->daeHybridDataReporterReceiver::Disconnect();
+//	}
 
-	bool IsConnected(void)
-	{
-        if(boost::python::override f = this->get_override("IsConnected"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::IsConnected();
-	}
-	bool def_IsConnected(void)
-	{
-        return this->daeHybridDataReporterReceiver::IsConnected();
-	}
+//	bool IsConnected(void)
+//	{
+//        if(boost::python::override f = this->get_override("IsConnected"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::IsConnected();
+//	}
+//	bool def_IsConnected(void)
+//	{
+//        return this->daeHybridDataReporterReceiver::IsConnected();
+//	}
 
-	bool StartRegistration(void)
-	{
-        if(boost::python::override f = this->get_override("StartRegistration"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::StartRegistration();
-	}
-	bool def_StartRegistration(void)
-	{
-        return this->daeHybridDataReporterReceiver::StartRegistration();
-	}
+//	bool StartRegistration(void)
+//	{
+//        if(boost::python::override f = this->get_override("StartRegistration"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::StartRegistration();
+//	}
+//	bool def_StartRegistration(void)
+//	{
+//        return this->daeHybridDataReporterReceiver::StartRegistration();
+//	}
 
-	bool RegisterDomain(const daeDataReporterDomain* pDomain)
-	{
-        if(boost::python::override f = this->get_override("RegisterDomain"))
-            return f(pDomain);
-		else
-			return this->daeHybridDataReporterReceiver::RegisterDomain(pDomain);
-	}
-	bool def_RegisterDomain(const daeDataReporterDomain* pDomain)
-	{
-        return this->daeHybridDataReporterReceiver::RegisterDomain(pDomain);
-	}
+//	bool RegisterDomain(const daeDataReporterDomain* pDomain)
+//	{
+//        if(boost::python::override f = this->get_override("RegisterDomain"))
+//            return f(pDomain);
+//		else
+//			return this->daeHybridDataReporterReceiver::RegisterDomain(pDomain);
+//	}
+//	bool def_RegisterDomain(const daeDataReporterDomain* pDomain)
+//	{
+//        return this->daeHybridDataReporterReceiver::RegisterDomain(pDomain);
+//	}
 
-	bool RegisterVariable(const daeDataReporterVariable* pVariable)
-	{
-        if(boost::python::override f = this->get_override("RegisterVariable"))
-            return f(pVariable);
-		else
-			return this->daeHybridDataReporterReceiver::RegisterVariable(pVariable);
-	}
-	bool def_RegisterVariable(const daeDataReporterVariable* pVariable)
-	{
-        return this->daeHybridDataReporterReceiver::RegisterVariable(pVariable);
-	}
+//	bool RegisterVariable(const daeDataReporterVariable* pVariable)
+//	{
+//        if(boost::python::override f = this->get_override("RegisterVariable"))
+//            return f(pVariable);
+//		else
+//			return this->daeHybridDataReporterReceiver::RegisterVariable(pVariable);
+//	}
+//	bool def_RegisterVariable(const daeDataReporterVariable* pVariable)
+//	{
+//        return this->daeHybridDataReporterReceiver::RegisterVariable(pVariable);
+//	}
 
-	bool EndRegistration(void)
-	{
-        if(boost::python::override f = this->get_override("EndRegistration"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::EndRegistration();
-	}
-	bool def_EndRegistration(void)
-	{
-        return this->daeHybridDataReporterReceiver::EndRegistration();
-	}
+//	bool EndRegistration(void)
+//	{
+//        if(boost::python::override f = this->get_override("EndRegistration"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::EndRegistration();
+//	}
+//	bool def_EndRegistration(void)
+//	{
+//        return this->daeHybridDataReporterReceiver::EndRegistration();
+//	}
 
-	bool StartNewResultSet(real_t dTime)
-	{
-        if(boost::python::override f = this->get_override("StartNewResultSet"))
-            return f(dTime);
-		else
-			return this->daeHybridDataReporterReceiver::StartNewResultSet(dTime);
-	}
-	bool def_StartNewResultSet(real_t dTime)
-	{
-        return this->daeHybridDataReporterReceiver::StartNewResultSet(dTime);
-	}
+//	bool StartNewResultSet(real_t dTime)
+//	{
+//        if(boost::python::override f = this->get_override("StartNewResultSet"))
+//            return f(dTime);
+//		else
+//			return this->daeHybridDataReporterReceiver::StartNewResultSet(dTime);
+//	}
+//	bool def_StartNewResultSet(real_t dTime)
+//	{
+//        return this->daeHybridDataReporterReceiver::StartNewResultSet(dTime);
+//	}
 
-	bool EndOfData(void)
-	{
-        if(boost::python::override f = this->get_override("EndOfData"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::EndOfData();
-	}
-	bool def_EndOfData(void)
-	{
-        return this->daeHybridDataReporterReceiver::EndOfData();
-	}
+//	bool EndOfData(void)
+//	{
+//        if(boost::python::override f = this->get_override("EndOfData"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::EndOfData();
+//	}
+//	bool def_EndOfData(void)
+//	{
+//        return this->daeHybridDataReporterReceiver::EndOfData();
+//	}
 
-	bool SendVariable(const daeDataReporterVariableValue* pVariableValue)
-	{
-        if(boost::python::override f = this->get_override("SendVariable"))
-            return f(pVariableValue);
-		else
-			return this->daeHybridDataReporterReceiver::SendVariable(pVariableValue);
-	}
-	bool def_SendVariable(const daeDataReporterVariableValue* pVariableValue)
-	{
-        return this->daeHybridDataReporterReceiver::SendVariable(pVariableValue);
-	}
+//	bool SendVariable(const daeDataReporterVariableValue* pVariableValue)
+//	{
+//        if(boost::python::override f = this->get_override("SendVariable"))
+//            return f(pVariableValue);
+//		else
+//			return this->daeHybridDataReporterReceiver::SendVariable(pVariableValue);
+//	}
+//	bool def_SendVariable(const daeDataReporterVariableValue* pVariableValue)
+//	{
+//        return this->daeHybridDataReporterReceiver::SendVariable(pVariableValue);
+//	}
 
-	bool Start()
-	{
-        if(boost::python::override f = this->get_override("Start"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::Start();
-	}
-	bool def_Start()
-	{
-        return this->daeHybridDataReporterReceiver::Start();
-	}
+//	bool Start()
+//	{
+//        if(boost::python::override f = this->get_override("Start"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::Start();
+//	}
+//	bool def_Start()
+//	{
+//        return this->daeHybridDataReporterReceiver::Start();
+//	}
 
-	bool Stop()
-	{
-        if(boost::python::override f = this->get_override("Stop"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::Stop();
-	}
-	bool def_Stop()
-	{
-        return this->daeHybridDataReporterReceiver::Stop();
-	}
+//	bool Stop()
+//	{
+//        if(boost::python::override f = this->get_override("Stop"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::Stop();
+//	}
+//	bool def_Stop()
+//	{
+//        return this->daeHybridDataReporterReceiver::Stop();
+//	}
 
-	daeDataReporterProcess* GetProcess()
-	{
-        if(boost::python::override f = this->get_override("GetProcess"))
-            return f();
-		else
-			return this->daeHybridDataReporterReceiver::GetProcess();
-	}
-	daeDataReporterProcess* def_GetProcess()
-	{
-        return this->daeHybridDataReporterReceiver::GetProcess();
-	}
-};
+//	daeDataReceiverProcess* GetProcess()
+//	{
+//        if(boost::python::override f = this->get_override("GetProcess"))
+//            return f();
+//		else
+//			return this->daeHybridDataReporterReceiver::GetProcess();
+//	}
+//	daeDataReceiverProcess* def_GetProcess()
+//	{
+//        return this->daeHybridDataReporterReceiver::GetProcess();
+//	}
+//};
 
 
 /*******************************************************
@@ -1201,10 +1217,10 @@ boost::python::numeric::array GetTimeValuesDataReceiverVariable(daeDataReceiverV
 boost::python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var);
 
 /*******************************************************
-	daeDataReporterProcess
+	daeDataReceiverProcess
 *******************************************************/
-boost::python::list GetDomainsDataReporterProcess(daeDataReporterProcess& process);
-boost::python::list GetVariablesDataReporterProcess(daeDataReporterProcess& process);
+boost::python::list GetDomainsDataReporterProcess(daeDataReceiverProcess& process);
+boost::python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& process);
 
 }
 

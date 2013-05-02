@@ -1,0 +1,1173 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Getting Started with DAE Tools &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="2. pyDAE User Guide" href="pyDAE_user_guide.html" />
+    <link rel="prev" title="Contents" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyDAE_user_guide.html" title="2. pyDAE User Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started-with-dae-tools">
+<h1>1. Getting Started with DAE Tools<a class="headerlink" href="#getting-started-with-dae-tools" title="Permalink to this headline">¶</a></h1>
+<p>This chapter gives the basic information about what is needed to develop a model of a process, how to simulate/optimize
+it and how to obtain and plot the results of a process simulation/optimization. In general, the simulation/optimization
+of a process consists of three tasks:</p>
+<ol class="arabic simple">
+<li>Modelling of a proces</li>
+<li>Defining a simulation/optimization</li>
+<li>Processing the results</li>
+</ol>
+<div class="section" id="programming-language">
+<h2>1.1. Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> core libraries are written in standard c++. However, <a class="reference external" href="http://www.python.org">Python</a> programming language is
+used as the main modelling language. The main reason for use of Python is (as the authors say):
+<em>&#8220;Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple
+but effective approach to object-oriented programming. Python&#8217;s elegant syntax and dynamic typing, together with its
+interpreted nature, make it an ideal language for scripting and rapid application development in many areas on
+most platforms&#8221;</em> <a class="reference external" href="http://docs.python.org/tutorial">link</a>.</p>
+<p>And: &#8220;<em>Often, programmers fall in love with Python because of the increased productivity it provides. Since there is no
+compilation step, the edit-test-debug cycle is incredibly fast&#8221;</em> <a class="reference external" href="http://www.python.org/doc/essays/blurb">link</a>. Also, please
+have a look on <a class="reference external" href="http://www.python.org/doc/essays/comparisons">a comparison to the other languages</a>. Based on the information
+available online, and according to the personal experience, the python programs are much shorter and take an order of magnitude
+less time to develop it. Initially I developed daePlotter module in c++; it took me about one month of part time coding. But,
+then I moved to python: reimplementing it in PyQt took me just two days (with several new features added), while the code size
+shrank from 24 cpp modules to four python modules only!</p>
+<p><em>&#8220;Where Python code is typically 3-5 times shorter than equivalent Java code, it is often 5-10 times shorter than equivalent
+C++ code! Anecdotal evidence suggests that one Python programmer can finish in two months what two C++ programmers can&#8217;t
+complete in a year. Python shines as a glue language, used to combine components written in C++&#8221;</em>
+<a class="reference external" href="http://www.python.org/doc/essays/comparisons">link</a>.
+Obviously, not everything can be developed in python; for complex projects I still prefer the heavy c++ artillery.</p>
+</div>
+<div class="section" id="the-main-concepts">
+<h2>1.2. The main concepts<a class="headerlink" href="#the-main-concepts" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> contains 5 modules:</p>
+<ul class="simple">
+<li>Core</li>
+<li>Activity</li>
+<li>DataReporting</li>
+<li>IDAS</li>
+<li>Units</li>
+</ul>
+<div class="section" id="core-module">
+<h3>1.2.1. Core module<a class="headerlink" href="#core-module" title="Permalink to this headline">¶</a></h3>
+<p>Core module defines the main modelling concepts:</p>
+<ul class="simple">
+<li><strong>Model</strong></li>
+</ul>
+<blockquote>
+<div><p>A model of the process is a simplified abstraction of real world process/phenomena describing its most important/driving elements and their interactions. In <strong>DAE Tools</strong> models are created by defining their parameters, distribution domains, variables, equations, and ports.</p>
+<ul class="simple">
+<li><strong>Distribution domain</strong></li>
+</ul>
+<blockquote>
+<div>Domain is a general term used to define an array of different objects (parameters, variables, equations but models and ports as well).</div></blockquote>
+<ul class="simple">
+<li><strong>Parameter</strong></li>
+</ul>
+<blockquote>
+<div>Parameter can be defined as a time invariant quantity that will not change during a simulation.</div></blockquote>
+<ul class="simple">
+<li><strong>Variable</strong></li>
+</ul>
+<blockquote>
+<div>Variable can be defined as a time variant quantity, also called a <em>state variable</em>.</div></blockquote>
+<ul class="simple">
+<li><strong>Equation</strong></li>
+</ul>
+<blockquote>
+<div>Equation can be defined as an expression used to calculate a variable value, which can be created
+by performing basic mathematical operations (+, -, <a href="#id3"><span class="problematic" id="id4">*</span></a>, /) and functions (such as sin, cos, tan, sqrt, log, ln, exp, pow, abs etc)
+on parameter and variable values (and time and partial derivatives as well).</div></blockquote>
+<ul class="simple">
+<li><strong>State transition network</strong></li>
+</ul>
+<blockquote>
+<div>State transition networks are used to model a special type of equations:
+<em>discontinuous equation*s. Discontinuous equations are equations that take different forms subject to certain conditions.
+They are composed of a finite number of *states</em>.</div></blockquote>
+<ul class="simple">
+<li><strong>State</strong></li>
+</ul>
+<blockquote>
+<div>States can be defined as a set of actions (in our case a set of equations) under current operating conditions.
+In addition, every state contains a set of state transitions which describe conditions
+when the state changes occur.</div></blockquote>
+<ul class="simple">
+<li><strong>State Transition</strong></li>
+</ul>
+<blockquote>
+<div>State transition can be defined as a transition from the current to some other state, subject to given conditions.</div></blockquote>
+<ul class="simple">
+<li><strong>Port</strong></li>
+</ul>
+<blockquote>
+<div>Ports are objects used to connect two model instances and exchange continuous information.
+Like models, they may contain domains, parameters and variables.</div></blockquote>
+<ul class="simple">
+<li><strong>EventPort</strong></li>
+</ul>
+<blockquote>
+<div>Event ports are objects used to connect two model instances and exchange discrete information (events/messages).</div></blockquote>
+</div></blockquote>
+<ul class="simple">
+<li><strong>Simulation</strong></li>
+</ul>
+<blockquote>
+<div>Simulation of a process can be considered as the model run for certain input conditions.
+To define a simulation, several tasks are necessary such as: specifying information about domains and parameters,
+fixing the degrees of freedom by assigning values to certain variables, setting the initial conditions and many other
+(setting the initial guesses, absolute tolerances, etc).</div></blockquote>
+<ul class="simple">
+<li><strong>Optimization</strong></li>
+</ul>
+<blockquote>
+<div><p>Process optimization can be considered as a process adjustment so as to minimize or maximize a specified goal while
+satisfying imposed set of constraints. The most common goals are minimizing cost, maximizing throughput, and/or
+efficiency. In general there are three types of parameters that can be adjusted to affect optimal performance:</p>
+<ul class="simple">
+<li>Equipment optimization</li>
+<li>Operating procedures</li>
+<li>Control optimization</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><strong>Solver</strong></li>
+</ul>
+<blockquote>
+<div>Solver is a set of mathematical procedures/algorithms necessary to solve a given set of equations.
+There are several types of solvers: Linear Algebraic solvers (<strong>LA</strong>), used to solve linear systems of equations;
+Nonlinear Algebraic solvers (<strong>NLA</strong>), used to solve non-linear systems of equations; Differential Algebraic solvers
+(<strong>DAE</strong>), used to solve mixed systems of differential and algebraic equations; Nonlinear Programming solvers (<strong>NLP</strong>),
+used to solve nonlinear optimization problems; Mixed-integer Nonlinear Programming solvers (<strong>MINLP</strong>), used to solve
+mixed-integer nonlinear optimization problems. In <strong>DAE Tools</strong> it is possible to choose <strong>DAE</strong>
+(currently only <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">Sundials IDAS</a>), <strong>NLP/MINLP</strong>
+(currently <a class="reference external" href="https://projects.coin-or.org/Bonmin">IPOPT/BONMIN</a>
+and <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">NLOPT</a>),
+and <strong>LA</strong> solvers (built-in Sundials LA solvers; <a class="reference external" href="http://trilinos.sandia.gov/packages/amesos">Trilinos Amesos</a>;
+<a class="reference external" href="http://trilinos.sandia.gov/packages/aztecoo">Trilinos AztecOO</a>;
+<a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">SuperLU/SuperLU_MT</a>;
+<a class="reference external" href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>; <a class="reference external" href="http://www.amd.com/acml">AMD ACML</a>).</div></blockquote>
+<ul class="simple">
+<li><strong>Data Reporter</strong></li>
+</ul>
+<blockquote>
+<div>Data reporter is defined as an object used to report the results of a simulation/optimization.
+They can either keep the results internally (and export them into a file, for instance) or send them via
+TCP/IP protocol to the <strong>DAE Tools</strong> plotter.</div></blockquote>
+<ul class="simple">
+<li><strong>Data Receiver</strong></li>
+</ul>
+<blockquote>
+<div>Data receiver can be defined as on object which duty is to receive the results from a data reporter.
+These data can be later plotted or processed in some other ways.</div></blockquote>
+<ul class="simple">
+<li><strong>Log</strong></li>
+</ul>
+<blockquote>
+<div>Log is defined as an object used to send messages from the various parts of <strong>DAE Tools</strong> framework
+(messages from solvers or simulation).</div></blockquote>
+</div>
+<div class="section" id="activity-module">
+<h3>1.2.2. Activity module<a class="headerlink" href="#activity-module" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="datareporting-module">
+<h3>1.2.3. DataReporting module<a class="headerlink" href="#datareporting-module" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="idas-module">
+<h3>1.2.4. IDAS module<a class="headerlink" href="#idas-module" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="units-module">
+<h3>1.2.5. Units module<a class="headerlink" href="#units-module" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="running-a-simulation">
+<h2>1.3. Running a simulation<a class="headerlink" href="#running-a-simulation" title="Permalink to this headline">¶</a></h2>
+<p>Two steps are needed to run a simulation:</p>
+<ol class="arabic simple">
+<li>Start <strong>daePlotter</strong>:</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><strong>In GNU/Linux and MacOS:</strong></li>
+</ul>
+<blockquote>
+<div>Go to: <strong>Applications/Programming/daePlotter</strong> or type the following shell command: <strong>daeplotter</strong></div></blockquote>
+<ul class="simple">
+<li><strong>In Windows:</strong></li>
+</ul>
+<blockquote>
+<div><p>Go to: <strong>Start/Programs/DAE Tools/daePlotter</strong>
+The <strong>daePlotter</strong> main window should appear (given in <a class="reference internal" href="#figure-1"><em>Figure 1.</em></a>)</p>
+<blockquote>
+<div><div class="figure align-center" id="figure-1" style="width: 300pt">
+<img alt="_images/Screenshot-DAEPlotter.png" src="_images/Screenshot-DAEPlotter.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 1.</strong> daePlotter main window.</p>
+</div>
+</div></blockquote>
+</div></blockquote>
+<p><strong>daePlotter</strong> can be also added to a panel. Simply add a custom application launcher (command: daeplotter).</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>Start <strong>DAE Tools Examples</strong> program to try some examples:</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><strong>In GNU/Linux and MacOS:</strong></li>
+</ul>
+<blockquote>
+<div>Go to: <strong>Applications/Programming/DAE Tools Examples</strong>
+or type the following shell command: <strong>daeexamples</strong></div></blockquote>
+<ul class="simple">
+<li><strong>In Windows:</strong></li>
+</ul>
+<blockquote>
+<div>Go to: <strong>Start/Programs/DAE Tools/DAE Tools Examples</strong></div></blockquote>
+</div></blockquote>
+<p>In general, simulations are started by typing the following shell commands (GNU/Linux and Windows):
+figwidth
+.. code-block:: bash</p>
+<blockquote>
+<div>cd &#8220;directory where simulation file is located&#8221;
+python mySimulation.py</div></blockquote>
+<p>The main window of <strong>DAE Tools Examples</strong> application is given in <a class="reference internal" href="#figure-2a"><em>Figure 2a.</em></a> while the output from the simulation run
+in <a class="reference internal" href="#figure-2b"><em>Figure 2b.</em></a>. Users can select one of several tutorials, run them, and inspect their source code or model reports.
+Model reports open in a new window of the system&#8217;s default web browser (however, only Mozilla Firefox is currently supported
+because of the MathML rendering issue).</p>
+<div class="figure align-center" id="figure-2a" style="width: 300pt">
+<img alt="_images/Screenshot-DAEToolsTutorials.png" src="_images/Screenshot-DAEToolsTutorials.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 2a.</strong> DAE Tools Examples main window</p>
+</div>
+<div class="figure align-center" id="figure-2b" style="width: 300pt">
+<img alt="_images/Screenshot-DAEToolsTutorials-Run.png" src="_images/Screenshot-DAEToolsTutorials-Run.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 2b.</strong> A typical optimization output from DAE Tools</p>
+</div>
+<p>The simulation can also be started from the shell. The sample output is given in <a class="reference internal" href="#figure-3"><em>Figure 3.</em></a>:</p>
+<div class="figure align-center" id="figure-3" style="width: 300pt">
+<img alt="_images/Screenshot-RunningSimulation.png" src="_images/Screenshot-RunningSimulation.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 3.</strong> Shell output from the simulation</p>
+</div>
+</div>
+<div class="section" id="running-an-optimization">
+<h2>1.4. Running an optimization<a class="headerlink" href="#running-an-optimization" title="Permalink to this headline">¶</a></h2>
+<p>Running the optimization problems is analogous to running a simulation.</p>
+</div>
+<div class="section" id="model-development">
+<h2>1.5. Model development<a class="headerlink" href="#model-development" title="Permalink to this headline">¶</a></h2>
+<p>In general, three approaches to process modelling exist (<a class="footnote-reference" href="#morton2003" id="id5">[1]</a>):</p>
+<blockquote>
+<div><ul class="simple">
+<li>Sequential Modular (<strong>SeqM</strong>) approach</li>
+<li>Simultaneous Modular (<strong>SimM</strong>) approach</li>
+<li>Equation-Oriented (<strong>EO</strong>) approach</li>
+</ul>
+</div></blockquote>
+<p>The pros &amp; cons of the first two approaches are extensively studied in the literature. Under the <strong>EO</strong> approach we generate
+and gather together all equations and variables which constitute the model representing the process. The equations are solved
+simultaneously using a suitable mathematical algorithm (Morton, 2003 <a class="footnote-reference" href="#morton2003" id="id6">[1]</a>). Equation-oriented simulation requires
+simultaneous solution of a set of differential algebraic equations (<strong>DAE</strong>) which itself requires a solution of a set of
+nonlinear algebraic equations (<strong>NLAE</strong>) and linear algebraic equations (<strong>LAE</strong>). The Newton&#8217;s method or some variant of it
+is almost always used to solve problems described by NLAEs. A brief history of Equation-Oriented solvers and comparison of
+<strong>SeqM</strong> and <strong>EO</strong> approaches as well as descriptions of the simultaneous modular and equation-oriented methods can be found
+in Morton, 2003 (<a class="footnote-reference" href="#morton2003" id="id7">[1]</a>). Also a good overview of the equation-oriented approach and its application in
+<a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a> is given by Barton &amp; Pantelides (<a class="footnote-reference" href="#pantelides1" id="id8">[2]</a>, <a class="footnote-reference" href="#pantelides2" id="id9">[3]</a>, <a class="footnote-reference" href="#pantelides3" id="id10">[4]</a>).</p>
+<p><strong>DAE Tools</strong> use the Equation-Oriented approach to process modelling, and the following types of processes can be modelled:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Lumped and distributed</li>
+<li>Steady-state and dynamic</li>
+</ul>
+</div></blockquote>
+<p>Problems can be formulated as linear, non-linear, and (partial) differential algebraic systems (of index 1).
+The most common problems are initial value problems of implicit form. Equations can be ordinary or discontinuous,
+where discontinuities are automatically handled by the framework. A good overview of discontinuous equations and
+a procedure for location of equation discontinuities is given by Park &amp; Barton (<a class="footnote-reference" href="#parkbarton" id="id11">[5]</a>)
+and in <a class="reference external" href="https://computation.llnl.gov/casc/sundials/documentation/ida_guide/node3.html#SECTION00330000000000000000documentation">Sundials IDA</a>
+(used in DAE Tools).</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="morton2003" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id5">1</a>, <a class="fn-backref" href="#id6">2</a>, <a class="fn-backref" href="#id7">3</a>)</em> Morton, W., Equation-Oriented Simulation and Optimization. <em>Proc. Indian Natl. Sci. Acad.</em> 2003, 317-357.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[2]</a></td><td>Pantelides, C. C., and P. I. Barton, Equation-oriented dynamic simulation current status and future perspectives, <em>Computers &amp; Chemical Engineering</em>, vol. 17, no. Supplement 1, pp. 263 - 285, 1993.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id9">[3]</a></td><td>Barton, P. I., and C. C. Pantelides, gPROMS - a Combined Discrete/Continuous Modelling Environment for Chemical Processing Systems, <em>Simulation Series</em>, vol. 25, no. 3, pp. 25-34, 1993.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[4]</a></td><td>Barton, P. I., and C. C. Pantelides, Modeling of combined discrete/continuous processes&#8221;, <em>AIChE Journal</em>, vol. 40, pp. 966-979, 1994.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="parkbarton" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[5]</a></td><td>Park, T., and P. I. Barton, State event location in differential-algebraic models&#8221;, <em>ACM Transactions on Modeling and Computer Simulation</em>, vol. 6, no. 2, New York, NY, USA, ACM, pp. 137-165, 1996.</td></tr>
+</tbody>
+</table>
+<div class="section" id="models">
+<h3>1.5.1. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
+<p>In <strong>DAE Tools</strong> models are created by defining its parameters, distribution domains, variables, equations, and ports.
+Models are developed by deriving a new class from the base model class (<a class="reference internal" href="core.html#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt></a>).
+The process consists of two steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Declare all domains, parameters, variables and ports in <a class="reference internal" href="core.html#pyCore.daeModel.__init__" title="pyCore.daeModel.__init__"><tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt></a> function (the constructor)</li>
+<li>Declare equations and state transition networks in <a class="reference internal" href="core.html#pyCore.daeModel.DeclareEquations" title="pyCore.daeModel.DeclareEquations"><tt class="xref py py-meth docutils literal"><span class="pre">DeclareEquations()</span></tt></a> function</li>
+</ol>
+</div></blockquote>
+<p>Models in <strong>pyDAE</strong> (using python programming language) can be defined by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myModel</span><span class="p">(</span><span class="n">daeModel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Parent</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Description</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">daeModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Parent</span><span class="p">,</span> <span class="n">Description</span><span class="p">)</span>
+        <span class="o">...</span> <span class="p">(</span><span class="n">here</span> <span class="n">go</span> <span class="n">declarations</span> <span class="n">of</span> <span class="n">domains</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">etc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">DeclareEquations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span> <span class="p">(</span><span class="n">here</span> <span class="n">go</span> <span class="n">declarations</span> <span class="n">of</span> <span class="n">equations</span> <span class="ow">and</span> <span class="n">state</span> <span class="n">transitions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> (using c++ programming language):</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myModel</span> <span class="o">:</span> <span class="k">public</span> <span class="n">daeModel</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">myModel</span><span class="p">(</span><span class="n">string</span> <span class="n">strName</span><span class="p">,</span> <span class="n">daeModel</span><span class="o">*</span> <span class="n">pParent</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">string</span> <span class="n">strDescription</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="o">:</span> <span class="n">daeModel</span><span class="p">(</span><span class="n">strName</span><span class="p">,</span> <span class="n">pParent</span><span class="p">,</span> <span class="n">strDescription</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="p">...</span> <span class="p">(</span><span class="n">here</span> <span class="n">go</span> <span class="n">additional</span> <span class="n">properties</span> <span class="n">of</span> <span class="n">domains</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">etc</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">DeclareEquations</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="p">...</span> <span class="p">(</span><span class="n">here</span> <span class="n">go</span> <span class="n">declarations</span> <span class="n">of</span> <span class="n">equations</span> <span class="n">and</span> <span class="n">state</span> <span class="n">transitions</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="p">...</span> <span class="p">(</span><span class="n">here</span> <span class="n">go</span> <span class="n">declarations</span> <span class="n">of</span> <span class="n">domains</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">etc</span><span class="p">)</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>More information about developing models can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="distribution-domains">
+<h3>1.5.2. Distribution domains<a class="headerlink" href="#distribution-domains" title="Permalink to this headline">¶</a></h3>
+<p>There are two types of domains in <strong>DAE Tools</strong>: simple arrays and distributed domains (commonly used to distribute variables,
+parameters and equations in space). The distributed domains can have a uniform (default) or a user specified non-uniform grid.
+At the moment, only the following finite difference methods can be used to calculate partial derivatives:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Backward finite difference method (BFD)</li>
+<li>Forward finite difference method (FFD)</li>
+<li>Center finite difference method (CFD)</li>
+</ul>
+</div></blockquote>
+<p>In <strong>DAE Tools</strong> just anything can be distributed on domains: parameters, variables, equations even models and ports.
+Obviously it does not have a physical meaning to distribute a model on a domain, However that can be useful for modelling
+of complex processes where we can create an array of models where each point in a distributed domain have a corresponding
+model so that a user does not have to take care of number of points in the domain, etc. In addition, domain points values
+can be obtained as a <strong>NumPy</strong> one-dimensional array; this way <strong>DAE Tools</strong> can be easily used in conjuction with other
+scientific python libraries <a class="reference external" href="http://numpy.scipy.org">NumPy</a>, <a class="reference external" href="http://www.scipy.org">SciPy</a>, for instance and many
+<a class="reference external" href="http://www.scipy.org/Projects">other</a>.</p>
+<p>Domains in <strong>pyDAE</strong> can be defined by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myDomain</span> <span class="o">=</span> <span class="n">daeDomain</span><span class="p">(</span><span class="s">&quot;myDomain&quot;</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="n">Description</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong>:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeDomain</span> <span class="n">myDomain</span><span class="p">(</span><span class="s">&quot;myDomain&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="n">Description</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>More information about domains can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="parameters">
+<h3>1.5.3. Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<p>There are two types of parameters in <strong>DAE Tools</strong>: ordinary and distributed. Several functions to get a parameter
+value (function call operator <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>) and array of values
+(<a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>) have been defined. In addition, distributed parameters have
+<a class="reference internal" href="core.html#pyCore.daeParameter.npyValues" title="pyCore.daeParameter.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt></a> property to get the values as a numpy multi-dimensional array.</p>
+<p>Parameters in <strong>pyDAE</strong> can be defined by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myParam</span> <span class="o">=</span> <span class="n">daeParameter</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">eReal</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong>:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeParameter</span> <span class="n">myParam</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">eReal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>More information about parameters can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeParameter" title="pyCore.daeParameter"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="variables">
+<h3>1.5.4. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<p>There are two types of variables in <strong>DAE Tools</strong>: ordinary and distributed. Functions to get a variable value
+(function call operator <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>), a time or a partial derivative
+(<a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>) or
+functions to obtain an array of values, time or partial derivatives (<a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt></a>)
+have been defined. In addition, distributed variables have <a class="reference internal" href="core.html#pyCore.daeVariable.npyValues" title="pyCore.daeVariable.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt></a> property to get
+the values as a numpy multi-dimensional array.</p>
+<p>Variables in <strong>pyDAE</strong> can be defined by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong>:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeVariable</span> <span class="n">myVar</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>More information about variables can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeVariable" title="pyCore.daeVariable"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="equations">
+<h3>1.5.5. Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h3>
+<p><strong>DAE Tools</strong> introduce two types of equations: ordinary and distributed. What makes distributed
+equations special is that an equation expression is valid on every point within the domains that
+the equations is distriibuted on. Equations can be distributed on a whole domain, on a part of it
+or on some of the points in a domain. Equations in <strong>pyDAE</strong> can be defined by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eq</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">CreateEquation</span><span class="p">(</span><span class="s">&quot;myEquation&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong>:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeEquation</span><span class="o">*</span> <span class="n">eq</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">CreateEquation</span><span class="p">(</span><span class="s">&quot;myEquation&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To define an equation expression (used to calculate its residual and its gradient - which represent a single row in a
+Jacobian matrix) <strong>DAE Tools</strong> combine the
+<a class="reference external" href="http://en.wikipedia.org/wiki/Automatic_differentiation#Operator_overloading">operator overloading</a>
+technique for <a class="reference external" href="http://en.wikipedia.org/wiki/Automatic_differentiation">automatic differentiation</a>
+(adopted from <a class="reference external" href="https://projects.coin-or.org/ADOL-C">ADOL-C</a> library) with the concept of representing equations as
+<strong>evaluation trees</strong>. Evaluation trees are made of binary or unary nodes, itself representing four basic mathematical
+operations and frequently used mathematical functions, such as <tt class="docutils literal"><span class="pre">sin,</span> <span class="pre">cos,</span> <span class="pre">tan,</span> <span class="pre">sqrt,</span> <span class="pre">pow,</span> <span class="pre">log,</span> <span class="pre">ln,</span> <span class="pre">exp,</span> <span class="pre">min,</span> <span class="pre">max,</span> <span class="pre">floor,</span> <span class="pre">ceil,</span>
+<span class="pre">abs,</span> <span class="pre">sum,</span> <span class="pre">product,</span> <span class="pre">...</span></tt>. These basic mathematical operations and functions are implemented to operate on <strong>a heavily
+modified ADOL-C</strong> library class <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a> (which has been extended to contain information about
+domains/parameters/variables etc). In adition, a new <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> class has been introduced to apply all
+above-mentioned operations on arrays of variables.
+What is different here is that <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a>/<a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> classes and mathematical
+operators/functions work in two modes; they can either <strong>build-up an evaluation tree</strong> or <strong>calculate a value of an expression</strong>.
+Once built the evaluation trees can be used to calculate equation residuals or derivatives to fill a Jacobian matrix
+necessary for a Newton-type iteration. A typical evaluation tree is presented in <a class="reference internal" href="#figure-4"><em>Figure 4.</em></a>.</p>
+<div class="figure align-center" id="figure-4" style="width: 300pt">
+<img alt="_static/EvaluationTree.png" src="_static/EvaluationTree.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 4.</strong> DAE Tools equation evaluation tree</p>
+</div>
+<p>As it has been noted before, domains, parameters, and variables contain functions that return
+<a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a>/<a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> objects, which can be used to calculate
+residuals and derivatives. These functions include functions to get a value of
+a domain/parameter/variable (function call operator), to get a time or a partial derivative of a variable
+(functions <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>)
+or functions to obtain an array of values, time or partial derivatives (<a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt></a>).
+Another useful feature of <strong>DAE Tools</strong> equations is that they can be
+exported into MathML or Latex format and easily visualized.</p>
+<p>For example, the equation <em>F</em> (given in <a class="reference internal" href="#figure-4"><em>Figure 4.</em></a>) can be defined in <strong>pyDAE</strong> by using the following
+statements:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">F</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">CreateEquation</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">,</span> <span class="s">&quot;F description&quot;</span><span class="p">)</span>
+<span class="n">F</span><span class="o">.</span><span class="n">Residal</span> <span class="o">=</span> <span class="n">V14</span><span class="o">.</span><span class="n">dt</span><span class="p">()</span> <span class="o">+</span> <span class="n">V1</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">V14</span><span class="p">()</span> <span class="o">+</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">Sin</span><span class="p">(</span><span class="mf">3.14</span> <span class="o">*</span> <span class="n">V3</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeEquation</span><span class="o">*</span> <span class="n">F</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">CreateEquation</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">,</span> <span class="s">&quot;F description&quot;</span><span class="p">);</span>
+<span class="n">F</span><span class="o">-&gt;</span><span class="n">SetResidal</span><span class="p">(</span> <span class="n">V14</span><span class="p">.</span><span class="n">dt</span><span class="p">()</span> <span class="o">+</span> <span class="n">V1</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">V14</span><span class="p">()</span> <span class="o">+</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="mf">3.14</span> <span class="o">*</span> <span class="n">V3</span><span class="p">())</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>More information about equations can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeEquation" title="pyCore.daeEquation"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEquation</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="state-transition-networks-discontinuous-equations">
+<h3>1.5.6. State Transition Networks (discontinuous equations)<a class="headerlink" href="#state-transition-networks-discontinuous-equations" title="Permalink to this headline">¶</a></h3>
+<p>Discontinuous equations are equations that take different forms subject to certain conditions. For example,
+if we want to model a flow through a pipe we may observe three different flow regimes:</p>
+<ul class="simple">
+<li>Laminar: if Reynolds number is less than 2,100</li>
+<li>Transient: if Reynolds number is greater than 2,100 and less than 10,000</li>
+<li>Turbulent: if Reynolds number is greater than 10,000</li>
+</ul>
+<p>What we can see is that from any of these three states we can go to any other state. This type of discontinuities
+is called a <strong>reversible discontinuity</strong> and can be described by the
+<a class="reference internal" href="core.html#pyCore.daeModel.IF" title="pyCore.daeModel.IF"><tt class="xref py py-meth docutils literal"><span class="pre">IF()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.ELSE_IF" title="pyCore.daeModel.ELSE_IF"><tt class="xref py py-meth docutils literal"><span class="pre">ELSE_IF()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.ELSE" title="pyCore.daeModel.ELSE"><tt class="xref py py-meth docutils literal"><span class="pre">ELSE()</span></tt></a>
+state transient network functions.
+In <strong>pyDAE</strong> it is given by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">IF</span><span class="p">(</span><span class="n">Re</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">2100</span><span class="p">)</span>                      <span class="c"># (Laminar flow)</span>
+<span class="c">#... (equations go here)</span>
+
+<span class="n">ELSE_IF</span><span class="p">(</span><span class="n">Re</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2100</span> <span class="ow">and</span> <span class="n">Re</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">)</span> <span class="c"># (Transient flow)</span>
+<span class="c">#... (equations go here)</span>
+
+<span class="n">ELSE</span><span class="p">()</span>                                <span class="c"># (Turbulent flow)</span>
+<span class="c">#... (equations go here)</span>
+
+<span class="n">END_IF</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">IF</span><span class="p">(</span><span class="n">Re</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">2100</span><span class="p">);</span>                      <span class="c1">// (Laminar flow)</span>
+<span class="c1">//... (equations go here)</span>
+
+<span class="n">ELSE_IF</span><span class="p">(</span><span class="n">Re</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2100</span> <span class="o">&amp;&amp;</span> <span class="n">Re</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">);</span>  <span class="c1">// (Transient flow)</span>
+<span class="c1">//... (equations go here)</span>
+
+<span class="n">ELSE</span><span class="p">();</span>                                <span class="c1">// (Turbulent flow)</span>
+<span class="c1">//... (equations go here)</span>
+
+<span class="n">END_IF</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><strong>Reversible discontinuities</strong> can be <strong>symmetrical</strong> and <strong>non-symmetrical</strong>. The above example is <strong>symmetrical</strong>.
+However, if we have a CPU and we want to model its power dissipation we may have three operating modes with the
+following state transitions:</p>
+<ul class="simple">
+<li>Normal mode<ul>
+<li>switch to <strong>Power saving mode</strong> if CPU load is below 5%</li>
+<li>switch to <strong>Fried mode</strong> if the temperature is above 110 degrees</li>
+</ul>
+</li>
+<li>Power saving mode<ul>
+<li>switch to <strong>Normal mode</strong> if CPU load is above 5%</li>
+<li>switch to <strong>Fried mode</strong> if the temperature is above 110 degrees</li>
+</ul>
+</li>
+<li>Fried mode (no escape from here... go to the nearest shop and buy a new one!)</li>
+</ul>
+<p>What we can see is that from the <strong>Normal mode</strong> we can either go to the <strong>Power saving mode</strong> or to the <strong>Fried mode</strong>.
+The same stands for the <strong>Power saving mode</strong>: we can either go to the <strong>Normal mode</strong> or to the <strong>Fried mode</strong>.
+However, once the temperature exceeds 110 degrees the CPU dies (let&#8217;s say we heavily overclocked it) and there
+is no going back. This type of discontinuities is called an <strong>irreversible discontinuity</strong> and can be described by
+using  <a class="reference internal" href="core.html#pyCore.daeModel.STN" title="pyCore.daeModel.STN"><tt class="xref py py-meth docutils literal"><span class="pre">STN()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.STATE" title="pyCore.daeModel.STATE"><tt class="xref py py-meth docutils literal"><span class="pre">STATE()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.END_STN" title="pyCore.daeModel.END_STN"><tt class="xref py py-meth docutils literal"><span class="pre">END_STN()</span></tt></a>
+functions while state transitions using <a class="reference internal" href="core.html#pyCore.daeModel.ON_CONDITION" title="pyCore.daeModel.ON_CONDITION"><tt class="xref py py-meth docutils literal"><span class="pre">ON_CONDITION()</span></tt></a> function.
+In <strong>pyDAE</strong> this type of state transitions is given by the following statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">STN</span><span class="p">(</span><span class="s">&quot;CPU&quot;</span><span class="p">)</span>
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;Normal&quot;</span><span class="p">)</span>
+<span class="c">#... (equations go here)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">CPULoad</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;PowerSaving&quot;</span><span class="p">)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">T</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">110</span><span class="p">,</span>        <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Fried&quot;</span><span class="p">)</span>
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;PowerSaving&quot;</span><span class="p">)</span>
+<span class="c">#... (equations go here)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">CPULoad</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Normal&quot;</span><span class="p">)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">T</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">110</span><span class="p">,</span>         <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Fried&quot;</span><span class="p">)</span>
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;Normal&quot;</span><span class="p">)</span>
+<span class="c">#... (equations go here)</span>
+
+<span class="n">END_STN</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">STN</span><span class="p">(</span><span class="s">&quot;CPU&quot;</span><span class="p">);</span>
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;Normal&quot;</span><span class="p">);</span>
+<span class="c1">//... (equations go here)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">CPULoad</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;PowerSaving&quot;</span><span class="p">);</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">T</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">110</span><span class="p">,</span>        <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Fried&quot;</span><span class="p">);</span>
+
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;PowerSaving&quot;</span><span class="p">);</span>
+<span class="c1">//... (equations go here)</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">CPULoad</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Normal&quot;</span><span class="p">);</span>
+<span class="n">ON_CONDITION</span><span class="p">(</span><span class="n">T</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">110</span><span class="p">,</span>         <span class="n">switchToState</span> <span class="o">=</span> <span class="s">&quot;Fried&quot;</span><span class="p">);</span>
+
+<span class="n">STATE</span><span class="p">(</span><span class="s">&quot;Normal&quot;</span><span class="p">);</span>
+<span class="c1">//... (equations go here)</span>
+
+<span class="n">END_STN</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>More information about state transition networks can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeSTN" title="pyCore.daeSTN"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeSTN</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="ports">
+<h3>1.5.7. Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h3>
+<p>Ports are used to connect two models. Like models, they may contain domains, parameters and variables. For instance,
+in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myPort</span><span class="p">(</span><span class="n">daePort</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Parent</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Description</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">daePort</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Parent</span><span class="p">,</span> <span class="n">Description</span><span class="p">)</span>
+        <span class="c">#... (here go declarations of domains, parameters and variables)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myPort</span> <span class="o">:</span> <span class="k">public</span> <span class="n">daePort</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="n">myPort</span><span class="p">(</span><span class="n">string</span> <span class="n">strName</span><span class="p">,</span> <span class="n">daeePortType</span> <span class="n">eType</span><span class="p">,</span> <span class="n">daeModel</span><span class="o">*</span> <span class="n">pParent</span><span class="p">,</span> <span class="n">string</span> <span class="n">strDescription</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">daePort</span><span class="p">(</span><span class="n">strName</span><span class="p">,</span> <span class="n">eType</span><span class="p">,</span> <span class="n">pParent</span><span class="p">,</span> <span class="n">strDescription</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//... (here go additional properties of domains, parameters and variables)</span>
+    <span class="p">}</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="c1">//... (here go declarations of domains, parameters and variables)</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>More information about ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daePort" title="pyCore.daePort"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daePort</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="event-ports">
+<h3>1.5.8. Event Ports<a class="headerlink" href="#event-ports" title="Permalink to this headline">¶</a></h3>
+<p>Event ports are also used to connect two models; however, they allow sending of discrete messages (events) between
+model instances. Events can be triggered manually or as a result of a state transition in a model. The main difference
+between event and ordinary ports is that the former allow a discrete communication between model instances while
+latter allow a continuous exchange of information. A single outlet event port can be connected to unlimited number
+of inlet event ports. Messages contain a floating point value that can be used by a recipient (these actions are
+specified in <a class="reference internal" href="core.html#pyCore.daeModel.ON_EVENT" title="pyCore.daeModel.ON_EVENT"><tt class="xref py py-meth docutils literal"><span class="pre">ON_EVENT()</span></tt></a> function); that value might be a simple number or an expression
+involving model variables/parameters.</p>
+<p>More information about event ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeEventPort" title="pyCore.daeEventPort"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEventPort</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="simulation">
+<h3>1.5.9. Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h3>
+<p>As it was mentioned before, simulation of a process can be considered as the model run for certain input conditions.
+To define a simulation in <strong>DAE Tools</strong> the following tasks have to be done:</p>
+<ol class="arabic simple">
+<li>Derive a new simulation class</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>Specify a model to simulate</li>
+<li>Specify its domains and parameters information</li>
+<li>Fix the degrees of freedom by assigning the values to certain variables</li>
+<li>Set the initial conditions for differential variables</li>
+<li>Set the other variables&#8217; information: initial guesses, absolute tolerances, etc</li>
+<li>Specify the operating procedure. It can be either a simple run for a specified period of time (default) or
+a complex one where various actions can be taken during the simulation</li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>Specify DAE and LA solvers</li>
+<li>Specify a data reporter and a data receiver, and connect them</li>
+<li>Set a time horizon, reporting interval, etc</li>
+<li>Do the initialization of the DAE system</li>
+<li>Save model report and/or runtime model report (to inspect expanded equations etc)</li>
+<li>Run the simulation</li>
+</ol>
+<p>Simulations in <strong>pyDAE</strong> can be defined by the following construct:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span><span class="p">(</span><span class="n">daeSimulation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">daeSimulation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">myModel</span><span class="p">(</span><span class="s">&quot;myModel&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetUpParametersAndDomains</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#... (here we set up domains and parameters)</span>
+
+    <span class="k">def</span> <span class="nf">SetUpVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#... (here we set up degrees of freedom, initial conditions, initial guesses, etc)</span>
+
+    <span class="k">def</span> <span class="nf">Run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#... (here goes a custom operating procedure, if needed)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span> <span class="o">:</span> <span class="k">public</span> <span class="n">daeSimulation</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">mySimulation</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="o">:</span> <span class="n">m</span><span class="p">(</span><span class="s">&quot;myModel&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">SetModel</span><span class="p">(</span><span class="o">&amp;</span><span class="n">m</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">void</span> <span class="n">SetUpParametersAndDomains</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//... (here we set up domains and parameters)</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">SetUpVariables</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//... (here we set up degrees of freedom, initial conditions, initial guesses, etc)</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">Run</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//... (here goes a custom operating procedure, if needed)</span>
+    <span class="p">}</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">myModel</span> <span class="n">m</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>1.5.10. Running a simulation<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<p>Simulations in <strong>pyDAE</strong> can be run in two modes:</p>
+<ol class="arabic simple">
+<li>By using PyQt4 graphical user interface (GUI)</li>
+<li>From the shell</li>
+</ol>
+<ol class="arabic simple">
+<li>Running a simulation from the GUI (<strong>pyDAE</strong> only)</li>
+</ol>
+<blockquote>
+<div>Here the default log, and data reporter objects will be used, while the user can choose DAE and LA solvers and
+specify time horizon and reporting interval.</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Import modules</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="c"># Create QtApplication object</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+<span class="c"># Create simulation object</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">simTutorial</span><span class="p">()</span>
+
+<span class="c"># Report ALL variables in the model</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Show the daeSimulator window to choose the other information needed for simulation</span>
+<span class="n">simulator</span>  <span class="o">=</span> <span class="n">daeSimulator</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">simulation</span><span class="o">=</span><span class="n">sim</span><span class="p">)</span>
+<span class="n">simulator</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c"># Execute applications main loop</span>
+<span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Running a simulation from the shell:</li>
+</ol>
+<p>In <strong>pyDAE</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Import modules</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+
+<span class="c"># Create Log, Solver, DataReporter and Simulation object</span>
+<span class="n">log</span>          <span class="o">=</span> <span class="n">daeStdOutLog</span><span class="p">()</span>
+<span class="n">solver</span>       <span class="o">=</span> <span class="n">daeIDAS</span><span class="p">()</span>
+<span class="n">datareporter</span> <span class="o">=</span> <span class="n">daeTCPIPDataReporter</span><span class="p">()</span>
+<span class="n">simulation</span>   <span class="o">=</span> <span class="n">simTutorial</span><span class="p">()</span>
+
+<span class="c"># Set the linear solver (optional)</span>
+<span class="n">lasolver</span>     <span class="o">=</span> <span class="n">pyTrilinosAmesos</span><span class="o">.</span><span class="n">CreateTrilinosAmesosSolver</span><span class="p">(</span><span class="s">&quot;Amesos_Superlu&quot;</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">SetLASolver</span><span class="p">(</span><span class="n">eThirdParty</span><span class="p">,</span> <span class="n">lasolver</span><span class="p">)</span>
+
+<span class="c"># Report ALL variables in the model</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Set the time horizon (1000 seconds) and the reporting interval (10 seconds)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">SetReportingInterval</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">SetTimeHorizon</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c"># Connect data reporter (use the default TCP/IP connection string)</span>
+<span class="n">simName</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&quot; [m.%Y %H:%M:%S]&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">())</span>
+<span class="k">if</span><span class="p">(</span><span class="n">datareporter</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">simName</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="c"># Initialize the simulation</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">datareporter</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+
+<span class="c"># Solve at time = 0 (initialization)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">SolveInitial</span><span class="p">()</span>
+
+<span class="c"># Run</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">Finalize</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="c1">// Create Log, Solver, DataReporter and Simulation object</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeSimulation_t</span><span class="o">&gt;</span>    <span class="n">pSimulation</span><span class="p">(</span><span class="k">new</span> <span class="n">simTutorial</span><span class="p">);</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeDataReporter_t</span><span class="o">&gt;</span>  <span class="n">pDataReporter</span><span class="p">(</span><span class="n">daeCreateTCPIPDataReporter</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeIDASolver</span><span class="o">&gt;</span>       <span class="n">pDAESolver</span><span class="p">(</span><span class="n">daeCreateIDASolver</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeLog_t</span><span class="o">&gt;</span>           <span class="n">pLog</span><span class="p">(</span><span class="n">daeCreateStdOutLog</span><span class="p">());</span>
+
+<span class="c1">// Report ALL variables in the model</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+<span class="c1">// Set the time horizon and the reporting interval</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">SetReportingInterval</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">SetTimeHorizon</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">// Connect data reporter</span>
+<span class="n">string</span> <span class="n">strName</span> <span class="o">=</span> <span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">();</span>
+<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">pDataReporter</span><span class="o">-&gt;</span><span class="n">Connect</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">strName</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">;</span>
+
+<span class="c1">// Initialize the simulation</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pDAESolver</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">pDataReporter</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">pLog</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+<span class="c1">// Solve at time = 0 (initialization)</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">SolveInitial</span><span class="p">();</span>
+
+<span class="c1">// Run</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">Run</span><span class="p">();</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">Finalize</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optimization">
+<h3>1.5.11. Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h3>
+<p>To define an optimization problem it is first necessary to develop a model of the process and to define
+a simulation (as explained above). Having done these tasks (working model and simulation) the optimization
+in <strong>DAE Tools</strong> can be defined by specifying the objective function, optimization variables and optimization
+constraints. It is intentionally chosen to keep simulation and optimization tightly coupled. The optimization
+problem should be specified in the function <a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a>.
+The tasks have to be done are:</p>
+<ol class="arabic simple">
+<li>Specify the objective function</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>Objective function is defined by specifying its residual (similarly to specifying an equation residual);
+Internally the framework will create a new variable (V_obj) and a new equation (F_obj).</li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li>Specify optimization variables</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>The optimization variables have to be already defined in the model and their values assigned in the simulation;
+they can be either non-distributed or distributed.</li>
+<li>Specify a type of optimization variable values. The variables can be <strong>continuous</strong> (floating point values in
+the given range), <strong>integer</strong> (set of integer values in the given range) or <strong>binary</strong> (integer value: 0 or 1).</li>
+<li>Specify the starting point (within the range)</li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Specify optimization constraints</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>Two types of constraints exist in DAE Tools: <strong>equality</strong> and <strong>inequality</strong> constraints
+To define an <strong>equality</strong> constraint its residual and the value has to be specified;
+To define an <strong>inequality</strong> constraint its residual, the lower and upper bounds have to be specified;
+Internally the framework will create a new variable (V_constraint[N]) and a new equation (F_constraint[N])
+for each defined constraint, where N is the ordinal number of the constraint.</li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li>Specify NLP/MINLP solver</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>Currently <strong>BONMIN</strong> MINLP solver and <strong>IPOPT</strong> and <strong>NLOPT</strong> solvers are supported (the <strong>BONMIN</strong>
+solver internally uses <strong>IPOPT</strong> to solve NLP problems)</li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="5">
+<li>Specify DAE and LA solvers</li>
+<li>Specify a data reporter and a data receiver, and connect them</li>
+<li>Set a time horizon, reporting interval, etc</li>
+<li>Set the options of the (MI)NLP solver</li>
+<li>Initialize the optimization</li>
+<li>Save model report and/or runtime model report (to inspect expanded equations etc)</li>
+<li>Run the optimization</li>
+</ol>
+<p><a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a> function is declared in <strong>pyDAE</strong> as the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span><span class="p">(</span><span class="n">daeSimulation</span><span class="p">):</span>
+    <span class="c">#... (here we set up a simulation)</span>
+
+    <span class="k">def</span> <span class="nf">SetUpOptimization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#... (here goes a declaration of the obj. function, opt. variables and constraints)</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span> <span class="o">:</span> <span class="k">public</span> <span class="n">daeSimulation</span>
+<span class="p">{</span>
+    <span class="c1">//... (here we set up a simulation)</span>
+
+    <span class="kt">void</span> <span class="n">SetUpOptimization</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//... (here goes a declaration of the obj. function, opt. variables and constraints)</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-optimization">
+<h3>1.5.12. Running the optimization<a class="headerlink" href="#running-the-optimization" title="Permalink to this headline">¶</a></h3>
+<p>Optimizations, like simulations in <strong>pyDAE</strong> can be run in two modes:</p>
+<ol class="arabic simple">
+<li>By using PyQt4 graphical user interface (GUI)</li>
+<li>From the shell</li>
+</ol>
+<ol class="arabic simple">
+<li>Running an optimization from the GUI (<strong>pyDAE</strong> only)</li>
+</ol>
+<blockquote>
+<div>Here the default log, and data reporter objects will be used, while the user can choose NLP, DAE and LA solvers and
+specify time horizon and reporting interval:</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Import modules</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="c"># Create QtApplication object</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+<span class="c"># Create simulation object</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">simTutorial</span><span class="p">()</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">daeBONMIN</span><span class="p">()</span>
+
+<span class="c"># Report ALL variables in the model</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Show the daeSimulator window to choose the other information needed for optimization</span>
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">daeSimulator</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">simulation</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">nlpsolver</span><span class="o">=</span><span class="n">nlp</span><span class="p">)</span>
+<span class="n">simulator</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c"># Execute applications main loop</span>
+<span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Running a simulation from the shell:</li>
+</ol>
+<p>In <strong>pyDAE</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Import modules</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+
+<span class="c"># Create Log, NLPSolver, DAESolver, DataReporter, Simulation and Optimization objects</span>
+<span class="n">log</span>          <span class="o">=</span> <span class="n">daePythonStdOutLog</span><span class="p">()</span>
+<span class="n">daesolver</span>    <span class="o">=</span> <span class="n">daeIDAS</span><span class="p">()</span>
+<span class="n">nlpsolver</span>    <span class="o">=</span> <span class="n">daeBONMIN</span><span class="p">()</span>
+<span class="n">datareporter</span> <span class="o">=</span> <span class="n">daeTCPIPDataReporter</span><span class="p">()</span>
+<span class="n">simulation</span>   <span class="o">=</span> <span class="n">simTutorial</span><span class="p">()</span>
+<span class="n">optimization</span> <span class="o">=</span> <span class="n">daeOptimization</span><span class="p">()</span>
+
+<span class="c"># Enable reporting of all variables</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Set the time horizon and the reporting interval</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">ReportingInterval</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">TimeHorizon</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="c"># Connect data reporter</span>
+<span class="n">simName</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&quot; [m.%Y %H:%M:%S]&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">())</span>
+<span class="k">if</span><span class="p">(</span><span class="n">datareporter</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">simName</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="c"># Initialize the simulation</span>
+<span class="n">optimization</span><span class="o">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">nlpsolver</span><span class="p">,</span> <span class="n">daesolver</span><span class="p">,</span> <span class="n">datareporter</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+
+<span class="c"># Set the MINLP solver options (optional)</span>
+<span class="c">#nlpsolver.SetOption(&#39;OPTION&#39;, VALUE)</span>
+<span class="c">#nlpsolver.LoadOptionsFile(&quot;&quot;)</span>
+
+<span class="c"># Save the model report and the runtime model report</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SaveModelReport</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s">&quot;.xml&quot;</span><span class="p">)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SaveRuntimeModelReport</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s">&quot;-rt.xml&quot;</span><span class="p">)</span>
+
+<span class="c"># Run</span>
+<span class="n">optimization</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+<span class="n">optimization</span><span class="o">.</span><span class="n">Finalize</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>while in <strong>cDAE</strong> by:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="c1">// Create Log, NLPSolver, DAESolver, DataReporter, Simulation and Optimization objects</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeSimulation_t</span><span class="o">&gt;</span>        <span class="n">pSimulation</span><span class="p">(</span><span class="k">new</span> <span class="n">simTutorial</span><span class="p">);</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeDataReporter_t</span><span class="o">&gt;</span>      <span class="n">pDataReporter</span><span class="p">(</span><span class="n">daeCreateTCPIPDataReporter</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeIDASolver</span><span class="o">&gt;</span>           <span class="n">pDAESolver</span><span class="p">(</span><span class="n">daeCreateIDASolver</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeLog_t</span><span class="o">&gt;</span>               <span class="n">pLog</span><span class="p">(</span><span class="n">daeCreateStdOutLog</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeNLPSolver_t</span><span class="o">&gt;</span>         <span class="n">pNLPSolver</span><span class="p">(</span><span class="k">new</span> <span class="n">daeBONMINSolver</span><span class="p">());</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">scoped_ptr</span><span class="o">&lt;</span><span class="n">daeOptimization_t</span><span class="o">&gt;</span>      <span class="n">pOptimization</span><span class="p">(</span><span class="k">new</span> <span class="n">daeOptimization</span><span class="p">());</span>
+
+<span class="c1">// Report ALL variables in the model</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+<span class="c1">// Set the time horizon and the reporting interval</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">SetReportingInterval</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">SetTimeHorizon</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">// Connect data reporter</span>
+<span class="n">string</span> <span class="n">strName</span> <span class="o">=</span> <span class="n">pSimulation</span><span class="o">-&gt;</span><span class="n">GetModel</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetName</span><span class="p">();</span>
+<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">pDataReporter</span><span class="o">-&gt;</span><span class="n">Connect</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">strName</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">;</span>
+
+<span class="c1">// Initialize the simulation</span>
+<span class="n">pOptimization</span><span class="o">-&gt;</span><span class="n">Initialize</span><span class="p">(</span><span class="n">pSimulation</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">pNLPSolver</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">pDAESolver</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">pDataReporter</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">pLog</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+<span class="c1">// Run</span>
+<span class="n">pOptimization</span><span class="p">.</span><span class="n">Run</span><span class="p">();</span>
+<span class="n">pOptimization</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>More information about simulation can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="activity.html#pyActivity.daeOptimization" title="pyActivity.daeOptimization"><tt class="xref py py-class docutils literal"><span class="pre">daeOptimization</span></tt></a>.
+Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+<div class="section" id="processing-the-results">
+<h3>1.5.13. Processing the results<a class="headerlink" href="#processing-the-results" title="Permalink to this headline">¶</a></h3>
+<p>The simulation/optimization results can be easily plotted by using <strong>DAE Plotter</strong> application.
+It is possible to choose between 2D and 3D plots. After choosing a desired type, a <strong>Choose variable</strong>
+(given in <a class="reference internal" href="#figure-5"><em>Figure 5.</em></a>) dialog appears where a user has to select a variable to plot and specify information
+about domains - fix some of them while leaving another free by selecting <cite>*</cite> from the list (to create a 2D plot
+you need one domain free, while for a 3D plot you need two free domains).</p>
+<blockquote>
+<div><div class="figure align-center" id="figure-5" style="width: 300pt">
+<img alt="_images/Screenshot-ChooseVariable.png" src="_images/Screenshot-ChooseVariable.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 5.</strong> Choose variable dialog for a 2D plot</p>
+</div>
+</div></blockquote>
+<p>Typical 2D and 3D plots are given in <a class="reference internal" href="#figure-6"><em>Figure 6.</em></a> and <a class="reference internal" href="#figure-7"><em>Figure 7.</em></a>.</p>
+<blockquote>
+<div><div class="figure align-center" id="figure-6" style="width: 300pt">
+<img alt="_images/Screenshot-2Dplot.png" src="_images/Screenshot-2Dplot.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 6.</strong> Example 2D plot (produced by Matplotlib)</p>
+</div>
+<div class="figure align-center" id="figure-7" style="width: 300pt">
+<img alt="_images/Screenshot-3Dplot.png" src="_images/Screenshot-3Dplot.png" style="width: 250pt;" />
+<p class="caption"><strong>Figure 7.</strong> Example 3D plot (produced by Mayavi2)</p>
+</div>
+</div></blockquote>
+<img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">1. Getting Started with DAE Tools</a><ul>
+<li><a class="reference internal" href="#programming-language">1.1. Programming language</a></li>
+<li><a class="reference internal" href="#the-main-concepts">1.2. The main concepts</a><ul>
+<li><a class="reference internal" href="#core-module">1.2.1. Core module</a></li>
+<li><a class="reference internal" href="#activity-module">1.2.2. Activity module</a></li>
+<li><a class="reference internal" href="#datareporting-module">1.2.3. DataReporting module</a></li>
+<li><a class="reference internal" href="#idas-module">1.2.4. IDAS module</a></li>
+<li><a class="reference internal" href="#units-module">1.2.5. Units module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-a-simulation">1.3. Running a simulation</a></li>
+<li><a class="reference internal" href="#running-an-optimization">1.4. Running an optimization</a></li>
+<li><a class="reference internal" href="#model-development">1.5. Model development</a><ul>
+<li><a class="reference internal" href="#models">1.5.1. Models</a></li>
+<li><a class="reference internal" href="#distribution-domains">1.5.2. Distribution domains</a></li>
+<li><a class="reference internal" href="#parameters">1.5.3. Parameters</a></li>
+<li><a class="reference internal" href="#variables">1.5.4. Variables</a></li>
+<li><a class="reference internal" href="#equations">1.5.5. Equations</a></li>
+<li><a class="reference internal" href="#state-transition-networks-discontinuous-equations">1.5.6. State Transition Networks (discontinuous equations)</a></li>
+<li><a class="reference internal" href="#ports">1.5.7. Ports</a></li>
+<li><a class="reference internal" href="#event-ports">1.5.8. Event Ports</a></li>
+<li><a class="reference internal" href="#simulation">1.5.9. Simulation</a></li>
+<li><a class="reference internal" href="#id12">1.5.10. Running a simulation</a></li>
+<li><a class="reference internal" href="#optimization">1.5.11. Optimization</a></li>
+<li><a class="reference internal" href="#running-the-optimization">1.5.12. Running the optimization</a></li>
+<li><a class="reference internal" href="#processing-the-results">1.5.13. Processing the results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Contents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyDAE_user_guide.html"
+                        title="next chapter">2. pyDAE User Guide</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/getting_started.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pyDAE_user_guide.html" title="2. pyDAE User Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 02, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

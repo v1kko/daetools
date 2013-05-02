@@ -120,9 +120,9 @@ python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)
 }
 
 /*******************************************************
-	daeDataReporterProcess
+	daeDataReceiverProcess
 *******************************************************/
-python::list GetDomainsDataReporterProcess(daeDataReporterProcess& process)
+python::list GetDomainsDataReporterProcess(daeDataReceiverProcess& process)
 {
 	python::list l;
 	daeDataReceiverDomain* obj;
@@ -135,7 +135,7 @@ python::list GetDomainsDataReporterProcess(daeDataReporterProcess& process)
 	return l;
 }
 
-python::list GetVariablesDataReporterProcess(daeDataReporterProcess& process)
+python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& process)
 {
 	python::list l;
 	daeDataReceiverVariable* obj;

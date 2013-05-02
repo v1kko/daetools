@@ -58,27 +58,35 @@ Core module defines the main modelling concepts:
 
  * **Distribution domain**
   Domain is a general term used to define an array of different objects (parameters, variables, equations but models and ports as well).
+
  * **Parameter**
   Parameter can be defined as a time invariant quantity that will not change during a simulation.
+
  * **Variable**
   Variable can be defined as a time variant quantity, also called a *state variable*.
+
  * **Equation**
   Equation can be defined as an expression used to calculate a variable value, which can be created
   by performing basic mathematical operations (+, -, *, /) and functions (such as sin, cos, tan, sqrt, log, ln, exp, pow, abs etc)
   on parameter and variable values (and time and partial derivatives as well).
+
  * **State transition network**
   State transition networks are used to model a special type of equations:
   *discontinuous equation*s. Discontinuous equations are equations that take different forms subject to certain conditions.
   They are composed of a finite number of *states*.
+
  * **State**
   States can be defined as a set of actions (in our case a set of equations) under current operating conditions.
   In addition, every state contains a set of state transitions which describe conditions
   when the state changes occur.
+
  * **State Transition**
   State transition can be defined as a transition from the current to some other state, subject to given conditions.
+
  * **Port**
   Ports are objects used to connect two model instances and exchange continuous information.
   Like models, they may contain domains, parameters and variables.
+
  * **EventPort**
   Event ports are objects used to connect two model instances and exchange discrete information (events/messages).
 

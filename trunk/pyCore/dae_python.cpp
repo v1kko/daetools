@@ -1366,6 +1366,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog", DOCSTR_daeBaseLog, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeBaseLog_init))
+            
 		.def("Message",				&daeLog_t::Message,     &daepython::daeBaseLogWrapper::def_Message, ( arg("self"), 
                                                                                                           arg("message"), 
                                                                                                           arg("severity") 
@@ -1378,6 +1379,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeFileLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeFileLog", DOCSTR_daeFileLog, no_init)
         .def(init<string>(( arg("self"), arg("filename") ), DOCSTR_daeFileLog_init))
+            
 		.def("Message",	&daeLog_t::Message, &daepython::daeFileLogWrapper::def_Message, ( arg("self"), 
                                                                                           arg("message"), 
                                                                                           arg("severity") 
@@ -1386,6 +1388,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeStdOutLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeStdOutLog", DOCSTR_daeStdOutLog, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeStdOutLog_init))
+            
 		.def("Message",	&daeLog_t::Message, &daepython::daeStdOutLogWrapper::def_Message, ( arg("self"), 
                                                                                             arg("message"), 
                                                                                             arg("severity") 
@@ -1394,6 +1397,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeTCPIPLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeTCPIPLog", DOCSTR_daeTCPIPLog, no_init)
         .def(init<string, int>(( arg("self"), arg("tcpipAddress"), arg("port") ), DOCSTR_daeTCPIPLog_init))
+            
 		.def("Message", &daeLog_t::Message, &daepython::daeTCPIPLogWrapper::def_Message, ( arg("self"), 
                                                                                            arg("message"), 
                                                                                            arg("severity") 
@@ -1402,6 +1406,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
 	class_<daepython::daeTCPIPLogServerWrapper, boost::noncopyable>("daeTCPIPLogServer", DOCSTR_daeTCPIPLogServer, no_init)
         .def(init<int>(( arg("self"), arg("port") ), DOCSTR_daeTCPIPLogServer_init))
+            
 		.def("MessageReceived",	pure_virtual(&daeTCPIPLogServer::MessageReceived), ( arg("self"), 
                                                                                      arg("message") 
                                                                                    ), DOCSTR_daeTCPIPLogServer_MessageReceived)

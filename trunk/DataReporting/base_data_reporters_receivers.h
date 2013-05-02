@@ -18,7 +18,7 @@ daeDataReporter_t* daeCreateTCPIPDataReporter(void);
 //daeDataReceiver_t* daeCreateTCPIPDataReceiverServer(int nPort);
 daeDataReporter_t* daeCreateDelegateDataReporter(const std::vector<daeDataReporter_t*>& ptrarrDataReporters);
 
-void daeCreateHybridDataReporterReceiver(daeDataReceiver_t** pReceiver, daeDataReporter_t** pReporter);
+//void daeCreateHybridDataReporterReceiver(daeDataReceiver_t** pReceiver, daeDataReporter_t** pReporter);
 
 }
 }

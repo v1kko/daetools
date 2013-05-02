@@ -347,6 +347,7 @@ const char* DOCSTR_daeVectorExternalFunction = "";
     const char* DOCSTR_daeVectorExternalFunction_call = "";  
 
 const char* DOCSTR_daeLog_t = "";  
+    const char* DOCSTR_daeLog_t_init = "";
     const char* DOCSTR_daeLog_t_Enabled = "";  
     const char* DOCSTR_daeLog_t_PrintProgress = "";  
     const char* DOCSTR_daeLog_t_Indent = "";  

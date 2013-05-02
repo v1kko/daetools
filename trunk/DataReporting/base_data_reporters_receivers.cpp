@@ -52,12 +52,12 @@ daeDataReporter_t* daeCreateDelegateDataReporter(const vector<daeDataReporter_t*
 	return pReporter;
 }
 
-void daeCreateHybridDataReporterReceiver(daeDataReceiver_t** pReceiver, daeDataReporter_t** pReporter)
-{
-	daeHybridDataReporterReceiver* _pHybrid = new daeHybridDataReporterReceiver;
-	*pReceiver = _pHybrid;
-	*pReporter = _pHybrid;
-}
+//void daeCreateHybridDataReporterReceiver(daeDataReceiver_t** pReceiver, daeDataReporter_t** pReporter)
+//{
+//	daeHybridDataReporterReceiver* _pHybrid = new daeHybridDataReporterReceiver;
+//	*pReceiver = _pHybrid;
+//	*pReporter = _pHybrid;
+//}
 
 //void daeCreateLinkedDataReporterReceiver(daeDataReceiver_t** pReceiver, daeDataReporter_t** pReporter)
 //{

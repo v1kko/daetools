@@ -13,60 +13,88 @@ BOOST_PYTHON_MODULE(pyDataReporting)
     docstring_options doc_options(true, true, false);
 
 /**************************************************************
-	daeDataReporter
+	daeDataReporter auxuliary classes
 ***************************************************************/
-	class_<daeDataReporterDomain>("daeDataReporterDomain")
-		.def(init<string, daeeDomainType, size_t>())
+	class_<daeDataReporterDomain, boost::noncopyable>("daeDataReporterDomain", DOCSTR_daeDataReporterDomain, no_init)
+		.def(init<string, daeeDomainType, size_t>(( arg("self"), 
+                                                    arg("name"), 
+                                                    arg("type"), 
+                                                    arg("numberOfPoints") 
+                                                  ), DOCSTR_daeDataReporterDomain_init))
 		
-		.def_readonly("Name",				&daeDataReporterDomain::m_strName)
-		.def_readonly("Type",				&daeDataReporterDomain::m_eType)		
-		.def_readonly("NumberOfPoints",		&daeDataReporterDomain::m_nNumberOfPoints)
+		.def_readonly("Name",				&daeDataReporterDomain::m_strName,          DOCSTR_daeDataReporterDomain_Name)
+		.def_readonly("Type",				&daeDataReporterDomain::m_eType,            DOCSTR_daeDataReporterDomain_Type)		
+		.def_readonly("NumberOfPoints",		&daeDataReporterDomain::m_nNumberOfPoints,  DOCSTR_daeDataReporterDomain_NumberOfPoints)
 		
-		.add_property("Points",				&daepython::GetDataReporterDomainPoints)
+		.add_property("Points",				&daepython::GetDataReporterDomainPoints,    DOCSTR_daeDataReporterDomain_Points)
 
-		.def("__getitem__",					&daeDataReporterDomain::GetPoint)
-		.def("__setitem__",					&daeDataReporterDomain::SetPoint)
+		.def("__getitem__",					&daeDataReporterDomain::GetPoint,           DOCSTR_daeDataReporterDomain_getitem)
+		.def("__setitem__",					&daeDataReporterDomain::SetPoint,           DOCSTR_daeDataReporterDomain_setitem)
 		;
 
-	class_<daeDataReporterVariable>("daeDataReporterVariable")
-		.def(init<string, size_t>())
+	class_<daeDataReporterVariable, boost::noncopyable>("daeDataReporterVariable", DOCSTR_daeDataReporterVariable, no_init)
+		.def(init<string, size_t>(( arg("self"), 
+                                    arg("name"), 
+                                    arg("numberOfPoints") 
+                                  ), DOCSTR_daeDataReporterVariable_init))
 		
-		.def_readonly("Name",				&daeDataReporterVariable::m_strName)
-		.def_readonly("NumberOfPoints",		&daeDataReporterVariable::m_nNumberOfPoints)
+		.def_readonly("Name",				&daeDataReporterVariable::m_strName,            DOCSTR_daeDataReporterVariable_Name)
+		.def_readonly("NumberOfPoints",		&daeDataReporterVariable::m_nNumberOfPoints,    DOCSTR_daeDataReporterVariable_NumberOfPoints)
 		
-		.add_property("NumberOfDomains",	&daeDataReporterVariable::GetNumberOfDomains)
-		.add_property("Domains",			&daepython::GetDataReporterDomains)
+		.add_property("NumberOfDomains",	&daeDataReporterVariable::GetNumberOfDomains,   DOCSTR_daeDataReporterVariable_NumberOfDomains)
+		.add_property("Domains",			&daepython::GetDataReporterDomains,             DOCSTR_daeDataReporterVariable_Domains)
 
-		.def("AddDomain",					&daeDataReporterVariable::AddDomain)
+		.def("AddDomain",					&daeDataReporterVariable::AddDomain, ( arg("self"), 
+                                                                                   arg("domainName") 
+                                                                                 ), DOCSTR_daeDataReporterVariable_AddDomain)
 		;
 
-	class_<daeDataReporterVariableValue>("daeDataReporterVariableValue")
-		.def(init<string, size_t>())
+	class_<daeDataReporterVariableValue, boost::noncopyable>("daeDataReporterVariableValue", DOCSTR_daeDataReporterVariableValue, no_init)
+		.def(init<string, size_t>(( arg("self"), 
+                                    arg("name"), 
+                                    arg("numberOfPoints") 
+                                  ), DOCSTR_daeDataReporterVariableValue_init))
 		
-		.def_readonly("Name",				&daeDataReporterVariableValue::m_strName)
-		.def_readonly("NumberOfPoints",		&daeDataReporterVariableValue::m_nNumberOfPoints)
+		.def_readonly("Name",				&daeDataReporterVariableValue::m_strName,           DOCSTR_daeDataReporterVariableValue_Name)
+		.def_readonly("NumberOfPoints",		&daeDataReporterVariableValue::m_nNumberOfPoints,   DOCSTR_daeDataReporterVariableValue_NumberOfPoints)
 
-		.add_property("Values",				&daepython::GetNumPyArrayDataReporterVariableValue)
+		.add_property("Values",				&daepython::GetNumPyArrayDataReporterVariableValue, DOCSTR_daeDataReporterVariableValue_Values)
 		
-		.def("__getitem__",					&daeDataReporterVariableValue::GetValue)
-		.def("__setitem__",					&daeDataReporterVariableValue::SetValue)
+		.def("__getitem__",					&daeDataReporterVariableValue::GetValue,            DOCSTR_daeDataReporterVariableValue_getitem)
+		.def("__setitem__",					&daeDataReporterVariableValue::SetValue,            DOCSTR_daeDataReporterVariableValue_setitem)
 		;
 
-	class_<daepython::daeDataReporterWrapper, boost::noncopyable>("daeDataReporter_t"/*, no_init*/)
-		.def("Connect",				pure_virtual(&daeDataReporter_t::Connect))
-		.def("Disconnect",			pure_virtual(&daeDataReporter_t::Disconnect))
-		.def("IsConnected",			pure_virtual(&daeDataReporter_t::IsConnected))
-		.def("StartRegistration",	pure_virtual(&daeDataReporter_t::StartRegistration))
-		.def("RegisterDomain",		pure_virtual(&daeDataReporter_t::RegisterDomain))
-		.def("RegisterVariable",	pure_virtual(&daeDataReporter_t::RegisterVariable))
-		.def("EndRegistration",		pure_virtual(&daeDataReporter_t::EndRegistration))
-		.def("StartNewResultSet",	pure_virtual(&daeDataReporter_t::StartNewResultSet))
-		.def("EndOfData",		    pure_virtual(&daeDataReporter_t::EndOfData))
-		.def("SendVariable",	    pure_virtual(&daeDataReporter_t::SendVariable))
+/**************************************************************
+    daeDataReporter_xxx
+***************************************************************/
+	class_<daepython::daeDataReporterWrapper, boost::noncopyable>("daeDataReporter_t", DOCSTR_daeDataReporter_t, no_init)
+		.def("Connect",				pure_virtual(&daeDataReporter_t::Connect),           ( arg("self"), 
+                                                                                           arg("connectionString"), 
+                                                                                           arg("processName") 
+                                                                                         ), DOCSTR_daeDataReporter_t_Connect)
+		.def("Disconnect",			pure_virtual(&daeDataReporter_t::Disconnect),        ( arg("self") ), DOCSTR_daeDataReporter_t_Disconnect)
+		.def("IsConnected",			pure_virtual(&daeDataReporter_t::IsConnected),       ( arg("self") ), DOCSTR_daeDataReporter_t_IsConnected)
+		.def("StartRegistration",	pure_virtual(&daeDataReporter_t::StartRegistration), ( arg("self") ), DOCSTR_daeDataReporter_t_StartRegistration)
+		.def("RegisterDomain",		pure_virtual(&daeDataReporter_t::RegisterDomain),    ( arg("self"), 
+                                                                                           arg("domain") 
+                                                                                         ), DOCSTR_daeDataReporter_t_RegisterDomain)
+		.def("RegisterVariable",	pure_virtual(&daeDataReporter_t::RegisterVariable),  ( arg("self"), 
+                                                                                           arg("variable") 
+                                                                                         ), DOCSTR_daeDataReporter_t_RegisterVariable)
+		.def("EndRegistration",		pure_virtual(&daeDataReporter_t::EndRegistration),   ( arg("self") ), DOCSTR_daeDataReporter_t_EndRegistration)
+		.def("StartNewResultSet",	pure_virtual(&daeDataReporter_t::StartNewResultSet), ( arg("self"),
+                                                                                           arg("time") 
+                                                                                         ), DOCSTR_daeDataReporter_t_StartNewResultSet)
+        .def("SendVariable",	    pure_virtual(&daeDataReporter_t::SendVariable),      ( arg("self"), 
+                                                                                           arg("variableValue") 
+                                                                                         ), DOCSTR_daeDataReporter_t_SendVariable)
+		.def("EndOfData",		    pure_virtual(&daeDataReporter_t::EndOfData),         ( arg("self") ), DOCSTR_daeDataReporter_t_EndOfData)
 		;
 
 
-	class_<daeBlackHoleDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeBlackHoleDataReporter")
+	class_<daeBlackHoleDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeBlackHoleDataReporter", no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeBlackHoleDataReporter::Connect)
 		.def("Disconnect",			&daeBlackHoleDataReporter::Disconnect)
 		.def("IsConnected",			&daeBlackHoleDataReporter::IsConnected)
@@ -79,7 +107,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("SendVariable",	  	&daeBlackHoleDataReporter::SendVariable)  
 		;
 	
-	class_<daepython::daeDelegateDataReporterWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDelegateDataReporter")
+	class_<daepython::daeDelegateDataReporterWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDelegateDataReporter", DOCSTR_daeDelegateDataReporter, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDelegateDataReporterWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDelegateDataReporterWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDelegateDataReporterWrapper::def_IsConnected)
@@ -90,10 +120,15 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeDelegateDataReporterWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDelegateDataReporterWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDelegateDataReporterWrapper::def_SendVariable)
-		.def("AddDataReporter",	  	&daeDelegateDataReporter::AddDataReporter)
+		
+        .def("AddDataReporter",	  	&daeDelegateDataReporter::AddDataReporter, ( arg("self"), arg("dataReporter") ), DOCSTR_daeDelegateDataReporter_AddDataReporter)
+        
+        .add_property("DataReporters",  &daepython::daeDelegateDataReporterWrapper::GetDataReporters, DOCSTR_daeDelegateDataReporter_DataReporters)
 		;
 
-	class_<daepython::daeDataReporterLocalWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterLocal")
+	class_<daepython::daeDataReporterLocalWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterLocal", DOCSTR_daeDataReporterLocal, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterLocalWrapper::Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterLocalWrapper::Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterLocalWrapper::IsConnected)
@@ -104,10 +139,13 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeDataReporterLocalWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDataReporterLocalWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDataReporterLocalWrapper::def_SendVariable)
-		.add_property("Process",	make_function(&daeDataReporterLocal::GetProcess, return_internal_reference<>()) )
+            
+		.add_property("Process",	make_function(&daeDataReporterLocal::GetProcess, return_internal_reference<>()), DOCSTR_daeDataReporterLocal_Process )
 		;
 	
-	class_<daeNoOpDataReporter, bases<daeDataReporterLocal>, boost::noncopyable>("daeNoOpDataReporter")
+	class_<daeNoOpDataReporter, bases<daeDataReporterLocal>, boost::noncopyable>("daeNoOpDataReporter", DOCSTR_daeNoOpDataReporter, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeNoOpDataReporter::Connect)
 		.def("Disconnect",			&daeNoOpDataReporter::Disconnect)
 		.def("IsConnected",			&daeNoOpDataReporter::IsConnected)
@@ -120,7 +158,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("SendVariable",	  	&daeNoOpDataReporter::SendVariable)  
 		;
 
-	class_<daepython::daeDataReporterFileWrapper, bases<daeDataReporterLocal>, boost::noncopyable>("daeDataReporterFile")
+	class_<daepython::daeDataReporterFileWrapper, bases<daeDataReporterLocal>, boost::noncopyable>("daeDataReporterFile", DOCSTR_daeDataReporterFile, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterFileWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterFileWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterFileWrapper::def_IsConnected)
@@ -131,10 +171,15 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeDataReporterFileWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDataReporterFileWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDataReporterFileWrapper::def_SendVariable)
-		.def("WriteDataToFile",	    &daeFileDataReporter::WriteDataToFile,	&daepython::daeDataReporterFileWrapper::WriteDataToFile)
+            
+		.def("WriteDataToFile",	    &daeFileDataReporter::WriteDataToFile,	
+                                    &daepython::daeDataReporterFileWrapper::WriteDataToFile,
+                                    ( arg("self") ), DOCSTR_daeDataReporterFile_WriteDataToFile)
 		;
 
-	class_<daepython::daeTEXTFileDataReporterWrapper, bases<daeFileDataReporter>, boost::noncopyable>("daeTEXTFileDataReporter")
+	class_<daepython::daeTEXTFileDataReporterWrapper, bases<daeFileDataReporter>, boost::noncopyable>("daeTEXTFileDataReporter", DOCSTR_daeTEXTFileDataReporter, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeTEXTFileDataReporterWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeTEXTFileDataReporterWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeTEXTFileDataReporterWrapper::def_IsConnected)
@@ -145,10 +190,14 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeTEXTFileDataReporterWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeTEXTFileDataReporterWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeTEXTFileDataReporterWrapper::def_SendVariable)
-		.def("WriteDataToFile",	    &daeFileDataReporter::WriteDataToFile,	&daepython::daeTEXTFileDataReporterWrapper::def_WriteDataToFile)
+		.def("WriteDataToFile",	    &daeFileDataReporter::WriteDataToFile,	
+                                    &daepython::daeTEXTFileDataReporterWrapper::def_WriteDataToFile,
+                                    ( arg("self") ), DOCSTR_daeTEXTFileDataReporter_WriteDataToFile)
 		;
 
-	class_<daepython::daeDataReporterRemoteWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterRemote")
+	class_<daepython::daeDataReporterRemoteWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterRemote", DOCSTR_daeDataReporterRemote, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterRemoteWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterRemoteWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterRemoteWrapper::def_IsConnected)
@@ -159,10 +208,15 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeDataReporterRemoteWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDataReporterRemoteWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDataReporterRemoteWrapper::def_SendVariable)
-		.def("SendMessage",	    	&daeDataReporterRemote::SendMessage,    &daepython::daeDataReporterRemoteWrapper::SendMessage)
+		
+        .def("SendMessage",	    	&daeDataReporterRemote::SendMessage,    
+                                    &daepython::daeDataReporterRemoteWrapper::SendMessage,
+                                    ( arg("self"), arg("message") ), DOCSTR_daeDataReporterRemote_SendMessage)
 		; 
 	
-	class_<daepython::daeTCPIPDataReporterWrapper, bases<daeDataReporterRemote>, boost::noncopyable>("daeTCPIPDataReporter")
+	class_<daepython::daeTCPIPDataReporterWrapper, bases<daeDataReporterRemote>, boost::noncopyable>("daeTCPIPDataReporter", DOCSTR_daeTCPIPDataReporter, no_init)
+        .def(init<>(( arg("self") )))
+            
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeTCPIPDataReporterWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeTCPIPDataReporterWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeTCPIPDataReporterWrapper::def_IsConnected)
@@ -173,59 +227,74 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("StartNewResultSet",	&daeDataReporter_t::StartNewResultSet,	&daepython::daeTCPIPDataReporterWrapper::def_StartNewResultSet)
 		.def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeTCPIPDataReporterWrapper::def_EndOfData)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeTCPIPDataReporterWrapper::def_SendVariable)
-		.def("SendMessage",	    	&daeDataReporterRemote::SendMessage,	&daepython::daeTCPIPDataReporterWrapper::def_SendMessage)
+		
+        .def("SendMessage",	    	&daeDataReporterRemote::SendMessage,	
+                                    &daepython::daeTCPIPDataReporterWrapper::def_SendMessage,
+                                    ( arg("self"), arg("message") ), DOCSTR_daeTCPIPDataReporter_SendMessage)
 		; 
 		
 /**************************************************************
 	daeDataReceiver
 ***************************************************************/
-	class_<daeDataReceiverDomain, boost::noncopyable>("daeDataReceiverDomain")
-		.def(init<string, daeeDomainType, size_t>())
+	class_<daeDataReceiverDomain, boost::noncopyable>("daeDataReceiverDomain", DOCSTR_daeDataReceiverDomain, no_init)
+		.def(init<string, daeeDomainType, size_t>(( arg("self"), 
+                                                    arg("name"), 
+                                                    arg("type"), 
+                                                    arg("numberOfPoints") 
+                                                  ), DOCSTR_daeDataReceiverDomain_init))
 		
-		.def_readonly("Name",				&daeDataReceiverDomain::m_strName)
-		.def_readonly("Type",				&daeDataReceiverDomain::m_eType)
-		.def_readonly("NumberOfPoints",		&daeDataReceiverDomain::m_nNumberOfPoints)
+		.def_readonly("Name",				&daeDataReceiverDomain::m_strName,          DOCSTR_daeDataReceiverDomain_Name)
+		.def_readonly("Type",				&daeDataReceiverDomain::m_eType,            DOCSTR_daeDataReceiverDomain_Type)
+		.def_readonly("NumberOfPoints",		&daeDataReceiverDomain::m_nNumberOfPoints,  DOCSTR_daeDataReceiverDomain_NumberOfPoints)
 		
-		.add_property("Points",				&daepython::GetDataReceiverDomainPoints)
+		.add_property("Points",				&daepython::GetDataReceiverDomainPoints,    DOCSTR_daeDataReceiverDomain_Points)
 		
-		.def("__getitem__",					&daeDataReceiverDomain::GetPoint)
-		.def("__setitem__",					&daeDataReceiverDomain::SetPoint)
+		.def("__getitem__",					&daeDataReceiverDomain::GetPoint,           DOCSTR_daeDataReceiverDomain_getitem)
+		.def("__setitem__",					&daeDataReceiverDomain::SetPoint,           DOCSTR_daeDataReceiverDomain_setitem)
 		;
 
-	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue")  
-		.def(init<real_t, size_t>())
+	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue", DOCSTR_daeDataReceiverVariableValue, no_init)  
+		.def(init<real_t, size_t>(( arg("self"), 
+                                    arg("time"), 
+                                    arg("numberOfPoints") 
+                                  ), DOCSTR_daeDataReceiverVariableValue_init))
 		
-		.def_readonly("Time",				&daeDataReceiverVariableValue::m_dTime)
+		.def_readonly("Time",				&daeDataReceiverVariableValue::m_dTime, DOCSTR_daeDataReceiverVariableValue_Time)
 
-		.def("__getitem__",					&daeDataReceiverVariableValue::GetValue)
-		.def("__setitem__",					&daeDataReceiverVariableValue::SetValue)
+		.def("__getitem__",					&daeDataReceiverVariableValue::GetValue, DOCSTR_daeDataReceiverVariableValue_getitem)
+		.def("__setitem__",					&daeDataReceiverVariableValue::SetValue, DOCSTR_daeDataReceiverVariableValue_setitem)
 		;
 
-	class_<daeDataReceiverVariable, boost::noncopyable>("daeDataReceiverVariable")
-		.def(init<string, size_t>()) 
+	class_<daeDataReceiverVariable, boost::noncopyable>("daeDataReceiverVariable", DOCSTR_daeDataReceiverVariable, no_init)
+		.def(init<string, size_t>(( arg("self"), 
+                                    arg("name"), 
+                                    arg("numberOfPoints") 
+                                  ), DOCSTR_daeDataReceiverVariable_init)) 
 
-		.def_readonly("Name",				&daeDataReceiverVariable::m_strName)
-		.def_readonly("NumberOfPoints",		&daeDataReceiverVariable::m_nNumberOfPoints)
+		.def_readonly("Name",				&daeDataReceiverVariable::m_strName, DOCSTR_daeDataReceiverVariable_Name)
+		.def_readonly("NumberOfPoints",		&daeDataReceiverVariable::m_nNumberOfPoints, DOCSTR_daeDataReceiverVariable_NumberOfPoints)
 		
-		.add_property("Domains",			&daepython::GetDomainsDataReceiverVariable)
-		.add_property("TimeValues",			&daepython::GetTimeValuesDataReceiverVariable)
-		.add_property("Values",				&daepython::GetNumPyArrayDataReceiverVariable)
+		.add_property("Domains",			&daepython::GetDomainsDataReceiverVariable, DOCSTR_daeDataReceiverVariable_Domains)
+		.add_property("TimeValues",			&daepython::GetTimeValuesDataReceiverVariable, DOCSTR_daeDataReceiverVariable_TimeValues)
+		.add_property("Values",				&daepython::GetNumPyArrayDataReceiverVariable, DOCSTR_daeDataReceiverVariable_Values)
 		
-		.def("AddDomain",					&daeDataReceiverVariable::AddDomain)
-		.def("AddVariableValue",			&daeDataReceiverVariable::AddVariableValue)
+		.def("AddDomain",					&daeDataReceiverVariable::AddDomain, DOCSTR_daeDataReceiverVariable_AddDomain)
+		.def("AddVariableValue",			&daeDataReceiverVariable::AddVariableValue, DOCSTR_daeDataReceiverVariable_AddVariableValue)
 		;
 
-	class_<daeDataReporterProcess, boost::noncopyable>("daeDataReporterProcess")
-		.def(init<string>())
+	class_<daeDataReceiverProcess, boost::noncopyable>("daeDataReceiverProcess", DOCSTR_daeDataReceiverProcess, no_init)
+		.def(init<string>(( arg("self"), 
+                            arg("name") 
+                          ), DOCSTR_daeDataReceiverProcess_init))
 
-		.def_readonly("Name",				&daeDataReporterProcess::m_strName)
+		.def_readonly("Name",				&daeDataReceiverProcess::m_strName, DOCSTR_daeDataReceiverProcess_Name)
  
-		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess)
-		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess)
+		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess, DOCSTR_daeDataReceiverProcess_Domains)
+		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess, DOCSTR_daeDataReceiverProcess_Variables)
 		
-		.def("RegisterDomain",				&daeDataReporterProcess::RegisterDomain)
-		.def("RegisterVariable",			&daeDataReporterProcess::RegisterVariable)
-		.def("FindVariable",				&daeDataReporterProcess::FindVariable, return_internal_reference<>())
+		.def("RegisterDomain",				&daeDataReceiverProcess::RegisterDomain, DOCSTR_daeDataReceiverProcess_RegisterDomain)
+		.def("RegisterVariable",			&daeDataReceiverProcess::RegisterVariable, DOCSTR_daeDataReceiverProcess_RegisterVariable)
+		.def("FindVariable",				&daeDataReceiverProcess::FindVariable, return_internal_reference<>(), DOCSTR_daeDataReceiverProcess_FindVariable)
 		;
   
 	class_<daepython::daeDataReceiverWrapper, boost::noncopyable>("daeDataReceiver_t", no_init)
@@ -234,7 +303,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("GetProcess",			pure_virtual(&daeDataReceiver_t::GetProcess), return_internal_reference<>())
 		;
 
-	class_<daepython::daeTCPIPDataReceiverServerWrapper, boost::noncopyable>("daeTCPIPDataReceiverServer", init<int>())
+	class_<daepython::daeTCPIPDataReceiverServerWrapper, boost::noncopyable>("daeTCPIPDataReceiverServer", no_init)
+        .def(init<int>())
+            
 		.add_property("NumberOfProcesses",		&daepython::daeTCPIPDataReceiverServerWrapper::GetNumberOfProcesses)
 		.add_property("NumberOfDataReceivers",	&daepython::daeTCPIPDataReceiverServerWrapper::GetNumberOfDataReceivers)
 		//.add_property("DataReceivers",			&daepython::daeTCPIPDataReceiverServerWrapper::GetDataReceivers)

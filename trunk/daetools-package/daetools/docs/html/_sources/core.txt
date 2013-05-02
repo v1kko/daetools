@@ -7,7 +7,6 @@ Module pyCore
 
 Overview
 ========
-Trt mrt.
 
 
 Key modelling concepts
@@ -399,25 +398,37 @@ Logging support
     :members:
     :undoc-members:
 
+    .. automethod:: __init__
+
 .. autoclass:: pyCore.daeBaseLog
     :members:
     :undoc-members:
+
+    .. automethod:: __init__
 
 .. autoclass:: pyCore.daeFileLog
     :members:
     :undoc-members:
 
+    .. automethod:: __init__
+
 .. autoclass:: pyCore.daeStdOutLog
     :members:
     :undoc-members:
+
+    .. automethod:: __init__
 
 .. autoclass:: pyCore.daeTCPIPLog
     :members:
     :undoc-members:
 
+    .. automethod:: __init__
+
 .. autoclass:: pyCore.daeTCPIPLogServer
     :members:
     :undoc-members:
+
+    .. automethod:: __init__
 
 Autodifferentiation and equation evaluation tree support
 ========================================================

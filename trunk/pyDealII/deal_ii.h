@@ -12,12 +12,158 @@
 #include "fem_common.h"
 using dae::core::adouble;
 
+#include <typeinfo>
+#include <fstream>
+#include <iostream>
+
+class adNumber 
+{
+public:
+    adNumber(void) {}
+    adNumber(double v) {ad.setValue(v);}
+    adNumber(const adNumber& a) {ad = a.ad;}
+    virtual ~adNumber(){}
+
+public:
+    adNumber& operator =(const adNumber& a) {ad = a.ad; return *this;}
+    adNumber& operator =(double v) {ad.setValue(v); return *this;}
+
+    adNumber operator -(void) const {adNumber tmp; tmp.ad = -ad; return tmp;}
+    adNumber operator +(void) const {return *this;}
+
+    adNumber& operator +=(const adNumber& a) {ad = ad + a.ad; return *this;}
+    adNumber& operator -=(const adNumber& a) {ad = ad - a.ad; return *this;}
+    adNumber& operator *=(const adNumber& a) {ad = ad * a.ad; return *this;}
+    adNumber& operator *=(double v) {ad *= v; return *this;}
+    adNumber& operator /=(const adNumber& a) {ad = ad / a.ad; return *this;}
+    adNumber& operator /=(double v) {ad /= v; return *this;}
+
+    bool operator !=(const adNumber& a) const {return (ad.getValue() != a.ad.getValue());}
+
+    bool operator ==(const adNumber& a) const {return (ad.getValue() == a.ad.getValue());}
+
+    bool operator <=(const adNumber& a) const {return (ad.getValue() <= a.ad.getValue());}
+
+    bool operator >=(const adNumber& a) const {return (ad.getValue() >= a.ad.getValue());}
+
+    bool operator >(const adNumber& a) const {return (ad.getValue() > a.ad.getValue());}
+
+    bool operator <(const adNumber& a) const {return (ad.getValue() < a.ad.getValue());}
+	
+public:
+    adouble ad;
+};
+
+adNumber operator +(const adNumber& l, const adNumber& r);
+adNumber operator -(const adNumber& l, const adNumber& r);
+adNumber operator *(const adNumber& l, const adNumber& r);
+adNumber operator *(const adNumber& l, double r);
+adNumber operator /(const adNumber& l, const adNumber& r);
+
+namespace std
+{
+adNumber exp(const adNumber &a);
+adNumber log(const adNumber &a);
+adNumber sqrt(const adNumber &a);
+adNumber sin(const adNumber &a);
+adNumber cos(const adNumber &a);
+adNumber tan(const adNumber &a);
+adNumber asin(const adNumber &a);
+adNumber acos(const adNumber &a);
+adNumber atan(const adNumber &a);
+
+adNumber pow(const adNumber &a, double v);
+adNumber pow(const adNumber &a, const adNumber &b);
+
+adNumber log10(const adNumber &a);
+
+adNumber ceil(const adNumber &a);
+adNumber floor(const adNumber &a);
+
+adNumber abs(const adNumber &a);
+adNumber fabs(const adNumber &a);
+adNumber max(const adNumber &a, const adNumber &b);
+adNumber min(const adNumber &a, const adNumber &b);
+
+
+adNumber operator +(const adNumber& l, const adNumber& r) {adNumber tmp; tmp.ad = l.ad + r.ad; return tmp;}
+adNumber operator -(const adNumber& l, const adNumber& r) {adNumber tmp; tmp.ad = l.ad - r.ad; return tmp;}
+adNumber operator *(const adNumber& l, const adNumber& r) {adNumber tmp; tmp.ad = l.ad * r.ad; return tmp;}
+adNumber operator *(const adNumber& l, double r) {adNumber tmp; tmp.ad = l.ad * r; return tmp;}
+adNumber operator *(double l, const adNumber& r) {adNumber tmp; tmp.ad = l * r.ad; return tmp;}
+adNumber operator /(const adNumber& l, const adNumber& r) {adNumber tmp; tmp.ad = l.ad / r.ad; return tmp;}
+adNumber operator /(const adNumber& l, double r) {adNumber tmp; tmp.ad = l.ad / r; return tmp;}
+
+adNumber exp(const adNumber &a) {adNumber tmp; tmp.ad = exp(a.ad); return tmp;}
+adNumber log(const adNumber &a) {adNumber tmp; tmp.ad = log(a.ad); return tmp;}
+adNumber sqrt(const adNumber &a) {adNumber tmp; tmp.ad = sqrt(a.ad); return tmp;}
+adNumber sin(const adNumber &a) {adNumber tmp; tmp.ad = sin(a.ad); return tmp;}
+adNumber cos(const adNumber &a) {adNumber tmp; tmp.ad = cos(a.ad); return tmp;}
+adNumber tan(const adNumber &a) {adNumber tmp; tmp.ad = tan(a.ad); return tmp;}
+adNumber asin(const adNumber &a) {adNumber tmp; tmp.ad = asin(a.ad); return tmp;}
+adNumber acos(const adNumber &a) {adNumber tmp; tmp.ad = acos(a.ad); return tmp;}
+adNumber atan(const adNumber &a) {adNumber tmp; tmp.ad = atan(a.ad); return tmp;}
+
+adNumber pow(const adNumber &a, double v) {adNumber tmp; tmp.ad = pow(a.ad, v); return tmp;}
+adNumber pow(const adNumber &a, const adNumber &b) {adNumber tmp; tmp.ad = pow(a.ad, b.ad); return tmp;}
+
+adNumber log10(const adNumber &a) {adNumber tmp; tmp.ad = exp(a.ad); return tmp;}
+
+adNumber ceil(const adNumber &a) {adNumber tmp; tmp.ad = ceil(a.ad); return tmp;}
+adNumber floor(const adNumber &a) {adNumber tmp; tmp.ad = floor(a.ad); return tmp;}
+
+adNumber abs(const adNumber &a) {adNumber tmp; tmp.ad = abs(a.ad); return tmp;}
+adNumber fabs(const adNumber &a) {adNumber tmp; tmp.ad = abs(a.ad); return tmp;}
+adNumber max(const adNumber &a, const adNumber &b) {adNumber tmp; tmp.ad = max(a.ad, b.ad); return tmp;}
+adNumber min(const adNumber &a, const adNumber &b) {adNumber tmp; tmp.ad = min(a.ad, b.ad); return tmp;}
+}
+using namespace std;
+
+std::ostream& operator<<(std::ostream& out, const adNumber& a);
+std::size_t memory_consumption (const adNumber& a);
+
+std::ostream& operator<<(std::ostream& out, const adNumber& a)
+{
+    return out << a.ad;
+}
+
+std::size_t memory_consumption (const adNumber& a)
+{
+    return 0;
+}
+
+namespace dealii
+{
+namespace internal
+{
+void print (const adNumber &t, const char *format);
+void copy (const adNumber *begin,
+           const adNumber *end,
+           adNumber       *dest);
+
+void print (const adNumber &t, const char *format)
+{       
+}
+
+void copy (const adNumber *begin,
+           const adNumber *end,
+           adNumber       *dest)
+{
+}
+
+}
+}
+
+
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
 #include <deal.II/base/logstream.h>
 #include <deal.II/lac/vector.h>
+#include <deal.II/lac/vector.templates.h>
 #include <deal.II/lac/full_matrix.h>
+#include <deal.II/lac/full_matrix.templates.h>
 #include <deal.II/lac/sparse_matrix.h>
+#include <deal.II/lac/sparse_matrix.templates.h>
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/precondition.h>
 #include <deal.II/lac/constraint_matrix.h>
@@ -41,15 +187,105 @@ using dae::core::adouble;
 #include <deal.II/base/convergence_table.h>
 #include <deal.II/fe/fe_values.h>
 
-#include <typeinfo>
-#include <fstream>
-#include <iostream>
-
 //extern void run_dealii_poisson_test();
+
+#include <boost/math/complex.hpp>
+
+namespace dealii
+{
+namespace numbers
+{
+template <>
+struct NumberTraits<adNumber>
+{
+                                     /**
+                                      * A flag that specifies whether the
+                                      * template type given to this class is
+                                      * complex or real. Since this
+                                      * specialization of the general
+                                      * template is selected for complex
+                                      * types, the answer is
+                                      * <code>true</code>.
+                                      */
+    static const bool is_complex = true;
+    
+    typedef adNumber real_type;
+
+                                     /**
+                                      * Return the complex-conjugate of the
+                                      * given number.
+                                      */
+    static
+    adNumber conjugate (const adNumber &x);
+
+                                     /**
+                                      * Return the square of the absolute
+                                      * value of the given number. Since
+                                      * this specialization of the general
+                                      * template is chosen for types equal
+                                      * to std::complex, this function
+                                      * returns the product of a number and
+                                      * its complex conjugate.
+                                      */
+    static
+    real_type abs_square (const adNumber &x);
+
+
+                                     /**
+                                      * Return the absolute value of a
+                                      * complex number.
+                                      */
+    static
+    real_type abs (const adNumber &x);
+};
+}
+
+namespace numbers
+{
+template <>
+adNumber
+NumberTraits<adNumber >::conjugate (const adNumber &x)
+{
+  return x;
+}
+
+
+
+template <>
+typename NumberTraits<adNumber >::real_type
+NumberTraits<adNumber >::abs (const adNumber &x)
+{
+  return std::abs(x);
+}
+
+
+
+template <>
+typename NumberTraits<adNumber >::real_type
+NumberTraits<adNumber >::abs_square (const adNumber &x)
+{
+  return x * x;
+}
+
+}
+
+template
+class SparseMatrix<adNumber>;
+
+template
+class FullMatrix<adNumber>;
+
+template
+class Vector<adNumber>;
+}
 
 namespace Step7
 {
 using namespace dealii;
+
+typedef SparseMatrix<adNumber> adSparseMatrix;
+typedef FullMatrix<adNumber>   adFullMatrix;
+typedef Vector<adNumber>       adVector;
 
 
 template <int dim>
@@ -165,6 +401,7 @@ enum RefinementMode
     adaptive_refinement
 };
 
+
 template <int dim>
 class HelmholtzProblem
 {
@@ -192,10 +429,14 @@ public:
     ConstraintMatrix                        hanging_node_constraints;
     
     SparsityPattern                         sparsity_pattern;
-    SparseMatrix<double>                    system_matrix;
+  
+    adSparseMatrix                          system_matrix;
+    adVector                                solution;
+    adVector                                system_rhs;
     
-    Vector<double>                          solution;
-    Vector<double>                          system_rhs;
+//    SparseMatrix<double>                    system_matrix;
+//    Vector<double>                          solution;
+//    Vector<double>                          system_rhs;
     
     const RefinementMode                    refinement_mode;
     
@@ -298,8 +539,8 @@ void HelmholtzProblem<dim>::assemble_system ()
     
     const unsigned int dofs_per_cell = fe->dofs_per_cell;
     
-    FullMatrix<double>   cell_matrix (dofs_per_cell, dofs_per_cell);
-    Vector<double>       cell_rhs (dofs_per_cell);
+    adFullMatrix  cell_matrix (dofs_per_cell, dofs_per_cell);
+    adVector      cell_rhs (dofs_per_cell);
     
     std::vector<unsigned int> local_dof_indices (dofs_per_cell);
     
@@ -321,8 +562,8 @@ void HelmholtzProblem<dim>::assemble_system ()
             endc = dof_handler.end();
     for (; cell!=endc; ++cell)
     {
-        cell_matrix = 0;
-        cell_rhs = 0;
+        cell_matrix = adNumber(0);
+        cell_rhs = adNumber(0);
         
         fe_values.reinit (cell);
         
@@ -334,7 +575,7 @@ void HelmholtzProblem<dim>::assemble_system ()
             {
                 for (unsigned int j=0; j<dofs_per_cell; ++j)
                 {
-                    cell_matrix(i,j) += ((fe_values.shape_grad(i,q_point) *
+                    cell_matrix(i,j) += adNumber((fe_values.shape_grad(i,q_point) *
                                           fe_values.shape_grad(j,q_point)
                                           +
                                           fe_values.shape_value(i,q_point) *
@@ -342,7 +583,7 @@ void HelmholtzProblem<dim>::assemble_system ()
                                           fe_values.JxW(q_point));
                 }
                 
-                cell_rhs(i) += (fe_values.shape_value(i,q_point) *
+                cell_rhs(i) += adNumber(fe_values.shape_value(i,q_point) *
                                 rhs_values [q_point] *
                                 fe_values.JxW(q_point));
             }
@@ -361,7 +602,7 @@ void HelmholtzProblem<dim>::assemble_system ()
                                fe_face_values.normal_vector(q_point));
                     
                     for (unsigned int i=0; i<dofs_per_cell; ++i)
-                        cell_rhs(i) += (neumann_value *
+                        cell_rhs(i) += adNumber(neumann_value *
                                         fe_face_values.shape_value(i,q_point) *
                                         fe_face_values.JxW(q_point));
                 }
@@ -376,17 +617,17 @@ void HelmholtzProblem<dim>::assemble_system ()
                                    local_dof_indices[j],
                                    cell_matrix(i,j));
 
-                if(!A(local_dof_indices[i], local_dof_indices[j]).node)
-                    A(local_dof_indices[i], local_dof_indices[j]) = adouble_(cell_matrix(i,j));
-                else
-                    A(local_dof_indices[i], local_dof_indices[j]) += adouble_(cell_matrix(i,j));
+            //    if(!A(local_dof_indices[i], local_dof_indices[j]).node)
+            //        A(local_dof_indices[i], local_dof_indices[j]) = adouble_(cell_matrix(i,j));
+            //    else
+            //        A(local_dof_indices[i], local_dof_indices[j]) += adouble_(cell_matrix(i,j));
             }
             
             system_rhs(local_dof_indices[i]) += cell_rhs(i);
-            if(!b[local_dof_indices[i]].node)
-                b[local_dof_indices[i]] = adouble_(cell_rhs(i));
-            else
-                b[local_dof_indices[i]] += adouble_(cell_rhs(i));
+            //if(!b[local_dof_indices[i]].node)
+            //    b[local_dof_indices[i]] = adouble_(cell_rhs(i));
+            //else
+            //    b[local_dof_indices[i]] += adouble_(cell_rhs(i));
         }
     }
     
@@ -398,7 +639,7 @@ void HelmholtzProblem<dim>::assemble_system ()
                                               0,
                                               Solution<dim>(),
                                               boundary_values);
-    
+/*    
     std::cout << (boost::format("N = %1%, NNZ = %2%") % A.N % A.NNZ).str() << std::endl;
     for(std::map<unsigned int,double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
     {
@@ -417,7 +658,7 @@ void HelmholtzProblem<dim>::assemble_system ()
         b[index] = adouble_(value);
     }
     //A.Print(true);
-    
+*/    
     MatrixTools::apply_boundary_values (boundary_values,
                                         system_matrix,
                                         solution,
@@ -429,16 +670,16 @@ void HelmholtzProblem<dim>::assemble_system ()
 template <int dim>
 void HelmholtzProblem<dim>::solve ()
 {
-    SolverControl           solver_control (1000, 1e-12);
-    SolverCG<>              cg (solver_control);
+//    SolverControl           solver_control (1000, 1e-12);
+//    SolverCG<>              cg (solver_control);
     
-    PreconditionSSOR<> preconditioner;
-    preconditioner.initialize(system_matrix, 1.2);
+//    PreconditionSSOR<> preconditioner;
+//    preconditioner.initialize(system_matrix, 1.2);
     
-    cg.solve (system_matrix, solution, system_rhs,
-              preconditioner);
+//    cg.solve (system_matrix, solution, system_rhs,
+//              preconditioner);
     
-    hanging_node_constraints.distribute (solution);
+//    hanging_node_constraints.distribute (solution);
 }
 
 
@@ -486,6 +727,7 @@ void HelmholtzProblem<dim>::refine_grid ()
 template <int dim>
 void HelmholtzProblem<dim>::process_solution (const unsigned int cycle)
 {
+/*
     Vector<float> difference_per_cell (triangulation.n_active_cells());
     VectorTools::integrate_difference (dof_handler,
                                        solution,
@@ -534,6 +776,7 @@ void HelmholtzProblem<dim>::process_solution (const unsigned int cycle)
     
     for(size_t i = 0; i < solution.size(); i++)
         std::cout << (boost::format("T[%1%] = %2%") % i % solution[i]).str() << std::endl;
+*/
 }
 
 
@@ -568,6 +811,7 @@ void HelmholtzProblem<dim>::run ()
             
         setup_system ();
         
+    /*    
         assemble_system ();
         solve ();
         
@@ -713,7 +957,7 @@ void HelmholtzProblem<dim>::run ()
             std::ofstream table_file(conv_filename.c_str());
             convergence_table.write_tex(table_file);
         }
-        
+    */    
         //run_dealii_poisson_test();
         
 /*        

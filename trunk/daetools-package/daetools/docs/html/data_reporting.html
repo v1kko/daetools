@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Module pyDataReporting &mdash; DAE Tools Project 1.3.1 documentation</title>
+    <title>3.3. Module pyDataReporting &mdash; DAE Tools Project 1.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,9 +26,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
-    <link rel="up" title="pyDAE API Reference" href="pyDAE_api_ref.html" />
-    <link rel="next" title="Module pyIDAS" href="dae_solver.html" />
-    <link rel="prev" title="Module pyActivity" href="activity.html" /> 
+    <link rel="up" title="3. pyDAE API Reference" href="pyDAE_api_ref.html" />
+    <link rel="next" title="3.4. Module pyIDAS" href="dae_solver.html" />
+    <link rel="prev" title="3.2. Module pyActivity" href="activity.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,13 +41,13 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dae_solver.html" title="Module pyIDAS"
+          <a href="dae_solver.html" title="3.4. Module pyIDAS"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="Module pyActivity"
+          <a href="activity.html" title="3.2. Module pyActivity"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
-          <li><a href="pyDAE_api_ref.html" accesskey="U">pyDAE API Reference</a> &raquo;</li> 
+          <li><a href="pyDAE_api_ref.html" accesskey="U">3. pyDAE API Reference</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,92 +56,525 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-pydatareporting">
-<h1>Module pyDataReporting<a class="headerlink" href="#module-pydatareporting" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-pyDataReporting"></span><div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Trt mrt.</p>
+  <div class="section" id="module-pyDataReporting">
+<span id="module-pydatareporting"></span><h1>3.3. Module pyDataReporting<a class="headerlink" href="#module-pyDataReporting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>3.3.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="datareporter-classes">
+<h2>3.3.2. DataReporter classes<a class="headerlink" href="#datareporter-classes" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#module-pyDataReporting" title="pyDataReporting"><tt class="xref py py-obj docutils literal"><span class="pre">pyDataReporting</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReporter_t" title="pyDataReporting.daeDataReporter_t"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporter_t</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeDataReporterLocal" title="pyDataReporting.daeDataReporterLocal"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporterLocal</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeNoOpDataReporter" title="pyDataReporting.daeNoOpDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daeNoOpDataReporter</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeDataReporterFile" title="pyDataReporting.daeDataReporterFile"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporterFile</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeTEXTFileDataReporter" title="pyDataReporting.daeTEXTFileDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daeTEXTFileDataReporter</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeBlackHoleDataReporter" title="pyDataReporting.daeBlackHoleDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daeBlackHoleDataReporter</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDelegateDataReporter" title="pyDataReporting.daeDelegateDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daeDelegateDataReporter</span></tt></a></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-<div class="section" id="daedatareporter-t">
-<h3>daeDataReporter_t<a class="headerlink" href="#daedatareporter-t" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pyDataReporting.daeDataReporter_t">
 <em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporter_t</tt><a class="headerlink" href="#pyDataReporting.daeDataReporter_t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
 <dl class="method">
 <dt id="pyDataReporting.daeDataReporter_t.Connect">
-<tt class="descname">Connect</tt><big>(</big><em>(daeDataReporter_t)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.Connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Connect( (daeDataReporter_t)arg1, (str)arg2, (str)arg3) -&gt; None</p>
-</dd></dl>
+<tt class="descname">Connect</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(str)connectionString</em>, <em>(str)processName</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.Connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyDataReporting.daeDataReporter_t.Disconnect">
-<tt class="descname">Disconnect</tt><big>(</big><em>(daeDataReporter_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.Disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Disconnect( (daeDataReporter_t)arg1) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.EndOfData">
-<tt class="descname">EndOfData</tt><big>(</big><em>(daeDataReporter_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.EndOfData" title="Permalink to this definition">¶</a></dt>
-<dd><p>EndOfData( (daeDataReporter_t)arg1) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.EndRegistration">
-<tt class="descname">EndRegistration</tt><big>(</big><em>(daeDataReporter_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.EndRegistration" title="Permalink to this definition">¶</a></dt>
-<dd><p>EndRegistration( (daeDataReporter_t)arg1) -&gt; None</p>
-</dd></dl>
+<tt class="descname">Disconnect</tt><big>(</big><em>(daeDataReporter_t)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.Disconnect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyDataReporting.daeDataReporter_t.IsConnected">
-<tt class="descname">IsConnected</tt><big>(</big><em>(daeDataReporter_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.IsConnected" title="Permalink to this definition">¶</a></dt>
-<dd><p>IsConnected( (daeDataReporter_t)arg1) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.RegisterDomain">
-<tt class="descname">RegisterDomain</tt><big>(</big><em>(daeDataReporter_t)arg1</em>, <em>(daeDataReporterDomain)arg2</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.RegisterDomain" title="Permalink to this definition">¶</a></dt>
-<dd><p>RegisterDomain( (daeDataReporter_t)arg1, (daeDataReporterDomain)arg2) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.RegisterVariable">
-<tt class="descname">RegisterVariable</tt><big>(</big><em>(daeDataReporter_t)arg1</em>, <em>(daeDataReporterVariable)arg2</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.RegisterVariable" title="Permalink to this definition">¶</a></dt>
-<dd><p>RegisterVariable( (daeDataReporter_t)arg1, (daeDataReporterVariable)arg2) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.SendVariable">
-<tt class="descname">SendVariable</tt><big>(</big><em>(daeDataReporter_t)arg1</em>, <em>(daeDataReporterVariableValue)arg2</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.SendVariable" title="Permalink to this definition">¶</a></dt>
-<dd><p>SendVariable( (daeDataReporter_t)arg1, (daeDataReporterVariableValue)arg2) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyDataReporting.daeDataReporter_t.StartNewResultSet">
-<tt class="descname">StartNewResultSet</tt><big>(</big><em>(daeDataReporter_t)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.StartNewResultSet" title="Permalink to this definition">¶</a></dt>
-<dd><p>StartNewResultSet( (daeDataReporter_t)arg1, (float)arg2) -&gt; None</p>
-</dd></dl>
+<tt class="descname">IsConnected</tt><big>(</big><em>(daeDataReporter_t)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.IsConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyDataReporting.daeDataReporter_t.StartRegistration">
-<tt class="descname">StartRegistration</tt><big>(</big><em>(daeDataReporter_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.StartRegistration" title="Permalink to this definition">¶</a></dt>
-<dd><p>StartRegistration( (daeDataReporter_t)arg1) -&gt; None</p>
+<tt class="descname">StartRegistration</tt><big>(</big><em>(daeDataReporter_t)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.StartRegistration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.RegisterDomain">
+<tt class="descname">RegisterDomain</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(daeDataReporterDomain)domain</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.RegisterDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.RegisterVariable">
+<tt class="descname">RegisterVariable</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(daeDataReporterVariable)variable</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.RegisterVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.EndRegistration">
+<tt class="descname">EndRegistration</tt><big>(</big><em>(daeDataReporter_t)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.EndRegistration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.StartNewResultSet">
+<tt class="descname">StartNewResultSet</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(Float)time</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.StartNewResultSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.SendVariable">
+<tt class="descname">SendVariable</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(daeDataReporterVariableValue)variableValue</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.SendVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporter_t.EndOfData">
+<tt class="descname">EndOfData</tt><big>(</big><em>(daeDataReporter_t)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporter_t.EndOfData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
+
+<div class="section" id="data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">
+<h3>3.3.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterLocal">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterLocal</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterLocal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporter_t" title="pyDataReporting.daeDataReporter_t"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporter_t</span></tt></a></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterLocal.Process">
+<tt class="descname">Process</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterLocal.Process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeNoOpDataReporter">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeNoOpDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeNoOpDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterLocal" title="pyDataReporting.daeDataReporterLocal"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterLocal</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterFile">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterFile</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterLocal" title="pyDataReporting.daeDataReporterLocal"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterLocal</span></tt></a></p>
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporterFile.WriteDataToFile">
+<tt class="descname">WriteDataToFile</tt><big>(</big><em>(daeDataReporterFile)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReporterFile.WriteDataToFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeTEXTFileDataReporter">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeTEXTFileDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeTEXTFileDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterFile" title="pyDataReporting.daeDataReporterFile"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterFile</span></tt></a></p>
+<dl class="method">
+<dt id="pyDataReporting.daeTEXTFileDataReporter.WriteDataToFile">
+<tt class="descname">WriteDataToFile</tt><big>(</big><em>(daeTEXTFileDataReporter)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeTEXTFileDataReporter.WriteDataToFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">
+<h3>3.3.2.2. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterRemote">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterRemote</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterRemote" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporter_t" title="pyDataReporting.daeDataReporter_t"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporter_t</span></tt></a></p>
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporterRemote.SendMessage">
+<tt class="descname">SendMessage</tt><big>(</big><em>(daeDataReporterRemote)self</em>, <em>(str)message</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReporterRemote.SendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeTCPIPDataReporter">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeTCPIPDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeTCPIPDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterRemote" title="pyDataReporting.daeDataReporterRemote"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterRemote</span></tt></a></p>
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReporter.SendMessage">
+<tt class="descname">SendMessage</tt><big>(</big><em>(daeTCPIPDataReporter)self</em>, <em>(str)message</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReporter.SendMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="special-purpose-data-reporters">
+<h3>3.3.2.3. Special-purpose data reporters<a class="headerlink" href="#special-purpose-data-reporters" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pyDataReporting.daeBlackHoleDataReporter">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeBlackHoleDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeBlackHoleDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporter_t" title="pyDataReporting.daeDataReporter_t"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporter_t</span></tt></a></p>
+<p>Data reporter that does not process any data and all function calls simply return <tt class="docutils literal"><span class="pre">True</span></tt>.
+Could be used when no results from the simulation are needed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDelegateDataReporter">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDelegateDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeDelegateDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporter_t" title="pyDataReporting.daeDataReporter_t"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporter_t</span></tt></a></p>
+<p>A container-like data reporter, which does not process any data but forwards (delegates) all function calls
+(<a class="reference internal" href="#pyDataReporting.daeDataReporter_t.Disconnect" title="pyDataReporting.daeDataReporter_t.Disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">Disconnect()</span></tt></a>, <a class="reference internal" href="#pyDataReporting.daeDataReporter_t.IsConnected" title="pyDataReporting.daeDataReporter_t.IsConnected"><tt class="xref py py-meth docutils literal"><span class="pre">IsConnected()</span></tt></a>,
+<a class="reference internal" href="#pyDataReporting.daeDataReporter_t.StartRegistration" title="pyDataReporting.daeDataReporter_t.StartRegistration"><tt class="xref py py-meth docutils literal"><span class="pre">StartRegistration()</span></tt></a>, <a class="reference internal" href="#pyDataReporting.daeDataReporter_t.RegisterDomain" title="pyDataReporting.daeDataReporter_t.RegisterDomain"><tt class="xref py py-meth docutils literal"><span class="pre">RegisterDomain()</span></tt></a>,
+<a class="reference internal" href="#pyDataReporting.daeDataReporter_t.RegisterVariable" title="pyDataReporting.daeDataReporter_t.RegisterVariable"><tt class="xref py py-meth docutils literal"><span class="pre">RegisterVariable()</span></tt></a>, <a class="reference internal" href="#pyDataReporting.daeDataReporter_t.EndRegistration" title="pyDataReporting.daeDataReporter_t.EndRegistration"><tt class="xref py py-meth docutils literal"><span class="pre">EndRegistration()</span></tt></a>,
+<a class="reference internal" href="#pyDataReporting.daeDataReporter_t.StartNewResultSet" title="pyDataReporting.daeDataReporter_t.StartNewResultSet"><tt class="xref py py-meth docutils literal"><span class="pre">StartNewResultSet()</span></tt></a>, <a class="reference internal" href="#pyDataReporting.daeDataReporter_t.SendVariable" title="pyDataReporting.daeDataReporter_t.SendVariable"><tt class="xref py py-meth docutils literal"><span class="pre">SendVariable()</span></tt></a>,
+<a class="reference internal" href="#pyDataReporting.daeDataReporter_t.EndOfData" title="pyDataReporting.daeDataReporter_t.EndOfData"><tt class="xref py py-meth docutils literal"><span class="pre">EndOfData()</span></tt></a>) to data reporters in the containing list of data reporters.
+Data reporters can be added by using the <tt class="xref py py-meth docutils literal"><span class="pre">AddDataReporter()</span></tt>.
+The list of containing data reporters is in the <tt class="xref py py-attr docutils literal"><span class="pre">DataReporters</span></tt>
+attribute.</p>
+<dl class="method">
+<dt id="pyDataReporting.daeDelegateDataReporter.Connect">
+<tt class="descname">Connect</tt><big>(</big><em>(daeDataReporter_t)self</em>, <em>(str)connectionString</em>, <em>(str)processName</em><big>)</big> &rarr; Boolean<a class="headerlink" href="#pyDataReporting.daeDelegateDataReporter.Connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does nothing. Always returns <tt class="docutils literal"><span class="pre">True</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDelegateDataReporter.AddDataReporter">
+<tt class="descname">AddDataReporter</tt><big>(</big><em>(daeDelegateDataReporter)self</em>, <em>(daeDataReporter_t)dataReporter</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDelegateDataReporter.AddDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDelegateDataReporter.DataReporters">
+<tt class="descname">DataReporters</tt><a class="headerlink" href="#pyDataReporting.daeDelegateDataReporter.DataReporters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="datareporter-data-containers">
+<h2>3.3.3. DataReporter data-containers<a class="headerlink" href="#datareporter-data-containers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReporterDomain" title="pyDataReporting.daeDataReporterDomain"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporterDomain</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeDataReporterVariable" title="pyDataReporting.daeDataReporterVariable"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporterVariable</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReporterVariableValue" title="pyDataReporting.daeDataReporterVariableValue"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReporterVariableValue</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterDomain">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterDomain</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterDomain.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterDomain.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterDomain.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterDomain.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterDomain.Points">
+<tt class="descname">Points</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterDomain.Points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterDomain.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterDomain.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterVariable">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterVariable</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyDataReporting.daeDataReporterVariable.AddDomain">
+<tt class="descname">AddDomain</tt><big>(</big><em>(daeDataReporterVariable)self</em>, <em>(str)domainName</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReporterVariable.AddDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariable.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariable.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariable.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariable.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariable.NumberOfDomains">
+<tt class="descname">NumberOfDomains</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariable.NumberOfDomains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariable.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariable.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReporterVariableValue">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterVariableValue</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariableValue.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariableValue.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariableValue.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariableValue.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReporterVariableValue.Values">
+<tt class="descname">Values</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterVariableValue.Values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="datareceiver-classes">
+<h2>3.3.4. DataReceiver classes<a class="headerlink" href="#datareceiver-classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReceiver_t" title="pyDataReporting.daeDataReceiver_t"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReceiver_t</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeTCPIPDataReceiverServer" title="pyDataReporting.daeTCPIPDataReceiverServer"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPDataReceiverServer</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyDataReporting.daeDataReceiver_t">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReceiver_t</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiver_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiver_t.GetProcess">
+<tt class="descname">GetProcess</tt><big>(</big><em>(daeDataReceiver_t)arg1</em><big>)</big> &rarr; daeDataReceiverProcess<a class="headerlink" href="#pyDataReporting.daeDataReceiver_t.GetProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>GetProcess( (daeDataReceiver_t)arg1) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiver_t.Start">
+<tt class="descname">Start</tt><big>(</big><em>(daeDataReceiver_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReceiver_t.Start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start( (daeDataReceiver_t)arg1) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiver_t.Stop">
+<tt class="descname">Stop</tt><big>(</big><em>(daeDataReceiver_t)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeDataReceiver_t.Stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop( (daeDataReceiver_t)arg1) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeTCPIPDataReceiverServer</tt><a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.GetDataReceiver">
+<tt class="descname">GetDataReceiver</tt><big>(</big><em>(daeTCPIPDataReceiverServer)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; daeDataReceiver_t<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.GetDataReceiver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.GetProcess">
+<tt class="descname">GetProcess</tt><big>(</big><em>(daeTCPIPDataReceiverServer)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; daeDataReceiverProcess<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.GetProcess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.IsConnected">
+<tt class="descname">IsConnected</tt><big>(</big><em>(daeTCPIPDataReceiverServer)arg1</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.IsConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.NumberOfDataReceivers">
+<tt class="descname">NumberOfDataReceivers</tt><a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.NumberOfDataReceivers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.NumberOfProcesses">
+<tt class="descname">NumberOfProcesses</tt><a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.NumberOfProcesses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.Start">
+<tt class="descname">Start</tt><big>(</big><em>(daeTCPIPDataReceiverServer)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.Start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeTCPIPDataReceiverServer.Stop">
+<tt class="descname">Stop</tt><big>(</big><em>(daeTCPIPDataReceiverServer)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeTCPIPDataReceiverServer.Stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="datareceiver-data-containers">
+<h2>3.3.5. DataReceiver data-containers<a class="headerlink" href="#datareceiver-data-containers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReceiverDomain" title="pyDataReporting.daeDataReceiverDomain"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReceiverDomain</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeDataReceiverVariable" title="pyDataReporting.daeDataReceiverVariable"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReceiverVariable</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyDataReporting.daeDataReceiverVariableValue" title="pyDataReporting.daeDataReceiverVariableValue"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReceiverVariableValue</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyDataReporting.daeDataReceiverProcess" title="pyDataReporting.daeDataReceiverProcess"><tt class="xref py py-obj docutils literal"><span class="pre">daeDataReceiverProcess</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyDataReporting.daeDataReceiverDomain">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReceiverDomain</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverDomain.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverDomain.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverDomain.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverDomain.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverDomain.Points">
+<tt class="descname">Points</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverDomain.Points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverDomain.Type">
+<tt class="descname">Type</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverDomain.Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReceiverVariable">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReceiverVariable</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiverVariable.AddDomain">
+<tt class="descname">AddDomain</tt><big>(</big><em>(daeDataReceiverVariable)arg1</em>, <em>(daeDataReceiverDomain)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.AddDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiverVariable.AddVariableValue">
+<tt class="descname">AddVariableValue</tt><big>(</big><em>(daeDataReceiverVariable)arg1</em>, <em>(daeDataReceiverVariableValue)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.AddVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariable.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariable.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariable.NumberOfPoints">
+<tt class="descname">NumberOfPoints</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.NumberOfPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariable.TimeValues">
+<tt class="descname">TimeValues</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.TimeValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariable.Values">
+<tt class="descname">Values</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariable.Values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReceiverVariableValue">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReceiverVariableValue</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverVariableValue.Time">
+<tt class="descname">Time</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverVariableValue.Time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyDataReporting.daeDataReceiverProcess">
+<em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReceiverProcess</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverProcess.Domains">
+<tt class="descname">Domains</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.Domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiverProcess.FindVariable">
+<tt class="descname">FindVariable</tt><big>(</big><em>(daeDataReceiverProcess)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; daeDataReceiverVariable<a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.FindVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverProcess.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiverProcess.RegisterDomain">
+<tt class="descname">RegisterDomain</tt><big>(</big><em>(daeDataReceiverProcess)arg1</em>, <em>(daeDataReceiverDomain)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.RegisterDomain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyDataReporting.daeDataReceiverProcess.RegisterVariable">
+<tt class="descname">RegisterVariable</tt><big>(</big><em>(daeDataReceiverProcess)arg1</em>, <em>(daeDataReceiverVariable)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.RegisterVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyDataReporting.daeDataReceiverProcess.Variables">
+<tt class="descname">Variables</tt><a class="headerlink" href="#pyDataReporting.daeDataReceiverProcess.Variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
-</div>
 </div>
 </div>
 
@@ -156,21 +589,27 @@
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Module pyDataReporting</a><ul>
-<li><a class="reference internal" href="#overview">Overview</a><ul>
-<li><a class="reference internal" href="#daedatareporter-t">daeDataReporter_t</a></li>
+<li><a class="reference internal" href="#">3.3. Module pyDataReporting</a><ul>
+<li><a class="reference internal" href="#overview">3.3.1. Overview</a></li>
+<li><a class="reference internal" href="#datareporter-classes">3.3.2. DataReporter classes</a><ul>
+<li><a class="reference internal" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">3.3.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)</a></li>
+<li><a class="reference internal" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">3.3.2.2. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)</a></li>
+<li><a class="reference internal" href="#special-purpose-data-reporters">3.3.2.3. Special-purpose data reporters</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#datareporter-data-containers">3.3.3. DataReporter data-containers</a></li>
+<li><a class="reference internal" href="#datareceiver-classes">3.3.4. DataReceiver classes</a></li>
+<li><a class="reference internal" href="#datareceiver-data-containers">3.3.5. DataReceiver data-containers</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="activity.html"
-                        title="previous chapter">Module pyActivity</a></p>
+                        title="previous chapter">3.2. Module pyActivity</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="dae_solver.html"
-                        title="next chapter">Module pyIDAS</a></p>
+                        title="next chapter">3.4. Module pyIDAS</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/data_reporting.txt"
@@ -203,18 +642,18 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dae_solver.html" title="Module pyIDAS"
+          <a href="dae_solver.html" title="3.4. Module pyIDAS"
              >next</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="Module pyActivity"
+          <a href="activity.html" title="3.2. Module pyActivity"
              >previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
-          <li><a href="pyDAE_api_ref.html" >pyDAE API Reference</a> &raquo;</li> 
+          <li><a href="pyDAE_api_ref.html" >3. pyDAE API Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on Apr 25, 2013.
+      Last updated on May 02, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

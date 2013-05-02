@@ -142,7 +142,7 @@ def run():
 
     # ACHTUNG, ACHTUNG!!
     # To request simulation to calculate sensitivities use the keyword argument CalculateSensitivities:
-    simulation.Initialize(daesolver, datareporter, log, CalculateSensitivities = True)
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

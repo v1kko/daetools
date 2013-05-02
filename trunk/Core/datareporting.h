@@ -466,16 +466,16 @@ public:
 };
 
 /*********************************************************************
-	daeDataReporterProcess
+	daeDataReceiverProcess
 *********************************************************************/
-class daeDataReporterProcess
+class daeDataReceiverProcess
 {
 public:
-	daeDataReporterProcess(void)
+	daeDataReceiverProcess(void)
 	{
 	}
 	
-	daeDataReporterProcess(const string& strName)
+	daeDataReceiverProcess(const string& strName)
 	{
 		m_strName = strName;
 	}
@@ -522,7 +522,7 @@ public:
 public:
 	virtual bool					Start(void)																				= 0;
 	virtual bool					Stop(void)																				= 0;
-	virtual daeDataReporterProcess*	GetProcess(void)																		= 0;
+	virtual daeDataReceiverProcess*	GetProcess(void)																		= 0;
 	virtual void					GetProcessName(string& strProcessName)													= 0;
 	virtual void					GetDomains(std::vector<const daeDataReceiverDomain*>& ptrarrDomains) const				= 0;
 	virtual void					GetVariables(std::map<string, const daeDataReceiverVariable*>& ptrmapVariables) const	= 0;

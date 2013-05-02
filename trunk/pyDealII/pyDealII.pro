@@ -23,11 +23,11 @@ QMAKE_CXXFLAGS += -std=c++0x
 
 #QMAKE_CXXFLAGS += -DHAVE_CONFIG_H -DHAVE_ISNAN -ggdb  -DBOOST_NO_HASH -DBOOST_NO_SLIST -DDEBUG -Wall -W -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-long-long -std=c++0x -Wa,--compress-debug-sections -pthread -D_REENTRANT -fPIC
 
-LIBS += $${DAE_CORE_LIB} \
+LIBS += $${DEALII_LIBS} \
+        $${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
-        $${DEALII_LIBS} \
         $${RT}
 
 SOURCES += stdafx.cpp \

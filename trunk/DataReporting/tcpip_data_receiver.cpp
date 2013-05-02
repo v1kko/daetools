@@ -457,7 +457,7 @@ void daeTCPIPDataReceiver::thread(void)
 	}
 }
 
-daeDataReporterProcess*	daeTCPIPDataReceiver::GetProcess(void)
+daeDataReceiverProcess*	daeTCPIPDataReceiver::GetProcess(void)
 {
 	return &m_drProcess;
 }

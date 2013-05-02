@@ -52,11 +52,11 @@ public:
 	virtual bool EndOfData(void);
 	virtual bool SendVariable(const daeDataReporterVariableValue* pVariableValue);
 	
-	daeDataReporterProcess*	GetProcess(void);
+	daeDataReceiverProcess*	GetProcess(void);
 
 public:
 	real_t						m_dCurrentTime;
-	daeDataReporterProcess		m_drProcess;
+	daeDataReceiverProcess		m_drProcess;
 };
 
 /*********************************************************************
@@ -166,27 +166,27 @@ protected:
 /*********************************************************************
 	daeHybridDataReporterReceiver
 *********************************************************************/
-class DAE_DATAREPORTERS_API daeHybridDataReporterReceiver : public daeDataReporterLocal,
-														    public daeDataReceiver_t
-{
-public:
-	daeHybridDataReporterReceiver(void);
-	virtual ~daeHybridDataReporterReceiver(void);
+//class DAE_DATAREPORTERS_API daeHybridDataReporterReceiver : public daeDataReporterLocal,
+//														    public daeDataReceiver_t
+//{
+//public:
+//	daeHybridDataReporterReceiver(void);
+//	virtual ~daeHybridDataReporterReceiver(void);
 
-public:
-// daeDataReporter_t part
-	virtual bool Connect(const string& strConnectString, const string& strProcessName);
-	virtual bool Disconnect(void);
-	virtual bool IsConnected(void);
+//public:
+//// daeDataReporter_t part
+//	virtual bool Connect(const string& strConnectString, const string& strProcessName);
+//	virtual bool Disconnect(void);
+//	virtual bool IsConnected(void);
 
-// daeDataReceiver_t part
-	virtual bool	Start(void);
-	virtual bool	Stop(void);
-	virtual void	GetProcessName(string& strProcessName);
-	virtual void	GetDomains(std::vector<const daeDataReceiverDomain*>& ptrarrDomains) const;
-	virtual void	GetVariables(std::map<string, const daeDataReceiverVariable*>& ptrmappVariables) const;
-	virtual daeDataReporterProcess*	GetProcess(void);
-};
+//// daeDataReceiver_t part
+//	virtual bool	Start(void);
+//	virtual bool	Stop(void);
+//	virtual void	GetProcessName(string& strProcessName);
+//	virtual void	GetDomains(std::vector<const daeDataReceiverDomain*>& ptrarrDomains) const;
+//	virtual void	GetVariables(std::map<string, const daeDataReceiverVariable*>& ptrmappVariables) const;
+//	virtual daeDataReceiverProcess*	GetProcess(void);
+//};
 
 /*********************************************************************
 	daeMessageFormatter
@@ -385,7 +385,7 @@ public:
 		return strMessage[0];
 	}
 	
-	void StartRegistration(const string& strMessage, daeDataReporterProcess& drProcess)
+	void StartRegistration(const string& strMessage, daeDataReceiverProcess& drProcess)
 	{
 		boost::int32_t curPos, nameSize;
 		const char* data = strMessage.c_str();
@@ -410,7 +410,7 @@ public:
 		}
 	}
 	
-	void EndRegistration(const string& strMessage, daeDataReporterProcess& drProcess)
+	void EndRegistration(const string& strMessage, daeDataReceiverProcess& drProcess)
 	{
 		boost::int32_t msgSize, curPos;
 		const char* data = strMessage.c_str();
@@ -421,7 +421,7 @@ public:
 		
 	}
 	
-	void RegisterDomain(const string& strMessage, daeDataReporterProcess& drProcess)
+	void RegisterDomain(const string& strMessage, daeDataReceiverProcess& drProcess)
 	{
 		boost::int32_t curPos, nameSize;
 		const char* data = strMessage.c_str();
@@ -463,7 +463,7 @@ public:
 		memcpy(pDomain->m_pPoints, &data[curPos], sizeof(real_t)*pDomain->m_nNumberOfPoints);
 	}
 	
-	void RegisterVariable(const string& strMessage, daeDataReporterProcess& drProcess)
+	void RegisterVariable(const string& strMessage, daeDataReceiverProcess& drProcess)
 	{
 		boost::int32_t i, msgSize, curPos, nameSize;
 		const char* data = strMessage.c_str();
@@ -565,7 +565,7 @@ public:
 		dCurrentTime = *((real_t*)&data[1]);
 	}
 	
-	void SendVariable(const string& strMessage, daeDataReporterProcess& drProcess, real_t dCurrentTime /* Input */)
+	void SendVariable(const string& strMessage, daeDataReceiverProcess& drProcess, real_t dCurrentTime /* Input */)
 	{
 		boost::int32_t msgSize, curPos, nameSize;
 		const char* data = strMessage.c_str();
@@ -631,7 +631,7 @@ public:
 		pVariable->m_ptrarrValues.push_back(pValue);
 	}
 	
-	void EndOfData(const string& strMessage, daeDataReporterProcess& drProcess)
+	void EndOfData(const string& strMessage, daeDataReceiverProcess& drProcess)
 	{
 		boost::int32_t i, msgSize, curPos, nameSize;
 		const char* data = strMessage.c_str();
@@ -723,17 +723,15 @@ public:
 	virtual void	GetProcessName(string& strProcessName);
 	virtual void	GetDomains(std::vector<const daeDataReceiverDomain*>& ptrarrDomains) const;
 	virtual void	GetVariables(std::map<string, const daeDataReceiverVariable*>& ptrmappVariables) const;
-	virtual daeDataReporterProcess*	GetProcess(void);
+	virtual daeDataReceiverProcess*	GetProcess(void);
 	
-//	bool StartAndWait(void);
 	void thread(void);
 	void ParseMessage(unsigned char* data, boost::int32_t msgSize);
-//	void HandleAccept(void);
 	
 protected:
 	boost::shared_ptr<tcp::socket>	 m_tcpipSocket;
 	real_t							 m_dCurrentTime;
-	daeDataReporterProcess			 m_drProcess;
+	daeDataReceiverProcess			 m_drProcess;
 	boost::shared_ptr<boost::thread> m_pThread;
 };
 

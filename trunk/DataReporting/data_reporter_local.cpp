@@ -122,7 +122,7 @@ bool daeDataReporterLocal::SendVariable(const daeDataReporterVariableValue* pVar
 	return true;
 }
 	
-daeDataReporterProcess* daeDataReporterLocal::GetProcess(void)
+daeDataReceiverProcess* daeDataReporterLocal::GetProcess(void)
 {
 	return &m_drProcess;
 }

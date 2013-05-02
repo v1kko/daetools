@@ -2,6 +2,7 @@ Contents
 =========
 
 .. toctree::
+   :numbered:
 
    getting_started
    pyDAE_user_guide
