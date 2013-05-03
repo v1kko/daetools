@@ -287,10 +287,8 @@ class dae2DPlot(QtGui.QDialog):
 
     #@QtCore.pyqtSlot()
     def newCurve(self):
-        NoOfProcesses = self.tcpipServer.NumberOfProcesses
-        processes = []
-        for i in range(0, NoOfProcesses):
-            processes.append(self.tcpipServer.GetProcess(i))
+        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+        
         cv = daeChooseVariable(processes, self.plotType)
         cv.setWindowTitle('Choose variable for 2D plot')
         if cv.exec_() != QtGui.QDialog.Accepted:

@@ -28,8 +28,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		
 		.add_property("Points",				&daepython::GetDataReporterDomainPoints,    DOCSTR_daeDataReporterDomain_Points)
 
-		.def("__getitem__",					&daeDataReporterDomain::GetPoint,           DOCSTR_daeDataReporterDomain_getitem)
-		.def("__setitem__",					&daeDataReporterDomain::SetPoint,           DOCSTR_daeDataReporterDomain_setitem)
+		.def("__getitem__",					&daeDataReporterDomain::GetPoint,           ( arg("self"), arg("index") ), DOCSTR_daeDataReporterDomain_getitem)
+        .def("__setitem__",                 &daeDataReporterDomain::SetPoint,           ( arg("self"), arg("index"), arg("value") ),  DOCSTR_daeDataReporterDomain_setitem)
 		;
 
 	class_<daeDataReporterVariable, boost::noncopyable>("daeDataReporterVariable", DOCSTR_daeDataReporterVariable, no_init)
@@ -60,8 +60,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 
 		.add_property("Values",				&daepython::GetNumPyArrayDataReporterVariableValue, DOCSTR_daeDataReporterVariableValue_Values)
 		
-		.def("__getitem__",					&daeDataReporterVariableValue::GetValue,            DOCSTR_daeDataReporterVariableValue_getitem)
-		.def("__setitem__",					&daeDataReporterVariableValue::SetValue,            DOCSTR_daeDataReporterVariableValue_setitem)
+		.def("__getitem__",					&daeDataReporterVariableValue::GetValue,            ( arg("self"), arg("index") ), DOCSTR_daeDataReporterVariableValue_getitem)
+		.def("__setitem__",					&daeDataReporterVariableValue::SetValue,            ( arg("self"), arg("index"), arg("value") ), DOCSTR_daeDataReporterVariableValue_setitem)
 		;
 
 /**************************************************************
@@ -249,8 +249,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		
 		.add_property("Points",				&daepython::GetDataReceiverDomainPoints,    DOCSTR_daeDataReceiverDomain_Points)
 		
-		.def("__getitem__",					&daeDataReceiverDomain::GetPoint,           DOCSTR_daeDataReceiverDomain_getitem)
-		.def("__setitem__",					&daeDataReceiverDomain::SetPoint,           DOCSTR_daeDataReceiverDomain_setitem)
+		.def("__getitem__",					&daeDataReceiverDomain::GetPoint,           ( arg("self"), arg("index") ), DOCSTR_daeDataReceiverDomain_getitem)
+		.def("__setitem__",					&daeDataReceiverDomain::SetPoint,           ( arg("self"), arg("index"), arg("value") ), DOCSTR_daeDataReceiverDomain_setitem)
 		;
 
 	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue", DOCSTR_daeDataReceiverVariableValue, no_init)  
@@ -261,8 +261,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		
 		.def_readonly("Time",				&daeDataReceiverVariableValue::m_dTime, DOCSTR_daeDataReceiverVariableValue_Time)
 
-		.def("__getitem__",					&daeDataReceiverVariableValue::GetValue, DOCSTR_daeDataReceiverVariableValue_getitem)
-		.def("__setitem__",					&daeDataReceiverVariableValue::SetValue, DOCSTR_daeDataReceiverVariableValue_setitem)
+		.def("__getitem__",					&daeDataReceiverVariableValue::GetValue, ( arg("self"), arg("index") ), DOCSTR_daeDataReceiverVariableValue_getitem)
+		.def("__setitem__",					&daeDataReceiverVariableValue::SetValue, ( arg("self"), arg("index"), arg("value") ), DOCSTR_daeDataReceiverVariableValue_setitem)
 		;
 
 	class_<daeDataReceiverVariable, boost::noncopyable>("daeDataReceiverVariable", DOCSTR_daeDataReceiverVariable, no_init)
@@ -271,15 +271,17 @@ BOOST_PYTHON_MODULE(pyDataReporting)
                                     arg("numberOfPoints") 
                                   ), DOCSTR_daeDataReceiverVariable_init)) 
 
-		.def_readonly("Name",				&daeDataReceiverVariable::m_strName, DOCSTR_daeDataReceiverVariable_Name)
-		.def_readonly("NumberOfPoints",		&daeDataReceiverVariable::m_nNumberOfPoints, DOCSTR_daeDataReceiverVariable_NumberOfPoints)
+		.def_readonly("Name",				&daeDataReceiverVariable::m_strName,            DOCSTR_daeDataReceiverVariable_Name)
+		.def_readonly("NumberOfPoints",		&daeDataReceiverVariable::m_nNumberOfPoints,    DOCSTR_daeDataReceiverVariable_NumberOfPoints)
 		
-		.add_property("Domains",			&daepython::GetDomainsDataReceiverVariable, DOCSTR_daeDataReceiverVariable_Domains)
-		.add_property("TimeValues",			&daepython::GetTimeValuesDataReceiverVariable, DOCSTR_daeDataReceiverVariable_TimeValues)
-		.add_property("Values",				&daepython::GetNumPyArrayDataReceiverVariable, DOCSTR_daeDataReceiverVariable_Values)
+		.add_property("Domains",			&daepython::GetDomainsDataReceiverVariable,     DOCSTR_daeDataReceiverVariable_Domains)
+		.add_property("TimeValues",			&daepython::GetTimeValuesDataReceiverVariable,  DOCSTR_daeDataReceiverVariable_TimeValues)
+		.add_property("Values",				&daepython::GetNumPyArrayDataReceiverVariable,  DOCSTR_daeDataReceiverVariable_Values)
 		
-		.def("AddDomain",					&daeDataReceiverVariable::AddDomain, DOCSTR_daeDataReceiverVariable_AddDomain)
-		.def("AddVariableValue",			&daeDataReceiverVariable::AddVariableValue, DOCSTR_daeDataReceiverVariable_AddVariableValue)
+		.def("AddDomain",					&daeDataReceiverVariable::AddDomain, 
+                                            ( arg("self"), arg("domain") ), DOCSTR_daeDataReceiverVariable_AddDomain)
+		.def("AddVariableValue",			&daeDataReceiverVariable::AddVariableValue, 
+                                            ( arg("self"), arg("variableValue") ), DOCSTR_daeDataReceiverVariable_AddVariableValue)
 		;
 
 	class_<daeDataReceiverProcess, boost::noncopyable>("daeDataReceiverProcess", DOCSTR_daeDataReceiverProcess, no_init)
@@ -289,33 +291,48 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 
 		.def_readonly("Name",				&daeDataReceiverProcess::m_strName, DOCSTR_daeDataReceiverProcess_Name)
  
-		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess, DOCSTR_daeDataReceiverProcess_Domains)
-		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess, DOCSTR_daeDataReceiverProcess_Variables)
+		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess, 
+                                            DOCSTR_daeDataReceiverProcess_Domains)
+		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess, 
+                                            DOCSTR_daeDataReceiverProcess_Variables)
 		
-		.def("RegisterDomain",				&daeDataReceiverProcess::RegisterDomain, DOCSTR_daeDataReceiverProcess_RegisterDomain)
-		.def("RegisterVariable",			&daeDataReceiverProcess::RegisterVariable, DOCSTR_daeDataReceiverProcess_RegisterVariable)
-		.def("FindVariable",				&daeDataReceiverProcess::FindVariable, return_internal_reference<>(), DOCSTR_daeDataReceiverProcess_FindVariable)
+		.def("RegisterDomain",				&daeDataReceiverProcess::RegisterDomain, 
+                                            ( arg("self"), arg("domain") ), DOCSTR_daeDataReceiverProcess_RegisterDomain)
+		.def("RegisterVariable",			&daeDataReceiverProcess::RegisterVariable, 
+                                            ( arg("self"), arg("variable") ), DOCSTR_daeDataReceiverProcess_RegisterVariable)
+		.def("FindVariable",				&daeDataReceiverProcess::FindVariable, return_internal_reference<>(), 
+                                            ( arg("self"), arg("variableName") ), DOCSTR_daeDataReceiverProcess_FindVariable)
 		;
   
-	class_<daepython::daeDataReceiverWrapper, boost::noncopyable>("daeDataReceiver_t", no_init)
-		.def("Start",				pure_virtual(&daeDataReceiver_t::Start))
-		.def("Stop",				pure_virtual(&daeDataReceiver_t::Stop))
-		.def("GetProcess",			pure_virtual(&daeDataReceiver_t::GetProcess), return_internal_reference<>())
+	class_<daepython::daeDataReceiverWrapper, boost::noncopyable>("daeDataReceiver_t", DOCSTR_daeDataReceiver_t, no_init)
+        .add_property("Process",	make_function(&daeDataReceiver_t::GetProcess, return_internal_reference<>()), 
+                                    DOCSTR_daeDataReceiver_t_Process)
+		
+        .def("Start",				pure_virtual(&daeDataReceiver_t::Start),    
+                                    ( arg("self") ), DOCSTR_daeDataReceiver_t_Start)
+		.def("Stop",				pure_virtual(&daeDataReceiver_t::Stop),     
+                                    ( arg("self") ), DOCSTR_daeDataReceiver_t_Stop)
 		;
 
-	class_<daepython::daeTCPIPDataReceiverServerWrapper, boost::noncopyable>("daeTCPIPDataReceiverServer", no_init)
-        .def(init<int>())
-            
-		.add_property("NumberOfProcesses",		&daepython::daeTCPIPDataReceiverServerWrapper::GetNumberOfProcesses)
-		.add_property("NumberOfDataReceivers",	&daepython::daeTCPIPDataReceiverServerWrapper::GetNumberOfDataReceivers)
-		//.add_property("DataReceivers",			&daepython::daeTCPIPDataReceiverServerWrapper::GetDataReceivers)
-		//.add_property("Processes",				&daepython::daeTCPIPDataReceiverServerWrapper::GetProcesses)
+    class_<daeTCPIPDataReceiver, bases<daeDataReceiver_t>, boost::noncopyable>("daeTCPIPDataReceiver", DOCSTR_daeTCPIPDataReceiver, no_init)
+		.def("Start",				&daeTCPIPDataReceiver::Start,    
+                                    ( arg("self") ), DOCSTR_daeTCPIPDataReceiver_Start)
+		.def("Stop",				&daeTCPIPDataReceiver::Stop,     
+                                    ( arg("self") ), DOCSTR_daeTCPIPDataReceiver_Stop)
+		;
 
-        .def("Start",					&daepython::daeTCPIPDataReceiverServerWrapper::Start_)
-        .def("Stop",					&daepython::daeTCPIPDataReceiverServerWrapper::Stop_)
-		.def("GetProcess",				&daepython::daeTCPIPDataReceiverServerWrapper::GetProcess, return_internal_reference<>())
-		.def("GetDataReceiver",			&daepython::daeTCPIPDataReceiverServerWrapper::GetDataReceiver, return_internal_reference<>())
-		.def("IsConnected",				&daepython::daeTCPIPDataReceiverServerWrapper::IsConnected_)
+	class_<daepython::daeTCPIPDataReceiverServerWrapper, boost::noncopyable>("daeTCPIPDataReceiverServer", DOCSTR_daeTCPIPDataReceiverServer, no_init)
+        .def(init<int>(( arg("self") ), DOCSTR_daeTCPIPDataReceiverServer_init))
+            
+		.add_property("DataReceivers",	&daepython::daeTCPIPDataReceiverServerWrapper::GetDataReceivers,         
+                                        DOCSTR_daeTCPIPDataReceiverServer_DataReceivers)
+
+        .def("Start",					&daepython::daeTCPIPDataReceiverServerWrapper::Start_, 
+                                        ( arg("self") ), DOCSTR_daeTCPIPDataReceiverServer_Start)
+        .def("Stop",					&daepython::daeTCPIPDataReceiverServerWrapper::Stop_, 
+                                        ( arg("self") ), DOCSTR_daeTCPIPDataReceiverServer_Stop)
+        .def("IsConnected",				&daepython::daeTCPIPDataReceiverServerWrapper::IsConnected_, 
+                                        ( arg("self") ), DOCSTR_daeTCPIPDataReceiverServer_IsConnected)
 	;
 
 }

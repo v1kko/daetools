@@ -126,7 +126,7 @@ Special-purpose data reporters
         Does nothing. Always returns ``True``.
 
 DataReporter data-containers
-============================
+----------------------------
 .. autosummary::
     daeDataReporterDomain
     daeDataReporterVariable
@@ -135,30 +135,57 @@ DataReporter data-containers
 .. autoclass:: pyDataReporting.daeDataReporterDomain
     :members:
     :undoc-members:
+
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
+    
 .. autoclass:: pyDataReporting.daeDataReporterVariable
     :members:
     :undoc-members:
+        
 .. autoclass:: pyDataReporting.daeDataReporterVariableValue
     :members:
     :undoc-members:
+
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
 
 DataReceiver classes
 ====================
 
 .. autosummary::
     daeDataReceiver_t
+    daeTCPIPDataReceiver
     daeTCPIPDataReceiverServer
     
 .. autoclass:: pyDataReporting.daeDataReceiver_t
     :members:
     :undoc-members:
+    :exclude-members: Start, Stop, Process
+
+    .. method:: Start((daeDataReceiver_t)self) -> bool
+
+    .. method:: Stop((daeDataReceiver_t)self) -> bool
+
+    .. attribute:: Process
+
+
         
+.. autoclass:: pyDataReporting.daeTCPIPDataReceiver
+    :members:
+    :undoc-members:
+    :exclude-members: Start, Stop, Process
+
+    .. automethod:: Start
+    .. automethod:: Stop
+    .. autoattribute:: Process
+
 .. autoclass:: pyDataReporting.daeTCPIPDataReceiverServer
     :members:
     :undoc-members:
 
 DataReceiver data-containers
-============================
+----------------------------
 
 .. autosummary::
     daeDataReceiverDomain
@@ -170,6 +197,9 @@ DataReceiver data-containers
     :members:
     :undoc-members:
 
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
+
 .. autoclass:: pyDataReporting.daeDataReceiverVariable
     :members:
     :undoc-members:
@@ -177,6 +207,9 @@ DataReceiver data-containers
 .. autoclass:: pyDataReporting.daeDataReceiverVariableValue
     :members:
     :undoc-members:
+
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
 
 .. autoclass:: pyDataReporting.daeDataReceiverProcess
     :members:

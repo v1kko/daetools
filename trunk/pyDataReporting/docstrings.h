@@ -95,4 +95,23 @@ const char* DOCSTR_daeDataReceiverProcess = "";
     const char* DOCSTR_daeDataReceiverProcess_RegisterVariable = "";
     const char* DOCSTR_daeDataReceiverProcess_FindVariable = "";
 
+    
+    
+const char* DOCSTR_daeDataReceiver_t = "";
+    const char* DOCSTR_daeDataReceiver_t_Start = "";
+    const char* DOCSTR_daeDataReceiver_t_Stop = "";
+    const char* DOCSTR_daeDataReceiver_t_Process = "";
+
+const char* DOCSTR_daeTCPIPDataReceiver = "";
+    const char* DOCSTR_daeTCPIPDataReceiver_Start = "";
+    const char* DOCSTR_daeTCPIPDataReceiver_Stop = "";
+    const char* DOCSTR_daeTCPIPDataReceiver_Process = "";
+
+const char* DOCSTR_daeTCPIPDataReceiverServer = "";
+    const char* DOCSTR_daeTCPIPDataReceiverServer_init = "";
+    const char* DOCSTR_daeTCPIPDataReceiverServer_Start = "";
+    const char* DOCSTR_daeTCPIPDataReceiverServer_Stop = "";
+    const char* DOCSTR_daeTCPIPDataReceiverServer_IsConnected = "";
+    const char* DOCSTR_daeTCPIPDataReceiverServer_DataReceivers = "";
+    
 #endif

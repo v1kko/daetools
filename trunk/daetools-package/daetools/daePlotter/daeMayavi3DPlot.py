@@ -26,10 +26,8 @@ class daeMayavi3DPlot:
         self.tcpipServer = tcpipServer        
                 
     def newSurface(self):
-        NoOfProcesses = self.tcpipServer.NumberOfProcesses
-        processes = []
-        for i in range(0, NoOfProcesses):
-            processes.append(self.tcpipServer.GetProcess(i))
+        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+
         cv = daeChooseVariable(processes, daeChooseVariable.plot3D)
         cv.setWindowTitle('Choose variable for 3D plot')
         if cv.exec_() != QtGui.QDialog.Accepted:
