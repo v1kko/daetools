@@ -6,21 +6,35 @@ Module pyIDAS
 .. py:currentmodule:: pyIDAS
 
 Overview
-==========
-Trt mrt.
+========
+
+Classes
+=======
 
 .. autosummary::
+    daeDAESolver_t
     daeIDAS
 
-daeIDAS
---------
+.. autoclass:: pyIDAS.daeDAESolver_t
+    :members:
+    :undoc-members:
 
 .. autoclass:: pyIDAS.daeIDAS
     :members:
     :undoc-members:
 
 
+Enumerations
+=============
+.. autosummary::
+    :nosignatures:
 
+    daeeIDALASolverType
+
+.. autoclass:: pyIDAS.daeeIDALASolverType
+    :members:
+    :undoc-members:
+    :exclude-members: names, values
 
 
 .. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/

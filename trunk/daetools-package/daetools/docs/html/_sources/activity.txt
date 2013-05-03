@@ -5,7 +5,8 @@ Module pyActivity
 Overview
 ==========
 
-
+Classes
+=======
 .. py:module:: pyActivity
 .. py:currentmodule:: pyActivity
 
@@ -13,8 +14,6 @@ Overview
     daeSimulation
     daeOptimization
 
-daeSimulation
--------------
 .. autoclass:: pyActivity.daeSimulation
     :members:
     :undoc-members:
@@ -129,8 +128,6 @@ daeSimulation
     .. autoattribute:: SimulationMode
     .. autoattribute:: VariableTypes
 
-daeOptimization
----------------
 .. autoclass:: pyActivity.daeOptimization
     :members:
     :undoc-members:

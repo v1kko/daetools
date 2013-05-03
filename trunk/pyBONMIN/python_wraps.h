@@ -20,6 +20,7 @@
 #include "../dae_develop.h"
 #include "../DataReporting/datareporters.h"
 #include "../BONMIN_MINLPSolver/nlpsolver.h"
+#include "../BONMIN_MINLPSolver/base_solvers.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
 

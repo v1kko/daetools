@@ -99,7 +99,7 @@ def setOptions(nlpsolver):
 def guiRun(app):
     sim = simTutorial()
     opt = daeOptimization()
-    nlp = pyBONMIN.daeBONMIN()
+    nlp = pyBONMIN.daeCreateBONMINSolver()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
@@ -117,7 +117,7 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    nlpsolver    = pyBONMIN.daeBONMIN()
+    nlpsolver    = pyBONMIN.daeCreateBONMINSolver()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
     optimization = daeOptimization()

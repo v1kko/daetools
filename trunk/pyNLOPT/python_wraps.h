@@ -20,6 +20,7 @@
 #include "../dae_develop.h"
 #include "../DataReporting/datareporters.h"
 #include "../NLOPT_NLPSolver/nlpsolver.h"
+#include "../NLOPT_NLPSolver/base_solvers.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
 

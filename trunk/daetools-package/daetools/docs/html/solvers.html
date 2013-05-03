@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
-    <link rel="next" title="5. Tutorials" href="tutorials.html" />
+    <link rel="next" title="5. Code generators" href="code_generators.html" />
     <link rel="prev" title="3.5. Module pyUnits" href="units.html" /> 
   </head>
   <body>
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorials.html" title="5. Tutorials"
+          <a href="code_generators.html" title="5. Code generators"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="units.html" title="3.5. Module pyUnits"
@@ -56,136 +56,321 @@
             
   <div class="section" id="third-party-solvers">
 <h1>4. Third party solvers<a class="headerlink" href="#third-party-solvers" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-solvers.superlu.pySuperLU">
-<span id="linear-solvers"></span><h2>4.1. Linear solvers<a class="headerlink" href="#module-solvers.superlu.pySuperLU" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="linear-solvers">
+<h2>4.1. Linear solvers<a class="headerlink" href="#linear-solvers" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="pySuperLU.daeIDALASolver_t">
-<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">daeIDALASolver_t</tt><a class="headerlink" href="#pySuperLU.daeIDALASolver_t" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
-<dl class="method">
-<dt id="pySuperLU.daeIDALASolver_t.Create">
-<tt class="descname">Create</tt><big>(</big><em>(daeIDALASolver_t)arg1</em>, <em>(object)arg2</em>, <em>(int)arg3</em>, <em>(object)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeIDALASolver_t.Create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create( (daeIDALASolver_t)arg1, (object)arg2, (int)arg3, (object)arg4) -&gt; None</p>
-</dd></dl>
+<dt id="pyCore.daeIDALASolver_t">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeIDALASolver_t</tt><a class="headerlink" href="#pyCore.daeIDALASolver_t" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pyCore.daeIDALASolver_t.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyCore.daeIDALASolver_t.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
-<dt id="pySuperLU.daeIDALASolver_t.Reinitialize">
-<tt class="descname">Reinitialize</tt><big>(</big><em>(daeIDALASolver_t)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeIDALASolver_t.Reinitialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reinitialize( (daeIDALASolver_t)arg1, (object)arg2) -&gt; None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU.daeIDALASolver_t.SaveAsXPM">
-<tt class="descname">SaveAsXPM</tt><big>(</big><em>(daeIDALASolver_t)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeIDALASolver_t.SaveAsXPM" title="Permalink to this definition">¶</a></dt>
-<dd><p>SaveAsXPM( (daeIDALASolver_t)arg1, (str)arg2) -&gt; None</p>
-</dd></dl>
+<dt id="pyCore.daeIDALASolver_t.SaveAsXPM">
+<tt class="descname">SaveAsXPM</tt><big>(</big><em>(daeIDALASolver_t)self</em>, <em>(str)xpmFilename</em><big>)</big> &rarr; int<a class="headerlink" href="#pyCore.daeIDALASolver_t.SaveAsXPM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
+<div class="section" id="module-solvers.superlu.pySuperLU">
+<span id="superlu"></span><h3>4.1.1. SuperLU<a class="headerlink" href="#module-solvers.superlu.pySuperLU" title="Permalink to this headline">¶</a></h3>
+<p class="rubric">Instantiation function</p>
+<dl class="function">
+<dt id="pySuperLU.daeCreateSuperLUSolver">
+<tt class="descclassname">pySuperLU.</tt><tt class="descname">daeCreateSuperLUSolver</tt><big>(</big><big>)</big> &rarr; daeIDALASolver_t<a class="headerlink" href="#pySuperLU.daeCreateSuperLUSolver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Classes</p>
 <dl class="class">
 <dt id="pySuperLU.daeSuperLU_Solver">
 <em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">daeSuperLU_Solver</tt><a class="headerlink" href="#pySuperLU.daeSuperLU_Solver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pySuperLU.daeIDALASolver_t" title="pySuperLU.daeIDALASolver_t"><tt class="xref py py-class docutils literal"><span class="pre">pySuperLU.daeIDALASolver_t</span></tt></a></p>
-<dl class="method">
-<dt id="pySuperLU.daeSuperLU_Solver.Create">
-<tt class="descname">Create</tt><big>(</big><em>(daeSuperLU_Solver)arg1</em>, <em>(object)arg2</em>, <em>(int)arg3</em>, <em>(object)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.Create" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU.daeSuperLU_Solver.GetOptions">
-<tt class="descname">GetOptions</tt><big>(</big><em>(daeSuperLU_Solver)arg1</em><big>)</big> &rarr; superlu_options_t<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.GetOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pySuperLU.daeIDALASolver_t</span></tt></p>
 <dl class="attribute">
-<dt id="pySuperLU.daeSuperLU_Solver.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.Name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU.daeSuperLU_Solver.Reinitialize">
-<tt class="descname">Reinitialize</tt><big>(</big><em>(daeSuperLU_Solver)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.Reinitialize" title="Permalink to this definition">¶</a></dt>
+<dt id="pySuperLU.daeSuperLU_Solver.Options">
+<tt class="descname">Options</tt><a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.Options" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pySuperLU.daeSuperLU_Solver.SaveAsMatrixMarketFile">
-<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeSuperLU_Solver)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em>, <em>(str)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU.daeSuperLU_Solver.SaveAsXPM">
-<tt class="descname">SaveAsXPM</tt><big>(</big><em>(daeSuperLU_Solver)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.SaveAsXPM" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeSuperLU_Solver)self</em>, <em>(str)filename</em>, <em>(str)matrixName</em>, <em>(str)description</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU.daeSuperLU_Solver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-solvers.superlu_mt.pySuperLU_MT"></span><dl class="class">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver">
-<em class="property">class </em><tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">daeSuperLU_MT_Solver</tt><a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pySuperLU_MT.daeIDALASolver_t</span></tt></p>
-<dl class="method">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.Create">
-<tt class="descname">Create</tt><big>(</big><em>(daeSuperLU_MT_Solver)arg1</em>, <em>(object)arg2</em>, <em>(int)arg3</em>, <em>(object)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.Create" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.GetOptions">
-<tt class="descname">GetOptions</tt><big>(</big><em>(daeSuperLU_MT_Solver)arg1</em><big>)</big> &rarr; superlumt_options_t<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.GetOptions" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt id="pySuperLU.superlu_options_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">superlu_options_t</tt><a class="headerlink" href="#pySuperLU.superlu_options_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU.superlu_options_t.ColPerm">
+<tt class="descname">ColPerm</tt><a class="headerlink" href="#pySuperLU.superlu_options_t.ColPerm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.Name" title="Permalink to this definition">¶</a></dt>
+<dt id="pySuperLU.superlu_options_t.DiagPivotThresh">
+<tt class="descname">DiagPivotThresh</tt><a class="headerlink" href="#pySuperLU.superlu_options_t.DiagPivotThresh" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.Reinitialize">
-<tt class="descname">Reinitialize</tt><big>(</big><em>(daeSuperLU_MT_Solver)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.Reinitialize" title="Permalink to this definition">¶</a></dt>
+<dl class="attribute">
+<dt id="pySuperLU.superlu_options_t.PrintStat">
+<tt class="descname">PrintStat</tt><a class="headerlink" href="#pySuperLU.superlu_options_t.PrintStat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.superlu_options_t.RowPerm">
+<tt class="descname">RowPerm</tt><a class="headerlink" href="#pySuperLU.superlu_options_t.RowPerm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Enumerations</p>
+<dl class="class">
+<dt id="pySuperLU.IterRefine_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">IterRefine_t</tt><a class="headerlink" href="#pySuperLU.IterRefine_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU.IterRefine_t.DOUBLE">
+<tt class="descname">DOUBLE</tt><em class="property"> = pySuperLU.IterRefine_t.DOUBLE</em><a class="headerlink" href="#pySuperLU.IterRefine_t.DOUBLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.IterRefine_t.EXTRA">
+<tt class="descname">EXTRA</tt><em class="property"> = pySuperLU.IterRefine_t.EXTRA</em><a class="headerlink" href="#pySuperLU.IterRefine_t.EXTRA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.IterRefine_t.NOREFINE">
+<tt class="descname">NOREFINE</tt><em class="property"> = pySuperLU.IterRefine_t.NOREFINE</em><a class="headerlink" href="#pySuperLU.IterRefine_t.NOREFINE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.IterRefine_t.SINGLE">
+<tt class="descname">SINGLE</tt><em class="property"> = pySuperLU.IterRefine_t.SINGLE</em><a class="headerlink" href="#pySuperLU.IterRefine_t.SINGLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pySuperLU.rowperm_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">rowperm_t</tt><a class="headerlink" href="#pySuperLU.rowperm_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU.rowperm_t.LargeDiag">
+<tt class="descname">LargeDiag</tt><em class="property"> = pySuperLU.rowperm_t.LargeDiag</em><a class="headerlink" href="#pySuperLU.rowperm_t.LargeDiag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.rowperm_t.MY_PERMR">
+<tt class="descname">MY_PERMR</tt><em class="property"> = pySuperLU.rowperm_t.MY_PERMR</em><a class="headerlink" href="#pySuperLU.rowperm_t.MY_PERMR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.rowperm_t.NOROWPERM">
+<tt class="descname">NOROWPERM</tt><em class="property"> = pySuperLU.rowperm_t.NOROWPERM</em><a class="headerlink" href="#pySuperLU.rowperm_t.NOROWPERM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pySuperLU.yes_no_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">yes_no_t</tt><a class="headerlink" href="#pySuperLU.yes_no_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU.yes_no_t.NO">
+<tt class="descname">NO</tt><em class="property"> = pySuperLU.yes_no_t.NO</em><a class="headerlink" href="#pySuperLU.yes_no_t.NO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.yes_no_t.YES">
+<tt class="descname">YES</tt><em class="property"> = pySuperLU.yes_no_t.YES</em><a class="headerlink" href="#pySuperLU.yes_no_t.YES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pySuperLU.colperm_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU.</tt><tt class="descname">colperm_t</tt><a class="headerlink" href="#pySuperLU.colperm_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU.colperm_t.COLAMD">
+<tt class="descname">COLAMD</tt><em class="property"> = pySuperLU.colperm_t.COLAMD</em><a class="headerlink" href="#pySuperLU.colperm_t.COLAMD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.colperm_t.METIS_AT_PLUS_A">
+<tt class="descname">METIS_AT_PLUS_A</tt><em class="property"> = pySuperLU.colperm_t.METIS_AT_PLUS_A</em><a class="headerlink" href="#pySuperLU.colperm_t.METIS_AT_PLUS_A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.colperm_t.MMD_ATA">
+<tt class="descname">MMD_ATA</tt><em class="property"> = pySuperLU.colperm_t.MMD_ATA</em><a class="headerlink" href="#pySuperLU.colperm_t.MMD_ATA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.colperm_t.MMD_AT_PLUS_A">
+<tt class="descname">MMD_AT_PLUS_A</tt><em class="property"> = pySuperLU.colperm_t.MMD_AT_PLUS_A</em><a class="headerlink" href="#pySuperLU.colperm_t.MMD_AT_PLUS_A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU.colperm_t.NATURAL">
+<tt class="descname">NATURAL</tt><em class="property"> = pySuperLU.colperm_t.NATURAL</em><a class="headerlink" href="#pySuperLU.colperm_t.NATURAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-solvers.superlu_mt.pySuperLU_MT">
+<span id="superlu-mt"></span><h3>4.1.2. SuperLU_MT<a class="headerlink" href="#module-solvers.superlu_mt.pySuperLU_MT" title="Permalink to this headline">¶</a></h3>
+<p class="rubric">Instantiation function</p>
+<dl class="function">
+<dt id="pySuperLU_MT.daeCreateSuperLUSolver">
+<tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">daeCreateSuperLUSolver</tt><big>(</big><big>)</big> &rarr; daeIDALASolver_t<a class="headerlink" href="#pySuperLU_MT.daeCreateSuperLUSolver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Classes</p>
+<dl class="class">
+<dt id="pySuperLU_MT.daeSuperLU_MT_Solver">
+<em class="property">class </em><tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">daeSuperLU_MT_Solver</tt><a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pySuperLU_MT.daeIDALASolver_t</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.Options">
+<tt class="descname">Options</tt><a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.Options" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pySuperLU_MT.daeSuperLU_MT_Solver.SaveAsMatrixMarketFile">
-<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeSuperLU_MT_Solver)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em>, <em>(str)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pySuperLU_MT.daeSuperLU_MT_Solver.SaveAsXPM">
-<tt class="descname">SaveAsXPM</tt><big>(</big><em>(daeSuperLU_MT_Solver)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.SaveAsXPM" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeSuperLU_MT_Solver)self</em>, <em>(str)filename</em>, <em>(str)matrixName</em>, <em>(str)description</em><big>)</big> &rarr; int<a class="headerlink" href="#pySuperLU_MT.daeSuperLU_MT_Solver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-solvers.trilinos.pyTrilinos"></span><dl class="class">
-<dt id="pyTrilinos.daeTrilinosSolver">
-<em class="property">class </em><tt class="descclassname">pyTrilinos.</tt><tt class="descname">daeTrilinosSolver</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyTrilinos.daeIDALASolver_t</span></tt></p>
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.Create">
-<tt class="descname">Create</tt><big>(</big><em>(daeTrilinosSolver)arg1</em>, <em>(object)arg2</em>, <em>(int)arg3</em>, <em>(object)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.Create" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.GetAmesosOptions">
-<tt class="descname">GetAmesosOptions</tt><big>(</big><em>(daeTrilinosSolver)arg1</em><big>)</big> &rarr; TeuchosParameterList<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.GetAmesosOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.GetAztecOOOptions">
-<tt class="descname">GetAztecOOOptions</tt><big>(</big><em>(daeTrilinosSolver)arg1</em><big>)</big> &rarr; TeuchosParameterList<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.GetAztecOOOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.GetIfpackOptions">
-<tt class="descname">GetIfpackOptions</tt><big>(</big><em>(daeTrilinosSolver)arg1</em><big>)</big> &rarr; TeuchosParameterList<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.GetIfpackOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.GetMLOptions">
-<tt class="descname">GetMLOptions</tt><big>(</big><em>(daeTrilinosSolver)arg1</em><big>)</big> &rarr; TeuchosParameterList<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.GetMLOptions" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt id="pySuperLU_MT.superlumt_options_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">superlumt_options_t</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.ColPerm">
+<tt class="descname">ColPerm</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.ColPerm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="pyTrilinos.daeTrilinosSolver.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.Name" title="Permalink to this definition">¶</a></dt>
+<dt id="pySuperLU_MT.superlumt_options_t.PrintStat">
+<tt class="descname">PrintStat</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.PrintStat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.diag_pivot_thresh">
+<tt class="descname">diag_pivot_thresh</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.diag_pivot_thresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.drop_tol">
+<tt class="descname">drop_tol</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.drop_tol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.nprocs">
+<tt class="descname">nprocs</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.nprocs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.panel_size">
+<tt class="descname">panel_size</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.panel_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.superlumt_options_t.relax">
+<tt class="descname">relax</tt><a class="headerlink" href="#pySuperLU_MT.superlumt_options_t.relax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Enumerations</p>
+<dl class="class">
+<dt id="pySuperLU_MT.yes_no_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">yes_no_t</tt><a class="headerlink" href="#pySuperLU_MT.yes_no_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU_MT.yes_no_t.NO">
+<tt class="descname">NO</tt><em class="property"> = pySuperLU_MT.yes_no_t.NO</em><a class="headerlink" href="#pySuperLU_MT.yes_no_t.NO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.yes_no_t.YES">
+<tt class="descname">YES</tt><em class="property"> = pySuperLU_MT.yes_no_t.YES</em><a class="headerlink" href="#pySuperLU_MT.yes_no_t.YES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pySuperLU_MT.colperm_t">
+<em class="property">class </em><tt class="descclassname">pySuperLU_MT.</tt><tt class="descname">colperm_t</tt><a class="headerlink" href="#pySuperLU_MT.colperm_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pySuperLU_MT.colperm_t.COLAMD">
+<tt class="descname">COLAMD</tt><em class="property"> = pySuperLU_MT.colperm_t.COLAMD</em><a class="headerlink" href="#pySuperLU_MT.colperm_t.COLAMD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.colperm_t.METIS_AT_PLUS_A">
+<tt class="descname">METIS_AT_PLUS_A</tt><em class="property"> = pySuperLU_MT.colperm_t.METIS_AT_PLUS_A</em><a class="headerlink" href="#pySuperLU_MT.colperm_t.METIS_AT_PLUS_A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.colperm_t.MMD_ATA">
+<tt class="descname">MMD_ATA</tt><em class="property"> = pySuperLU_MT.colperm_t.MMD_ATA</em><a class="headerlink" href="#pySuperLU_MT.colperm_t.MMD_ATA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.colperm_t.MMD_AT_PLUS_A">
+<tt class="descname">MMD_AT_PLUS_A</tt><em class="property"> = pySuperLU_MT.colperm_t.MMD_AT_PLUS_A</em><a class="headerlink" href="#pySuperLU_MT.colperm_t.MMD_AT_PLUS_A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pySuperLU_MT.colperm_t.NATURAL">
+<tt class="descname">NATURAL</tt><em class="property"> = pySuperLU_MT.colperm_t.NATURAL</em><a class="headerlink" href="#pySuperLU_MT.colperm_t.NATURAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-solvers.trilinos.pyTrilinos">
+<span id="trilinos"></span><h3>4.1.3. Trilinos<a class="headerlink" href="#module-solvers.trilinos.pyTrilinos" title="Permalink to this headline">¶</a></h3>
+<p class="rubric">Instantiation function</p>
+<dl class="function">
+<dt id="pyTrilinos.daeTrilinosSupportedSolvers">
+<tt class="descclassname">pyTrilinos.</tt><tt class="descname">daeTrilinosSupportedSolvers</tt><big>(</big><big>)</big> &rarr; list<a class="headerlink" href="#pyTrilinos.daeTrilinosSupportedSolvers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyTrilinos.daeCreateTrilinosSolver">
+<tt class="descclassname">pyTrilinos.</tt><tt class="descname">daeCreateTrilinosSolver</tt><big>(</big><em>(str)solverName</em>, <em>(str)preconditionerName</em><big>)</big> &rarr; daeIDALASolver_t<a class="headerlink" href="#pyTrilinos.daeCreateTrilinosSolver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Classes</p>
+<dl class="class">
+<dt id="pyTrilinos.daeTrilinosSolver">
+<em class="property">class </em><tt class="descclassname">pyTrilinos.</tt><tt class="descname">daeTrilinosSolver</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyTrilinos.daeIDALASolver_t</span></tt></p>
+<dl class="attribute">
+<dt id="pyTrilinos.daeTrilinosSolver.AmesosOptions">
+<tt class="descname">AmesosOptions</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.AmesosOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyTrilinos.daeTrilinosSolver.AztecOOOptions">
+<tt class="descname">AztecOOOptions</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.AztecOOOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyTrilinos.daeTrilinosSolver.IfpackOptions">
+<tt class="descname">IfpackOptions</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.IfpackOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyTrilinos.daeTrilinosSolver.MLOptions">
+<tt class="descname">MLOptions</tt><a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.MLOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -200,22 +385,12 @@
 
 <dl class="method">
 <dt id="pyTrilinos.daeTrilinosSolver.PrintPreconditionerInfo">
-<tt class="descname">PrintPreconditionerInfo</tt><big>(</big><em>(daeTrilinosSolver)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.PrintPreconditionerInfo" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.Reinitialize">
-<tt class="descname">Reinitialize</tt><big>(</big><em>(daeTrilinosSolver)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.Reinitialize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintPreconditionerInfo</tt><big>(</big><em>(daeTrilinosSolver)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.PrintPreconditionerInfo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyTrilinos.daeTrilinosSolver.SaveAsMatrixMarketFile">
-<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeTrilinosSolver)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em>, <em>(str)arg4</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyTrilinos.daeTrilinosSolver.SaveAsXPM">
-<tt class="descname">SaveAsXPM</tt><big>(</big><em>(daeTrilinosSolver)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.SaveAsXPM" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">SaveAsMatrixMarketFile</tt><big>(</big><em>(daeTrilinosSolver)self</em>, <em>(str)filename</em>, <em>(str)matrixName</em>, <em>(str)description</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.daeTrilinosSolver.SaveAsMatrixMarketFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -225,54 +400,111 @@
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-solvers.ipopt.pyIPOPT">
-<span id="optimization-solvers"></span><h2>4.2. Optimization solvers<a class="headerlink" href="#module-solvers.ipopt.pyIPOPT" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
+<dt id="pyTrilinos.TeuchosParameterList">
+<em class="property">class </em><tt class="descclassname">pyTrilinos.</tt><tt class="descname">TeuchosParameterList</tt><a class="headerlink" href="#pyTrilinos.TeuchosParameterList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.Print">
+<tt class="descname">Print</tt><big>(</big><em>(TeuchosParameterList)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.Print" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.get_bool">
+<tt class="descname">get_bool</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.get_bool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.get_float">
+<tt class="descname">get_float</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em><big>)</big> &rarr; float<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.get_float" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.get_int">
+<tt class="descname">get_int</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em><big>)</big> &rarr; int<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.get_int" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.get_string">
+<tt class="descname">get_string</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em><big>)</big> &rarr; str<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.get_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.set_bool">
+<tt class="descname">set_bool</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em>, <em>(bool)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.set_bool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.set_float">
+<tt class="descname">set_float</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em>, <em>(float)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.set_float" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.set_int">
+<tt class="descname">set_int</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em>, <em>(int)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.set_int" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyTrilinos.TeuchosParameterList.set_string">
+<tt class="descname">set_string</tt><big>(</big><em>(TeuchosParameterList)self</em>, <em>(str)name</em>, <em>(str)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyTrilinos.TeuchosParameterList.set_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="optimization-solvers">
+<h2>4.2. Optimization solvers<a class="headerlink" href="#optimization-solvers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeIDALASolver_t</tt></dt>
+<dd><dl class="attribute">
+<dt>
+<tt class="descname">Name</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeIDALASolver_t.Initialize">
+<tt class="descname">Initialize</tt><big>(</big><em>(daeIDALASolver_t)self</em>, <em>(daeSimulation_t)simulation</em>, <em>(daeDAESolver_t)daeSolver</em>, <em>(daeDataReporter_t)dataReporter</em>, <em>(daeLog_t)log</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeIDALASolver_t.Initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeIDALASolver_t.Solve">
+<tt class="descname">Solve</tt><big>(</big><em>(daeIDALASolver_t)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeIDALASolver_t.Solve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-solvers.ipopt.pyIPOPT"></span><dl class="class">
 <dt id="pyIPOPT.daeIPOPT">
 <em class="property">class </em><tt class="descclassname">pyIPOPT.</tt><tt class="descname">daeIPOPT</tt><a class="headerlink" href="#pyIPOPT.daeIPOPT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyIPOPT.daeNLPSolver_t</span></tt></p>
 <dl class="method">
 <dt id="pyIPOPT.daeIPOPT.ClearOptions">
-<tt class="descname">ClearOptions</tt><big>(</big><em>(daeIPOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.ClearOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyIPOPT.daeIPOPT.Initialize">
-<tt class="descname">Initialize</tt><big>(</big><em>(daeIPOPT)arg1</em>, <em>(object)arg2</em>, <em>(object)arg3</em>, <em>(object)arg4</em>, <em>(object)arg5</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.Initialize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">ClearOptions</tt><big>(</big><em>(daeIPOPT)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.ClearOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyIPOPT.daeIPOPT.LoadOptionsFile">
-<tt class="descname">LoadOptionsFile</tt><big>(</big><em>(daeIPOPT)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.LoadOptionsFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="pyIPOPT.daeIPOPT.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pyIPOPT.daeIPOPT.Name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">LoadOptionsFile</tt><big>(</big><em>(daeIPOPT)self</em>, <em>(str)optionsFilename</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.LoadOptionsFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyIPOPT.daeIPOPT.PrintOptions">
-<tt class="descname">PrintOptions</tt><big>(</big><em>(daeIPOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.PrintOptions" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintOptions</tt><big>(</big><em>(daeIPOPT)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.PrintOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyIPOPT.daeIPOPT.PrintUserOptions">
-<tt class="descname">PrintUserOptions</tt><big>(</big><em>(daeIPOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.PrintUserOptions" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintUserOptions</tt><big>(</big><em>(daeIPOPT)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.PrintUserOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyIPOPT.daeIPOPT.SetOption">
-<tt class="descname">SetOption</tt><big>(</big><em>(daeIPOPT)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.SetOption" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetOption( (daeIPOPT)arg1, (str)arg2, (float)arg3) -&gt; None</p>
-<p>SetOption( (daeIPOPT)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+<tt class="descname">SetOption</tt><big>(</big><em>(daeIPOPT)self</em>, <em>(str)name</em>, <em>(str)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.SetOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>SetOption( (daeIPOPT)self, (str)name, (float)value) -&gt; None</p>
+<p>SetOption( (daeIPOPT)self, (str)name, (int)value) -&gt; None</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="pyIPOPT.daeIPOPT.Solve">
-<tt class="descname">Solve</tt><big>(</big><em>(daeIPOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIPOPT.daeIPOPT.Solve" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -282,45 +514,30 @@
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyBONMIN.daeNLPSolver_t</span></tt></p>
 <dl class="method">
 <dt id="pyBONMIN.daeBONMIN.ClearOptions">
-<tt class="descname">ClearOptions</tt><big>(</big><em>(daeBONMIN)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.ClearOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyBONMIN.daeBONMIN.Initialize">
-<tt class="descname">Initialize</tt><big>(</big><em>(daeBONMIN)arg1</em>, <em>(object)arg2</em>, <em>(object)arg3</em>, <em>(object)arg4</em>, <em>(object)arg5</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.Initialize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">ClearOptions</tt><big>(</big><em>(daeBONMIN)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.ClearOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyBONMIN.daeBONMIN.LoadOptionsFile">
-<tt class="descname">LoadOptionsFile</tt><big>(</big><em>(daeBONMIN)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.LoadOptionsFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="pyBONMIN.daeBONMIN.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pyBONMIN.daeBONMIN.Name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">LoadOptionsFile</tt><big>(</big><em>(daeBONMIN)self</em>, <em>(str)optionsFilename</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.LoadOptionsFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyBONMIN.daeBONMIN.PrintOptions">
-<tt class="descname">PrintOptions</tt><big>(</big><em>(daeBONMIN)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.PrintOptions" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintOptions</tt><big>(</big><em>(daeBONMIN)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.PrintOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyBONMIN.daeBONMIN.PrintUserOptions">
-<tt class="descname">PrintUserOptions</tt><big>(</big><em>(daeBONMIN)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.PrintUserOptions" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintUserOptions</tt><big>(</big><em>(daeBONMIN)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.PrintUserOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyBONMIN.daeBONMIN.SetOption">
-<tt class="descname">SetOption</tt><big>(</big><em>(daeBONMIN)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.SetOption" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetOption( (daeBONMIN)arg1, (str)arg2, (float)arg3) -&gt; None</p>
-<p>SetOption( (daeBONMIN)arg1, (str)arg2, (int)arg3) -&gt; None</p>
+<tt class="descname">SetOption</tt><big>(</big><em>(daeBONMIN)self</em>, <em>(str)name</em>, <em>(str)value</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.SetOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>SetOption( (daeBONMIN)self, (str)name, (float)value) -&gt; None</p>
+<p>SetOption( (daeBONMIN)self, (str)name, (int)value) -&gt; None</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="pyBONMIN.daeBONMIN.Solve">
-<tt class="descname">Solve</tt><big>(</big><em>(daeBONMIN)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyBONMIN.daeBONMIN.Solve" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -329,23 +546,8 @@
 <em class="property">class </em><tt class="descclassname">pyNLOPT.</tt><tt class="descname">daeNLOPT</tt><a class="headerlink" href="#pyNLOPT.daeNLOPT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyNLOPT.daeNLPSolver_t</span></tt></p>
 <dl class="method">
-<dt id="pyNLOPT.daeNLOPT.Initialize">
-<tt class="descname">Initialize</tt><big>(</big><em>(daeNLOPT)arg1</em>, <em>(object)arg2</em>, <em>(object)arg3</em>, <em>(object)arg4</em>, <em>(object)arg5</em><big>)</big> &rarr; None<a class="headerlink" href="#pyNLOPT.daeNLOPT.Initialize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="pyNLOPT.daeNLOPT.Name">
-<tt class="descname">Name</tt><a class="headerlink" href="#pyNLOPT.daeNLOPT.Name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="pyNLOPT.daeNLOPT.PrintOptions">
-<tt class="descname">PrintOptions</tt><big>(</big><em>(daeNLOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyNLOPT.daeNLOPT.PrintOptions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyNLOPT.daeNLOPT.Solve">
-<tt class="descname">Solve</tt><big>(</big><em>(daeNLOPT)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyNLOPT.daeNLOPT.Solve" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">PrintOptions</tt><big>(</big><em>(daeNLOPT)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyNLOPT.daeNLOPT.PrintOptions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -429,8 +631,13 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">4. Third party solvers</a><ul>
-<li><a class="reference internal" href="#module-solvers.superlu.pySuperLU">4.1. Linear solvers</a></li>
-<li><a class="reference internal" href="#module-solvers.ipopt.pyIPOPT">4.2. Optimization solvers</a></li>
+<li><a class="reference internal" href="#linear-solvers">4.1. Linear solvers</a><ul>
+<li><a class="reference internal" href="#module-solvers.superlu.pySuperLU">4.1.1. SuperLU</a></li>
+<li><a class="reference internal" href="#module-solvers.superlu_mt.pySuperLU_MT">4.1.2. SuperLU_MT</a></li>
+<li><a class="reference internal" href="#module-solvers.trilinos.pyTrilinos">4.1.3. Trilinos</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#optimization-solvers">4.2. Optimization solvers</a></li>
 <li><a class="reference internal" href="#parameter-estimation-solvers">4.3. Parameter estimation solvers</a></li>
 </ul>
 </li>
@@ -440,8 +647,8 @@
   <p class="topless"><a href="units.html"
                         title="previous chapter">3.5. Module pyUnits</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="tutorials.html"
-                        title="next chapter">5. Tutorials</a></p>
+  <p class="topless"><a href="code_generators.html"
+                        title="next chapter">5. Code generators</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/solvers.txt"
@@ -474,7 +681,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorials.html" title="5. Tutorials"
+          <a href="code_generators.html" title="5. Code generators"
              >next</a> |</li>
         <li class="right" >
           <a href="units.html" title="3.5. Module pyUnits"

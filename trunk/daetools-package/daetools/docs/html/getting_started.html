@@ -364,12 +364,12 @@ and in <a class="reference external" href="https://computation.llnl.gov/casc/sun
 <div class="section" id="models">
 <h3>1.5.1. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
 <p>In <strong>DAE Tools</strong> models are created by defining its parameters, distribution domains, variables, equations, and ports.
-Models are developed by deriving a new class from the base model class (<a class="reference internal" href="core.html#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt></a>).
+Models are developed by deriving a new class from the base model class (<tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt>).
 The process consists of two steps:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Declare all domains, parameters, variables and ports in <a class="reference internal" href="core.html#pyCore.daeModel.__init__" title="pyCore.daeModel.__init__"><tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt></a> function (the constructor)</li>
-<li>Declare equations and state transition networks in <a class="reference internal" href="core.html#pyCore.daeModel.DeclareEquations" title="pyCore.daeModel.DeclareEquations"><tt class="xref py py-meth docutils literal"><span class="pre">DeclareEquations()</span></tt></a> function</li>
+<li>Declare all domains, parameters, variables and ports in <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> function (the constructor)</li>
+<li>Declare equations and state transition networks in <tt class="xref py py-meth docutils literal"><span class="pre">DeclareEquations()</span></tt> function</li>
 </ol>
 </div></blockquote>
 <p>Models in <strong>pyDAE</strong> (using python programming language) can be defined by the following statement:</p>
@@ -402,7 +402,7 @@ The process consists of two steps:</p>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>More information about developing models can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt></a>.
+<p>More information about developing models can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="distribution-domains">
@@ -432,15 +432,15 @@ scientific python libraries <a class="reference external" href="http://numpy.sci
 <div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeDomain</span> <span class="n">myDomain</span><span class="p">(</span><span class="s">&quot;myDomain&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="n">Description</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>More information about domains can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a>.
+<p>More information about domains can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="parameters">
 <h3>1.5.3. Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
 <p>There are two types of parameters in <strong>DAE Tools</strong>: ordinary and distributed. Several functions to get a parameter
-value (function call operator <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>) and array of values
-(<a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>) have been defined. In addition, distributed parameters have
-<a class="reference internal" href="core.html#pyCore.daeParameter.npyValues" title="pyCore.daeParameter.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt></a> property to get the values as a numpy multi-dimensional array.</p>
+value (function call operator <tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt>) and array of values
+(<tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt>) have been defined. In addition, distributed parameters have
+<tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt> property to get the values as a numpy multi-dimensional array.</p>
 <p>Parameters in <strong>pyDAE</strong> can be defined by the following statement:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">myParam</span> <span class="o">=</span> <span class="n">daeParameter</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">eReal</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
 </pre></div>
@@ -449,17 +449,17 @@ value (function call operator <a class="reference internal" href="core.html#pyCo
 <div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeParameter</span> <span class="n">myParam</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">eReal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>More information about parameters can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeParameter" title="pyCore.daeParameter"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter</span></tt></a>.
+<p>More information about parameters can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="variables">
 <h3>1.5.4. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
 <p>There are two types of variables in <strong>DAE Tools</strong>: ordinary and distributed. Functions to get a variable value
-(function call operator <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>), a time or a partial derivative
-(<a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>) or
-functions to obtain an array of values, time or partial derivatives (<a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>,
-<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt></a>)
-have been defined. In addition, distributed variables have <a class="reference internal" href="core.html#pyCore.daeVariable.npyValues" title="pyCore.daeVariable.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt></a> property to get
+(function call operator <tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt>), a time or a partial derivative
+(<tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt>, or <tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt>) or
+functions to obtain an array of values, time or partial derivatives (<tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt>, or <tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt>)
+have been defined. In addition, distributed variables have <tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt> property to get
 the values as a numpy multi-dimensional array.</p>
 <p>Variables in <strong>pyDAE</strong> can be defined by the following statement:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
@@ -469,7 +469,7 @@ the values as a numpy multi-dimensional array.</p>
 <div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeVariable</span> <span class="n">myVar</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>More information about variables can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeVariable" title="pyCore.daeVariable"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable</span></tt></a>.
+<p>More information about variables can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="equations">
@@ -493,24 +493,24 @@ technique for <a class="reference external" href="http://en.wikipedia.org/wiki/A
 <strong>evaluation trees</strong>. Evaluation trees are made of binary or unary nodes, itself representing four basic mathematical
 operations and frequently used mathematical functions, such as <tt class="docutils literal"><span class="pre">sin,</span> <span class="pre">cos,</span> <span class="pre">tan,</span> <span class="pre">sqrt,</span> <span class="pre">pow,</span> <span class="pre">log,</span> <span class="pre">ln,</span> <span class="pre">exp,</span> <span class="pre">min,</span> <span class="pre">max,</span> <span class="pre">floor,</span> <span class="pre">ceil,</span>
 <span class="pre">abs,</span> <span class="pre">sum,</span> <span class="pre">product,</span> <span class="pre">...</span></tt>. These basic mathematical operations and functions are implemented to operate on <strong>a heavily
-modified ADOL-C</strong> library class <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a> (which has been extended to contain information about
-domains/parameters/variables etc). In adition, a new <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> class has been introduced to apply all
+modified ADOL-C</strong> library class <tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt> (which has been extended to contain information about
+domains/parameters/variables etc). In adition, a new <tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt> class has been introduced to apply all
 above-mentioned operations on arrays of variables.
-What is different here is that <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a>/<a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> classes and mathematical
+What is different here is that <tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt>/<tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt> classes and mathematical
 operators/functions work in two modes; they can either <strong>build-up an evaluation tree</strong> or <strong>calculate a value of an expression</strong>.
 Once built the evaluation trees can be used to calculate equation residuals or derivatives to fill a Jacobian matrix
 necessary for a Newton-type iteration. A typical evaluation tree is presented in <a class="reference internal" href="#figure-4"><em>Figure 4.</em></a>.</p>
 <div class="figure align-center" id="figure-4" style="width: 300pt">
-<img alt="_static/EvaluationTree.png" src="_static/EvaluationTree.png" style="width: 250pt;" />
+<img alt="_images/EvaluationTree.png" src="_images/EvaluationTree.png" style="width: 250pt;" />
 <p class="caption"><strong>Figure 4.</strong> DAE Tools equation evaluation tree</p>
 </div>
 <p>As it has been noted before, domains, parameters, and variables contain functions that return
-<a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt></a>/<a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt></a> objects, which can be used to calculate
+<tt class="xref py py-class docutils literal"><span class="pre">adouble</span></tt>/<tt class="xref py py-class docutils literal"><span class="pre">adouble_array</span></tt> objects, which can be used to calculate
 residuals and derivatives. These functions include functions to get a value of
 a domain/parameter/variable (function call operator), to get a time or a partial derivative of a variable
-(functions <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>)
-or functions to obtain an array of values, time or partial derivatives (<a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>,
-<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt></a>).
+(functions <tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt>, or <tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt>)
+or functions to obtain an array of values, time or partial derivatives (<tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt>, or <tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt>).
 Another useful feature of <strong>DAE Tools</strong> equations is that they can be
 exported into MathML or Latex format and easily visualized.</p>
 <p>For example, the equation <em>F</em> (given in <a class="reference internal" href="#figure-4"><em>Figure 4.</em></a>) can be defined in <strong>pyDAE</strong> by using the following
@@ -524,7 +524,7 @@ statements:</p>
 <span class="n">F</span><span class="o">-&gt;</span><span class="n">SetResidal</span><span class="p">(</span> <span class="n">V14</span><span class="p">.</span><span class="n">dt</span><span class="p">()</span> <span class="o">+</span> <span class="n">V1</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">V14</span><span class="p">()</span> <span class="o">+</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="mf">3.14</span> <span class="o">*</span> <span class="n">V3</span><span class="p">())</span> <span class="p">);</span>
 </pre></div>
 </div>
-<p>More information about equations can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeEquation" title="pyCore.daeEquation"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEquation</span></tt></a>.
+<p>More information about equations can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEquation</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="state-transition-networks-discontinuous-equations">
@@ -538,7 +538,7 @@ if we want to model a flow through a pipe we may observe three different flow re
 </ul>
 <p>What we can see is that from any of these three states we can go to any other state. This type of discontinuities
 is called a <strong>reversible discontinuity</strong> and can be described by the
-<a class="reference internal" href="core.html#pyCore.daeModel.IF" title="pyCore.daeModel.IF"><tt class="xref py py-meth docutils literal"><span class="pre">IF()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.ELSE_IF" title="pyCore.daeModel.ELSE_IF"><tt class="xref py py-meth docutils literal"><span class="pre">ELSE_IF()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.ELSE" title="pyCore.daeModel.ELSE"><tt class="xref py py-meth docutils literal"><span class="pre">ELSE()</span></tt></a>
+<tt class="xref py py-meth docutils literal"><span class="pre">IF()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">ELSE_IF()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">ELSE()</span></tt>
 state transient network functions.
 In <strong>pyDAE</strong> it is given by the following statement:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">IF</span><span class="p">(</span><span class="n">Re</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">2100</span><span class="p">)</span>                      <span class="c"># (Laminar flow)</span>
@@ -586,8 +586,8 @@ following state transitions:</p>
 The same stands for the <strong>Power saving mode</strong>: we can either go to the <strong>Normal mode</strong> or to the <strong>Fried mode</strong>.
 However, once the temperature exceeds 110 degrees the CPU dies (let&#8217;s say we heavily overclocked it) and there
 is no going back. This type of discontinuities is called an <strong>irreversible discontinuity</strong> and can be described by
-using  <a class="reference internal" href="core.html#pyCore.daeModel.STN" title="pyCore.daeModel.STN"><tt class="xref py py-meth docutils literal"><span class="pre">STN()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.STATE" title="pyCore.daeModel.STATE"><tt class="xref py py-meth docutils literal"><span class="pre">STATE()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeModel.END_STN" title="pyCore.daeModel.END_STN"><tt class="xref py py-meth docutils literal"><span class="pre">END_STN()</span></tt></a>
-functions while state transitions using <a class="reference internal" href="core.html#pyCore.daeModel.ON_CONDITION" title="pyCore.daeModel.ON_CONDITION"><tt class="xref py py-meth docutils literal"><span class="pre">ON_CONDITION()</span></tt></a> function.
+using  <tt class="xref py py-meth docutils literal"><span class="pre">STN()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">STATE()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">END_STN()</span></tt>
+functions while state transitions using <tt class="xref py py-meth docutils literal"><span class="pre">ON_CONDITION()</span></tt> function.
 In <strong>pyDAE</strong> this type of state transitions is given by the following statement:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">STN</span><span class="p">(</span><span class="s">&quot;CPU&quot;</span><span class="p">)</span>
 
@@ -627,7 +627,7 @@ In <strong>pyDAE</strong> this type of state transitions is given by the followi
 <span class="n">END_STN</span><span class="p">();</span>
 </pre></div>
 </div>
-<p>More information about state transition networks can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeSTN" title="pyCore.daeSTN"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeSTN</span></tt></a>.
+<p>More information about state transition networks can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeSTN</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="ports">
@@ -655,7 +655,7 @@ in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>More information about ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daePort" title="pyCore.daePort"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daePort</span></tt></a>.
+<p>More information about ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daePort</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="event-ports">
@@ -665,9 +665,9 @@ model instances. Events can be triggered manually or as a result of a state tran
 between event and ordinary ports is that the former allow a discrete communication between model instances while
 latter allow a continuous exchange of information. A single outlet event port can be connected to unlimited number
 of inlet event ports. Messages contain a floating point value that can be used by a recipient (these actions are
-specified in <a class="reference internal" href="core.html#pyCore.daeModel.ON_EVENT" title="pyCore.daeModel.ON_EVENT"><tt class="xref py py-meth docutils literal"><span class="pre">ON_EVENT()</span></tt></a> function); that value might be a simple number or an expression
+specified in <tt class="xref py py-meth docutils literal"><span class="pre">ON_EVENT()</span></tt> function); that value might be a simple number or an expression
 involving model variables/parameters.</p>
-<p>More information about event ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeEventPort" title="pyCore.daeEventPort"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEventPort</span></tt></a>.
+<p>More information about event ports can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeEventPort</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="simulation">
@@ -856,7 +856,7 @@ specify time horizon and reporting interval.</div></blockquote>
 a simulation (as explained above). Having done these tasks (working model and simulation) the optimization
 in <strong>DAE Tools</strong> can be defined by specifying the objective function, optimization variables and optimization
 constraints. It is intentionally chosen to keep simulation and optimization tightly coupled. The optimization
-problem should be specified in the function <a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a>.
+problem should be specified in the function <tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt>.
 The tasks have to be done are:</p>
 <ol class="arabic simple">
 <li>Specify the objective function</li>
@@ -909,7 +909,7 @@ solver internally uses <strong>IPOPT</strong> to solve NLP problems)</li>
 <li>Save model report and/or runtime model report (to inspect expanded equations etc)</li>
 <li>Run the optimization</li>
 </ol>
-<p><a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a> function is declared in <strong>pyDAE</strong> as the following:</p>
+<p><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt> function is declared in <strong>pyDAE</strong> as the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span><span class="p">(</span><span class="n">daeSimulation</span><span class="p">):</span>
     <span class="c">#... (here we set up a simulation)</span>
 
@@ -1043,7 +1043,7 @@ specify time horizon and reporting interval:</div></blockquote>
 <span class="n">pOptimization</span><span class="p">.</span><span class="n">Finalize</span><span class="p">();</span>
 </pre></div>
 </div>
-<p>More information about simulation can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <a class="reference internal" href="activity.html#pyActivity.daeOptimization" title="pyActivity.daeOptimization"><tt class="xref py py-class docutils literal"><span class="pre">daeOptimization</span></tt></a>.
+<p>More information about simulation can be found in <a class="reference internal" href="pyDAE_user_guide.html"><em>pyDAE User Guide</em></a> and <tt class="xref py py-class docutils literal"><span class="pre">daeOptimization</span></tt>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="processing-the-results">
@@ -1166,7 +1166,7 @@ you need one domain free, while for a 3D plot you need two free domains).</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 02, 2013.
+      Last updated on May 03, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

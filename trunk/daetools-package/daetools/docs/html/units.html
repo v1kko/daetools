@@ -27,7 +27,7 @@
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
     <link rel="up" title="3. pyDAE API Reference" href="pyDAE_api_ref.html" />
-    <link rel="next" title="4. Third part solvers" href="solvers.html" />
+    <link rel="next" title="4. Third party solvers" href="solvers.html" />
     <link rel="prev" title="3.4. Module pyIDAS" href="dae_solver.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="solvers.html" title="4. Third part solvers"
+          <a href="solvers.html" title="4. Third party solvers"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="dae_solver.html" title="3.4. Module pyIDAS"
@@ -69,18 +69,133 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pyUnits.unit" title="pyUnits.unit"><tt class="xref py py-obj docutils literal"><span class="pre">unit</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyUnits.base_unit" title="pyUnits.base_unit"><tt class="xref py py-obj docutils literal"><span class="pre">base_unit</span></tt></a></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-obj docutils literal"><span class="pre">quantity</span></tt></a></td>
+<tr class="row-even"><td><a class="reference internal" href="#pyUnits.unit" title="pyUnits.unit"><tt class="xref py py-obj docutils literal"><span class="pre">unit</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-obj docutils literal"><span class="pre">quantity</span></tt></a></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="class">
+<dt id="pyUnits.base_unit">
+<em class="property">class </em><tt class="descclassname">pyUnits.</tt><tt class="descname">base_unit</tt><a class="headerlink" href="#pyUnits.base_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyUnits.base_unit.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyUnits.base_unit.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)arg1, (float)arg2, (dict)arg3) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.base_unit.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><em>(base_unit)arg1</em>, <em>(base_unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.base_unit.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__mul__( (base_unit)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.base_unit.__div__">
+<tt class="descname">__div__</tt><big>(</big><em>(base_unit)arg1</em>, <em>(base_unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.base_unit.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__div__( (base_unit)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.base_unit.__pow__">
+<tt class="descname">__pow__</tt><big>(</big><em>(base_unit)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.base_unit.__pow__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.base_unit.__eq__">
+<tt class="descname">__eq__</tt><big>(</big><em>(base_unit)arg1</em>, <em>(base_unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.base_unit.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.base_unit.__ne__">
+<tt class="descname">__ne__</tt><big>(</big><em>(base_unit)arg1</em>, <em>(base_unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.base_unit.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.C">
+<tt class="descname">C</tt><a class="headerlink" href="#pyUnits.base_unit.C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.I">
+<tt class="descname">I</tt><a class="headerlink" href="#pyUnits.base_unit.I" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.L">
+<tt class="descname">L</tt><a class="headerlink" href="#pyUnits.base_unit.L" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.M">
+<tt class="descname">M</tt><a class="headerlink" href="#pyUnits.base_unit.M" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.N">
+<tt class="descname">N</tt><a class="headerlink" href="#pyUnits.base_unit.N" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.O">
+<tt class="descname">O</tt><a class="headerlink" href="#pyUnits.base_unit.O" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.T">
+<tt class="descname">T</tt><a class="headerlink" href="#pyUnits.base_unit.T" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyUnits.base_unit.multiplier">
+<tt class="descname">multiplier</tt><a class="headerlink" href="#pyUnits.base_unit.multiplier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="pyUnits.unit">
 <em class="property">class </em><tt class="descclassname">pyUnits.</tt><tt class="descname">unit</tt><a class="headerlink" href="#pyUnits.unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="method">
+<dt id="pyUnits.unit.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyUnits.unit.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)arg1, (dict)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.unit.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><em>(unit)arg1</em>, <em>(unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.unit.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__mul__( (unit)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.unit.__div__">
+<tt class="descname">__div__</tt><big>(</big><em>(unit)arg1</em>, <em>(unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.unit.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__div__( (unit)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.unit.__pow__">
+<tt class="descname">__pow__</tt><big>(</big><em>(unit)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.unit.__pow__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.unit.__eq__">
+<tt class="descname">__eq__</tt><big>(</big><em>(unit)arg1</em>, <em>(unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.unit.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.unit.__ne__">
+<tt class="descname">__ne__</tt><big>(</big><em>(unit)arg1</em>, <em>(unit)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.unit.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="pyUnits.unit.baseUnit">
 <tt class="descname">baseUnit</tt><a class="headerlink" href="#pyUnits.unit.baseUnit" title="Permalink to this definition">¶</a></dt>
@@ -98,8 +213,98 @@
 <em class="property">class </em><tt class="descclassname">pyUnits.</tt><tt class="descname">quantity</tt><a class="headerlink" href="#pyUnits.quantity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
 <dl class="method">
+<dt id="pyUnits.quantity.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)arg1</em><big>)</big> &rarr; None<a class="headerlink" href="#pyUnits.quantity.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (float)value, (unit)unit) -&gt; None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__neg__">
+<tt class="descname">__neg__</tt><big>(</big><em>(quantity)arg1</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__neg__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__pos__">
+<tt class="descname">__pos__</tt><big>(</big><em>(quantity)arg1</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__pos__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__add__">
+<tt class="descname">__add__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__add__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__sub__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__mul__( (quantity)arg1, (unit)arg2) -&gt; object</p>
+<p>__mul__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__div__">
+<tt class="descname">__div__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__div__( (quantity)arg1, (unit)arg2) -&gt; object</p>
+<p>__div__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__pow__">
+<tt class="descname">__pow__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__pow__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__pow__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__eq__">
+<tt class="descname">__eq__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__eq__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__eq__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__ne__">
+<tt class="descname">__ne__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__ne__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__ne__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__lt__">
+<tt class="descname">__lt__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__lt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__lt__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__lt__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__le__">
+<tt class="descname">__le__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__le__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__le__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__le__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__gt__">
+<tt class="descname">__gt__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__gt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__gt__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__gt__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyUnits.quantity.__ge__">
+<tt class="descname">__ge__</tt><big>(</big><em>(quantity)arg1</em>, <em>(quantity)arg2</em><big>)</big> &rarr; object<a class="headerlink" href="#pyUnits.quantity.__ge__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__ge__( (quantity)arg1, (float)arg2) -&gt; object</p>
+<p>__ge__( (quantity)arg1, (float)arg2) -&gt; object</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyUnits.quantity.scaleTo">
-<tt class="descname">scaleTo</tt><big>(</big><em>(quantity)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; quantity<a class="headerlink" href="#pyUnits.quantity.scaleTo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">scaleTo</tt><big>(</big><em>(quantity)self</em>, <em>(object)referrer</em><big>)</big> &rarr; quantity<a class="headerlink" href="#pyUnits.quantity.scaleTo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -146,7 +351,7 @@
                         title="previous chapter">3.4. Module pyIDAS</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="solvers.html"
-                        title="next chapter">4. Third part solvers</a></p>
+                        title="next chapter">4. Third party solvers</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/units.txt"
@@ -179,7 +384,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="solvers.html" title="4. Third part solvers"
+          <a href="solvers.html" title="4. Third party solvers"
              >next</a> |</li>
         <li class="right" >
           <a href="dae_solver.html" title="3.4. Module pyIDAS"

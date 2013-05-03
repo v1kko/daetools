@@ -24,24 +24,36 @@ BOOST_PYTHON_MODULE(pyIPOPT)
 		;
 	
 #ifdef daeBONMIN	
-    class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeBONMIN")
+    class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeBONMIN", DOCSTR_daeBONMIN, no_init)
 #endif
 #ifdef daeIPOPT
-	class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeIPOPT")
+    class_<daepython::daeBONMINWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeIPOPT", DOCSTR_daeBONMIN, no_init)
 #endif
-		.add_property("Name",		&daeBONMINSolver::GetName)
-		.def("Initialize",			&daeBONMINSolver::Initialize)
-		.def("Solve",				&daeBONMINSolver::Solve)
+        .add_property("Name",		&daeBONMINSolver::GetName, DOCSTR_daeBONMIN_Name)
+        .def("Initialize",			&daeBONMINSolver::Initialize, ( boost::python::arg("self"),
+                                                                   boost::python::arg("simulation"),
+                                                                   boost::python::arg("daeSolver"),
+                                                                   boost::python::arg("dataReporter"),
+                                                                   boost::python::arg("log")
+                                                                 ), DOCSTR_daeBONMIN_Initialize)
+        .def("Solve",				&daeBONMINSolver::Solve, ( boost::python::arg("self") ), DOCSTR_daeBONMIN_Solve)
+
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionS, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionS)
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionN, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionN)
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionI, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionI)
 		
-        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionS)
-        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionN)
-        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionI) 
-		
-        .def("ClearOptions",		&daeBONMINSolver::ClearOptions) 
-        .def("PrintOptions",		&daeBONMINSolver::PrintOptions) 
-        .def("PrintUserOptions",	&daeBONMINSolver::PrintUserOptions) 
-        .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile) 
+        .def("ClearOptions",		&daeBONMINSolver::ClearOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_ClearOptions)
+        .def("PrintOptions",		&daeBONMINSolver::PrintOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintOptions)
+        .def("PrintUserOptions",	&daeBONMINSolver::PrintUserOptions, ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintUserOptions)
+        .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile,  ( boost::python::arg("self"), boost::python::arg("optionsFilename") ), DOCSTR_daeBONMIN_LoadOptionsFile)
         ; 
+
+#ifdef daeBONMIN
+    def("daeCreateBONMINSolver", daeCreateBONMINSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateBONMINSolver);
+#endif
+#ifdef daeIPOPT
+    def("daeCreateIPOPTSolver", daeCreateIPOPTSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateIPOPTSolver);
+#endif
 }
 
 

@@ -60,39 +60,112 @@
 <span id="module-pyidas"></span><h1>3.4. Module pyIDAS<a class="headerlink" href="#module-pyIDAS" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
 <h2>3.4.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Trt mrt.</p>
+</div>
+<div class="section" id="classes">
+<h2>3.4.2. Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#pyIDAS.daeIDAS" title="pyIDAS.daeIDAS"><tt class="xref py py-obj docutils literal"><span class="pre">daeIDAS</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyIDAS.daeDAESolver_t" title="pyIDAS.daeDAESolver_t"><tt class="xref py py-obj docutils literal"><span class="pre">daeDAESolver_t</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pyIDAS.daeIDAS" title="pyIDAS.daeIDAS"><tt class="xref py py-obj docutils literal"><span class="pre">daeIDAS</span></tt></a></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-<div class="section" id="daeidas">
-<h3>3.4.1.1. daeIDAS<a class="headerlink" href="#daeidas" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pyIDAS.daeDAESolver_t">
+<em class="property">class </em><tt class="descclassname">pyIDAS.</tt><tt class="descname">daeDAESolver_t</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
+<dl class="attribute">
+<dt id="pyIDAS.daeDAESolver_t.InitialConditionMode">
+<tt class="descname">InitialConditionMode</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t.InitialConditionMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeDAESolver_t.Log">
+<tt class="descname">Log</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t.Log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeDAESolver_t.Name">
+<tt class="descname">Name</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t.Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeDAESolver_t.NumberOfVariables">
+<tt class="descname">NumberOfVariables</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t.NumberOfVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeDAESolver_t.RelativeTolerance">
+<tt class="descname">RelativeTolerance</tt><a class="headerlink" href="#pyIDAS.daeDAESolver_t.RelativeTolerance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="pyIDAS.daeIDAS">
 <em class="property">class </em><tt class="descclassname">pyIDAS.</tt><tt class="descname">daeIDAS</tt><a class="headerlink" href="#pyIDAS.daeIDAS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyIDAS.daeDAESolver_t</span></tt></p>
+<dd><p>Bases: <a class="reference internal" href="#pyIDAS.daeDAESolver_t" title="pyIDAS.daeDAESolver_t"><tt class="xref py py-class docutils literal"><span class="pre">pyIDAS.daeDAESolver_t</span></tt></a></p>
 <dl class="method">
 <dt id="pyIDAS.daeIDAS.SaveMatrixAsXPM">
-<tt class="descname">SaveMatrixAsXPM</tt><big>(</big><em>(daeIDAS)arg1</em>, <em>(str)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIDAS.daeIDAS.SaveMatrixAsXPM" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">SaveMatrixAsXPM</tt><big>(</big><em>(daeIDAS)self</em>, <em>(str)xpmFilename</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIDAS.daeIDAS.SaveMatrixAsXPM" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyIDAS.daeIDAS.SetLASolver">
-<tt class="descname">SetLASolver</tt><big>(</big><em>(daeIDAS)arg1</em>, <em>(daeeIDALASolverType)arg2</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIDAS.daeIDAS.SetLASolver" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetLASolver( (daeIDAS)arg1, (object)arg2) -&gt; None</p>
+<tt class="descname">SetLASolver</tt><big>(</big><em>(daeIDAS)self</em>, <em>(daeeIDALASolverType)laSolverType</em><big>)</big> &rarr; None<a class="headerlink" href="#pyIDAS.daeIDAS.SetLASolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>SetLASolver( (daeIDAS)self, (object)laSolver) -&gt; None</p>
 </dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="enumerations">
+<h2>3.4.3. Enumerations<a class="headerlink" href="#enumerations" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pyIDAS.daeeIDALASolverType" title="pyIDAS.daeeIDALASolverType"><tt class="xref py py-obj docutils literal"><span class="pre">daeeIDALASolverType</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="pyIDAS.daeeIDALASolverType">
+<em class="property">class </em><tt class="descclassname">pyIDAS.</tt><tt class="descname">daeeIDALASolverType</tt><a class="headerlink" href="#pyIDAS.daeeIDALASolverType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.enum</span></tt></p>
+<dl class="attribute">
+<dt id="pyIDAS.daeeIDALASolverType.eSundialsGMRES">
+<tt class="descname">eSundialsGMRES</tt><em class="property"> = pyIDAS.daeeIDALASolverType.eSundialsGMRES</em><a class="headerlink" href="#pyIDAS.daeeIDALASolverType.eSundialsGMRES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeeIDALASolverType.eSundialsLU">
+<tt class="descname">eSundialsLU</tt><em class="property"> = pyIDAS.daeeIDALASolverType.eSundialsLU</em><a class="headerlink" href="#pyIDAS.daeeIDALASolverType.eSundialsLU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeeIDALASolverType.eSundialsLapack">
+<tt class="descname">eSundialsLapack</tt><em class="property"> = pyIDAS.daeeIDALASolverType.eSundialsLapack</em><a class="headerlink" href="#pyIDAS.daeeIDALASolverType.eSundialsLapack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyIDAS.daeeIDALASolverType.eThirdParty">
+<tt class="descname">eThirdParty</tt><em class="property"> = pyIDAS.daeeIDALASolverType.eThirdParty</em><a class="headerlink" href="#pyIDAS.daeeIDALASolverType.eThirdParty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
-</div>
 </div>
 </div>
 
@@ -108,10 +181,9 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">3.4. Module pyIDAS</a><ul>
-<li><a class="reference internal" href="#overview">3.4.1. Overview</a><ul>
-<li><a class="reference internal" href="#daeidas">3.4.1.1. daeIDAS</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#overview">3.4.1. Overview</a></li>
+<li><a class="reference internal" href="#classes">3.4.2. Classes</a></li>
+<li><a class="reference internal" href="#enumerations">3.4.3. Enumerations</a></li>
 </ul>
 </li>
 </ul>
@@ -165,7 +237,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 02, 2013.
+      Last updated on May 03, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

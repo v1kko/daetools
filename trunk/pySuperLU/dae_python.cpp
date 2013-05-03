@@ -27,8 +27,6 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 	LA Solver
 ***************************************************************/
 	class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
-		.def("Create",		pure_virtual(&daeIDALASolver_t::Create))
-		.def("Reinitialize",pure_virtual(&daeIDALASolver_t::Reinitialize))
 		.def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
 		;
 
@@ -61,22 +59,22 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 		;
 	
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_MT_Solver")
-		.add_property("Name",			&daeSuperLUSolver::GetName)
-		.def("Create",					&daeSuperLUSolver::Create)
-		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
-		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
-		.def("GetOptions",				&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
+        .add_property("Name",			&daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
+        .add_property("Options",		make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUSolver_Options)
+        .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
+                                        ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
+        .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
+                                        ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
 		;
 #endif
 	
 #ifdef daeSuperLU_CUDA
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_CUDA_Solver")
-		.add_property("Name",			&daeSuperLUSolver::GetName)
-		.def("Create",					&daeSuperLUSolver::Create)
-		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
-		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
+        .add_property("Name",			&daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
+        .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
+                                        ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
+        .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
+                                        ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
 		;
 #endif
 
@@ -103,20 +101,21 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 		.def_readwrite("RowPerm",			&superlu_options_t::RowPerm)
 		.def_readwrite("PrintStat",			&superlu_options_t::PrintStat)
 		//.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
-		//.def_readwrite("Equil",				&superlu_options_t::Equil)
+        //.def_readwrite("Equil",			&superlu_options_t::Equil)
 		;
 
 	class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_Solver")
-		.add_property("Name",			&daeSuperLUSolver::GetName)
-		.def("Create",					&daeSuperLUSolver::Create)
-		.def("Reinitialize",			&daeSuperLUSolver::Reinitialize)
-		.def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM)
-		.def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile)
-		.def("GetOptions",				&daeSuperLUSolver::GetOptions, return_value_policy<reference_existing_object>())
+        .add_property("Name",			&daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
+        .add_property("Options",		make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUMTSolver_Options)
+
+        .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
+                                        ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
+        .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
+                                        ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
 		;
 	
 #endif
 	
-	def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<manage_new_object>());
+    def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateSuperLUSolver);
 
 }

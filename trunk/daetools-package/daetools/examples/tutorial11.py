@@ -131,7 +131,7 @@ def setOptions(lasolver):
     # Amesos_Superlu solver
     #######################################################
     if lasolver.Name == "Amesos_Superlu":
-        paramListAmesos = lasolver.GetAmesosOptions()
+        paramListAmesos = lasolver.AmesosOptions
 
         # Amesos status options:
         paramListAmesos.set_int("OutputLevel", 0)
@@ -157,7 +157,7 @@ def setOptions(lasolver):
     #  - preconditioner options given
     #######################################################
     if ("AztecOO" in lasolver.Name) or ("AztecOO_Ifpack" in lasolver.Name) or ("AztecOO_ML" in lasolver.Name):
-        paramListAztec = lasolver.GetAztecOOOptions()
+        paramListAztec = lasolver.AztecOOOptions
 
         lasolver.NumIters  = 500
         lasolver.Tolerance = 1e-6
@@ -175,7 +175,7 @@ def setOptions(lasolver):
     #######################################################
     if "AztecOO_Ifpack" in lasolver.Name:
         # 2b) Ifpack preconditioner:
-        paramListIfpack = lasolver.GetIfpackOptions()
+        paramListIfpack = lasolver.IfpackOptions
         paramListIfpack.set_string("relaxation: type",               "Jacobi")
         paramListIfpack.set_float ("relaxation: min diagonal value", 1e-2)
         paramListIfpack.set_int   ("relaxation: sweeps",             5)
@@ -186,13 +186,13 @@ def setOptions(lasolver):
 
     elif "AztecOO_ML" in lasolver.Name:
         # 2c) ML preconditioner:
-        paramListML = lasolver.GetMLOptions()
+        paramListML = lasolver.MLOptions
         paramListML.set_bool("reuse: enable", True)
         paramListML.Print()
 
     elif "AztecOO" in lasolver.Name:
         # 2a) AztecOO built-in preconditioner:
-        paramListAztec = lasolver.GetAztecOOOptions()
+        paramListAztec = lasolver.AztecOOOptions
         paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
         paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
         paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)

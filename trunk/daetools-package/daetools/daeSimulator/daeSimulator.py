@@ -368,7 +368,7 @@ class daeSimulator(QtGui.QDialog):
                     if minlpsolverIndex == self.nlpIPOPT:
                         try:
                             from daetools.solvers import pyIPOPT
-                            self.nlpsolver = pyIPOPT.daeIPOPT()
+                            self.nlpsolver = pyIPOPT.daeCreateIPOPTSolver()
                         except Exception as e:
                             self.showMessage("Cannot create IPOPT NLP solver\nError: " + str(e))
                             return
@@ -389,7 +389,7 @@ class daeSimulator(QtGui.QDialog):
                             algorithm, ok = QtGui.QInputDialog.getItem(None, "NLOPT Algorithm", "Choose the NLOPT algorithm:", algorithms, len(algorithms)-1, False)
                             if not ok:
                                 algorithm = 'NLOPT_LD_SLSQP'
-                            self.nlpsolver = pyNLOPT.daeNLOPT(str(algorithm))
+                            self.nlpsolver = pyNLOPT.daeCreateNLOPTSolver(str(algorithm))
                         except Exception as e:
                             self.showMessage("Cannot create NLOPT NLP solver\nError: " + str(e))
                             return
@@ -397,7 +397,7 @@ class daeSimulator(QtGui.QDialog):
                     elif minlpsolverIndex == self.nlpBONMIN:
                         try:
                             from daetools.solvers import pyBONMIN
-                            self.nlpsolver = pyBONMIN.daeBONMIN()
+                            self.nlpsolver = pyBONMIN.daeCreateBONMINSolver()
                         except Exception as e:
                             self.showMessage("Cannot create BONMIN MINLP solver\nError: " + str(e))
                             return

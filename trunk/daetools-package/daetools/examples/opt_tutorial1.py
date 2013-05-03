@@ -102,7 +102,7 @@ def setOptions(nlpsolver):
 def guiRun(app):
     sim = simTutorial()
     opt = daeOptimization()
-    nlp = pyIPOPT.daeIPOPT()
+    nlp = pyIPOPT.daeCreateIPOPTSolver()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 5
@@ -117,7 +117,7 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    nlpsolver    = pyIPOPT.daeIPOPT()
+    nlpsolver    = pyIPOPT.daeCreateIPOPTSolver()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
     optimization = daeOptimization()

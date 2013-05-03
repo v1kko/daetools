@@ -26,23 +26,22 @@ BOOST_PYTHON_MODULE(pyIDAS)
 /**************************************************************
 	daeSolver
 ***************************************************************/
-	class_<daepython::daeDAESolverWrapper, boost::noncopyable>("daeDAESolver_t", no_init)
-	    .add_property("NumberOfVariables",		&daeDAESolver_t::GetNumberOfVariables)
-		.add_property("Log",					make_function(&daeDAESolver_t::GetLog, return_internal_reference<>()))
-		.add_property("RelativeTolerance",		&daeDAESolver_t::GetRelativeTolerance,     &daeDAESolver_t::SetRelativeTolerance)
-		.add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,  &daeDAESolver_t::SetInitialConditionMode)
-		.add_property("Name",					&daeDAESolver_t::GetName)
-     
-		//.def("Initialize",	pure_virtual(&daeDAESolver_t::Initialize))
-		//.def("Solve",			pure_virtual(&daeDAESolver_t::Solve))
+    class_<daepython::daeDAESolverWrapper, boost::noncopyable>("daeDAESolver_t", DOCSTR_daeDAESolver_t, no_init)
+        .add_property("NumberOfVariables",		&daeDAESolver_t::GetNumberOfVariables, DOCSTR_daeDAESolver_t_NumberOfVariables)
+        .add_property("Log",					make_function(&daeDAESolver_t::GetLog, return_internal_reference<>()),  DOCSTR_daeDAESolver_t_Log)
+        .add_property("RelativeTolerance",		&daeDAESolver_t::GetRelativeTolerance,
+                                                &daeDAESolver_t::SetRelativeTolerance, DOCSTR_daeDAESolver_t_RelativeTolerance)
+        .add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,
+                                                &daeDAESolver_t::SetInitialConditionMode, DOCSTR_daeDAESolver_t_InitialConditionMode)
+        .add_property("Name",					&daeDAESolver_t::GetName, DOCSTR_daeDAESolver_t_Name)
 		;
    
-	class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDAS")
-		//.def("Initialize",				&daepython::daeIDASolverWrapper::Initialize)
-		//.def("Solve",						&daeIDASolver::Solve)
-		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver1)  
-		.def("SetLASolver",					&daepython::daeIDASolverWrapper::SetLASolver2) 
-		.def("SaveMatrixAsXPM",				&daeIDASolver::SaveMatrixAsXPM)
+    class_<daepython::daeIDASolverWrapper, bases<daeDAESolver_t>, boost::noncopyable>("daeIDAS", DOCSTR_daeIDAS, no_init)
+        .def(init<>(( arg("self") ), DOCSTR_daeIDAS_init))
+
+        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("laSolverType") ), DOCSTR_daeIDAS_SetLASolver1)
+        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("laSolver") ),     DOCSTR_daeIDAS_SetLASolver2)
+        .def("SaveMatrixAsXPM",	&daeIDASolver::SaveMatrixAsXPM,                ( arg("self"), arg("xpmFilename") ),  DOCSTR_daeIDAS_SaveMatrixAsXPM)
 		;
 
 }
