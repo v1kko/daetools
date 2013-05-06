@@ -49,7 +49,7 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
     - UpperBound: float (not enforced at the moment)
     - InitialGuess: float
     - AbsoluteTolerance: float
-   Standard variable types are defined in daeVariableTypes.py
+   Standard variable types are defined in variable_types.py
    Here, a very simple dimensionless variable type is declared:
 """
 typeNone = daeVariableType("typeNone", unit(), 0, 1E10,   0, 1e-5)

@@ -34,7 +34,7 @@ from time import localtime, strftime
 from daetools.solvers.superlu import pySuperLU as superlu
 #from daetools.solvers.superlu_mt import pySuperLU_MT as superlu
 
-# Standard variable types are defined in daeVariableTypes.py
+# Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):

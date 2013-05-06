@@ -30,7 +30,7 @@ except ImportError:
 
 try:
     from daetools.pyDAE import *
-    from choose_variable import Ui_ChooseVariable
+    from choose_variable_ui import Ui_ChooseVariable
     from table_widget import Ui_tableWidgetDialog
 except ImportError:
     print '[daeChooseVariable]: Cannot load daetools modules'

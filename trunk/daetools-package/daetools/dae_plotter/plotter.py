@@ -34,10 +34,10 @@ except Exception, e:
     sys.exit()
 
 try:
-    from about import AboutDialog
-    from daetools.pyDAE.WebViewDialog import WebView
+    from about import daeAboutDialog
+    from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception, e:
-    print '[daePlotter]: Cannot load about/WebView module\n Error: ', str(e)
+    print '[daePlotter]: Cannot load daeAbout/daeWebView module\n Error: ', str(e)
 
 try:
     images_dir = join(dirname(__file__), 'images')
@@ -96,7 +96,7 @@ class daeMainWindow(QtGui.QMainWindow):
         
         help = menubar.addMenu('&Help')
         help.addAction(about)
-        #help.addAction(docs)
+        help.addAction(docs)
 
         self.toolbar = self.addToolBar('Main toolbar')
 
@@ -116,42 +116,43 @@ class daeMainWindow(QtGui.QMainWindow):
 
     def plot2D(self, updateInterval = 0):
         try:
-            from dae2DPlot import dae2DPlot
+            from plot2d import dae2DPlot
         except Exception, e:
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
             
-        plot2d = dae2DPlot(self, self.tcpipServer, updateInterval)
-        if plot2d.newCurve() == False:
-            plot2d.close()
-            del plot2d
+        plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
+        if plot2D.newCurve() == False:
+            plot2D.close()
+            del plot2D
         else:
-            plot2d.show()
+            plot2D.show()
 
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
         try:
-            from daeMayavi3DPlot import daeMayavi3DPlot
+            from mayavi_plot3d import daeMayavi3DPlot
         except Exception, e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
         
-        plot3d = daeMayavi3DPlot(self.tcpipServer)
-        if plot3d.newSurface() == False:
-            del plot3d
+        plot3D = daeMayavi3DPlot(self.tcpipServer)
+        if plot3D.newSurface() == False:
+            del plot3D
 
     #@QtCore.pyqtSlot()
     def slotAbout(self):
-        about = AboutDialog(self)
+        about = daeAboutDialog(self)
         about.exec_()
     
     #@QtCore.pyqtSlot()
     def slotDocumentation(self):
-        site_packages = distutils.sysconfig.get_python_lib()
-        url = QtCore.QUrl(site_packages + '/daetools/docs/index.html')
-        wv = WebView(url)
+        #site_packages = distutils.sysconfig.get_python_lib()
+        docs_dir = os.path.join(os.path.dirname(__file__), '../docs/html/index.html')
+        url = QtCore.QUrl(docs_dir)
+        wv = daeWebView(url)
         wv.resize(800, 550)
-        wv.setWindowState(QtCore.Qt.WindowMaximized)
+        #wv.setWindowState(QtCore.Qt.WindowMaximized)
         wv.setWindowTitle("DAE Tools documentation")
         wv.exec_()
     

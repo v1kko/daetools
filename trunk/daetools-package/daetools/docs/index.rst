@@ -9,6 +9,8 @@ Contents
    pyDAE_api_ref
    solvers
    code_generators
+   dae_plotter
+   dae_simulator
    tutorials
 
 Indices and tables

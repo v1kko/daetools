@@ -38,7 +38,7 @@ except Exception, e:
 
 try:
     from RunExamples_ui import Ui_RunExamplesDialog
-    from daetools.pyDAE.WebViewDialog import WebView
+    from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception, e:
     print '[daeRunExamples]: Cannot load UI modules\n Error: ', str(e)
 
@@ -182,7 +182,7 @@ class RunExamples(QtGui.QDialog):
             url   = QtCore.QUrl(join(_examples_dir, simName + ".html"))
             print url
             title = simName + ".py"
-            wv = WebView(url)
+            wv = daeWebView(url)
             wv.setWindowTitle(title)
             wv.exec_()
         except Exception as e:
@@ -262,7 +262,7 @@ class RunExamples(QtGui.QDialog):
             sys.stdout = saveout
             message = '<pre>{0}</pre>'.format(output.getvalue())
             try:
-                view = WebView(message)
+                view = daeWebView(message)
                 view.resize(700, 500)
                 view.setWindowTitle('Console execution results')
                 view.exec_()

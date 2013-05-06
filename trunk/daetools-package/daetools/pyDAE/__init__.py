@@ -12,12 +12,10 @@ from pyDataReporting import *
 from pyIDAS import *
 
 # Platform-independent modules
-from daeLogs import daePythonStdOutLog
-from daeVariableTypes import *
-
-#from daeModelicaExport import daeModelicaExport
+from logs import daePythonStdOutLog
+from variable_types import *
 
 try:
-    from daetools.daeSimulator import *
+    from daetools.dae_simulator.simulator import daeSimulator
 except ImportError as e:
     print('Cannot import daeSimulator module. Error: {0}'.format(str(e)))

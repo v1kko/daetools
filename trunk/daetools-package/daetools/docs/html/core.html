@@ -155,7 +155,7 @@
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
 <dl class="method">
 <dt id="pyCore.daeVariableType.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(unit)units</em>, <em>(float)lowerBound</em>, <em>(float)upperBound</em>, <em>(float)initialGuess</em>, <em>(float)absTolerance</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariableType.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(object)units</em>, <em>(float)lowerBound</em>, <em>(float)upperBound</em>, <em>(float)initialGuess</em>, <em>(float)absTolerance</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVariableType.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -252,8 +252,8 @@
 <dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
 <dl class="method">
 <dt id="pyCore.daeDomain.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(unit)units</em><span class="optional">[</span>, <em>(str)description=''</em><span class="optional">]</span><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomain.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>__init__( (object)self, (str)name, (daePort)parentPort, (unit)units [, (str)description=&#8217;&#8216;]) -&gt; None</p>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(object)units</em><span class="optional">[</span>, <em>(str)description=''</em><span class="optional">]</span><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDomain.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (str)name, (daePort)parentPort, (object)units [, (str)description=&#8217;&#8216;]) -&gt; None</p>
 </dd></dl>
 
 <dl class="method">
@@ -334,8 +334,8 @@
 <dd><p>Bases: <a class="reference internal" href="#pyCore.daeObject" title="pyCore.daeObject"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeObject</span></tt></a></p>
 <dl class="method">
 <dt id="pyCore.daeParameter.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(unit)units</em>, <em>(daePort)parentPort</em><span class="optional">[</span>, <em>(str)description=''</em><span class="optional">[</span>, <em>(list)domains=</em><span class="optional">[</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeParameter.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>__init__( (object)self, (str)name, (unit)units, (daeModel)parentModel [, (str)description=&#8217;&#8217; [, (list)domains=[]]]) -&gt; None</p>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(object)units</em>, <em>(daePort)parentPort</em><span class="optional">[</span>, <em>(str)description=''</em><span class="optional">[</span>, <em>(list)domains=</em><span class="optional">[</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeParameter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)self, (str)name, (object)units, (daeModel)parentModel [, (str)description=&#8217;&#8217; [, (list)domains=[]]]) -&gt; None</p>
 </dd></dl>
 
 <dl class="method">
@@ -1127,7 +1127,7 @@ depends on the number of domains that the variable is distributed on.</p>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
 <dl class="method">
 <dt id="pyCore.daeScalarExternalFunction.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(unit)units</em>, <em>(dict)arguments</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeScalarExternalFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(object)units</em>, <em>(dict)arguments</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeScalarExternalFunction.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1154,7 +1154,7 @@ depends on the number of domains that the variable is distributed on.</p>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">Boost.Python.instance</span></tt></p>
 <dl class="method">
 <dt id="pyCore.daeVectorExternalFunction.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(unit)units</em>, <em>(int)numberOfXXX</em>, <em>(dict)arguments</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVectorExternalFunction.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)name</em>, <em>(daeModel)parentModel</em>, <em>(object)units</em>, <em>(int)numberOfXXX</em>, <em>(dict)arguments</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeVectorExternalFunction.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1548,7 +1548,7 @@ This class cannot be instantiated from Python</p>
 <td></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#pyCore.Constant" title="pyCore.Constant"><tt class="xref py py-obj docutils literal"><span class="pre">Constant</span></tt></a></td>
-<td>Constant( (quantity)value) -&gt; adouble</td>
+<td>Constant( (object)value) -&gt; adouble</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="#pyCore.Array" title="pyCore.Array"><tt class="xref py py-obj docutils literal"><span class="pre">Array</span></tt></a></td>
 <td></td>
@@ -1585,7 +1585,7 @@ This class cannot be instantiated from Python</p>
 <dl class="function">
 <dt id="pyCore.Constant">
 <tt class="descclassname">pyCore.</tt><tt class="descname">Constant</tt><big>(</big><em>(float)value</em><big>)</big> &rarr; adouble<a class="headerlink" href="#pyCore.Constant" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constant( (quantity)value) -&gt; adouble</p>
+<dd><p>Constant( (object)value) -&gt; adouble</p>
 </dd></dl>
 
 <dl class="function">
@@ -3193,7 +3193,7 @@ long object will be returned instead.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 03, 2013.
+      Last updated on May 05, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

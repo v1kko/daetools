@@ -14,7 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE.WebView_ui import Ui_WebViewDialog
 
-class WebView(QtGui.QDialog):
+class daeWebView(QtGui.QDialog):
     def __init__(self, url):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_WebViewDialog()

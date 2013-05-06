@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>WebViewDialog</class>
  <widget class="QDialog" name="WebViewDialog">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,8 +25,8 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QWebView" name="webView">
-     <property name="url">
+    <widget class="QWebView" name="webView" native="true">
+     <property name="url" stdset="0">
       <url>
        <string>about:blank</string>
       </url>

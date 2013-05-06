@@ -1,2 +1,2 @@
 #!/bin/sh
-python -c "from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()"
+python -c "from daetools.examples.run_examples import daeRunExamples; daeRunExamples()"

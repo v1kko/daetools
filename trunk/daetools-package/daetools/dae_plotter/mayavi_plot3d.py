@@ -15,7 +15,7 @@ import sys, math
 import numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-from daeChooseVariable import daeChooseVariable, daeTableDialog
+from choose_variable import daeChooseVariable, daeTableDialog
 try:
     from enthought.mayavi import mlab
 except ImportError:

@@ -16,7 +16,7 @@ from os.path import join, realpath, dirname
 from daetools.pyDAE import *
 from time import ctime, time, localtime, strftime, struct_time
 from PyQt4 import QtCore, QtGui
-from Simulator_ui import Ui_SimulatorDialog
+from simulator_ui import Ui_SimulatorDialog
 
 try:
     from daetools.pyDAE.WebViewDialog import WebView

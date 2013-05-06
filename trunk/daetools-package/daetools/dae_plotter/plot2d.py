@@ -14,8 +14,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys, numpy
 from os.path import join, realpath, dirname
 from daetools.pyDAE import *
-from daeChooseVariable import daeChooseVariable, daeTableDialog
-from daePlotOptions import *
+from choose_variable import daeChooseVariable, daeTableDialog
+from plot_options import *
 from PyQt4 import QtCore, QtGui
 import matplotlib
 from matplotlib.figure import Figure

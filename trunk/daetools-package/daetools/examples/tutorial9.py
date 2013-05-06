@@ -45,7 +45,7 @@ try:
 except ImportError as e:
     print('Unable to import LA solver: {0}'.format(e))
 
-# Standard variable types are defined in daeVariableTypes.py
+# Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, J, W
 
 class modTutorial(daeModel):

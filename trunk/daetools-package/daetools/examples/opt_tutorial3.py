@@ -24,7 +24,7 @@ from daetools.pyDAE import *
 from daetools.solvers.nlopt import pyNLOPT
 from time import localtime, strftime
 
-# Standard variable types are defined in daeVariableTypes.py
+# Standard variable types are defined in variable_types.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

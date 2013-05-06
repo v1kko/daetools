@@ -28,7 +28,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import fmin, fmin_bfgs, fmin_l_bfgs_b
 
-# Standard variable types are defined in daeVariableTypes.py
+# Standard variable types are defined in variable_types.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

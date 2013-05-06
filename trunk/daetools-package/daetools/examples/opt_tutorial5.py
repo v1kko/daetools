@@ -32,7 +32,7 @@ matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 
-# Standard variable types are defined in daeVariableTypes.py
+# Standard variable types are defined in variable_types.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
