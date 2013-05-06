@@ -19,9 +19,9 @@ from PyQt4 import QtCore, QtGui
 from simulator_ui import Ui_SimulatorDialog
 
 try:
-    from daetools.pyDAE.WebViewDialog import WebView
+    from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
-    print 'Cannot load WebView module\n Error: ', str(e)
+    print 'Cannot load web_view_dialog module\n Error: ', str(e)
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -432,7 +432,7 @@ class daeSimulator(QtGui.QDialog):
             self.lasolver.SaveAsXPM(matName)
             url = QtCore.QUrl(matName)
             try:
-                wv = WebView(url)
+                wv = daeWebView(url)
                 wv.resize(400, 400)
                 wv.setWindowTitle("Sparse matrix: " + matName)
                 wv.exec_()

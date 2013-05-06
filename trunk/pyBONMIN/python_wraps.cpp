@@ -8,5 +8,9 @@ using namespace boost::python;
   
 namespace daepython
 {
+daeNLPSolver_t* daeCreateNLPSolver(void)
+{
+    return new daeBONMINWrapper();
+}
 
 }

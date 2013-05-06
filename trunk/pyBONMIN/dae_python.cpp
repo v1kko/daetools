@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(pyIPOPT)
         .def("Solve",				&daeBONMINSolver::Solve, ( boost::python::arg("self") ), DOCSTR_daeBONMIN_Solve)
 
         .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionS, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionS)
-        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionN, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionN)
+        .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionF, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionN)
         .def("SetOption",			&daepython::daeBONMINWrapper::SetOptionI, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionI)
 		
         .def("ClearOptions",		&daeBONMINSolver::ClearOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_ClearOptions)
@@ -49,10 +49,10 @@ BOOST_PYTHON_MODULE(pyIPOPT)
         ; 
 
 #ifdef daeBONMIN
-    def("daeCreateBONMINSolver", daeCreateBONMINSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateBONMINSolver);
+    def("daeCreateBONMINSolver", daepython::daeCreateNLPSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateBONMINSolver);
 #endif
 #ifdef daeIPOPT
-    def("daeCreateIPOPTSolver", daeCreateIPOPTSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateIPOPTSolver);
+    def("daeCreateIPOPTSolver", daepython::daeCreateNLPSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateIPOPTSolver);
 #endif
 }
 

@@ -28,6 +28,8 @@ using namespace dae::nlpsolver;
 
 namespace daepython
 {
+daeNLPSolver_t* daeCreateNLPSolver(void);
+
 class daeNLPSolverWrapper : public daeNLPSolver_t,
 					        public boost::python::wrapper<daeNLPSolver_t>
 {
@@ -61,7 +63,7 @@ public:
 		daeBONMINSolver::SetOption(strOptionName, strValue);
 	}
 	    
-	void SetOptionN(const string& strOptionName, real_t dValue)
+	void SetOptionF(const string& strOptionName, real_t dValue)
 	{
 		daeBONMINSolver::SetOption(strOptionName, dValue);
 	}

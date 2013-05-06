@@ -20,7 +20,7 @@ daeMinpackLeastSq module test.
 
 import sys, numpy
 from daetools.pyDAE import *
-from daetools.solvers.daeMinpackLeastSq import *
+from daetools.solvers.minpack import daeMinpackLeastSq
 from time import localtime, strftime
 from numpy.linalg import cholesky
 import matplotlib
