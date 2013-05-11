@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
+"""
+..
+ ***********************************************************************************
                              tutorial10.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 In this example we use the same conduction problem as in the tutorial 1.
+
 Here we introduce:
- - daeModel functions d() and dt() which calculate time- or partial-derivative of an expression
- - Initialization files
- - Domains which bounds depend on parameter values
- - How to evaluate integrals of a function
+
+- daeModel functions d() and dt() which calculate time- or partial-derivative of an expression
+- Initialization files
+- Domains which bounds depend on parameter values
+- How to evaluate integrals of a function
 """
 
 import sys

@@ -1,34 +1,47 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
-                             whatsTheTime.py
+"""
+..
+ ***********************************************************************************
+                             whats_the_time.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 What is the time? (AKA Hello world!) is a very simple simulation.
 It shows the basic structure of the model and the simulation classes.
-A typical simulation imcludes 8 basic tasks:
-    1. How to import the pyDAE module
-    2. How to declare variable types
-    3. How to define a model by deriving a class from the base daeModel, what are the methods
-       that must be implemented by every model, and how to define an equation and its residual
-    4. How to define a simulation by deriving a class from the base daeSimulation, what are the methods
-       that must be implemented by every simulation, and how to set initial conditions
-    5. How to create auxiliary objects required for the simulation (DAE solver, data reporter and logging objects)
-    6. How to set simulation's additional settings
-    7. How to connect a data reporter
-    8. How to run a simulation
+A typical simulation includes 8 basic tasks:
+
+1. How to import the pyDAE module(s)
+2. How to declare variable types :py:class:`~pyCore.daeVariableType`
+3. How to define a model by deriving a class from the base :py:class:`~pyCore.daeModel` and which functions
+   must be implemented by every model (:py:meth:`~pyCore.daeModel.__init__`, :py:meth:`~pyCore.daeModel.DeclareEquations`):
+
+   - how to declare parameters and variables in :py:meth:`~pyCore.daeModel.__init__` function
+   - how to declare equations and their residuals in :py:meth:`~pyCore.daeModel.DeclareEquations` function
+   
+4. How to define a simulation by deriving a class from the base :py:class:`~pyActivity.daeSimulation` and which functions
+   must be implemented by every simulation (:py:meth:`~pyActivity.daeSimulation.__init__`,
+   :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains`, :py:meth:`~pyActivity.daeSimulation.SetUpVariables`):
+
+   - how to set specify a model to be used in simulation in :py:meth:`~pyActivity.daeSimulation.__init__` function
+   - how to set values of parameters in :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains` function
+   - how to set initial conditions in :py:meth:`~pyActivity.daeSimulation.SetUpVariables` function
+
+5. How to create auxiliary objects required for the simulation (DAE solver, data reporter
+   and logging objects)
+6. How to set simulation's additional settings
+7. How to connect a data reporter
+8. How to run a simulation
 """
 
 # 1. Import the modules
@@ -192,7 +205,7 @@ def guiRun(app):
 # Setup everything manually and run in a console
 def consoleRun():
     """
-    5.Create Log, Solver, DataReporter and Simulation object
+    5. Create Log, Solver, DataReporter and Simulation object
       Every simulation requires the following four objects:
        - log is used to send the messages from other parts of the framework, informs us about the simulation progress or errors
        - solver is DAE solver used to solve the underlying system of differential and algebraic equations

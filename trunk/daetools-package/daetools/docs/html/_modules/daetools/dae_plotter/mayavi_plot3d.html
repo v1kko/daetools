@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.dae_plotter.mayavi_plot3d &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.dae_plotter.mayavi_plot3d</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;********************************************************************************</span>
+<span class="sd">                             daeMayavi3DPlot.py</span>
+<span class="sd">                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span class="sd">                 Copyright (C) Dragan Nikolic, 2010</span>
+<span class="sd">***********************************************************************************</span>
+<span class="sd">DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span class="sd">terms of the GNU General Public License version 3 as published by the Free Software </span>
+<span class="sd">Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT </span>
+<span class="sd">ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span class="sd">PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="sd">You should have received a copy of the GNU General Public License along with the</span>
+<span class="sd">DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">********************************************************************************&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">daetools.pyDAE</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">choose_variable</span> <span class="kn">import</span> <span class="n">daeChooseVariable</span><span class="p">,</span> <span class="n">daeTableDialog</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">enthought.mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+    
+<div class="viewcode-block" id="daeMayavi3DPlot"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.mayavi_plot3d.daeMayavi3DPlot">[docs]</a><span class="k">class</span> <span class="nc">daeMayavi3DPlot</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcpipServer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tcpipServer</span> <span class="o">=</span> <span class="n">tcpipServer</span>        
+                
+<div class="viewcode-block" id="daeMayavi3DPlot.newSurface"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.mayavi_plot3d.daeMayavi3DPlot.newSurface">[docs]</a>    <span class="k">def</span> <span class="nf">newSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataReceiver</span><span class="o">.</span><span class="n">Process</span> <span class="k">for</span> <span class="n">dataReceiver</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tcpipServer</span><span class="o">.</span><span class="n">DataReceivers</span><span class="p">]</span>
+
+        <span class="n">cv</span> <span class="o">=</span> <span class="n">daeChooseVariable</span><span class="p">(</span><span class="n">processes</span><span class="p">,</span> <span class="n">daeChooseVariable</span><span class="o">.</span><span class="n">plot3D</span><span class="p">)</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&#39;Choose variable for 3D plot&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cv</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">!=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+            
+        <span class="n">variable</span><span class="p">,</span> <span class="n">domainIndexes</span><span class="p">,</span> <span class="n">domainPoints</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">,</span> <span class="n">zAxisLabel</span><span class="p">,</span> <span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">zPoints</span><span class="p">,</span> <span class="n">currentTime</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">getPlot3DData</span><span class="p">()</span>
+        <span class="n">xPoints</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xPoints</span><span class="p">)</span>
+        <span class="n">yPoints</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yPoints</span><span class="p">)</span>
+
+        <span class="n">xmax</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xPoints</span><span class="p">)</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yPoints</span><span class="p">)</span>
+        <span class="n">zmax</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">zPoints</span><span class="p">)</span>
+
+        <span class="n">xmin</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xPoints</span><span class="p">)</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">yPoints</span><span class="p">)</span>
+        <span class="n">zmin</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">zPoints</span><span class="p">)</span>
+
+        <span class="n">warp</span> <span class="o">=</span> <span class="s">&#39;auto&#39;</span>
+        <span class="c">#if((xmax == xmin) or (ymax == ymin) or (zmax == zmin)):</span>
+        <span class="c">#    warp = &#39;auto&#39;</span>
+        <span class="c">#else:</span>
+        <span class="c">#    warp = math.sqrt( (xmax-xmin)*(ymax-ymin) ) / (zmax-zmin)</span>
+               
+        <span class="c"># colormap=&#39;gist_earth&#39;, &#39;RdBu&#39;</span>
+        <span class="n">stype</span> <span class="o">=</span> <span class="s">&#39;surface&#39;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">stype</span> <span class="o">==</span> <span class="s">&#39;surface&#39;</span><span class="p">):</span>
+            <span class="c">#print &quot;warp=&quot;, warp</span>
+            <span class="c">#print &quot;[xmin, xmax, ymin, ymax, zmin, zmax]=&quot;, [xmin, xmax, ymin, ymax, zmin, zmax]</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">surf</span><span class="p">(</span><span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">zPoints</span><span class="p">,</span> <span class="n">warp_scale</span><span class="o">=</span><span class="n">warp</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="s">&#39;surface&#39;</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">)</span>
+            <span class="c">#mlab.title(&#39;polar mesh&#39;)</span>
+            <span class="c">#mlab.outline()</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">ranges</span><span class="o">=</span><span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">],</span> <span class="n">nb_labels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="n">mlab</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xAxisLabel</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">yAxisLabel</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">zlabel</span><span class="p">(</span><span class="n">zAxisLabel</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">stype</span> <span class="o">==</span> <span class="s">&#39;map&#39;</span><span class="p">):</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">zPoints</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">)</span>
+            <span class="c">#mlab.title(&#39;polar mesh&#39;)</span>
+            <span class="c">#mlab.outline()</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">ranges</span><span class="o">=</span><span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">],</span> <span class="n">nb_labels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="n">mlab</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xAxisLabel</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">yAxisLabel</span><span class="p">)</span>
+            <span class="n">mlab</span><span class="o">.</span><span class="n">zlabel</span><span class="p">(</span><span class="n">zAxisLabel</span><span class="p">)</span>
+            
+        <span class="n">mlab</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+       
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 11, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

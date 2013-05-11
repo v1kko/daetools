@@ -1,0 +1,269 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>7. DAE Tools Simulator &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="8. Tutorials" href="tutorials.html" />
+    <link rel="prev" title="6. DAE Tools Plotter" href="dae_plotter.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials.html" title="8. Tutorials"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dae_plotter.html" title="6. DAE Tools Plotter"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dae-tools-simulator">
+<h1>7. DAE Tools Simulator<a class="headerlink" href="#dae-tools-simulator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>7.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-daetools.dae_simulator.simulator">
+<span id="classes"></span><h2>7.2. Classes<a class="headerlink" href="#module-daetools.dae_simulator.simulator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="daetools.dae_simulator.simulator.daeSimulator">
+<em class="property">class </em><tt class="descclassname">daetools.dae_simulator.simulator.</tt><tt class="descname">daeSimulator</tt><big>(</big><em>app</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></tt></p>
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.done">
+<tt class="descname">done</tt><big>(</big><em>status</em><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.done"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.done" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAmdACML">
+<tt class="descname">laAmdACML</tt><em class="property"> = 10</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAmdACML" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAmesos_Klu">
+<tt class="descname">laAmesos_Klu</tt><em class="property"> = 3</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAmesos_Klu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAmesos_Lapack">
+<tt class="descname">laAmesos_Lapack</tt><em class="property"> = 6</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAmesos_Lapack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAmesos_Superlu">
+<tt class="descname">laAmesos_Superlu</tt><em class="property"> = 4</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAmesos_Superlu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAmesos_Umfpack">
+<tt class="descname">laAmesos_Umfpack</tt><em class="property"> = 5</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAmesos_Umfpack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laAztecOO">
+<tt class="descname">laAztecOO</tt><em class="property"> = 7</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laAztecOO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laCUSP">
+<tt class="descname">laCUSP</tt><em class="property"> = 14</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laCUSP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laIntelMKL">
+<tt class="descname">laIntelMKL</tt><em class="property"> = 9</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laIntelMKL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laIntelPardiso">
+<tt class="descname">laIntelPardiso</tt><em class="property"> = 8</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laIntelPardiso" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laLapack">
+<tt class="descname">laLapack</tt><em class="property"> = 11</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laLapack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laMagmaLapack">
+<tt class="descname">laMagmaLapack</tt><em class="property"> = 12</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laMagmaLapack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laSundialsLU">
+<tt class="descname">laSundialsLU</tt><em class="property"> = 0</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laSundialsLU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laSuperLU">
+<tt class="descname">laSuperLU</tt><em class="property"> = 1</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laSuperLU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laSuperLU_CUDA">
+<tt class="descname">laSuperLU_CUDA</tt><em class="property"> = 13</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laSuperLU_CUDA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.laSuperLU_MT">
+<tt class="descname">laSuperLU_MT</tt><em class="property"> = 2</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.laSuperLU_MT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.nlpBONMIN">
+<tt class="descname">nlpBONMIN</tt><em class="property"> = 2</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.nlpBONMIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.nlpIPOPT">
+<tt class="descname">nlpIPOPT</tt><em class="property"> = 0</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.nlpIPOPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.nlpNLOPT">
+<tt class="descname">nlpNLOPT</tt><em class="property"> = 1</em><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.nlpNLOPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.showMessage">
+<tt class="descname">showMessage</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.showMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.showMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.slotExportSparseMatrixAsMatrixMarketFormat">
+<tt class="descname">slotExportSparseMatrixAsMatrixMarketFormat</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.slotExportSparseMatrixAsMatrixMarketFormat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.slotExportSparseMatrixAsMatrixMarketFormat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.slotOpenSparseMatrixImage">
+<tt class="descname">slotOpenSparseMatrixImage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.slotOpenSparseMatrixImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.slotOpenSparseMatrixImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.slotPause">
+<tt class="descname">slotPause</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.slotPause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.slotPause" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.slotResume">
+<tt class="descname">slotResume</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.slotResume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.slotResume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="daetools.dae_simulator.simulator.daeSimulator.slotRun">
+<tt class="descname">slotRun</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/dae_simulator/simulator.html#daeSimulator.slotRun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.dae_simulator.simulator.daeSimulator.slotRun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">7. DAE Tools Simulator</a><ul>
+<li><a class="reference internal" href="#overview">7.1. Overview</a></li>
+<li><a class="reference internal" href="#module-daetools.dae_simulator.simulator">7.2. Classes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dae_plotter.html"
+                        title="previous chapter">6. DAE Tools Plotter</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorials.html"
+                        title="next chapter">8. Tutorials</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/dae_simulator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorials.html" title="8. Tutorials"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dae_plotter.html" title="6. DAE Tools Plotter"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 11, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

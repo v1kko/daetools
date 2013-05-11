@@ -1,26 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
+"""
+..
+ ***********************************************************************************
                              tutorial6.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 This is the simple port demo.
+
 Here we introduce:
- - Ports
- - Port connections
- - Units (instances of other models)
+
+- Ports
+- Port connections
+- Units (instances of other models)
 
 A simple port type 'portSimple' is defined which contains only one variable 't'.
 Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'.

@@ -1,25 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
+"""
+..
+ ***********************************************************************************
                              tutorial8.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 In this example we use a similar problem as in the tutorial 5.
+
 Here we introduce:
- - Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)
- - Custom data reporters
+
+- Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)
+- Custom data reporters
 
 Some time it is not enough to send the result to daePlotter but it is desirable to
 export them in certain format for use in other programs. Here we show how the custom
@@ -222,7 +225,7 @@ def consoleRun():
     simulation.Run()
     simulation.Finalize()
     simulation.dr4.Plot(
-        simulation.m.T,                        # Subplot 1
+        simulation.m.T,                       # Subplot 1
         [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
         )
 

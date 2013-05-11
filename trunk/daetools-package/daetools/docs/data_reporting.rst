@@ -12,7 +12,6 @@ Module pyDataReporting
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 .. py:module:: pyDataReporting
-.. py:currentmodule:: pyDataReporting
    
 Overview
 ==========
@@ -80,7 +79,29 @@ Data reporters that *do not* send data to a data receiver and keep data locally 
 
     .. method:: WriteDataToFile((daeTEXTFileDataReporter)self) -> None
 
-                      
+Third-party local data reporters
+--------------------------------
+.. py:module:: daetools.pyDAE.data_reporters
+
+.. autosummary::
+    daePlotDataReporter
+    daeMatlabMATFileDataReporter
+
+.. autoclass:: daetools.pyDAE.data_reporters.daePlotDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+
+.. py:currentmodule:: pyDataReporting
+
 Data reporters that *do* send data to a data receiver (*remote data reporters*)
 -------------------------------------------------------------------------------
 .. autoclass:: pyDataReporting.daeDataReporterRemote

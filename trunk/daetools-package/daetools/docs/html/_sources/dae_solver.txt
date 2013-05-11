@@ -12,7 +12,6 @@ Module pyIDAS
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 .. py:module:: pyIDAS
-.. py:currentmodule:: pyIDAS
 
 Overview
 ========

@@ -141,8 +141,8 @@ Optimization solvers
 Parameter estimation solvers
 ============================
 
-.. py:currentmodule:: daetools.solvers.daeMinpackLeastSq
-.. autoclass:: daetools.solvers.daeMinpackLeastSq.daeMinpackLeastSq
+.. py:currentmodule:: daetools.solvers.minpack
+.. autoclass:: daetools.solvers.minpack.daeMinpackLeastSq
     :members:
     :undoc-members:
 

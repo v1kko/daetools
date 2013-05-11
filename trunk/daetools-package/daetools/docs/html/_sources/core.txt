@@ -12,7 +12,6 @@ Module pyCore
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 .. py:module:: pyCore
-.. py:currentmodule:: pyCore
 
 Overview
 ========
@@ -390,54 +389,6 @@ Functions
 .. autofunction:: pyCore.Product
 .. autofunction:: pyCore.Integral
 .. autofunction:: pyCore.Average
-
-Logging support
-===============
-.. autosummary::
-    :nosignatures:
-
-    daeLog_t
-    daeBaseLog
-    daeFileLog
-    daeStdOutLog
-    daeTCPIPLog
-    daeTCPIPLogServer
-
-.. autoclass:: pyCore.daeLog_t
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeBaseLog
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeFileLog
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeStdOutLog
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeTCPIPLog
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
-
-.. autoclass:: pyCore.daeTCPIPLogServer
-    :members:
-    :undoc-members:
-
-    .. automethod:: __init__
 
 Autodifferentiation and equation evaluation tree support
 ========================================================

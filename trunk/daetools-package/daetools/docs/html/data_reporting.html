@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>3.3. Module pyDataReporting &mdash; DAE Tools Project 1.3.1 documentation</title>
+    <title>3.4. Module pyDataReporting &mdash; DAE Tools Project 1.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
     <link rel="up" title="3. pyDAE API Reference" href="pyDAE_api_ref.html" />
-    <link rel="next" title="3.4. Module pyIDAS" href="dae_solver.html" />
-    <link rel="prev" title="3.2. Module pyActivity" href="activity.html" /> 
+    <link rel="next" title="3.5. Module pyIDAS" href="dae_solver.html" />
+    <link rel="prev" title="3.3. Module pyActivity" href="activity.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,10 +41,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dae_solver.html" title="3.4. Module pyIDAS"
+          <a href="dae_solver.html" title="3.5. Module pyIDAS"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="3.2. Module pyActivity"
+          <a href="activity.html" title="3.3. Module pyActivity"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
           <li><a href="pyDAE_api_ref.html" accesskey="U">3. pyDAE API Reference</a> &raquo;</li> 
@@ -57,12 +57,12 @@
           <div class="body">
             
   <div class="section" id="module-pydatareporting">
-<h1>3.3. Module pyDataReporting<a class="headerlink" href="#module-pydatareporting" title="Permalink to this headline">¶</a></h1>
+<h1>3.4. Module pyDataReporting<a class="headerlink" href="#module-pydatareporting" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="module-pyDataReporting"></span><div class="section" id="overview">
-<h2>3.3.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<h2>3.4.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="datareporter-classes">
-<h2>3.3.2. DataReporter classes<a class="headerlink" href="#datareporter-classes" title="Permalink to this headline">¶</a></h2>
+<h2>3.4.2. DataReporter classes<a class="headerlink" href="#datareporter-classes" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -149,7 +149,7 @@
 </dd></dl>
 
 <div class="section" id="data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">
-<h3>3.3.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pyDataReporting.daeDataReporterLocal">
 <em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterLocal</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterLocal" title="Permalink to this definition">¶</a></dt>
@@ -190,8 +190,92 @@
 </dd></dl>
 
 </div>
+<div class="section" id="module-daetools.pyDAE.data_reporters">
+<span id="third-party-local-data-reporters"></span><h3>3.4.2.2. Third-party local data reporters<a class="headerlink" href="#module-daetools.pyDAE.data_reporters" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#daetools.pyDAE.data_reporters.daePlotDataReporter" title="daetools.pyDAE.data_reporters.daePlotDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daePlotDataReporter</span></tt></a>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter" title="daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter"><tt class="xref py py-obj docutils literal"><span class="pre">daeMatlabMATFileDataReporter</span></tt></a>()</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="daetools.pyDAE.data_reporters.daePlotDataReporter">
+<em class="property">class </em><tt class="descclassname">daetools.pyDAE.data_reporters.</tt><tt class="descname">daePlotDataReporter</tt><a class="reference internal" href="_modules/daetools/pyDAE/data_reporters.html#daePlotDataReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.pyDAE.data_reporters.daePlotDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterLocal" title="pyDataReporting.daeDataReporterLocal"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterLocal</span></tt></a></p>
+<dl class="method">
+<dt id="daetools.pyDAE.data_reporters.daePlotDataReporter.Plot">
+<tt class="descname">Plot</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/daetools/pyDAE/data_reporters.html#daePlotDataReporter.Plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.pyDAE.data_reporters.daePlotDataReporter.Plot" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">args</span></tt> can be either:</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li>Instances of daeVariable, or</li>
+<li>Lists of daeVariable instances, or</li>
+<li>A mixture of both.</li>
+</ol>
+</div></blockquote>
+<p>Each <tt class="docutils literal"><span class="pre">arg</span></tt> will get its own subplot. The subplots are all automatically
+arranged such that the resulting figure is as square-like as
+possible. You can however override the shape by supplying <tt class="docutils literal"><span class="pre">figRows</span></tt>
+and <tt class="docutils literal"><span class="pre">figCols</span></tt> as keyword args.</p>
+<p>Basic Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Create Log, Solver, DataReporter and Simulation object</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">daePythonStdOutLog</span><span class="p">()</span>
+<span class="n">daesolve</span> <span class="o">=</span> <span class="n">daeIDAS</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">daetools.pyDAE.data_reporters</span> <span class="kn">import</span> <span class="n">daePlotDataReporter</span>
+<span class="n">datareporter</span> <span class="o">=</span> <span class="n">daePlotDataReporter</span><span class="p">()</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">simTutorial</span><span class="p">()</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SetReportingOn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">ReportingInterval</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">TimeHorizon</span> <span class="o">=</span> <span class="mi">500</span>
+
+<span class="n">simName</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="n">strftime</span><span class="p">(</span><span class="s">&quot; [</span><span class="si">%d</span><span class="s">.%m.%Y %H:%M:%S]&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">())</span>
+<span class="k">if</span><span class="p">(</span><span class="n">datareporter</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">simName</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">daesolver</span><span class="p">,</span> <span class="n">datareporter</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SaveModelReport</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s">&quot;.xml&quot;</span><span class="p">)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">SaveRuntimeModelReport</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s">&quot;-rt.xml&quot;</span><span class="p">)</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">SolveInitial</span><span class="p">()</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">Finalize</span><span class="p">()</span>
+<span class="n">datareporter</span><span class="o">.</span><span class="n">Plot</span><span class="p">(</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Ci</span><span class="p">,</span>                       <span class="c"># Subplot 1</span>
+    <span class="p">[</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">event</span><span class="p">],</span>  <span class="c"># Subplot 2 (2 sets)</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Vp</span><span class="p">,</span>                       <span class="c"># Subplot 3</span>
+    <span class="p">[</span><span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">simulation</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">Vp</span><span class="p">]</span>      <span class="c"># Subplot 4 (2 sets)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter">
+<em class="property">class </em><tt class="descclassname">daetools.pyDAE.data_reporters.</tt><tt class="descname">daeMatlabMATFileDataReporter</tt><a class="reference internal" href="_modules/daetools/pyDAE/data_reporters.html#daeMatlabMATFileDataReporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyDataReporting.daeDataReporterLocal" title="pyDataReporting.daeDataReporterLocal"><tt class="xref py py-class docutils literal"><span class="pre">pyDataReporting.daeDataReporterLocal</span></tt></a></p>
+<dl class="method">
+<dt id="daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter.WriteDataToFile">
+<tt class="descname">WriteDataToFile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/daetools/pyDAE/data_reporters.html#daeMatlabMATFileDataReporter.WriteDataToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter.WriteDataToFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">
-<h3>3.3.2.2. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.2.3. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)<a class="headerlink" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pyDataReporting.daeDataReporterRemote">
 <em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeDataReporterRemote</tt><a class="headerlink" href="#pyDataReporting.daeDataReporterRemote" title="Permalink to this definition">¶</a></dt>
@@ -216,7 +300,7 @@
 
 </div>
 <div class="section" id="special-purpose-data-reporters">
-<h3>3.3.2.3. Special-purpose data reporters<a class="headerlink" href="#special-purpose-data-reporters" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.2.4. Special-purpose data reporters<a class="headerlink" href="#special-purpose-data-reporters" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pyDataReporting.daeBlackHoleDataReporter">
 <em class="property">class </em><tt class="descclassname">pyDataReporting.</tt><tt class="descname">daeBlackHoleDataReporter</tt><a class="headerlink" href="#pyDataReporting.daeBlackHoleDataReporter" title="Permalink to this definition">¶</a></dt>
@@ -258,7 +342,7 @@ attribute.</p>
 
 </div>
 <div class="section" id="datareporter-data-containers">
-<h3>3.3.2.4. DataReporter data-containers<a class="headerlink" href="#datareporter-data-containers" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.2.5. DataReporter data-containers<a class="headerlink" href="#datareporter-data-containers" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -377,7 +461,7 @@ attribute.</p>
 </div>
 </div>
 <div class="section" id="datareceiver-classes">
-<h2>3.3.3. DataReceiver classes<a class="headerlink" href="#datareceiver-classes" title="Permalink to this headline">¶</a></h2>
+<h2>3.4.3. DataReceiver classes<a class="headerlink" href="#datareceiver-classes" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -464,7 +548,7 @@ attribute.</p>
 </dd></dl>
 
 <div class="section" id="datareceiver-data-containers">
-<h3>3.3.3.1. DataReceiver data-containers<a class="headerlink" href="#datareceiver-data-containers" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.3.1. DataReceiver data-containers<a class="headerlink" href="#datareceiver-data-containers" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -635,17 +719,18 @@ attribute.</p>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">3.3. Module pyDataReporting</a><ul>
-<li><a class="reference internal" href="#overview">3.3.1. Overview</a></li>
-<li><a class="reference internal" href="#datareporter-classes">3.3.2. DataReporter classes</a><ul>
-<li><a class="reference internal" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">3.3.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)</a></li>
-<li><a class="reference internal" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">3.3.2.2. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)</a></li>
-<li><a class="reference internal" href="#special-purpose-data-reporters">3.3.2.3. Special-purpose data reporters</a></li>
-<li><a class="reference internal" href="#datareporter-data-containers">3.3.2.4. DataReporter data-containers</a></li>
+<li><a class="reference internal" href="#">3.4. Module pyDataReporting</a><ul>
+<li><a class="reference internal" href="#overview">3.4.1. Overview</a></li>
+<li><a class="reference internal" href="#datareporter-classes">3.4.2. DataReporter classes</a><ul>
+<li><a class="reference internal" href="#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">3.4.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)</a></li>
+<li><a class="reference internal" href="#module-daetools.pyDAE.data_reporters">3.4.2.2. Third-party local data reporters</a></li>
+<li><a class="reference internal" href="#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">3.4.2.3. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)</a></li>
+<li><a class="reference internal" href="#special-purpose-data-reporters">3.4.2.4. Special-purpose data reporters</a></li>
+<li><a class="reference internal" href="#datareporter-data-containers">3.4.2.5. DataReporter data-containers</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#datareceiver-classes">3.3.3. DataReceiver classes</a><ul>
-<li><a class="reference internal" href="#datareceiver-data-containers">3.3.3.1. DataReceiver data-containers</a></li>
+<li><a class="reference internal" href="#datareceiver-classes">3.4.3. DataReceiver classes</a><ul>
+<li><a class="reference internal" href="#datareceiver-data-containers">3.4.3.1. DataReceiver data-containers</a></li>
 </ul>
 </li>
 </ul>
@@ -654,10 +739,10 @@ attribute.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="activity.html"
-                        title="previous chapter">3.2. Module pyActivity</a></p>
+                        title="previous chapter">3.3. Module pyActivity</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="dae_solver.html"
-                        title="next chapter">3.4. Module pyIDAS</a></p>
+                        title="next chapter">3.5. Module pyIDAS</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/data_reporting.txt"
@@ -690,10 +775,10 @@ attribute.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="dae_solver.html" title="3.4. Module pyIDAS"
+          <a href="dae_solver.html" title="3.5. Module pyIDAS"
              >next</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="3.2. Module pyActivity"
+          <a href="activity.html" title="3.3. Module pyActivity"
              >previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
           <li><a href="pyDAE_api_ref.html" >3. pyDAE API Reference</a> &raquo;</li> 
@@ -701,7 +786,7 @@ attribute.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 06, 2013.
+      Last updated on May 11, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

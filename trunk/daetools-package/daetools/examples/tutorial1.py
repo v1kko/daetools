@@ -1,88 +1,102 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
+"""
+..
+ ***********************************************************************************
                              tutorial1.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 This tutorial introduces several new concepts:
- - Distribution domains
- - Distributed parameters, variables and equations
- - Boundary and initial conditions
 
-In this example we model a simple heat conduction problem:
-   - a conduction through a very thin, rectangular copper plate.
+- Distribution domains
+- Distributed parameters, variables and equations
+- Boundary and initial conditions
+
+In this example we model a simple heat conduction problem: a conduction through a very thin,
+rectangular copper plate.
+
 This example should be sufficiently complex to describe all basic DAE Tools features.
 For this problem, we need a two-dimensional Cartesian grid in X and Y axis
 (here, for simplicity, divided into 10 x 10 segments):
 
-Y axis
-    ^
-    |
-Ly -| T T T T T T T T T T T
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
-    | L + + + + + + + + + R
- 0 -| B B B B B B B B B B B
-    --|-------------------|----> X axis
-      0                   Lx
+.. code-block:: none
+
+     Y axis
+        ^
+        |
+    Ly -| T T T T T T T T T T T
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+        | L + + + + + + + + + R
+     0 -| B B B B B B B B B B B
+        --|-------------------|-------> X axis
+          0                   Lx
 
 Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the top edge of the plate
 (for y = Ly) represent the points where the heat is applied.
+
 The plate is considered insulated at the left (x = 0) and the right edges (x = Lx) of the plate (points 'L' and 'R').
 To model this type of problem, we have to write a heat balance equation for all interior points except the left, right,
 top and bottom edges, where we need to define the Neumann type boundary conditions.
 
 In this problem we have to define the following domains:
- - x: X axis domain, length Lx = 0.1 m
- - y: Y axis domain, length Ly = 0.1 m
+
+- x: X axis domain, length Lx = 0.1 m
+- y: Y axis domain, length Ly = 0.1 m
 
 the following parameters:
- - ro: copper density, 8960 kg/m3
- - cp: copper specific heat capacity, 385 J/(kgK)
- - k:  copper heat conductivity, 401 W/(mK)
- - Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)
- - Qt: heat flux at the top edge of the plate, here set to 0 W/m2
+
+- ro: copper density, 8960 kg/m3
+- cp: copper specific heat capacity, 385 J/(kgK)
+- k:  copper heat conductivity, 401 W/(mK)
+- Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)
+- Qt: heat flux at the top edge of the plate, here set to 0 W/m2
 
 and the following variable:
- - T: the temperature of the plate, K (distributed on x and y domains)
+
+- T: the temperature of the plate, K (distributed on x and y domains)
 
 Also, we need to write the following 5 equations:
 
-1) Heat balance:
+1) Heat balance::
+
       ro * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),
                                                                        for all y in: (0, Ly)
 
-2) Boundary conditions for the bottom edge:
+2) Boundary conditions for the bottom edge::
+
       -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],
                                 and y = 0
 
-3) Boundary conditions for the top edge:
+3) Boundary conditions for the top edge::
+
       -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],
                                 and y = Ly
 
-4) Boundary conditions for the left edge:
+4) Boundary conditions for the left edge::
+
       dT(x,y) / dx = 0;  for all y in: (0, Ly),
                          and x = 0
 
-5) Boundary conditions for the right edge:
+5) Boundary conditions for the right edge::
+
       dT(x,y) / dx = 0;  for all y in: (0, Ly),
                          and x = Ln
 

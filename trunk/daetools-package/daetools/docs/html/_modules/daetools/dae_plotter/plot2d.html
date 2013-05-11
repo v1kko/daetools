@@ -1,0 +1,460 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.dae_plotter.plot2d &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.dae_plotter.plot2d</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;********************************************************************************</span>
+<span class="sd">                             dae2DPlot.py</span>
+<span class="sd">                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span class="sd">                 Copyright (C) Dragan Nikolic, 2010</span>
+<span class="sd">***********************************************************************************</span>
+<span class="sd">DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span class="sd">terms of the GNU General Public License version 3 as published by the Free Software </span>
+<span class="sd">Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT </span>
+<span class="sd">ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span class="sd">PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="sd">You should have received a copy of the GNU General Public License along with the</span>
+<span class="sd">DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">********************************************************************************&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">realpath</span><span class="p">,</span> <span class="n">dirname</span>
+<span class="kn">from</span> <span class="nn">daetools.pyDAE</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">choose_variable</span> <span class="kn">import</span> <span class="n">daeChooseVariable</span><span class="p">,</span> <span class="n">daeTableDialog</span>
+<span class="kn">from</span> <span class="nn">plot_options</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt4agg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt4agg</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QTAgg</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+
+<span class="n">images_dir</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;images&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="daePlot2dDefaults"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.daePlot2dDefaults">[docs]</a><span class="k">class</span> <span class="nc">daePlot2dDefaults</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linewidth</span> <span class="o">=</span> <span class="n">linewidth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linestyle</span> <span class="o">=</span> <span class="n">linestyle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markersize</span> <span class="o">=</span> <span class="n">markersize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markerfacecolor</span> <span class="o">=</span> <span class="n">markerfacecolor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markeredgecolor</span> <span class="o">=</span> <span class="n">markeredgecolor</span>
+</div>
+<div class="viewcode-block" id="dae2DPlot"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot">[docs]</a><span class="k">class</span> <span class="nc">dae2DPlot</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="n">plotDefaults</span> <span class="o">=</span> <span class="p">[</span><span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;^&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;h&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;solid&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;^&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;h&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dashed&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span><span class="p">,</span>  <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;^&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">,</span>   <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;h&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">),</span>
+                    <span class="n">daePlot2dDefaults</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;dotted&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span>     <span class="s">&#39;black&#39;</span><span class="p">)</span> <span class="p">]</span>
+                    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tcpipServer</span><span class="p">,</span> <span class="n">updateInterval</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_DeleteOnClose</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">tcpipServer</span> <span class="o">=</span> <span class="n">tcpipServer</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">legendOn</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridOn</span>   <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span>   <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">updateInterval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateInterval</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotType</span> <span class="o">=</span> <span class="n">daeChooseVariable</span><span class="o">.</span><span class="n">plot2D</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateInterval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">updateInterval</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotType</span> <span class="o">=</span> <span class="n">daeChooseVariable</span><span class="o">.</span><span class="n">plot2DAnimated</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;2D plot&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;line-chart.png&#39;</span><span class="p">)))</span>
+
+        <span class="nb">exit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;close.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Exit&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="nb">exit</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+Q&#39;</span><span class="p">)</span>
+        <span class="nb">exit</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Exit application&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">exit</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;preferences.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Options&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+P&#39;</span><span class="p">)</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Options&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotProperties</span><span class="p">)</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;grid.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Grid on/off&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+G&#39;</span><span class="p">)</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Grid on/off&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotToggleGrid</span><span class="p">)</span>
+
+        <span class="n">legend</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;legend.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Legend on/off&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">legend</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+L&#39;</span><span class="p">)</span>
+        <span class="n">legend</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Legend on/off&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">legend</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotToggleLegend</span><span class="p">)</span>
+
+        <span class="n">viewdata</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;data.png&#39;</span><span class="p">)),</span> <span class="s">&#39;View tabular data&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">viewdata</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+D&#39;</span><span class="p">)</span>
+        <span class="n">viewdata</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;View tabular data&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">viewdata</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotViewTabularData</span><span class="p">)</span>
+
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;csv.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Export CSV&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">csv</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+S&#39;</span><span class="p">)</span>
+        <span class="n">csv</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Export CSV&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotExportCSV</span><span class="p">)</span>
+
+        <span class="n">remove_line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;remove.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Remove line&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">remove_line</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+R&#39;</span><span class="p">)</span>
+        <span class="n">remove_line</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Remove line&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">remove_line</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">slotRemoveLine</span><span class="p">)</span>
+
+        <span class="n">new_line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="s">&#39;add.png&#39;</span><span class="p">)),</span> <span class="s">&#39;Add line&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&#39;Ctrl+A&#39;</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="s">&#39;Add line&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">new_line</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">newCurve</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layoutToolbar</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar_widget</span><span class="p">)</span>
+        <span class="n">layoutToolbar</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sizePolicy</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">sizePolicy</span><span class="p">)</span>
+
+        <span class="n">layoutPlot</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layoutPlot</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">((</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;white&#39;</span><span class="p">)</span><span class="c">#&quot;#E5E5E5&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span> <span class="o">=</span> <span class="n">NavigationToolbar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_widget</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        
+        <span class="c">#self.mpl_toolbar.addSeparator()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">viewdata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">legend</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">new_line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">remove_line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="c">#self.mpl_toolbar.addSeparator()</span>
+        <span class="c">#self.mpl_toolbar.addAction(exit)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp8</span>  <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">font_manager</span><span class="o">.</span><span class="n">FontProperties</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s">&#39;sans-serif&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp9</span>  <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">font_manager</span><span class="o">.</span><span class="n">FontProperties</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s">&#39;sans-serif&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp11</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">font_manager</span><span class="o">.</span><span class="n">FontProperties</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s">&#39;sans-serif&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">textTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">fontproperties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp9</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">xlabel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">():</span>
+            <span class="n">xlabel</span><span class="o">.</span><span class="n">set_fontproperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp9</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ylabel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">():</span>
+            <span class="n">ylabel</span><span class="o">.</span><span class="n">set_fontproperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp9</span><span class="p">)</span>
+
+        <span class="n">layoutToolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="p">)</span>
+        <span class="n">layoutPlot</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">)</span>
+        <span class="n">layoutPlot</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar_widget</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateInterval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;timeout()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateCurves</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateInterval</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="dae2DPlot.closeEvent"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;dae2DPlot.closeEvent&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="dae2DPlot.updateCurves"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.updateCurves">[docs]</a>    <span class="k">def</span> <span class="nf">updateCurves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">domainIndexes</span><span class="p">,</span> <span class="n">domainPoints</span><span class="p">,</span> <span class="n">fun</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">domainIndexes</span><span class="p">,</span> <span class="n">domainPoints</span><span class="p">)</span>
+                <span class="n">xPoints</span>     <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                <span class="n">yPoints</span>     <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="n">currentTime</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                
+                <span class="n">line</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">xPoints</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">yPoints</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">textTime</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="s">&#39;Time = {0} s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">currentTime</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">textTime</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> 
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">reformatPlot</span><span class="p">()</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotProperties"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotProperties">[docs]</a>    <span class="k">def</span> <span class="nf">slotProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">figure_edit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotToggleLegend"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotToggleLegend">[docs]</a>    <span class="k">def</span> <span class="nf">slotToggleLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legendOn</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">legendOn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reformatPlot</span><span class="p">()</span>    
+        
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotToggleGrid"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotToggleGrid">[docs]</a>    <span class="k">def</span> <span class="nf">slotToggleGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridOn</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridOn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reformatPlot</span><span class="p">()</span>    
+
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotExportCSV"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotExportCSV">[docs]</a>    <span class="k">def</span> <span class="nf">slotExportCSV</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">strInitialFilename</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">current</span><span class="p">()</span><span class="o">.</span><span class="n">path</span><span class="p">()</span>
+        <span class="n">strInitialFilename</span> <span class="o">+=</span> <span class="s">&quot;/untitled.csv&quot;</span><span class="p">;</span>
+        <span class="n">strExt</span> <span class="o">=</span> <span class="s">&quot;Comma separated files (*.csv)&quot;</span>
+        <span class="n">strCaption</span> <span class="o">=</span> <span class="s">&quot;Save file&quot;</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strCaption</span><span class="p">,</span> <span class="n">strInitialFilename</span><span class="p">,</span> <span class="n">strExt</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">fileName</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()):</span>
+            <span class="k">return</span>
+
+        <span class="n">datafile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fileName</span><span class="p">),</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">xlabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">()</span>
+            <span class="n">datafile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">xlabel</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&quot;</span><span class="s">,</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">ylabel</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&quot;\n</span><span class="s">&#39;</span> <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+                <span class="n">datafile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.14e</span><span class="s">,</span><span class="si">%.14e</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="c">#datafile.write(str(x[i]) + &#39;,&#39; + str(y[i]) + &#39;\n&#39;)</span>
+            <span class="n">datafile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotViewTabularData"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotViewTabularData">[docs]</a>    <span class="k">def</span> <span class="nf">slotViewTabularData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+
+        <span class="n">tableDialog</span> <span class="o">=</span> <span class="n">daeTableDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tableDialog</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&#39;Raw data&#39;</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">tableDialog</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span>
+        <span class="n">nr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ncol</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">nr</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">nr</span> <span class="o">=</span> <span class="n">n</span>
+                
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">setColumnCount</span><span class="p">(</span><span class="n">ncol</span><span class="p">)</span>
+        <span class="n">horHeader</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">verHeader</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">xlabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">()</span>
+            <span class="n">horHeader</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+                <span class="n">newItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">newItem</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+                <span class="n">verHeader</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+            
+        <span class="n">table</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="n">horHeader</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">setVerticalHeaderLabels</span><span class="p">(</span><span class="n">verHeader</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">resizeRowsToContents</span><span class="p">()</span>
+        <span class="n">tableDialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.slotRemoveLine"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.slotRemoveLine">[docs]</a>    <span class="k">def</span> <span class="nf">slotRemoveLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="n">nameToRemove</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QInputDialog</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Choose line to remove&quot;</span><span class="p">,</span> <span class="s">&quot;Lines:&quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameToRemove</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reformatPlot</span><span class="p">()</span>
+                    <span class="k">return</span>
+
+    <span class="c">#@QtCore.pyqtSlot()</span></div>
+<div class="viewcode-block" id="dae2DPlot.newCurve"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.newCurve">[docs]</a>    <span class="k">def</span> <span class="nf">newCurve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataReceiver</span><span class="o">.</span><span class="n">Process</span> <span class="k">for</span> <span class="n">dataReceiver</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tcpipServer</span><span class="o">.</span><span class="n">DataReceivers</span><span class="p">]</span>
+        
+        <span class="n">cv</span> <span class="o">=</span> <span class="n">daeChooseVariable</span><span class="p">(</span><span class="n">processes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotType</span><span class="p">)</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&#39;Choose variable for 2D plot&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cv</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">!=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+            
+        <span class="n">variable</span><span class="p">,</span> <span class="n">domainIndexes</span><span class="p">,</span> <span class="n">domainPoints</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">,</span> <span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">currentTime</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">getPlot2DData</span><span class="p">()</span>
+
+        <span class="n">domains</span> <span class="o">=</span> <span class="s">&quot;(&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">domainPoints</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">domains</span> <span class="o">+=</span> <span class="s">&quot;, &quot;</span>
+            <span class="n">domains</span> <span class="o">+=</span> <span class="n">domainPoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">domains</span> <span class="o">+=</span> <span class="s">&quot;)&quot;</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addLine</span><span class="p">(</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">,</span> <span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">domains</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">yAxisLabel</span> <span class="o">+</span> <span class="n">domains</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">domainIndexes</span><span class="p">,</span> <span class="n">domainPoints</span><span class="p">,</span> <span class="n">daeChooseVariable</span><span class="o">.</span><span class="n">get2DData</span><span class="p">)</span> <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="dae2DPlot.addLine"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.addLine">[docs]</a>    <span class="k">def</span> <span class="nf">addLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">,</span> <span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">domains</span><span class="p">):</span>
+        <span class="n">no_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">())</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">no_lines</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">dae2DPlot</span><span class="o">.</span><span class="n">plotDefaults</span><span class="p">)</span>
+        <span class="n">pd</span> <span class="o">=</span> <span class="n">dae2DPlot</span><span class="o">.</span><span class="n">plotDefaults</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        
+        <span class="n">line</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xPoints</span><span class="p">,</span> <span class="n">yPoints</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">yAxisLabel</span><span class="o">+</span><span class="n">domains</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">linewidth</span><span class="p">,</span> \
+                                      <span class="n">linestyle</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">marker</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">markersize</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">markerfacecolor</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">markeredgecolor</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">no_lines</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fp11</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">yAxisLabel</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fp11</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">reformatPlot</span><span class="p">()</span>  
+        <span class="k">return</span> <span class="n">line</span>
+</div>
+<div class="viewcode-block" id="dae2DPlot.reformatPlot"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot2d.dae2DPlot.reformatPlot">[docs]</a>    <span class="k">def</span> <span class="nf">reformatPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+        <span class="n">xmin</span> <span class="o">=</span> <span class="mf">1e20</span>
+        <span class="n">xmax</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e20</span>
+        <span class="n">ymin</span> <span class="o">=</span> <span class="mf">1e20</span>
+        <span class="n">ymax</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1e20</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">xmin</span><span class="p">:</span>
+                <span class="n">xmin</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">xmax</span><span class="p">:</span>
+                <span class="n">xmax</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">ymin</span><span class="p">:</span>
+                <span class="n">ymin</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">ymax</span><span class="p">:</span>
+                <span class="n">ymax</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">())</span>
+        
+        <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.05</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.05</span>
+        <span class="n">xmin</span> <span class="o">-=</span> <span class="n">dx</span>
+        <span class="n">xmax</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="n">ymin</span> <span class="o">-=</span> <span class="n">dy</span>
+        <span class="n">ymax</span> <span class="o">+=</span> <span class="n">dy</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridOn</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legendOn</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fp8</span><span class="p">,</span> <span class="n">numpoints</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fancybox</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">legend_</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 11, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

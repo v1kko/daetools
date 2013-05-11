@@ -15,10 +15,12 @@ pyDAE API Reference
    :maxdepth: 3
 
    core
+   log
    activity
    data_reporting
    dae_solver
    units
+   variable_types
 
 .. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
     :alt:

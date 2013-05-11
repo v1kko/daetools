@@ -3,7 +3,6 @@ Module pyUnits
 ******************
 
 .. py:module:: pyUnits
-.. py:currentmodule:: pyUnits
 
 Overview
 =========

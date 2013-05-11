@@ -1,0 +1,303 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.pyDAE.data_reporters &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="daetools.pyDAE" href="../pyDAE.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyDAE.html" accesskey="U">daetools.pyDAE</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.pyDAE.data_reporters</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;********************************************************************************</span>
+<span class="sd">                            daeDataReporters.py</span>
+<span class="sd">                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span class="sd">                 Copyright (C) Dragan Nikolic, 2010</span>
+<span class="sd">***********************************************************************************</span>
+<span class="sd">DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span class="sd">terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span class="sd">Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="sd">ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span class="sd">PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="sd">You should have received a copy of the GNU General Public License along with the</span>
+<span class="sd">DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">********************************************************************************&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pyCore</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyDataReporting</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">scipy</span>
+    <span class="kn">from</span> <span class="nn">scipy.io</span> <span class="kn">import</span> <span class="n">savemat</span><span class="p">,</span> <span class="n">loadmat</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Cannot load scipy.io.savemat module&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<div class="viewcode-block" id="daeMatlabMATFileDataReporter"><a class="viewcode-back" href="../../../data_reporting.html#daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter">[docs]</a><span class="k">class</span> <span class="nc">daeMatlabMATFileDataReporter</span><span class="p">(</span><span class="n">daeDataReporterLocal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">daeDataReporterLocal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ProcessName</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">Connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ConnectionString</span><span class="p">,</span> <span class="n">ProcessName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ProcessName</span>      <span class="o">=</span> <span class="n">ProcessName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionString</span> <span class="o">=</span> <span class="n">ConnectionString</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">IsConnected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">Disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteDataToFile</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="daeMatlabMATFileDataReporter.WriteDataToFile"><a class="viewcode-back" href="../../../data_reporting.html#daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter.WriteDataToFile">[docs]</a>    <span class="k">def</span> <span class="nf">WriteDataToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mdict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Process</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+            <span class="n">mdict</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">Values</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">scipy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">savemat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ConnectionString</span><span class="p">,</span>
+                             <span class="n">mdict</span><span class="p">,</span>
+                             <span class="n">appendmat</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                             <span class="n">format</span><span class="o">=</span><span class="s">&#39;5&#39;</span><span class="p">,</span>
+                             <span class="n">long_field_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                             <span class="n">do_compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                             <span class="n">oned_as</span><span class="o">=</span><span class="s">&#39;row&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Cannot call scipy.io.savemat(); is SciPy installed?</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="daePlotDataReporter"><a class="viewcode-back" href="../../../data_reporting.html#daetools.pyDAE.data_reporters.daePlotDataReporter">[docs]</a><span class="k">class</span> <span class="nc">daePlotDataReporter</span><span class="p">(</span><span class="n">daeDataReporterLocal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">daeDataReporterLocal</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ProcessName</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">Connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ConnectionString</span><span class="p">,</span> <span class="n">ProcessName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ProcessName</span>      <span class="o">=</span> <span class="n">ProcessName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ConnectionString</span> <span class="o">=</span> <span class="n">ConnectionString</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">IsConnected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">Disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="daePlotDataReporter.Plot"><a class="viewcode-back" href="../../../data_reporting.html#daetools.pyDAE.data_reporters.daePlotDataReporter.Plot">[docs]</a>    <span class="k">def</span> <span class="nf">Plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        ``args`` can be either:</span>
+
+<span class="sd">            a) Instances of daeVariable, or</span>
+<span class="sd">            b) Lists of daeVariable instances, or</span>
+<span class="sd">            c) A mixture of both.</span>
+
+<span class="sd">        Each ``arg`` will get its own subplot. The subplots are all automatically</span>
+<span class="sd">        arranged such that the resulting figure is as square-like as</span>
+<span class="sd">        possible. You can however override the shape by supplying ``figRows``</span>
+<span class="sd">        and ``figCols`` as keyword args.</span>
+
+<span class="sd">        Basic Example::</span>
+
+<span class="sd">            # Create Log, Solver, DataReporter and Simulation object</span>
+<span class="sd">            log = daePythonStdOutLog()</span>
+<span class="sd">            daesolve = daeIDAS()</span>
+<span class="sd">            from daetools.pyDAE.data_reporters import daePlotDataReporter</span>
+<span class="sd">            datareporter = daePlotDataReporter()</span>
+<span class="sd">            simulation = simTutorial()</span>
+
+<span class="sd">            simulation.m.SetReportingOn(True)</span>
+<span class="sd">            simulation.ReportingInterval = 20</span>
+<span class="sd">            simulation.TimeHorizon = 500</span>
+
+<span class="sd">            simName = simulation.m.Name + strftime(&quot; [%d.%m.%Y %H:%M:%S]&quot;, localtime())</span>
+<span class="sd">            if(datareporter.Connect(&quot;&quot;, simName) == False):</span>
+<span class="sd">                sys.exit()</span>
+
+<span class="sd">            simulation.Initialize(daesolver, datareporter, log)</span>
+
+<span class="sd">            simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+<span class="sd">            simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+
+<span class="sd">            simulation.SolveInitial()</span>
+<span class="sd">            simulation.Run()</span>
+
+<span class="sd">            simulation.Finalize()</span>
+<span class="sd">            datareporter.Plot(</span>
+<span class="sd">                simulation.m.Ci,                       # Subplot 1</span>
+<span class="sd">                [simulation.m.L, simulation.m.event],  # Subplot 2 (2 sets)</span>
+<span class="sd">                simulation.m.Vp,                       # Subplot 3</span>
+<span class="sd">                [simulation.m.L, simulation.m.Vp]      # Subplot 4 (2 sets)</span>
+<span class="sd">                )</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+            <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">floor</span>
+
+            <span class="sd">&#39;&#39;&#39; Math to make sure we have enough subplots for any number</span>
+<span class="sd">            of given variables.&#39;&#39;&#39;</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">kwargCheck</span><span class="p">(</span><span class="n">kw</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">valueIfNone</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">kw</span><span class="p">)</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">kw</span><span class="p">]:</span>
+                    <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">kw</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">valueIfNone</span>
+
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">kwargCheck</span><span class="p">(</span><span class="s">&#39;figRows&#39;</span><span class="p">,</span> <span class="n">valueIfNone</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))))</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">kwargCheck</span><span class="p">(</span><span class="s">&#39;figCols&#39;</span><span class="p">,</span> <span class="n">valueIfNone</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))))</span>
+
+            <span class="sd">&#39;&#39;&#39; Create lookup for convenience.  There are two kinds of</span>
+<span class="sd">            &quot;variable&quot; identifiers:</span>
+<span class="sd">               a) instances of daeDataReceiverVariable (I call processVar)</span>
+<span class="sd">               b) instances of daeVariable (I call daeVar)</span>
+<span class="sd">            This lookup will create a name-value dict for later matching.&#39;&#39;&#39;</span>
+            <span class="n">lookup</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">processVar</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Process</span><span class="o">.</span><span class="n">Variables</span><span class="p">:</span>
+                <span class="n">lookup</span><span class="p">[</span><span class="n">processVar</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">processVar</span>
+
+            <span class="k">def</span> <span class="nf">varLabel</span><span class="p">(</span><span class="n">daeVar</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&#39;${0} {1}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">daeVar</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">daeVar</span><span class="o">.</span><span class="n">VariableType</span><span class="o">.</span><span class="n">Units</span><span class="p">))</span>
+
+            <span class="k">def</span> <span class="nf">larger_axlim</span><span class="p">(</span><span class="n">axlim</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot; This function enlarges the y-axis range so that data</span>
+<span class="sd">                will not lie underneath an axis line.</span>
+
+<span class="sd">                    axlim: 2-tuple</span>
+<span class="sd">                    result: 2-tuple (enlarged range)</span>
+
+<span class="sd">                This was taken from (thanks bernie!):</span>
+<span class="sd">                http://stackoverflow.com/a/6230993/170656</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">axmin</span><span class="p">,</span><span class="n">axmax</span> <span class="o">=</span> <span class="n">axlim</span>
+                <span class="n">axrng</span> <span class="o">=</span> <span class="n">axmax</span> <span class="o">-</span> <span class="n">axmin</span>
+                <span class="n">new_min</span> <span class="o">=</span> <span class="n">axmin</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">axrng</span>
+                <span class="n">new_max</span> <span class="o">=</span> <span class="n">axmax</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">axrng</span>
+                <span class="k">return</span> <span class="n">new_min</span><span class="p">,</span> <span class="n">new_max</span>
+
+            <span class="k">def</span> <span class="nf">plotVariable</span><span class="p">(</span><span class="n">daeVar</span><span class="p">):</span>
+                <span class="sd">&#39;&#39;&#39; Create easy plotter that requires only a daeVariable.</span>
+<span class="sd">                This function will plot the variable&#39;s data onto whatever</span>
+<span class="sd">                is the current set of axes.  Note that the matchups between</span>
+<span class="sd">                the processVar and daeVar require daeVar.CanonicalName, not</span>
+<span class="sd">                merely Name.&#39;&#39;&#39;</span>
+                <span class="k">if</span> <span class="n">lookup</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">daeVar</span><span class="o">.</span><span class="n">CanonicalName</span><span class="p">):</span>
+                    <span class="n">processVar</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">[</span><span class="n">daeVar</span><span class="o">.</span><span class="n">CanonicalName</span><span class="p">]</span>
+                    <span class="c">#import pdb; pdb.set_trace()</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                        <span class="n">processVar</span><span class="o">.</span><span class="n">TimeValues</span><span class="p">,</span>
+                        <span class="n">processVar</span><span class="o">.</span><span class="n">Values</span><span class="p">,</span>
+                        <span class="n">label</span><span class="o">=</span><span class="n">varLabel</span><span class="p">(</span><span class="n">daeVar</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+                <span class="sd">&#39;&#39;&#39;Loop over arguments: some are variables (each one gets its</span>
+<span class="sd">                own subplot) and some are lists of variables, these vars</span>
+<span class="sd">                will share a plot.&#39;&#39;&#39;</span>
+                <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (s)&#39;</span><span class="p">)</span>
+                <span class="c">#plt.title(&#39;Title&#39;)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="mf">1.2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="sd">&#39;&#39;&#39; This arg is a list of variables.  These must all be</span>
+<span class="sd">                    plotted on the same plot.&#39;&#39;&#39;</span>
+                    <span class="n">variables</span> <span class="o">=</span> <span class="n">arg</span>
+                    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                        <span class="n">plotVariable</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="sd">&#39;&#39;&#39; This arg is a single variable.&#39;&#39;&#39;</span>
+                    <span class="n">variable</span> <span class="o">=</span> <span class="n">arg</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">varLabel</span><span class="p">(</span><span class="n">variable</span><span class="p">))</span>
+                    <span class="n">plotVariable</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+                <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span> <span class="n">larger_axlim</span><span class="p">(</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">traceback</span>
+            <span class="k">print</span> <span class="s">&#39;Error: </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyDAE.html" >daetools.pyDAE</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 11, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

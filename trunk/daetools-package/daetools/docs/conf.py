@@ -96,6 +96,10 @@ pygments_style = 'sphinx'
 #modindex_common_prefix = []
 
 
+# pngmath
+#pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
+
+ 
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

@@ -1,35 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
+"""
+..
+ ***********************************************************************************
                              tutorial9.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+ ***********************************************************************************
+ DAE Tools is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License version 3 as published by the Free Software
+ Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with the
+ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************************
 
-"""
 In this example we use the same conduction problem as in the tutorial 1.
+
 Here we introduce:
+
  - Third party linear equations solvers
 
 Currently there are 3rd party linear equations solvers:
- - SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)
- - SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)
- - Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
- - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
- - AmdACML: multi-threaded dense lapack direct solver defined in pyAmdACML (proprietary)
- - IntelMKL: multi-threaded dense lapack direct solver defined in pyIntelMKL (proprietary)
- - Lapack: generic sequential dense lapack direct solver defined in pyLapack module
-           (The University of Tennessee free license)
- - Magma: implementation of the sequential dense Lapack direct solver on CUDA NVidia GPUs
+
+- SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)
+- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)
+- Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
+- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
 """
 
 import sys

@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>daetools.dae_plotter.plot_options &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for daetools.dae_plotter.plot_options</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">..</span>
+<span class="sd"> **********************************************************************************</span>
+<span class="sd">                              daePlotOptions.py</span>
+<span class="sd">                  DAE Tools: pyDAE module, www.daetools.com</span>
+<span class="sd">                  Copyright (C) Dragan Nikolic, 2010</span>
+<span class="sd"> ***********************************************************************************</span>
+<span class="sd"> DAE Tools is free software; you can redistribute it and/or modify it under the </span>
+<span class="sd"> terms of the GNU General Public License version 3 as published by the Free Software </span>
+<span class="sd"> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT </span>
+<span class="sd"> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A </span>
+<span class="sd"> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span class="sd"> You should have received a copy of the GNU General Public License along with the</span>
+<span class="sd"> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd"> ***********************************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">formlayout</span> <span class="kn">import</span> <span class="n">fedit</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;[daePlotOptions]: Cannot load formlayout.fedit module&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="n">LINESTYLES</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="s">&#39;-&#39;</span><span class="p">:</span> <span class="s">&#39;Solid&#39;</span><span class="p">,</span>
+              <span class="s">&#39;--&#39;</span><span class="p">:</span> <span class="s">&#39;Dashed&#39;</span><span class="p">,</span>
+              <span class="s">&#39;-.&#39;</span><span class="p">:</span> <span class="s">&#39;DashDot&#39;</span><span class="p">,</span>
+              <span class="s">&#39;:&#39;</span><span class="p">:</span> <span class="s">&#39;Dotted&#39;</span><span class="p">,</span>
+<span class="c">#              &#39;steps&#39;: &#39;Steps&#39;, # BUG!!</span>
+              <span class="s">&#39;none&#39;</span><span class="p">:</span> <span class="s">&#39;None&#39;</span><span class="p">,</span>
+              <span class="p">}</span>
+
+<span class="n">MARKERS</span> <span class="o">=</span> <span class="p">{</span>
+           <span class="s">&#39;none&#39;</span><span class="p">:</span> <span class="s">&#39;None&#39;</span><span class="p">,</span>
+           <span class="s">&#39;o&#39;</span><span class="p">:</span> <span class="s">&#39;circles&#39;</span><span class="p">,</span>
+           <span class="s">&#39;^&#39;</span><span class="p">:</span> <span class="s">&#39;triangle_up&#39;</span><span class="p">,</span>
+           <span class="s">&#39;v&#39;</span><span class="p">:</span> <span class="s">&#39;triangle_down&#39;</span><span class="p">,</span>
+           <span class="s">&#39;&lt;&#39;</span><span class="p">:</span> <span class="s">&#39;triangle_left&#39;</span><span class="p">,</span>
+           <span class="s">&#39;&gt;&#39;</span><span class="p">:</span> <span class="s">&#39;triangle_right&#39;</span><span class="p">,</span>
+           <span class="s">&#39;s&#39;</span><span class="p">:</span> <span class="s">&#39;square&#39;</span><span class="p">,</span>
+           <span class="s">&#39;+&#39;</span><span class="p">:</span> <span class="s">&#39;plus&#39;</span><span class="p">,</span>
+           <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="s">&#39;cross&#39;</span><span class="p">,</span>
+           <span class="s">&#39;*&#39;</span><span class="p">:</span> <span class="s">&#39;star&#39;</span><span class="p">,</span>
+           <span class="s">&#39;D&#39;</span><span class="p">:</span> <span class="s">&#39;diamond&#39;</span><span class="p">,</span>
+           <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="s">&#39;thin_diamond&#39;</span><span class="p">,</span>
+           <span class="s">&#39;1&#39;</span><span class="p">:</span> <span class="s">&#39;tripod_down&#39;</span><span class="p">,</span>
+           <span class="s">&#39;2&#39;</span><span class="p">:</span> <span class="s">&#39;tripod_up&#39;</span><span class="p">,</span>
+           <span class="s">&#39;3&#39;</span><span class="p">:</span> <span class="s">&#39;tripod_left&#39;</span><span class="p">,</span>
+           <span class="s">&#39;4&#39;</span><span class="p">:</span> <span class="s">&#39;tripod_right&#39;</span><span class="p">,</span>
+           <span class="s">&#39;h&#39;</span><span class="p">:</span> <span class="s">&#39;hexagon&#39;</span><span class="p">,</span>
+           <span class="s">&#39;H&#39;</span><span class="p">:</span> <span class="s">&#39;rotated_hexagon&#39;</span><span class="p">,</span>
+           <span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="s">&#39;pentagon&#39;</span><span class="p">,</span>
+           <span class="s">&#39;|&#39;</span><span class="p">:</span> <span class="s">&#39;vertical_line&#39;</span><span class="p">,</span>
+           <span class="s">&#39;_&#39;</span><span class="p">:</span> <span class="s">&#39;horizontal_line&#39;</span><span class="p">,</span>
+           <span class="s">&#39;.&#39;</span><span class="p">:</span> <span class="s">&#39;dots&#39;</span><span class="p">,</span>
+           <span class="p">}</span>
+
+<span class="n">COLORS</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="s">&#39;#0000ff&#39;</span><span class="p">,</span> <span class="s">&#39;g&#39;</span><span class="p">:</span> <span class="s">&#39;#00ff00&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">:</span> <span class="s">&#39;#ff0000&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">:</span> <span class="s">&#39;#ff00ff&#39;</span><span class="p">,</span>
+          <span class="s">&#39;m&#39;</span><span class="p">:</span> <span class="s">&#39;#ff00ff&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="s">&#39;#ffff00&#39;</span><span class="p">,</span> <span class="s">&#39;k&#39;</span><span class="p">:</span> <span class="s">&#39;#000000&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">:</span> <span class="s">&#39;#ffffff&#39;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="col2hex"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot_options.col2hex">[docs]</a><span class="k">def</span> <span class="nf">col2hex</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert matplotlib color to hex&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">COLORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="figure_edit"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot_options.figure_edit">[docs]</a><span class="k">def</span> <span class="nf">figure_edit</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Edit matplotlib figure options&quot;&quot;&quot;</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="c"># separator</span>
+
+    <span class="n">has_curve</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span>
+
+    <span class="c"># Get / General</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+    <span class="n">general</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;Title&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_title</span><span class="p">()),</span>
+               <span class="p">(</span><span class="s">&#39;Gridlines&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Legend&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&lt;b&gt;X-Axis&lt;/b&gt;&quot;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Min&#39;</span><span class="p">,</span> <span class="n">xmin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;Max&#39;</span><span class="p">,</span> <span class="n">xmax</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Label&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()),</span>
+               <span class="p">(</span><span class="s">&#39;Scale&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xscale</span><span class="p">(),</span> <span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">]),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&lt;b&gt;Y-Axis&lt;/b&gt;&quot;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Min&#39;</span><span class="p">,</span> <span class="n">ymin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;Max&#39;</span><span class="p">,</span> <span class="n">ymax</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Label&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylabel</span><span class="p">()),</span>
+               <span class="p">(</span><span class="s">&#39;Scale&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">(),</span> <span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="s">&#39;log&#39;</span><span class="p">])</span>
+               <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">has_curve</span><span class="p">:</span>
+        <span class="n">curves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">linestyles</span> <span class="o">=</span> <span class="n">LINESTYLES</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">markers</span> <span class="o">=</span> <span class="n">MARKERS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span>
+            <span class="n">curvedata</span> <span class="o">=</span> <span class="p">[</span>
+                         <span class="p">(</span><span class="s">&#39;Label&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+                         <span class="c">#sep,</span>
+                         <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;&lt;b&gt;Line&lt;/b&gt;&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s">&#39;Style&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">get_linestyle</span><span class="p">()]</span> <span class="o">+</span> <span class="n">linestyles</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s">&#39;Width&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">get_linewidth</span><span class="p">()),</span>
+                         <span class="p">(</span><span class="s">&#39;Color&#39;</span><span class="p">,</span> <span class="n">col2hex</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_color</span><span class="p">())),</span>
+                         <span class="c">#sep,</span>
+                         <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;&lt;b&gt;Marker&lt;/b&gt;&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s">&#39;Style&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">get_marker</span><span class="p">()]</span> <span class="o">+</span> <span class="n">markers</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s">&#39;Size&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">get_markersize</span><span class="p">()),</span>
+                         <span class="p">(</span><span class="s">&#39;Facecolor&#39;</span><span class="p">,</span> <span class="n">col2hex</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_markerfacecolor</span><span class="p">())),</span>
+                         <span class="p">(</span><span class="s">&#39;Edgecolor&#39;</span><span class="p">,</span> <span class="n">col2hex</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">get_markeredgecolor</span><span class="p">())),</span>
+                         <span class="p">]</span>
+            <span class="n">curves</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">curvedata</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">])</span>
+
+    <span class="n">datalist</span> <span class="o">=</span> <span class="p">[(</span><span class="n">general</span><span class="p">,</span> <span class="s">&quot;Axes&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">has_curve</span><span class="p">:</span>
+        <span class="n">datalist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">curves</span><span class="p">,</span> <span class="s">&quot;Curves&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">fedit</span><span class="p">(</span><span class="n">datalist</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;Figure options&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">has_curve</span><span class="p">:</span>
+        <span class="n">general</span><span class="p">,</span> <span class="n">curves</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">general</span><span class="p">,</span> <span class="o">=</span> <span class="n">result</span>
+
+    <span class="c"># Set / General</span>
+    <span class="n">title</span><span class="p">,</span> <span class="n">gridlines</span><span class="p">,</span> <span class="n">legend</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">xscale</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">yscale</span> <span class="o">=</span> <span class="n">general</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="n">xscale</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="n">yscale</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">has_curve</span><span class="p">:</span>
+        <span class="c"># Set / Curves</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curves</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">label</span><span class="p">,</span> <span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> \
+                <span class="n">marker</span><span class="p">,</span> <span class="n">markersize</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="p">,</span> <span class="n">markeredgecolor</span> <span class="o">=</span> <span class="n">curve</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">set_linestyle</span><span class="p">(</span><span class="n">linestyle</span><span class="p">)</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="n">linewidth</span><span class="p">)</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&#39;none&#39;</span><span class="p">:</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">set_marker</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">set_markersize</span><span class="p">(</span><span class="n">markersize</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">set_markerfacecolor</span><span class="p">(</span><span class="n">markerfacecolor</span><span class="p">)</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">set_markeredgecolor</span><span class="p">(</span><span class="n">markeredgecolor</span><span class="p">)</span>
+
+    <span class="c"># Redraw</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="surface_edit"><a class="viewcode-back" href="../../../dae_plotter.html#daetools.dae_plotter.plot_options.surface_edit">[docs]</a><span class="k">def</span> <span class="nf">surface_edit</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Edit matplotlib figure options&quot;&quot;&quot;</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="c"># separator</span>
+
+    <span class="c"># Get / General</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlim3d</span><span class="p">()</span>
+    <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim3d</span><span class="p">()</span>
+    <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_zlim3d</span><span class="p">()</span>
+    <span class="n">general</span> <span class="o">=</span> <span class="p">[</span><span class="c">#(&#39;Title&#39;, axes.get_title()),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="s">&#39;Color map&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;jet&#39;</span><span class="p">,</span> <span class="s">&#39;autumn&#39;</span><span class="p">,</span> <span class="s">&#39;bone&#39;</span><span class="p">,</span> <span class="s">&#39;cool&#39;</span><span class="p">,</span> <span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="s">&#39;flag&#39;</span><span class="p">,</span> <span class="s">&#39;gray&#39;</span><span class="p">,</span> <span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="s">&#39;hsv&#39;</span><span class="p">,</span> <span class="s">&#39;jet&#39;</span><span class="p">,</span> <span class="s">&#39;pink&#39;</span><span class="p">,</span> <span class="s">&#39;prism&#39;</span><span class="p">,</span> <span class="s">&#39;spring&#39;</span><span class="p">,</span> <span class="s">&#39;summer&#39;</span><span class="p">,</span> <span class="s">&#39;winter&#39;</span><span class="p">,</span> <span class="s">&#39;spectral&#39;</span><span class="p">]),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&lt;b&gt;X-Axis&lt;/b&gt;&quot;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Min&#39;</span><span class="p">,</span> <span class="n">xmin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;Max&#39;</span><span class="p">,</span> <span class="n">xmax</span><span class="p">),</span>
+               <span class="c">#(&#39;Label&#39;, axes.get_xlabel()),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&lt;b&gt;Y-Axis&lt;/b&gt;&quot;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Min&#39;</span><span class="p">,</span> <span class="n">ymin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;Max&#39;</span><span class="p">,</span> <span class="n">ymax</span><span class="p">),</span>
+               <span class="c">#(&#39;Label&#39;, axes.get_ylabel()),</span>
+               <span class="c">#sep,</span>
+               <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&lt;b&gt;Z-Axis&lt;/b&gt;&quot;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s">&#39;Min&#39;</span><span class="p">,</span> <span class="n">zmin</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;Max&#39;</span><span class="p">,</span> <span class="n">zmax</span><span class="p">)</span>
+               <span class="c">#(&#39;Label&#39;, axes.get_zlabel()),</span>
+               <span class="p">]</span>
+
+    <span class="n">datalist</span> <span class="o">=</span> <span class="p">[(</span><span class="n">general</span><span class="p">,</span> <span class="s">&quot;Axes&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">fedit</span><span class="p">(</span><span class="n">datalist</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;Figure options&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    
+    <span class="n">general</span><span class="p">,</span> <span class="o">=</span> <span class="n">result</span>
+    
+    <span class="c"># Set / General</span>
+    <span class="c">#title, xmin, xmax, xlabel, ymin, ymax, ylabel, zmin, zmax, zlabel = general</span>
+    <span class="n">cmap</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">general</span>
+    
+    <span class="c">#axes.set_title(title)</span>
+    
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim3d</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+    <span class="c">#axes.set_xlabel(xlabel)</span>
+    
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim3d</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="c">#axes.set_ylabel(ylabel)</span>
+    
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_zlim3d</span><span class="p">(</span><span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">)</span>
+    <span class="c">#axes.set_zlabel(zlabel)</span>
+
+    <span class="c"># Redraw</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 11, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

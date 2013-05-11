@@ -33,10 +33,10 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
         return True
 
     def Disconnect(self):
-        self.Write()
+        self.WriteDataToFile()
         return True
 
-    def Write(self):
+    def WriteDataToFile(self):
         mdict = {}
         for var in self.Process.Variables:
             mdict[var.Name] = var.Values
@@ -71,48 +71,49 @@ class daePlotDataReporter(daeDataReporterLocal):
 
     def Plot(self, *args, **kwargs):
         '''
-        args can be either:
+        ``args`` can be either:
 
-            a) instances of daeVariable, or
-            b) lists of daeVariable instances, or
-            c) a mixture of both.
-        Each arg will get its own subplot.  The subplots are all automatically
+            a) Instances of daeVariable, or
+            b) Lists of daeVariable instances, or
+            c) A mixture of both.
+
+        Each ``arg`` will get its own subplot. The subplots are all automatically
         arranged such that the resulting figure is as square-like as
-        possible.  You can however override the shape by supplying figRows
-        and figCols as keyword args.
+        possible. You can however override the shape by supplying ``figRows``
+        and ``figCols`` as keyword args.
 
-        Basic Example:
+        Basic Example::
 
-        # Create Log, Solver, DataReporter and Simulation object
-        log = daePythonStdOutLog()
-        daesolve = daeIDAS()
-        from daetools.pyDAE.daeDataReporters import daePlotDataReporter
-        datareporter = daePlotDataReporter()
-        simulation = simTutorial()
+            # Create Log, Solver, DataReporter and Simulation object
+            log = daePythonStdOutLog()
+            daesolve = daeIDAS()
+            from daetools.pyDAE.data_reporters import daePlotDataReporter
+            datareporter = daePlotDataReporter()
+            simulation = simTutorial()
 
-        simulation.m.SetReportingOn(True)
-        simulation.ReportingInterval = 20
-        simulation.TimeHorizon = 500
+            simulation.m.SetReportingOn(True)
+            simulation.ReportingInterval = 20
+            simulation.TimeHorizon = 500
 
-        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-        if(datareporter.Connect("", simName) == False):
-            sys.exit()
+            simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+            if(datareporter.Connect("", simName) == False):
+                sys.exit()
 
-        simulation.Initialize(daesolver, datareporter, log)
+            simulation.Initialize(daesolver, datareporter, log)
 
-        simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-        simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+            simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+            simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-        simulation.SolveInitial()
-        simulation.Run()
+            simulation.SolveInitial()
+            simulation.Run()
 
-        simulation.Finalize()
-        datareporter.Plot(
-            simulation.m.Ci,                       # Subplot 1
-            [simulation.m.L, simulation.m.event],  # Subplot 2 (2 sets)
-            simulation.m.Vp,                       # Subplot 3
-            [simulation.m.L, simulation.m.Vp]      # Subplot 4 (2 sets)
-            )
+            simulation.Finalize()
+            datareporter.Plot(
+                simulation.m.Ci,                       # Subplot 1
+                [simulation.m.L, simulation.m.event],  # Subplot 2 (2 sets)
+                simulation.m.Vp,                       # Subplot 3
+                [simulation.m.L, simulation.m.Vp]      # Subplot 4 (2 sets)
+                )
         '''
         try:
             import matplotlib.pyplot as plt
