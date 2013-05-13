@@ -152,7 +152,7 @@ void daeSTN::ReconnectStateTransitionsAndStates()
 	
 //	size_t i, k;
 //	daeState* pState;
-//	daeStateTransition *pST;
+//	daeOnConditionActions *pST;
 //
 //	for(i = 0; i < m_ptrarrStates.size(); i++)
 //	{
@@ -160,7 +160,7 @@ void daeSTN::ReconnectStateTransitionsAndStates()
 //		if(!pState)
 //			daeDeclareAndThrowException(exInvalidPointer);
 //
-//		for(k = 0; k < pState->m_ptrarrStateTransitions.size(); k++)
+//		for(k = 0; k < pState->m_ptrarrOnConditionActions.size(); k++)
 //		{
 //			pST = pState->m_ptrarrStateTransitions[k];
 //			if(!pST)
@@ -233,7 +233,7 @@ void daeSTN::FinalizeDeclaration()
 	m_bInitialized = true;
 }
 
-void daeSTN::InitializeStateTransitions(void)
+void daeSTN::InitializeOnEventAndOnConditionActions(void)
 {
 	size_t i;
 	daeState *pState;
@@ -244,7 +244,7 @@ void daeSTN::InitializeStateTransitions(void)
 		if(!pState)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		pState->InitializeStateTransitions();
+		pState->InitializeOnEventAndOnConditionActions();
 	}
 }
 
@@ -341,7 +341,7 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 	size_t i, k, m;
 	daeSTN* pSTN;
 	daeState* pState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionAction;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 	pair<size_t, size_t> uintPair;
 	map<size_t, size_t>::iterator iter;
@@ -385,13 +385,13 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 		if(!pState)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		for(m = 0; m < pState->m_ptrarrStateTransitions.size(); m++)
+		for(m = 0; m < pState->m_ptrarrOnConditionActions.size(); m++)
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[m];
-			if(!pStateTransition)
+			pOnConditionAction = pState->m_ptrarrOnConditionActions[m];
+			if(!pOnConditionAction)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
-			pStateTransition->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes, false);
+			pOnConditionAction->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes, false);
 		}
 	}
 }
@@ -460,7 +460,7 @@ void daeSTN::AddExpressionsToBlock(daeBlock* pBlock)
 	size_t i;
 	daeSTN* pSTN;
 	daeState* pState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 	pair<size_t, daeExpressionInfo> pairExprInfo;
 	map<size_t, daeExpressionInfo>::iterator iter;
 
@@ -472,13 +472,13 @@ void daeSTN::AddExpressionsToBlock(daeBlock* pBlock)
 		throw e;
 	}
 
-	for(i = 0; i < pState->m_ptrarrStateTransitions.size(); i++) 
+	for(i = 0; i < pState->m_ptrarrOnConditionActions.size(); i++) 
 	{
-		pStateTransition = pState->m_ptrarrStateTransitions[i];
-		if(!pStateTransition)
+		pOnConditionActions = pState->m_ptrarrOnConditionActions[i];
+		if(!pOnConditionActions)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		for(iter = pStateTransition->m_mapExpressionInfos.begin(); iter != pStateTransition->m_mapExpressionInfos.end(); iter++)
+		for(iter = pOnConditionActions->m_mapExpressionInfos.begin(); iter != pOnConditionActions->m_mapExpressionInfos.end(); iter++)
 		{
 			pairExprInfo		= *iter;
 			pairExprInfo.first	= pBlock->m_mapExpressionInfos.size();				
@@ -502,7 +502,7 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 	size_t i, k, m;
 	daeSTN* pSTN;
 	daeState* pState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 	pair<size_t, daeExpressionInfo> pairExprInfo;
 
 	if(!m_pModel)
@@ -523,24 +523,24 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
 		size_t nIndexInState = 0;
-		for(k = 0; k < pState->m_ptrarrStateTransitions.size(); k++) 
+		for(k = 0; k < pState->m_ptrarrOnConditionActions.size(); k++) 
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[k];
-			if(!pStateTransition)
+			pOnConditionActions = pState->m_ptrarrOnConditionActions[k];
+			if(!pOnConditionActions)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
 		// Fill array with expressions of the form: left - right, 
 		// made of the conditional expressions, like: left >= right ... etc etc
 			m_pModel->m_pDataProxy->SetGatherInfo(true);
 			pBlock->SetInitializeMode(true);
-				pStateTransition->m_Condition.BuildExpressionsArray(&EC);
-				for(m = 0; m < pStateTransition->m_Condition.m_ptrarrExpressions.size(); m++)
+				pOnConditionActions->m_Condition.BuildExpressionsArray(&EC);
+				for(m = 0; m < pOnConditionActions->m_Condition.m_ptrarrExpressions.size(); m++)
 				{
-					pairExprInfo.first                     = nIndexInState;
-					pairExprInfo.second.m_pExpression      = pStateTransition->m_Condition.m_ptrarrExpressions[m];
-					pairExprInfo.second.m_pStateTransition = pStateTransition;
+					pairExprInfo.first                        = nIndexInState;
+					pairExprInfo.second.m_pExpression         = pOnConditionActions->m_Condition.m_ptrarrExpressions[m];
+					pairExprInfo.second.m_pOnConditionActions = pOnConditionActions;
 
-					pStateTransition->m_mapExpressionInfos.insert(pairExprInfo);
+					pOnConditionActions->m_mapExpressionInfos.insert(pairExprInfo);
 					nIndexInState++;
 				}
 			m_pModel->m_pDataProxy->SetGatherInfo(false);
@@ -568,7 +568,7 @@ bool daeSTN::CheckDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -582,10 +582,10 @@ bool daeSTN::CheckDiscontinuities(void)
 	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
-	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
+	for(i = 0; i < m_pActiveState->m_ptrarrOnConditionActions.size(); i++)
 	{
-		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
-		if(pStateTransition->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
+		pOnConditionActions = m_pActiveState->m_ptrarrOnConditionActions[i];
+		if(pOnConditionActions->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
 			return true;
 	}
 
@@ -604,7 +604,7 @@ void daeSTN::ExecuteOnConditionActions(void)
 {
 	size_t i;
 	daeSTN* pSTN;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -618,15 +618,16 @@ void daeSTN::ExecuteOnConditionActions(void)
 	EC.m_pBlock						= m_pModel->m_pDataProxy->GetBlock();
 	EC.m_eEquationCalculationMode	= eCalculate;
 
-	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
+	for(i = 0; i < m_pActiveState->m_ptrarrOnConditionActions.size(); i++)
 	{
-		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
-		if(pStateTransition->m_Condition.Evaluate(&EC))
+		pOnConditionActions = m_pActiveState->m_ptrarrOnConditionActions[i];
+		
+        if(pOnConditionActions->m_Condition.Evaluate(&EC))
 		{
 			if(m_pModel->m_pDataProxy->PrintInfo())
-				LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+				LogMessage(string("The condition: ") + pOnConditionActions->GetConditionAsString() + string(" is satisfied"), 0);
 			
-			pStateTransition->ExecuteActions();
+			pOnConditionActions->Execute();
 			break;
 		}
 	}
@@ -645,7 +646,7 @@ bool daeSTN::CheckDiscontinuities(void)
 {
 	size_t i;
 	daeSTN* pSTN;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -663,18 +664,18 @@ bool daeSTN::CheckDiscontinuities(void)
 	daeState* pFormerActiveState = m_pActiveState;
 	
 	bool bResult = false;
-	for(i = 0; i < m_pActiveState->m_ptrarrStateTransitions.size(); i++)
+	for(i = 0; i < m_pActiveState->m_ptrarrOnConditionActions.size(); i++)
 	{
-		pStateTransition = m_pActiveState->m_ptrarrStateTransitions[i];
-		if(!pStateTransition)
+		pOnConditionActions = m_pActiveState->m_ptrarrOnConditionActions[i];
+		if(!pOnConditionActions)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		if(pStateTransition->m_Condition.Evaluate(&EC))
+		if(pOnConditionActions->m_Condition.Evaluate(&EC))
 		{
-			LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+			LogMessage(string("The condition: ") + pOnConditionActions->GetConditionAsString() + string(" is satisfied"), 0);
 		
 		// Execute the actions
-			pStateTransition->ExecuteActions();
+			pOnConditionActions->Execute();
 			
 		// If the active state has changed then set the flag and break
 			if(pFormerActiveState != m_pActiveState)
@@ -682,7 +683,7 @@ bool daeSTN::CheckDiscontinuities(void)
 				bResult = true;
 				break;
 			}
-			//return CheckState(pStateTransition->m_pStateTo);
+			//return CheckState(pOnConditionActions->m_pStateTo);
 		}
 	}
 

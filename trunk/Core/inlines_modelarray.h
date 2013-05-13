@@ -35,6 +35,35 @@ public:
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
 			it->CleanUpSetupData();
 	}
+    
+    virtual void BuildExpressions(daeBlock* pBlock)
+    {
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->BuildExpressions(pBlock);
+	}
+
+    virtual bool CheckDiscontinuities(void)
+    {
+        bool bReturn = false;
+		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+		{
+            if(it->CheckDiscontinuities())
+                bReturn = true;
+        }
+        return bReturn;
+	}
+    
+    virtual void AddExpressionsToBlock(daeBlock* pBlock)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->AddExpressionsToBlock(pBlock);
+    }
+
+    virtual void ExecuteOnConditionActions(void)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->ExecuteOnConditionActions();        
+    }
 	
 protected:
 	virtual size_t GetTotalNumberOfVariables(void) const

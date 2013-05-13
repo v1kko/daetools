@@ -144,6 +144,9 @@ string daePortConnection__repr__(const daePortConnection& self);
 string daeOnEventActions__str__(const daeOnEventActions& self);
 string daeOnEventActions__repr__(const daeOnEventActions& self);
 
+string daeOnConditionActions__str__(const daeOnConditionActions& self);
+string daeOnConditionActions__repr__(const daeOnConditionActions& self);
+
 /*******************************************************
 	Common functions
 *******************************************************/
@@ -1028,19 +1031,36 @@ public:
 	}
 
     void ON_CONDITION(const daeCondition& rCondition,
-                      const string& strStateTo               = string(),
+                      boost::python::list switchToStates     = boost::python::list(),
                       boost::python::list setVariableValues  = boost::python::list(),
 	                  boost::python::list triggerEvents      = boost::python::list(),
 					  boost::python::list userDefinedActions = boost::python::list(),
                       real_t dEventTolerance = 0.0)
     {
 		daeAction* pAction;
+        string strSTN;
+        string strStateTo;
+        std::vector< std::pair<string, string> > arrSwitchToStates;
         daeEventPort* pEventPort;
         std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
         std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
 		std::vector<daeAction*> ptrarrUserDefinedActions;
         boost::python::ssize_t i, n;
         boost::python::tuple t;
+
+        n = boost::python::len(switchToStates);
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
+            if(boost::python::len(t) != 2)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            strSTN     = boost::python::extract<string>(t[0]);
+            strStateTo = boost::python::extract<string>(t[1]);
+            
+			std::pair<string, string> p(strSTN, strStateTo);
+            arrSwitchToStates.push_back(p);
+        }
 
         n = boost::python::len(setVariableValues);
         for(i = 0; i < n; i++)
@@ -1139,7 +1159,7 @@ public:
 		}
 
         daeModel::ON_CONDITION(rCondition,
-                               strStateTo,
+                               arrSwitchToStates,
                                arrSetVariables,
                                arrTriggerEvents,
 							   ptrarrUserDefinedActions,
@@ -1341,6 +1361,11 @@ public:
 	{
         return getListFromVector(m_ptrarrOnEventActions);
 	}
+    
+    boost::python::list GetOnConditionActions(void)
+	{
+        return getListFromVector(m_ptrarrOnConditionActions);
+	}
 	
 	boost::python::list GetPortArrays(void)
 	{
@@ -1404,9 +1429,9 @@ public:
 	daeState
 *******************************************************/
 boost::python::list daeState_GetEquations(daeState& self);
-boost::python::list daeState_GetStateTransitions(daeState& self);
 boost::python::list daeState_GetNestedSTNs(daeState& self);
 boost::python::list daeState_GetOnEventActions(daeState& self);
+boost::python::list daeState_GetOnConditionActions(daeState& self);
 
 /*******************************************************
 	daeSTN
@@ -1600,10 +1625,11 @@ public:
 
 
 /*******************************************************
-	daeStateTransition
+	daeOnConditionActions
 *******************************************************/
-daeCondition* daeStateTransition_GetCondition(daeStateTransition& self);
-boost::python::list daeStateTransition_GetActions(daeStateTransition& self);
+daeCondition* daeOnConditionActions_Condition(daeOnConditionActions& self);
+boost::python::list daeOnConditionActions_Actions(daeOnConditionActions& self);
+boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActions& self);
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

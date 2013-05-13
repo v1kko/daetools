@@ -750,6 +750,16 @@ string daeOnEventActions__repr__(const daeOnEventActions& self)
     return daeGetStrippedRelativeName(NULL, &self);
 }
 
+string daeOnConditionActions__str__(const daeOnConditionActions& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeOnConditionActions__repr__(const daeOnConditionActions& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
 string adouble__str__(const adouble& self)
 {
     string str;
@@ -2629,11 +2639,6 @@ boost::python::list daeState_GetEquations(daeState& self)
     return getListFromVector(self.Equations());
 }
 
-boost::python::list daeState_GetStateTransitions(daeState& self)
-{
-    return getListFromVector(self.StateTransitions());
-}
-
 boost::python::list daeState_GetNestedSTNs(daeState& self)
 {
     return getListFromVector(self.NestedSTNs());
@@ -2644,20 +2649,29 @@ boost::python::list daeState_GetOnEventActions(daeState& self)
     return getListFromVector(self.OnEventActions());
 }
 
+boost::python::list daeState_GetOnConditionActions(daeState& self)
+{
+    return getListFromVector(self.OnConditionActions());
+}
+
 /*******************************************************
-	daeStateTransition
+	daeOnConditionActions
 *******************************************************/
-daeCondition* daeStateTransition_GetCondition(daeStateTransition& self)
+daeCondition* daeOnConditionActions_Condition(daeOnConditionActions& self)
 {
     return self.GetCondition();
 }
 
-boost::python::list daeStateTransition_GetActions(daeStateTransition& self)
+boost::python::list daeOnConditionActions_Actions(daeOnConditionActions& self)
 {
-    std::vector<daeAction_t*> ptrarrActions;
-	self.GetActions(ptrarrActions);
-    return getListFromVectorAndCastPointer<daeAction_t*, daeAction*>(ptrarrActions);
+    return getListFromVector(self.Actions());
 }
+
+boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActions& self)
+{
+    return getListFromVector(self.UserDefinedActions());
+}
+
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

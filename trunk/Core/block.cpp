@@ -443,7 +443,14 @@ void daeBlock::Initialize(void)
 		e << "Number of equations [" << GetNumberOfEquations() << "] is not equal to number of variables [" << m_mapVariableIndexes.size() << "]";
 		throw e;
 	}
+    
+// First BuildExpressions in the top level model and its children
+    daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    if(!pModel)
+		daeDeclareException(exInvalidPointer);
+    pModel->BuildExpressions(this);
 
+// Then BuildExpressions in all STNs
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
@@ -457,6 +464,8 @@ void daeBlock::Initialize(void)
    And, btw, this does not affect anything, it just checks for discontinuities. Properly done,
    it should call ExecuteOnConditionActions() if CheckDiscontinuities() returns true.
 	
+    pModel->CheckDiscontinuities();
+    
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
@@ -476,28 +485,12 @@ bool daeBlock::CheckForDiscontinuities(void)
 
 	if(m_dCurrentTime > 0 && m_pDataProxy->PrintInfo())
 		m_pDataProxy->LogMessage(string("Checking state transitions at time [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("]..."), 0);
+    
+// First check discontinuities in the top level model
+    daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    if(pModel->CheckDiscontinuities())
+        return true;
 
-// First check the global stopping condition from the DataProxy (Simulation)
-/*
-	daeModel* model = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-	if(!model)
-	   daeDeclareAndThrowException(exInvalidPointer);
-	daeCondition* pCondition = model->GetGlobalCondition();
-	if(pCondition)
-	{
-		daeExecutionContext EC;
-		EC.m_pBlock						= this;
-		EC.m_pDataProxy					= m_pDataProxy;
-		EC.m_eEquationCalculationMode	= eCalculate;
-	
-		if(pCondition->Evaluate(&EC))
-		{
-			m_pDataProxy->LogMessage(string("The global condition: ") + pCondition->SaveNodeAsPlainText() + string(" is satisfied"), 0);
-			return eGlobalDiscontinuity;
-		}
-	}
-*/
-	
 // Then check conditions from STNs
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
@@ -518,6 +511,9 @@ daeeDiscontinuityType daeBlock::ExecuteOnConditionActions(void)
 	m_pDataProxy->SetReinitializationFlag(false);
 	m_pDataProxy->SetCopyDataFromBlock(false);
 
+    daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pModel->ExecuteOnConditionActions();
+    
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
 		pSTN = m_ptrarrSTNs[i];
@@ -550,28 +546,10 @@ void daeBlock::RebuildExpressionMap()
 
 	m_mapExpressionInfos.clear();
 
-// First add the global stopping condition from daeDataProxy
-//	daeModel* model = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-//	if(!model)
-//	   daeDeclareAndThrowException(exInvalidPointer);
-//	daeCondition* pCondition = model->GetGlobalCondition();
-//	if(pCondition)
-//	{
-//		daeExpressionInfo ei;
-//		pair<size_t, daeExpressionInfo> pairExprInfo;
-//		map<size_t, daeExpressionInfo>::iterator iter;
-//
-//		for(size_t i = 0; i < pCondition->m_ptrarrExpressions.size(); i++)
-//		{
-//			ei.m_pExpression      = pCondition->m_ptrarrExpressions[i];
-//			ei.m_pStateTransition = NULL;
-//			
-//			pairExprInfo.first	= m_mapExpressionInfos.size();				
-//			pairExprInfo.second	= ei;				
-//			m_mapExpressionInfos.insert(pairExprInfo);
-//		}
-//	}
-	
+// First rebuild for the top level model
+    daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pModel->AddExpressionsToBlock(this);
+
 // Then for all othe STNs
 	for(i = 0; i < m_ptrarrSTNs.size(); i++)
 	{
@@ -636,14 +614,6 @@ size_t daeBlock::GetNumberOfRoots() const
 {
 	size_t nNoRoots = 0;
 	
-// First check the global stopping condition
-//	daeModel* model = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-//	if(!model)
-//	   daeDeclareAndThrowException(exInvalidPointer);
-//	daeCondition* pCondition = model->GetGlobalCondition();
-//	if(pCondition)
-//		nNoRoots = 1;
-
 	return (nNoRoots + m_mapExpressionInfos.size());
 }
 

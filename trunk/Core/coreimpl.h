@@ -212,7 +212,7 @@ protected:
 	friend class daeSTN;
 	friend class daeIF;
 	friend class daeState;
-	friend class daeStateTransition;
+	friend class daeOnConditionActions;
 	friend class daeModel;
 	friend class daePortArray;
 	friend class daeModelArray;
@@ -546,17 +546,17 @@ public:
 /******************************************************************
 	daeExpressionInfo
 *******************************************************************/
-class daeStateTransition;
+class daeOnConditionActions;
 class daeExpressionInfo
 {
 public:
 	daeExpressionInfo(void)
 	{
-		m_pStateTransition = NULL;
-	};
+		m_pOnConditionActions = NULL;
+	}
 
-	adNodePtr	m_pExpression;
-	daeStateTransition* m_pStateTransition;
+	adNodePtr	           m_pExpression;
+	daeOnConditionActions* m_pOnConditionActions;
 };
 
 /******************************************************************
@@ -2309,6 +2309,66 @@ protected:
 };
 
 /******************************************************************
+	daeOnConditionActions
+*******************************************************************/
+class DAE_CORE_API daeOnConditionActions : virtual public daeObject,
+						                   virtual public daeOnConditionActions_t
+{
+public:
+	daeDeclareDynamicClass(daeOnConditionActions)
+	daeOnConditionActions(void);
+	virtual ~daeOnConditionActions(void);
+
+public:
+	string GetCanonicalName(void) const;
+	void Execute(void);
+
+public:	
+	void Open(io::xmlTag_t* pTag);
+	void Save(io::xmlTag_t* pTag) const;
+	void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
+
+	bool CheckObject(std::vector<string>& strarrErrors) const;
+	void CleanUpSetupData();
+	void Clone(const daeOnConditionActions& rObject);
+	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	
+	void Initialize(void);
+	void Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
+	void Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
+	void Create_ON_CONDITION(daeState* pStateFrom, 
+                             daeModel* pModel,
+							 const daeCondition& rCondition, 
+							 std::vector<daeAction*>& ptrarrActions, 
+							 std::vector<daeAction*>& ptrarrUserDefinedActions,
+							 real_t dEventTolerance);
+
+	string GetConditionAsString() const;
+	
+	daeCondition*	GetCondition(void);
+	void			SetCondition(daeCondition& rCondition);
+    
+    const std::vector<daeAction*>& Actions(void) const;
+    const std::vector<daeAction*>& UserDefinedActions(void) const;
+
+protected:
+	daePtrVector<daeAction*>			m_ptrarrActions;
+	std::vector<daeAction*>				m_ptrarrUserDefinedActions;
+	daeCondition						m_Condition;
+	std::map<size_t, daeExpressionInfo>	m_mapExpressionInfos; 
+    daeState*                           m_pParentState;
+
+// Internal variables, used only during Open
+	long	m_nStateFromID;
+	long	m_nStateToID;
+	friend class daeIF;
+	friend class daeSTN;
+    friend class daeModel;
+    friend class daeState;
+};
+
+/******************************************************************
 	daePortConnection
 *******************************************************************/
 class DAE_CORE_API daePortConnection : virtual public daeObject,
@@ -2476,12 +2536,11 @@ public:
 	virtual size_t	GetTotalNumberOfEquations(void) const;
 
 	size_t			GetNumberOfSTNs(void) const;
-
-	void SetGlobalConditionContext(void);
-	void UnsetGlobalConditionContext(void);
-	void SetGlobalCondition(daeCondition condition);
-	void ResetGlobalCondition(void);
-	daeCondition* GetGlobalCondition() const;
+    
+    void BuildExpressions(daeBlock* pBlock);
+    bool CheckDiscontinuities(void);
+    void AddExpressionsToBlock(daeBlock* pBlock);
+    void ExecuteOnConditionActions(void);
 
 	daeEquation* CreateEquation(const string& strName, string strDescription = "", real_t dScaling = 1.0);
 
@@ -2493,6 +2552,7 @@ public:
 	void AddPort(daePort* pPort);
 	void AddEventPort(daeEventPort* pPort);
 	void AddOnEventAction(daeOnEventActions* pOnEventAction);
+    void AddOnConditionAction(daeOnConditionActions* pOnConditionAction);
 	void AddPortConnection(daePortConnection* pPortConnection);
 	void AddEventPortConnection(daeEventPortConnection* pEventPortConnection);
 	void AddPortArray(daePortArray* pPortArray);
@@ -2515,7 +2575,6 @@ public:
 	
 // Overridables		
 public:
-	//virtual void DeclareData(void);
 	virtual void DeclareEquations(void);
 
 protected:
@@ -2529,7 +2588,6 @@ protected:
 	void AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription = "");
 	void AddModelArray(daeModelArray& rModelArray, const string& strName, string strDescription = "");
 
-	//void DeclareDataBase(void);
 	void DeclareEquationsBase(void);
 
 	daeSTN* AddSTN(const string& strName);
@@ -2545,13 +2603,13 @@ protected:
 	void      END_STN(void);
 	void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
 	
-	void ON_CONDITION(const daeCondition&										rCondition, 
-					  const string&												strStateTo, 
-					  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
-					  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
-					  std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions, 
-					  real_t													dEventTolerance = 0);
-	
+    void ON_CONDITION(const daeCondition&                                       rCondition, 
+                      std::vector< std::pair<string, string> >&					arrSwitchToStates, 
+                      std::vector< std::pair<daeVariableWrapper, adouble> >&    arrSetVariables,
+                      std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
+                      std::vector<daeAction*>&                                  ptrarrUserDefinedActions, 
+                      real_t                                                    dEventTolerance = 0.0);
+    
 	void ON_EVENT(daeEventPort*												pTriggerEventPort, 
 				  std::vector< std::pair<string, string> >&					arrSwitchToStates, 
 				  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
@@ -2577,6 +2635,7 @@ public:
 	void RemovePort(daePort* pObject);
 	void RemoveEventPort(daeEventPort* pObject);
 	void RemoveOnEventAction(daeOnEventActions* pObject);
+    void RemoveOnConditionAction(daeOnConditionActions* pObject);
 	void RemovePortArray(daePortArray* pObject);
 	void RemoveModelArray(daeModelArray* pObject);
 	void RemoveExternalFunction(daeExternalFunction_t* pObject);
@@ -2589,7 +2648,7 @@ protected:
 	void		InitializeDEDIs(void);
 	void		InitializePortAndModelArrays(void);
 	void		InitializeSTNs(void);
-	void		InitializeOnEventActions(void);
+	void		InitializeOnEventAndOnConditionActions(void);
 	void		DoBlockDecomposition(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
@@ -2622,7 +2681,6 @@ protected:
 	void		RemoveStateFromStack(void);
 
 protected:
-	daeCondition*						m_pCondition;
 	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
 	size_t								m_nVariablesStartingIndex;
 	size_t								m_nTotalNumberOfVariables;
@@ -2640,6 +2698,7 @@ protected:
 	daePtrVector<daePort*>					m_ptrarrPorts;
 	daePtrVector<daeEventPort*>				m_ptrarrEventPorts;
 	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
+    daePtrVector<daeOnConditionActions*>	m_ptrarrOnConditionActions;
 	daePtrVector<daePortArray*>				m_ptrarrPortArrays;
 	daePtrVector<daeModelArray*>			m_ptrarrComponentArrays;
 	daePtrVector<daeExternalFunction_t*>	m_ptrarrExternalFunctions;
@@ -2655,12 +2714,10 @@ protected:
 // Used only during GatherInfo
 	daeExecutionContext*	m_pExecutionContextForGatherInfo;
 	
-	daeExecutionContext		m_globalConditionContext;
-
 	friend class daeIF;
 	friend class daeState;
 	friend class daeSTN;
-	friend class daeStateTransition;
+	friend class daeOnConditionActions;
 	friend class daePort;
 	friend class daeEventPort;
 	friend class daeAction;
@@ -2716,24 +2773,28 @@ public:
 	void   SetVariablesStartingIndex(size_t nVariablesStartingIndex);
 
 protected:
-	virtual size_t	GetTotalNumberOfVariables(void) const																		= 0;
-	virtual size_t	GetTotalNumberOfEquations(void) const																		= 0;
-	virtual void DeclareData(void)																								= 0;
-	virtual void DeclareEquations(void)																							= 0;
-	virtual void InitializeParameters(void)																						= 0;
-	virtual void InitializeVariables(void)																						= 0;
-	virtual void InitializeEquations(void)																						= 0;
-	virtual void InitializeSTNs(void)																							= 0;
-	virtual void InitializeOnEventActions(void)																					= 0;
-	virtual void InitializeDEDIs(void)																		                    = 0;
-	virtual void CreatePortConnectionEquations(void)																			= 0;
-	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)												= 0;
-	virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)										= 0;
+	virtual size_t	GetTotalNumberOfVariables(void) const               															= 0;
+	virtual size_t	GetTotalNumberOfEquations(void) const                   														= 0;
+	virtual void DeclareData(void)                                              													= 0;
+	virtual void DeclareEquations(void)                                             												= 0;
+	virtual void InitializeParameters(void)                                             											= 0;
+	virtual void InitializeVariables(void)                                                  										= 0;
+	virtual void InitializeEquations(void)                                                      									= 0;
+	virtual void InitializeSTNs(void)                                                               								= 0;
+	virtual void InitializeOnEventAndOnConditionActions(void)																		= 0;
+	virtual void InitializeDEDIs(void)                                                                  		                    = 0;
+	virtual void CreatePortConnectionEquations(void)                                                        						= 0;
+	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)                               					= 0;
+	virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)                            				= 0;
 	virtual void CollectAllSTNs(std::vector<daeSTN*>& ptrarrSTNs) const																= 0;
 	virtual void CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
 	virtual void CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
-	virtual void SetDefaultAbsoluteTolerances(void)																				= 0;
-	virtual void SetDefaultInitialGuesses(void)																					= 0;	
+	virtual void SetDefaultAbsoluteTolerances(void)                                                                                 = 0;
+	virtual void SetDefaultInitialGuesses(void)                                                                                     = 0;	
+    virtual void BuildExpressions(daeBlock* pBlock)                                                                                 = 0;
+    virtual bool CheckDiscontinuities(void)                                                                                         = 0;
+    virtual void AddExpressionsToBlock(daeBlock* pBlock)                                                                            = 0;
+    virtual void ExecuteOnConditionActions(void)                                                                                    = 0;
 	
 protected:
 	virtual void Create(void);
@@ -2834,7 +2895,7 @@ protected:
 /******************************************************************
 	daeState
 *******************************************************************/
-class daeStateTransition;
+class daeOnConditionActions;
 class daeSTN;
 class DAE_CORE_API daeState : virtual public daeObject,
 						      virtual public daeState_t
@@ -2846,7 +2907,8 @@ public:
 
 public:
 	virtual string	GetCanonicalName(void) const;
-	virtual void	GetStateTransitions(std::vector<daeStateTransition_t*>& ptrarrStateTransitions);
+    virtual void	GetOnConditionActions(std::vector<daeOnConditionActions_t*>& ptrarrOnConditionActions);
+    virtual void	GetOnEventActions(std::vector<daeOnEventActions_t*>& ptrarrOnEventActions);
 	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations);
 	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs);
 
@@ -2862,12 +2924,11 @@ public:
 	void CleanUpSetupData();
 	
 	void AddEquation(daeEquation* pEquation);
-	//daeEquation* AddEquation(const string& strEquationExpression);
 
 	size_t GetNumberOfEquations(void) const;
-	size_t GetNumberOfStateTransitions(void) const;
 	size_t GetNumberOfSTNs(void) const;
 
+    void AddOnConditionAction(daeOnConditionActions& rOnConditionActions, const string& strName, string strDescription);
 	void AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription);
 	
 	void CalcNonZeroElements(int& NNZ);
@@ -2878,14 +2939,13 @@ public:
     const std::vector<daeEquation*>& Equations() const;
     const std::vector<daeSTN*>& NestedSTNs() const;
 	const std::vector<daeOnEventActions*>& OnEventActions() const;
-    const std::vector<daeStateTransition*>& StateTransitions() const;
+    const std::vector<daeOnConditionActions*>& OnConditionActions() const;
 
 protected:
 	void	Create(const string& strName, daeSTN* pSTN);
-	void	InitializeStateTransitions(void);
+	void	InitializeOnEventAndOnConditionActions(void);
 	void	InitializeDEDIs(void);
 
-	void	AddStateTransition(daeStateTransition* pStateTransition);
 	void	AddNestedSTN(daeSTN* pSTN);
 
 	daeSTN*	GetSTN(void) const;
@@ -2896,69 +2956,14 @@ protected:
 protected:
 	daeSTN*									m_pSTN;
 	daePtrVector<daeEquation*>				m_ptrarrEquations;
-	daePtrVector<daeStateTransition*>		m_ptrarrStateTransitions;
+	daePtrVector<daeOnConditionActions*>	m_ptrarrOnConditionActions;
 	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 	daePtrVector<daeSTN*>					m_ptrarrSTNs;
 	friend class daeIF;
 	friend class daeSTN;
 	friend class daeModel;
-	friend class daeStateTransition;
-};
-
-/******************************************************************
-	daeStateTransition
-*******************************************************************/
-class DAE_CORE_API daeStateTransition : virtual public daeObject,
-						                virtual public daeStateTransition_t
-{
-public:
-	daeDeclareDynamicClass(daeStateTransition)
-	daeStateTransition(void);
-	virtual ~daeStateTransition(void);
-
-public:
-	string GetCanonicalName(void) const;
-	void GetActions(std::vector<daeAction_t*>& ptrarrActions) const;
-	void ExecuteActions(void);
-
-public:	
-	void Open(io::xmlTag_t* pTag);
-	void Save(io::xmlTag_t* pTag) const;
-	void OpenRuntime(io::xmlTag_t* pTag);
-	void SaveRuntime(io::xmlTag_t* pTag) const;
-
-	bool CheckObject(std::vector<string>& strarrErrors) const;
-	void CleanUpSetupData();
-	void Clone(const daeStateTransition& rObject);
-	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-	
-	void Initialize(void);
-	void Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance);
-	void Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance);
-	void Create_ON_CONDITION(daeState* pStateFrom, 
-							 const daeCondition& rCondition, 
-							 std::vector<daeAction*>& ptrarrActions, 
-							 std::vector<daeAction*>& ptrarrUserDefinedActions,
-							 real_t dEventTolerance);
-
-	string GetConditionAsString() const;
-	
-	daeCondition*	GetCondition(void);
-	void			SetCondition(daeCondition& rCondition);
-
-protected:
-	daeSTN*								m_pSTN;
-	daePtrVector<daeAction*>			m_ptrarrActions;
-	std::vector<daeAction*>				m_ptrarrUserDefinedActions;
-	daeCondition						m_Condition;
-	std::map<size_t, daeExpressionInfo>	m_mapExpressionInfos; 
-
-// Internal variables, used only during Open
-	long	m_nStateFromID;
-	long	m_nStateToID;
-	friend class daeIF;
-	friend class daeSTN;
+	friend class daeOnConditionActions;
 };
 
 /******************************************************************
@@ -3013,7 +3018,7 @@ public:
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
 
-	void			InitializeStateTransitions(void);
+	void			InitializeOnEventAndOnConditionActions(void);
 	void			InitializeDEDIs(void);
 
 	bool			CheckState(daeState* pState);
@@ -3432,7 +3437,6 @@ typedef daeCreateObjectDelegate<daeSTN>*				pfnCreateSTN;
 typedef daeCreateObjectDelegate<daeIF>*					pfnCreateIF;
 typedef daeCreateObjectDelegate<daePort>*				pfnCreatePort;
 typedef daeCreateObjectDelegate<daeState>*				pfnCreateState;
-typedef daeCreateObjectDelegate<daeStateTransition>*	pfnCreateStateTransition;
 typedef daeCreateObjectDelegate<daeModel>*				pfnCreateModel;
 typedef daeCreateObjectDelegate<daePortConnection>*		pfnCreatePortConnection;
 
@@ -3453,15 +3457,6 @@ public:
 	daePort_t*				CreatePort(const string& strClass);
 	daeModel_t*				CreateModel(const string& strClass);
 	
-//	daeParameter_t*			CreateParameter(const string& strClass);
-//	daeDomain_t*			CreateDomain(const string& strClass);
-//	daeVariable_t*			CreateVariable(const string& strClass);
-//	daeEquation_t*			CreateEquation(const string& strClass);
-//	daeSTN_t*				CreateSTN(const string& strClass);
-//	daeState_t*				CreateState(const string& strClass);
-//	daeStateTransition_t*	CreateStateTransition(const string& strClass);
-//	daePortConnection_t*	CreatePortConnection(const string& strClass);
-
 	void SupportedVariableTypes(std::vector<string>& strarrClasses);
 	void SupportedPorts(std::vector<string>& strarrClasses);
 	void SupportedModels(std::vector<string>& strarrClasses);

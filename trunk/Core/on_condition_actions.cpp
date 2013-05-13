@@ -6,28 +6,28 @@ namespace dae
 namespace core 
 {
 /*************************************************
-	daeStateTransition
+	daeOnConditionActions
 **************************************************/
-daeStateTransition::daeStateTransition()
+daeOnConditionActions::daeOnConditionActions()
 {
-	m_pSTN		= NULL;
-	m_pModel	= NULL;
+	m_pModel	   = NULL;
+    m_pParentState = NULL;
 }
 
-daeStateTransition::~daeStateTransition()
-{
-}
-
-void daeStateTransition::Clone(const daeStateTransition& rObject)
+daeOnConditionActions::~daeOnConditionActions()
 {
 }
 
-void daeStateTransition::CleanUpSetupData()
+void daeOnConditionActions::Clone(const daeOnConditionActions& rObject)
+{
+}
+
+void daeOnConditionActions::CleanUpSetupData()
 {
 	m_Condition.m_pSetupConditionNode.reset();
 }
 
-void daeStateTransition::Open(io::xmlTag_t* pTag)
+void daeOnConditionActions::Open(io::xmlTag_t* pTag)
 {
 	string strName;
 
@@ -42,7 +42,7 @@ void daeStateTransition::Open(io::xmlTag_t* pTag)
 	pTag->OpenExistingObject<daeCondition, daeCondition>(strName, &m_Condition);
 }
 
-void daeStateTransition::Save(io::xmlTag_t* pTag) const
+void daeOnConditionActions::Save(io::xmlTag_t* pTag) const
 {
 	string strName;
 
@@ -55,7 +55,7 @@ void daeStateTransition::Save(io::xmlTag_t* pTag) const
 	pTag->SaveObjectArray(strName, m_ptrarrActions);
 }
 
-void daeStateTransition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+void daeOnConditionActions::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 	daeDeclareAndThrowException(exNotImplemented); 
 
@@ -94,117 +94,111 @@ void daeStateTransition::Export(std::string& strContent, daeeModelLanguage eLang
 //	strContent += fmtFile.str();
 }
 
-void daeStateTransition::OpenRuntime(io::xmlTag_t* pTag)
+void daeOnConditionActions::OpenRuntime(io::xmlTag_t* pTag)
 {
 	daeObject::OpenRuntime(pTag);
 }
 
-void daeStateTransition::SaveRuntime(io::xmlTag_t* pTag) const
+void daeOnConditionActions::SaveRuntime(io::xmlTag_t* pTag) const
 {
 	daeObject::SaveRuntime(pTag);
 }
 
-void daeStateTransition::Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
+void daeOnConditionActions::Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateFrom)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal start state in StateTransition [" << GetCanonicalName() << "], start state [" << pStateFrom->GetCanonicalName() << "]";
+		e << "Illegal start state in OnConditionActions [" << GetCanonicalName() << "], start state [" << pStateFrom->GetCanonicalName() << "]";
 		throw e;
 	}
 	if(strStateToName.empty())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal end state in StateTransition [" << GetCanonicalName() << "], end state [" << strStateToName << "]";
+		e << "Illegal end state in OnConditionActions [" << GetCanonicalName() << "], end state [" << strStateToName << "]";
 		throw e;
 	}
 
-	string strName = "StateTransition_" + toString<size_t>(pStateFrom->m_ptrarrStateTransitions.size());
+	string strName = "OnConditionActions_" + toString<size_t>(pStateFrom->m_ptrarrOnConditionActions.size());
 
-	m_pSTN				= pStateFrom->GetSTN();
-	m_strShortName		= strName;
-	m_pModel			= pStateFrom->m_pModel;
-	
-	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, m_pModel, m_pSTN, strStateToName, string(""));
+	daeAction* pAction = new daeAction(string("actionChangeState_") + strStateToName, pStateFrom->m_pModel, pStateFrom->m_pSTN, strStateToName, string(""));
 	dae_push_back(m_ptrarrActions, pAction);
 	
-	m_Condition			= rCondition;
-
-	m_Condition.m_pModel = m_pModel;
+	m_Condition = rCondition;
+	m_Condition.m_pModel = pStateFrom->m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
-	pStateFrom->AddStateTransition(this);
+    
+	pStateFrom->AddOnConditionAction(*this, strName, string(""));
 }
 
-void daeStateTransition::Create_ON_CONDITION(daeState* pStateFrom, 
-											 const daeCondition& rCondition, 
-											 vector<daeAction*>& ptrarrActions, 
-											 vector<daeAction*>& ptrarrUserDefinedActions,
-											 real_t dEventTolerance)
+void daeOnConditionActions::Create_ON_CONDITION(daeState* pStateFrom,
+                                                daeModel* pModel,
+                                                const daeCondition& rCondition, 
+                                                vector<daeAction*>& ptrarrActions, 
+                                                vector<daeAction*>& ptrarrUserDefinedActions,
+                                                real_t dEventTolerance)
 {
-	if(!pStateFrom)
+    string strName;
+    
+	if(ptrarrActions.empty() && ptrarrUserDefinedActions.empty())
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal start state in StateTransition [" << GetCanonicalName() << "], start state [" << pStateFrom->GetCanonicalName() << "]";
-		throw e;
-	}
-	if(ptrarrActions.empty())
-	{	
-		daeDeclareException(exInvalidCall); 
-		e << "Empty list of actions in StateTransition [" << GetCanonicalName();
+        e << "All list of actions are empty in ON_CONDITION() call";
 		throw e;
 	}
 
-	string strName = "StateTransition_" + toString<size_t>(pStateFrom->m_ptrarrStateTransitions.size());
+    if(pStateFrom)
+        strName = "OnConditionActions_" + toString<size_t>(pStateFrom->m_ptrarrOnConditionActions.size());
+    else
+        strName = "OnConditionActions_" + toString<size_t>(pModel->m_ptrarrOnConditionActions.size());
 
-	m_pSTN			= pStateFrom->GetSTN();
-	m_strShortName	= strName;
-	m_pModel		= pStateFrom->m_pModel;
-	
-	m_ptrarrActions.EmptyAndFreeMemory();
+    m_ptrarrActions.EmptyAndFreeMemory();
 	m_ptrarrUserDefinedActions.clear();
 
 	dae_set_vector(ptrarrActions, m_ptrarrActions);
 	dae_set_vector(ptrarrUserDefinedActions, m_ptrarrUserDefinedActions);
 	
+    SetName(strName);
+    SetModel(pModel);
+    
 	m_Condition		              = rCondition;
-	m_Condition.m_pModel          = m_pModel;
+	m_Condition.m_pModel          = pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
 
-	pStateFrom->AddStateTransition(this);
-}
-	
-string daeStateTransition::GetCanonicalName(void) const
-{
-	if(m_pSTN)
-		return m_pSTN->GetCanonicalName() + '.' + m_strShortName;
-	else
-		return m_strShortName;
+    if(pStateFrom)
+        pStateFrom->AddOnConditionAction(*this, strName, string(""));
+    else
+        pModel->AddOnConditionAction(this);
 }
 
 // IF block cannot execute any action, so no need to specify them
-void daeStateTransition::Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
+void daeOnConditionActions::Create_IF(daeState* pStateTo, const daeCondition& rCondition, real_t dEventTolerance)
 {
 	if(!pStateTo)
 	{	
 		daeDeclareException(exInvalidCall); 
-		e << "Illegal end state in StateTransition [" << GetCanonicalName() << "]";
+		e << "Illegal target state in OnConditionActions [" << GetCanonicalName() << "]";
 		throw e;
 	}
 
-	string strName = "StateTransition_" + toString<size_t>(pStateTo->m_ptrarrStateTransitions.size());
+	string strName = "OnConditionActions_" + toString<size_t>(pStateTo->m_ptrarrOnConditionActions.size());
 
-	m_pSTN				= pStateTo->GetSTN();
-	m_strShortName		= strName;
-	m_pModel			= pStateTo->m_pModel;
-	
-	m_Condition			= rCondition;
-
+	m_Condition	= rCondition;
 	m_Condition.m_pModel = pStateTo->m_pModel;
 	m_Condition.m_dEventTolerance = dEventTolerance;
-	pStateTo->AddStateTransition(this);
+    
+	pStateTo->AddOnConditionAction(*this, strName, string(""));
 }
 
-void daeStateTransition::ExecuteActions(void)
+string daeOnConditionActions::GetCanonicalName(void) const
+{
+	if(m_pParentState)
+		return m_pParentState->GetCanonicalName() + '.' + m_strShortName;
+	else
+        return daeObject::GetCanonicalName();
+}
+
+void daeOnConditionActions::Execute(void)
 {
 	daeAction* pAction;
 	
@@ -220,7 +214,7 @@ void daeStateTransition::ExecuteActions(void)
 	}
 }
 
-void daeStateTransition::Initialize(void)
+void daeOnConditionActions::Initialize(void)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
@@ -242,29 +236,32 @@ void daeStateTransition::Initialize(void)
 	}
 }
 
-daeCondition* daeStateTransition::GetCondition(void)
+daeCondition* daeOnConditionActions::GetCondition(void)
 {
 	return &m_Condition;
 }
 
-void daeStateTransition::SetCondition(daeCondition& rCondition)
+void daeOnConditionActions::SetCondition(daeCondition& rCondition)
 {
 	m_Condition = rCondition;
 }
 
-string daeStateTransition::GetConditionAsString() const
+string daeOnConditionActions::GetConditionAsString() const
 {
 	return m_Condition.SaveNodeAsPlainText();
 }
 
-void daeStateTransition::GetActions(vector<daeAction_t*>& ptrarrActions) const
+const std::vector<daeAction*>& daeOnConditionActions::Actions(void) const
 {
-	ptrarrActions.clear();
-	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
-		ptrarrActions.push_back(m_ptrarrActions[i]);
+    return m_ptrarrActions;
 }
 
-bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
+const std::vector<daeAction*>& daeOnConditionActions::UserDefinedActions(void) const
+{
+	return m_ptrarrUserDefinedActions;
+}
+
+bool daeOnConditionActions::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
 
@@ -276,14 +273,6 @@ bool daeStateTransition::CheckObject(vector<string>& strarrErrors) const
 	if(!daeObject::CheckObject(strarrErrors))
 		bCheck = false;
 
-// Check parent STN pointer	
-	if(!m_pSTN)
-	{
-		strError = "Invalid parent state transition network in state transition [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		return false;
-	}
-	
 	for(size_t i = 0; i < m_ptrarrActions.size(); i++)
 	{
 		daeAction* pAction = m_ptrarrActions[i];

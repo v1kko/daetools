@@ -644,6 +644,15 @@ public:
 };
 
 /******************************************************************
+	daeOnConditionActions_t
+*******************************************************************/
+class daeOnConditionActions_t : virtual public daeObject_t
+{
+public:
+	virtual void Execute(void) = 0;
+};
+
+/******************************************************************
 	daePortConnection_t
 *******************************************************************/
 class daePortConnection_t : virtual public daeObject_t
@@ -667,27 +676,15 @@ public:
 	daeState_t
 *******************************************************************/
 class daeSTN_t;
-class daeStateTransition_t;
+class daeOnConditionActions_t;
 class daeState_t : virtual public daeObject_t
 {
 public:
-	virtual void	GetStateTransitions(std::vector<daeStateTransition_t*>& ptrarrStateTransitions)	= 0;
-	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)						= 0;
-	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)								= 0;
-	virtual void	CleanUpSetupData()																= 0;
-};
-
-/******************************************************************
-	daeStateTransition_t
-*******************************************************************/
-class daeStateTransition_t : virtual public daeObject_t
-{
-public:
-//	virtual daeState_t*		GetStateTo(void) const	 = 0;
-//	virtual daeState_t*		GetStateFrom(void) const = 0;
-	virtual void GetActions(std::vector<daeAction_t*>& ptrarrActions) const	= 0;
-	virtual void ExecuteActions(void)										= 0;
-	virtual void CleanUpSetupData()											= 0;
+	virtual void	GetOnConditionActions(std::vector<daeOnConditionActions_t*>& ptrarrOnConditionActions)	= 0;
+    virtual void	GetOnEventActions(std::vector<daeOnEventActions_t*>& ptrarrOnEventActions)              = 0;
+	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)                              = 0;
+	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)                                       = 0;
+	virtual void	CleanUpSetupData()                                                                      = 0;
 };
 
 /******************************************************************

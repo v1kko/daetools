@@ -43,7 +43,6 @@ class simpleUserAction(daeAction):
     def __init__(self, eventPort):
         daeAction.__init__(self)
         self.eventPort = eventPort
-        print self.Name
 
     def Execute(self):
         # The floating point value of the data sent with the event can be retrieved 
@@ -56,9 +55,29 @@ class simpleUserAction(daeAction):
             from PyQt4 import QtCore, QtGui
             if QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(None, 'tutorial13', msg)
-        except:
+        finally:
+            print '********************************************************'
             print msg
-        
+            print '********************************************************'
+
+class simpleUserAction2(daeAction):
+    def __init__(self, msg):
+        daeAction.__init__(self)
+        self.msg = msg
+
+    def Execute(self):
+        # Try to show a message box if there is application instance already defined
+        # that is we are in the 'gui' mode
+        try:
+            from PyQt4 import QtCore, QtGui
+            if QtCore.QCoreApplication.instance():
+                QtGui.QMessageBox.warning(None, 'tutorial13', self.msg)
+        finally:
+            print '********************************************************'
+            print 'tutorial13 simpleUserAction2 message: '
+            print self.msg
+            print '********************************************************'
+            
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -74,7 +93,7 @@ class modTutorial(daeModel):
         self.event = daeVariable("event", no_t,          self, "Variable which value is set in ON_EVENT function")
 
         # Here we create two event ports (inlet and outlet) and connect them.
-        # It makes no sense in reality, but this is example is just a show case - in the real application
+        # It makes no sense in reality, but this is example is just an example - in the real application
         # they would be defined in separate models.
         # Event ports can be connected/disconnected at any time.
         self.epIn  = daeEventPort("epIn",  eInletPort,  self, "Inlet event port")
@@ -96,7 +115,7 @@ class modTutorial(daeModel):
                                           ON_CONDITION() function
         Arguments:
           - Condition that triggers the actions
-          - 'switchTo' is the name of the state (in the current state transition network) that will be set active 
+          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name) that will be set active
              when the condition is satisified
           - 'triggerEvents' is a list of python tuples (outlet-event-port, expression), 
              where the first part is the event-port object and the second a value to be sent when the event is trigerred
@@ -104,12 +123,12 @@ class modTutorial(daeModel):
              will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
           - 'userDefinedActions' is a list of user defined daeAction-derived objects
         """
-        self.ON_CONDITION(self.T() > Constant(340*K),    switchTo           = 'Cooling',
+        self.ON_CONDITION(self.T() > Constant(340*K),    switchToStates     = [ ('Regulator', 'Cooling') ],
                                                          setVariableValues  = [ (self.event, 100) ], # event variable is dimensionless
                                                          triggerEvents      = [],
                                                          userDefinedActions = [] )
 
-        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+        self.ON_CONDITION(Time() > Constant(350*s), switchToStates     = [ ('Regulator', 'HeaterOff') ],
                                                     setVariableValues  = [],
                                                     triggerEvents      = [ (self.epOut, self.T() + Constant(5.0*K)) ],
                                                     userDefinedActions = [] )
@@ -119,12 +138,12 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.ON_CONDITION(self.T() < Constant(320*K),    switchTo           = 'Heating',
+        self.ON_CONDITION(self.T() < Constant(320*K),    switchToStates     = [ ('Regulator', 'Heating') ],
                                                          setVariableValues  = [ (self.event, 200) ], # event variable is dimensionless
                                                          triggerEvents      = [],
                                                          userDefinedActions = [] )
 
-        self.ON_CONDITION(Time() > Constant(350*s), switchTo           = 'HeaterOff',
+        self.ON_CONDITION(Time() > Constant(350*s), switchToStates     = [ ('Regulator', 'HeaterOff') ],
                                                     setVariableValues  = [],
                                                     triggerEvents      = [ (self.epOut, self.T() + Constant(6.0*K)) ],
                                                     userDefinedActions = [] )
@@ -138,8 +157,19 @@ class modTutorial(daeModel):
 
         # Users are responsible for creating/deleting of user actions and have to ensure
         # that they still exist until the end of simulation.
-        self.action = simpleUserAction(self.epIn)
+        self.action  = simpleUserAction(self.epIn)
+        self.action2 = simpleUserAction2('This message should be fired when the time is 100s.')
 
+        """
+        The ON_CONDITION() function can be directly called from the DeclareEquations() and in that case
+        the OnCondition handler belongs to the model and is always active.
+        """
+        self.ON_CONDITION(Time() == Constant(100*s), switchToStates     = [],
+                                                     setVariableValues  = [],
+                                                     triggerEvents      = [],
+                                                     userDefinedActions = [self.action2] )
+
+        
         """
                                    ON_EVENT() function
         The actions executed when the event on the inlet epIn event port is received.
@@ -147,7 +177,7 @@ class modTutorial(daeModel):
         and then they are active only when that particular state is active.
         Arguments:
           - Event port (could be either inlet or outlet)
-          - 'switchToStates' is a list of python tuples (STN-name, State-name)
+          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name)
           - 'triggerEvents' is a list of python tuples (outlet-event-port, expression)
           - 'setVariableValues' is a list of python tuples (variable, expression)
           - 'userDefinedActions' is a list of daeAction derived classes

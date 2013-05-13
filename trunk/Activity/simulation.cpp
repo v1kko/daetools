@@ -1113,11 +1113,11 @@ void daeSimulation::EnterConditionalIntegrationMode(void)
 	daeDeclareAndThrowException(exNotImplemented)
 /**************************************************************/
 	
-	m_bConditionalIntegrationMode = true;
-	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
-	if(!pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-	pModel->SetGlobalConditionContext();
+//	m_bConditionalIntegrationMode = true;
+//	daeModel* pModel = dynamic_cast<daeModel*>(m_pModel);
+//	if(!pModel)
+//		daeDeclareAndThrowException(exInvalidPointer);
+//	pModel->SetGlobalConditionContext();
 }
 
 // Integrates until the stopping condition or final time is reached
@@ -1126,7 +1126,7 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 /**************************************************************/
 	daeDeclareAndThrowException(exNotImplemented);
 /**************************************************************/
-
+/*
 	if(!m_bConditionalIntegrationMode)
 	{
 		daeDeclareException(exInvalidCall);
@@ -1153,7 +1153,7 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 	m_pDAESolver->RefreshRootFunctions();
 	m_dCurrentTime = m_pDAESolver->Solve(m_dTimeHorizon, eStopCriterion);
 	pModel->ResetGlobalCondition();
-	
+*/	
 	return m_dCurrentTime;
 }
 

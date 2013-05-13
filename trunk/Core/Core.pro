@@ -18,12 +18,13 @@ SOURCES += xmlreadstream.cpp \
     variable.cpp \
     stn.cpp \
     if.cpp \
-    state_transition.cpp \
     state.cpp \
     stdafx.cpp \
     ports.cpp \
 	event_port.cpp \
 	action.cpp \
+	on_event_actions.cpp \
+	on_condition_actions.cpp \
     partial.cpp \
     parameter.cpp \
     object.cpp \

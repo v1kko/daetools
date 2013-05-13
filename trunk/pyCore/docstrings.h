@@ -255,6 +255,12 @@ const char* DOCSTR_daeOnEventActions = "";
     const char* DOCSTR_daeOnEventActions_UserDefinedActions = "";
     const char* DOCSTR_daeOnEventActions_Execute = "";
     
+const char* DOCSTR_daeOnConditionActions = "";  
+    const char* DOCSTR_daeOnConditionActions_Condition = "";  
+    const char* DOCSTR_daeOnConditionActions_Actions = "";  
+    const char* DOCSTR_daeOnConditionActions_UserDefinedActions = "";  
+    const char* DOCSTR_daeOnConditionActions_Execute = "";  
+    
 const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_init = "Constructor...";
     const char* DOCSTR_daeModel_Domains = "A list of domains in the model.";
@@ -264,6 +270,7 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_Ports = "A list of ports in the model.";
     const char* DOCSTR_daeModel_EventPorts = "A list of event ports in the model.";
     const char* DOCSTR_daeModel_OnEventActions = "A list of OnEvent actions in the model.";
+    const char* DOCSTR_daeModel_OnConditionActions = "A list of OnCondition actions in the model.";
     const char* DOCSTR_daeModel_STNs = "A list of state transition networks in the model.";
     const char* DOCSTR_daeModel_Components = "A list of components in the model.";
     const char* DOCSTR_daeModel_PortArrays = "A list of arrays of ports in the model.";
@@ -327,11 +334,6 @@ const char* DOCSTR_daeState = "";
     const char* DOCSTR_daeState_NestedSTNs = "";  
     const char* DOCSTR_daeState_OnConditionActions = "";  
     const char* DOCSTR_daeState_OnEventActions = "";
-
-const char* DOCSTR_daeStateTransition = "";  
-    const char* DOCSTR_daeStateTransition_init = "";  
-    const char* DOCSTR_daeStateTransition_Condition = "";  
-    const char* DOCSTR_daeStateTransition_Actions = "";  
 
 const char* DOCSTR_daeSTN = "";  
     const char* DOCSTR_daeSTN_init = "";  

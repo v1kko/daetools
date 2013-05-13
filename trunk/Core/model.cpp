@@ -13,7 +13,6 @@ daeModel::daeModel()
 	m_pExecutionContextForGatherInfo	= NULL;
 	m_nVariablesStartingIndex			= 0;
 	m_nTotalNumberOfVariables			= 0;
-	m_pCondition						= NULL;
 
 // When used programmatically they dont own pointers !!!!!
 	m_ptrarrDomains.SetOwnershipOnPointers(false);
@@ -33,7 +32,6 @@ daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 	m_pExecutionContextForGatherInfo	= NULL;
 	m_nVariablesStartingIndex			= 0;
 	m_nTotalNumberOfVariables			= 0;
-	m_pCondition						= NULL;
 
 // When used programmatically they dont own pointers !!!!!
 	m_ptrarrDomains.SetOwnershipOnPointers(false);
@@ -54,11 +52,6 @@ daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 
 daeModel::~daeModel()
 {
-	if(m_pCondition)
-	{
-		delete m_pCondition;
-		m_pCondition = NULL;
-	}
 }
 
 void daeModel::Clone(const daeModel& rObject)
@@ -180,6 +173,8 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrVariables.EmptyAndFreeMemory();
 	m_ptrarrPorts.EmptyAndFreeMemory();
 	m_ptrarrEventPorts.EmptyAndFreeMemory();
+    m_ptrarrOnEventActions.EmptyAndFreeMemory();
+    m_ptrarrOnConditionActions.EmptyAndFreeMemory();
 	m_ptrarrEquationExecutionInfos.EmptyAndFreeMemory();
 	m_ptrarrPortArrays.EmptyAndFreeMemory();
 	m_ptrarrComponentArrays.EmptyAndFreeMemory();
@@ -194,6 +189,8 @@ void daeModel::Open(io::xmlTag_t* pTag)
 	m_ptrarrVariables.SetOwnershipOnPointers(true);
 	m_ptrarrPorts.SetOwnershipOnPointers(true);
 	m_ptrarrEventPorts.SetOwnershipOnPointers(true);
+    m_ptrarrOnEventActions.SetOwnershipOnPointers(true);
+    m_ptrarrOnConditionActions.SetOwnershipOnPointers(true);
 	m_ptrarrEquationExecutionInfos.SetOwnershipOnPointers(true);
 	m_ptrarrPortArrays.SetOwnershipOnPointers(true);
 	m_ptrarrComponentArrays.SetOwnershipOnPointers(true);
@@ -295,6 +292,10 @@ void daeModel::Save(io::xmlTag_t* pTag) const
 // ON EVENT ACTIONS
 	strName = "OnEventActions";
 	pTag->SaveObjectArray(strName, m_ptrarrOnEventActions);
+    
+// ON CONDITION ACTIONS
+    strName = "OnConditionActions";
+    pTag->SaveObjectArray(strName, m_ptrarrOnConditionActions);
 
 // STNs
 	strName = "STNs";
@@ -358,6 +359,10 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
 // ON EVENT ACTIONS
 	strName = "OnEventActions";
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrOnEventActions);
+    
+// ON CONDITION ACTIONS
+    strName = "OnConditionActions";
+    pTag->SaveRuntimeObjectArray(strName, m_ptrarrOnConditionActions);
 
 // STNs
 	strName = "STNs";
@@ -584,8 +589,8 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrVariables,       strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPorts,           strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPorts,      strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrComponents,          strConstructor, eLanguage, c);
-		ExportObjectArray(m_ptrarrComponentArrays,     strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponents,      strConstructor, eLanguage, c);
+		ExportObjectArray(m_ptrarrComponentArrays, strConstructor, eLanguage, c);
 		ExportObjectArray(m_ptrarrPortArrays,      strConstructor, eLanguage, c);
 		
 		ExportObjectArray(m_ptrarrEquations,			strDeclareEquations, eLanguage, c);
@@ -593,6 +598,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrPortConnections,		strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPortConnections,	strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrOnEventActions,		strDeclareEquations, eLanguage, c);
+        ExportObjectArray(m_ptrarrOnConditionActions,	strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strConstructor % (strDeclareEquations.empty() ? (c.CalculateIndent(c.m_nPythonIndentLevel) + "pass\n") : strDeclareEquations);
@@ -651,6 +657,7 @@ void daeModel::CreateDefinition(std::string& strContent, daeeModelLanguage eLang
 		ExportObjectArray(m_ptrarrPortConnections,		strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrEventPortConnections,	strDeclareEquations, eLanguage, c);
 		ExportObjectArray(m_ptrarrOnEventActions,		strDeclareEquations, eLanguage, c);
+        ExportObjectArray(m_ptrarrOnConditionActions,	strDeclareEquations, eLanguage, c);
 		
 		fmtFile.parse(strFile);
 		fmtFile % GetObjectClassName() % strCXXDeclaration % strConstructor % strDeclareEquations;
@@ -872,9 +879,28 @@ void daeModel::AddOnEventAction(daeOnEventActions* pOnEventAction)
 		throw e;
 	}
 
-    //SetModelAndCanonicalName(pOnEventAction);
     pOnEventAction->SetModel(this);
 	dae_push_back(m_ptrarrOnEventActions, pOnEventAction);
+}
+
+void daeModel::AddOnConditionAction(daeOnConditionActions* pOnConditionAction)
+{
+    std::string strName = pOnConditionAction->GetName();
+	if(strName.empty())
+	{
+		daeDeclareException(exInvalidCall);
+		e << "OnConditionAction name cannot be empty";
+		throw e;
+	}
+	if(CheckName(m_ptrarrOnConditionActions, strName))
+	{
+		daeDeclareException(exInvalidCall); 
+		e << "OnConditionAction [" << strName << "] already exists in the model [" << GetCanonicalName() << "]";
+		throw e;
+	}
+
+    pOnConditionAction->SetModel(this);
+	dae_push_back(m_ptrarrOnConditionActions, pOnConditionAction);
 }
 
 void daeModel::AddPortConnection(daePortConnection* pPortConnection)
@@ -1038,8 +1064,8 @@ void daeModel::IF(const daeCondition& rCondition, real_t dEventTolerance)
 	daeIF* _pIF = AddIF(string(""));
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
-	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_IF(_pState, rCondition, dEventTolerance);
+    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
+	_pOnConditionActions->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
@@ -1067,8 +1093,8 @@ void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
 // Add new state
 	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
 	daeState* _pState = _pIF->AddState(strStateName);
-	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_IF(_pState, rCondition, dEventTolerance);
+    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
+	_pOnConditionActions->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE(void)
@@ -1180,10 +1206,10 @@ void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition,
 		throw e;
 	}
 
-	daeStateTransition* _pST = new daeStateTransition;
-	_pST->Create_SWITCH_TO(pCurrentState, strState, rCondition, dEventTolerance);
+    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
+	_pOnConditionActions->Create_SWITCH_TO(pCurrentState, strState, rCondition, dEventTolerance);
 }
-
+/*
 void daeModel::ON_CONDITION(const daeCondition&								rCondition, 
 							const string&									strStateTo, 
 							vector< pair<daeVariableWrapper, adouble> >&	arrSetVariables,
@@ -1200,12 +1226,12 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 	adouble value;
 	vector<daeAction*> ptrarrActions;
 
-// Current STN must exist!!!
+// The current STN must exist!!!
 // Otherwise throw an exception
 	if(!_currentSTN)
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "ON_CONDITION() can only be called after call to STN()";
+		e << "This variant of the ON_CONDITION() function must be called after a call to STN()";
 		throw e;
 	}
 	
@@ -1219,11 +1245,12 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 		throw e;
 	}
 
-	daeStateTransition* _pST = new daeStateTransition;
-
-// ChangeState	
-	pAction = new daeAction(string("actionChangeState_") + strStateTo, this, _currentSTN, strStateTo, string(""));
-	ptrarrActions.push_back(pAction);
+    if(!strStateTo.empty())
+    {
+    // ChangeStateaction
+        pAction = new daeAction(string("actionChangeState_") + strStateTo, this, _currentSTN, strStateTo, string(""));
+        ptrarrActions.push_back(pAction);
+    }
 
 // TriggerEvents
 	for(i = 0; i < arrTriggerEvents.size(); i++)
@@ -1252,7 +1279,90 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 		ptrarrActions.push_back(pAction);
 	}
 
-	_pST->Create_ON_CONDITION(pCurrentState, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
+    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
+   	_pOnConditionActions->Create_ON_CONDITION(pCurrentState, this, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
+}
+*/
+
+void daeModel::ON_CONDITION(const daeCondition&								rCondition, 
+                            vector< pair<string, string> >&					arrSwitchToStates, 
+							vector< pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+							vector< pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
+							vector<daeAction*>&								ptrarrUserDefinedActions, 
+							real_t											dEventTolerance)
+{
+	size_t i;
+    string strSTN;
+	string strStateTo;
+	daeAction* pAction;
+	daeEventPort* pEventPort;
+	pair<daeVariableWrapper, adouble> p;
+    pair<string, string> p1;
+	pair<daeEventPort*, adouble> p3;
+	daeVariableWrapper variable;
+	adouble value;
+	vector<daeAction*> ptrarrActions;
+
+// ChangeState	
+    for(i = 0; i < arrSwitchToStates.size(); i++)
+    {
+        p1 = arrSwitchToStates[i];
+        strSTN     = p1.first;
+        strStateTo = p1.second;
+        if(strStateTo.empty())
+            daeDeclareAndThrowException(exInvalidCall);
+            
+        pAction = new daeAction(string("actionChangeState_") + strSTN + "_" + strStateTo, this, strSTN, strStateTo, string(""));
+        ptrarrActions.push_back(pAction);
+    }
+
+// TriggerEvents
+	for(i = 0; i < arrTriggerEvents.size(); i++)
+	{
+		p3 = arrTriggerEvents[i];
+		pEventPort = p3.first;
+		value      = p3.second;
+		if(!pEventPort)
+			daeDeclareAndThrowException(exInvalidPointer);
+			
+		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, value, string(""));
+
+		ptrarrActions.push_back(pAction);
+	}
+
+// SetVariables	
+	for(i = 0; i < arrSetVariables.size(); i++)
+	{
+		p = arrSetVariables[i];
+		variable = p.first;
+		value    = p.second;
+			
+		string name = ReplaceAll(string("actionSetVariable_") + variable.GetName(), '.', '_');
+		pAction = new daeAction(name, this, variable, value, string(""));
+
+		ptrarrActions.push_back(pAction);
+	}
+
+    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
+    
+    if(_currentSTN)
+    {
+    // Current state must exist!!!
+    // Otherwise throw an exception
+        daeState* pCurrentState = GetStateFromStack();
+        if(!pCurrentState)
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "ON_CONDITION() can only be called after a call to STATE()";
+            throw e;
+        }
+        
+        _pOnConditionActions->Create_ON_CONDITION(pCurrentState, this, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
+    }
+    else
+    {
+        _pOnConditionActions->Create_ON_CONDITION(NULL, this, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
+    }
 }
 
 void daeModel::ON_EVENT(daeEventPort*									pTriggerEventPort, 
@@ -1339,6 +1449,178 @@ void daeModel::ON_EVENT(daeEventPort*									pTriggerEventPort,
 	// Attach ONLY those OnEventActions that belong to the model; others will be set during the active state changes
 		pTriggerEventPort->Attach(pOnEventAction);
 	}
+}
+
+void daeModel::BuildExpressions(daeBlock* pBlock)
+{
+    size_t i, k, m;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	daeOnConditionActions* pOnConditionActions;
+	pair<size_t, daeExpressionInfo> pairExprInfo;
+
+	daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pDataProxy.get();
+	EC.m_pBlock						= pBlock;
+	EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
+
+// I have to set this since Create_adouble called from adSetup nodes needs it
+	PropagateGlobalExecutionContext(&EC);
+
+    size_t nIndexInModel = 0;
+    for(k = 0; k < m_ptrarrOnConditionActions.size(); k++) 
+    {
+        pOnConditionActions = m_ptrarrOnConditionActions[k];
+        if(!pOnConditionActions)
+            daeDeclareAndThrowException(exInvalidPointer); 
+
+    // Fill array with expressions of the form: left - right, 
+    // made of the conditional expressions, like: left >= right ... etc etc
+        m_pDataProxy->SetGatherInfo(true);
+        pBlock->SetInitializeMode(true);
+            pOnConditionActions->m_Condition.BuildExpressionsArray(&EC);
+            for(m = 0; m < pOnConditionActions->m_Condition.m_ptrarrExpressions.size(); m++)
+            {
+                pairExprInfo.first                        = nIndexInModel;
+                pairExprInfo.second.m_pExpression         = pOnConditionActions->m_Condition.m_ptrarrExpressions[m];
+                pairExprInfo.second.m_pOnConditionActions = pOnConditionActions;
+
+                pOnConditionActions->m_mapExpressionInfos.insert(pairExprInfo);
+                nIndexInModel++;
+            }
+        m_pDataProxy->SetGatherInfo(false);
+        pBlock->SetInitializeMode(false);
+    }
+        
+// Restore it to NULL
+    PropagateGlobalExecutionContext(NULL);
+
+// Next, BuildExpressions in each child-model
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->BuildExpressions(pBlock);
+    }
+    
+// Finally, BuildExpressions in each modelarray
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->BuildExpressions(pBlock);
+    }
+}
+
+bool daeModel::CheckDiscontinuities(void)
+{
+    size_t i;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	daeOnConditionActions* pOnConditionActions;
+	pair<size_t, daeExpressionInfo> pairExprInfo;
+	map<size_t, daeExpressionInfo>::iterator iter;
+
+    daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pDataProxy.get();
+	EC.m_pBlock						= m_pDataProxy->GetBlock();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+    for(i = 0; i < m_ptrarrOnConditionActions.size(); i++) 
+    {
+        pOnConditionActions = m_ptrarrOnConditionActions[i];
+        if(pOnConditionActions->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
+			return true;
+    }
+    
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        if(pModel->CheckDiscontinuities()) // There is a discontinuity, therefore return true
+			return true;
+    }
+    
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        if(pModelArray->CheckDiscontinuities()) // There is a discontinuity, therefore return true
+			return true;
+    }
+    
+    return false;
+}
+
+void daeModel::AddExpressionsToBlock(daeBlock* pBlock)
+{
+    size_t i;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	daeOnConditionActions* pOnConditionActions;
+	pair<size_t, daeExpressionInfo> pairExprInfo;
+	map<size_t, daeExpressionInfo>::iterator iter;
+
+    for(i = 0; i < m_ptrarrOnConditionActions.size(); i++) 
+    {
+        pOnConditionActions = m_ptrarrOnConditionActions[i];
+        
+        for(iter = pOnConditionActions->m_mapExpressionInfos.begin(); iter != pOnConditionActions->m_mapExpressionInfos.end(); iter++)
+		{
+			pairExprInfo		= *iter;
+			pairExprInfo.first	= pBlock->m_mapExpressionInfos.size();				
+			pBlock->m_mapExpressionInfos.insert(pairExprInfo);
+		}
+    }
+    
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->AddExpressionsToBlock(pBlock);
+    }
+    
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->AddExpressionsToBlock(pBlock);
+    }
+}
+
+void daeModel::ExecuteOnConditionActions(void)
+{
+    size_t i;
+	daeModel* pModel;
+	daeModelArray* pModelArray;
+	daeOnConditionActions* pOnConditionActions;
+	pair<size_t, daeExpressionInfo> pairExprInfo;
+	map<size_t, daeExpressionInfo>::iterator iter;
+    
+    daeExecutionContext EC;
+	EC.m_pDataProxy					= m_pDataProxy.get();
+	EC.m_pBlock						= m_pDataProxy->GetBlock();
+	EC.m_eEquationCalculationMode	= eCalculate;
+
+    for(i = 0; i < m_ptrarrOnConditionActions.size(); i++) 
+    {
+        pOnConditionActions = m_ptrarrOnConditionActions[i];
+        
+        if(pOnConditionActions->m_Condition.Evaluate(&EC))
+		{
+			if(m_pDataProxy->PrintInfo())
+				LogMessage(string("The condition: ") + pOnConditionActions->GetConditionAsString() + string(" is satisfied"), 0);
+			
+			pOnConditionActions->Execute();
+			break;
+		}
+    }
+    
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->ExecuteOnConditionActions();
+    }
+    
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->ExecuteOnConditionActions();
+    }
 }
 
 void daeModel::AddPortArray(daePortArray& rPortArray, const string& strName, daeePortType ePortType, string strDescription)
@@ -1493,6 +1775,11 @@ void daeModel::RemoveEventPort(daeEventPort* pObject)
 void daeModel::RemoveOnEventAction(daeOnEventActions* pObject)
 {
 	m_ptrarrOnEventActions.Remove(pObject);
+}
+
+void daeModel::RemoveOnConditionAction(daeOnConditionActions* pObject)
+{
+    m_ptrarrOnConditionActions.Remove(pObject);    
 }
 
 void daeModel::RemovePortArray(daePortArray* pObject)
@@ -2125,7 +2412,7 @@ void daeModel::BuildUpSTNsAndEquations()
 		InitializeDEDIs();
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
-		InitializeOnEventActions();		
+		InitializeOnEventAndOnConditionActions();		
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -2344,10 +2631,11 @@ void daeModel::InitializeVariables()
 	m_nTotalNumberOfVariables = _currentVariablesIndex - m_nVariablesStartingIndex;
 }
 
-void daeModel::InitializeOnEventActions(void)
+void daeModel::InitializeOnEventAndOnConditionActions(void)
 {
 	size_t i;
 	daeOnEventActions* pOnEventActions;
+    daeOnConditionActions* pOnConditionActions;
 	daeModel* pModel;
 	daeModelArray* pModelArray;
 	
@@ -2361,18 +2649,28 @@ void daeModel::InitializeOnEventActions(void)
 		pOnEventActions->Initialize();
 	}
 
+// Initialize OnConditionActions
+	for(i = 0; i < m_ptrarrOnConditionActions.size(); i++)
+	{
+		pOnConditionActions = m_ptrarrOnConditionActions[i];
+		if(!pOnConditionActions)
+			daeDeclareAndThrowException(exInvalidPointer);
+
+		pOnConditionActions->Initialize();
+	}
+
 // Next, initialize OnEventActions in each child-model
 	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
 		pModel = m_ptrarrComponents[i];
-		pModel->InitializeOnEventActions();
+		pModel->InitializeOnEventAndOnConditionActions();
 	}
 	
 // Finally, initialize OnEventActions in each modelarray
 	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
 		pModelArray = m_ptrarrComponentArrays[i];
-		pModelArray->InitializeOnEventActions();
+		pModelArray->InitializeOnEventAndOnConditionActions();
 	}
 }
 
@@ -2390,7 +2688,7 @@ void daeModel::InitializeSTNs(void)
 		if(!pSTN)
 			daeDeclareAndThrowException(exInvalidPointer);
 
-		pSTN->InitializeStateTransitions();
+		pSTN->InitializeOnEventAndOnConditionActions();
 	}
 
 // Next, initialize STNs in each child-model
@@ -2910,61 +3208,6 @@ void daeModel::SetDefaultAbsoluteTolerances()
 		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->SetDefaultAbsoluteTolerances();
 	}
-}
-
-void daeModel::SetGlobalConditionContext(void)
-{
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-	
-	m_globalConditionContext.m_pDataProxy				= m_pDataProxy.get();
-	m_globalConditionContext.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
-
-	m_pDataProxy->SetGatherInfo(true);
-	PropagateGlobalExecutionContext(&m_globalConditionContext);
-}
-
-void daeModel::UnsetGlobalConditionContext(void)
-{
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-	
-	m_globalConditionContext.m_pDataProxy				= NULL;
-	m_globalConditionContext.m_eEquationCalculationMode	= eECMUnknown;
-
-	m_pDataProxy->SetGatherInfo(false);
-	PropagateGlobalExecutionContext(NULL);
-}
-
-void daeModel::SetGlobalCondition(daeCondition condition)
-{
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
-	if(!m_pExecutionContextForGatherInfo)
-		daeDeclareAndThrowException(exInvalidPointer);
-	
-	if(m_pCondition)
-		delete m_pCondition;
-	m_pCondition = new daeCondition;
-
-	*m_pCondition          = condition.m_pConditionNode->CreateRuntimeNode(m_pExecutionContextForGatherInfo);
-	m_pCondition->m_pModel = this;
-	m_pCondition->BuildExpressionsArray(m_pExecutionContextForGatherInfo);
-
-	m_pDataProxy->SetGatherInfo(false);
-	PropagateGlobalExecutionContext(NULL);
-}
-
-void daeModel::ResetGlobalCondition(void)
-{
-	if(m_pCondition)
-		delete m_pCondition;
-	m_pCondition = NULL;
-}
-
-daeCondition* daeModel::GetGlobalCondition() const
-{
-	return m_pCondition;	
 }
 
 size_t daeModel::GetNumberOfSTNs(void) const
@@ -3601,6 +3844,7 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
 	dae_capacity_check(m_ptrarrEventPorts);
 	dae_capacity_check(m_ptrarrComponents);
 	dae_capacity_check(m_ptrarrOnEventActions);
+    dae_capacity_check(m_ptrarrOnConditionActions);
 	dae_capacity_check(m_ptrarrEquationExecutionInfos);
 	dae_capacity_check(m_ptrarrComponentArrays);
 	dae_capacity_check(m_ptrarrPortArrays);

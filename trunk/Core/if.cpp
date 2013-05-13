@@ -60,7 +60,7 @@ void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMode
 				{
 					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.IF(%1%)\n\n" + "%2%%3%\n";
 
-					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					pState->m_ptrarrOnConditionActions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
 				
@@ -81,7 +81,7 @@ void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMode
 				{
 					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.ELSE_IF(%1%)\n\n" + "%2%3%\n";
 					
-					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					pState->m_ptrarrOnConditionActions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
 				
@@ -105,7 +105,7 @@ void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMode
 				{
 					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "IF(%1%);\n\n" + "%2%%3%\n";
 
-					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					pState->m_ptrarrOnConditionActions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
 				
@@ -126,7 +126,7 @@ void daeIF::Export(std::string& strContent, daeeModelLanguage eLanguage, daeMode
 				{
 					strState = c.CalculateIndent(c.m_nPythonIndentLevel) + "ELSE_IF(%1%);\n\n" + "%2%3%\n";
 					
-					pState->m_ptrarrStateTransitions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
+					pState->m_ptrarrOnConditionActions[0]->m_Condition.Export(strStateTransition, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrEquations, strEquations, eLanguage, c);
 					ExportObjectArray(pState->m_ptrarrSTNs, strSTNs, eLanguage, c);
 				
@@ -162,7 +162,7 @@ void daeIF::AddExpressionsToBlock(daeBlock* pBlock)
 	size_t i, k, m;
 	daeSTN* pSTN;
 	daeState* pState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 	pair<size_t, daeExpressionInfo> pairExprInfo;
 	map<size_t, daeExpressionInfo>::iterator iter;
 
@@ -172,13 +172,13 @@ void daeIF::AddExpressionsToBlock(daeBlock* pBlock)
 		if(!pState)
 			daeDeclareAndThrowException(exInvalidPointer); 
 
-		for(k = 0; k < pState->m_ptrarrStateTransitions.size(); k++) 
+		for(k = 0; k < pState->m_ptrarrOnConditionActions.size(); k++) 
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[k];
-			if(!pStateTransition)
+			pOnConditionActions = pState->m_ptrarrOnConditionActions[k];
+			if(!pOnConditionActions)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
-			for(iter = pStateTransition->m_mapExpressionInfos.begin(); iter != pStateTransition->m_mapExpressionInfos.end(); iter++)
+			for(iter = pOnConditionActions->m_mapExpressionInfos.begin(); iter != pOnConditionActions->m_mapExpressionInfos.end(); iter++)
 			{
 				pairExprInfo		= *iter;
 				pairExprInfo.first	= pBlock->m_mapExpressionInfos.size();				
@@ -223,7 +223,7 @@ bool daeIF::CheckDiscontinuities()
 	bool bResult, bResultTemp;
 	size_t i;
 	daeState* pState, *pElseState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -246,11 +246,11 @@ bool daeIF::CheckDiscontinuities()
 
 		if(i != m_ptrarrStates.size() - 1) // All states except the last
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[0];
-			if(!pStateTransition)
+			pOnConditionActions = pState->m_ptrarrOnConditionActions[0];
+			if(!pOnConditionActions)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
-			bResultTemp = pStateTransition->m_Condition.Evaluate(&EC);
+			bResultTemp = pOnConditionActions->m_Condition.Evaluate(&EC);
 			if(bResultTemp)
 				return CheckState(pState);
 		}
@@ -275,7 +275,7 @@ bool daeIF::CheckDiscontinuities(void)
 	size_t i;
 	daeSTN* pSTN;
 	daeState* pState;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -295,9 +295,9 @@ bool daeIF::CheckDiscontinuities(void)
 
 		if(i != m_ptrarrStates.size() - 1) // All states except the last (for ELSE does not have conditions)
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[0];
+			pOnConditionActions = pState->m_ptrarrOnConditionActions[0];
 
-			if(pStateTransition->m_Condition.Evaluate(&EC))
+			if(pOnConditionActions->m_Condition.Evaluate(&EC))
 			{
 			// If this state is not the active one then there is state change - therefore return true
 			// If it is equal then there is no state change so break the for loop
@@ -331,7 +331,7 @@ void daeIF::ExecuteOnConditionActions(void)
 	size_t i;
 	daeState* pState;
 	daeSTN* pSTN;
-	daeStateTransition* pStateTransition;
+	daeOnConditionActions* pOnConditionActions;
 
 	if(!m_pActiveState)
 	{	
@@ -351,14 +351,14 @@ void daeIF::ExecuteOnConditionActions(void)
 
 		if(i != m_ptrarrStates.size() - 1) // All states except the last
 		{
-			pStateTransition = pState->m_ptrarrStateTransitions[0];
+			pOnConditionActions = pState->m_ptrarrOnConditionActions[0];
 
-			if(pStateTransition->m_Condition.Evaluate(&EC))
+			if(pOnConditionActions->m_Condition.Evaluate(&EC))
 			{
 				if(m_pActiveState != pState)
 				{
 					if(m_pModel->m_pDataProxy->PrintInfo())
-						LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+						LogMessage(string("The condition: ") + pOnConditionActions->GetConditionAsString() + string(" is satisfied"), 0);
 					SetActiveState(pState);
 				}
 				break;
@@ -384,7 +384,7 @@ void daeIF::ExecuteOnConditionActions(void)
 
 void daeIF::CheckState(daeState* pState)
 {
-//	daeStateTransition* pStateTransition;
+//	daeOnConditionActions* pOnConditionActions;
 //	
 //	if(!pState)
 //		daeDeclareAndThrowException(exInvalidPointer);
@@ -393,8 +393,8 @@ void daeIF::CheckState(daeState* pState)
 //// but continue searching for state change in the nested IF/STNs
 //	if(m_pActiveState != pState)
 //	{
-//		pStateTransition = pState->m_ptrarrStateTransitions[0];
-//		LogMessage(string("The condition: ") + pStateTransition->GetConditionAsString() + string(" is satisfied"), 0);
+//		pOnConditionActions = pState->m_ptrarrOnConditionActions[0];
+//		LogMessage(string("The condition: ") + pOnConditionActions->GetConditionAsString() + string(" is satisfied"), 0);
 //		SetActiveState(pState);
 //	}
 }
@@ -507,7 +507,7 @@ bool daeIF::CheckObject(vector<string>& strarrErrors) const
 		if(i != m_ptrarrStates.size()-1)
 		{
 		// Number of state transitions in each state except the last must be 1
-			if(pState->m_ptrarrStateTransitions.size() != 1)
+			if(pState->m_ptrarrOnConditionActions.size() != 1)
 			{	
 				strError = "States in if block must contain only one state transition in if block [" + GetCanonicalName() + "]";
 				strarrErrors.push_back(strError);
@@ -517,7 +517,7 @@ bool daeIF::CheckObject(vector<string>& strarrErrors) const
 		else
 		{
 		// Number of state transitions in the last state (ELSE) has to be 0
-			if(pState->m_ptrarrStateTransitions.size() != 0)
+			if(pState->m_ptrarrOnConditionActions.size() != 0)
 			{	
 				strError = "The last in if block mustn't contain any state transitions in if block [" + GetCanonicalName() + "]";
 				strarrErrors.push_back(strError);

@@ -1217,8 +1217,20 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("Execute",	&daeOnEventActions::Execute, DOCSTR_daeOnEventActions_Execute)
             
         .def("__str__",	 &daepython::daeOnEventActions__str__)
-        .def("__repr__", &daepython::daeOnEventActions__repr__)
+        .def("__repr__", &daepython::daeOnEventActions__repr__) 
     ;
+    
+    class_<daeOnConditionActions, bases<daeObject>, boost::noncopyable>("daeOnConditionActions", DOCSTR_daeOnConditionActions, no_init)
+		.add_property("Condition",          make_function(&daepython::daeOnConditionActions_Condition, return_internal_reference<>()),
+                                                                                                   DOCSTR_daeOnConditionActions_Condition)
+        .add_property("Actions",	        &daepython::daeOnConditionActions_Actions,             DOCSTR_daeOnConditionActions_Actions)
+        .add_property("UserDefinedActions", &daepython::daeOnConditionActions_UserDefinedActions,  DOCSTR_daeOnConditionActions_UserDefinedActions)
+        
+        .def("Execute",	&daeOnConditionActions::Execute, DOCSTR_daeOnConditionActions_Execute)
+        
+        .def("__str__",	 &daepython::daeOnConditionActions__str__)
+        .def("__repr__", &daepython::daeOnConditionActions__repr__)
+		;
     
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel", DOCSTR_daeModel, no_init)
 		.def(init<string, optional<daeModel*, string> >(( arg("self"), 
@@ -1227,20 +1239,21 @@ BOOST_PYTHON_MODULE(pyCore)
                                                           arg("description") = ""
                                                         ), DOCSTR_daeModel_init))
 
-		.add_property("Domains",				&daepython::daeModelWrapper::GetDomains,        DOCSTR_daeModel_Domains)
-		.add_property("Parameters",				&daepython::daeModelWrapper::GetParameters,     DOCSTR_daeModel_Parameters)
-		.add_property("Variables",				&daepython::daeModelWrapper::GetVariables,      DOCSTR_daeModel_Variables)
-		.add_property("Equations",				&daepython::daeModelWrapper::GetEquations,      DOCSTR_daeModel_Equations)
-		.add_property("Ports",					&daepython::daeModelWrapper::GetPorts,          DOCSTR_daeModel_Ports)
-		.add_property("EventPorts",				&daepython::daeModelWrapper::GetEventPorts,     DOCSTR_daeModel_EventPorts)
-		.add_property("OnEventActions",			&daepython::daeModelWrapper::GetOnEventActions, DOCSTR_daeModel_OnEventActions)
-        .add_property("STNs",					&daepython::daeModelWrapper::GetSTNs,           DOCSTR_daeModel_STNs)
-		.add_property("Components",				&daepython::daeModelWrapper::GetComponents,     DOCSTR_daeModel_Components)
-		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays,     DOCSTR_daeModel_PortArrays)
-		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays,DOCSTR_daeModel_ComponentArrays)
-        .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections,DOCSTR_daeModel_PortConnections)
-		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                      DOCSTR_daeModel_IsModelDynamic)
-        .add_property("ModelType",	   		    &daeModel::GetModelType,                        DOCSTR_daeModel_ModelType)
+		.add_property("Domains",				&daepython::daeModelWrapper::GetDomains,            DOCSTR_daeModel_Domains)
+		.add_property("Parameters",				&daepython::daeModelWrapper::GetParameters,         DOCSTR_daeModel_Parameters)
+		.add_property("Variables",				&daepython::daeModelWrapper::GetVariables,          DOCSTR_daeModel_Variables)
+		.add_property("Equations",				&daepython::daeModelWrapper::GetEquations,          DOCSTR_daeModel_Equations)
+		.add_property("Ports",					&daepython::daeModelWrapper::GetPorts,              DOCSTR_daeModel_Ports)
+		.add_property("EventPorts",				&daepython::daeModelWrapper::GetEventPorts,         DOCSTR_daeModel_EventPorts)
+		.add_property("OnEventActions",			&daepython::daeModelWrapper::GetOnEventActions,     DOCSTR_daeModel_OnEventActions)
+        .add_property("OnConditionActions",		&daepython::daeModelWrapper::GetOnConditionActions, DOCSTR_daeModel_OnConditionActions)
+        .add_property("STNs",					&daepython::daeModelWrapper::GetSTNs,               DOCSTR_daeModel_STNs)
+		.add_property("Components",				&daepython::daeModelWrapper::GetComponents,         DOCSTR_daeModel_Components)
+		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays,         DOCSTR_daeModel_PortArrays)
+		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays,    DOCSTR_daeModel_ComponentArrays)
+        .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections,    DOCSTR_daeModel_PortConnections)
+		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                          DOCSTR_daeModel_IsModelDynamic)
+        .add_property("ModelType",	   		    &daeModel::GetModelType,                            DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
 
         .def("__str__",           &daepython::daeModel__str__)  
@@ -1281,7 +1294,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ON_CONDITION",    &daepython::daeModelWrapper::ON_CONDITION, 
                                 ( arg("self"), 
                                   arg("condition"), 
-                                  arg("switchTo")           = string(), 
+                                  arg("switchToStates")     = boost::python::list(), 
                                   arg("setVariableValues")  = boost::python::list(),
                                   arg("triggerEvents")      = boost::python::list(),
                                   arg("userDefinedActions") = boost::python::list(),
@@ -1347,21 +1360,14 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
     
 	class_<daeState, bases<daeObject>, boost::noncopyable>("daeState", DOCSTR_daeState, no_init)
-		.add_property("Equations",			 &daepython::daeState_GetEquations,        DOCSTR_daeState_Equations)
-		.add_property("StateTransitions",	 &daepython::daeState_GetStateTransitions, DOCSTR_daeState_StateTransitions)
-		.add_property("NestedSTNs",			 &daepython::daeState_GetNestedSTNs,       DOCSTR_daeState_NestedSTNs)
-        .add_property("OnEventActions",      &daepython::daeState_GetOnEventActions,   DOCSTR_daeState_OnEventActions)
-        //.add_property("OnConditionActions", &daepython::daeState_GetOnConditionActions, DOCSTR_daeState_OnConditionActions)
+		.add_property("Equations",			 &daepython::daeState_GetEquations,          DOCSTR_daeState_Equations)
+		.add_property("NestedSTNs",			 &daepython::daeState_GetNestedSTNs,         DOCSTR_daeState_NestedSTNs)
+        .add_property("OnEventActions",      &daepython::daeState_GetOnEventActions,     DOCSTR_daeState_OnEventActions)
+        .add_property("OnConditionActions",  &daepython::daeState_GetOnConditionActions, DOCSTR_daeState_OnConditionActions)
             
         .def("__str__",				&daepython::daeState__str__)
         .def("__repr__",			&daepython::daeState__repr__)
     ;
-
-	class_<daeStateTransition, bases<daeObject>, boost::noncopyable>("daeStateTransition", DOCSTR_daeStateTransition, no_init)
-		.add_property("Condition",	make_function(&daepython::daeStateTransition_GetCondition, return_internal_reference<>()),
-                                    DOCSTR_daeStateTransition_Condition)
-        .add_property("Actions",	&daepython::daeStateTransition_GetActions, DOCSTR_daeStateTransition_Actions)
-		;
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN", DOCSTR_daeSTN, no_init)
         .add_property("ActiveState",	&daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
