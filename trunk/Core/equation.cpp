@@ -1205,6 +1205,16 @@ void daeEquation::GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo
 	dae_set_vector(m_ptrarrEquationExecutionInfos, ptrarrEquationExecutionInfos);
 }
 
+daeState* daeEquation::GetParentState() const
+{
+    return m_pParentState;
+}
+
+std::vector<daeDEDI*> daeEquation::GetDEDIs() const
+{
+    return m_ptrarrDistributedEquationDomainInfos;
+}
+
 void daeEquation::SetResidual(adouble res)
 {
 	if(!res.node)

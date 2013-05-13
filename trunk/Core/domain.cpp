@@ -492,6 +492,11 @@ void daeDomain::SetUnits(const unit& units)
 	m_Unit = units;
 }
 
+daePort* daeDomain::GetParentPort(void) const
+{
+    return m_pParentPort;
+}
+
 daeeDomainType daeDomain::GetType(void) const
 {
 	return m_eDomainType;

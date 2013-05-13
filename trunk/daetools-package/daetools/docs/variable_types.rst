@@ -17,7 +17,7 @@ Overview
 .. py:module:: daetools.pyDAE.variable_types
 .. py:currentmodule:: daetools.pyDAE.variable_types
 
-.. autoattribute:: daetools.pyDAE.variable_types.time_t
+.. autoattribute:: daetools.pyDAE.variable_types.time_t 
 .. autoattribute:: daetools.pyDAE.variable_types.length_t
 .. autoattribute:: daetools.pyDAE.variable_types.area_t
 .. autoattribute:: daetools.pyDAE.variable_types.volume_t

@@ -2795,7 +2795,7 @@ void daeModel::SetDefaultInitialGuesses(void)
 	daeModelArray* pModelArray;
 	daePortArray* pPortArray;
 	daeVariable* pVariable;
-	daeVariableType_t* pVariableType;
+	const daeVariableType_t* pVariableType;
 
 	size_t nNumberOfVariables = m_ptrarrVariables.size();
 	for(size_t i = 0; i < nNumberOfVariables; i++)
@@ -2855,7 +2855,7 @@ void daeModel::SetDefaultAbsoluteTolerances()
 	size_t i;
 	daeModel* pModel;
 	daeVariable* pVariable;
-	daeVariableType_t* pVariableType;
+	const daeVariableType_t* pVariableType;
 	daeModelArray* pModelArray;
 	daePortArray* pPortArray;
 
@@ -3833,6 +3833,11 @@ const std::vector<daePort*>& daeModel::Ports() const
 	return m_ptrarrPorts;
 }
 
+const std::vector<daeEventPort*>& daeModel::EventPorts() const
+{
+	return m_ptrarrEventPorts;
+}
+
 const std::vector<daeModel*>& daeModel::Models() const
 {
 	return m_ptrarrComponents;
@@ -3851,6 +3856,16 @@ const std::vector<daeVariable*>& daeModel::Variables() const
 const std::vector<daeParameter*>& daeModel::Parameters() const
 {
 	return m_ptrarrParameters;
+}
+
+const std::vector<daeEquation*>& daeModel::Equations() const
+{
+	return m_ptrarrEquations;
+}
+
+const std::vector<daeSTN*>& daeModel::STNs() const
+{
+	return m_ptrarrSTNs;
 }
 
 const std::vector<daePortArray*>& daeModel::PortArrays() const

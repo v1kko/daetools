@@ -3,9 +3,9 @@
 #define NO_IMPORT_ARRAY
 #include <noprefix.h>
 using namespace std;
-using namespace boost;
 using namespace boost::python;
 #include <boost/property_tree/json_parser.hpp>
+#include "../Core/units_io.h"
 
 namespace daepython
 {
@@ -224,6 +224,12 @@ std::string daeConfig__str__(daeConfig& self)
 	return self.toString();
 }
 
+std::string daeConfig__repr__(daeConfig& self)
+{
+    string msg = "daeConfig(\"%s\")";
+	return (boost::format(msg) % daeConfig::GetConfigFolder()).str();
+}
+
 boost::python::object daeConfig__contains__(daeConfig& self, boost::python::object key)
 {
 	extract<string>  str_key(key);
@@ -381,70 +387,386 @@ void daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::pyt
 }
 
 /*******************************************************
-	__str__ funkcije
+	__str__ and __repr__ funkcije
 *******************************************************/
-string daeVariableType_str(const daeVariableType& self)
+string daeVariableType__repr__(const daeVariableType& self)
 {
-	string str;
-	str += self.GetName() + string(", ");
-	str += toString(self.GetUnits()) + string(", ");
-	str += string("[") + toString(self.GetLowerBound()) + string(", ") + toString(self.GetUpperBound()) + string("], ");
-	str += toString(self.GetInitialGuess()) + string(", ");
-	str += toString(self.GetAbsoluteTolerance());
-	return str;
+    daeModelExportContext c;
+    c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;    
+    string strUnits = units::Export(ePYDAE, c, self.GetUnits());
+    
+    return (boost::format("daeVariableType(name=\"%1%\", units=%2%, lowerBound=%3%, upperBound=%4%, initialGuess=%5%, absoluteTolerance=%6%)") % 
+            self.GetName() % strUnits % self.GetLowerBound() % 
+            self.GetUpperBound() % self.GetInitialGuess() % self.GetAbsoluteTolerance()).str();
 }
 
-string daeDomain_str(const daeDomain& self)
+string daeDomainIndex__repr__(const daeDomainIndex& self)
 {
-//	cout << "called daeDomain_str" << endl;
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    if(self.m_eType == eConstantIndex)
+	{
+        return (boost::format("daeDomainIndex(index=%1%)") % self.m_nIndex).str();
+	}
+	else if(self.m_eType == eDomainIterator)
+	{
+		if(!self.m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+        return (boost::format("daeDomainIndex(dedi=%1%)") % daeDEDI__repr__(*self.m_pDEDI)).str();
+	}
+	else if(self.m_eType == eIncrementedDomainIterator)
+	{
+		if(!self.m_pDEDI)
+			daeDeclareAndThrowException(exInvalidPointer);
+        return (boost::format("daeDomainIndex(dedi=%1%, increment=%2%)") % daeDEDI__repr__(*self.m_pDEDI) % self.m_iIncrement).str();
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+    return string("");
 }
 
-string daeParameter_str(const daeParameter& self)
+string daeIndexRange__repr__(const daeIndexRange& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    if(self.m_eType == eAllPointsInDomain)
+	{
+        return (boost::format("daeIndexRange(domain=%1%)") % self.m_pDomain->GetStrippedName()).str();
+	}
+	else if(self.m_eType == eRangeOfIndexes)
+	{
+        return (boost::format("daeIndexRange(domain=%1%, startIndex=%2%, stopIndex=%3%, step=%4%)") % self.m_pDomain->GetStrippedName()
+                                                                                                    % self.m_iStartIndex
+                                                                                                    % self.m_iEndIndex
+                                                                                                    % self.m_iStride).str();
+	}
+	else if(self.m_eType == eCustomRange)
+	{
+		string strItems = "[" + toString(self.m_narrCustomPoints) + "]";
+        return (boost::format("daeIndexRange(domain=%1%, customPoints=%2%)") % self.m_pDomain->GetStrippedName() 
+                                                                             % strItems).str();
+	}
+	else
+	{
+		daeDeclareAndThrowException(exInvalidCall)
+	}
+    return string("");
 }
 
-string daeVariable_str(const daeVariable& self)
+string daeArrayRange__str__(const daeArrayRange& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    return self.GetRangeAsString();
 }
 
-string daePort_str(const daePort& self)
+string daeArrayRange__repr__(const daeArrayRange& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    if(self.m_eType == eRangeDomainIndex)
+	{
+        return (boost::format("daeArrayRange(domainIndex=%1%)") % daeDomainIndex__repr__(self.m_domainIndex)).str();
+	}
+	else if(self.m_eType == eRange)
+	{
+        return (boost::format("daeArrayRange(indexRange=%1%)") % daeIndexRange__repr__(self.m_Range)).str();
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+	return string("");
 }
 
-string daeModel_str(const daeModel& self)
+string daeDomain__str__(const daeDomain& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    return daeGetStrippedRelativeName(NULL, &self);
 }
 
-string daeEquation_str(const daeEquation& self)
+string daeDomain__repr__(const daeDomain& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    daeModelExportContext c;
+    c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;    
+    string strUnits = units::Export(ePYDAE, c, self.GetUnits());
+    
+    if(self.GetParentPort())
+        return (boost::format("daeDomain(name=\"%1%\", parentPort=%2%, units=%3%, description=\"%4%\")") % 
+                self.GetName() % daeGetStrippedRelativeName(NULL, self.GetParentPort()) % strUnits % self.GetDescription()).str();
+    else
+        return (boost::format("daeDomain(name=\"%1%\", parentModel=%2%, units=%3%, description=\"%4%\")") % 
+                self.GetName() % daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) % strUnits % self.GetDescription()).str();
 }
 
-string daeDEDI_str(const daeDEDI& self)
+string daeParameter__str__(const daeParameter& self)
 {
-	string str;
-	str += self.GetCanonicalName();
-	return str;
+    return daeGetStrippedRelativeName(NULL, &self);
 }
 
-string adouble_repr(const adouble& self)
+string daeParameter__repr__(const daeParameter& self)
+{
+    daeModelExportContext c;
+    c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;    
+    
+    string strUnits   = units::Export(ePYDAE, c, self.GetUnits());
+    string strDomains = "[" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(self.Domains(), NULL) + "]";    
+    
+    if(self.GetParentPort())
+        return (boost::format("daeParameter(name=\"%1%\", units=%2%, parentPort=%3%, description=\"%4%\", domains=%5%)") % 
+                self.GetName() % strUnits % daeGetStrippedRelativeName(NULL, self.GetParentPort()) % 
+                self.GetDescription() % strDomains).str();
+    else
+        return (boost::format("daeParameter(name=\"%1%\", units=%2%, parentModel=%3%, description=\"%4%\", domains=%5%)") % 
+                self.GetName() % strUnits % daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) % 
+                self.GetDescription() % strDomains).str();
+}
+
+string daeVariable__str__(const daeVariable& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeVariable__repr__(const daeVariable& self)
+{
+    string strDomains = "[" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(self.Domains(), NULL) + "]";    
+    if(self.GetParentPort())
+        return (boost::format("daeVariable(name=\"%1%\", variableType=%2%, parentPort=%3%, description=\"%4%\", domains=%5%)") % 
+                self.GetName() % self.GetVariableType()->GetName() % daeGetStrippedRelativeName(NULL, self.GetParentPort()) % 
+                self.GetDescription() % strDomains).str();
+    else
+        return (boost::format("daeVariable(name=\"%1%\", variableType=%2%, parentModel=%3%, description=\"%4%\", domains=%5%)") % 
+                self.GetName() % self.GetVariableType()->GetName() % daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) % 
+                self.GetDescription() % strDomains).str();
+}
+
+string daePort__str__(const daePort& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daePort__repr__(const daePort& self)
+{
+    string strDomains    = getVector__repr__(self.Domains(),    &daeDomain__str__);
+    string strParameters = getVector__repr__(self.Parameters(), &daeParameter__str__);
+    string strVariables  = getVector__repr__(self.Variables(),  &daeVariable__str__);
+    string strPortType   = g_EnumTypesCollection->esmap_daeePortType.GetString(self.GetType());
+    string strParent     = self.GetModel() ? daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) : "None";
+    
+    string fmt = "daePort(name=\"%1%\", type=%2%, parentModel=%3%, description=\"%4%\", "
+                         "domains=%5%, parameters=%6%, variables=%7%)";
+    return (boost::format(fmt) % self.GetName() % strPortType % strParent % self.GetDescription()
+                               % strDomains % strParameters % strVariables).str();
+}
+
+string daeEventPort__str__(const daeEventPort& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeEventPort__repr__(const daeEventPort& self)
+{
+    string strPortType = g_EnumTypesCollection->esmap_daeePortType.GetString(self.GetType());
+    string strParent   = self.GetModel() ? daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) : "None";
+    
+    return (boost::format("daeEventPort(name=\"%1%\", type=%2%, parentModel=%3%, description=\"%4%\")") % 
+                           self.GetName() % strPortType % strParent % self.GetDescription()).str();
+}
+
+string daeModel__str__(const daeModel& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeModel__repr__(const daeModel& self)
+{
+    string strDomains    = getVector__repr__(self.Domains(),    &daeDomain__str__);
+    string strParameters = getVector__repr__(self.Parameters(), &daeParameter__str__);
+    string strVariables  = getVector__repr__(self.Variables(),  &daeVariable__str__);
+    string strEquations  = getVector__repr__(self.Equations(),  &daeEquation__str__);
+    string strSTNs       = getVector__repr__(self.STNs(),       &daeSTN__str__);
+    string strPorts      = getVector__repr__(self.Ports(),      &daePort__str__);
+    string strEventPorts = getVector__repr__(self.EventPorts(), &daeEventPort__str__);
+    string strUnits      = getVector__repr__(self.Models(),     &daeModel__str__);     
+    string strParent     = self.GetModel() ? daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) : "None";
+    
+    string fmt = "daeModel(name=\"%1%\", parentModel=%2%, description=\"%3%\", "
+                          "domains=%4%, parameters=%5%, variables=%6%, equations=%7%, "
+                          "stns=%8%, ports=%9%, eventPorts=%10%, units=%11%)";
+    return (boost::format(fmt) % self.GetName() % strParent % self.GetDescription() %
+            strDomains % strParameters % strVariables % strEquations %
+            strSTNs % strPorts % strEventPorts % strUnits).str();
+}
+
+string daeEquation__str__(const daeEquation& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeEquation__repr__(const daeEquation& self)
+{
+    string strResidual = adouble__str__(self.GetResidual());
+    string strDEDIs    = getVector__repr__(self.GetDEDIs(), &daeDEDI__repr__);
+    
+    if(self.GetParentState())
+        return (boost::format("daeEquation(name=\"%1%\", parentState=%2%, description=\"%3%\", distributedDomains=%4%, residual=%5%)") % 
+                self.GetName() % 
+                daeGetStrippedRelativeName(NULL, self.GetParentState()) % 
+                self.GetDescription() % strDEDIs % strResidual).str();
+    else
+        return (boost::format("daeEquation(name=\"%1%\", parentModel=%2%, description=\"%3%\", distributedDomains=%4%, residual=%5%)") % 
+                self.GetName() % daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) % 
+                self.GetDescription() % strDEDIs % strResidual).str();
+}
+
+string daeSTN__str__(const daeSTN& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeSTN__repr__(const daeSTN& self)
+{
+    string strStates = getVector__repr__(self.States(), &daeState__str__);
+    string strParent = self.GetModel() ? daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) : "None";
+    
+    if(self.GetParentState())
+        return (boost::format("daeSTN(name=\"%1%\", parentState=%2%, states=%3%, description=\"%4%\")") % 
+                              self.GetName() % daeGetStrippedRelativeName(NULL, self.GetParentState()) % strStates % self.GetDescription()).str();
+    else
+        return (boost::format("daeSTN(name=\"%1%\", parentModel=%2%, states=%3%, description=\"%4%\")") % 
+                              self.GetName() % strParent % strStates % self.GetDescription()).str();
+}
+
+string daeIF__str__(const daeIF& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeIF__repr__(const daeIF& self)
+{
+    string strStates = getVector__repr__(self.States(), &daeState__str__);
+    string strParent = self.GetModel() ? daeGetStrippedRelativeName(NULL, dynamic_cast<daeModel*>(self.GetModel())) : "None";
+    
+    if(self.GetParentState())
+        return (boost::format("daeIF(name=\"%1%\", parentState=%2%, states=%3%, description=\"%4%\")") % 
+                              self.GetName() % daeGetStrippedRelativeName(NULL, self.GetParentState()) % strStates % self.GetDescription()).str();
+    else
+        return (boost::format("daeIF(name=\"%1%\", parentModel=%2%, states=%3%, description=\"%4%\")") % 
+                              self.GetName() % strParent % strStates % self.GetDescription()).str();
+}
+
+string daeState__str__(const daeState& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeState__repr__(const daeState& self)
+{
+    string strEquations          = getVector__repr__(self.Equations(),      &daeEquation__str__);
+    string strOnEventActions     = getVector__repr__(self.OnEventActions(), &daeOnEventActions__str__);
+    string strNestedSTNs         = getVector__repr__(self.NestedSTNs(),     &daeSTN__str__);
+    string strOnConditionActions = "[]";
+    
+    return (boost::format("daeState(name=\"%1%\", equations=%2%, onEventActions=%3%, onConditionActions=%4%, nestedSTNs=%5%)") % 
+                          self.GetName() % strEquations % strOnEventActions % strOnConditionActions % strNestedSTNs).str();
+}
+
+string daeDEDI__str__(const daeDEDI& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeDEDI__repr__(const daeDEDI& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeOptimizationVariable__str__(const daeOptimizationVariable& self)
+{
+    return self.GetName();
+}
+
+string daeOptimizationVariable__repr__(const daeOptimizationVariable& self)
+{
+    return self.GetName();
+}
+
+string daeObjectiveFunction__str__(const daeObjectiveFunction& self)
+{
+    return self.GetName();
+}
+
+string daeObjectiveFunction__repr__(const daeObjectiveFunction& self)
+{
+    return self.GetName();
+}
+
+string daeOptimizationConstraint__str__(const daeOptimizationConstraint& self)
+{
+    return self.GetName();
+}
+
+string daeOptimizationConstraint__repr__(const daeOptimizationConstraint& self)
+{
+    return self.GetName();
+}
+
+string daeMeasuredVariable__str__(const daeMeasuredVariable& self)
+{
+    return self.GetName();
+}
+
+string daeMeasuredVariable__repr__(const daeMeasuredVariable& self)
+{
+    return self.GetName();
+}
+
+string daeEventPortConnection__str__(const daeEventPortConnection& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeEventPortConnection__repr__(const daeEventPortConnection& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daePortConnection__str__(const daePortConnection& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daePortConnection__repr__(const daePortConnection& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeOnEventActions__str__(const daeOnEventActions& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeOnEventActions__repr__(const daeOnEventActions& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string adouble__str__(const adouble& self)
+{
+    string str;
+	daeModelExportContext c;
+	
+	c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;
+	if(self.node)
+		self.node->Export(str, ePYDAE, c);
+    else
+        str = toString(self.getValue());
+
+    return str;
+}
+
+string adouble__repr__(const adouble& self)
 {
 	string strNode;
 	daeModelExportContext c;
@@ -453,14 +775,37 @@ string adouble_repr(const adouble& self)
 	c.m_bExportDefinition  = true;
 	c.m_pModel             = NULL;
 	if(self.node)
-	{
-		self.node->Export(strNode, eCDAE, c);
-		return (boost::format("adouble(%1%, %2%, %3%)") % self.getValue() % self.getDerivative() % strNode).str();
-	}
-	else
-	{
-		return (boost::format("adouble(%1%, %2%)") % self.getValue() % self.getDerivative()).str();
-	}
+		self.node->Export(strNode, ePYDAE, c);
+    else
+        strNode = "None";
+
+    return (boost::format("adouble(value=%1%, derivative=%2%, gatherInfo=%3%, node=%4%)") % self.getValue() % self.getDerivative() % self.getGatherInfo() % strNode).str();
+}
+
+string adouble_array__str__(const adouble_array& self)
+{
+    string strValues = "[";
+    for(size_t i = 0; i < self.m_arrValues.size(); i++)
+        strValues += (boost::format("%1%%2%") % (i==0 ? "" : ", ") % adouble__str__(self.m_arrValues[i])).str();
+    strValues += "]";
+    return strValues;
+}
+
+string adouble_array__repr__(const adouble_array& self)
+{
+    string strNode;
+	daeModelExportContext c;
+	
+	c.m_nPythonIndentLevel = 0;
+	c.m_bExportDefinition  = true;
+	c.m_pModel             = NULL;
+	if(self.node)
+		self.node->Export(strNode, ePYDAE, c);
+    else
+        strNode = "None";
+    
+	return (boost::format("adouble_array(gatherInfo=%1%, node=%2%)") % 
+            self.getGatherInfo() % strNode).str();
 }
 
 /*******************************************************
@@ -840,7 +1185,7 @@ boost::python::object GetNumPyArrayDomain(daeDomain& domain)
 	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = domain.GetNumberOfPoints();
 
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	for(size_t k = 0; k < (size_t)dimensions; k++)
 		values[k] = *domain.GetPoint(k);
@@ -965,7 +1310,7 @@ boost::python::object GetNumPyArrayParameter(daeParameter& param)
             nTotalSize *= dimensions[i];
         }
     
-        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
         real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
         for(size_t k = 0; k < nTotalSize; k++)
             values[k] = data[k];
@@ -1187,7 +1532,7 @@ boost::python::object daeVariable_Values(daeVariable& var)
         nStart = var.GetOverallIndex();
         nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
     
-        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
         real_t* values = static_cast<real_t*>(PyArray_DATA(numpy_array.ptr()));
         
         for(k = 0, i = nStart; i < nEnd; i++, k++)
@@ -1217,12 +1562,12 @@ boost::python::object daeVariable_IDs(daeVariable& var)
     else
     {
         dimensions = new npy_intp[nDomains];
-        for(size_t i = 0; i < nDomains; i++)
+        for(i = 0; i < nDomains; i++)
             dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
         nStart = var.GetOverallIndex();
         nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
     
-        python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
         npy_int* values = static_cast<npy_int*>(PyArray_DATA(numpy_array.ptr()));
         
         for(k = 0, i = nStart; i < nEnd; i++, k++)
@@ -2264,27 +2609,39 @@ boost::python::list GetStatesSTN(daeSTN& self)
 }
 
 /*******************************************************
+	daeOnEventActions
+*******************************************************/
+boost::python::list daeOnEventActions_Actions(const daeOnEventActions& self)
+{
+    return getListFromVector(self.Actions());
+}
+
+boost::python::list daeOnEventActions_UserDefinedActions(const daeOnEventActions& self)
+{
+    return getListFromVector(self.UserDefinedActions());
+}
+
+/*******************************************************
 	daeState
 *******************************************************/
 boost::python::list daeState_GetEquations(daeState& self)
 {
-    std::vector<daeEquation_t*> ptrarrEquations;
-	self.GetEquations(ptrarrEquations);
-    return getListFromVectorAndCastPointer<daeEquation_t*, daeEquation*>(ptrarrEquations);
+    return getListFromVector(self.Equations());
 }
 
 boost::python::list daeState_GetStateTransitions(daeState& self)
 {
-    std::vector<daeStateTransition_t*> ptrarrStateTransitions;
-	self.GetStateTransitions(ptrarrStateTransitions);
-    return getListFromVectorAndCastPointer<daeStateTransition_t*, daeStateTransition*>(ptrarrStateTransitions);
+    return getListFromVector(self.StateTransitions());
 }
 
 boost::python::list daeState_GetNestedSTNs(daeState& self)
 {
-    std::vector<daeSTN_t*> ptrarrSTNs;
-	self.GetNestedSTNs(ptrarrSTNs);
-    return getListFromVectorAndCastPointer<daeSTN_t*, daeSTN*>(ptrarrSTNs);
+    return getListFromVector(self.NestedSTNs());
+}
+
+boost::python::list daeState_GetOnEventActions(daeState& self)
+{
+    return getListFromVector(self.OnEventActions());
 }
 
 /*******************************************************
@@ -2313,7 +2670,7 @@ boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
 
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
 	o.GetGradients(values, dimensions);
@@ -2329,7 +2686,7 @@ boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimization
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
 
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
 	o.GetGradients(values, dimensions);
@@ -2345,7 +2702,7 @@ boost::python::numeric::array GetGradientsMeasuredVariable(daeMeasuredVariable& 
 	nType      = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
 	dimensions = o.GetNumberOfOptimizationVariables();
 
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+	boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
 	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
 	::memset(values, 0, dimensions * sizeof(real_t));
 	o.GetGradients(values, dimensions);

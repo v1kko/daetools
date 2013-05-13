@@ -3464,7 +3464,7 @@ void adSetupExpressionDerivativeNode::Export(std::string& strContent, daeeModelL
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "self.dt(%1%)";
+		strExport = "dt(%1%)";
 		fmtFile.parse(strExport);
 		fmtFile % strExpression;
 	}
@@ -3776,7 +3776,7 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "self.d(%1%, %2%)";
+		strExport = "d(%1%, %2%)";
 		fmtFile.parse(strExport);
 		fmtFile % strExpression % strDomainName;
 	}
@@ -4021,7 +4021,7 @@ void adSetupIntegralNode::Export(std::string& strContent, daeeModelLanguage eLan
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "self.integral(%1%)";
+		strExport = "integral(%1%)";
 		fmtFile.parse(strExport);
 		fmtFile % strExpression;
 	}

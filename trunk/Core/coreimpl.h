@@ -345,6 +345,8 @@ public:
 	
 	void	CreateArray(size_t nNoIntervals);
 	void	CreateDistributed(daeeDiscretizationMethod eMethod, size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dRB);
+    
+    daePort* GetParentPort(void) const;
 	
 protected:
 	void	CreatePoints(void);
@@ -1593,6 +1595,9 @@ public:
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 	void DistributeOnDomain(daeDomain& rDomain);
+    
+    daePort* GetParentPort(void) const;
+    const std::vector<daeDomain*>& Domains(void) const;
 
 	adouble	operator()(void);
 	template<typename TYPE1>
@@ -1675,9 +1680,9 @@ public:
 	virtual ~daeVariable(void);
 
 public:	
-	virtual string				GetCanonicalName(void) const;
-	virtual daeVariableType_t*	GetVariableType(void);
-	virtual void				GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
+	virtual string                   GetCanonicalName(void) const;
+	virtual const daeVariableType_t* GetVariableType(void) const;
+	virtual void                     GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 
 	virtual size_t	GetNumberOfPoints(void) const;
 
@@ -1854,6 +1859,9 @@ public:
 	daeDomain* GetDomain(size_t nIndex) const;
 
     void GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const;
+    
+    daePort* GetParentPort(void) const;
+    const std::vector<daeDomain*>& Domains(void) const;
 
 public:
 	adouble	operator()(void);
@@ -2287,6 +2295,8 @@ public:
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	daeEventPort* GetEventPort(void) const;
+    const std::vector<daeAction*>& Actions() const;
+    const std::vector<daeAction*>& UserDefinedActions() const;
 	
 	void Initialize(void);
 
@@ -2493,10 +2503,13 @@ public:
 	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
 
 	const std::vector<daePort*>& Ports() const;
+    const std::vector<daeEventPort*>& EventPorts() const;
 	const std::vector<daeModel*>& Models() const;
 	const std::vector<daeDomain*>& Domains() const;
 	const std::vector<daeParameter*>& Parameters() const;
 	const std::vector<daeVariable*>& Variables() const;
+    const std::vector<daeEquation*>& Equations() const;
+    const std::vector<daeSTN*>& STNs() const;
 	const std::vector<daePortArray*>& PortArrays() const;
 	const std::vector<daeModelArray*>& ModelArrays() const;
 	
@@ -2861,6 +2874,11 @@ public:
 	void FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 	void ConnectOnEventActions(void);
 	void DisconnectOnEventActions(void);
+    
+    const std::vector<daeEquation*>& Equations() const;
+    const std::vector<daeSTN*>& NestedSTNs() const;
+	const std::vector<daeOnEventActions*>& OnEventActions() const;
+    const std::vector<daeStateTransition*>& StateTransitions() const;
 
 protected:
 	void	Create(const string& strName, daeSTN* pSTN);
@@ -2984,6 +3002,8 @@ public:
 	void			CalcNonZeroElements(int& NNZ);
 	void			FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
+    const std::vector<daeState*>& States() const;
+    
 	daeState*		GetParentState(void) const;
 	void			SetParentState(daeState* pParentState);
 	
@@ -3100,6 +3120,9 @@ public:
 	virtual size_t	GetNumberOfEquations(void) const;
 	
 	void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos) const;
+    
+    daeState* GetParentState() const;
+    std::vector<daeDEDI*> GetDEDIs() const;
 
 protected:
 	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node);

@@ -249,6 +249,12 @@ const char* DOCSTR_daeMeasuredVariable = "";
     const char* DOCSTR_daeMeasuredVariable_Gradients = "";  
     const char* DOCSTR_daeMeasuredVariable_AbsTolerance = "";  
     
+const char* DOCSTR_daeOnEventActions = "";
+    const char* DOCSTR_daeOnEventActions_EventPort = "";
+    const char* DOCSTR_daeOnEventActions_Actions = "";
+    const char* DOCSTR_daeOnEventActions_UserDefinedActions = "";
+    const char* DOCSTR_daeOnEventActions_Execute = "";
+    
 const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_init = "Constructor...";
     const char* DOCSTR_daeModel_Domains = "A list of domains in the model.";
@@ -320,6 +326,7 @@ const char* DOCSTR_daeState = "";
     const char* DOCSTR_daeState_StateTransitions = "";  
     const char* DOCSTR_daeState_NestedSTNs = "";  
     const char* DOCSTR_daeState_OnConditionActions = "";  
+    const char* DOCSTR_daeState_OnEventActions = "";
 
 const char* DOCSTR_daeStateTransition = "";  
     const char* DOCSTR_daeStateTransition_init = "";  

@@ -28,7 +28,7 @@
 namespace daepython
 {
 template<typename ITEM>
-boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
+boost::python::list getListFromVector(const std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
    
@@ -39,7 +39,7 @@ boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
 }
 
 template<typename ITEM, typename CAST>
-boost::python::list getListFromVectorAndCastPointer(std::vector<ITEM>& arrItems)
+boost::python::list getListFromVectorAndCastPointer(const std::vector<ITEM>& arrItems)
 {
     CAST pObject;
     boost::python::list l;
@@ -53,7 +53,7 @@ boost::python::list getListFromVectorAndCastPointer(std::vector<ITEM>& arrItems)
 }
 
 template<typename ITEM>
-boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
+boost::python::list getListFromVectorByValue(const std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
    
@@ -63,18 +63,86 @@ boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
     return l;
 }
 
+template<typename ITEM>
+std::string getVector__repr__(const std::vector<ITEM*>& arrItems, std::string (*__repr__)(const ITEM&))
+{
+    std::string str = "[";
+    for(size_t i = 0; i < arrItems.size(); i++)
+        str += (i == 0 ? "" : ", ") + __repr__(*arrItems[i]);
+    str += "]";
+    
+    return str;    
+}
+
+template<typename ITEM, typename CAST>
+std::string getVectorWithCast__repr__(const std::vector<ITEM*>& arrItems, std::string (*__repr__)(const CAST&))
+{
+    std::string str = "[";
+    for(size_t i = 0; i < arrItems.size(); i++)
+    {
+        CAST* ptr = dynamic_cast<CAST*>(arrItems[i]);
+        str += (i == 0 ? "" : ", ") + __repr__(*ptr);
+    }
+    str += "]";
+    
+    return str;    
+}
+
 /*******************************************************
 	String functions
 *******************************************************/
-string daeVariableType_str(const daeVariableType& self) ;
-string daeDomain_str(const daeDomain& self);
-string daeParameter_str(const daeParameter& self);
-string daeVariable_str(const daeVariable& self);
-string daePort_str(const daePort& self);
-string daeModel_str(const daeModel& self);
-string daeEquation_str(const daeEquation& self);
-string daeDEDI_str(const daeDEDI& self);
-string adouble_repr(const adouble& self);
+string daeVariableType__repr__(const daeVariableType& self);
+string daeDomainIndex__repr__(const daeDomainIndex& self);
+string daeIndexRange__repr__(const daeIndexRange& self);
+string daeArrayRange__str__(const daeArrayRange& self);
+string daeArrayRange__repr__(const daeArrayRange& self);
+string daeDomain__str__(const daeDomain& self);
+string daeDomain__repr__(const daeDomain& self);
+string daeParameter__str__(const daeParameter& self);
+string daeParameter__repr__(const daeParameter& self);
+string daeVariable__str__(const daeVariable& self);
+string daeVariable__repr__(const daeVariable& self);
+string daePort__str__(const daePort& self);
+string daePort__repr__(const daePort& self);
+string daeEventPort__str__(const daeEventPort &self);
+string daeEventPort__repr__(const daeEventPort& self);
+string daeModel__str__(const daeModel& self);
+string daeModel__repr__(const daeModel& self);
+string daeEquation__str__(const daeEquation& self);
+string daeEquation__repr__(const daeEquation& self);
+string daeSTN__str__(const daeSTN& self);
+string daeSTN__repr__(const daeSTN& self);
+string daeIF__str__(const daeIF& self);
+string daeIF__repr__(const daeIF& self);
+string daeState__str__(const daeState& self);
+string daeState__repr__(const daeState& self);
+string daeDEDI__str__(const daeDEDI& self);
+string daeDEDI__repr__(const daeDEDI& self);
+string adouble__str__(const adouble& self);
+string adouble__repr__(const adouble& self);
+string adouble_array__str__(const adouble_array& self);
+string adouble_array__repr__(const adouble_array& self);
+
+string daeOptimizationVariable__str__(const daeOptimizationVariable& self);
+string daeOptimizationVariable__repr__(const daeOptimizationVariable& self);
+
+string daeObjectiveFunction__str__(const daeObjectiveFunction& self);
+string daeObjectiveFunction__repr__(const daeObjectiveFunction& self);
+
+string daeOptimizationConstraint__str__(const daeOptimizationConstraint& self);
+string daeOptimizationConstraint__repr__(const daeOptimizationConstraint& self);
+
+string daeMeasuredVariable__str__(const daeMeasuredVariable& self);
+string daeMeasuredVariable__repr__(const daeMeasuredVariable& self);
+
+string daeEventPortConnection__str__(const daeEventPortConnection& self);
+string daeEventPortConnection__repr__(const daeEventPortConnection& self);
+
+string daePortConnection__str__(const daePortConnection& self);
+string daePortConnection__repr__(const daePortConnection& self);
+
+string daeOnEventActions__str__(const daeOnEventActions& self);
+string daeOnEventActions__repr__(const daeOnEventActions& self);
 
 /*******************************************************
 	Common functions
@@ -101,6 +169,7 @@ void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value);
 void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value);
 
 std::string daeConfig__str__(daeConfig& self);
+std::string daeConfig__repr__(daeConfig& self);
 boost::python::object daeConfig__contains__(daeConfig& self, boost::python::object key);
 boost::python::object daeConfig_has_key(daeConfig& self, boost::python::object key);
 boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::object key);
@@ -805,6 +874,16 @@ public:
 	{
         this->get_override("Execute")();
 	}
+    
+    std::string __str__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
+    
+    std::string __repr__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
 };
 
 
@@ -886,6 +965,12 @@ boost::python::list daePortConnection_GetEquations(daePortConnection& self);
 	daeSTN
 *******************************************************/
 boost::python::list GetStatesSTN(daeSTN& self);
+
+/*******************************************************
+	daeOnEventActions
+*******************************************************/
+boost::python::list daeOnEventActions_Actions(const daeOnEventActions& self);
+boost::python::list daeOnEventActions_UserDefinedActions(const daeOnEventActions& self);
 
 /*******************************************************
 	daeModel
@@ -1321,6 +1406,7 @@ public:
 boost::python::list daeState_GetEquations(daeState& self);
 boost::python::list daeState_GetStateTransitions(daeState& self);
 boost::python::list daeState_GetNestedSTNs(daeState& self);
+boost::python::list daeState_GetOnEventActions(daeState& self);
 
 /*******************************************************
 	daeSTN
@@ -1407,6 +1493,16 @@ public:
 			daeDeclareAndThrowException(exInvalidCall);
 		}
 	}
+    
+    std::string __str__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
+    
+    std::string __repr__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
 };
 
 /*******************************************************
@@ -1490,6 +1586,16 @@ public:
 			return daeVectorExternalFunctionWrapper::Calculate(mapValues);
 		}
 	}
+    
+    std::string __str__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
+    
+    std::string __repr__()
+    {
+        return daeGetStrippedRelativeName(NULL, this);
+    }
 };
 
 

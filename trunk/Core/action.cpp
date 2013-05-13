@@ -633,6 +633,16 @@ daeEventPort* daeOnEventActions::GetEventPort(void) const
 	return m_pEventPort;
 }
 
+const std::vector<daeAction*>& daeOnEventActions::Actions() const
+{
+    return m_ptrarrOnEventActions;
+}
+
+const std::vector<daeAction*>& daeOnEventActions::UserDefinedActions() const
+{
+    return m_ptrarrUserDefinedOnEventActions;
+}
+
 void daeOnEventActions::Initialize(void)
 {
 	size_t i;

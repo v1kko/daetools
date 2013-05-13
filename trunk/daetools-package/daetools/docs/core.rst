@@ -45,6 +45,7 @@ Classes
     daeArrayRange
     daeDEDI
     daeAction
+    daeOnEventActions
     daeOptimizationVariable
     daeObjectiveFunction
     daeOptimizationConstraint
@@ -337,6 +338,10 @@ Classes
 
     .. automethod:: __init__
 
+.. autoclass:: pyCore.daeOnEventActions
+    :members:
+    :undoc-members:
+
 .. autoclass:: pyCore.daeOptimizationVariable
     :members:
     :undoc-members:
@@ -403,10 +408,13 @@ Classes
 
 .. autoclass:: pyCore.adouble
     :members:
+    
+    .. automethod:: __init__
 
 .. autoclass:: pyCore.adouble_array
     :members:
 
+    .. automethod:: __init__
     .. automethod:: __len__
     .. automethod:: __getitem__
     .. automethod:: __setitem__

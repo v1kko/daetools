@@ -788,6 +788,11 @@ daeState* daeSTN::GetParentState(void) const
 	return m_pParentState;
 }
 
+const std::vector<daeState*>& daeSTN::States() const
+{
+    return m_ptrarrStates;
+}
+
 void daeSTN::SetParentState(daeState* pParentState)
 {
 	if(!pParentState)

@@ -140,9 +140,10 @@ public:
 class DAE_CORE_API adouble 
 {
 public:
-    adouble(void);
-    adouble(const real_t value);
-    adouble(const real_t value, real_t derivative);
+    adouble(real_t value = 0.0, 
+            real_t derivative = 0.0, 
+            bool gatherInfo = false, // gatherInfo must be false by default!
+            adNode* node_ = NULL);
     adouble(const adouble& a);
     virtual ~adouble();
 
@@ -313,7 +314,8 @@ std::ostream& operator<<(std::ostream& out, const adouble& a);
 class DAE_CORE_API adouble_array
 {
 public:
-	adouble_array(void);
+    adouble_array(bool gatherInfo = false,  // gatherInfo must be false by default!
+                  adNodeArray* node_ = NULL);
 	adouble_array(const adouble_array& a);
 	virtual ~adouble_array(void);
 

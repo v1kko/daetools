@@ -326,6 +326,26 @@ void daeState::DisconnectOnEventActions(void)
 	}
 }
 
+const std::vector<daeEquation*>& daeState::Equations() const
+{
+	return m_ptrarrEquations;
+}
+
+const std::vector<daeSTN*>& daeState::NestedSTNs() const
+{
+	return m_ptrarrSTNs;
+}
+
+const std::vector<daeOnEventActions*>& daeState::OnEventActions() const
+{
+	return m_ptrarrOnEventActions;
+}
+
+const std::vector<daeStateTransition*>& daeState::StateTransitions() const
+{
+    return m_ptrarrStateTransitions;
+}
+
 //daeEquation* daeState::AddEquation(const string& strEquationExpression)
 //{
 //	daeEquation* pEquation = new daeEquation();

@@ -253,11 +253,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__setitem__",	   &daepython::daeConfig__setitem__,  ( arg("self"), arg("propertyPath"), arg("value") ), DOCSTR_daeConfig_)
 	        
         .def("__str__",		   &daepython::daeConfig__str__)
+        .def("__repr__",	   &daepython::daeConfig__repr__)
 	;
         
-    /*******************************
-     * Nodes
-     *******************************/
+/*******************************
+    Nodes
+********************************/
     class_<daeNodeSaveAsContext>("daeNodeSaveAsContext")
         .def(init<daeModel*>())
         .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel)
@@ -424,14 +425,15 @@ BOOST_PYTHON_MODULE(pyCore)
 	;
 
 	class_<adouble>("adouble", DOCSTR_adouble, no_init)
-        .def(init<>(( arg("self") ), DOCSTR_adouble_init))
-            
-		.add_property("Value",		&adouble::getValue,      &adouble::setValue, DOCSTR_adouble_Value)
+        .def(init< optional<real_t, real_t, bool, adNode*> >(( arg("self"), arg("value") = 0.0, arg("derivative") = 0.0, arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_init))
+		
+        .add_property("Value",		&adouble::getValue,      &adouble::setValue, DOCSTR_adouble_Value)
 		.add_property("Derivative",	&adouble::getDerivative, &adouble::setDerivative, DOCSTR_adouble_Derivative) 
         .add_property("Node",       make_function(&adouble::getNodeRawPtr, return_internal_reference<>()), DOCSTR_adouble_Node)
         .add_property("GatherInfo",	&adouble::getGatherInfo, &adouble::setGatherInfo, DOCSTR_adouble_GatherInfo)
 
-        .def("__repr__",     &daepython::adouble_repr)
+        .def("__str__",  &daepython::adouble__str__)
+        .def("__repr__", &daepython::adouble__repr__)
 
         .def(- self)
 		.def(+ self)
@@ -472,6 +474,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(real_t() >= self)
 		.def(real_t() != self)
 		;
+    ;
+    
 	def("Exp",   &daepython::ad_exp);
 	def("Log",   &daepython::ad_log);
 	def("Sqrt",  &daepython::ad_sqrt);
@@ -515,7 +519,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Array",		&daepython::adarr_Array,   (arg("values")), DOCSTR_Array);  
 	
 	class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
-        .def(init<>(( arg("self") ), DOCSTR_adouble_array_init))
+        .def(init< optional<bool, adNodeArray*> >( ( arg("self"), arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_array_init))
             
         .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo,                DOCSTR_adouble_array_GatherInfo)
         .add_property("Node",        make_function(&adouble_array::getNodeRawPtr, return_internal_reference<>()), DOCSTR_adouble_array_Node)
@@ -526,6 +530,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__setitem__", &adouble_array::SetItem, ( arg("self"), arg("index"), arg("value") ),   DOCSTR_adouble_array_setitem)
         .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end), 
                             DOCSTR_adouble_array_items)
+            
+        .def("__str__",     &daepython::adouble_array__str__)
+        .def("__repr__",    &daepython::adouble_array__repr__)
 
         .def(- self)
 		.def(self + self)
@@ -589,7 +596,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("InitialGuess",		&daeVariableType::GetInitialGuess,		&daeVariableType::SetInitialGuess,      DOCSTR_daeVariableType_InitialGuess)
 		.add_property("AbsoluteTolerance",	&daeVariableType::GetAbsoluteTolerance, &daeVariableType::SetAbsoluteTolerance, DOCSTR_daeVariableType_AbsoluteTolerance)
 
-		.def("__str__",						&daepython::daeVariableType_str)
+        .def("__repr__",					&daepython::daeVariableType__repr__)
 		;
 
     class_<daeObject, boost::noncopyable>("daeObject", DOCSTR_daeObject, no_init)
@@ -625,6 +632,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("Increment",	&daeDomainIndex::m_iIncrement, DOCSTR_daeDomainIndex_Increment)
 
         .def("__str__",				&daeDomainIndex::GetIndexAsString)
+        .def("__repr__",			&daepython::daeDomainIndex__repr__)
 		;
 
 	class_<daeIndexRange>("daeIndexRange", DOCSTR_daeIndexRange, no_init)
@@ -641,6 +649,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("Step",		&daeIndexRange::m_iStride,     DOCSTR_daeIndexRange_Step)
 
         .def("__str__",				&daeIndexRange::ToString)
+        .def("__repr__",			&daepython::daeIndexRange__repr__)
 		;
 
 	class_<daeArrayRange>("daeArrayRange", DOCSTR_daeArrayRange, no_init)
@@ -652,6 +661,9 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def_readonly("Type",			&daeArrayRange::m_eType,       DOCSTR_daeArrayRange_Type)
 		.def_readonly("Range",			&daeArrayRange::m_Range,       DOCSTR_daeArrayRange_Range)
 		.def_readonly("DomainIndex",	&daeArrayRange::m_domainIndex, DOCSTR_daeArrayRange_DomainIndex)
+            
+        .def("__str__",				&daepython::daeArrayRange__str__)
+        .def("__repr__",			&daepython::daeArrayRange__repr__)
 		;
 
 	class_<daeDomain, bases<daeObject>, boost::noncopyable>("daeDomain", DOCSTR_daeDomain, no_init)
@@ -681,7 +693,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Points",					&daepython::GetDomainPoints, 
                                                 &daepython::SetDomainPoints, DOCSTR_daeDomain_Points)
 
-		.def("__str__",							&daepython::daeDomain_str)
+		.def("__str__",	 					    &daepython::daeDomain__str__)
+        .def("__repr__",						&daepython::daeDomain__repr__)
 		
         .def("CreateArray",						&daeDomain::CreateArray, ( arg("self"), 
                                                                            arg("noIntervals") 
@@ -704,14 +717,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("DomainPoints",	&daepython::daeDEDI_GetDomainPoints, DOCSTR_daeDEDI_DomainPoints)
         .add_property("DomainBounds",	&daeDEDI::GetDomainBounds, DOCSTR_daeDEDI_DomainBounds)
 		
-        .def("__str__",		&daepython::daeDEDI_str)
+        .def("__str__",	    &daepython::daeDEDI__str__)
+        .def("__repr__",	&daepython::daeDEDI__repr__)
+            
 		.def("__call__",	&daeDEDI::operator(), ( arg("self") ), DOCSTR_daeDEDI_call)
 		.def(self + size_t())
 		.def(self - size_t())  
 		;
 
 	class_<daepython::daeParameterWrapper, bases<daeObject>, boost::noncopyable>("daeParameter", DOCSTR_daeParameter, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeParameter_init))
 		.def(init<string, const unit&, daePort*, optional<string, boost::python::list> >(( arg("self"), 
                                                                                            arg("name"), 
                                                                                            arg("units"), 
@@ -733,7 +747,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("npyValues",      &daepython::GetNumPyArrayParameter, DOCSTR_daeParameter_npyValues)
         .add_property("NumberOfPoints", &daeParameter::GetNumberOfPoints, DOCSTR_daeParameter_NumberOfPoints)
 
-		.def("__str__",				&daepython::daeParameter_str)  
+		.def("__repr__",				&daepython::daeParameter__repr__)  
+        .def("__str__", 				&daepython::daeParameter__str__)  
+            
 		.def("DistributeOnDomain",	&daeParameter::DistributeOnDomain, ( arg("self"), arg("domain") ), DOCSTR_daeParameter_DistributeOnDomain)
 
 		.def("GetValue", &daepython::daeParameterWrapper::GetParameterValue0)
@@ -803,7 +819,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		;    
 
 	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable", DOCSTR_daeVariable, no_init)  
-        //.def(init<>(( arg("self") ), DOCSTR_daeVariable_init))
 		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >(( arg("self"), 
                                                                                                        arg("name"), 
                                                                                                        arg("variableType"), 
@@ -829,7 +844,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("npyValues",      &daepython::daeVariable_Values,  DOCSTR_daeVariable_npyValues)
         .add_property("npyIDs",         &daepython::daeVariable_IDs,     DOCSTR_daeVariable_npyIDs)
 
-		.def("__str__",					&daepython::daeVariable_str) 
+		.def("__str__",				    &daepython::daeVariable__str__) 
+        .def("__repr__",				&daepython::daeVariable__repr__) 
+            
 		.def("DistributeOnDomain",		&daeVariable::DistributeOnDomain, ( arg("self"), arg("domain") ), DOCSTR_daeVariable_DistributeOnDomain)
 
 		.def("__call__", &daepython::VariableFunctionCall0)
@@ -1082,7 +1099,9 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("Parameters",		&daepython::daePortWrapper::GetParameters, DOCSTR_daePort_Parameters)
 		.add_property("Variables",		&daepython::daePortWrapper::GetVariables, DOCSTR_daePort_Variables)
 
-		.def("__str__",					&daepython::daePort_str)
+		.def("__str__",		    		&daepython::daePort__str__)
+        .def("__repr__",				&daepython::daePort__repr__)
+            
 		.def("SetReportingOn",			&daePort::SetReportingOn, ( arg("self"), arg("reportingOn") ), DOCSTR_daePort_SetReportingOn)
 		.def("Export",					&daePort::Export, ( arg("self"), arg("content"), arg("language"), arg("context") ), DOCSTR_daePort_Export)
 		;
@@ -1100,6 +1119,8 @@ BOOST_PYTHON_MODULE(pyCore)
 	    .add_property("RecordEvents",	&daeEventPort::GetRecordEvents, &daeEventPort::SetRecordEvents, DOCSTR_daeEventPort_RecordEvents)
         .add_property("Events",			&daepython::GetEventPortEventsList, DOCSTR_daeEventPort_Events)  
 		
+        .def("__str__",		    &daepython::daeEventPort__str__)
+        .def("__repr__",		&daepython::daeEventPort__repr__)
 		.def("__call__",		&daeEventPort::operator(), ( arg("self") ), DOCSTR_daeEventPort_call)
 		.def("SendEvent",		&daeEventPort::SendEvent, ( arg("self"), arg("data") ) , DOCSTR_daeEventPort_SendEvent)  
 		.def("ReceiveEvent",	&daeEventPort::ReceiveEvent, ( arg("self"), arg("data") ), DOCSTR_daeEventPort_ReceiveEvent)  
@@ -1114,6 +1135,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("VariableWrapper", make_function(&daepython::daeActionWrapper::GetVariableWrapper, return_internal_reference<>()), DOCSTR_daeAction_VariableWrapper)
         .add_property("SetupNode",       make_function(&daepython::daeActionWrapper::getSetupNodeRawPtr, return_internal_reference<>()), DOCSTR_daeAction_SetupNode)
         .add_property("RuntimeNode",     make_function(&daepython::daeActionWrapper::getRuntimeNodeRawPtr, return_internal_reference<>()), DOCSTR_daeAction_RuntimeNode)
+            
+        .def("__str__",				&daepython::daeActionWrapper::__str__)
+        .def("__repr__",			&daepython::daeActionWrapper::__repr__)
             
 		.def("Execute",		pure_virtual(&daepython::daeActionWrapper::Execute), ( arg("self") ), DOCSTR_daeAction_Execute)
         ;
@@ -1132,46 +1156,74 @@ BOOST_PYTHON_MODULE(pyCore)
 
     class_<daeOptimizationVariable, bases<daeOptimizationVariable_t> >("daeOptimizationVariable", DOCSTR_daeOptimizationVariable, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeOptimizationVariable_init))
+            
         .add_property("Name",           &daeOptimizationVariable::GetName, DOCSTR_daeOptimizationVariable)
         .add_property("Type",           &daeOptimizationVariable::GetType,          &daeOptimizationVariable::SetType, DOCSTR_daeOptimizationVariable)
         .add_property("Value",          &daeOptimizationVariable::GetValue,         &daeOptimizationVariable::SetValue, DOCSTR_daeOptimizationVariable)
         .add_property("LowerBound",     &daeOptimizationVariable::GetLB,            &daeOptimizationVariable::SetLB, DOCSTR_daeOptimizationVariable)
         .add_property("UpperBound",     &daeOptimizationVariable::GetUB,            &daeOptimizationVariable::SetUB, DOCSTR_daeOptimizationVariable)
         .add_property("StartingPoint",  &daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint, DOCSTR_daeOptimizationVariable)
+            
+        .def("__str__",				&daepython::daeOptimizationVariable__str__)
+        .def("__repr__",			&daepython::daeOptimizationVariable__repr__)
         ;
 
     class_<daeObjectiveFunction, bases<daeObjectiveFunction_t> >("daeObjectiveFunction", DOCSTR_daeObjectiveFunction, no_init)  
         .def(init<>(( arg("self") ), DOCSTR_daeObjectiveFunction_init))
+            
         .add_property("Name",           &daeObjectiveFunction::GetName, DOCSTR_daeObjectiveFunction_Name)
         .add_property("Residual",       &daeObjectiveFunction::GetResidual, &daeObjectiveFunction::SetResidual, DOCSTR_daeObjectiveFunction_Residual)
         .add_property("Value",          &daeObjectiveFunction::GetValue, DOCSTR_daeObjectiveFunction_Value)
         .add_property("Gradients",      &daepython::GetGradientsObjectiveFunction, DOCSTR_daeObjectiveFunction_Gradients)
         //.add_property("AbsTolerance", &daeObjectiveFunction::GetAbsTolerance, &daeObjectiveFunction::SetAbsTolerance, DOCSTR_daeObjectiveFunction_AbsTolerance)
+            
+        .def("__str__",				&daepython::daeObjectiveFunction__str__)
+        .def("__repr__",			&daepython::daeObjectiveFunction__repr__)
         ;
 
     class_<daeOptimizationConstraint, bases<daeOptimizationConstraint_t> >("daeOptimizationConstraint", DOCSTR_daeOptimizationConstraint, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeOptimizationConstraint_init))
+            
         .add_property("Name",           &daeOptimizationConstraint::GetName, DOCSTR_daeOptimizationConstraint_Name)
         .add_property("Residual",       &daeOptimizationConstraint::GetResidual, &daeOptimizationConstraint::SetResidual, DOCSTR_daeOptimizationConstraint_Residual)
         .add_property("Value",          &daeOptimizationConstraint::GetValue, DOCSTR_daeOptimizationConstraint_Value)
         .add_property("Type",           &daeOptimizationConstraint::GetType, &daeOptimizationConstraint::SetType, DOCSTR_daeOptimizationConstraint_Type)
         .add_property("Gradients",      &daepython::GetGradientsOptimizationConstraint, DOCSTR_daeOptimizationConstraint_Gradients)
         //.add_property("AbsTolerance", &daeOptimizationConstraint::GetAbsTolerance, &daeOptimizationConstraint::SetAbsTolerance, DOCSTR_daeOptimizationConstraint_AbsTolerance)
+            
+        .def("__str__",				&daepython::daeOptimizationConstraint__str__)
+        .def("__repr__",			&daepython::daeOptimizationConstraint__repr__)
         ;
 
     class_<daeMeasuredVariable, bases<daeMeasuredVariable_t> >("daeMeasuredVariable", DOCSTR_daeMeasuredVariable, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeMeasuredVariable_init))
+            
         .add_property("Name",           &daeMeasuredVariable::GetName, DOCSTR_daeMeasuredVariable_Name)
         .add_property("Residual",       &daeMeasuredVariable::GetResidual, &daeMeasuredVariable::SetResidual, DOCSTR_daeMeasuredVariable_Residual)
         .add_property("Value",          &daeMeasuredVariable::GetValue, DOCSTR_daeMeasuredVariable_Value)
         .add_property("Gradients",      &daepython::GetGradientsMeasuredVariable, DOCSTR_daeMeasuredVariable_Gradients)
         //.add_property("AbsTolerance", &daeMeasuredVariable::GetAbsTolerance, &daeMeasuredVariable::SetAbsTolerance, DOCSTR_daeMeasuredVariable_AbsTolerance)
+            
+        .def("__str__",				&daepython::daeMeasuredVariable__str__)
+        .def("__repr__",			&daepython::daeMeasuredVariable__repr__)
         ;
 
+    class_<daeOnEventActions, bases<daeObject>, boost::noncopyable>("daeOnEventActions", DOCSTR_daeOnEventActions, no_init)
+        .add_property("EventPort",          make_function(&daeOnEventActions::GetEventPort, return_internal_reference<>()),
+                                                                                               DOCSTR_daeOnEventActions_EventPort)
+        .add_property("Actions",            &daepython::daeOnEventActions_Actions,             DOCSTR_daeOnEventActions_Actions)
+        .add_property("UserDefinedActions", &daepython::daeOnEventActions_UserDefinedActions,  DOCSTR_daeOnEventActions_UserDefinedActions)
+            
+        .def("Execute",	&daeOnEventActions::Execute, DOCSTR_daeOnEventActions_Execute)
+            
+        .def("__str__",	 &daepython::daeOnEventActions__str__)
+        .def("__repr__", &daepython::daeOnEventActions__repr__)
+    ;
+    
 	class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel", DOCSTR_daeModel, no_init)
 		.def(init<string, optional<daeModel*, string> >(( arg("self"), 
                                                           arg("name"),
-                                                          arg("parent") = NULL, 
+                                                          arg("parentModel") = NULL, 
                                                           arg("description") = ""
                                                         ), DOCSTR_daeModel_init))
 
@@ -1191,7 +1243,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                        DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
 
-        .def("__str__",          &daepython::daeModel_str, ( arg("self") ), "str info")  
+        .def("__str__",           &daepython::daeModel__str__)  
+        .def("__repr__",          &daepython::daeModel__repr__)  
+            
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(), 
                                  ( arg("self"), arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_daeModel_CreateEquation)
 		.def("DeclareEquations", &daeModel::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations,
@@ -1260,54 +1314,66 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
     
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeEquation_init))
         .add_property("Residual",                       &daeEquation::GetResidual, &daeEquation::SetResidual, DOCSTR_daeEquation_Residual)
         .add_property("Scaling",                        &daeEquation::GetScaling,  &daeEquation::SetScaling, DOCSTR_daeEquation_Scaling)
         .add_property("EquationExecutionInfos",	        &daepython::daeEquation_GetEquationExecutionInfos, DOCSTR_daeEquation_EquationExecutionInfos)
         .add_property("DistributedEquationDomainInfos",	&daepython::daeEquation_DistributedEquationDomainInfos, DOCSTR_daeEquation_DistributedEquationDomainInfos)
         .add_property("EquationType",	                &daeEquation::GetEquationType, DOCSTR_daeEquation_EquationType)
             
-		.def("__str__",				&daepython::daeEquation_str)
+		.def("__str__",				&daepython::daeEquation__str__)
+        .def("__repr__",			&daepython::daeEquation__repr__)
+            
 		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain1, return_internal_reference<>(), 
                                     ( arg("self"), arg("domain"), arg("domainBounds") ), DOCSTR_daeEquation_DistributeOnDomain1)
 		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain2, return_internal_reference<>(), 
                                     ( arg("self"), arg("domain"), arg("domainIndexes") ), DOCSTR_daeEquation_DistributeOnDomain1)
-		;
+	;
 
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", DOCSTR_daePortConnection, no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()), DOCSTR_daePortConnection_PortFrom)
         .add_property("PortTo",     make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()), DOCSTR_daePortConnection_PortTo)
         .add_property("Equations",	&daepython::daePortConnection_GetEquations, DOCSTR_daePortConnection_Equations)  
+            
+        .def("__str__",				&daepython::daePortConnection__str__)
+        .def("__repr__",			&daepython::daePortConnection__repr__)
     ;
     
     class_<daeEventPortConnection, bases<daeObject>, boost::noncopyable>("daeEventPortConnection", DOCSTR_daeEventPortConnection, no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()), DOCSTR_daeEventPortConnection_PortFrom)
         .add_property("PortTo",     make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()), DOCSTR_daeEventPortConnection_PortTo)
+            
+        .def("__str__",				&daepython::daeEventPortConnection__str__)
+        .def("__repr__",			&daepython::daeEventPortConnection__repr__)
     ;
     
 	class_<daeState, bases<daeObject>, boost::noncopyable>("daeState", DOCSTR_daeState, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeState_init))
-		.add_property("Equations",			 &daepython::daeState_GetEquations, DOCSTR_daeState_Equations)
+		.add_property("Equations",			 &daepython::daeState_GetEquations,        DOCSTR_daeState_Equations)
 		.add_property("StateTransitions",	 &daepython::daeState_GetStateTransitions, DOCSTR_daeState_StateTransitions)
-		.add_property("NestedSTNs",			 &daepython::daeState_GetNestedSTNs, DOCSTR_daeState_NestedSTNs)
+		.add_property("NestedSTNs",			 &daepython::daeState_GetNestedSTNs,       DOCSTR_daeState_NestedSTNs)
+        .add_property("OnEventActions",      &daepython::daeState_GetOnEventActions,   DOCSTR_daeState_OnEventActions)
         //.add_property("OnConditionActions", &daepython::daeState_GetOnConditionActions, DOCSTR_daeState_OnConditionActions)
-		;
+            
+        .def("__str__",				&daepython::daeState__str__)
+        .def("__repr__",			&daepython::daeState__repr__)
+    ;
 
 	class_<daeStateTransition, bases<daeObject>, boost::noncopyable>("daeStateTransition", DOCSTR_daeStateTransition, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeStateTransition_init))
 		.add_property("Condition",	make_function(&daepython::daeStateTransition_GetCondition, return_internal_reference<>()),
                                     DOCSTR_daeStateTransition_Condition)
         .add_property("Actions",	&daepython::daeStateTransition_GetActions, DOCSTR_daeStateTransition_Actions)
 		;
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN", DOCSTR_daeSTN, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeSTN_init))
         .add_property("ActiveState",	&daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
         .add_property("States",			&daepython::GetStatesSTN, DOCSTR_daeSTN_States)
+        
+        .def("__str__",				&daepython::daeSTN__str__)
+        .def("__repr__",			&daepython::daeSTN__repr__)
         ;
 
 	class_<daeIF, bases<daeSTN>, boost::noncopyable>("daeIF", DOCSTR_daeIF, no_init)
-        //.def(init<>(( arg("self") ), DOCSTR_daeIF_init))
+        .def("__str__",				&daepython::daeIF__str__)
+        .def("__repr__",			&daepython::daeIF__repr__)
 		;
 	
 	class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction", DOCSTR_daeScalarExternalFunction, no_init)
@@ -1322,6 +1388,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("Calculate",	pure_virtual(&daepython::daeScalarExternalFunctionWrapper::Calculate_), 
                             ( arg("self"), arg("values") ), DOCSTR_daeScalarExternalFunction_Calculate)
 		.def("__call__",	&daeScalarExternalFunction::operator(), ( arg("self") ), DOCSTR_daeScalarExternalFunction_call)
+        .def("__str__",		&daepython::daeScalarExternalFunctionWrapper::__str__)
+        .def("__repr__",	&daepython::daeScalarExternalFunctionWrapper::__repr__)
 		;
 	
 	class_<daepython::daeVectorExternalFunctionWrapper, boost::noncopyable>("daeVectorExternalFunction", DOCSTR_daeVectorExternalFunction, no_init)
@@ -1337,6 +1405,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("Calculate",	pure_virtual(&daepython::daeVectorExternalFunctionWrapper::Calculate_), 
                             ( arg("self"), arg("values") ), DOCSTR_daeVectorExternalFunction_Calculate)
 		.def("__call__",	&daeVectorExternalFunction::operator(), ( arg("self") ), DOCSTR_daeVectorExternalFunction_call)
+        .def("__str__",		&daepython::daeVectorExternalFunctionWrapper::__str__)
+        .def("__repr__",	&daepython::daeVectorExternalFunctionWrapper::__repr__)
 		;
 
 

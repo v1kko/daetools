@@ -34,25 +34,17 @@ inline real_t makeNaN()
 /*********************************************************************************************
 	adouble
 **********************************************************************************************/
-adouble::adouble() 
+adouble::adouble(real_t value/* = 0.0*/, 
+                 real_t derivative/* = 0.0*/, 
+                 bool gatherInfo/* = false*/, 
+                 adNode* node_/* = NULL*/)
 {
-	m_dValue = 0.0;
-    m_dDeriv = 0.0;
-	m_bGatherInfo = false;
-}
-
-adouble::adouble(const real_t value)
-{
-	m_dValue = value;
-    m_dDeriv = 0.0;
-	m_bGatherInfo = false;
-}
-
-adouble::adouble(const real_t value, real_t deriv)
-{
-	m_dValue = value;
-    m_dDeriv = deriv;
-	m_bGatherInfo = false;
+	m_dValue      = value;
+    m_dDeriv      = derivative;
+	m_bGatherInfo = gatherInfo;
+    
+    if(gatherInfo)
+        node = adNodePtr( (node_ ? node_->Clone() : new adConstantNode(value)) );            
 }
 
 adouble::adouble(const adouble& a)

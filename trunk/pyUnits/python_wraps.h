@@ -84,7 +84,12 @@ string unit__str__(unit& self)
 
 string unit__repr__(unit& self)
 {
-	return (boost::format("unit(%s)") % self).str();
+    string strMap = "{";
+    for(std::map<std::string, double>::const_iterator iter = self.units.begin(); iter != self.units.end(); iter++)
+        strMap += (boost::format("%s:%f, ") % iter->first % iter->second).str();
+    strMap += "}";
+    
+    return (boost::format("unit(%1%)") % strMap).str();
 }
 
 boost::python::dict unit_get_units_dict(unit& self)

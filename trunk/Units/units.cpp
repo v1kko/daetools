@@ -401,6 +401,7 @@ const unit unit::operator-(void) const
 //	}
 //	return boost::algorithm::join(arrUnits, __string_unit_delimiter__);
 //}
+
 std::string unit::toString(void) const
 {
 	std::string strPositive, strNegative;

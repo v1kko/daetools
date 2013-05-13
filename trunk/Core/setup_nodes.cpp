@@ -71,7 +71,7 @@ void adSetupParameterNode::Export(std::string& strContent, daeeModelLanguage eLa
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
 	else if(eLanguage == ePYDAE)
-		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
@@ -300,10 +300,11 @@ void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLan
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
 	else if(eLanguage == ePYDAE)
-		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
+
 //string adSetupVariableNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //	vector<string> strarrIndexes;
@@ -438,7 +439,7 @@ void adSetupTimeDerivativeNode::Export(std::string& strContent, daeeModelLanguag
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "self.%1%.dt(%2%)";
+		strExport = /*"self.*/ "%1%.dt(%2%)";
 		fmtFile.parse(strExport);
 		fmtFile % strName % toString(strarrIndexes);
 	}
@@ -590,7 +591,7 @@ void adSetupPartialDerivativeNode::Export(std::string& strContent, daeeModelLang
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "self.%1%.%2%(self.%3%, %4%)";
+		strExport = "%1%.%2%(%3%, %4%)"; // "self.%1%.%2%(self.%3%, %4%)"
 		fmtFile.parse(strExport);
 		fmtFile % strName % (m_nDegree == 1 ? "d" : "d2") % strDomainName % toString(strarrIndexes);
 	}

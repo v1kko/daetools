@@ -642,7 +642,7 @@ void adEventPortDataNode::Export(std::string& strContent, daeeModelLanguage eLan
 	if(eLanguage == eCDAE)
 		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pEventPort) + "()";
 	else if(eLanguage == ePYDAE)
-		strContent += "self." + daeGetStrippedRelativeName(c.m_pModel, m_pEventPort) + "()";
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pEventPort) + "()";
 	else
 		daeDeclareAndThrowException(exNotImplemented);
 }
@@ -740,6 +740,16 @@ const quantity adRuntimeParameterNode::GetQuantity(void) const
 adNode* adRuntimeParameterNode::Clone(void) const
 {
 	return new adRuntimeParameterNode(*this);
+}
+
+void adRuntimeParameterNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(m_narrDomains) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(m_narrDomains) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 
 //string adRuntimeParameterNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
@@ -878,6 +888,16 @@ const quantity adDomainIndexNode::GetQuantity(void) const
 adNode* adDomainIndexNode::Clone(void) const
 {
 	return new adDomainIndexNode(*this);
+}
+
+void adDomainIndexNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pDomain) + "(" + toString(m_nIndex) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pDomain) + "(" + toString(m_nIndex) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 
 //string adDomainIndexNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
@@ -1068,6 +1088,16 @@ const quantity adRuntimeVariableNode::GetQuantity(void) const
 adNode* adRuntimeVariableNode::Clone(void) const
 {
 	return new adRuntimeVariableNode(*this);
+}
+
+void adRuntimeVariableNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(m_narrDomains) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(m_narrDomains) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 
 //string adRuntimeVariableNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
@@ -1278,6 +1308,16 @@ const quantity adRuntimeTimeDerivativeNode::GetQuantity(void) const
 adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 {
 	return new adRuntimeTimeDerivativeNode(*this);
+}
+
+void adRuntimeTimeDerivativeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+	if(eLanguage == eCDAE)
+		strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + ".dt(" + toString(m_narrDomains) + ")";
+	else if(eLanguage == ePYDAE)
+		strContent += /*"self." +*/ daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + ".dt(" + toString(m_narrDomains) + ")";
+	else
+		daeDeclareAndThrowException(exNotImplemented);
 }
 
 //string adRuntimeTimeDerivativeNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const

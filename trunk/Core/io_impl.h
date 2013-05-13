@@ -271,16 +271,24 @@ public:
 	daeEnumTypesCollection(void)
 	{
 		using namespace dae::core;
-		daeesmapAdd2(esmap_daeDomainType, eArray, eDistributed);
-		daeesmapAdd3(esmap_daeeParameterType, eReal, eInteger, eBool);		
-		daeesmapAdd2(esmap_daeeModelLanguage, eCDAE, ePYDAE);		
-		daeesmapAdd8(esmap_daeeDomainBounds, eOpenOpen, eOpenClosed, eClosedOpen, eClosedClosed, eLowerBound, eUpperBound, eFunctor, eCustomBound);		
+		daeesmapAdd2(esmap_daeDomainType,               eArray, eDistributed);
+		daeesmapAdd3(esmap_daeeParameterType,           eReal, eInteger, eBool);		
+        daeesmapAdd3(esmap_daeePortType,                eUnknownPort, eInletPort, eOutletPort);		
+        daeesmapAdd3(esmap_daeeOptimizationVariableType,eIntegerVariable, eBinaryVariable, eContinuousVariable);		
+        daeesmapAdd2(esmap_daeeConstraintType,          eInequalityConstraint, eEqualityConstraint);		
+		daeesmapAdd2(esmap_daeeModelLanguage,           eCDAE, ePYDAE);		
+		daeesmapAdd8(esmap_daeeDomainBounds,            eOpenOpen, eOpenClosed, eClosedOpen, 
+                                                        eClosedClosed, eLowerBound, eUpperBound, 
+                                                        eFunctor, eCustomBound);		
 	}
 
-	daeEnumStringMap<core::daeeDomainType>		esmap_daeDomainType;
-	daeEnumStringMap<core::daeeParameterType>	esmap_daeeParameterType;	
-	daeEnumStringMap<core::daeeModelLanguage>	esmap_daeeModelLanguage;	
-	daeEnumStringMap<core::daeeDomainBounds>	esmap_daeeDomainBounds;	
+	daeEnumStringMap<core::daeeDomainType>                  esmap_daeDomainType;
+	daeEnumStringMap<core::daeeParameterType>               esmap_daeeParameterType;	
+    daeEnumStringMap<core::daeePortType>                    esmap_daeePortType;	
+    daeEnumStringMap<core::daeeOptimizationVariableType>	esmap_daeeOptimizationVariableType;	
+    daeEnumStringMap<core::daeeConstraintType>              esmap_daeeConstraintType;	
+	daeEnumStringMap<core::daeeModelLanguage>               esmap_daeeModelLanguage;	
+	daeEnumStringMap<core::daeeDomainBounds>                esmap_daeeDomainBounds;	
 };
 
 static boost::shared_ptr<daeEnumTypesCollection> g_EnumTypesCollection = boost::shared_ptr<daeEnumTypesCollection>(new daeEnumTypesCollection());

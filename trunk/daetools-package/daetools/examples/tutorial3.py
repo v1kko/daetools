@@ -39,6 +39,7 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.x  = daeDomain("x", self, m, "X axis domain")
+        print self.x, repr(self.x)
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
         self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
@@ -46,6 +47,7 @@ class modTutorial(daeModel):
         self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
+        print self.k, repr(self.k)
 
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
         self.Tave   = daeVariable("T_ave",  temperature_t, self, "The average temperature")
@@ -56,6 +58,7 @@ class modTutorial(daeModel):
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
         self.T.DistributeOnDomain(self.y)
+        print self.T, repr(self.T)
 
     def DeclareEquations(self):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
@@ -63,6 +66,7 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
                      (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
+        print '___Equation', eq, repr(eq)
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
@@ -173,6 +177,8 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("adTest", "User-defined adouble_array")
         eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)
+
+        print '___Model', self, repr(self)
         
 class simTutorial(daeSimulation):
     def __init__(self):

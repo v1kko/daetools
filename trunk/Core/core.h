@@ -405,13 +405,13 @@ public:
 class daeVariable_t : virtual public daeObject_t
 {
 public:
-	virtual daeVariableType_t*		GetVariableType(void)									= 0;
-	virtual void					GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
+	virtual const daeVariableType_t* GetVariableType(void) const							= 0;
+	virtual void					 GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
 
-	virtual size_t					GetNumberOfPoints(void)	const		= 0;
+	virtual size_t					 GetNumberOfPoints(void)	const		= 0;
 
-	virtual bool					GetReportingOn(void) const			= 0;
-	virtual void					SetReportingOn(bool bOn)			= 0;
+	virtual bool					 GetReportingOn(void) const			= 0;
+	virtual void					 SetReportingOn(bool bOn)			= 0;
 
 	virtual void	SetValue(real_t value) = 0;
 	virtual void	SetValue(size_t nD1, real_t value) = 0;

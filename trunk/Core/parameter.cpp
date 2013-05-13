@@ -232,6 +232,16 @@ string daeParameter::GetCanonicalName(void) const
 		return daeObject::GetCanonicalName();
 }
 
+daePort* daeParameter::GetParentPort(void) const
+{
+    return m_pParentPort;
+}
+
+const std::vector<daeDomain*>& daeParameter::Domains(void) const
+{
+    return m_ptrDomains;
+}
+
 bool daeParameter::GetReportingOn(void) const
 {
 	return m_bReportingOn;

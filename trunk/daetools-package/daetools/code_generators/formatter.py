@@ -242,7 +242,6 @@ class daeExpressionFormatter(object):
             value = '(' + self.formatRuntimeConditionNode(node.Node) + ')'
             if node.LogicalOperator == eNot:
                 res = self.NOT.format(value = value)
-                #res = '{0}{1}'.format(self.NOT, n)
             else:
                 raise RuntimeError('Not supported unary logical operator')
 
@@ -252,11 +251,9 @@ class daeExpressionFormatter(object):
 
             if node.LogicalOperator == eAnd:
                 res = self.AND.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.AND, right)
 
             elif node.LogicalOperator == eOr:
                 res = self.OR.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.OR, right)
 
             else:
                 raise RuntimeError('Not supported binary logical operator')
@@ -267,27 +264,21 @@ class daeExpressionFormatter(object):
 
             if node.ConditionType == eNotEQ: # !=
                 res = self.NEQ.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.NEQ, right)
 
             elif node.ConditionType == eEQ: # ==
                 res = self.EQ.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.EQ, right)
 
             elif node.ConditionType == eGT: # >
                 res = self.GT.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.GT, right)
 
             elif node.ConditionType == eGTEQ: # >=
                 res = self.GTEQ.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.GTEQ, right)
 
             elif node.ConditionType == eLT: # <
                 res = self.LT.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.LT, right)
 
             elif node.ConditionType == eLTEQ: # <=
                 res = self.LTEQ.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.LTEQ, right)
 
             else:
                 raise RuntimeError('Not supported condition type')
@@ -311,59 +302,45 @@ class daeExpressionFormatter(object):
 
             if node.Function == eSign:
                 res = self.SIGN.format(value = value)
-                #res = '{0}{1}'.format(self.SIGN, n)
 
             elif node.Function == eSqrt:
                 res = self.SQRT.format(value = value)
-                #res = '{0}({1})'.format(self.SQRT, n)
 
             elif node.Function == eExp:
                 res = self.EXP.format(value = value)
-                #res = '{0}({1})'.format(self.EXP, n)
 
             elif node.Function == eLog:
                 res = self.LOG10.format(value = value)
-                #res = '{0}({1})'.format(self.LOG10, n)
 
             elif node.Function == eLn:
                 res = self.LOG.format(value = value)
-                #res = '{0}({1})'.format(self.LOG, n)
 
             elif node.Function == eAbs:
                 res = self.ABS.format(value = value)
-                #res = '{0}({1})'.format(self.ABS, n)
 
             elif node.Function == eSin:
                 res = self.SIN.format(value = value)
-                #res = '{0}({1})'.format(self.SIN, n)
 
             elif node.Function == eCos:
                 res = self.COS.format(value = value)
-                #res = '{0}({1})'.format(self.COS, n)
 
             elif node.Function == eTan:
                 res = self.TAN.format(value = value)
-                #res = '{0}({1})'.format(self.TAN, n)
 
             elif node.Function == eArcSin:
                 res = self.ASIN.format(value = value)
-                #res = '{0}({1})'.format(self.ASIN, n)
 
             elif node.Function == eArcCos:
                 res = self.ACOS.format(value = value)
-                #res = '{0}({1})'.format(self.ACOS, n)
 
             elif node.Function == eArcTan:
                 res = self.ATAN.format(value = value)
-                #res = '{0}({1})'.format(self.ATAN, n)
 
             elif node.Function == eCeil:
                 res = self.CEIL.format(value = value)
-                #res = '{0}({1})'.format(self.CEIL, n)
 
             elif node.Function == eFloor:
                 res = self.FLOOR.format(value = value)
-                #res = '{0}({1})'.format(self.FLOOR, n)
 
             else:
                 raise RuntimeError('Not supported unary function')
@@ -374,34 +351,24 @@ class daeExpressionFormatter(object):
 
             if node.Function == ePlus:
                 res = self.PLUS.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.PLUS, right)
 
             elif node.Function == eMinus:
                 res = self.MINUS.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.MINUS, right)
 
             elif node.Function == eMulti:
                 res = self.MULTI.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.MULTI, right)
 
             elif node.Function == eDivide:
                 res = self.DIVIDE.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0} {1} {2}'.format(left, self.DIVIDE, right)
 
             elif node.Function == ePower:
                 res = self.POWER.format(leftValue = leftValue, rightValue = rightValue)
-                #if self.POWER == 'pow': # use function pow()
-                #    res = 'pow({0}, {1})'.format(left, right)
-                #else:
-                #    res = '{0} {1} {2}'.format(left, self.POWER, right)
 
             elif node.Function == eMin:
                 res = self.MIN.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0}({1}, {2})'.format(self.MIN, left, right)
 
             elif node.Function == eMax:
                 res = self.MAX.format(leftValue = leftValue, rightValue = rightValue)
-                #res = '{0}({1}, {2})'.format(self.MAX, left, right)
 
             else:
                 raise RuntimeError('Not supported binary function')

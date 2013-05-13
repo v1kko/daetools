@@ -206,6 +206,16 @@ string daeVariable::GetCanonicalName(void) const
 		return daeObject::GetCanonicalName();
 }
 
+daePort* daeVariable::GetParentPort(void) const
+{
+    return m_pParentPort;
+}
+
+const std::vector<daeDomain*>& daeVariable::Domains(void) const
+{
+    return m_ptrDomains;
+}
+
 void daeVariable::SetAbsoluteTolerances(real_t dAbsTolerances)
 {
 	if(!m_pModel)
@@ -1827,7 +1837,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 	ReSetInitialCondition(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
 }
 
-daeVariableType_t* daeVariable::GetVariableType(void)
+const daeVariableType_t* daeVariable::GetVariableType(void) const
 {
 	return &m_VariableType;
 }

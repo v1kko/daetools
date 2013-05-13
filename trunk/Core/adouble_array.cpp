@@ -22,9 +22,16 @@ namespace core
 /*********************************************************************************************
  adouble_array
 **********************************************************************************************/
-adouble_array::adouble_array()
+adouble_array::adouble_array(bool gatherInfo/* = false*/, 
+                             adNodeArray* node_/* = NULL*/)
 {
-	m_bGatherInfo = false;
+    m_bGatherInfo = gatherInfo;
+    
+    if(gatherInfo)
+    {
+        if(node_)
+            node = adNodeArrayPtr(node_->Clone());
+    }
 }
 
 adouble_array::adouble_array(const adouble_array& a)
