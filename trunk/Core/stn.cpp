@@ -217,9 +217,6 @@ void daeSTN::FinalizeDeclaration()
 {
 	daeState *pState;
 
-// This function is called at the end of creation of states so remove the last state from stack
-	m_pModel->RemoveStateFromStack();
-
 // Set the active state (default is the first)
 	if(!GetActiveState())
 	{
@@ -803,21 +800,14 @@ void daeSTN::SetParentState(daeState* pParentState)
 
 daeState* daeSTN::AddState(string strName)
 {
-// Remove previous state (if any) from the stack
-	m_pModel->RemoveStateFromStack();
-
-// Instantiate a new state and add it to STN
-// Ignore the name
+// Instantiate a new state and add it to this STN
 	daeState* pState = new daeState();
 	
 	dae_push_back(m_ptrarrStates, pState);
 	
 	pState->Create(strName, this);
-//	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
-
-// Put it on the stack
-	m_pModel->PutStateToStack(pState);
-	return pState;
+	
+    return pState;
 }
 
 void daeSTN::GetStates(vector<daeState_t*>& ptrarrStates)
@@ -991,8 +981,8 @@ void daeSTN::CalcNonZeroElements(int& NNZ)
 		for(i = 0; i < m_ptrarrStates.size(); i++)
 		{
 			pState = m_ptrarrStates[i];
-			if(pState->GetNumberOfEquations() != arrIndexes.size())
-				daeDeclareAndThrowException(exInvalidCall);
+			//if(pState->GetNumberOfEquations() != arrIndexes.size())
+			//	daeDeclareAndThrowException(exInvalidCall);
 			
 		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
 			nCurrentEquaton = 0;
@@ -1022,8 +1012,8 @@ void daeSTN::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 		for(i = 0; i < m_ptrarrStates.size(); i++)
 		{
 			pState = m_ptrarrStates[i];
-			if(pState->GetNumberOfEquations() != arrIndexes.size())
-				daeDeclareAndThrowException(exInvalidCall);
+			//if(pState->GetNumberOfEquations() != arrIndexes.size())
+			//	daeDeclareAndThrowException(exInvalidCall);
 			
 		// Get the vector with the map<OverallIndex, BlockIndex> for each equation in the state 
 			nCurrentEquaton = 0;

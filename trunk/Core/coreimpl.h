@@ -2591,7 +2591,7 @@ protected:
 	void DeclareEquationsBase(void);
 
 	daeSTN* AddSTN(const string& strName);
-	daeIF*  AddIF(const string& strCondition);
+	daeIF*  AddIF();
 
 	void IF(const daeCondition& rCondition, real_t dEventTolerance = 0);
 	void ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance = 0);
@@ -2674,11 +2674,6 @@ protected:
 	void		CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	void		CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	bool		DetectObject(string& strShortName, std::vector<size_t>& narrDomains, daeeObjectType& eType, daeObject_t** ppObject);
-	
-// Used to nest States
-	daeState*	GetStateFromStack(void);
-	void		PutStateToStack(daeState* pState);
-	void		RemoveStateFromStack(void);
 
 protected:
 	boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
@@ -2705,10 +2700,9 @@ protected:
 
 	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 
-// Used to nest STNS
-	std::vector<daeState*> m_ptrarrStackStates;
-
-	daeSTN*	_currentSTN;
+// Used to nest STNs/IFs
+	std::stack<daeState*> m_ptrarrStackStates;
+    std::stack<daeSTN*>   m_ptrarrStackSTNs;
 
 	size_t	_currentVariablesIndex;
 // Used only during GatherInfo
@@ -2925,8 +2919,8 @@ public:
 	
 	void AddEquation(daeEquation* pEquation);
 
-	size_t GetNumberOfEquations(void) const;
-	size_t GetNumberOfSTNs(void) const;
+//	size_t GetNumberOfEquations(void) const;
+//	size_t GetNumberOfSTNs(void) const;
 
     void AddOnConditionAction(daeOnConditionActions& rOnConditionActions, const string& strName, string strDescription);
 	void AddOnEventAction(daeOnEventActions& rOnEventAction, const string& strName, string strDescription);

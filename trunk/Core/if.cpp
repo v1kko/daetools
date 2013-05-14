@@ -202,9 +202,6 @@ void daeIF::FinalizeDeclaration()
 {
 	daeState* pState;
 
-// This function is called at the end of creation of states so remove the last state from stack
-	m_pModel->RemoveStateFromStack();
-
 // Set the active state (just temporary, until the next check)
 	if(!GetActiveState())
 	{
@@ -401,9 +398,6 @@ void daeIF::CheckState(daeState* pState)
 
 daeState* daeIF::AddState(string strName)
 {
-// Remove previous state (if any) from the stack
-	m_pModel->RemoveStateFromStack();
-
 // Instantiate a new state and add it to STN
 	daeState* pState = new daeState();
 
@@ -411,21 +405,19 @@ daeState* daeIF::AddState(string strName)
 	
 	string strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
 	pState->Create(strStateName, this);
-//	pState->m_strCanonicalName = m_strCanonicalName + "." + pState->m_strShortName;
 
-// Put it on the stack
-	m_pModel->PutStateToStack(pState);
-	return pState;
+    return pState;
 }
 
 daeState* daeIF::CreateElse(void)
 {
 	string strName = "ELSE";
 	daeState* pELSE = daeSTN::AddState(strName);
+    
 // Override default State_XXX name with ELSE
 	pELSE->SetName(strName);
-//	pELSE->SetCanonicalName(m_strCanonicalName + "." + strName);
-	return pELSE;
+	
+    return pELSE;
 }
 
 bool daeIF::CheckObject(vector<string>& strarrErrors) const

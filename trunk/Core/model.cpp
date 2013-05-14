@@ -9,7 +9,6 @@ namespace core
 {
 daeModel::daeModel()
 {
-	_currentSTN							= NULL;
 	m_pExecutionContextForGatherInfo	= NULL;
 	m_nVariablesStartingIndex			= 0;
 	m_nTotalNumberOfVariables			= 0;
@@ -28,7 +27,6 @@ daeModel::daeModel()
 
 daeModel::daeModel(string strName, daeModel* pModel, string strDescription)
 {
-	_currentSTN							= NULL;
 	m_pExecutionContextForGatherInfo	= NULL;
 	m_nVariablesStartingIndex			= 0;
 	m_nTotalNumberOfVariables			= 0;
@@ -1012,44 +1010,46 @@ daeSTN* daeModel::AddSTN(const string& strName)
 	}
 
 	daeSTN* pSTN = new daeSTN;
-	daeState* pParentState = GetStateFromStack();
+    
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());
 
 	pSTN->SetName(strName);
     pSTN->SetModel(this);
 	//SetModelAndCanonicalName(pSTN);
 
-	if(!pParentState)
+	if(!pCurrentState) // Add a top-level STN
 	{
 		pSTN->m_pParentState = NULL;
 		dae_push_back(m_ptrarrSTNs, pSTN);
 	}
-	else
+	else // Add a nested STN to the current State
 	{
-		pSTN->m_pParentState = pParentState;
-		pParentState->AddNestedSTN(pSTN);
+		pSTN->m_pParentState = pCurrentState;
+		pCurrentState->AddNestedSTN(pSTN);
 	}
 
 	return pSTN;
 }
 
-daeIF* daeModel::AddIF(const string& strCondition)
+daeIF* daeModel::AddIF()
 {
 	daeIF* pIF = new daeIF;
-	daeState* pParentState = GetStateFromStack();
+    
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());
 
 	string strName;
 
-	if(!pParentState)
+	if(!pCurrentState) // Add a top-level IF
 	{
 		strName = "IF_" + toString<size_t>(m_ptrarrSTNs.size());
 		pIF->m_pParentState = NULL;
 		dae_push_back(m_ptrarrSTNs, pIF);
 	}
-	else
+	else // Add a nested IF to the current State
 	{
-		strName = "IF_" + toString<size_t>(m_ptrarrSTNs.size()) + "_" + toString<size_t>(pParentState->GetNumberOfSTNs());
-		pIF->m_pParentState = pParentState;
-		pParentState->AddNestedSTN(pIF);
+		strName = "IF_" + toString<size_t>(m_ptrarrSTNs.size()) + "_" + toString<size_t>(pCurrentState->m_ptrarrSTNs.size());
+		pIF->m_pParentState = pCurrentState;
+		pCurrentState->AddNestedSTN(pIF);
 	}
     
 	pIF->SetName(strName);
@@ -1061,228 +1061,304 @@ daeIF* daeModel::AddIF(const string& strCondition)
 
 void daeModel::IF(const daeCondition& rCondition, real_t dEventTolerance)
 {
-	daeIF* _pIF = AddIF(string(""));
-	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
-	daeState* _pState = _pIF->AddState(strStateName);
+// Create daeIF and push it on the stack
+    daeIF* _pIF = AddIF();
+    m_ptrarrStackSTNs.push(_pIF);
+    
+// Create a new state and push it on the stack
+    daeState* _pState = _pIF->AddState(string(""));
+    m_ptrarrStackStates.push(_pState);
+    
     daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
 	_pOnConditionActions->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance)
 {
-// Current state must exist!!!
-// Otherwise throw an exception
-	daeState* pCurrentState = GetStateFromStack();
-	if(!pCurrentState)
+// Current STN must exist!!!
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "ELSE_IF can only be called after call to IF() or ELSE_IF()";
+        e << "Before calling ELSE_IF() an IF block must be started with a call to IF() function";
+		throw e;
+	}
+    
+// Current state must exist!!!
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+    if(!pCurrentState)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "ELSE_IF() can only be called after a call to IF() or another ELSE_IF()";
+        throw e;
+    }
+    
+// Current STN and the parent STN of the current state must be the same object!!
+    if(pCurrentState->GetSTN() != pCurrentSTN)
+    {
+		daeDeclareException(exInvalidCall); 
+        e << "ELSE_IF() can only be called after a call to IF() or another ELSE_IF()";
 		throw e;
 	}
 
 // Parrent of the current state must be an IF block!!
-// Otherwise throw an exception
-	daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentState->GetSTN());
-	if(!_pIF)
+    if(typeid(*pCurrentSTN) != typeid(daeIF))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid IF block";
+        e << "ELSE_IF() can only be called after a call to IF() or another ELSE_IF()";
 		throw e;
 	}
+    daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentSTN);
+    if(!_pIF)
+        daeDeclareAndThrowException(exInvalidPointer); 
 
-// Add new state
-	string strStateName = "State" + toString<size_t>(_pIF->m_ptrarrStates.size());
-	daeState* _pState = _pIF->AddState(strStateName);
+// Create a new state, remove the top from the stack and push the new one
+    daeState* _pState = _pIF->AddState(string(""));
+    m_ptrarrStackStates.pop();        
+    m_ptrarrStackStates.push(_pState);
+    
     daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
 	_pOnConditionActions->Create_IF(_pState, rCondition, dEventTolerance);
 }
 
 void daeModel::ELSE(void)
 {
+// Current STN must exist!!!
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling ELSE() an IF block must be started with a call to IF() function";
+        throw e;
+    }
+    
 // Current state must exist!!!
-// Otherwise throw an exception
-	daeState* pCurrentState = GetStateFromStack();
-	if(!pCurrentState)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "ELSE can only be called after call to IF() or ELSE_IF()";
-		throw e;
-	}
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+    if(!pCurrentState)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "ELSE() can only be called after a call to IF() or another ELSE_IF()";
+        throw e;
+    }
+    
+// Current STN and the parent STN of the current state must be the same object!!
+    if(pCurrentState->GetSTN() != pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "ELSE() can only be called after a call to IF() or another ELSE_IF()";
+        throw e;
+    }
 
 // Parrent of the current state must be an IF block!!
-// Otherwise throw an exception
-	daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentState->GetSTN());
-	if(!_pIF)
+    if(typeid(*pCurrentSTN) != typeid(daeIF))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid IF block";
+        e << "ELSE_IF() can only be called after a call to IF() or another ELSE_IF()";
 		throw e;
 	}
+    daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentSTN);
 
-// Create ELSE state
-	_pIF->CreateElse();
+// Create a new state, remove the top from the stack and push the new one
+	daeState* _pState = _pIF->CreateElse();
+    m_ptrarrStackStates.pop();        
+    m_ptrarrStackStates.push(_pState);
 }
 
 void daeModel::END_IF(void)
 {
+// Current STN must exist!!!
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling END_IF() an IF block must be started with a call to IF() function";
+        throw e;
+    }
+    
 // Current state must exist!!!
-// Otherwise throw an exception
-	daeState* pCurrentState = GetStateFromStack();
-	if(!pCurrentState)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "ELSE can only be called after call to IF() or ELSE_IF()";
-		throw e;
-	}
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+    if(!pCurrentState)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "END_IF() can only be called after a call to IF() or another ELSE_IF()";
+        throw e;
+    }
+    
+// Current STN and the parent STN of the current state must be the same object!!
+    if(pCurrentState->GetSTN() != pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "END_IF can only be called after a call to IF() or ELSE_IF()";
+        throw e;
+    }
 
 // Parrent of the current state must be an IF block!!
-// Otherwise throw an exception
-	daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentState->GetSTN());
-	if(!_pIF)
+    if(typeid(*pCurrentSTN) != typeid(daeIF))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "Invalid IF block";
+        e << "ELSE_IF() can only be called after a call to IF() or another ELSE_IF()";
 		throw e;
 	}
+    daeIF* _pIF = dynamic_cast<daeIF*>(pCurrentSTN);
 
 // Finalize the IF block
 	_pIF->FinalizeDeclaration();
+    
+// Remove the top state from the stack
+    m_ptrarrStackStates.pop();    
+// Remove the top STN from the stack
+    m_ptrarrStackSTNs.pop();        
 }
 
 daeSTN* daeModel::STN(const string& strSTN)
 {
-	_currentSTN = AddSTN(strSTN);
-	return _currentSTN;
+// Create daeSTN and push it on the stack
+	daeSTN* _pSTN = AddSTN(strSTN);
+    m_ptrarrStackSTNs.push(_pSTN);
+	
+    return _pSTN;
 }
 
 daeState* daeModel::STATE(const string& strState)
 {
 // Current STN must exist!!!
-// Otherwise throw an exception
-	if(!_currentSTN)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "STATE() can only be called after call to STN()";
-		throw e;
-	}
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling STATE() a STN must be started with a call to STN() function";
+        throw e;
+    }
+    
+// The current STN must be daeSTN
+    if(typeid(*pCurrentSTN) != typeid(daeSTN))
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "STATE() can only be called after a call to STN()";
+        throw e;
+    }
+    
+    daeState* pCurrentState = NULL;
+    if(pCurrentSTN->m_ptrarrStates.empty()) // We are adding the first state: there is no current state
+    {
+    }
+    else // We are adding additional state: the current state must exist
+    {
+        pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+        if(!pCurrentState)
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "STATE() can only be called after a call to STN()";
+            throw e;
+        }
+        
+    // Current STN and the parent STN of the current state must be the same object!!
+        if(pCurrentState->GetSTN() != pCurrentSTN)
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "STATE() can only be called after a call to STN()";
+            throw e;
+        }
+    }
 
-	daeState* pState = _currentSTN->AddState(strState);
-	return pState;
+// Create a new state
+	daeState* pState = pCurrentSTN->AddState(strState);
+    
+// If it is a first state in the STN then do not pop the state from the stack; otherwise do pop it
+    if(pCurrentSTN->m_ptrarrStates.size() > 0)
+    {
+        if(!m_ptrarrStackStates.empty())
+            m_ptrarrStackStates.pop();
+    }
+// Push the new state on the stack
+    m_ptrarrStackStates.push(pState);
+
+    return pState;
 }
 
 void daeModel::END_STN(void)
 {
 // Current STN must exist!!!
-// Otherwise throw an exception
-	if(!_currentSTN)
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling END_STN() a STN must be started with a call to STN() function";
+        throw e;
+    }
+    
+// Current state must exist!!!
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+    if(!pCurrentState)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "END_STN() can only be called after a call to STATE()";
+        throw e;
+    }
+    
+// Current STN and the parent STN of the current state must be the same object!!
+    if(pCurrentState->GetSTN() != pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "END_STN can only be called after a call to STN() and STATE()";
+        throw e;
+    }
+
+// Parrent of the current state must be STN!!
+    if(typeid(*pCurrentSTN) != typeid(daeSTN))
 	{
 		daeDeclareException(exInvalidCall); 
-		e << "END_STN() can only be called after call to STN()";
+        e << "END_STN() can only be called after a call to STN() and STATE()";
 		throw e;
 	}
 
-	_currentSTN->FinalizeDeclaration();
-	_currentSTN = NULL;
+	pCurrentSTN->FinalizeDeclaration();
+    
+// Remove the top state from the stack
+    m_ptrarrStackStates.pop();
+// Remove the top STN from the stack
+    m_ptrarrStackSTNs.pop();        
 }
 
 void daeModel::SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance)
 {
 // Current STN must exist!!!
-// Otherwise throw an exception
-	if(!_currentSTN)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "SWITCH_TO() can only be called after call to STN()";
-		throw e;
-	}
-	
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    if(!pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling SWITCH_TO() a STN must be started with a call to STN() function";
+        throw e;
+    }
+    
 // Current state must exist!!!
-// Otherwise throw an exception
-	daeState* pCurrentState = GetStateFromStack();
-	if(!pCurrentState)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "SWITCH_TO() can only be called after call to STATE()";
-		throw e;
-	}
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+    if(!pCurrentState)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "Before calling SWITCH_TO() a new state must be started with a call to STATE() function";
+        throw e;
+    }
+    
+// Current STN and the parent STN of the current state must be the same object!!
+    if(pCurrentState->GetSTN() != pCurrentSTN)
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "SWITCH_TO() can only be called after a call to STN()";
+        throw e;
+    }
+
+// Parrent of the current state must be STN!!
+    if(typeid(*pCurrentSTN) != typeid(daeSTN))
+    {
+        daeDeclareException(exInvalidCall); 
+        e << "SWITCH_TO() can only be called after a call to STN()";
+        throw e;
+    }
 
     daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
 	_pOnConditionActions->Create_SWITCH_TO(pCurrentState, strState, rCondition, dEventTolerance);
 }
-/*
-void daeModel::ON_CONDITION(const daeCondition&								rCondition, 
-							const string&									strStateTo, 
-							vector< pair<daeVariableWrapper, adouble> >&	arrSetVariables,
-							vector< pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
-							vector<daeAction*>&								ptrarrUserDefinedActions, 
-							real_t											dEventTolerance)
-{
-	size_t i;
-	daeAction* pAction;
-	daeEventPort* pEventPort;
-	pair<daeVariableWrapper, adouble> p;
-	pair<daeEventPort*, adouble> p3;
-	daeVariableWrapper variable;
-	adouble value;
-	vector<daeAction*> ptrarrActions;
-
-// The current STN must exist!!!
-// Otherwise throw an exception
-	if(!_currentSTN)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "This variant of the ON_CONDITION() function must be called after a call to STN()";
-		throw e;
-	}
-	
-// Current state must exist!!!
-// Otherwise throw an exception
-	daeState* pCurrentState = GetStateFromStack();
-	if(!pCurrentState)
-	{
-		daeDeclareException(exInvalidCall); 
-		e << "ON_CONDITION() can only be called after call to STATE()";
-		throw e;
-	}
-
-    if(!strStateTo.empty())
-    {
-    // ChangeStateaction
-        pAction = new daeAction(string("actionChangeState_") + strStateTo, this, _currentSTN, strStateTo, string(""));
-        ptrarrActions.push_back(pAction);
-    }
-
-// TriggerEvents
-	for(i = 0; i < arrTriggerEvents.size(); i++)
-	{
-		p3 = arrTriggerEvents[i];
-		pEventPort = p3.first;
-		value      = p3.second;
-		if(!pEventPort)
-			daeDeclareAndThrowException(exInvalidPointer);
-			
-		pAction = new daeAction(string("actionTriggerEvent_") + pEventPort->GetName(), this, pEventPort, value, string(""));
-
-		ptrarrActions.push_back(pAction);
-	}
-
-// SetVariables	
-	for(i = 0; i < arrSetVariables.size(); i++)
-	{
-		p = arrSetVariables[i];
-		variable = p.first;
-		value    = p.second;
-			
-		string name = ReplaceAll(string("actionSetVariable_") + variable.GetName(), '.', '_');
-		pAction = new daeAction(name, this, variable, value, string(""));
-
-		ptrarrActions.push_back(pAction);
-	}
-
-    daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
-   	_pOnConditionActions->Create_ON_CONDITION(pCurrentState, this, rCondition, ptrarrActions, ptrarrUserDefinedActions, dEventTolerance);
-}
-*/
 
 void daeModel::ON_CONDITION(const daeCondition&								rCondition, 
                             vector< pair<string, string> >&					arrSwitchToStates, 
@@ -1302,7 +1378,9 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 	daeVariableWrapper variable;
 	adouble value;
 	vector<daeAction*> ptrarrActions;
-
+    
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    
 // ChangeState	
     for(i = 0; i < arrSwitchToStates.size(); i++)
     {
@@ -1345,15 +1423,22 @@ void daeModel::ON_CONDITION(const daeCondition&								rCondition,
 
     daeOnConditionActions* _pOnConditionActions = new daeOnConditionActions();
     
-    if(_currentSTN)
+    if(pCurrentSTN)
     {
+    // If we are in the IF block throw an exception
+        if(typeid(*pCurrentSTN) == typeid(daeIF))
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "ON_CONDITION() cannot be called from the IF block";
+            throw e;
+        }
+        
     // Current state must exist!!!
-    // Otherwise throw an exception
-        daeState* pCurrentState = GetStateFromStack();
+        daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
         if(!pCurrentState)
         {
             daeDeclareException(exInvalidCall); 
-            e << "ON_CONDITION() can only be called after a call to STATE()";
+            e << "Before calling ON_CONDITION() a new state must be started with a call to STATE() function";
             throw e;
         }
         
@@ -1386,6 +1471,8 @@ void daeModel::ON_EVENT(daeEventPort*									pTriggerEventPort,
 	if(!pTriggerEventPort)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+    daeSTN* pCurrentSTN = (m_ptrarrStackSTNs.empty() ? NULL : m_ptrarrStackSTNs.top());	
+    
 /*  ACHTUNG, ACHTUNG!!!
     We SHOULD be able to have OnEvent actions EVEN on the OUTLET event ports!!
 	Therefore, the type check below is commented out.
@@ -1435,12 +1522,27 @@ void daeModel::ON_EVENT(daeEventPort*									pTriggerEventPort,
 		ptrarrOnEventActions.push_back(pAction);
 	}
 	
-	daeState* pParentState = GetStateFromStack();
-
 	daeOnEventActions* pOnEventAction;
-	if(pParentState)	
+	if(pCurrentSTN)	
 	{
-		pOnEventAction = new daeOnEventActions(pTriggerEventPort, pParentState, ptrarrOnEventActions, ptrarrUserDefinedActions, string(""));
+    // If we are in the IF block throw an exception
+        if(typeid(*pCurrentSTN) == typeid(daeIF))
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "ON_EVENT() can only be called after a call to STN() not IF()";
+            throw e;
+        }
+        
+    // Current state must exist!!!
+        daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
+        if(!pCurrentState)
+        {
+            daeDeclareException(exInvalidCall); 
+            e << "Before calling ON_EVENT() a new state must be started with a call to STATE() function";
+            throw e;
+        }
+        
+		pOnEventAction = new daeOnEventActions(pTriggerEventPort, pCurrentState, ptrarrOnEventActions, ptrarrUserDefinedActions, string(""));
 	}
 	else
 	{
@@ -1673,12 +1775,12 @@ daeEquation* daeModel::CreateEquation(const string& strName, string strDescripti
 {
 	string strEqName;
 	daeEquation* pEquation = new daeEquation();
-	daeState* pParentState = GetStateFromStack();
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());	
 
 	pEquation->SetDescription(strDescription);
 	pEquation->SetScaling(dScaling);
 	
-	if(!pParentState)
+	if(!pCurrentState)
 	{
 		strEqName = (strName.empty() ? "Equation_" + toString<size_t>(m_ptrarrEquations.size()) : strName);
 		pEquation->SetName(strEqName);
@@ -1686,10 +1788,11 @@ daeEquation* daeModel::CreateEquation(const string& strName, string strDescripti
 	}
 	else
 	{
-		strEqName = (strName.empty() ? "Equation_" + toString<size_t>(pParentState->m_ptrarrEquations.size()) : strName);
+		strEqName = (strName.empty() ? "Equation_" + toString<size_t>(pCurrentState->m_ptrarrEquations.size()) : strName);
 		pEquation->SetName(strEqName);
-		pParentState->AddEquation(pEquation);
+		pCurrentState->AddEquation(pEquation);
 	}
+    
 	return pEquation;
 }
 
@@ -2402,17 +2505,27 @@ void daeModel::BuildUpSTNsAndEquations()
 
 	m_pDataProxy->SetGatherInfo(true);
 	PropagateGlobalExecutionContext(&EC);
-		m_ptrarrStackStates.clear();
+    
+        if(m_ptrarrStackSTNs.size() > 0)
+            daeDeclareAndThrowException(exInvalidCall);
+        while(m_ptrarrStackStates.size() > 0)
+            daeDeclareAndThrowException(exInvalidCall);
+        
 	// Declare equations in this model	
 		DeclareEquations();
 	// Declare equations in child models and model arrays
 		DeclareEquationsBase();
-		m_ptrarrStackStates.clear();
+        
+        if(m_ptrarrStackSTNs.size() > 0)
+            daeDeclareAndThrowException(exInvalidCall);
+        while(m_ptrarrStackStates.size() > 0)
+            daeDeclareAndThrowException(exInvalidCall);
 	// Create indexes in DEDIs (they are not created in the moment of declaration!)
 		InitializeDEDIs();
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
-		InitializeOnEventAndOnConditionActions();		
+		InitializeOnEventAndOnConditionActions();	
+        
 	m_pDataProxy->SetGatherInfo(false);
 	PropagateGlobalExecutionContext(NULL);
 }
@@ -3213,24 +3326,6 @@ void daeModel::SetDefaultAbsoluteTolerances()
 size_t daeModel::GetNumberOfSTNs(void) const
 {
 	return m_ptrarrSTNs.size();
-}
-
-daeState* daeModel::GetStateFromStack()
-{
-	if(m_ptrarrStackStates.size() == 0)
-		return NULL;
-	return m_ptrarrStackStates[m_ptrarrStackStates.size() - 1];
-}
-
-void daeModel::PutStateToStack(daeState* pState)
-{
-	m_ptrarrStackStates.push_back(pState);
-}
-
-void daeModel::RemoveStateFromStack()
-{
-	if(!m_ptrarrStackStates.empty())
-		m_ptrarrStackStates.pop_back();
 }
 
 daeDomain* daeModel::FindDomain(unsigned long nID) const

@@ -1256,7 +1256,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                            DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
 
-        .def("__str__",           &daepython::daeModel__str__)  
+        .def("__str__",           &daepython::daeModel__str__)
         .def("__repr__",          &daepython::daeModel__repr__)  
             
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(), 

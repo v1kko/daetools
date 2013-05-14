@@ -352,15 +352,15 @@ const std::vector<daeOnConditionActions*>& daeState::OnConditionActions() const
 //	return pEquation;
 //}
 
-size_t daeState::GetNumberOfEquations(void) const
-{
-	return m_ptrarrEquations.size();
-}
+//size_t daeState::GetNumberOfEquations(void) const
+//{
+//	return m_ptrarrEquations.size();
+//}
 
-size_t daeState::GetNumberOfSTNs(void) const
-{
-	return m_ptrarrSTNs.size();
-}
+//size_t daeState::GetNumberOfSTNs(void) const
+//{
+//	return m_ptrarrSTNs.size();
+//}
 
 void daeState::AddNestedSTN(daeSTN* pSTN)
 {
@@ -480,10 +480,10 @@ bool daeState::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 	}
 	
-// Check number of equations	
-	if(m_ptrarrEquations.size() == 0)
+// The number of equations cannot be zero if there are no nested STNs
+	if(m_ptrarrEquations.size() == 0 && m_ptrarrSTNs.empty())
 	{
-		strError = "Invalid number of equations in state [" + GetCanonicalName() + "]";
+		strError = "The number of equations is zero in the state [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}

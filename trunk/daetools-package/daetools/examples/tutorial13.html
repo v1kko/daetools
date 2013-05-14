@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial13.py</title>
+</head>
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
+<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>..</span>
+<span style='color:#008000;'> ***********************************************************************************</span>
+<span style='color:#008000;'>                             tutorial13.py</span>
+<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'> ***********************************************************************************</span>
+<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'> ************************************************************************************</span>
+
+<span style='color:#008000;'>In this example we use the same problem as in the tutorial 5.</span>
+
+<span style='color:#008000;'>Here we introduce:</span>
+
+<span style='color:#008000;'>- The event ports</span>
+<span style='color:#008000;'>- ON_CONDITION() function showing the new types of actions that can be executed</span>
+<span style='color:#008000;'>  during state transitions</span>
+<span style='color:#008000;'>- ON_EVENT() function showing the new types of actions that can be executed</span>
+<span style='color:#008000;'>  when an event is triggered</span>
+<span style='color:#008000;'>- User defined actions</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#0000ff;'>import</span> sys
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+
+<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+
+<span style='color:#008000;'># User defined action executed in OnEvent handler</span>
+<span style='color:#008000;'># The __init__ function accepts an event port as an argument that is used </span>
+<span style='color:#008000;'># to retrieve the value of the event data </span>
+<b>class</b> simpleUserAction(daeAction):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, eventPort):
+        daeAction.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.eventPort <b><span style='color:#0000ff;'>=</span></b> eventPort
+
+    <b>def</b> Execute(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># The floating point value of the data sent with the event can be retrieved </span>
+        <span style='color:#008000;'># using daeEventPort property EventData </span>
+        msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>'simpleUserAction executed; input data = {0}'</span>.<span style='color:#0000ff;'>format</span>(<span style='color:#0000ff;'>self</span>.eventPort.EventData)
+        
+        <span style='color:#008000;'># Try to show a message box if there is application instance already defined</span>
+        <span style='color:#008000;'># that is we are in the 'gui' mode</span>
+        <b>try</b>:
+            <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+            <b>if</b> QtCore.QCoreApplication.instance():
+                QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#ff0000;'>'tutorial13'</span>, msg)
+        <b>finally</b>:
+            <b>print</b> <span style='color:#ff0000;'>'********************************************************'</span>
+            <b>print</b> msg
+            <b>print</b> <span style='color:#ff0000;'>'********************************************************'</span>
+
+<b>class</b> simpleUserAction2(daeAction):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, msg):
+        daeAction.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.msg <b><span style='color:#0000ff;'>=</span></b> msg
+
+    <b>def</b> Execute(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># Try to show a message box if there is application instance already defined</span>
+        <span style='color:#008000;'># that is we are in the 'gui' mode</span>
+        <b>try</b>:
+            <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+            <b>if</b> QtCore.QCoreApplication.instance():
+                QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#ff0000;'>'tutorial13'</span>, <span style='color:#0000ff;'>self</span>.msg)
+        <b>finally</b>:
+            <b>print</b> <span style='color:#ff0000;'>'********************************************************'</span>
+            <b>print</b> <span style='color:#ff0000;'>'tutorial13 simpleUserAction2 message: '</span>
+            <b>print</b> <span style='color:#0000ff;'>self</span>.msg
+            <b>print</b> <span style='color:#ff0000;'>'********************************************************'</span>
+            
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#0000ff;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#ff0000;'>&quot;m&quot;</span>,       kg,           <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#ff0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#ff0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#ff0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>,         <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#ff0000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Temperature of the surroundings&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.Qin   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#ff0000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.T     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#ff0000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Temperature of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.event <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#ff0000;'>&quot;event&quot;</span>, no_t,          <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Variable which value is set in ON_EVENT function&quot;</span>)
+
+        <span style='color:#008000;'># Here we create two event ports (inlet and outlet) and connect them.</span>
+        <span style='color:#008000;'># It makes no sense in reality, but this is example is just an example - in the real application</span>
+        <span style='color:#008000;'># they would be defined in separate models.</span>
+        <span style='color:#008000;'># Event ports can be connected/disconnected at any time.</span>
+        <span style='color:#0000ff;'>self</span>.epIn  <b><span style='color:#0000ff;'>=</span></b> daeEventPort(<span style='color:#ff0000;'>&quot;epIn&quot;</span>,  eInletPort,  <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Inlet event port&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.epOut <b><span style='color:#0000ff;'>=</span></b> daeEventPort(<span style='color:#ff0000;'>&quot;epOut&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Outlet event port&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.ConnectEventPorts(<span style='color:#0000ff;'>self</span>.epIn, <span style='color:#0000ff;'>self</span>.epOut)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#ff0000;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
+
+        <span style='color:#0000ff;'>self</span>.stnRegulator <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#ff0000;'>&quot;Regulator&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#ff0000;'>&quot;Heating&quot;</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;Q_in&quot;</span>, <span style='color:#ff0000;'>&quot;The heater is on&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
+
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>                                          ON_CONDITION() function</span>
+<span style='color:#008000;'>        Arguments:</span>
+<span style='color:#008000;'>          - Condition that triggers the actions</span>
+<span style='color:#008000;'>          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name) that will be set active</span>
+<span style='color:#008000;'>             when the condition is satisified</span>
+<span style='color:#008000;'>          - 'triggerEvents' is a list of python tuples (outlet-event-port, expression), </span>
+<span style='color:#008000;'>             where the first part is the event-port object and the second a value to be sent when the event is trigerred</span>
+<span style='color:#008000;'>          - 'setVariableValues' is a list of python tuples (variable, expression); if the variable is differential it</span>
+<span style='color:#008000;'>             will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)</span>
+<span style='color:#008000;'>          - 'userDefinedActions' is a list of user defined daeAction-derived objects</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>340</span><b><span style='color:#0000ff;'>*</span></b>K),    switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#ff0000;'>'Regulator'</span>, <span style='color:#ff0000;'>'Cooling'</span>) ],
+                                                         setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.event, <span style='color:#c000c0;'>100</span>) ], <span style='color:#008000;'># event variable is dimensionless</span>
+                                                         triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                         userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(Time() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span><b><span style='color:#0000ff;'>*</span></b>s), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#ff0000;'>'Regulator'</span>, <span style='color:#ff0000;'>'HeaterOff'</span>) ],
+                                                    setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.epOut, <span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>+</span></b> Constant(<span style='color:#c000c0;'>5.0</span><b><span style='color:#0000ff;'>*</span></b>K)) ],
+                                                    userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#ff0000;'>&quot;Cooling&quot;</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;Q_in&quot;</span>, <span style='color:#ff0000;'>&quot;The heater is off&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qin()
+
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#c000c0;'>320</span><b><span style='color:#0000ff;'>*</span></b>K),    switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#ff0000;'>'Regulator'</span>, <span style='color:#ff0000;'>'Heating'</span>) ],
+                                                         setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.event, <span style='color:#c000c0;'>200</span>) ], <span style='color:#008000;'># event variable is dimensionless</span>
+                                                         triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                         userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(Time() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span><b><span style='color:#0000ff;'>*</span></b>s), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#ff0000;'>'Regulator'</span>, <span style='color:#ff0000;'>'HeaterOff'</span>) ],
+                                                    setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.epOut, <span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>+</span></b> Constant(<span style='color:#c000c0;'>6.0</span><b><span style='color:#0000ff;'>*</span></b>K)) ],
+                                                    userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#ff0000;'>&quot;HeaterOff&quot;</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;Q_in&quot;</span>, <span style='color:#ff0000;'>&quot;The heater is off&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qin()
+
+        <span style='color:#0000ff;'>self</span>.END_STN()
+
+        <span style='color:#008000;'># Users are responsible for creating/deleting of user actions and have to ensure</span>
+        <span style='color:#008000;'># that they still exist until the end of simulation.</span>
+        <span style='color:#0000ff;'>self</span>.action  <b><span style='color:#0000ff;'>=</span></b> simpleUserAction(<span style='color:#0000ff;'>self</span>.epIn)
+        <span style='color:#0000ff;'>self</span>.action2 <b><span style='color:#0000ff;'>=</span></b> simpleUserAction2(<span style='color:#ff0000;'>'This message should be fired when the time is 100s.'</span>)
+
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        The ON_CONDITION() function can be directly called from the DeclareEquations() and in that case</span>
+<span style='color:#008000;'>        the OnCondition handler belongs to the model and is always active.</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(Time() <b><span style='color:#0000ff;'>==</span></b> Constant(<span style='color:#c000c0;'>100</span><b><span style='color:#0000ff;'>*</span></b>s), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [],
+                                                     setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                     triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                     userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.action2] )
+
+        
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>                                   ON_EVENT() function</span>
+<span style='color:#008000;'>        The actions executed when the event on the inlet epIn event port is received.</span>
+<span style='color:#008000;'>        OnEvent handlers can be also specified as a part of the state definition</span>
+<span style='color:#008000;'>        and then they are active only when that particular state is active.</span>
+<span style='color:#008000;'>        Arguments:</span>
+<span style='color:#008000;'>          - Event port (could be either inlet or outlet)</span>
+<span style='color:#008000;'>          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name)</span>
+<span style='color:#008000;'>          - 'triggerEvents' is a list of python tuples (outlet-event-port, expression)</span>
+<span style='color:#008000;'>          - 'setVariableValues' is a list of python tuples (variable, expression)</span>
+<span style='color:#008000;'>          - 'userDefinedActions' is a list of daeAction derived classes</span>
+<span style='color:#008000;'>        daeEventPort defines the operator() which returns adouble object that can be evaluated at the moment</span>
+<span style='color:#008000;'>        when the action is executed to get the value of the event data (ie. to set a new value of a variable).</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        <span style='color:#0000ff;'>self</span>.ON_EVENT(<span style='color:#0000ff;'>self</span>.epIn, switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#ff0000;'>'Regulator'</span>, <span style='color:#ff0000;'>'HeaterOff'</span>)],
+                                 setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.event, <span style='color:#0000ff;'>self</span>.epIn()) ],
+                                 triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                 userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.action])
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#ff0000;'>&quot;tutorial13&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;In this example we use the same problem as in the tutorial 5. </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
+                             <span style='color:#ff0000;'>&quot;Here we introduce: </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
+                             <span style='color:#ff0000;'>&quot;  - The event ports </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
+                             <span style='color:#ff0000;'>&quot;  - ON_CONDITION() function showing the new types of actions that can be executed &quot;</span> \
+                             <span style='color:#ff0000;'>&quot;during state transitions </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
+                             <span style='color:#ff0000;'>&quot;  - ON_EVENT() function showing the new types of actions that can be executed &quot;</span> \
+                             <span style='color:#ff0000;'>&quot;when an event is triggered </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
+                             <span style='color:#ff0000;'>&quot;  - User defined actions&quot;</span> \
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#0000ff;'>self</span>.m.m.SetValue(<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>*</span></b> kg)
+        <span style='color:#0000ff;'>self</span>.m.alpha.SetValue(<span style='color:#c000c0;'>200</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#0000ff;'>self</span>.m.A.SetValue(<span style='color:#c000c0;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
+        <span style='color:#0000ff;'>self</span>.m.Tsurr.SetValue(<span style='color:#c000c0;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># Set the state active at the beginning (the default is the first declared state; here 'Heating')</span>
+        <span style='color:#0000ff;'>self</span>.m.stnRegulator.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;Heating&quot;</span>
+
+        <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(<span style='color:#c000c0;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#0000ff;'>self</span>.m.event.AssignValue(<span style='color:#c000c0;'>0.0</span>)
+
+
+<span style='color:#008000;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
+    simulator.exec_()
+
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#ff0000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#ff0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#ff0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;-rt.xml&quot;</span>)
+
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#008000;'># Run</span>
+    simulation.Run()
+
+    <span style='color:#008000;'># Print the list of events</span>
+    log.Message(<span style='color:#ff0000;'>'Events occured at the {0} event port:'</span>.<span style='color:#0000ff;'>format</span>(simulation.m.epOut.CanonicalName), <span style='color:#c000c0;'>0</span>)
+    log.Message(<span style='color:#0000ff;'>str</span>(simulation.m.epOut.Events), <span style='color:#c000c0;'>0</span>)
+
+    log.Message(<span style='color:#ff0000;'>'Events occured at the {0} event port:'</span>.<span style='color:#0000ff;'>format</span>(simulation.m.epIn.CanonicalName), <span style='color:#c000c0;'>0</span>)
+    log.Message(<span style='color:#0000ff;'>str</span>(simulation.m.epIn.Events), <span style='color:#c000c0;'>0</span>)
+    
+    simulation.Finalize()
+
+<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>'console'</span>):
+        consoleRun()
+    <b>else</b>:
+        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        guiRun(app)
+</pre>
+</body>
+</html>
