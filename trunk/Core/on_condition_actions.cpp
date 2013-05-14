@@ -101,7 +101,15 @@ void daeOnConditionActions::OpenRuntime(io::xmlTag_t* pTag)
 
 void daeOnConditionActions::SaveRuntime(io::xmlTag_t* pTag) const
 {
-	daeObject::SaveRuntime(pTag);
+    string strName;
+
+    daeObject::SaveRuntime(pTag);
+
+	strName = "Condition";
+	pTag->SaveRuntimeObject(strName, &m_Condition);
+
+	strName = "Actions";
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrActions);
 }
 
 void daeOnConditionActions::Create_SWITCH_TO(daeState* pStateFrom, const string& strStateToName, const daeCondition& rCondition, real_t dEventTolerance)

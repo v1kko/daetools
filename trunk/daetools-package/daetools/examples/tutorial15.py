@@ -53,12 +53,12 @@ class modTutorial(daeModel):
         self.IF(Time() < Constant(200*s)) # --------------------------------------------------> 1
 
         # IF-1.1
-        self.IF(Time() >= Constant(0*s) and Time() < Constant(100*s)) # ------------> 1.1
+        self.IF((Time() >= Constant(0*s)) & (Time() < Constant(100*s))) # ------------> 1.1
 
         # IF-1.1.1
-        self.IF(Time() >= Constant(0*s) and Time() < Constant(50*s)) # ---> 1.1.1
+        self.IF((Time() >= Constant(0*s)) & (Time() < Constant(50*s))) # ---> 1.1.1
         eq = self.CreateEquation("Q_111", "The heater is on")
-        eq.Residual = self.Qin() - Constant(1501 * W)
+        eq.Residual = self.Qin() - Constant(1600 * W)
 
         self.ELSE() # ----------------------------------------------------> 1.1.1
         eq = self.CreateEquation("Q_112", "The heater is on")
@@ -68,13 +68,18 @@ class modTutorial(daeModel):
 
         self.ELSE() # --------------------------------------------------------------> 1.1
         eq = self.CreateEquation("Q_12", "The heater is on")
-        eq.Residual = self.Qin() - Constant(1499 * W)
+        eq.Residual = self.Qin() - Constant(1400 * W)
 
         self.END_IF() # ------------------------------------------------------------>1.1
 
+        self.ELSE_IF((Time() >= Constant(200*s)) & (Time() < Constant(300*s))) # ------------->1
+
+        eq = self.CreateEquation("Q_2", "The heater is on")
+        eq.Residual = self.Qin() - Constant(1300 * W)
+
         self.ELSE() # ------------------------------------------------------------------------>1
 
-        eq = self.CreateEquation("Q_2", "The heater is off")
+        eq = self.CreateEquation("Q_3", "The heater is off")
         eq.Residual = self.Qin()
 
         self.END_IF() # ---------------------------------------------------------------------->1

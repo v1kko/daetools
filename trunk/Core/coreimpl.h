@@ -2289,6 +2289,9 @@ public:
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
+    
+    void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	void Clone(const daeOnEventActions& rObject);

@@ -818,9 +818,9 @@ void condBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeS
 
 	strName  = "mo";
 	if(m_eLogicalOperator == eAnd)
-		strOperator = "&And;";
+		strOperator = "&#x2227;";
 	else if(m_eLogicalOperator == eOr)
-		strOperator = "&Or;";
+		strOperator = "&#x2228;";
 	else
 		daeDeclareAndThrowException(exInvalidCall);  
 	mrowout->AddTag(strName, strOperator);

@@ -160,7 +160,24 @@ void daeOnEventActions::Save(io::xmlTag_t* pTag) const
 	strName = "Actions";
 	pTag->SaveObjectArray(strName, m_ptrarrOnEventActions);
 }
-	
+
+void daeOnEventActions::OpenRuntime(io::xmlTag_t* pTag)
+{
+	daeObject::OpenRuntime(pTag);
+}
+
+void daeOnEventActions::SaveRuntime(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	daeObject::Save(pTag);
+
+	strName = "EventPort";
+	pTag->SaveObjectRef(strName, m_pEventPort);
+
+	strName = "Actions";
+	pTag->SaveRuntimeObjectArray(strName, m_ptrarrOnEventActions);
+}
 void daeOnEventActions::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 }

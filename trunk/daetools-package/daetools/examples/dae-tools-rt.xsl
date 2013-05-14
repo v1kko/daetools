@@ -498,12 +498,11 @@
           <xsl:for-each select="Object">
               <p>
                 <b><i>
-                    <!--<xsl:value-of select="Name"/>-->
                     <xsl:copy-of select="MathMLName"/>:
                 </i></b>
               </p>
 
-              <p style="padding-left:20px">
+              <p style="padding-left:15px">
                  <xsl:copy-of select="MathML"/>
                  <br></br>
                 
@@ -512,11 +511,11 @@
                  </i>
              </p>
 
-             <p style="padding-left:20px">
+             <p style="padding-left:10px">
                Expanded into:
              </p>
 
-            <div style="padding-left:40px">
+            <div style="padding-left:10px">
                 <xsl:apply-templates select="EquationExecutionInfos"/> 
             </div>
 
@@ -581,37 +580,29 @@
 
         <xsl:if test="Type = 'eIF'">
 
-          <div style="padding-left:30px; padding-right:30px;">
-            <h3>
-               <!--<xsl:value-of select="Name"/>-->
-               <xsl:copy-of select="MathMLName"/> 
-            </h3>
-            <p>
-                <i>     
-                    <xsl:value-of select="Description"/>
-                </i>
-            </p>
-
+          <div style="padding-left:10px; padding-right:10px;">
             <ul>
                 <xsl:for-each select="States/Object">
                     <li>
-                        <xsl:if test="count(StateTransitions/Object) = 0">
-                            Else
+                        <xsl:if test="position() = 1">
+                            IF <xsl:apply-templates select="OnConditionActions/Object/Condition"/>
                         </xsl:if>
 
-                        <xsl:if test="count(StateTransitions/Object) > 0">
-                            <xsl:for-each select="StateTransitions/Object">
-                                If <xsl:apply-templates select="Condition"/>
-                            </xsl:for-each>
+                        <xsl:if test="position() > 1 and position() != last()">
+                            ELSE IF <xsl:apply-templates select="OnConditionActions/Object/Condition"/>
                         </xsl:if>
-                        <br></br>
 
-                        <div style="padding-left:30px; padding-right:30px;">
+                        <xsl:if test="position() = last()">
+                            ELSE
+                        </xsl:if>
+
+                        <br/>
+
+                        <div style="padding-left:10px; padding-right:10px;">
                             <xsl:apply-templates select="Equations"/>
                             <xsl:apply-templates select="STNs"/>
                         </div>
                     </li>
-                    <br/>
                 </xsl:for-each>
             </ul>
 
@@ -619,9 +610,8 @@
         </xsl:if>
 
         <xsl:if test="Type = 'eSTN'">
-          <div style="padding-left:30px; padding-right:30px;">
+          <div style="padding-left:10px; padding-right:10px;">
             <h3>
-               <!--<xsl:value-of select="Name"/>-->
                <xsl:copy-of select="MathMLName"/> 
             </h3>
             <p>
@@ -635,14 +625,14 @@
 
                     <li>
                         <b>
-                            <!--<xsl:value-of select="Name"/>-->
                             <xsl:copy-of select="MathMLName"/> 
                         </b>
                         <br></br>
 
-                        <div style="padding-left:30px; padding-right:30px;">
+                        <div style="padding-left:10px; padding-right:10px;">
                             <xsl:apply-templates select="Equations"/>
-                            <xsl:apply-templates select="StateTransitions"/>
+                            <xsl:apply-templates select="OnConditionActions"/>
+                            <xsl:apply-templates select="OnEventActions"/>
                             <xsl:apply-templates select="STNs"/>
                         </div>
                     </li>
@@ -667,11 +657,11 @@
           <xsl:attribute name="name">
             <xsl:value-of select="@ID"/>
           </xsl:attribute>
-          <!--<xsl:value-of select="Name"/>-->
           <xsl:copy-of select="MathMLName"/> 
         </a>
         <xsl:apply-templates select="Equations"/>
-        <xsl:apply-templates select="StateTransitions"/>
+        <xsl:apply-templates select="OnConditionActions"/>
+        <xsl:apply-templates select="OnEventActions"/>
         <xsl:apply-templates select="STNs"/>
       </xsl:for-each>
     </div>
@@ -679,18 +669,48 @@
 
 
 
-  <xsl:template match="StateTransitions">
+
+   <xsl:template match="Actions">
+        <xsl:if test="count(Object) > 0">
+            <ul>
+                <xsl:for-each select="Object">
+                    <li>
+                        <xsl:if test="Type = 'eChangeState'">
+                            Switch to: <xsl:copy-of select="StateTo/ObjectRefMathML"/>
+                        </xsl:if>
+                        <xsl:if test="Type = 'eSendEvent'">
+                            Trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/> with the data: <xsl:copy-of select="MathML"/>
+                        </xsl:if>
+                        <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
+                            Set: <xsl:copy-of select="MathML"/>
+                        </xsl:if>
+                    </li>
+                </xsl:for-each>
+            </ul>
+        </xsl:if>
+  </xsl:template>
+
+
+  <xsl:template match="OnConditionActions">
     <div>
       <xsl:for-each select="Object">
         <p>
-            If <xsl:apply-templates select="Condition"/> is satisfied switch to
-            <b>
-                <xsl:copy-of select="StateToRef/ObjectRefMathML"/>
-            </b>
+            When the condition <xsl:apply-templates select="Condition"/> is satisfied: <br/>
+            <xsl:apply-templates select="Actions"/>
         </p>
       </xsl:for-each>
     </div>
+  </xsl:template>
 
+  <xsl:template match="OnEventActions">
+    <div>
+      <xsl:for-each select="Object">
+        <p>
+            On event received on: <xsl:apply-templates select="EventPort/ObjectRefMathML"/> <br/>
+            <xsl:apply-templates select="Actions"/>
+        </p>
+      </xsl:for-each>
+    </div>
   </xsl:template>
 
   <xsl:template match="Condition">
