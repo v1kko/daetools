@@ -576,9 +576,9 @@
         <xsl:if test="Type = 'eIF'">
 
           <div style="padding-left:10px; padding-right:10px;">
-            <ul>
+<!--             <ul> -->
                 <xsl:for-each select="States/Object">
-                    <li>
+<!--                     <li> -->
                         <xsl:if test="position() = 1">
                             IF <xsl:apply-templates select="OnConditionActions/Object/Condition"/>
                         </xsl:if>
@@ -609,9 +609,9 @@
                             <xsl:apply-templates select="Equations"/>
                             <xsl:apply-templates select="STNs"/>
                         </div>
-                    </li>
+<!--                     </li> -->
                 </xsl:for-each>
-            </ul>
+<!--             </ul> -->
 
           </div>
         </xsl:if>

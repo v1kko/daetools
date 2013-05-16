@@ -583,7 +583,10 @@ bool daeSTN::CheckDiscontinuities(void)
 	{
 		pOnConditionActions = m_pActiveState->m_ptrarrOnConditionActions[i];
 		if(pOnConditionActions->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
+        {
+            m_pModel->m_pDataProxy->SetLastSatisfiedCondition(&pOnConditionActions->m_Condition);
 			return true;
+        }
 	}
 
 // Now I have to check for discontinuities in the nested STNs of the current active state

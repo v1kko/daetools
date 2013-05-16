@@ -97,7 +97,7 @@ public:
     daeCondition operator !(void) const;
 	
 	void   SetEventTolerance(real_t dEventTolerance);
-	real_t GetEventTolerance(void);
+	real_t GetEventTolerance(void) const;
 
 	void BuildExpressionsArray(const daeExecutionContext* pExecutionContext);
     void GetExpressionsArray(std::vector<adNode*>& ptrarrExpressions);

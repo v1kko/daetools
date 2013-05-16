@@ -133,10 +133,10 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
         eq.Residual = self.Qsum() + self.k() * Sum( self.T.d_array(self.y, '*', 0) )
         
-        # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Vector)
+        # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Array)
         #  - The function Constant() creates a constant quantity that contains a value and units 
         #  - The function Array() creates an array of constant quantities that contain a value and units
-        # Both functions accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
+        # Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
         #
         # The equation below expands into the following:
         #                                          ∂T(*, 0)

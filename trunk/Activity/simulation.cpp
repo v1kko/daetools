@@ -1045,6 +1045,11 @@ void daeSimulation::SetReportingInterval(real_t dReportingInterval)
 	}
 }
 
+daeCondition* daeSimulation::GetLastSatisfiedCondition(void) const
+{
+    return m_pModel->GetDataProxy()->GetLastSatisfiedCondition();
+}
+
 real_t daeSimulation::GetReportingInterval(void) const
 {
 	return m_dReportingInterval;

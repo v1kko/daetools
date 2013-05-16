@@ -137,7 +137,7 @@ void daeCondition::SetEventTolerance(real_t dEventTolerance)
 	m_dEventTolerance = dEventTolerance;
 }
 
-real_t daeCondition::GetEventTolerance(void)
+real_t daeCondition::GetEventTolerance(void) const
 {
 	return m_dEventTolerance;
 }

@@ -479,7 +479,60 @@ void daeAction::Save(io::xmlTag_t* pTag) const
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 }
-	
+
+void daeAction::OpenRuntime(io::xmlTag_t* pTag)
+{
+	daeObject::OpenRuntime(pTag);
+}
+
+void daeAction::SaveRuntime(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	daeObject::Save(pTag);
+
+	strName = "Type";
+	SaveEnum(pTag, strName, m_eActionType);
+
+	if(m_eActionType == eChangeState)
+	{
+		strName = "STN";
+		pTag->SaveObjectRef(strName, m_pSTN);
+		
+		strName = "StateTo";
+		pTag->SaveObjectRef(strName, m_pStateTo);
+	}
+	else if(m_eActionType == eSendEvent)
+	{
+		strName = "SendEventPort";
+		pTag->SaveObjectRef(strName, m_pSendEventPort);
+		
+		strName = "Expression";
+		adNode::SaveNode(pTag, strName, m_pSetupNode.get());
+
+		strName = "MathML";
+		SaveNodeAsMathML(m_pSetupNode.get(), pTag, strName);
+	}
+	else if(m_eActionType == eReAssignOrReInitializeVariable)
+	{
+		strName = "Variable";
+		pTag->Save(strName, m_pVariableWrapper->GetName());
+
+		strName = "Expression";
+		adNode::SaveNode(pTag, strName, m_pSetupNode.get());
+
+		strName = "MathML";
+		SaveNodeAsMathML(m_pSetupNode.get(), pTag, strName);
+	}
+	else if(m_eActionType == eUserDefinedAction)
+	{
+	}
+	else
+	{
+		daeDeclareAndThrowException(exNotImplemented);
+	}
+}
+
 void daeAction::SaveNodeAsMathML(adNode* node, io::xmlTag_t* pTag, const string& strObjectName) const
 {
 	string strName, strValue;

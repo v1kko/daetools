@@ -760,6 +760,17 @@ string daeOnConditionActions__repr__(const daeOnConditionActions& self)
     return daeGetStrippedRelativeName(NULL, &self);
 }
 
+string daeCondition__str__(const daeCondition& self)
+{
+    return self.SaveNodeAsPlainText(); 
+}
+
+string daeCondition__repr__(const daeCondition& self)
+{
+    return (boost::format("daeCondition(node=%1%, eventTolerance=%2%)") % 
+                           self.SaveNodeAsPlainText() % self.GetEventTolerance()).str();
+}
+
 string adouble__str__(const adouble& self)
 {
     string str;

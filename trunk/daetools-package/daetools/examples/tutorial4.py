@@ -17,7 +17,9 @@
  DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
  ************************************************************************************
 
-In this example we use the same conduction problem as in the tutorial 1.
+In this example we model a very simmple conduction problem where a piece of copper
+(a plate) is at one side exposed to the source of heat and at the other to the
+surroundings.
 
 Here we introduce:
 
@@ -27,10 +29,10 @@ Here we have a very simple heat balance::
 
     ro * cp * dT/dt - Qin = h * A * (T - Tsurr)
 
-A piece of copper (a plate) is at one side exposed to the source of heat and at the
-other to the surroundings. The process starts at the temperature of the metal of 283K.
+The process starts at the temperature of the metal of 283K.
 The metal is allowed to warm up for 200 seconds and then the heat source is
-removed and the metal cools down slowly again to the ambient temperature.
+removed and the metal cools down slowly to the ambient temperature.
+
 """
 
 import sys

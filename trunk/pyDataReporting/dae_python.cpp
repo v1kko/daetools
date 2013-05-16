@@ -129,9 +129,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 	class_<daepython::daeDataReporterLocalWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterLocal", DOCSTR_daeDataReporterLocal, no_init)
         .def(init<>(( arg("self") )))
             
-		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterLocalWrapper::Connect)
-		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterLocalWrapper::Disconnect)
-		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterLocalWrapper::IsConnected)
+		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterLocalWrapper::def_Connect)
+		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterLocalWrapper::def_Disconnect)
+		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterLocalWrapper::def_IsConnected)
 		.def("StartRegistration",	&daeDataReporter_t::StartRegistration,	&daepython::daeDataReporterLocalWrapper::def_StartRegistration)
 		.def("RegisterDomain",		&daeDataReporter_t::RegisterDomain,		&daepython::daeDataReporterLocalWrapper::def_RegisterDomain)
 		.def("RegisterVariable",	&daeDataReporter_t::RegisterVariable,	&daepython::daeDataReporterLocalWrapper::def_RegisterVariable)
@@ -141,6 +141,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDataReporterLocalWrapper::def_SendVariable)
             
 		.add_property("Process",	make_function(&daeDataReporterLocal::GetProcess, return_internal_reference<>()), DOCSTR_daeDataReporterLocal_Process )
+        
+        .add_property("dictDomains",		&daepython::daeDataReporterLocalWrapper::GetDomainsAsDict)
+        .add_property("dictVariables",		&daepython::daeDataReporterLocalWrapper::GetVariablesAsDict)
 		;
 	
 	class_<daeNoOpDataReporter, bases<daeDataReporterLocal>, boost::noncopyable>("daeNoOpDataReporter", DOCSTR_daeNoOpDataReporter, no_init)
@@ -291,10 +294,11 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 
 		.def_readonly("Name",				&daeDataReceiverProcess::m_strName, DOCSTR_daeDataReceiverProcess_Name)
  
-		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess, 
-                                            DOCSTR_daeDataReceiverProcess_Domains)
-		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess, 
-                                            DOCSTR_daeDataReceiverProcess_Variables)
+		.add_property("Domains",			&daepython::GetDomainsDataReporterProcess,   DOCSTR_daeDataReceiverProcess_Domains)
+		.add_property("Variables",			&daepython::GetVariablesDataReporterProcess, DOCSTR_daeDataReceiverProcess_Variables)
+            
+        .add_property("dictDomains",		&daepython::GetDomainsAsDictDataReporterProcess,   DOCSTR_daeDataReceiverProcess_dictDomains)
+        .add_property("dictVariables",		&daepython::GetVariablesAsDictDataReporterProcess, DOCSTR_daeDataReceiverProcess_dictVariables)
 		
 		.def("RegisterDomain",				&daeDataReceiverProcess::RegisterDomain, 
                                             ( arg("self"), arg("domain") ), DOCSTR_daeDataReceiverProcess_RegisterDomain)

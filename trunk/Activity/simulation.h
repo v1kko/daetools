@@ -100,7 +100,9 @@ public:
 	daeVariableWrapper*			SetInputVariable(adouble a);
 	daeOptimizationVariable*	SetModelParameter(adouble a, real_t LB, real_t UB, real_t defaultValue);
 
-	size_t GetNumberOfObjectiveFunctions(void) const;
+    daeCondition* GetLastSatisfiedCondition(void) const;
+
+    size_t GetNumberOfObjectiveFunctions(void) const;
 	void   SetNumberOfObjectiveFunctions(size_t n);
 
     size_t	GetNumberOfEquations(void) const;

@@ -14,6 +14,7 @@
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -102,17 +103,40 @@ public:
 	{
 	}
 
-	bool Connect(const string& strConnectString, const string& strProcessName)
+    bool Connect(const string& strConnectString, const string& strProcessName)
 	{
-		return this->get_override("Connect")(strConnectString, strProcessName);
+        if(boost::python::override f = this->get_override("Connect"))
+            return f(strConnectString, strProcessName);
+		else
+			return def_Connect(strConnectString, strProcessName);
 	}
+	bool def_Connect(const string& strConnectString, const string& strProcessName)
+	{
+        return true;
+	}
+
 	bool Disconnect(void)
 	{
-		return this->get_override("Disconnect")();
+        if(boost::python::override f = this->get_override("Disconnect"))
+            return f();
+		else
+			return def_Disconnect();
 	}
+	bool def_Disconnect(void)
+	{
+        return true;
+	}
+
 	bool IsConnected(void)
 	{
-		return this->get_override("IsConnected")();
+        if(boost::python::override f = this->get_override("IsConnected"))
+            return f();
+		else
+			return def_IsConnected();
+	}
+	bool def_IsConnected(void)
+	{
+        return true;
 	}
 
 	bool StartRegistration(void)
@@ -198,6 +222,30 @@ public:
 	{
         return this->daeDataReporterLocal::SendVariable(pVariableValue);
 	}
+    
+    boost::python::dict GetDomainsAsDict()
+    {
+        boost::python::dict d;
+        daeDataReceiverDomain* obj;
+    
+        for(size_t i = 0; i < m_drProcess.m_ptrarrRegisteredDomains.size(); i++)
+        {
+            obj = m_drProcess.m_ptrarrRegisteredDomains[i];
+            d[obj->m_strName] = boost::ref(obj);
+        }
+        return d;
+    }
+    
+    boost::python::dict GetVariablesAsDict()
+    {
+        boost::python::dict d;
+        map<string, daeDataReceiverVariable*>::const_iterator iter;
+        
+        for(iter = m_drProcess.m_ptrmapRegisteredVariables.begin(); iter != m_drProcess.m_ptrmapRegisteredVariables.end(); iter++)
+            d[ (*iter).first ] = boost::ref( (*iter).second );
+    
+        return d;    
+    }
 };
 
 class daeDataReporterFileWrapper : public daeFileDataReporter,
@@ -1221,6 +1269,9 @@ boost::python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)
 *******************************************************/
 boost::python::list GetDomainsDataReporterProcess(daeDataReceiverProcess& process);
 boost::python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& process);
+
+boost::python::dict GetDomainsAsDictDataReporterProcess(daeDataReceiverProcess& process);
+boost::python::dict GetVariablesAsDictDataReporterProcess(daeDataReceiverProcess& process);
 
 }
 

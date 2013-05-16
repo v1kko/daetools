@@ -205,8 +205,7 @@ enum daeeDiscontinuityType
 
 enum daeeStopCriterion
 {
-	eStopAtGlobalDiscontinuity = 0,
-	eStopAtModelDiscontinuity,
+	eStopAtModelDiscontinuity = 0,
 	eDoNotStopAtDiscontinuity
 };
 

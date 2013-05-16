@@ -1630,7 +1630,10 @@ bool daeModel::CheckDiscontinuities(void)
     {
         pOnConditionActions = m_ptrarrOnConditionActions[i];
         if(pOnConditionActions->m_Condition.Evaluate(&EC)) // There is a discontinuity, therefore return true
+        {
+            m_pDataProxy->SetLastSatisfiedCondition(&pOnConditionActions->m_Condition);
 			return true;
+        }
     }
     
     for(i = 0; i < m_ptrarrComponents.size(); i++)

@@ -150,4 +150,28 @@ python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& process)
 	return l;
 }
 
+boost::python::dict GetDomainsAsDictDataReporterProcess(daeDataReceiverProcess& process)
+{
+    python::dict d;
+	daeDataReceiverDomain* obj;
+
+	for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
+	{
+		obj = process.m_ptrarrRegisteredDomains[i];
+		d[obj->m_strName] = boost::ref(obj);
+	}
+	return d;
+}
+
+boost::python::dict GetVariablesAsDictDataReporterProcess(daeDataReceiverProcess& process)
+{
+    boost::python::dict d;
+    map<string, daeDataReceiverVariable*>::const_iterator iter;
+    
+    for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
+        d[ (*iter).first ] = boost::ref( (*iter).second );
+
+    return d;    
+}
+
 }

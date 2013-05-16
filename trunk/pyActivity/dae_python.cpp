@@ -16,7 +16,6 @@ BOOST_PYTHON_MODULE(pyActivity)
     Enums
 ***************************************************************/
     enum_<daeeStopCriterion>("daeeStopCriterion")
-        .value("eStopAtGlobalDiscontinuity",    dae::core::eStopAtGlobalDiscontinuity)
         .value("eStopAtModelDiscontinuity",     dae::core::eStopAtModelDiscontinuity)
         .value("eDoNotStopAtDiscontinuity",     dae::core::eDoNotStopAtDiscontinuity)
         .export_values()
@@ -85,6 +84,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("TotalNumberOfVariables", &daepython::daeDefaultSimulationWrapper::GetTotalNumberOfVariables, DOCSTR_daeSimulation_TotalNumberOfVariables)
         .add_property("RelativeTolerance",      &daepython::daeDefaultSimulationWrapper::GetRelativeTolerance,      DOCSTR_daeSimulation_RelativeTolerance)
         .add_property("AbsoluteTolerances",     &daepython::daeDefaultSimulationWrapper::GetAbsoluteTolerances,     DOCSTR_daeSimulation_AbsoluteTolerances)
+            
+        .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()), 
+                                                                                                            DOCSTR_daeSimulation_LastSatisfiedCondition)
             
 		.add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_,  DOCSTR_daeSimulation_DataReporter)
 		.add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_,           DOCSTR_daeSimulation_Log)

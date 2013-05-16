@@ -118,6 +118,8 @@ string daeState__str__(const daeState& self);
 string daeState__repr__(const daeState& self);
 string daeDEDI__str__(const daeDEDI& self);
 string daeDEDI__repr__(const daeDEDI& self);
+string daeCondition__str__(const daeCondition& self);
+string daeCondition__repr__(const daeCondition& self);
 string adouble__str__(const adouble& self);
 string adouble__repr__(const adouble& self);
 string adouble_array__str__(const adouble_array& self);

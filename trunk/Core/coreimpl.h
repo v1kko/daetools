@@ -607,6 +607,7 @@ public:
 		m_bReinitializationFlag		= false;
 		m_bIsModelDynamic			= false;
 		m_bCopyDataFromBlock        = false;
+        m_pLastSatisfiedCondition   = NULL;
 		
 		daeConfig& cfg = daeConfig::GetConfig();
 		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
@@ -1294,7 +1295,17 @@ public:
 		m_pBlock = pBlock;
 	}
 	
-	void PrintAssignedVariables() const
+    daeCondition* GetLastSatisfiedCondition(void) const
+	{
+		return m_pLastSatisfiedCondition;
+	}
+	
+	void SetLastSatisfiedCondition(daeCondition* pCondition)
+	{
+		m_pLastSatisfiedCondition = pCondition;
+	}
+
+    void PrintAssignedVariables() const
 	{
 		std::cout << "PrintAssignedVariables" << std::endl;
 		for(std::map<size_t, real_t>::const_iterator iter = m_mapAssignedValues.begin(); iter != m_mapAssignedValues.end(); iter++)
@@ -1303,11 +1314,11 @@ public:
 	}
 	
 protected:
-//	daeCondition*					m_pCondition;
 	daeLog_t*						m_pLog;
 	daeModel_t*						m_pTopLevelModel;
 	size_t							m_nTotalNumberOfVariables;
 	daeBlock*						m_pBlock;
+    daeCondition*                   m_pLastSatisfiedCondition;
 	
 	std::vector<real_t*>			m_pdarrValuesReferences;
 	std::vector<real_t*>			m_pdarrTimeDerivativesReferences;
@@ -2222,6 +2233,8 @@ public:
 	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
+    void OpenRuntime(io::xmlTag_t* pTag);
+	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	void Clone(const daeAction& rObject);

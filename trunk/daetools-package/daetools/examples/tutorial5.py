@@ -17,13 +17,12 @@
  DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
  ************************************************************************************
 
-In this example we use the same conduction problem as in the tutorial 1.
+In this example we use the same conduction problem as in the tutorial 4.
 
 Here we introduce:
 
 - Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)
 
-Here, we have the similar problem as in the tutorial 4. The model is equivalent.
 Again we have a piece of copper (a plate) is at one side exposed to the source of heat
 and at the other to the surroundings. The process starts at the temperature of 283K.
 The metal is allowed to warm up, and then its temperature is kept in the interval

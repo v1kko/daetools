@@ -419,9 +419,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()), DOCSTR_daeCondition_RuntimeNode)
         .add_property("Expressions",    &daepython::daeCondition_GetExpressions,                                           DOCSTR_daeCondition_Expressions)
             
-		//.def(!self)
+		//.def(!self) 
 		.def(self | self)
 		.def(self & self)
+            
+        .def("__str__",  &daepython::daeCondition__str__)
+        .def("__repr__", &daepython::daeCondition__repr__)
 	;
 
 	class_<adouble>("adouble", DOCSTR_adouble, no_init)
@@ -516,7 +519,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Time",			&Time, DOCSTR_Time);
 	def("Constant",		&daepython::ad_Constant_c, (arg("value")),  DOCSTR_Constant_c);
 	def("Constant",		&daepython::ad_Constant_q, (arg("value")),  DOCSTR_Constant_q);
-	def("Array",		&daepython::adarr_Array,   (arg("values")), DOCSTR_Array);  
+	def("Array",		&daepython::adarr_Array,   (arg("values")), DOCSTR_Array);
 	
 	class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
         .def(init< optional<bool, adNodeArray*> >( ( arg("self"), arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_array_init))
