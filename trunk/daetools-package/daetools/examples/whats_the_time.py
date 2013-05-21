@@ -2,43 +2,45 @@
 # -*- coding: utf-8 -*-
 
 """
-..
- ***********************************************************************************
-                             whats_the_time.py
-                 DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
- ***********************************************************************************
- DAE Tools is free software; you can redistribute it and/or modify it under the
- terms of the GNU General Public License version 3 as published by the Free Software
- Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- PARTICULAR PURPOSE. See the GNU General Public License for more details.
- You should have received a copy of the GNU General Public License along with the
- DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
- ************************************************************************************
-
+***********************************************************************************
+                            whats_the_time.py
+                DAE Tools: pyDAE module, www.daetools.com
+                Copyright (C) Dragan Nikolic, 2010
+***********************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+************************************************************************************
+"""
+__doc__ = """
 What is the time? (AKA Hello world!) is a very simple simulation.
 It shows the basic structure of the model and the simulation classes.
 A typical simulation includes 8 basic tasks:
 
 1. How to import the pyDAE module(s)
-2. How to declare variable types :py:class:`~pyCore.daeVariableType`
-3. How to define a model by deriving a class from the base :py:class:`~pyCore.daeModel` and which functions
-   must be implemented by every model (:py:meth:`~pyCore.daeModel.__init__`, :py:meth:`~pyCore.daeModel.DeclareEquations`):
+2. How to declare variable types daeVariableType
+3. How to define a model by deriving a class from the base daeModel
+   and which functions must be implemented by every model
+   (daeModel.__init__, daeModel.DeclareEquations):
 
-   - how to declare parameters and variables in :py:meth:`~pyCore.daeModel.__init__` function
-   - how to declare equations and their residuals in :py:meth:`~pyCore.daeModel.DeclareEquations` function
+   - how to declare parameters and variables in daeModel.__init__ function
+   - how to declare equations and their residuals in daeModel.DeclareEquations
+     function
    
-4. How to define a simulation by deriving a class from the base :py:class:`~pyActivity.daeSimulation` and which functions
-   must be implemented by every simulation (:py:meth:`~pyActivity.daeSimulation.__init__`,
-   :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains`, :py:meth:`~pyActivity.daeSimulation.SetUpVariables`):
+4. How to define a simulation by deriving a class from the base daeSimulation
+   and which functions must be implemented by every simulation (daeSimulation.__init__,
+   daeSimulation.SetUpParametersAndDomains, daeSimulation.SetUpVariables):
 
-   - how to set specify a model to be used in simulation in :py:meth:`~pyActivity.daeSimulation.__init__` function
-   - how to set values of parameters in :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains` function
-   - how to set initial conditions in :py:meth:`~pyActivity.daeSimulation.SetUpVariables` function
+   - how to set specify a model to be used in simulation in daeSimulation.__init__ function
+   - how to set values of parameters in daeSimulation.SetUpParametersAndDomains function
+   - how to set initial conditions in daeSimulation.SetUpVariables` function
 
-5. How to create auxiliary objects required for the simulation (DAE solver, data reporter
-   and logging objects)
+5. How to create auxiliary objects required for the simulation
+   (DAE solver, data reporter and logging objects)
 6. How to set simulation's additional settings
 7. How to connect a data reporter
 8. How to run a simulation

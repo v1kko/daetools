@@ -68,7 +68,7 @@ MacOS versions only. Additional linear solvers: AMD ACML and Intel Pardiso must 
 and compiled from source since they are not free software.
 
 Getting the packages
---------------------
+====================
 
 The instalation files can be downloaded from: `<https://sourceforge.net/projects/daetools/files>`_
 
@@ -90,8 +90,8 @@ The source code can be downloaded either from the subversion tree or from the fo
 Installation
 ============
 
-GNU/Linux (i686, x86_64)
-------------------------
+GNU/Linux
+---------
 
 First install the mandatory packages: python 2.7, numpy 1.5/1.6/1.7, scipy, matplotlib and pyqt4.
 
@@ -116,8 +116,8 @@ the following shell command:
     sudo python setup.py install
 
 
-MacOS (x86, x86_64)
--------------------
+MacOS
+-----
 
 First install the mandatory packages: **python 2.7**, **numpy 1.6**, **scipy**, **matplotlib** and **pyqt4**.
 As a starting point the following links can be used:
@@ -136,8 +136,8 @@ the following shell command:
     sudo python setup.py install
 
 
-Windows (32/64 bit)
--------------------
+Windows
+-------
 
 **DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
@@ -176,7 +176,7 @@ To uninstall use the uninstall program in ``Start`` -> ``All Programs`` -> ``DAE
     (Control Panel -> System): c:\AMD\acml4.4.0\ifort32_mp\lib;c:\Intel\MKL\10.2.5.035\ia32\bin\
 
     
-Compiling DAE Tools from source
+Compiling from source
 ===============================
 
 To compile the **DAE Tools** the following is needed:
@@ -185,7 +185,7 @@ To compile the **DAE Tools** the following is needed:
 * Compiled third party libraries and DAE/LA/NLP solvers: Sundials IDAS, Bonmin, NLopt, Trilinos, SuperLU, SuperLU_MT,
   Blas/Lapack
 
-All DAE Tools modules are developed using the QtCreator/QMake cross-platform integrated development environment.
+All **DAE Tools** modules are developed using the QtCreator/QMake cross-platform integrated development environment.
 The source code can be downloaded from the SourceForge website or checked out from the
 `DAE Tools subversion repository <https://svn.code.sf.net/p/daetools/code>`_:
 

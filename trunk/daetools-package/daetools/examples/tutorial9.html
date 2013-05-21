@@ -12,34 +12,34 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial9.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'> - Third party linear equations solvers</span>
-
-<span style='color:#008000;'>Currently there are 3rd party linear equations solvers:</span>
-
-<span style='color:#008000;'>- SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)</span>
-<span style='color:#008000;'>- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)</span>
-<span style='color:#008000;'>- Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)</span>
-<span style='color:#008000;'>- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial9.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'> - Third party linear equations solvers</span>
+
+<span style='color:#ff0000;'>Currently there are 3rd party linear equations solvers:</span>
+
+<span style='color:#ff0000;'>- SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)</span>
+<span style='color:#ff0000;'>- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)</span>
+<span style='color:#ff0000;'>- Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)</span>
+<span style='color:#ff0000;'>- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>

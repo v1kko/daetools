@@ -26,22 +26,25 @@
 <span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
 <span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 <span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'>- Discontinuous equations (symmetrical state transition networks: daeIF statements)</span>
-
-<span style='color:#008000;'>Here we have a very simple heat balance::</span>
-
-<span style='color:#008000;'>    ro * cp * dT/dt - Qin = h * A * (T - Tsurr)</span>
-
-<span style='color:#008000;'>A piece of copper (a plate) is at one side exposed to the source of heat and at the</span>
-<span style='color:#008000;'>other to the surroundings. The process starts at the temperature of the metal of 283K.</span>
-<span style='color:#008000;'>The metal is allowed to warm up for 200 seconds and then the heat source is</span>
-<span style='color:#008000;'>removed and the metal cools down slowly again to the ambient temperature.</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we model a very simmple conduction problem where a piece of copper</span>
+<span style='color:#ff0000;'>(a plate) is at one side exposed to the source of heat and at the other to the</span>
+<span style='color:#ff0000;'>surroundings.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'>- Discontinuous equations (symmetrical state transition networks: daeIF statements)</span>
+
+<span style='color:#ff0000;'>Here we have a very simple heat balance::</span>
+
+<span style='color:#ff0000;'>    ro * cp * dT/dt - Qin = h * A * (T - Tsurr)</span>
+
+<span style='color:#ff0000;'>The process starts at the temperature of the metal of 283K.</span>
+<span style='color:#ff0000;'>The metal is allowed to warm up for 200 seconds and then the heat source is</span>
+<span style='color:#ff0000;'>removed and the metal cools down slowly to the ambient temperature.</span>
+
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>

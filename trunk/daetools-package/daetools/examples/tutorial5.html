@@ -12,34 +12,33 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial5.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'>- Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)</span>
-
-<span style='color:#008000;'>Here, we have the similar problem as in the tutorial 4. The model is equivalent.</span>
-<span style='color:#008000;'>Again we have a piece of copper (a plate) is at one side exposed to the source of heat</span>
-<span style='color:#008000;'>and at the other to the surroundings. The process starts at the temperature of 283K.</span>
-<span style='color:#008000;'>The metal is allowed to warm up, and then its temperature is kept in the interval</span>
-<span style='color:#008000;'>[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal</span>
-<span style='color:#008000;'>cools down slowly again to the ambient temperature.</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial5.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we use the same conduction problem as in the tutorial 4.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'>- Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)</span>
+
+<span style='color:#ff0000;'>Again we have a piece of copper (a plate) is at one side exposed to the source of heat</span>
+<span style='color:#ff0000;'>and at the other to the surroundings. The process starts at the temperature of 283K.</span>
+<span style='color:#ff0000;'>The metal is allowed to warm up, and then its temperature is kept in the interval</span>
+<span style='color:#ff0000;'>[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal</span>
+<span style='color:#ff0000;'>cools down slowly again to the ambient temperature.</span>
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>

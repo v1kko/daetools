@@ -12,28 +12,28 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial16.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 4.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'>- Interactive operating procedures</span>
-
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial16.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we use the same conduction problem as in the tutorial 4.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'>- Interactive operating procedures</span>
+
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
@@ -198,7 +198,36 @@
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10000</span>
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#ff0000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#ff0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#ff0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#008000;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+<b>def</b> consoleRun():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDataReporterLocal()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
     simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10000</span>
 
     <span style='color:#008000;'># Connect data reporter</span>
@@ -219,10 +248,14 @@
     <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
-
+    
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>&quot;__main__&quot;</span>:
-    app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
-    guiRun(app)
+    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>'console'</span>):
+        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        consoleRun()
+    <b>else</b>:
+        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        guiRun(app)
 </pre>
 </body>
 </html>

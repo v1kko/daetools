@@ -12,40 +12,40 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial8.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use a similar problem as in the tutorial 5.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'>- Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)</span>
-<span style='color:#008000;'>- Custom data reporters</span>
-
-<span style='color:#008000;'>Some time it is not enough to send the result to daePlotter but it is desirable to</span>
-<span style='color:#008000;'>export them in certain format for use in other programs. Here we show how the custom</span>
-<span style='color:#008000;'>data reporter can be created. In this example the data reporter simply, after the simulation</span>
-<span style='color:#008000;'>is finished, save the results into a plain text file. Obviously, the data can be exported to</span>
-<span style='color:#008000;'>any format. Also some numpy functions that operate on numpy arrays can be used as well.</span>
-<span style='color:#008000;'>In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It</span>
-<span style='color:#008000;'>has the same interface and the functionality like all data reporters. However, it does not do</span>
-<span style='color:#008000;'>any data processing itself but calls the corresponding functions of data reporters which</span>
-<span style='color:#008000;'>are added to it by using the function AddDataReporter. This way it is possible, at the same</span>
-<span style='color:#008000;'>time, to send the results to the daePlotter and save them into a file (or process them in</span>
-<span style='color:#008000;'>some other ways).</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial8.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we use a similar problem as in the tutorial 5.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'>- Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)</span>
+<span style='color:#ff0000;'>- Custom data reporters</span>
+
+<span style='color:#ff0000;'>Some time it is not enough to send the result to daePlotter but it is desirable to</span>
+<span style='color:#ff0000;'>export them in certain format for use in other programs. Here we show how the custom</span>
+<span style='color:#ff0000;'>data reporter can be created. In this example the data reporter simply, after the simulation</span>
+<span style='color:#ff0000;'>is finished, save the results into a plain text file. Obviously, the data can be exported to</span>
+<span style='color:#ff0000;'>any format. Also some numpy functions that operate on numpy arrays can be used as well.</span>
+<span style='color:#ff0000;'>In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It</span>
+<span style='color:#ff0000;'>has the same interface and the functionality like all data reporters. However, it does not do</span>
+<span style='color:#ff0000;'>any data processing itself but calls the corresponding functions of data reporters which</span>
+<span style='color:#ff0000;'>are added to it by using the function AddDataReporter. This way it is possible, at the same</span>
+<span style='color:#ff0000;'>time, to send the results to the daePlotter and save them into a file (or process them in</span>
+<span style='color:#ff0000;'>some other ways).</span>
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, tempfile
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>

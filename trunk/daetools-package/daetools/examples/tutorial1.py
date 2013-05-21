@@ -2,29 +2,29 @@
 # -*- coding: utf-8 -*-
 
 """
-..
- ***********************************************************************************
-                             tutorial1.py
-                 DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
- ***********************************************************************************
- DAE Tools is free software; you can redistribute it and/or modify it under the
- terms of the GNU General Public License version 3 as published by the Free Software
- Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- PARTICULAR PURPOSE. See the GNU General Public License for more details.
- You should have received a copy of the GNU General Public License along with the
- DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
- ************************************************************************************
-
+***********************************************************************************
+                            tutorial1.py
+                DAE Tools: pyDAE module, www.daetools.com
+                Copyright (C) Dragan Nikolic, 2010
+***********************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+************************************************************************************
+"""
+__doc__ = """
 This tutorial introduces several new concepts:
 
 - Distribution domains
 - Distributed parameters, variables and equations
 - Boundary and initial conditions
 
-In this example we model a simple heat conduction problem: a conduction through a very thin,
-rectangular copper plate.
+In this example we model a simple heat conduction problem: a conduction through
+a very thin, rectangular copper plate.
 
 This example should be sufficiently complex to describe all basic DAE Tools features.
 For this problem, we need a two-dimensional Cartesian grid in X and Y axis
@@ -49,12 +49,13 @@ For this problem, we need a two-dimensional Cartesian grid in X and Y axis
         --|-------------------|-------> X axis
           0                   Lx
 
-Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the top edge of the plate
-(for y = Ly) represent the points where the heat is applied.
+Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the
+top edge of the plate (for y = Ly) represent the points where the heat is applied.
 
-The plate is considered insulated at the left (x = 0) and the right edges (x = Lx) of the plate (points 'L' and 'R').
-To model this type of problem, we have to write a heat balance equation for all interior points except the left, right,
-top and bottom edges, where we need to define the Neumann type boundary conditions.
+The plate is considered insulated at the left (x = 0) and the right edges (x = Lx)
+of the plate (points 'L' and 'R'). To model this type of problem, we have to write
+a heat balance equation for all interior points except the left, right, top and
+bottom edges, where we need to define the Neumann type boundary conditions.
 
 In this problem we have to define the following domains:
 
@@ -222,10 +223,6 @@ class simTutorial(daeSimulation):
         self.m.ro.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
         self.m.Qt.SetValue(0 * W/(m**2))
-        self.Log.Message('k  value = {0}; quantity = {1}'.format(self.m.k.GetValue(),  self.m.k.GetQuantity()),  0)
-        self.Log.Message('cp value = {0}; quantity = {1}'.format(self.m.cp.GetValue(), self.m.cp.GetQuantity()), 0)
-        self.Log.Message('ro value = {0}; quantity = {1}'.format(self.m.ro.GetValue(), self.m.ro.GetQuantity()), 0)
-        self.Log.Message('Qb value = {0}; quantity = {1}'.format(self.m.Qb.GetValue(), self.m.Qb.GetQuantity()), 0)
 
     def SetUpVariables(self):
         # SetInitialCondition function in the case of distributed variables can accept additional arguments

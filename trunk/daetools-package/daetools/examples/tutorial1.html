@@ -12,105 +12,106 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial1.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>This tutorial introduces several new concepts:</span>
-
-<span style='color:#008000;'>- Distribution domains</span>
-<span style='color:#008000;'>- Distributed parameters, variables and equations</span>
-<span style='color:#008000;'>- Boundary and initial conditions</span>
-
-<span style='color:#008000;'>In this example we model a simple heat conduction problem: a conduction through a very thin,</span>
-<span style='color:#008000;'>rectangular copper plate.</span>
-
-<span style='color:#008000;'>This example should be sufficiently complex to describe all basic DAE Tools features.</span>
-<span style='color:#008000;'>For this problem, we need a two-dimensional Cartesian grid in X and Y axis</span>
-<span style='color:#008000;'>(here, for simplicity, divided into 10 x 10 segments):</span>
-
-<span style='color:#008000;'>.. code-block:: none</span>
-
-<span style='color:#008000;'>     Y axis</span>
-<span style='color:#008000;'>        ^</span>
-<span style='color:#008000;'>        |</span>
-<span style='color:#008000;'>    Ly -| T T T T T T T T T T T</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>        | L + + + + + + + + + R</span>
-<span style='color:#008000;'>     0 -| B B B B B B B B B B B</span>
-<span style='color:#008000;'>        --|-------------------|-------&gt; X axis</span>
-<span style='color:#008000;'>          0                   Lx</span>
-
-<span style='color:#008000;'>Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the top edge of the plate</span>
-<span style='color:#008000;'>(for y = Ly) represent the points where the heat is applied.</span>
-
-<span style='color:#008000;'>The plate is considered insulated at the left (x = 0) and the right edges (x = Lx) of the plate (points 'L' and 'R').</span>
-<span style='color:#008000;'>To model this type of problem, we have to write a heat balance equation for all interior points except the left, right,</span>
-<span style='color:#008000;'>top and bottom edges, where we need to define the Neumann type boundary conditions.</span>
-
-<span style='color:#008000;'>In this problem we have to define the following domains:</span>
-
-<span style='color:#008000;'>- x: X axis domain, length Lx = 0.1 m</span>
-<span style='color:#008000;'>- y: Y axis domain, length Ly = 0.1 m</span>
-
-<span style='color:#008000;'>the following parameters:</span>
-
-<span style='color:#008000;'>- ro: copper density, 8960 kg/m3</span>
-<span style='color:#008000;'>- cp: copper specific heat capacity, 385 J/(kgK)</span>
-<span style='color:#008000;'>- k:  copper heat conductivity, 401 W/(mK)</span>
-<span style='color:#008000;'>- Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)</span>
-<span style='color:#008000;'>- Qt: heat flux at the top edge of the plate, here set to 0 W/m2</span>
-
-<span style='color:#008000;'>and the following variable:</span>
-
-<span style='color:#008000;'>- T: the temperature of the plate, K (distributed on x and y domains)</span>
-
-<span style='color:#008000;'>Also, we need to write the following 5 equations:</span>
-
-<span style='color:#008000;'>1) Heat balance::</span>
-
-<span style='color:#008000;'>      ro * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),</span>
-<span style='color:#008000;'>                                                                       for all y in: (0, Ly)</span>
-
-<span style='color:#008000;'>2) Boundary conditions for the bottom edge::</span>
-
-<span style='color:#008000;'>      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],</span>
-<span style='color:#008000;'>                                and y = 0</span>
-
-<span style='color:#008000;'>3) Boundary conditions for the top edge::</span>
-
-<span style='color:#008000;'>      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],</span>
-<span style='color:#008000;'>                                and y = Ly</span>
-
-<span style='color:#008000;'>4) Boundary conditions for the left edge::</span>
-
-<span style='color:#008000;'>      dT(x,y) / dx = 0;  for all y in: (0, Ly),</span>
-<span style='color:#008000;'>                         and x = 0</span>
-
-<span style='color:#008000;'>5) Boundary conditions for the right edge::</span>
-
-<span style='color:#008000;'>      dT(x,y) / dx = 0;  for all y in: (0, Ly),</span>
-<span style='color:#008000;'>                         and x = Ln</span>
-
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial1.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>This tutorial introduces several new concepts:</span>
+
+<span style='color:#ff0000;'>- Distribution domains</span>
+<span style='color:#ff0000;'>- Distributed parameters, variables and equations</span>
+<span style='color:#ff0000;'>- Boundary and initial conditions</span>
+
+<span style='color:#ff0000;'>In this example we model a simple heat conduction problem: a conduction through</span>
+<span style='color:#ff0000;'>a very thin, rectangular copper plate.</span>
+
+<span style='color:#ff0000;'>This example should be sufficiently complex to describe all basic DAE Tools features.</span>
+<span style='color:#ff0000;'>For this problem, we need a two-dimensional Cartesian grid in X and Y axis</span>
+<span style='color:#ff0000;'>(here, for simplicity, divided into 10 x 10 segments):</span>
+
+<span style='color:#ff0000;'>.. code-block:: none</span>
+
+<span style='color:#ff0000;'>     Y axis</span>
+<span style='color:#ff0000;'>        ^</span>
+<span style='color:#ff0000;'>        |</span>
+<span style='color:#ff0000;'>    Ly -| T T T T T T T T T T T</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>        | L + + + + + + + + + R</span>
+<span style='color:#ff0000;'>     0 -| B B B B B B B B B B B</span>
+<span style='color:#ff0000;'>        --|-------------------|-------&gt; X axis</span>
+<span style='color:#ff0000;'>          0                   Lx</span>
+
+<span style='color:#ff0000;'>Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the</span>
+<span style='color:#ff0000;'>top edge of the plate (for y = Ly) represent the points where the heat is applied.</span>
+
+<span style='color:#ff0000;'>The plate is considered insulated at the left (x = 0) and the right edges (x = Lx)</span>
+<span style='color:#ff0000;'>of the plate (points 'L' and 'R'). To model this type of problem, we have to write</span>
+<span style='color:#ff0000;'>a heat balance equation for all interior points except the left, right, top and</span>
+<span style='color:#ff0000;'>bottom edges, where we need to define the Neumann type boundary conditions.</span>
+
+<span style='color:#ff0000;'>In this problem we have to define the following domains:</span>
+
+<span style='color:#ff0000;'>- x: X axis domain, length Lx = 0.1 m</span>
+<span style='color:#ff0000;'>- y: Y axis domain, length Ly = 0.1 m</span>
+
+<span style='color:#ff0000;'>the following parameters:</span>
+
+<span style='color:#ff0000;'>- ro: copper density, 8960 kg/m3</span>
+<span style='color:#ff0000;'>- cp: copper specific heat capacity, 385 J/(kgK)</span>
+<span style='color:#ff0000;'>- k:  copper heat conductivity, 401 W/(mK)</span>
+<span style='color:#ff0000;'>- Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)</span>
+<span style='color:#ff0000;'>- Qt: heat flux at the top edge of the plate, here set to 0 W/m2</span>
+
+<span style='color:#ff0000;'>and the following variable:</span>
+
+<span style='color:#ff0000;'>- T: the temperature of the plate, K (distributed on x and y domains)</span>
+
+<span style='color:#ff0000;'>Also, we need to write the following 5 equations:</span>
+
+<span style='color:#ff0000;'>1) Heat balance::</span>
+
+<span style='color:#ff0000;'>      ro * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),</span>
+<span style='color:#ff0000;'>                                                                       for all y in: (0, Ly)</span>
+
+<span style='color:#ff0000;'>2) Boundary conditions for the bottom edge::</span>
+
+<span style='color:#ff0000;'>      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],</span>
+<span style='color:#ff0000;'>                                and y = 0</span>
+
+<span style='color:#ff0000;'>3) Boundary conditions for the top edge::</span>
+
+<span style='color:#ff0000;'>      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],</span>
+<span style='color:#ff0000;'>                                and y = Ly</span>
+
+<span style='color:#ff0000;'>4) Boundary conditions for the left edge::</span>
+
+<span style='color:#ff0000;'>      dT(x,y) / dx = 0;  for all y in: (0, Ly),</span>
+<span style='color:#ff0000;'>                         and x = 0</span>
+
+<span style='color:#ff0000;'>5) Boundary conditions for the right edge::</span>
+
+<span style='color:#ff0000;'>      dT(x,y) / dx = 0;  for all y in: (0, Ly),</span>
+<span style='color:#ff0000;'>                         and x = Ln</span>
+
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, tempfile
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>

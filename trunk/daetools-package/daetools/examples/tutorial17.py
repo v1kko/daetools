@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 
 """
-..
- ***********************************************************************************
-                             tutorial17.py
-                 DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
- ***********************************************************************************
- DAE Tools is free software; you can redistribute it and/or modify it under the
- terms of the GNU General Public License version 3 as published by the Free Software
- Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- PARTICULAR PURPOSE. See the GNU General Public License for more details.
- You should have received a copy of the GNU General Public License along with the
- DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
- ************************************************************************************
-
+***********************************************************************************
+                            tutorial17.py
+                DAE Tools: pyDAE module, www.daetools.com
+                Copyright (C) Dragan Nikolic, 2010
+***********************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+************************************************************************************
+"""
+__doc__ = """
 In this example we use the same conduction problem as in the tutorial 4.
 
 Here we introduce:
@@ -83,6 +83,10 @@ class simTutorial(daeSimulation):
 
 class tcpipLogServer(daeTCPIPLogServer):
     def __init__(self, port, app, textEdit):
+        if port <= 0:
+            cfg  = daeGetConfig()
+            port = cfg.GetInteger("daetools.logging.tcpipLogPort", 51000)
+
         daeTCPIPLogServer.__init__(self, port)
 
         self.app      = app
@@ -107,7 +111,7 @@ class tcpipLogServerMainWindow(QtGui.QMainWindow):
         self.resize(600, 150)  # Resize window
 
         # Create TCPIP log server
-        self.logServer = tcpipLogServer(51002, app, self.ui.messagesEdit)
+        self.logServer = tcpipLogServer(0, app, self.ui.messagesEdit)
         # Start TCPIP log server
         self.logServer.Start()
 
@@ -158,7 +162,7 @@ def setupLog():
     log2 = daeTCPIPLog()
 
     # Connect TCPIP log
-    if(log2.Connect("127.0.0.1", 51002) == False):
+    if(log2.Connect("", 0) == False):
         sys.exit()
 
     log.AddLog(log1)

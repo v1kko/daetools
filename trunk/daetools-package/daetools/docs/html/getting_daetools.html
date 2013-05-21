@@ -111,8 +111,9 @@ Trilinos AztecOO (with built-in support for Ifpack and ML preconditioners), NLOP
 (with MUMPS linear solver and  PORD ordering). Standalone SuperLU_MT is available on GNU/Linux and
 MacOS versions only. Additional linear solvers: AMD ACML and Intel Pardiso must be downloaded separately
 and compiled from source since they are not free software.</p>
+</div>
 <div class="section" id="getting-the-packages">
-<h3>2.1.1. Getting the packages<a class="headerlink" href="#getting-the-packages" title="Permalink to this headline">¶</a></h3>
+<h2>2.2. Getting the packages<a class="headerlink" href="#getting-the-packages" title="Permalink to this headline">¶</a></h2>
 <p>The instalation files can be downloaded from: <a class="reference external" href="https://sourceforge.net/projects/daetools/files">https://sourceforge.net/projects/daetools/files</a></p>
 <p><strong>Note</strong>: From the version 1.2.1 <strong>DAE Tools</strong> use distutils to distribute python packages and extensions.</p>
 <p>The naming convention of the installation files:</p>
@@ -125,11 +126,10 @@ daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the folder with a particular version
 (<tt class="docutils literal"><span class="pre">daetools-1.2.1-source.tar.gz</span></tt> for instance).</p>
 </div>
-</div>
 <div class="section" id="installation">
-<h2>2.2. Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="gnu-linux-i686-x86-64">
-<h3>2.2.1. GNU/Linux (i686, x86_64)<a class="headerlink" href="#gnu-linux-i686-x86-64" title="Permalink to this headline">¶</a></h3>
+<h2>2.3. Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gnu-linux">
+<h3>2.3.1. GNU/Linux<a class="headerlink" href="#gnu-linux" title="Permalink to this headline">¶</a></h3>
 <p>First install the mandatory packages: python 2.7, numpy 1.5/1.6/1.7, scipy, matplotlib and pyqt4.</p>
 <p>In Debian GNU/Linux and derivatives use the Synaptic Package Manager or type the following commands:</p>
 <div class="highlight-bash"><div class="highlight"><pre>sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
@@ -145,8 +145,8 @@ the following shell command:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="macos-x86-x86-64">
-<h3>2.2.2. MacOS (x86, x86_64)<a class="headerlink" href="#macos-x86-x86-64" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="macos">
+<h3>2.3.2. MacOS<a class="headerlink" href="#macos" title="Permalink to this headline">¶</a></h3>
 <p>First install the mandatory packages: <strong>python 2.7</strong>, <strong>numpy 1.6</strong>, <strong>scipy</strong>, <strong>matplotlib</strong> and <strong>pyqt4</strong>.
 As a starting point the following links can be used:</p>
 <ul class="simple">
@@ -162,8 +162,8 @@ the following shell command:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="windows-32-64-bit">
-<h3>2.2.3. Windows (32/64 bit)<a class="headerlink" href="#windows-32-64-bit" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="windows">
+<h3>2.3.3. Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
 <p><strong>DAE Tools</strong> is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use <strong>DAE Tools</strong> on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
 First install the mandatory packages: python 2.7, numpy 1.6, scipy, matplotlib and pyqt4.
@@ -181,22 +181,22 @@ Finally, install <strong>DAE Tools</strong> by double clicking the file daetools
 To uninstall use the uninstall program in <tt class="docutils literal"><span class="pre">Start</span></tt> -&gt; <tt class="docutils literal"><span class="pre">All</span> <span class="pre">Programs</span></tt> -&gt; <tt class="docutils literal"><span class="pre">DAE</span> <span class="pre">Tools</span></tt> -&gt; <tt class="docutils literal"><span class="pre">Uninstall</span></tt>.</p>
 </div>
 </div>
-<div class="section" id="compiling-dae-tools-from-source">
-<h2>2.3. Compiling DAE Tools from source<a class="headerlink" href="#compiling-dae-tools-from-source" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="compiling-from-source">
+<h2>2.4. Compiling from source<a class="headerlink" href="#compiling-from-source" title="Permalink to this headline">¶</a></h2>
 <p>To compile the <strong>DAE Tools</strong> the following is needed:</p>
 <ul class="simple">
 <li>Installed python, numpy, and scipy modules</li>
 <li>Compiled third party libraries and DAE/LA/NLP solvers: Sundials IDAS, Bonmin, NLopt, Trilinos, SuperLU, SuperLU_MT,
 Blas/Lapack</li>
 </ul>
-<p>All DAE Tools modules are developed using the QtCreator/QMake cross-platform integrated development environment.
+<p>All <strong>DAE Tools</strong> modules are developed using the QtCreator/QMake cross-platform integrated development environment.
 The source code can be downloaded from the SourceForge website or checked out from the
 <a class="reference external" href="https://svn.code.sf.net/p/daetools/code">DAE Tools subversion repository</a>:</p>
 <div class="highlight-bash"><div class="highlight"><pre>svn checkout svn://svn.code.sf.net/p/daetools/code daetools
 </pre></div>
 </div>
 <div class="section" id="gnu-linux-and-macos">
-<h3>2.3.1. GNU/Linux and MacOS<a class="headerlink" href="#gnu-linux-and-macos" title="Permalink to this headline">¶</a></h3>
+<h3>2.4.1. GNU/Linux and MacOS<a class="headerlink" href="#gnu-linux-and-macos" title="Permalink to this headline">¶</a></h3>
 <p class="rubric" id="the-easy-way">The easy way</p>
 <p>First, install all the necessary dependencies by executing <tt class="docutils literal"><span class="pre">install_dependencies_linux.sh</span></tt> shell script located
 in the <tt class="docutils literal"><span class="pre">trunk</span></tt> directory. It will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS and
@@ -296,8 +296,8 @@ hacking is needed. Here are the instructions how to compile them:</li>
 <li>Compile the <tt class="docutils literal"><span class="pre">LA_Trilinos_Amesos</span></tt> project</li>
 </ul>
 </div>
-<div class="section" id="windows">
-<h3>2.3.2. Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>2.4.2. Windows<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>Necessary tools: <a class="reference external" href="http://qt.nokia.com/products/developer-tools">QtCreator</a>,
 <a class="reference external" href="http://www.microsoft.com/download/en/details.aspx?displaylang=en&amp;id=14597">Microsoft VC++</a>
 and <a class="reference external" href="http://www.g95.org">G95 Fortran</a> compiler (Mumps only).</p>
@@ -337,19 +337,17 @@ sudo python setup.py install
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">2. Getting DAE Tools</a><ul>
-<li><a class="reference internal" href="#system-requirements">2.1. System requirements</a><ul>
-<li><a class="reference internal" href="#getting-the-packages">2.1.1. Getting the packages</a></li>
+<li><a class="reference internal" href="#system-requirements">2.1. System requirements</a></li>
+<li><a class="reference internal" href="#getting-the-packages">2.2. Getting the packages</a></li>
+<li><a class="reference internal" href="#installation">2.3. Installation</a><ul>
+<li><a class="reference internal" href="#gnu-linux">2.3.1. GNU/Linux</a></li>
+<li><a class="reference internal" href="#macos">2.3.2. MacOS</a></li>
+<li><a class="reference internal" href="#windows">2.3.3. Windows</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation">2.2. Installation</a><ul>
-<li><a class="reference internal" href="#gnu-linux-i686-x86-64">2.2.1. GNU/Linux (i686, x86_64)</a></li>
-<li><a class="reference internal" href="#macos-x86-x86-64">2.2.2. MacOS (x86, x86_64)</a></li>
-<li><a class="reference internal" href="#windows-32-64-bit">2.2.3. Windows (32/64 bit)</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#compiling-dae-tools-from-source">2.3. Compiling DAE Tools from source</a><ul>
-<li><a class="reference internal" href="#gnu-linux-and-macos">2.3.1. GNU/Linux and MacOS</a></li>
-<li><a class="reference internal" href="#windows">2.3.2. Windows</a></li>
+<li><a class="reference internal" href="#compiling-from-source">2.4. Compiling from source</a><ul>
+<li><a class="reference internal" href="#gnu-linux-and-macos">2.4.1. GNU/Linux and MacOS</a></li>
+<li><a class="reference internal" href="#id2">2.4.2. Windows</a></li>
 </ul>
 </li>
 </ul>

@@ -16,7 +16,8 @@
  You should have received a copy of the GNU General Public License along with the
  DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
  ************************************************************************************
-
+"""
+__doc__ = """
 In this example we model a very simmple conduction problem where a piece of copper
 (a plate) is at one side exposed to the source of heat and at the other to the
 surroundings.

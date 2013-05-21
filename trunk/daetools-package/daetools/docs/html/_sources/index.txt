@@ -12,16 +12,13 @@ Contents
 
 .. toctree::
    :numbered:
+   :maxdepth: 1
 
    introduction
    getting_daetools
    getting_started
    pyDAE_user_guide
    pyDAE_api_ref
-   solvers
-   code_generators
-   dae_plotter
-   dae_simulator
    tutorials
 
 Indices and tables

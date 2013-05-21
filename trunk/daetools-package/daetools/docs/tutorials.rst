@@ -285,6 +285,60 @@ Source code             `tutorial14.py <../../examples/tutorial14.html>`_
 =====================   =================================================================
 
 
+Tutorial 15
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial15
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial15.xml <../../examples/tutorial15.xml>`_
+Runtime model report    `tutorial15-rt.xml <../../examples/tutorial15-rt.xml>`_
+Source code             `tutorial15.py <../../examples/tutorial15.html>`_
+=====================   =================================================================
+
+
+Tutorial 16
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial16
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial16.xml <../../examples/tutorial16.xml>`_
+Runtime model report    `tutorial16-rt.xml <../../examples/tutorial16-rt.xml>`_
+Source code             `tutorial16.py <../../examples/tutorial16.html>`_
+=====================   =================================================================
+
+
+Tutorial 17
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial17
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial17.xml <../../examples/tutorial17.xml>`_
+Runtime model report    `tutorial17-rt.xml <../../examples/tutorial17-rt.xml>`_
+Source code             `tutorial17.py <../../examples/tutorial17.html>`_
+=====================   =================================================================
+
+
 Optimization tutorial 1
 =======================
 .. rubric:: Description

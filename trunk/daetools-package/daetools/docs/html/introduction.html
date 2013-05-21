@@ -164,8 +164,68 @@ programming language itself)</td>
 </tbody>
 </table>
 </div>
+<div class="section" id="model-development">
+<h2>1.3. Model development<a class="headerlink" href="#model-development" title="Permalink to this headline">¶</a></h2>
+<p>In general, three approaches to process modelling exist (<a class="footnote-reference" href="#morton2003" id="id1">[1]</a>):</p>
+<ul class="simple">
+<li>Sequential Modular (<strong>SeqM</strong>) approach</li>
+<li>Simultaneous Modular (<strong>SimM</strong>) approach</li>
+<li>Equation-Oriented (<strong>EO</strong>) approach</li>
+</ul>
+<p>The pros &amp; cons of the first two approaches are extensively studied in the literature. Under the <strong>EO</strong> approach we generate
+and gather together all equations and variables which constitute the model representing the process. The equations are solved
+simultaneously using a suitable mathematical algorithm (Morton, 2003 <a class="footnote-reference" href="#morton2003" id="id2">[1]</a>). Equation-oriented simulation requires
+simultaneous solution of a set of differential algebraic equations (<strong>DAE</strong>) which itself requires a solution of a set of
+nonlinear algebraic equations (<strong>NLAE</strong>) and linear algebraic equations (<strong>LAE</strong>). The Newton&#8217;s method or some variant of it
+is almost always used to solve problems described by NLAEs. A brief history of Equation-Oriented solvers and comparison of
+<strong>SeqM</strong> and <strong>EO</strong> approaches as well as descriptions of the simultaneous modular and equation-oriented methods can be found
+in Morton, 2003 (<a class="footnote-reference" href="#morton2003" id="id3">[1]</a>). Also a good overview of the equation-oriented approach and its application in
+<a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a> is given by Barton &amp; Pantelides (<a class="footnote-reference" href="#pantelides1" id="id5">[2]</a>, <a class="footnote-reference" href="#pantelides2" id="id6">[3]</a>, <a class="footnote-reference" href="#pantelides3" id="id7">[4]</a>).</p>
+<p><strong>DAE Tools</strong> use the Equation-Oriented approach to process modelling, and the following types of processes can be modelled:</p>
+<ul class="simple">
+<li>Lumped and distributed</li>
+<li>Steady-state and dynamic</li>
+</ul>
+<p>Problems can be formulated as linear, non-linear, and (partial) differential algebraic systems (of index 1).
+The most common problems are initial value problems of implicit form. Equations can be ordinary or discontinuous,
+where discontinuities are automatically handled by the framework. A good overview of discontinuous equations and
+a procedure for location of equation discontinuities is given by Park &amp; Barton (<a class="footnote-reference" href="#parkbarton" id="id8">[5]</a>)
+and in <a class="reference external" href="https://computation.llnl.gov/casc/sundials/documentation/ida_guide/node3.html#SECTION00330000000000000000documentation">Sundials IDA</a>
+(used in DAE Tools).</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="morton2003" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>)</em> Morton, W., Equation-Oriented Simulation and Optimization. <em>Proc. Indian Natl. Sci. Acad.</em> 2003, 317-357.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td>Pantelides, C. C., and P. I. Barton, Equation-oriented dynamic simulation current status and future perspectives, <em>Computers &amp; Chemical Engineering</em>, vol. 17, no. Supplement 1, pp. 263 - 285, 1993.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[3]</a></td><td>Barton, P. I., and C. C. Pantelides, gPROMS - a Combined Discrete/Continuous Modelling Environment for Chemical Processing Systems, <em>Simulation Series</em>, vol. 25, no. 3, pp. 25-34, 1993.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="pantelides3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[4]</a></td><td>Barton, P. I., and C. C. Pantelides, Modeling of combined discrete/continuous processes&#8221;, <em>AIChE Journal</em>, vol. 40, pp. 966-979, 1994.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="parkbarton" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[5]</a></td><td>Park, T., and P. I. Barton, State event location in differential-algebraic models&#8221;, <em>ACM Transactions on Modeling and Computer Simulation</em>, vol. 6, no. 2, New York, NY, USA, ACM, pp. 137-165, 1996.</td></tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="the-main-features">
-<h2>1.3. The main features<a class="headerlink" href="#the-main-features" title="Permalink to this headline">¶</a></h2>
+<h2>1.4. The main features<a class="headerlink" href="#the-main-features" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> is a cross-platform equation-oriented process modelling and optimization system. All core libraries
 are written in standard ANSI/ISO c++ . It is highly portable - it can run on every platform with a decent c++ compiler,
 Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures making it suitable for
@@ -194,23 +254,44 @@ are also available ([[SuperLU_CUDA]], <a class="reference external" href="http:/
 pyDAE (python) and cDAE (c++) but other languages will be supported in the future (such as OpenModelica, EMSO ...).</p>
 </div>
 <div class="section" id="system-overview">
-<h2>1.4. System overview<a class="headerlink" href="#system-overview" title="Permalink to this headline">¶</a></h2>
+<h2>1.5. System overview<a class="headerlink" href="#system-overview" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="programming-language">
+<h2>1.6. Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> core libraries are written in standard c++. However, <a class="reference external" href="http://www.python.org">Python</a> programming language is
+used as the main modelling language. The main reason for use of Python is (as the authors say):
+<em>&#8220;Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple
+but effective approach to object-oriented programming. Python&#8217;s elegant syntax and dynamic typing, together with its
+interpreted nature, make it an ideal language for scripting and rapid application development in many areas on
+most platforms&#8221;</em> <a class="reference external" href="http://docs.python.org/tutorial">link</a>.</p>
+<p>And: &#8220;<em>Often, programmers fall in love with Python because of the increased productivity it provides. Since there is no
+compilation step, the edit-test-debug cycle is incredibly fast&#8221;</em> <a class="reference external" href="http://www.python.org/doc/essays/blurb">link</a>. Also, please
+have a look on <a class="reference external" href="http://www.python.org/doc/essays/comparisons">a comparison to the other languages</a>. Based on the information
+available online, and according to the personal experience, the python programs are much shorter and take an order of magnitude
+less time to develop it. Initially I developed daePlotter module in c++; it took me about one month of part time coding. But,
+then I moved to python: reimplementing it in PyQt took me just two days (with several new features added), while the code size
+shrank from 24 cpp modules to four python modules only!</p>
+<p><em>&#8220;Where Python code is typically 3-5 times shorter than equivalent Java code, it is often 5-10 times shorter than equivalent
+C++ code! Anecdotal evidence suggests that one Python programmer can finish in two months what two C++ programmers can&#8217;t
+complete in a year. Python shines as a glue language, used to combine components written in C++&#8221;</em>
+<a class="reference external" href="http://www.python.org/doc/essays/comparisons">link</a>.
+Obviously, not everything can be developed in python; for complex projects I still prefer the heavy c++ artillery.</p>
 </div>
 <div class="section" id="licence">
-<h2>1.5. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<h2>1.7. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> is <a class="reference external" href="http://www.gnu.org/">free software</a> and you can redistribute it and/or modify it under the terms of
 the <a class="reference external" href="http://www.gnu.org/licenses/licenses.html#GPL">GNU General Public Licence</a> version 3 as published by
 the Free Software Foundation (<a class="reference external" href="http://www.gnu.org/philosophy/free-sw.html">GNU philosophy</a>).</p>
 </div>
 <div class="section" id="history">
-<h2>1.6. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<h2>1.8. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><strong>&#8220;Necessity, who is the mother of invention&#8221;</strong></dt>
 <dd><em>Plato, Greek author &amp; philosopher (427 BC - 347 BC), The Republic</em></dd>
 <dt><strong>&#8220;Every good work of software starts by scratching a developer&#8217;s personal itch&#8221;</strong></dt>
 <dd><em>Eric S. Raymond, hacker, The Cathedral and the Bazaar, 1997</em></dd>
 </dl>
-<p>The latter cannot be more true <a class="footnote-reference" href="#ericraymond" id="id1">[1]</a>.
+<p>The latter cannot be more true <a class="footnote-reference" href="#ericraymond" id="id11">[6]</a>.
 The early ideas of starting a project like this go back into 2007. At that time I have been working on my
 PhD thesis using one of commercially available process modelling software. It was everything nice and well
 until I discovered some annoying bugs and lack of certain highly appreciated features. The developers of that
@@ -230,12 +311,12 @@ The new project was officially born early next year - 2008.</p>
 <table class="docutils footnote" frame="void" id="ericraymond" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>However, I do not agree with Eric Raymond and the Open Source Iniative views - they miss the point IMO, but let us leave it beside at the moment.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id11">[6]</a></td><td>However, I do not agree with Eric Raymond and the Open Source Iniative views - they miss the point IMO, but let us leave it beside at the moment.</td></tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="acknowledgements">
-<h2>1.7. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<h2>1.9. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
 <p>DAE Tools use the following third party free software libraries (GNU GPL, GNU LGPL, CPL, EPL, BSD or some other type of free/permissive/copy-left licences):</p>
 <ul class="simple">
 <li>Sundials IDAS: <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">https://computation.llnl.gov/casc/sundials/main.html</a></li>
@@ -265,7 +346,7 @@ The new project was officially born early next year - 2008.</p>
 <p>Please see the corresponding websites for more details about the licences.</p>
 </div>
 <div class="section" id="how-to-cite">
-<h2>1.8. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
+<h2>1.10. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
 <p>If you use <strong>DAE Tools</strong> in your work then please cite it in the following way:
 D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference external" href="http://www.daetools.com">http://www.daetools.com</a></p>
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
@@ -286,12 +367,14 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
 <li><a class="reference internal" href="#">1. Introduction</a><ul>
 <li><a class="reference internal" href="#what-is-dae-tools">1.1. What is DAE Tools?</a></li>
 <li><a class="reference internal" href="#programming-paradigms">1.2. Programming paradigms</a></li>
-<li><a class="reference internal" href="#the-main-features">1.3. The main features</a></li>
-<li><a class="reference internal" href="#system-overview">1.4. System overview</a></li>
-<li><a class="reference internal" href="#licence">1.5. Licence</a></li>
-<li><a class="reference internal" href="#history">1.6. History</a></li>
-<li><a class="reference internal" href="#acknowledgements">1.7. Acknowledgements</a></li>
-<li><a class="reference internal" href="#how-to-cite">1.8. How to cite</a></li>
+<li><a class="reference internal" href="#model-development">1.3. Model development</a></li>
+<li><a class="reference internal" href="#the-main-features">1.4. The main features</a></li>
+<li><a class="reference internal" href="#system-overview">1.5. System overview</a></li>
+<li><a class="reference internal" href="#programming-language">1.6. Programming language</a></li>
+<li><a class="reference internal" href="#licence">1.7. Licence</a></li>
+<li><a class="reference internal" href="#history">1.8. History</a></li>
+<li><a class="reference internal" href="#acknowledgements">1.9. Acknowledgements</a></li>
+<li><a class="reference internal" href="#how-to-cite">1.10. How to cite</a></li>
 </ul>
 </li>
 </ul>

@@ -12,30 +12,30 @@
 <span style='color:#008000;'># -*- coding: utf-8 -*-</span>
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>..</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'>                             tutorial3.py</span>
-<span style='color:#008000;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                 Copyright (C) Dragan Nikolic, 2010</span>
-<span style='color:#008000;'> ***********************************************************************************</span>
-<span style='color:#008000;'> DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'> terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'> Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'> ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'> PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'> You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'> DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'> ************************************************************************************</span>
-
-<span style='color:#008000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
-
-<span style='color:#008000;'>Here we introduce:</span>
-
-<span style='color:#008000;'>- Arrays of variable values</span>
-<span style='color:#008000;'>- Functions that operate on arrays of values</span>
-<span style='color:#008000;'>- Functions that create constants and arrays of constant values (Constant and Array)</span>
-<span style='color:#008000;'>- Non-uniform domain grids</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial3.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#ff0000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+
+<span style='color:#ff0000;'>Here we introduce:</span>
+
+<span style='color:#ff0000;'>- Arrays of variable values</span>
+<span style='color:#ff0000;'>- Functions that operate on arrays of values</span>
+<span style='color:#ff0000;'>- Functions that create constants and arrays of constant values (Constant and Array)</span>
+<span style='color:#ff0000;'>- Non-uniform domain grids</span>
+<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
@@ -143,10 +143,10 @@
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;Q_sum&quot;</span>, <span style='color:#ff0000;'>&quot;The sum of heat fluxes at the bottom edge of the plate&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> Sum( <span style='color:#0000ff;'>self</span>.T.d_array(<span style='color:#0000ff;'>self</span>.y, <span style='color:#ff0000;'>'*'</span>, <span style='color:#c000c0;'>0</span>) )
         
-        <span style='color:#008000;'># This equations is just a mental gymnastics to illustrate various functions (array, Constant, Vector)</span>
+        <span style='color:#008000;'># This equations is just a mental gymnastics to illustrate various functions (array, Constant, Array)</span>
         <span style='color:#008000;'>#  - The function Constant() creates a constant quantity that contains a value and units </span>
         <span style='color:#008000;'>#  - The function Array() creates an array of constant quantities that contain a value and units</span>
-        <span style='color:#008000;'># Both functions accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)</span>
+        <span style='color:#008000;'># Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)</span>
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'># The equation below expands into the following:</span>
         <span style='color:#008000;'>#                                          ∂T(*, 0)</span>
