@@ -24,6 +24,7 @@ Classes
 
     daeLog_t
     daeBaseLog
+    daeDelegateLog
     daeFileLog
     daeStdOutLog
     daeTCPIPLog
@@ -37,6 +38,12 @@ Classes
     .. automethod:: __init__
 
 .. autoclass:: pyCore.daeBaseLog
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: pyCore.daeDelegateLog
     :members:
     :undoc-members:
 

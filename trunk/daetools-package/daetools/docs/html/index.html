@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="#" />
-    <link rel="next" title="1. Getting Started with DAE Tools" href="getting_started.html" /> 
+    <link rel="next" title="1. Introduction" href="introduction.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,7 +39,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_started.html" title="1. Getting Started with DAE Tools"
+          <a href="introduction.html" title="1. Introduction"
              accesskey="N">next</a> |</li>
         <li><a href="#">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
       </ul>
@@ -54,155 +54,184 @@
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">1. Getting Started with DAE Tools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#programming-language">1.1. Programming language</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#the-main-concepts">1.2. The main concepts</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#core-module">1.2.1. Core module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#activity-module">1.2.2. Activity module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#datareporting-module">1.2.3. DataReporting module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#idas-module">1.2.4. IDAS module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#units-module">1.2.5. Units module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#what-is-dae-tools">1.1. What is DAE Tools?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#programming-paradigms">1.2. Programming paradigms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#the-main-features">1.3. The main features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#system-overview">1.4. System overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#licence">1.5. Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#history">1.6. History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#acknowledgements">1.7. Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#how-to-cite">1.8. How to cite</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#running-a-simulation">1.3. Running a simulation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#running-an-optimization">1.4. Running an optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#model-development">1.5. Model development</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#models">1.5.1. Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#distribution-domains">1.5.2. Distribution domains</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#parameters">1.5.3. Parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#variables">1.5.4. Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#equations">1.5.5. Equations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#state-transition-networks-discontinuous-equations">1.5.6. State Transition Networks (discontinuous equations)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#ports">1.5.7. Ports</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#event-ports">1.5.8. Event Ports</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#simulation">1.5.9. Simulation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#id12">1.5.10. Running a simulation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#optimization">1.5.11. Optimization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#running-the-optimization">1.5.12. Running the optimization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="getting_started.html#processing-the-results">1.5.13. Processing the results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_daetools.html">2. Getting DAE Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_daetools.html#system-requirements">2.1. System requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#getting-the-packages">2.1.1. Getting the packages</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="getting_daetools.html#installation">2.2. Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#gnu-linux-i686-x86-64">2.2.1. GNU/Linux (i686, x86_64)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#macos-x86-x86-64">2.2.2. MacOS (x86, x86_64)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#windows-32-64-bit">2.2.3. Windows (32/64 bit)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pyDAE_user_guide.html">2. pyDAE User Guide</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pyDAE_api_ref.html">3. pyDAE API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="core.html">3.1. Module pyCore</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="core.html#overview">3.1.1. Overview</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#key-modelling-concepts">3.1.2. Key modelling concepts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="core.html#classes">3.1.2.1. Classes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="core.html#functions">3.1.2.2. Functions</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#autodifferentiation-and-equation-evaluation-tree-support">3.1.3. Autodifferentiation and equation evaluation tree support</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="core.html#id1">3.1.3.1. Classes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="core.html#mathematical-functions">3.1.3.2. Mathematical functions</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#auxiliary-classes">3.1.4. Auxiliary classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#auxiliary-functions">3.1.5. Auxiliary functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#enumerations">3.1.6. Enumerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#global-constants">3.1.7. Global constants</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="log.html">3.2. Message logs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="log.html#overview">3.2.1. Overview</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="log.html#classes">3.2.1.1. Classes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="log.html#extra-logs">3.2.1.2. Extra logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_daetools.html#compiling-dae-tools-from-source">2.3. Compiling DAE Tools from source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#gnu-linux-and-macos">2.3.1. GNU/Linux and MacOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_daetools.html#windows">2.3.2. Windows</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="activity.html">3.3. Module pyActivity</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="activity.html#overview">3.3.1. Overview</a></li>
-<li class="toctree-l3"><a class="reference internal" href="activity.html#module-pyActivity">3.3.2. Classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="activity.html#enumerations">3.3.3. Enumerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">3. Getting Started with DAE Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#programming-language">3.1. Programming language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#the-main-concepts">3.2. The main concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#core-module">3.2.1. Core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#activity-module">3.2.2. Activity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#datareporting-module">3.2.3. DataReporting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#idas-module">3.2.4. IDAS module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#units-module">3.2.5. Units module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="data_reporting.html">3.4. Module pyDataReporting</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#overview">3.4.1. Overview</a></li>
-<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#datareporter-classes">3.4.2. DataReporter classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">3.4.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#module-daetools.pyDAE.data_reporters">3.4.2.2. Third-party local data reporters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">3.4.2.3. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#special-purpose-data-reporters">3.4.2.4. Special-purpose data reporters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#datareporter-data-containers">3.4.2.5. DataReporter data-containers</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#datareceiver-classes">3.4.3. DataReceiver classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#datareceiver-data-containers">3.4.3.1. DataReceiver data-containers</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="dae_solver.html">3.5. Module pyIDAS</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#overview">3.5.1. Overview</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#classes">3.5.2. Classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#enumerations">3.5.3. Enumerations</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="units.html">3.6. Module pyUnits</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="units.html#overview">3.6.1. Overview</a></li>
-<li class="toctree-l3"><a class="reference internal" href="units.html#classes">3.6.2. Classes</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="variable_types.html">3.7. Variable types</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="variable_types.html#module-daetools.pyDAE.variable_types">3.7.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#running-a-simulation">3.3. Running a simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#running-an-optimization">3.4. Running an optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#model-development">3.5. Model development</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#models">3.5.1. Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#distribution-domains">3.5.2. Distribution domains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#parameters">3.5.3. Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#variables">3.5.4. Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#equations">3.5.5. Equations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#state-transition-networks-discontinuous-equations">3.5.6. State Transition Networks (discontinuous equations)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#ports">3.5.7. Ports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#event-ports">3.5.8. Event Ports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#simulation">3.5.9. Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#id12">3.5.10. Running a simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#optimization">3.5.11. Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#running-the-optimization">3.5.12. Running the optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting_started.html#processing-the-results">3.5.13. Processing the results</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="solvers.html">4. Third party solvers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="solvers.html#linear-solvers">4.1. Linear solvers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.superlu.pySuperLU">4.1.1. SuperLU</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.superlu_mt.pySuperLU_MT">4.1.2. SuperLU_MT</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.trilinos.pyTrilinos">4.1.3. Trilinos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyDAE_user_guide.html">4. pyDAE User Guide</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="solvers.html#optimization-solvers">4.2. Optimization solvers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solvers.html#parameter-estimation-solvers">4.3. Parameter estimation solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyDAE_api_ref.html">5. pyDAE API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="core.html">5.1. Module pyCore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="core.html#overview">5.1.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#key-modelling-concepts">5.1.2. Key modelling concepts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="core.html#classes">5.1.2.1. Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#functions">5.1.2.2. Functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="code_generators.html">5. Code generators</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.analyzer">5.1. Auxiliary classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.modelica">5.2. Modelica</a></li>
-<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.ansi_c">5.3. ANSI C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.fmi">5.4. Functional Mockup Interface (FMI)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#autodifferentiation-and-equation-evaluation-tree-support">5.1.3. Autodifferentiation and equation evaluation tree support</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="core.html#id1">5.1.3.1. Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#mathematical-functions">5.1.3.2. Mathematical functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="dae_plotter.html">6. DAE Tools Plotter</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dae_plotter.html#overview">6.1. Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dae_plotter.html#module-daetools.dae_plotter.plotter">6.2. Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#auxiliary-classes">5.1.4. Auxiliary classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#auxiliary-functions">5.1.5. Auxiliary functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#enumerations">5.1.6. Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#global-constants">5.1.7. Global constants</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="dae_simulator.html">7. DAE Tools Simulator</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dae_simulator.html#overview">7.1. Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dae_simulator.html#module-daetools.dae_simulator.simulator">7.2. Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="log.html">5.2. Message logs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="log.html#overview">5.2.1. Overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="log.html#classes">5.2.1.1. Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="log.html#extra-logs">5.2.1.2. Extra logs</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">8. Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#what-s-the-time-aka-hello-world">8.1. What&#8217;s the time? (AKA: Hello world!)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-1">8.2. Tutorial 1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-2">8.3. Tutorial 2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-3">8.4. Tutorial 3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-4">8.5. Tutorial 4</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-5">8.6. Tutorial 5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-6">8.7. Tutorial 6</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-7">8.8. Tutorial 7</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-8">8.9. Tutorial 8</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-9">8.10. Tutorial 9</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-10">8.11. Tutorial 10</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-11">8.12. Tutorial 11</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-12">8.13. Tutorial 12</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-13">8.14. Tutorial 13</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-14">8.15. Tutorial 14</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-1">8.16. Optimization tutorial 1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-2">8.17. Optimization tutorial 2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-3">8.18. Optimization tutorial 3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-4">8.19. Optimization tutorial 4</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-5">8.20. Optimization tutorial 5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-6">8.21. Optimization tutorial 6</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="activity.html">5.3. Module pyActivity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="activity.html#overview">5.3.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="activity.html#module-pyActivity">5.3.2. Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="activity.html#enumerations">5.3.3. Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data_reporting.html">5.4. Module pyDataReporting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#overview">5.4.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#datareporter-classes">5.4.2. DataReporter classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#data-reporters-that-do-not-send-data-to-a-data-receiver-and-keep-data-locally-local-data-reporters">5.4.2.1. Data reporters that <em>do not</em> send data to a data receiver and keep data locally (<em>local data reporters</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#module-daetools.pyDAE.data_reporters">5.4.2.2. Third-party local data reporters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#data-reporters-that-do-send-data-to-a-data-receiver-remote-data-reporters">5.4.2.3. Data reporters that <em>do</em> send data to a data receiver (<em>remote data reporters</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#special-purpose-data-reporters">5.4.2.4. Special-purpose data reporters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#datareporter-data-containers">5.4.2.5. DataReporter data-containers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="data_reporting.html#datareceiver-classes">5.4.3. DataReceiver classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="data_reporting.html#datareceiver-data-containers">5.4.3.1. DataReceiver data-containers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dae_solver.html">5.5. Module pyIDAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#overview">5.5.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#classes">5.5.2. Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dae_solver.html#enumerations">5.5.3. Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="units.html">5.6. Module pyUnits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="units.html#overview">5.6.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="units.html#classes">5.6.2. Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="variable_types.html">5.7. Variable types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="variable_types.html#module-daetools.pyDAE.variable_types">5.7.1. Overview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solvers.html">6. Third party solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html#linear-solvers">6.1. Linear solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.superlu.pySuperLU">6.1.1. SuperLU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.superlu_mt.pySuperLU_MT">6.1.2. SuperLU_MT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solvers.html#module-solvers.trilinos.pyTrilinos">6.1.3. Trilinos</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html#optimization-solvers">6.2. Optimization solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html#parameter-estimation-solvers">6.3. Parameter estimation solvers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code_generators.html">7. Code generators</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.analyzer">7.1. Auxiliary classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.modelica">7.2. Modelica</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.ansi_c">7.3. ANSI C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_generators.html#module-daetools.code_generators.fmi">7.4. Functional Mockup Interface (FMI)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dae_plotter.html">8. DAE Tools Plotter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dae_plotter.html#overview">8.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dae_plotter.html#module-daetools.dae_plotter.plotter">8.2. Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dae_simulator.html">9. DAE Tools Simulator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dae_simulator.html#overview">9.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dae_simulator.html#module-daetools.dae_simulator.simulator">9.2. Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">10. Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#what-s-the-time-aka-hello-world">10.1. What&#8217;s the time? (AKA: Hello world!)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-1">10.2. Tutorial 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-2">10.3. Tutorial 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-3">10.4. Tutorial 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-4">10.5. Tutorial 4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-5">10.6. Tutorial 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-6">10.7. Tutorial 6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-7">10.8. Tutorial 7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-8">10.9. Tutorial 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-9">10.10. Tutorial 9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-10">10.11. Tutorial 10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-11">10.12. Tutorial 11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-12">10.13. Tutorial 12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-13">10.14. Tutorial 13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-14">10.15. Tutorial 14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-1">10.16. Optimization tutorial 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-2">10.17. Optimization tutorial 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-3">10.18. Optimization tutorial 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-4">10.19. Optimization tutorial 4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-5">10.20. Optimization tutorial 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#optimization-tutorial-6">10.21. Optimization tutorial 6</a></li>
 </ul>
 </li>
 </ul>
@@ -236,8 +265,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="getting_started.html"
-                        title="next chapter">1. Getting Started with DAE Tools</a></p>
+  <p class="topless"><a href="introduction.html"
+                        title="next chapter">1. Introduction</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -270,14 +299,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_started.html" title="1. Getting Started with DAE Tools"
+          <a href="introduction.html" title="1. Introduction"
              >next</a> |</li>
         <li><a href="#">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 13, 2013.
+      Last updated on May 21, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

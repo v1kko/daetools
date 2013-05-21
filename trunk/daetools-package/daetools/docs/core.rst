@@ -34,7 +34,6 @@ Classes
     daeIF
     daeEquation
     daeState
-    daeStateTransition
     daePort
     daeEventPort
     daePortConnection
@@ -45,6 +44,7 @@ Classes
     daeArrayRange
     daeDEDI
     daeAction
+    daeOnConditionActions
     daeOnEventActions
     daeOptimizationVariable
     daeObjectiveFunction
@@ -273,10 +273,6 @@ Classes
     :members:
     :undoc-members:
 
-.. autoclass:: pyCore.daeStateTransition
-    :members:
-    :undoc-members:
-
 .. autoclass:: pyCore.daePort
     :members:
     :undoc-members:
@@ -339,6 +335,10 @@ Classes
     .. automethod:: __init__
 
 .. autoclass:: pyCore.daeOnEventActions
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeOnConditionActions
     :members:
     :undoc-members:
 

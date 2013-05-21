@@ -13,6 +13,8 @@ Contents
 .. toctree::
    :numbered:
 
+   introduction
+   getting_daetools
    getting_started
    pyDAE_user_guide
    pyDAE_api_ref

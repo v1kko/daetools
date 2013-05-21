@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1. Getting Started with DAE Tools &mdash; DAE Tools Project 1.3.1 documentation</title>
+    <title>3. Getting Started with DAE Tools &mdash; DAE Tools Project 1.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
-    <link rel="next" title="2. pyDAE User Guide" href="pyDAE_user_guide.html" />
-    <link rel="prev" title="Contents" href="index.html" /> 
+    <link rel="next" title="4. pyDAE User Guide" href="pyDAE_user_guide.html" />
+    <link rel="prev" title="2. Getting DAE Tools" href="getting_daetools.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pyDAE_user_guide.html" title="2. pyDAE User Guide"
+          <a href="pyDAE_user_guide.html" title="4. pyDAE User Guide"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Contents"
+          <a href="getting_daetools.html" title="2. Getting DAE Tools"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
       </ul>
@@ -55,7 +55,7 @@
           <div class="body">
             
   <div class="section" id="getting-started-with-dae-tools">
-<h1>1. Getting Started with DAE Tools<a class="headerlink" href="#getting-started-with-dae-tools" title="Permalink to this headline">¶</a></h1>
+<h1>3. Getting Started with DAE Tools<a class="headerlink" href="#getting-started-with-dae-tools" title="Permalink to this headline">¶</a></h1>
 <p>This chapter gives the basic information about what is needed to develop a model of a process, how to simulate/optimize
 it and how to obtain and plot the results of a process simulation/optimization. In general, the simulation/optimization
 of a process consists of three tasks:</p>
@@ -65,7 +65,7 @@ of a process consists of three tasks:</p>
 <li>Processing the results</li>
 </ol>
 <div class="section" id="programming-language">
-<h2>1.1. Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h2>
+<h2>3.1. Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> core libraries are written in standard c++. However, <a class="reference external" href="http://www.python.org">Python</a> programming language is
 used as the main modelling language. The main reason for use of Python is (as the authors say):
 <em>&#8220;Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple
@@ -86,7 +86,7 @@ complete in a year. Python shines as a glue language, used to combine components
 Obviously, not everything can be developed in python; for complex projects I still prefer the heavy c++ artillery.</p>
 </div>
 <div class="section" id="the-main-concepts">
-<h2>1.2. The main concepts<a class="headerlink" href="#the-main-concepts" title="Permalink to this headline">¶</a></h2>
+<h2>3.2. The main concepts<a class="headerlink" href="#the-main-concepts" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> contains 5 modules:</p>
 <ul class="simple">
 <li>Core</li>
@@ -96,7 +96,7 @@ Obviously, not everything can be developed in python; for complex projects I sti
 <li>Units</li>
 </ul>
 <div class="section" id="core-module">
-<h3>1.2.1. Core module<a class="headerlink" href="#core-module" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.1. Core module<a class="headerlink" href="#core-module" title="Permalink to this headline">¶</a></h3>
 <p>Core module defines the main modelling concepts:</p>
 <ul class="simple">
 <li><strong>Model</strong></li>
@@ -215,20 +215,20 @@ These data can be later plotted or processed in some other ways.</div></blockquo
 (messages from solvers or simulation).</div></blockquote>
 </div>
 <div class="section" id="activity-module">
-<h3>1.2.2. Activity module<a class="headerlink" href="#activity-module" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.2. Activity module<a class="headerlink" href="#activity-module" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="datareporting-module">
-<h3>1.2.3. DataReporting module<a class="headerlink" href="#datareporting-module" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.3. DataReporting module<a class="headerlink" href="#datareporting-module" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="idas-module">
-<h3>1.2.4. IDAS module<a class="headerlink" href="#idas-module" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.4. IDAS module<a class="headerlink" href="#idas-module" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="units-module">
-<h3>1.2.5. Units module<a class="headerlink" href="#units-module" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.5. Units module<a class="headerlink" href="#units-module" title="Permalink to this headline">¶</a></h3>
 </div>
 </div>
 <div class="section" id="running-a-simulation">
-<h2>1.3. Running a simulation<a class="headerlink" href="#running-a-simulation" title="Permalink to this headline">¶</a></h2>
+<h2>3.3. Running a simulation<a class="headerlink" href="#running-a-simulation" title="Permalink to this headline">¶</a></h2>
 <p>Two steps are needed to run a simulation:</p>
 <ol class="arabic simple">
 <li>Start <strong>daePlotter</strong>:</li>
@@ -295,11 +295,11 @@ because of the MathML rendering issue).</p>
 </div>
 </div>
 <div class="section" id="running-an-optimization">
-<h2>1.4. Running an optimization<a class="headerlink" href="#running-an-optimization" title="Permalink to this headline">¶</a></h2>
+<h2>3.4. Running an optimization<a class="headerlink" href="#running-an-optimization" title="Permalink to this headline">¶</a></h2>
 <p>Running the optimization problems is analogous to running a simulation.</p>
 </div>
 <div class="section" id="model-development">
-<h2>1.5. Model development<a class="headerlink" href="#model-development" title="Permalink to this headline">¶</a></h2>
+<h2>3.5. Model development<a class="headerlink" href="#model-development" title="Permalink to this headline">¶</a></h2>
 <p>In general, three approaches to process modelling exist (<a class="footnote-reference" href="#morton2003" id="id5">[1]</a>):</p>
 <blockquote>
 <div><ul class="simple">
@@ -362,7 +362,7 @@ and in <a class="reference external" href="https://computation.llnl.gov/casc/sun
 </tbody>
 </table>
 <div class="section" id="models">
-<h3>1.5.1. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.1. Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
 <p>In <strong>DAE Tools</strong> models are created by defining its parameters, distribution domains, variables, equations, and ports.
 Models are developed by deriving a new class from the base model class (<a class="reference internal" href="core.html#pyCore.daeModel" title="pyCore.daeModel"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeModel</span></tt></a>).
 The process consists of two steps:</p>
@@ -406,7 +406,7 @@ The process consists of two steps:</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="distribution-domains">
-<h3>1.5.2. Distribution domains<a class="headerlink" href="#distribution-domains" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.2. Distribution domains<a class="headerlink" href="#distribution-domains" title="Permalink to this headline">¶</a></h3>
 <p>There are two types of domains in <strong>DAE Tools</strong>: simple arrays and distributed domains (commonly used to distribute variables,
 parameters and equations in space). The distributed domains can have a uniform (default) or a user specified non-uniform grid.
 At the moment, only the following finite difference methods can be used to calculate partial derivatives:</p>
@@ -436,7 +436,7 @@ scientific python libraries <a class="reference external" href="http://numpy.sci
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="parameters">
-<h3>1.5.3. Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.3. Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
 <p>There are two types of parameters in <strong>DAE Tools</strong>: ordinary and distributed. Several functions to get a parameter
 value (function call operator <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>) and array of values
 (<a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>) have been defined. In addition, distributed parameters have
@@ -453,7 +453,7 @@ value (function call operator <a class="reference internal" href="core.html#pyCo
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="variables">
-<h3>1.5.4. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.4. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
 <p>There are two types of variables in <strong>DAE Tools</strong>: ordinary and distributed. Functions to get a variable value
 (function call operator <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>), a time or a partial derivative
 (<a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>) or
@@ -473,7 +473,7 @@ the values as a numpy multi-dimensional array.</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="equations">
-<h3>1.5.5. Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.5. Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h3>
 <p><strong>DAE Tools</strong> introduce two types of equations: ordinary and distributed. What makes distributed
 equations special is that an equation expression is valid on every point within the domains that
 the equations is distriibuted on. Equations can be distributed on a whole domain, on a part of it
@@ -528,7 +528,7 @@ statements:</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="state-transition-networks-discontinuous-equations">
-<h3>1.5.6. State Transition Networks (discontinuous equations)<a class="headerlink" href="#state-transition-networks-discontinuous-equations" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.6. State Transition Networks (discontinuous equations)<a class="headerlink" href="#state-transition-networks-discontinuous-equations" title="Permalink to this headline">¶</a></h3>
 <p>Discontinuous equations are equations that take different forms subject to certain conditions. For example,
 if we want to model a flow through a pipe we may observe three different flow regimes:</p>
 <ul class="simple">
@@ -631,7 +631,7 @@ In <strong>pyDAE</strong> this type of state transitions is given by the followi
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="ports">
-<h3>1.5.7. Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.7. Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h3>
 <p>Ports are used to connect two models. Like models, they may contain domains, parameters and variables. For instance,
 in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myPort</span><span class="p">(</span><span class="n">daePort</span><span class="p">):</span>
@@ -659,7 +659,7 @@ in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="event-ports">
-<h3>1.5.8. Event Ports<a class="headerlink" href="#event-ports" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.8. Event Ports<a class="headerlink" href="#event-ports" title="Permalink to this headline">¶</a></h3>
 <p>Event ports are also used to connect two models; however, they allow sending of discrete messages (events) between
 model instances. Events can be triggered manually or as a result of a state transition in a model. The main difference
 between event and ordinary ports is that the former allow a discrete communication between model instances while
@@ -671,7 +671,7 @@ involving model variables/parameters.</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="simulation">
-<h3>1.5.9. Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.9. Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h3>
 <p>As it was mentioned before, simulation of a process can be considered as the model run for certain input conditions.
 To define a simulation in <strong>DAE Tools</strong> the following tasks have to be done:</p>
 <ol class="arabic simple">
@@ -744,7 +744,7 @@ a complex one where various actions can be taken during the simulation</li>
 </div>
 </div>
 <div class="section" id="id12">
-<h3>1.5.10. Running a simulation<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.10. Running a simulation<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <p>Simulations in <strong>pyDAE</strong> can be run in two modes:</p>
 <ol class="arabic simple">
 <li>By using PyQt4 graphical user interface (GUI)</li>
@@ -851,7 +851,7 @@ specify time horizon and reporting interval.</div></blockquote>
 </div>
 </div>
 <div class="section" id="optimization">
-<h3>1.5.11. Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.11. Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h3>
 <p>To define an optimization problem it is first necessary to develop a model of the process and to define
 a simulation (as explained above). Having done these tasks (working model and simulation) the optimization
 in <strong>DAE Tools</strong> can be defined by specifying the objective function, optimization variables and optimization
@@ -931,7 +931,7 @@ solver internally uses <strong>IPOPT</strong> to solve NLP problems)</li>
 </div>
 </div>
 <div class="section" id="running-the-optimization">
-<h3>1.5.12. Running the optimization<a class="headerlink" href="#running-the-optimization" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.12. Running the optimization<a class="headerlink" href="#running-the-optimization" title="Permalink to this headline">¶</a></h3>
 <p>Optimizations, like simulations in <strong>pyDAE</strong> can be run in two modes:</p>
 <ol class="arabic simple">
 <li>By using PyQt4 graphical user interface (GUI)</li>
@@ -1047,7 +1047,7 @@ specify time horizon and reporting interval:</div></blockquote>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="processing-the-results">
-<h3>1.5.13. Processing the results<a class="headerlink" href="#processing-the-results" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.13. Processing the results<a class="headerlink" href="#processing-the-results" title="Permalink to this headline">¶</a></h3>
 <p>The simulation/optimization results can be easily plotted by using <strong>DAE Plotter</strong> application.
 It is possible to choose between 2D and 3D plots. After choosing a desired type, a <strong>Choose variable</strong>
 (given in <a class="reference internal" href="#figure-5"><em>Figure 5.</em></a>) dialog appears where a user has to select a variable to plot and specify information
@@ -1086,32 +1086,32 @@ you need one domain free, while for a 3D plot you need two free domains).</p>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">1. Getting Started with DAE Tools</a><ul>
-<li><a class="reference internal" href="#programming-language">1.1. Programming language</a></li>
-<li><a class="reference internal" href="#the-main-concepts">1.2. The main concepts</a><ul>
-<li><a class="reference internal" href="#core-module">1.2.1. Core module</a></li>
-<li><a class="reference internal" href="#activity-module">1.2.2. Activity module</a></li>
-<li><a class="reference internal" href="#datareporting-module">1.2.3. DataReporting module</a></li>
-<li><a class="reference internal" href="#idas-module">1.2.4. IDAS module</a></li>
-<li><a class="reference internal" href="#units-module">1.2.5. Units module</a></li>
+<li><a class="reference internal" href="#">3. Getting Started with DAE Tools</a><ul>
+<li><a class="reference internal" href="#programming-language">3.1. Programming language</a></li>
+<li><a class="reference internal" href="#the-main-concepts">3.2. The main concepts</a><ul>
+<li><a class="reference internal" href="#core-module">3.2.1. Core module</a></li>
+<li><a class="reference internal" href="#activity-module">3.2.2. Activity module</a></li>
+<li><a class="reference internal" href="#datareporting-module">3.2.3. DataReporting module</a></li>
+<li><a class="reference internal" href="#idas-module">3.2.4. IDAS module</a></li>
+<li><a class="reference internal" href="#units-module">3.2.5. Units module</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#running-a-simulation">1.3. Running a simulation</a></li>
-<li><a class="reference internal" href="#running-an-optimization">1.4. Running an optimization</a></li>
-<li><a class="reference internal" href="#model-development">1.5. Model development</a><ul>
-<li><a class="reference internal" href="#models">1.5.1. Models</a></li>
-<li><a class="reference internal" href="#distribution-domains">1.5.2. Distribution domains</a></li>
-<li><a class="reference internal" href="#parameters">1.5.3. Parameters</a></li>
-<li><a class="reference internal" href="#variables">1.5.4. Variables</a></li>
-<li><a class="reference internal" href="#equations">1.5.5. Equations</a></li>
-<li><a class="reference internal" href="#state-transition-networks-discontinuous-equations">1.5.6. State Transition Networks (discontinuous equations)</a></li>
-<li><a class="reference internal" href="#ports">1.5.7. Ports</a></li>
-<li><a class="reference internal" href="#event-ports">1.5.8. Event Ports</a></li>
-<li><a class="reference internal" href="#simulation">1.5.9. Simulation</a></li>
-<li><a class="reference internal" href="#id12">1.5.10. Running a simulation</a></li>
-<li><a class="reference internal" href="#optimization">1.5.11. Optimization</a></li>
-<li><a class="reference internal" href="#running-the-optimization">1.5.12. Running the optimization</a></li>
-<li><a class="reference internal" href="#processing-the-results">1.5.13. Processing the results</a></li>
+<li><a class="reference internal" href="#running-a-simulation">3.3. Running a simulation</a></li>
+<li><a class="reference internal" href="#running-an-optimization">3.4. Running an optimization</a></li>
+<li><a class="reference internal" href="#model-development">3.5. Model development</a><ul>
+<li><a class="reference internal" href="#models">3.5.1. Models</a></li>
+<li><a class="reference internal" href="#distribution-domains">3.5.2. Distribution domains</a></li>
+<li><a class="reference internal" href="#parameters">3.5.3. Parameters</a></li>
+<li><a class="reference internal" href="#variables">3.5.4. Variables</a></li>
+<li><a class="reference internal" href="#equations">3.5.5. Equations</a></li>
+<li><a class="reference internal" href="#state-transition-networks-discontinuous-equations">3.5.6. State Transition Networks (discontinuous equations)</a></li>
+<li><a class="reference internal" href="#ports">3.5.7. Ports</a></li>
+<li><a class="reference internal" href="#event-ports">3.5.8. Event Ports</a></li>
+<li><a class="reference internal" href="#simulation">3.5.9. Simulation</a></li>
+<li><a class="reference internal" href="#id12">3.5.10. Running a simulation</a></li>
+<li><a class="reference internal" href="#optimization">3.5.11. Optimization</a></li>
+<li><a class="reference internal" href="#running-the-optimization">3.5.12. Running the optimization</a></li>
+<li><a class="reference internal" href="#processing-the-results">3.5.13. Processing the results</a></li>
 </ul>
 </li>
 </ul>
@@ -1119,11 +1119,11 @@ you need one domain free, while for a 3D plot you need two free domains).</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Contents</a></p>
+  <p class="topless"><a href="getting_daetools.html"
+                        title="previous chapter">2. Getting DAE Tools</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="pyDAE_user_guide.html"
-                        title="next chapter">2. pyDAE User Guide</a></p>
+                        title="next chapter">4. pyDAE User Guide</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/getting_started.txt"
@@ -1156,17 +1156,17 @@ you need one domain free, while for a 3D plot you need two free domains).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pyDAE_user_guide.html" title="2. pyDAE User Guide"
+          <a href="pyDAE_user_guide.html" title="4. pyDAE User Guide"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Contents"
+          <a href="getting_daetools.html" title="2. Getting DAE Tools"
              >previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 12, 2013.
+      Last updated on May 21, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

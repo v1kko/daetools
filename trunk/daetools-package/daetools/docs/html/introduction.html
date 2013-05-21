@@ -1,0 +1,351 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Introduction &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="2. Getting DAE Tools" href="getting_daetools.html" />
+    <link rel="prev" title="Contents" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_daetools.html" title="2. Getting DAE Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-dae-tools">
+<h2>1.1. What is DAE Tools?<a class="headerlink" href="#what-is-dae-tools" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> is a collection of software tools for modelling, simulation and optimization
+of real-world processes. Process modelling and simulation can be defined as theoretical
+concepts and computational methods that describe, represent in a mathematical form and simulate
+the functioning of real-world processes. <strong>DAE Tools</strong> is initially developed to model and
+simulate processes in chemical process industry (mass, heat and momentum transfers, chemical
+reactions, separation processes, thermodynamics). However, <strong>DAE Tools</strong> can help you develop
+high-accuracy models of (in general) many different kind of processes/phenomena, simulate/optimize
+them, visualize and analyse the results. Its features should be sufficient to enable mathematical
+description of chemical, physical or socio/economic phenomena. The most common are initial value
+problems of implicit form, which can be formulated as systems of linear, non-linear, and (partial)
+differential algebraic equations.</p>
+</div>
+<div class="section" id="programming-paradigms">
+<h2>1.2. Programming paradigms<a class="headerlink" href="#programming-paradigms" title="Permalink to this headline">¶</a></h2>
+<p>In general, there are two types of approaches that can be applied to process modelling:
+Domain Specific Language approach and a general-purpose programming language approach (such as
+c/c++, Java or Python). A Domain Specific Language (DSL) is a special-purpose programming or
+specification language dedicated to a particular problem domain and so designed that it directly
+supports the key concepts necessary to describe the underlying problems. A domain-specific
+language is created specifically to solve problems in a particular domain and is usually not
+intended to be able to solve problems outside it (although that may be technically possible in
+some cases). In contrast, general-purpose languages are created to solve problems in a wide
+variety of application domains.</p>
+<p>Domain-specific languages are languages with very specific goals in design and implementation and
+commonly lack low-level functions for filesystem access, interprocess control, and other functions
+that characterize full-featured programming languages, scripting or otherwise.</p>
+<p>A good example of general purpose (multi-domain) domain specific language is <a class="reference external" href="http://www.modelica.org">Modelica</a>
+while single-domain (chemical processing industry related) DSLs are <a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a>,
+<a class="reference external" href="http://ascend4.org">Ascend</a>, <a class="reference external" href="http://www.aspentech.com">SpeedUp</a> etc.</p>
+<p>DAE Tools approach is a sort of the hybrid approach: it applies general-purpose programming languages
+such as c++ and Python, but offers a class-hierarchy/API that resembles a syntax of a DSL as much as
+possible, an access to the low-level functions, large number of standard and third party libraries and
+uses state of the art free/open-source software components to accomplish particular tasks (calculating
+derivatives and sensitivities, solving systems of differential and algebraic systems of equations and
+optimization problems, processing and plotting results etc).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><strong>DSL Approach</strong></th>
+<th class="head"><strong>DAE Tools Approach</strong></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Domain-specific languages allow solutions to be expressed in the idiom and at the level of abstraction
+of the problem domain (direct support for all modelling concepts by the language syntax)</td>
+<td>Modelling concepts cannot be expressed directly in the programming language and have to be emulated in
+the API or in some other way</td>
+</tr>
+<tr class="row-odd"><td>Clean, concise, ellegant and natural way of building model descriptions: the code can be self documenting</td>
+<td>The support for modelling concepts is much more verbose and less elegant; however, DAE Tools can generate
+XML+MathML based model reports that can be either rendered in XHTML format using XSLT transformations
+(representing the code documentation) or used as an XML-based model exchange language.</td>
+</tr>
+<tr class="row-even"><td>Domain-specific languages could enhance quality, productivity, reliability, maintainability and portability</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>DSLs could be and often are simulator independent making a model exchange easier</td>
+<td>Programming language dependent; however, a large number of scientific software libraries exposes its
+functionality to Python via Python wrappers</td>
+</tr>
+<tr class="row-even"><td>Cost of designing, implementing, and maintaining a domain-specific language as well as the tools required
+to develop with it (IDE): a compiler/lexical parser/interpreter must be developed with all burden that comes
+with it (such as error handling, grammar ambiguities, hidden bugs etc)</td>
+<td>A compiler/lexical parser/interpreter is an integral part of the programming language (c++, Python) with a
+robust error handling, universal grammar and massively tested</td>
+</tr>
+<tr class="row-odd"><td>Cost of learning a new language vs. its limited applicability: users are required to master a new language
+(yet another language grammar)</td>
+<td>No learning of a new language required (everything can get done in a favourite programming language)</td>
+</tr>
+<tr class="row-even"><td>Increased difficulty of integrating the DSL with other components: calling external functions/libraries and
+interaction with other software is limited by the existence of wrappers around a simulator engine
+(for instance some scripting languages like Python or javascript)</td>
+<td>Calling external functions/libraries is a natural and straightforward Interaction with other software is
+natural and straightforward</td>
+</tr>
+<tr class="row-odd"><td>Models usually cannot be created in the runtime/on the fly (or at least not easily) and cannot be modified
+in the runtime</td>
+<td>Models can be created in the runtime/on the fly and easily modified in the runtime</td>
+</tr>
+<tr class="row-even"><td>Setting up a simulation (ie. the values of parameters values, initial conditions, initially active states)
+is embedded in the language and it is typically difficult to do it on the fly or to obtain the values from
+some other software (for example to chain several software calls where outputs of previous calls represent
+inputs to the subsequent ones)</td>
+<td>Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software
+in a natural way (chaining several software calls is easy since a large number of libraries make Python wrappers
+available)</td>
+</tr>
+<tr class="row-odd"><td>Simulation operating procedures are not flexible; manipulation of model parameters, variables, equations,
+simulation results etc is limited to only those operations provided by the language</td>
+<td>Operating procedures are completely flexible (within the limits of a programming language itself) and a
+manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
+a user cosiders suitable for his/her problem</td>
+</tr>
+<tr class="row-even"><td>Only the type of results provided by the language/simulator is available; custom processing is usually not
+possible or if a simulator does provide a way to build extensions it is limited to the functionality made
+available to them</td>
+<td>The results processing can be done in any way which a user considers suitable(again within the limits of a
+programming language itself)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="the-main-features">
+<h2>1.3. The main features<a class="headerlink" href="#the-main-features" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> is a cross-platform equation-oriented process modelling and optimization system. All core libraries
+are written in standard ANSI/ISO c++ . It is highly portable - it can run on every platform with a decent c++ compiler,
+Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures making it suitable for
+use in embedded systems). <strong>DAE Tools</strong> core libraries are small and fast, and each module can be easily extended.
+Models can be developed in Python (<strong>pyDAE</strong> module) or c++ (<strong>cDAE</strong> module), compiled into an independent
+executable and deployed without a need for any run time libraries.</p>
+<p>Various types of processes (lumped or distributed, steady-state or dynamic) can be modelled and optimized. They may
+range from very simple to those which require complex operating procedures. Equations can be ordinary or discontinuous,
+where discontinuities are automatically handled by the framework. Model reports  containing all information about
+a model can be exported in XML MathML format automatically creating a high quality documentation. The simulation
+results can be visualized, plotted and/or exported into various formats.</p>
+<p>Currently <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">Sundials IDAS</a> solver is used to solve DAE systems
+and calculate sensitivities, while <a class="reference external" href="https://projects.coin-or.org/Bonmin">BONMIN</a>,
+<a class="reference external" href="https://projects.coin-or.org/IPOPT">IPOPT</a>,
+and <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">NLOPT</a> solvers are used to solve NLP/MINLP problems.
+<strong>DAE Tools</strong> support direct dense and sparse matrix linear solvers (sequential and multi-threaded versions)
+at the moment. In addition to the built-in Sundials linear solvers, several third party libraries are interfaced:
+<a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">SuperLU/SuperLU_MT</a>,
+<a class="reference external" href="http://software.intel.com/en-us/intel-mkl">Intel Pardiso</a>, <a class="reference external" href="http://www.amd.com/acml">AMD ACML</a>,
+<a class="reference external" href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a> (KLU, Umfpack, SuperLU, Lapack),
+and <a class="reference external" href="http://trilinos.sandia.gov/packages/aztecoo">Trilinos AztecOO</a> (with built-in, Ifpack or ML preconditioners)
+which can take advantage of multi-core/cpu computers. Linear solvers that exploit general-purpose graphics processing
+units (<a class="reference external" href="http://en.wikipedia.org/wiki/GPGPU">GPGPU</a>, such as <a class="reference external" href="http://www.nvidia.com/object/cuda_home_new.html">NVidia CUDA</a>)
+are also available ([[SuperLU_CUDA]], <a class="reference external" href="http://code.google.com/p/cusp-library">CUSP</a>) but in an early development stage.</p>
+<p>DAE Tools models can be exported into some other modelling languages. At the moment, models can be exported into
+pyDAE (python) and cDAE (c++) but other languages will be supported in the future (such as OpenModelica, EMSO ...).</p>
+</div>
+<div class="section" id="system-overview">
+<h2>1.4. System overview<a class="headerlink" href="#system-overview" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="licence">
+<h2>1.5. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<p><strong>DAE Tools</strong> is <a class="reference external" href="http://www.gnu.org/">free software</a> and you can redistribute it and/or modify it under the terms of
+the <a class="reference external" href="http://www.gnu.org/licenses/licenses.html#GPL">GNU General Public Licence</a> version 3 as published by
+the Free Software Foundation (<a class="reference external" href="http://www.gnu.org/philosophy/free-sw.html">GNU philosophy</a>).</p>
+</div>
+<div class="section" id="history">
+<h2>1.6. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>&#8220;Necessity, who is the mother of invention&#8221;</strong></dt>
+<dd><em>Plato, Greek author &amp; philosopher (427 BC - 347 BC), The Republic</em></dd>
+<dt><strong>&#8220;Every good work of software starts by scratching a developer&#8217;s personal itch&#8221;</strong></dt>
+<dd><em>Eric S. Raymond, hacker, The Cathedral and the Bazaar, 1997</em></dd>
+</dl>
+<p>The latter cannot be more true <a class="footnote-reference" href="#ericraymond" id="id1">[1]</a>.
+The early ideas of starting a project like this go back into 2007. At that time I have been working on my
+PhD thesis using one of commercially available process modelling software. It was everything nice and well
+until I discovered some annoying bugs and lack of certain highly appreciated features. The developers of that
+proprietary program (as it is a case with all proprietary computer programs) had their own agenda fixing only
+what they wanted to fix and introducing new features that they anticipated. Although I was able to improve
+the code and introduce certain features which will help (not only) me - I was helpless. The source code was
+not available and nobody will ever consider giving it to me to create patches with bugs fixes/new features.
+Not even if I swear on the holy (c++) bible!!
+Very soon the contours of a new process modelling software slowly began to form. It took me a while until
+I made a definite plan and initial features, and I had to abandon a couple of initial versions...</p>
+<dl class="docutils">
+<dt><strong>&#8220;Plan to throw one away; you will, anyhow&#8221;</strong></dt>
+<dd><em>Eric S. Raymond, hacker, The Cathedral and the Bazaar, 1997</em></dd>
+</dl>
+<p>Damn you Eric Raymond, interfering with my business again! :-)
+The new project was officially born early next year - 2008.</p>
+<table class="docutils footnote" frame="void" id="ericraymond" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>However, I do not agree with Eric Raymond and the Open Source Iniative views - they miss the point IMO, but let us leave it beside at the moment.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="acknowledgements">
+<h2>1.7. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>DAE Tools use the following third party free software libraries (GNU GPL, GNU LGPL, CPL, EPL, BSD or some other type of free/permissive/copy-left licences):</p>
+<ul class="simple">
+<li>Sundials IDAS: <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">https://computation.llnl.gov/casc/sundials/main.html</a></li>
+<li>Boost: <a class="reference external" href="http://www.boost.org">http://www.boost.org</a></li>
+<li>ADOL-C: <a class="reference external" href="https://projects.coin-or.org/ADOL-C">https://projects.coin-or.org/ADOL-C</a></li>
+<li>Qt and pyQt4: <a class="reference external" href="http://qt.nokia.com">http://qt.nokia.com</a>, <a class="reference external" href="http://www.riverbankcomputing.co.uk/software/pyqt/intro">http://www.riverbankcomputing.co.uk/software/pyqt/intro</a></li>
+<li>Numpy: <a class="reference external" href="http://numpy.scipy.orghttp://numpy.scipy.org">http://numpy.scipy.orghttp://numpy.scipy.org</a></li>
+<li>Scipy: <a class="reference external" href="http://www.scipy.org">http://www.scipy.org</a></li>
+<li>Blas/Lapack/CLapack: <a class="reference external" href="http://www.netlib.org">http://www.netlib.org</a></li>
+<li>Minpack: <a class="reference external" href="http://www.netlib.org/minpack">http://www.netlib.org/minpack</a></li>
+<li>Atlas: <a class="reference external" href="http://math-atlas.sourceforge.net">http://math-atlas.sourceforge.net</a></li>
+<li>Trilinos Amesos: <a class="reference external" href="http://trilinos.sandia.gov/packages/amesos">http://trilinos.sandia.gov/packages/amesos</a></li>
+<li>Trilinos AztecOO: <a class="reference external" href="http://trilinos.sandia.gov/packages/aztecoo">http://trilinos.sandia.gov/packages/aztecoo</a></li>
+<li>SuperLU/SuperLU_MT: <a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">http://crd.lbl.gov/~xiaoye/SuperLU/index.html</a></li>
+<li>Umfpack: <a class="reference external" href="http://www.cise.ufl.edu/research/sparse/umfpack">http://www.cise.ufl.edu/research/sparse/umfpack</a></li>
+<li>MUMPS:  <a class="reference external" href="http://graal.ens-lyon.fr/MUMPS">http://graal.ens-lyon.fr/MUMPS</a></li>
+<li>IPOPT: <a class="reference external" href="https://projects.coin-or.org/Ipopt">https://projects.coin-or.org/Ipopt</a></li>
+<li>Bonmin: <a class="reference external" href="https://projects.coin-or.org/Bonmin">https://projects.coin-or.org/Bonmin</a></li>
+<li>NLOPT: <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">http://ab-initio.mit.edu/wiki/index.php/NLopt</a></li>
+<li>CUSP: <a class="reference external" href="http://code.google.com/p/cusp-library">http://code.google.com/p/cusp-library</a></li>
+</ul>
+<p>DAE Tools can optionally use the following proprietary software libraries:</p>
+<ul class="simple">
+<li>AMD ACML linear solver (pyAmdACML module): <a class="reference external" href="http://www.amd.com/acml">http://www.amd.com/acml</a></li>
+<li>Intel MKL linear solvers (pyIntelMKL and pyIntelPardiso modules): <a class="reference external" href="http://software.intel.com/en-us/articles/intel-mkl">http://software.intel.com/en-us/articles/intel-mkl</a></li>
+</ul>
+<p>Please see the corresponding websites for more details about the licences.</p>
+</div>
+<div class="section" id="how-to-cite">
+<h2>1.8. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
+<p>If you use <strong>DAE Tools</strong> in your work then please cite it in the following way:
+D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference external" href="http://www.daetools.com">http://www.daetools.com</a></p>
+<img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">1. Introduction</a><ul>
+<li><a class="reference internal" href="#what-is-dae-tools">1.1. What is DAE Tools?</a></li>
+<li><a class="reference internal" href="#programming-paradigms">1.2. Programming paradigms</a></li>
+<li><a class="reference internal" href="#the-main-features">1.3. The main features</a></li>
+<li><a class="reference internal" href="#system-overview">1.4. System overview</a></li>
+<li><a class="reference internal" href="#licence">1.5. Licence</a></li>
+<li><a class="reference internal" href="#history">1.6. History</a></li>
+<li><a class="reference internal" href="#acknowledgements">1.7. Acknowledgements</a></li>
+<li><a class="reference internal" href="#how-to-cite">1.8. How to cite</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Contents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="getting_daetools.html"
+                        title="next chapter">2. Getting DAE Tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_daetools.html" title="2. Getting DAE Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 21, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

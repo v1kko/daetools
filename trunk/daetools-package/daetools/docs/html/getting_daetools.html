@@ -1,0 +1,411 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Getting DAE Tools &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="3. Getting Started with DAE Tools" href="getting_started.html" />
+    <link rel="prev" title="1. Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="3. Getting Started with DAE Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="1. Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-dae-tools">
+<h1>2. Getting DAE Tools<a class="headerlink" href="#getting-dae-tools" title="Permalink to this headline">¶</a></h1>
+<p><strong>DAE Tools</strong> (pyDAE module) is installed in <tt class="docutils literal"><span class="pre">daetools</span></tt> folder within <tt class="docutils literal"><span class="pre">site-packages</span></tt> (or <tt class="docutils literal"><span class="pre">dist-packages</span></tt>)
+folder under python (tipically <tt class="docutils literal"><span class="pre">/usr/local/lib/pythonXY/Lib</span></tt> or <tt class="docutils literal"><span class="pre">C:\PythonX.Y\Lib</span></tt>).
+The structure of the folders is the following:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">daetools</span></tt><ul>
+<li><tt class="docutils literal"><span class="pre">code_generators</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">dae_plotter</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">dae_simulator</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">docs</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">examples</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">pyDAE</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">solvers</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">unit_tests</span></tt></li>
+</ul>
+</li>
+</ul>
+<div class="section" id="system-requirements">
+<h2>2.1. System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
+<p>Supported platforms:</p>
+<ul class="simple">
+<li>GNU/Linux (i686, x86_64, arm)</li>
+<li>Windows (32/64 bit)</li>
+<li>MacOS (x86, x86_64)</li>
+</ul>
+<p>Supported python versions:</p>
+<ul class="simple">
+<li>2.6 (some older GNU/Linux distributions only)</li>
+<li>2.7</li>
+</ul>
+<p>Supported numpy versions:</p>
+<ul class="simple">
+<li>GNU/Linux (1.5, 1.6, 1.7)</li>
+<li>Windows (1.6)</li>
+<li>MacOS (1.6)</li>
+</ul>
+<p>Mandatory packages:</p>
+<ul class="simple">
+<li>Python (2.7.x): <a class="reference external" href="http://www.python.org">http://www.python.org</a></li>
+<li>Numpy (1.5.x, 1.6.x, 1.7.x): <a class="reference external" href="http://numpy.scipy.org">http://numpy.scipy.org</a></li>
+<li>Scipy: <a class="reference external" href="http://www.scipy.org">http://www.scipy.org</a></li>
+<li>Matplotlib: <a class="reference external" href="http://matplotlib.sourceforge.net">http://matplotlib.sourceforge.net</a></li>
+<li>pyQt4 (4.x): <a class="reference external" href="http://www.riverbankcomputing.co.uk/software/pyqt">http://www.riverbankcomputing.co.uk/software/pyqt</a></li>
+</ul>
+<p>Optional packages (3rd party linear solvers):</p>
+<ul class="simple">
+<li>Intel Pardiso (proprietary)</li>
+<li>AMD ACML (proprietary)</li>
+</ul>
+<p>For more information on how to install packages please refer to the documentation for the specific library.
+By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU and Lapack linear
+solvers, SuperLU, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
+Trilinos AztecOO (with built-in support for Ifpack and ML preconditioners), NLOPT and IPOPT/BONMIN
+(with MUMPS linear solver and  PORD ordering). Standalone SuperLU_MT is available on GNU/Linux and
+MacOS versions only. Additional linear solvers: AMD ACML and Intel Pardiso must be downloaded separately
+and compiled from source since they are not free software.</p>
+<div class="section" id="getting-the-packages">
+<h3>2.1.1. Getting the packages<a class="headerlink" href="#getting-the-packages" title="Permalink to this headline">¶</a></h3>
+<p>The instalation files can be downloaded from: <a class="reference external" href="https://sourceforge.net/projects/daetools/files">https://sourceforge.net/projects/daetools/files</a></p>
+<p><strong>Note</strong>: From the version 1.2.1 <strong>DAE Tools</strong> use distutils to distribute python packages and extensions.</p>
+<p>The naming convention of the installation files:</p>
+<p><tt class="docutils literal"><span class="pre">daetools-major.minor.build-platform-architecture-python_version.tar.gz</span></tt></p>
+<p>where <tt class="docutils literal"><span class="pre">major.minor.build</span></tt> represents the version (<tt class="docutils literal"><span class="pre">1.2.1</span></tt> for instance), <tt class="docutils literal"><span class="pre">architecture</span></tt> could be <tt class="docutils literal"><span class="pre">i686</span></tt>, <tt class="docutils literal"><span class="pre">x86_64</span></tt>
+or <tt class="docutils literal"><span class="pre">universal</span></tt>, and <tt class="docutils literal"><span class="pre">python_version</span></tt> can be <tt class="docutils literal"><span class="pre">py26</span></tt>, <tt class="docutils literal"><span class="pre">py27</span></tt> etc. An example:
+<tt class="docutils literal"><span class="pre">daetools-1.2.1-gnu_linux-x86_64-py27.tar.gz</span></tt> is the version 1.2.1 for 64 bit GNU/Linux with python 2.7.</p>
+<p>For the other platforms, architectures and python versions not listed in <a class="reference internal" href="#system-requirements">System requirements</a>
+daetools must be compiled from the source.
+The source code can be downloaded either from the subversion tree or from the folder with a particular version
+(<tt class="docutils literal"><span class="pre">daetools-1.2.1-source.tar.gz</span></tt> for instance).</p>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>2.2. Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gnu-linux-i686-x86-64">
+<h3>2.2.1. GNU/Linux (i686, x86_64)<a class="headerlink" href="#gnu-linux-i686-x86-64" title="Permalink to this headline">¶</a></h3>
+<p>First install the mandatory packages: python 2.7, numpy 1.5/1.6/1.7, scipy, matplotlib and pyqt4.</p>
+<p>In Debian GNU/Linux and derivatives use the Synaptic Package Manager or type the following commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
+</pre></div>
+</div>
+<p>In Red Hat and derivatives use the package manager or type the following commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi
+</pre></div>
+</div>
+<p>Then unpack the downloaded archive, cd to the <tt class="docutils literal"><span class="pre">daetools-X.Y.Z</span></tt> folder and install <strong>DAE Tools</strong> by typing
+the following shell command:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="macos-x86-x86-64">
+<h3>2.2.2. MacOS (x86, x86_64)<a class="headerlink" href="#macos-x86-x86-64" title="Permalink to this headline">¶</a></h3>
+<p>First install the mandatory packages: <strong>python 2.7</strong>, <strong>numpy 1.6</strong>, <strong>scipy</strong>, <strong>matplotlib</strong> and <strong>pyqt4</strong>.
+As a starting point the following links can be used:</p>
+<ul class="simple">
+<li>Python 2.7: <a class="reference external" href="http://www.python.org/ftp/python/2.7.3/python-2.7.3-macosx10.6.dmg">http://www.python.org/ftp/python/2.7.3/python-2.7.3-macosx10.6.dmg</a></li>
+<li>Numpy: <a class="reference external" href="http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-py2.7-python.org-macosx10.6.dmg/download">http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-py2.7-python.org-macosx10.6.dmg/download</a></li>
+<li>Scipy: <a class="reference external" href="http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-py2.7-python.org-macosx10.6.dmg/download">http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-py2.7-python.org-macosx10.6.dmg/download</a></li>
+<li>Matplotlib: <a class="reference external" href="http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0-py2.7-python.org-macosx10.6.dmg/download">http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0-py2.7-python.org-macosx10.6.dmg/download</a></li>
+<li>PyQt4: <a class="reference external" href="http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4downloadsection">http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4downloadsection</a></li>
+</ul>
+<p>Then unpack the downloaded archive, cd to the <tt class="docutils literal"><span class="pre">daetools-X.Y.Z</span></tt> folder and install <strong>DAE Tools</strong> by typing
+the following shell command:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="windows-32-64-bit">
+<h3>2.2.3. Windows (32/64 bit)<a class="headerlink" href="#windows-32-64-bit" title="Permalink to this headline">¶</a></h3>
+<p><strong>DAE Tools</strong> is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use <strong>DAE Tools</strong> on
+64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
+First install the mandatory packages: python 2.7, numpy 1.6, scipy, matplotlib and pyqt4.
+As a starting point the following links can be used:</p>
+<ul class="simple">
+<li>Python 2.7: <a class="reference external" href="http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi">http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi</a></li>
+<li>Numpy: <a class="reference external" href="http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe/download">http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe/download</a></li>
+<li>Scipy: <a class="reference external" href="http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-win32-superpack-python2.7.exe/download">http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-win32-superpack-python2.7.exe/download</a></li>
+<li>Matplotlib: <a class="reference external" href="http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.win32-py2.7.exe/download">http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.win32-py2.7.exe/download</a></li>
+<li>PyQt4: <a class="reference external" href="http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4downloadsection">http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4downloadsection</a></li>
+</ul>
+<p>To be able to create 3D plots you need to install Mayavi2 package.  Alternatively you can install everything needed
+through <a class="reference external" href="http://www.pythonxy.com">Python(x,y)</a>.
+Finally, install <strong>DAE Tools</strong> by double clicking the file daetools_x.x-x-win32_py27.exe and follow the instructions.
+To uninstall use the uninstall program in <tt class="docutils literal"><span class="pre">Start</span></tt> -&gt; <tt class="docutils literal"><span class="pre">All</span> <span class="pre">Programs</span></tt> -&gt; <tt class="docutils literal"><span class="pre">DAE</span> <span class="pre">Tools</span></tt> -&gt; <tt class="docutils literal"><span class="pre">Uninstall</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="compiling-dae-tools-from-source">
+<h2>2.3. Compiling DAE Tools from source<a class="headerlink" href="#compiling-dae-tools-from-source" title="Permalink to this headline">¶</a></h2>
+<p>To compile the <strong>DAE Tools</strong> the following is needed:</p>
+<ul class="simple">
+<li>Installed python, numpy, and scipy modules</li>
+<li>Compiled third party libraries and DAE/LA/NLP solvers: Sundials IDAS, Bonmin, NLopt, Trilinos, SuperLU, SuperLU_MT,
+Blas/Lapack</li>
+</ul>
+<p>All DAE Tools modules are developed using the QtCreator/QMake cross-platform integrated development environment.
+The source code can be downloaded from the SourceForge website or checked out from the
+<a class="reference external" href="https://svn.code.sf.net/p/daetools/code">DAE Tools subversion repository</a>:</p>
+<div class="highlight-bash"><div class="highlight"><pre>svn checkout svn://svn.code.sf.net/p/daetools/code daetools
+</pre></div>
+</div>
+<div class="section" id="gnu-linux-and-macos">
+<h3>2.3.1. GNU/Linux and MacOS<a class="headerlink" href="#gnu-linux-and-macos" title="Permalink to this headline">¶</a></h3>
+<p class="rubric" id="the-easy-way">The easy way</p>
+<p>First, install all the necessary dependencies by executing <tt class="docutils literal"><span class="pre">install_dependencies_linux.sh</span></tt> shell script located
+in the <tt class="docutils literal"><span class="pre">trunk</span></tt> directory. It will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS and
+Fedora are supported but other can be easily added) and install all necessary packages needed for <strong>DAE Tools</strong>
+development.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># &#39;lsb_release&#39; command might be missing on some GNU/Linux platforms and has to be installed before proceeding.</span>
+<span class="c"># On Debian based systems:</span>
+<span class="c"># sudo apt-get install lsb-release</span>
+<span class="c"># On red Hat based systems:</span>
+<span class="c"># sudo yum install redhat-lsb</span>
+
+<span class="nb">cd </span>daetools/trunk
+sh install_dependencies_linux.sh
+</pre></div>
+</div>
+<p>Then, compile the third party libraries by executing <tt class="docutils literal"><span class="pre">compile_libraries_linux.sh</span></tt> shell script located in the
+<tt class="docutils literal"><span class="pre">trunk</span></tt> directory. The script will download all necessary source archives from the <strong>DAE Tools</strong> SourceForge web-site,
+unpack them, apply changes and compile them. If all dependencies are installed there should not be problems compiling
+the libraries.</p>
+<div class="highlight-bash"><div class="highlight"><pre>sh compile_libraries_linux.sh
+</pre></div>
+</div>
+<p><strong>Note 1:</strong>
+There is a bug in Sundials IDAS library. When compiling fails, go to the folder <tt class="docutils literal"><span class="pre">trunk/idas</span></tt> and change the line 24
+(or somewhere around it) in the <tt class="docutils literal"><span class="pre">Makefile</span></tt>: <tt class="docutils literal"><span class="pre">top_builddir</span> <span class="pre">=</span> <span class="pre">``</span> <span class="pre">to</span> <span class="pre">``top_builddir</span> <span class="pre">=</span> <span class="pre">.</span></tt>.</p>
+<p><strong>Note 2:</strong>
+There are known problems to compile the older bonmin and trilinos libraries using GNU GCC 4.6. This has been fixed
+in bonmin 1.5+ and trilinos 10.8+ versions. Therefore, either GCC 4.5 and below or the recent
+versions of bonmin/trilinos libraries should be used.</p>
+<p>Finally, compile the <strong>DAE Tools</strong> libraries and python modules by executing <tt class="docutils literal"><span class="pre">compile_linux.sh</span></tt> shell script located
+in the <tt class="docutils literal"><span class="pre">trunk</span></tt> directory. The script accepts one argument specifying projects that should be compiled. Any of the
+following is accepted: <tt class="docutils literal"><span class="pre">all</span></tt>, <tt class="docutils literal"><span class="pre">core</span></tt>, <tt class="docutils literal"><span class="pre">pydae</span></tt>, <tt class="docutils literal"><span class="pre">solvers</span></tt>, <tt class="docutils literal"><span class="pre">superlu</span></tt>, <tt class="docutils literal"><span class="pre">superlu_mt</span></tt>, <tt class="docutils literal"><span class="pre">superlu_cuda</span></tt>,
+<tt class="docutils literal"><span class="pre">cusp</span></tt>, <tt class="docutils literal"><span class="pre">trilinos</span></tt>, <tt class="docutils literal"><span class="pre">bonmin</span></tt>, <tt class="docutils literal"><span class="pre">ipopt</span></tt>, and <tt class="docutils literal"><span class="pre">nlopt</span></tt>. If <tt class="docutils literal"><span class="pre">all</span></tt> is specified the script will compile
+<tt class="docutils literal"><span class="pre">dae</span></tt>, <tt class="docutils literal"><span class="pre">superlu</span></tt>, <tt class="docutils literal"><span class="pre">superlu_mt</span></tt>, <tt class="docutils literal"><span class="pre">trilinos</span></tt>, <tt class="docutils literal"><span class="pre">bonmin</span></tt>, <tt class="docutils literal"><span class="pre">ipopt</span></tt>, and <tt class="docutils literal"><span class="pre">nlopt</span></tt> projects.</p>
+<div class="highlight-bash"><div class="highlight"><pre>sh compile_linux.sh all
+<span class="c"># Or for instance:</span>
+<span class="c"># sh compile_linux.sh dae superlu nlopt</span>
+</pre></div>
+</div>
+<p>All python extensions should be placed in <tt class="docutils literal"><span class="pre">trunk/daetools-package/daetools/pyDAE</span></tt> and
+<tt class="docutils literal"><span class="pre">trunk/daetools-package/daetools/solvers</span></tt> folders.
+<strong>DAE Tools</strong> can be now installed by using the folowing commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>daetools-package
+sudo python setup.py install
+</pre></div>
+</div>
+<p class="rubric" id="from-qtcreator-ide">From QtCreator IDE</p>
+<p>DAE Tools can also be compiled from within QtCreator IDE. First install dependencies and compile third party libraries
+(as explained in <a class="reference internal" href="#the-easy-way"><em>The easy way</em></a>) and then do the following:</p>
+<ul class="simple">
+<li>Do not do the shadow build. Uncheck it (for all projects) and build everything in the release folder</li>
+<li>Choose the right specification file for your platform (usually it is done automatically by the IDE, but double-check it):</li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li>for GNU/Linux use <tt class="docutils literal"><span class="pre">-spec</span> <span class="pre">linux-g++</span></tt></li>
+<li>for MacOS use <tt class="docutils literal"><span class="pre">-spec</span> <span class="pre">macx-g++</span></tt></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>Compile the <tt class="docutils literal"><span class="pre">dae</span></tt> project (you can add the additional Make argument <tt class="docutils literal"><span class="pre">-jN</span></tt> to speed-up the compilation process,
+where N is the number of processors plus one; for instance on the quad-core machine you can use <tt class="docutils literal"><span class="pre">-j5</span></tt>)</li>
+<li>Compile <tt class="docutils literal"><span class="pre">SuperLU/SuperLU_MT/SuperLU_CUDA</span></tt> and <tt class="docutils literal"><span class="pre">Bonmin/Ipopt</span></tt> solvers.
+<tt class="docutils literal"><span class="pre">SuperLU/SuperLU_MT/SuperLU_CUDA</span></tt> and <tt class="docutils literal"><span class="pre">Bonmin/Ipopt</span></tt> share the same code and the same project file so some
+hacking is needed. Here are the instructions how to compile them:</li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li>Compiling <tt class="docutils literal"><span class="pre">libcdaeBONMIN_MINLPSolver.a</span></tt> and <tt class="docutils literal"><span class="pre">pyBONMIN.so</span></tt>:<ul>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">BONMIN</span></tt> in <tt class="docutils literal"><span class="pre">BONMIN_MINLPSolver.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">BONMIN</span></tt> in <tt class="docutils literal"><span class="pre">pyBONMIN.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+</ul>
+</li>
+<li>Compiling <tt class="docutils literal"><span class="pre">libcdaeIPOPT_NLPSolver.a</span></tt> and <tt class="docutils literal"><span class="pre">pyIPOPT.so</span></tt>:<ul>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">IPOPT</span></tt> in <tt class="docutils literal"><span class="pre">BONMIN_MINLPSolver.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">IPOPT</span></tt> in <tt class="docutils literal"><span class="pre">pyBONMIN.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+</ul>
+</li>
+<li>Compiling <tt class="docutils literal"><span class="pre">libcdaeSuperLU_LASolver.a</span></tt> and <tt class="docutils literal"><span class="pre">pySuperLU.so</span></tt>:<ul>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU</span></tt> in <tt class="docutils literal"><span class="pre">LA_SuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU</span></tt> in <tt class="docutils literal"><span class="pre">pySuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+</ul>
+</li>
+<li>Compiling <tt class="docutils literal"><span class="pre">libcdaeSuperLU_MT_LASolver.a</span></tt> and <tt class="docutils literal"><span class="pre">pySuperLU_MT.so</span></tt>:<ul>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU_MT</span></tt> in <tt class="docutils literal"><span class="pre">LA_SuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU_MT</span></tt> in <tt class="docutils literal"><span class="pre">pySuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+</ul>
+</li>
+<li>Compiling <tt class="docutils literal"><span class="pre">libcdaeSuperLU_CUDA_LASolver.a</span></tt> and <tt class="docutils literal"><span class="pre">pySuperLU_CUDA.so</span></tt>:<ul>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU_CUDA</span></tt> in <tt class="docutils literal"><span class="pre">LA_SuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+<li>Set <tt class="docutils literal"><span class="pre">CONFIG</span> <span class="pre">+=</span> <span class="pre">SuperLU_CUDA</span></tt> in <tt class="docutils literal"><span class="pre">pySuperLU.pro</span></tt>, run <tt class="docutils literal"><span class="pre">qmake</span></tt> and then compile</li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>Compile the <tt class="docutils literal"><span class="pre">LA_Trilinos_Amesos</span></tt> project</li>
+</ul>
+</div>
+<div class="section" id="windows">
+<h3>2.3.2. Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>Necessary tools: <a class="reference external" href="http://qt.nokia.com/products/developer-tools">QtCreator</a>,
+<a class="reference external" href="http://www.microsoft.com/download/en/details.aspx?displaylang=en&amp;id=14597">Microsoft VC++</a>
+and <a class="reference external" href="http://www.g95.org">G95 Fortran</a> compiler (Mumps only).</p>
+<p><strong>Note:</strong> Compiling all third party libraries and <strong>DAE Tools</strong> projects requires a mental gymnastics
+impossible to describe by any human language so that the pre-compiled libraries are provided in the downloads
+section (<a class="reference external" href="https://sourceforge.net/projects/daetools/files/windows%20libraries">windows libraries</a>).</p>
+<p><strong>DAE Tools</strong> should be compiled from within QtCreator IDE:</p>
+<ul class="simple">
+<li>Unpack the downloaded archive <tt class="docutils literal"><span class="pre">bonmin-trilinos-idas-superlu-nlopt-mumps-g95-msvc-win32.zip</span></tt> into the
+<tt class="docutils literal"><span class="pre">daetools/trunk</span></tt> folder. All libraries are compiled with MS VC++ 2008 Express edition (the most likely other
+versions of MS VC++ will also work). Mumps Fortran 95 files are compiled with G95 Fortran compiler.</li>
+<li>Path to <tt class="docutils literal"><span class="pre">libf95.a</span></tt> and <tt class="docutils literal"><span class="pre">libgcc.a</span></tt> libraries should be set in <tt class="docutils literal"><span class="pre">dae.pri</span></tt> config file.
+For instance, if G95 is installed in <tt class="docutils literal"><span class="pre">c:\g95</span></tt> set the <tt class="docutils literal"><span class="pre">G95_LIBDIR</span></tt> variable to:
+<tt class="docutils literal"><span class="pre">G95_LIBDIR</span> <span class="pre">=</span> <span class="pre">c:\g95\lib\gcc-lib\i686-pc-mingw32\4.1.2</span></tt></li>
+<li>Follow the instructions for compiling <strong>DAE Tools</strong> described in <a class="reference internal" href="#from-qtcreator-ide"><em>From QtCreator IDE</em></a> section above.</li>
+</ul>
+<p><strong>Note:</strong> superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.</p>
+<p>DAE Tools can be installed by using the folowing commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>daetools-package
+sudo python setup.py install
+</pre></div>
+</div>
+<img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2. Getting DAE Tools</a><ul>
+<li><a class="reference internal" href="#system-requirements">2.1. System requirements</a><ul>
+<li><a class="reference internal" href="#getting-the-packages">2.1.1. Getting the packages</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation">2.2. Installation</a><ul>
+<li><a class="reference internal" href="#gnu-linux-i686-x86-64">2.2.1. GNU/Linux (i686, x86_64)</a></li>
+<li><a class="reference internal" href="#macos-x86-x86-64">2.2.2. MacOS (x86, x86_64)</a></li>
+<li><a class="reference internal" href="#windows-32-64-bit">2.2.3. Windows (32/64 bit)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compiling-dae-tools-from-source">2.3. Compiling DAE Tools from source</a><ul>
+<li><a class="reference internal" href="#gnu-linux-and-macos">2.3.1. GNU/Linux and MacOS</a></li>
+<li><a class="reference internal" href="#windows">2.3.2. Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">1. Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="next chapter">3. Getting Started with DAE Tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/getting_daetools.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="3. Getting Started with DAE Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="1. Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 21, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

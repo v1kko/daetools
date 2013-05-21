@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>3.2. Message logs &mdash; DAE Tools Project 1.3.1 documentation</title>
+    <title>5.2. Message logs &mdash; DAE Tools Project 1.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,9 +26,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
-    <link rel="up" title="3. pyDAE API Reference" href="pyDAE_api_ref.html" />
-    <link rel="next" title="3.3. Module pyActivity" href="activity.html" />
-    <link rel="prev" title="3.1. Module pyCore" href="core.html" /> 
+    <link rel="up" title="5. pyDAE API Reference" href="pyDAE_api_ref.html" />
+    <link rel="next" title="5.3. Module pyActivity" href="activity.html" />
+    <link rel="prev" title="5.1. Module pyCore" href="core.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,13 +41,13 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="3.3. Module pyActivity"
+          <a href="activity.html" title="5.3. Module pyActivity"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="core.html" title="3.1. Module pyCore"
+          <a href="core.html" title="5.1. Module pyCore"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
-          <li><a href="pyDAE_api_ref.html" accesskey="U">3. pyDAE API Reference</a> &raquo;</li> 
+          <li><a href="pyDAE_api_ref.html" accesskey="U">5. pyDAE API Reference</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,11 +57,11 @@
           <div class="body">
             
   <div class="section" id="message-logs">
-<h1>3.2. Message logs<a class="headerlink" href="#message-logs" title="Permalink to this headline">¶</a></h1>
+<h1>5.2. Message logs<a class="headerlink" href="#message-logs" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
-<h2>3.2.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<h2>5.2.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="classes">
-<h3>3.2.1.1. Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.1.1. Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -74,16 +74,19 @@
 <tr class="row-even"><td><a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeBaseLog</span></tt></a></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeFileLog" title="pyCore.daeFileLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeFileLog</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeDelegateLog" title="pyCore.daeDelegateLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeDelegateLog</span></tt></a></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeStdOutLog" title="pyCore.daeStdOutLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeStdOutLog</span></tt></a></td>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeFileLog" title="pyCore.daeFileLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeFileLog</span></tt></a></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeTCPIPLog" title="pyCore.daeTCPIPLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLog</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeStdOutLog" title="pyCore.daeStdOutLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeStdOutLog</span></tt></a></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeTCPIPLogServer" title="pyCore.daeTCPIPLogServer"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLogServer</span></tt></a></td>
+<tr class="row-even"><td><a class="reference internal" href="#pyCore.daeTCPIPLog" title="pyCore.daeTCPIPLog"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLog</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pyCore.daeTCPIPLogServer" title="pyCore.daeTCPIPLogServer"><tt class="xref py py-obj docutils literal"><span class="pre">daeTCPIPLogServer</span></tt></a></td>
 <td></td>
 </tr>
 </tbody>
@@ -194,6 +197,33 @@ This class cannot be instantiated from Python</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="pyCore.daeDelegateLog">
+<em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeDelegateLog</tt><a class="headerlink" href="#pyCore.daeDelegateLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
+<dl class="method">
+<dt id="pyCore.daeDelegateLog.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDelegateLog.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDelegateLog.AddLog">
+<tt class="descname">AddLog</tt><big>(</big><em>(daeDelegateLog)self</em>, <em>(daeLog_t)log</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDelegateLog.AddLog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeDelegateLog.Logs">
+<tt class="descname">Logs</tt><a class="headerlink" href="#pyCore.daeDelegateLog.Logs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeDelegateLog.Message">
+<tt class="descname">Message</tt><big>(</big><em>(daeDelegateLog)self</em>, <em>(str)message</em>, <em>(int)severity</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeDelegateLog.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message( (daeDelegateLog)self, (str)message, (int)severity) -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="pyCore.daeFileLog">
 <em class="property">class </em><tt class="descclassname">pyCore.</tt><tt class="descname">daeFileLog</tt><a class="headerlink" href="#pyCore.daeFileLog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
@@ -233,7 +263,22 @@ This class cannot be instantiated from Python</p>
 <dd><p>Bases: <a class="reference internal" href="#pyCore.daeBaseLog" title="pyCore.daeBaseLog"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeBaseLog</span></tt></a></p>
 <dl class="method">
 <dt id="pyCore.daeTCPIPLog.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>(object)self</em>, <em>(str)tcpipAddress</em>, <em>(int)port</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLog.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>(object)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLog.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeTCPIPLog.Connect">
+<tt class="descname">Connect</tt><big>(</big><em>(daeTCPIPLog)self</em>, <em>(str)tcpipAddress</em>, <em>(int)port</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyCore.daeTCPIPLog.Connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeTCPIPLog.Disconnect">
+<tt class="descname">Disconnect</tt><big>(</big><em>(daeTCPIPLog)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyCore.daeTCPIPLog.Disconnect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeTCPIPLog.IsConnected">
+<tt class="descname">IsConnected</tt><big>(</big><em>(daeTCPIPLog)self</em><big>)</big> &rarr; bool<a class="headerlink" href="#pyCore.daeTCPIPLog.IsConnected" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -256,14 +301,29 @@ This class cannot be instantiated from Python</p>
 <dl class="method">
 <dt id="pyCore.daeTCPIPLogServer.MessageReceived">
 <tt class="descname">MessageReceived</tt><big>(</big><em>(daeTCPIPLogServer)self</em>, <em>(str)message</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLogServer.MessageReceived" title="Permalink to this definition">¶</a></dt>
-<dd><p>MessageReceived( (daeTCPIPLogServer)arg1, (str)arg2) -&gt; None</p>
+<dd><p>MessageReceived( (daeTCPIPLogServer)self, (str)message) -&gt; None</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="pyCore.daeTCPIPLogServer.Port">
+<tt class="descname">Port</tt><a class="headerlink" href="#pyCore.daeTCPIPLogServer.Port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeTCPIPLogServer.Start">
+<tt class="descname">Start</tt><big>(</big><em>(daeTCPIPLogServer)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLogServer.Start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyCore.daeTCPIPLogServer.Stop">
+<tt class="descname">Stop</tt><big>(</big><em>(daeTCPIPLogServer)self</em><big>)</big> &rarr; None<a class="headerlink" href="#pyCore.daeTCPIPLogServer.Stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="extra-logs">
-<h3>3.2.1.2. Extra logs<a class="headerlink" href="#extra-logs" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.1.2. Extra logs<a class="headerlink" href="#extra-logs" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="daetools.pyDAE.logs.daePythonStdOutLog">
 <em class="property">class </em><tt class="descclassname">daetools.pyDAE.logs.</tt><tt class="descname">daePythonStdOutLog</tt><a class="reference internal" href="_modules/daetools/pyDAE/logs.html#daePythonStdOutLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#daetools.pyDAE.logs.daePythonStdOutLog" title="Permalink to this definition">¶</a></dt>
@@ -307,10 +367,10 @@ This class cannot be instantiated from Python</p>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">3.2. Message logs</a><ul>
-<li><a class="reference internal" href="#overview">3.2.1. Overview</a><ul>
-<li><a class="reference internal" href="#classes">3.2.1.1. Classes</a></li>
-<li><a class="reference internal" href="#extra-logs">3.2.1.2. Extra logs</a></li>
+<li><a class="reference internal" href="#">5.2. Message logs</a><ul>
+<li><a class="reference internal" href="#overview">5.2.1. Overview</a><ul>
+<li><a class="reference internal" href="#classes">5.2.1.1. Classes</a></li>
+<li><a class="reference internal" href="#extra-logs">5.2.1.2. Extra logs</a></li>
 </ul>
 </li>
 </ul>
@@ -319,10 +379,10 @@ This class cannot be instantiated from Python</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.html"
-                        title="previous chapter">3.1. Module pyCore</a></p>
+                        title="previous chapter">5.1. Module pyCore</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="activity.html"
-                        title="next chapter">3.3. Module pyActivity</a></p>
+                        title="next chapter">5.3. Module pyActivity</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/log.txt"
@@ -355,18 +415,18 @@ This class cannot be instantiated from Python</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="activity.html" title="3.3. Module pyActivity"
+          <a href="activity.html" title="5.3. Module pyActivity"
              >next</a> |</li>
         <li class="right" >
-          <a href="core.html" title="3.1. Module pyCore"
+          <a href="core.html" title="5.1. Module pyCore"
              >previous</a> |</li>
         <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li>
-          <li><a href="pyDAE_api_ref.html" >3. pyDAE API Reference</a> &raquo;</li> 
+          <li><a href="pyDAE_api_ref.html" >5. pyDAE API Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 13, 2013.
+      Last updated on May 21, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
