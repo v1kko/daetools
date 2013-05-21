@@ -424,7 +424,8 @@ a simulation (as explained above). Having done these tasks (working model and si
 in **DAE Tools** can be defined by specifying the objective function, optimization variables and optimization
 constraints. It is intentionally chosen to keep simulation and optimization tightly coupled. The optimization
 problem should be specified in the function :py:meth:`~pyActivity.daeSimulation.SetUpOptimization`.
-The tasks have to be done are:
+
+Definition of an optimization in **DAE Tools** requires the following steps:
 
 1. Specify the objective function
 
@@ -466,8 +467,9 @@ The tasks have to be done are:
 
 11. Run the optimization
 
-:py:meth:`~pyActivity.daeSimulation.SetUpOptimization` function is declared in **pyDAE** as the following:
+:py:meth:`~pyActivity.daeSimulation.SetUpOptimization` function should be declared in the simulation class:
 
+In **pyDAE**:
 .. code-block:: python
 
     class mySimulation(daeSimulation):
@@ -491,7 +493,7 @@ In **cDAE**:
         }
     };
 
-Optimizations, like simulations in **pyDAE** can be run in two modes:
+Optimizations, like simulations can be set-up to run in two modes:
 
 1. From the PyQt4 graphical user interface (**pyDAE** only)
  Here the default log, and data reporter objects will be used, while the user can choose NLP, DAE and LA solvers and
@@ -521,7 +523,7 @@ Optimizations, like simulations in **pyDAE** can be run in two modes:
     # Execute applications main loop
     app.exec_()
 
-2. From the shell:
+2. From the shell: 
  In **pyDAE**:
 
  .. code-block:: python
@@ -604,9 +606,9 @@ Processing the results
 
 The simulation/optimization results can be easily plotted by using **DAE Plotter** application.
 It is possible to choose between 2D and 3D plots. After choosing a desired type, a **Choose variable**
-(given in :ref:`Figure 5. <Figure-5>`) dialog appears where a user has to select a variable to plot and specify information
-about domains - fix some of them while leaving another free by selecting `*` from the list (to create a 2D plot
-you need one domain free, while for a 3D plot you need two free domains).
+(given in :ref:`Figure 5. <Figure-5>`) dialog appears where a variable to be plotted can be selected and information
+about domains specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
+(to create a 2D plot one domain must remain free, while for a 3D plot two domains).
 
     .. _Figure-5:
     .. figure:: _static/Screenshot-ChooseVariable.png

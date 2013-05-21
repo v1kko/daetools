@@ -456,8 +456,8 @@ python mySimulation.py
 a simulation (as explained above). Having done these tasks (working model and simulation) the optimization
 in <strong>DAE Tools</strong> can be defined by specifying the objective function, optimization variables and optimization
 constraints. It is intentionally chosen to keep simulation and optimization tightly coupled. The optimization
-problem should be specified in the function <a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a>.
-The tasks have to be done are:</p>
+problem should be specified in the function <a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a>.</p>
+<p>Definition of an optimization in <strong>DAE Tools</strong> requires the following steps:</p>
 <ol class="arabic simple">
 <li>Specify the objective function</li>
 </ol>
@@ -509,14 +509,20 @@ solver internally uses IPOPT to solve NLP problems)</li>
 <li>Save model report and/or runtime model report (to inspect expanded equations etc)</li>
 <li>Run the optimization</li>
 </ol>
-<p><a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a> function is declared in <strong>pyDAE</strong> as the following:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span><span class="p">(</span><span class="n">daeSimulation</span><span class="p">):</span>
-    <span class="o">...</span>
-
-    <span class="k">def</span> <span class="nf">SetUpOptimization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c"># Declarations of the obj. function, opt. variables and constraints:</span>
-</pre></div>
-</div>
+<p><a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpOptimization" title="pyActivity.daeSimulation.SetUpOptimization"><tt class="xref py py-meth docutils literal"><span class="pre">SetUpOptimization()</span></tt></a> function should be declared in the simulation class:</p>
+<p>In <strong>pyDAE</strong>:
+.. code-block:: python</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class mySimulation(daeSimulation):</dt>
+<dd><p class="first">...</p>
+<dl class="last docutils">
+<dt>def SetUpOptimization(self):</dt>
+<dd># Declarations of the obj. function, opt. variables and constraints:</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
 <p>In <strong>cDAE</strong>:</p>
 <div class="highlight-cpp"><div class="highlight"><pre><span class="k">class</span> <span class="nc">mySimulation</span> <span class="o">:</span> <span class="k">public</span> <span class="n">daeSimulation</span>
 <span class="p">{</span>
@@ -529,7 +535,7 @@ solver internally uses IPOPT to solve NLP problems)</li>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>Optimizations, like simulations in <strong>pyDAE</strong> can be run in two modes:</p>
+<p>Optimizations, like simulations can be set-up to run in two modes:</p>
 <ol class="arabic simple">
 <li>From the PyQt4 graphical user interface (<strong>pyDAE</strong> only)</li>
 </ol>
@@ -643,9 +649,9 @@ Also, do not forget to have a look on <a class="reference internal" href="tutori
 <h2>3.5. Processing the results<a class="headerlink" href="#processing-the-results" title="Permalink to this headline">¶</a></h2>
 <p>The simulation/optimization results can be easily plotted by using <strong>DAE Plotter</strong> application.
 It is possible to choose between 2D and 3D plots. After choosing a desired type, a <strong>Choose variable</strong>
-(given in <a class="reference internal" href="#figure-5"><em>Figure 5.</em></a>) dialog appears where a user has to select a variable to plot and specify information
-about domains - fix some of them while leaving another free by selecting <cite>*</cite> from the list (to create a 2D plot
-you need one domain free, while for a 3D plot you need two free domains).</p>
+(given in <a class="reference internal" href="#figure-5"><em>Figure 5.</em></a>) dialog appears where a variable to be plotted can be selected and information
+about domains specified - some domains should be fixed while leaving another free by selecting <tt class="docutils literal"><span class="pre">*</span></tt> from the list
+(to create a 2D plot one domain must remain free, while for a 3D plot two domains).</p>
 <blockquote>
 <div><div class="figure align-center" id="figure-5" style="width: 400pt">
 <img alt="_images/Screenshot-ChooseVariable.png" src="_images/Screenshot-ChooseVariable.png" style="width: 350pt;" />
