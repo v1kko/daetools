@@ -1,3 +1,0 @@
-[OtherGNULinux] [1.0-0] [i386] [test] [91.150.100.171] [21 August 2010] 
-[OtherGNULinux] [1.0-0] [amd64] [test] [91.150.100.171] [21 August 2010] 
-[Debian] [1.0-0] [i386] [dragan_flat@yahoo.co.uk] [91.150.100.171] [21/8/2010, 14:30:31] 
