@@ -49,7 +49,7 @@ except Exception, e:
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
-    import tutorial14
+    import tutorial14, tutorial15, tutorial16, tutorial17
 except Exception, e:
     exc_traceback = sys.exc_info()[2]
     print '\n'.join(traceback.format_tb(exc_traceback))
@@ -136,48 +136,78 @@ class RunExamples(QtGui.QDialog):
         self.connect(self.ui.toolButtonModelReport,        QtCore.SIGNAL('clicked()'), self.slotShowModelReport)
         self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
 
+        i = 0
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(0, "whats_the_time")
+        self.ui.comboBoxExample.setItemText(i, "whats_the_time")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(1, "tutorial1")
+        self.ui.comboBoxExample.setItemText(i, "tutorial1")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(2, "tutorial2")
+        self.ui.comboBoxExample.setItemText(i, "tutorial2")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(3, "tutorial3")
+        self.ui.comboBoxExample.setItemText(i, "tutorial3")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(4, "tutorial4")
+        self.ui.comboBoxExample.setItemText(i, "tutorial4")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(5, "tutorial5")
+        self.ui.comboBoxExample.setItemText(i, "tutorial5")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(6, "tutorial6")
+        self.ui.comboBoxExample.setItemText(i, "tutorial6")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(7, "tutorial7")
+        self.ui.comboBoxExample.setItemText(i, "tutorial7")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(8, "tutorial8")
+        self.ui.comboBoxExample.setItemText(i, "tutorial8")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(9, "tutorial9")
+        self.ui.comboBoxExample.setItemText(i, "tutorial9")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(10, "tutorial10")
+        self.ui.comboBoxExample.setItemText(i, "tutorial10")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(11, "tutorial11")
+        self.ui.comboBoxExample.setItemText(i, "tutorial11")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(12, "tutorial12")
+        self.ui.comboBoxExample.setItemText(i, "tutorial12")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(13, "tutorial13")
+        self.ui.comboBoxExample.setItemText(i, "tutorial13")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(14, "tutorial14")
+        self.ui.comboBoxExample.setItemText(i, "tutorial14")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(15, "opt_tutorial1")
+        self.ui.comboBoxExample.setItemText(i, "tutorial15")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(16, "opt_tutorial2")
+        self.ui.comboBoxExample.setItemText(i, "tutorial16")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(17, "opt_tutorial3")
+        self.ui.comboBoxExample.setItemText(i, "tutorial17")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(18, "opt_tutorial4")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial1")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(19, "opt_tutorial5")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial2")
+        i += 1
         self.ui.comboBoxExample.addItem("")
-        self.ui.comboBoxExample.setItemText(20, "opt_tutorial6")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial3")
+        i += 1
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial4")
+        i += 1
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial5")
+        i += 1
+        self.ui.comboBoxExample.addItem("")
+        self.ui.comboBoxExample.setItemText(i, "opt_tutorial6")
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -237,6 +267,12 @@ class RunExamples(QtGui.QDialog):
                 tutorial13.guiRun(self.app)
             elif simName == "tutorial14":
                 tutorial14.guiRun(self.app)
+            elif simName == "tutorial15":
+                tutorial15.guiRun(self.app)
+            elif simName == "tutorial16":
+                tutorial16.guiRun(self.app)
+            elif simName == "tutorial17":
+                tutorial17.guiRun(self.app)
             elif simName == "whats_the_time":
                 whats_the_time.guiRun(self.app)
             elif simName == "opt_tutorial1":

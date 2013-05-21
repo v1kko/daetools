@@ -217,6 +217,79 @@ public:
 };
 
 /********************************************************************
+	daeDelegateLog
+*********************************************************************/
+class daeDelegateLog : public daeBaseLog
+{
+public:
+	daeDelegateLog()
+	{
+	}
+
+	virtual ~daeDelegateLog(void)
+	{
+	}
+
+public:
+	virtual void Message(const string& strMessage, size_t nSeverity)
+	{
+        daeBaseLog::Message(strMessage, nSeverity);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->Message(strMessage, nSeverity);
+	}
+    
+    virtual void SetProgress(real_t nProgress)
+	{
+        daeBaseLog::SetProgress(nProgress);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->SetProgress(nProgress);
+	}
+    
+    virtual void SetIndent(size_t nIndent)
+    {
+        daeBaseLog::SetIndent(nIndent);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->SetIndent(nIndent);
+    }
+    
+    virtual void IncreaseIndent(size_t nOffset)
+    {
+        daeBaseLog::IncreaseIndent(nOffset);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->IncreaseIndent(nOffset);
+    }
+
+    virtual void DecreaseIndent(size_t nOffset)
+    {
+        daeBaseLog::DecreaseIndent(nOffset);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->DecreaseIndent(nOffset);
+    }
+    
+    virtual void SetEnabled(bool bEnabled)
+	{
+        daeBaseLog::SetEnabled(bEnabled);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->SetEnabled(bEnabled);
+	}	
+
+	virtual void SetPrintProgress(bool bPrintProgress)
+	{
+        daeBaseLog::SetPrintProgress(bPrintProgress);
+        for(std::vector<daeLog_t*>::iterator it = m_ptrarrLogs.begin(); it != m_ptrarrLogs.end(); it++)
+            (*it)->SetPrintProgress(bPrintProgress);
+	}	
+    
+    void AddLog(daeLog_t* pLog)
+    {
+        m_ptrarrLogs.push_back(pLog);
+    }
+    
+protected:
+	std::vector<daeLog_t*> m_ptrarrLogs;
+};
+
+/********************************************************************
 	daeFileLog
 *********************************************************************/
 class daeFileLog : public daeBaseLog
@@ -253,8 +326,7 @@ protected:
 
 daeLog_t* daeCreateFileLog(const string& strFileName);
 daeLog_t* daeCreateStdOutLog(void);
-daeLog_t* daeCreateTCPIPLog(const string& strIPAddress, int nPort);
-//daeLog_t* daeCreateTCPIPLogServer(int nPort);
+daeLog_t* daeCreateTCPIPLog(void);
 
 }
 }

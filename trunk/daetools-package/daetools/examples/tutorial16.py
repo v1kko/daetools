@@ -38,8 +38,6 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kW
 
-print sys.path
-
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -116,51 +114,56 @@ class InteractiveOP(QtGui.QDialog):
         self.connect(self.ui.runButton, QtCore.SIGNAL('clicked()'), self.integrate)
 
     def integrate(self):
-        # Get the data from the GUI
-        Qin      = float(self.ui.powerSpinBox.value())
-        interval = float(self.ui.intervalSpinBox.value())
-        self.simulation.ReportingInterval = float(self.ui.reportingIntervalSpinBox.value())
-        self.simulation.TimeHorizon       = self.simulation.CurrentTime + interval
+        try:
+            # Get the data from the GUI
+            Qin      = float(self.ui.powerSpinBox.value())
+            interval = float(self.ui.intervalSpinBox.value())
+            self.simulation.ReportingInterval = float(self.ui.reportingIntervalSpinBox.value())
+            self.simulation.TimeHorizon       = self.simulation.CurrentTime + interval
 
-        if self.simulation.ReportingInterval > interval:
-            QtGui.QMessageBox.warning(self, "tutorial16", 'Reporting interval must be lower than the integration interval')
-            return
-        
-        # Disable the input boxes and buttons
-        self.ui.powerSpinBox.setEnabled(False)
-        self.ui.intervalSpinBox.setEnabled(False)
-        self.ui.reportingIntervalSpinBox.setEnabled(False)
-        self.ui.runButton.setEnabled(False)
+            if self.simulation.ReportingInterval > interval:
+                QtGui.QMessageBox.warning(self, "tutorial16", 'Reporting interval must be lower than the integration interval')
+                return
 
-        # Reassign the new Qin value, reinitialize the simulation and report the data
-        self.simulation.m.Qin.ReAssignValue(Qin)
-        self.simulation.Reinitialize()
-        self.simulation.ReportData(self.simulation.CurrentTime)
+            # Disable the input boxes and buttons
+            self.ui.powerSpinBox.setEnabled(False)
+            self.ui.intervalSpinBox.setEnabled(False)
+            self.ui.reportingIntervalSpinBox.setEnabled(False)
+            self.ui.runButton.setEnabled(False)
 
-        # Integrate for ReportingInterval until the TimeHorizon is reached
-        # After each integration call update the plot with the new data
-        # Sleep for 0.1 seconds after each integration to give some real-time impression
-        time = self.simulation.IntegrateForTimeInterval(self.simulation.ReportingInterval)
-        self.simulation.ReportData(self.simulation.CurrentTime)
-        self._updatePlot()
-        sleep(0.1)
+            # Reassign the new Qin value, reinitialize the simulation and report the data
+            self.simulation.m.Qin.ReAssignValue(Qin)
+            self.simulation.Reinitialize()
+            self.simulation.ReportData(self.simulation.CurrentTime)
 
-        while time < self.simulation.TimeHorizon:
-            if time + self.simulation.ReportingInterval > self.simulation.TimeHorizon:
-                interval = self.simulation.TimeHorizon - time
-            else:
-                interval = self.simulation.ReportingInterval
-            
-            time = self.simulation.IntegrateForTimeInterval(interval)
+            # Integrate for ReportingInterval until the TimeHorizon is reached
+            # After each integration call update the plot with the new data
+            # Sleep for 0.1 seconds after each integration to give some real-time impression
+            time = self.simulation.IntegrateForTimeInterval(self.simulation.ReportingInterval)
             self.simulation.ReportData(self.simulation.CurrentTime)
             self._updatePlot()
             sleep(0.1)
+            
+            while time < self.simulation.TimeHorizon:
+                if time + self.simulation.ReportingInterval > self.simulation.TimeHorizon:
+                    interval = self.simulation.TimeHorizon - time
+                else:
+                    interval = self.simulation.ReportingInterval
 
-        # Enable the input boxes and buttons again
-        self.ui.powerSpinBox.setEnabled(True)
-        self.ui.intervalSpinBox.setEnabled(True)
-        self.ui.reportingIntervalSpinBox.setEnabled(True)
-        self.ui.runButton.setEnabled(True)
+                time = self.simulation.IntegrateForTimeInterval(interval)
+                self.simulation.ReportData(self.simulation.CurrentTime)
+                self._updatePlot()
+                sleep(0.1)
+
+        except Exception as e:
+            QtGui.QMessageBox.warning(self, "tutorial16", 'Error: %s' % str(e))
+            
+        finally:
+            # Enable the input boxes and buttons again
+            self.ui.powerSpinBox.setEnabled(True)
+            self.ui.intervalSpinBox.setEnabled(True)
+            self.ui.reportingIntervalSpinBox.setEnabled(True)
+            self.ui.runButton.setEnabled(True)
 
     def _updatePlot(self):
         temperature = self.simulation.DataReporter.dictVariables['tutorial16.T']
@@ -185,7 +188,36 @@ def guiRun(app):
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon = 10000
+
+    # Connect data reporter
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
+
+    # Initialize the simulation
+    simulation.Initialize(daesolver, datareporter, log)
+
+    # Solve at time=0 (initialization)
+    simulation.SolveInitial()
+
+    # Run
+    simulation.Run()
+    simulation.Finalize()
+
+def consoleRun():
+    # Create Log, Solver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeDataReporterLocal()
+    simulation   = simTutorial()
+
+    # Enable reporting of all variables
+    simulation.m.SetReportingOn(True)
+
+    # Set the time horizon and the reporting interval
+    simulation.ReportingInterval = 1
     simulation.TimeHorizon = 10000
 
     # Connect data reporter
@@ -206,7 +238,11 @@ def guiRun(app):
     # Run
     simulation.Run()
     simulation.Finalize()
-
+    
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
-    guiRun(app)
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        app = QtGui.QApplication(sys.argv)
+        consoleRun()
+    else:
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)

@@ -1688,6 +1688,33 @@ public:
 	}
 };
 
+class daeDelegateLogWrapper : public daeDelegateLog,
+	                          public boost::python::wrapper<daeDelegateLog>
+{
+public:
+	daeDelegateLogWrapper()
+	{
+	}
+
+	void Message(const string& strMessage, size_t nSeverity)
+	{
+        if(boost::python::override f = this->get_override("Message"))
+            f(strMessage, nSeverity);
+		else
+			this->daeDelegateLog::Message(strMessage, nSeverity);
+	}
+
+	void def_Message(const string& strMessage, size_t nSeverity)
+	{
+        this->daeDelegateLog::Message(strMessage, nSeverity);
+	}
+    
+    boost::python::list GetLogs()
+    {
+        return getListFromVector(m_ptrarrLogs);        
+    }
+};
+
 class daeFileLogWrapper : public daeFileLog,
 	                      public boost::python::wrapper<daeFileLog>
 {
@@ -1734,7 +1761,7 @@ class daeTCPIPLogWrapper : public daeTCPIPLog,
 	                       public boost::python::wrapper<daeTCPIPLog>
 {
 public:
-	daeTCPIPLogWrapper(string strIPAddress, int nPort) : daeTCPIPLog(strIPAddress, nPort)
+	daeTCPIPLogWrapper()
 	{
 	}
 
@@ -1781,15 +1808,14 @@ public:
 	{
 		thread_locker lock;
 		if(boost::python::override f = this->get_override("MessageReceived"))
-		{
 			f(szMessage);
-		}
 		else
-		{
-			daeDeclareException(exNotImplemented);
-			e << "daeTCPIPLogServer::MessageReceived() function must be implemented in the derived class";
-			throw e;
-		}
+            daeTCPIPLogServer::MessageReceived(szMessage);
+	}
+    
+    void def_MessageReceived(const char* szMessage)
+	{
+		daeTCPIPLogServer::MessageReceived(szMessage);
 	}
 };
 

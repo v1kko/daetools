@@ -1444,7 +1444,7 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeBaseLogWrapper, bases<daeLog_t>, boost::noncopyable>("daeBaseLog", DOCSTR_daeBaseLog, no_init)
-        .def(init<>(( arg("self") ), DOCSTR_daeBaseLog_init))
+        .def(init<>(( arg("self") ), DOCSTR_daeBaseLog_init)) 
             
 		.def("Message",				&daeLog_t::Message,     &daepython::daeBaseLogWrapper::def_Message, ( arg("self"), 
                                                                                                           arg("message"), 
@@ -1456,6 +1456,18 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("DecreaseIndent",		&daeBaseLog::DecreaseIndent, ( arg("self"), arg("offset") ), DOCSTR_daeBaseLog_DecreaseIndent)
 		;
 
+    
+    class_<daepython::daeDelegateLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeDelegateLog", DOCSTR_daeDelegateLog, no_init)
+        .def(init<>(( arg("self") ), DOCSTR_daeDelegateLog_init)) 
+            
+        .def("Message",	 &daeLog_t::Message,  &daepython::daeDelegateLogWrapper::def_Message, ( arg("self"), 
+                                                                                                arg("message"), 
+                                                                                                arg("severity") 
+                                                                                              ), DOCSTR_daeDelegateLog_Message)
+        .def("AddLog", &daeDelegateLog::AddLog, ( arg("self"), arg("log") ), DOCSTR_daeDelegateLog_AddLog)
+        .add_property("Logs",  &daepython::daeDelegateLogWrapper::GetLogs, DOCSTR_daeDelegateLog_Logs)
+        ;
+    
 	class_<daepython::daeFileLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeFileLog", DOCSTR_daeFileLog, no_init)
         .def(init<string>(( arg("self"), arg("filename") ), DOCSTR_daeFileLog_init))
             
@@ -1475,20 +1487,28 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
 	class_<daepython::daeTCPIPLogWrapper, bases<daeBaseLog>, boost::noncopyable>("daeTCPIPLog", DOCSTR_daeTCPIPLog, no_init)
-        .def(init<string, int>(( arg("self"), arg("tcpipAddress"), arg("port") ), DOCSTR_daeTCPIPLog_init))
+        .def(init<>(( arg("self") ), DOCSTR_daeTCPIPLog_init))
             
-		.def("Message", &daeLog_t::Message, &daepython::daeTCPIPLogWrapper::def_Message, ( arg("self"), 
-                                                                                           arg("message"), 
-                                                                                           arg("severity") 
-                                                                                         ), DOCSTR_daeTCPIPLog_Message)
+        //.def_readonly("Port",         &daeTCPIPLog::m_strIPAddress)
+        //.def_readonly("TCPIPAddress", &daeTCPIPLog::m_nPort)
+
+        .def("Connect",     &daeTCPIPLog::Connect, ( arg("self"), arg("tcpipAddress"), arg("port") ), DOCSTR_daeTCPIPLog_Connect)
+        .def("IsConnected", &daeTCPIPLog::IsConnected, ( arg("self") ), DOCSTR_daeTCPIPLog_IsConnected)
+        .def("Disconnect",  &daeTCPIPLog::Disconnect, ( arg("self") ), DOCSTR_daeTCPIPLog_Disconnect)
+		.def("Message",     &daeLog_t::Message, &daepython::daeTCPIPLogWrapper::def_Message, ( arg("self"), 
+                                                                                               arg("message"), 
+                                                                                               arg("severity") 
+                                                                                             ), DOCSTR_daeTCPIPLog_Message)
 		;
 
 	class_<daepython::daeTCPIPLogServerWrapper, boost::noncopyable>("daeTCPIPLogServer", DOCSTR_daeTCPIPLogServer, no_init)
         .def(init<int>(( arg("self"), arg("port") ), DOCSTR_daeTCPIPLogServer_init))
             
-		.def("MessageReceived",	pure_virtual(&daeTCPIPLogServer::MessageReceived), ( arg("self"), 
-                                                                                     arg("message") 
-                                                                                   ), DOCSTR_daeTCPIPLogServer_MessageReceived)
+        .add_property("Port",   &daeTCPIPLogServer::GetPort)
+            
+        .def("Start",           &daeTCPIPLogServer::Start, ( arg("self") ), DOCSTR_daeTCPIPLogServer_Start)
+        .def("Stop",            &daeTCPIPLogServer::Stop,  ( arg("self") ), DOCSTR_daeTCPIPLogServer_Stop)
+		.def("MessageReceived",	&daeTCPIPLogServer::MessageReceived, &daepython::daeTCPIPLogServerWrapper::def_MessageReceived, 
+                                ( arg("self"), arg("message") ), DOCSTR_daeTCPIPLogServer_MessageReceived)
 		;
-
 }

@@ -376,6 +376,12 @@ const char* DOCSTR_daeBaseLog = "";
     const char* DOCSTR_daeBaseLog_IncreaseIndent = "";  
     const char* DOCSTR_daeBaseLog_DecreaseIndent = "";  
 
+const char* DOCSTR_daeDelegateLog = "";
+    const char* DOCSTR_daeDelegateLog_init = "";
+    const char* DOCSTR_daeDelegateLog_Message = "";
+    const char* DOCSTR_daeDelegateLog_AddLog = "";
+    const char* DOCSTR_daeDelegateLog_Logs = "";
+    
 const char* DOCSTR_daeFileLog = "";  
     const char* DOCSTR_daeFileLog_init = "";  
     const char* DOCSTR_daeFileLog_Message = "";  
@@ -386,10 +392,15 @@ const char* DOCSTR_daeStdOutLog = "";
 
 const char* DOCSTR_daeTCPIPLog = "";  
     const char* DOCSTR_daeTCPIPLog_init = "";  
+    const char* DOCSTR_daeTCPIPLog_Connect = "";  
+    const char* DOCSTR_daeTCPIPLog_Disconnect = "";  
+    const char* DOCSTR_daeTCPIPLog_IsConnected = "";  
     const char* DOCSTR_daeTCPIPLog_Message = "";  
 
 const char* DOCSTR_daeTCPIPLogServer = "";  
     const char* DOCSTR_daeTCPIPLogServer_init = "";  
+    const char* DOCSTR_daeTCPIPLogServer_Start = "";  
+    const char* DOCSTR_daeTCPIPLogServer_Stop = "";  
     const char* DOCSTR_daeTCPIPLogServer_MessageReceived = "";  
 
 

@@ -34,17 +34,22 @@ namespace logging
 class daeTCPIPLog : public daeBaseLog
 {
 public:
-	daeTCPIPLog(string strIPAddress, int nPort);
+	daeTCPIPLog(void);
 	virtual ~daeTCPIPLog(void);
 
 public:
 	virtual void Message(const string& strMessage, size_t nSeverity);
+    
+public:
+    bool Connect(const string& strIPAddress, int nPort);
+	bool Disconnect(void);
+	bool IsConnected(void);
 
 protected:
-	int						m_nPort;
-	string					m_strIPAddress;
-	tcp::socket*            m_ptcpipSocket;
-	boost::asio::io_service m_ioService;
+	int						       m_nPort;
+	string					       m_strIPAddress;
+	boost::shared_ptr<tcp::socket> m_ptcpipSocket;
+	boost::asio::io_service        m_ioService;
 };
 
 /********************************************************************
@@ -57,15 +62,22 @@ public:
 	virtual ~daeTCPIPLogServer(void);
 	
 public:
-	virtual void MessageReceived(const char* strMessage) = 0;
-	void thread(void);
+    virtual void MessageReceived(const char* strMessage);
 
 public:
-	int						m_nPort;
-	boost::asio::io_service m_ioService;
-	tcp::acceptor			m_acceptor;
-	tcp::socket				m_tcpipSocket;
-	boost::thread*			m_pThread;
+    int  GetPort() const;
+    void Start(void);
+    void Stop(void);
+
+protected:
+    void thread(void);
+
+public:
+	int						         m_nPort;
+	boost::asio::io_service          m_ioService;
+	tcp::acceptor			         m_acceptor;
+	tcp::socket                      m_tcpipSocket;
+	boost::shared_ptr<boost::thread> m_pThread;
 };
 
 

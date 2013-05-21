@@ -196,8 +196,17 @@ class daeSimulator(QtGui.QDialog):
                     self.showMessage("Cannot connect data reporter!\nDid you forget to start daePlotter?")
                     raise RuntimeError("Cannot connect daeTCPIPDataReporter")
                     return
+
             if self.log == None:
                 self.log = daeTextEditLog(self.ui.textEdit, self.ui.progressBar, self.ui.progressLabel, self.app)
+            else:
+                log1 = self.log
+                log2 = daeTextEditLog(self.ui.textEdit, self.ui.progressBar, self.ui.progressLabel, self.app)
+                self.log = daeDelegateLog()
+                self.log.AddLog(log1)
+                self.log.AddLog(log2)
+                self._logs = [log1, log2]
+
             if self.daesolver == None:
                 self.daesolver = daeIDAS()
 

@@ -16,15 +16,10 @@ daeLog_t* daeCreateStdOutLog(void)
 	return new daeStdOutLog;
 }
 
-daeLog_t* daeCreateTCPIPLog(const string& strIPAddress, int nPort)
+daeLog_t* daeCreateTCPIPLog()
 {
-	return new daeTCPIPLog(strIPAddress, nPort);
+	return new daeTCPIPLog();
 }
-
-//daeLog_t* daeCreateTCPIPLogServer(int nPort)
-//{
-//	return new daeTCPIPLogServer(nPort);
-//}
 
 }
 }

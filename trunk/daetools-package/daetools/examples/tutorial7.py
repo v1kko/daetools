@@ -142,7 +142,7 @@ class simTutorial(daeSimulation):
                 self.m.T.ReSetInitialCondition(x, y, 300 * K)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))  
 
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)

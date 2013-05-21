@@ -8,29 +8,53 @@ namespace logging
 /********************************************************************
 	daeTCPIPLog
 *********************************************************************/
-daeTCPIPLog::daeTCPIPLog(string strIPAddress, int nPort)
+daeTCPIPLog::daeTCPIPLog(void)
 {
-	m_nPort	       = nPort;
-	m_strIPAddress = strIPAddress;
+}
 
-	m_ptcpipSocket = new tcp::socket(m_ioService);
-	tcp::endpoint endpoint(boost::asio::ip::address::from_string(strIPAddress), nPort);
+daeTCPIPLog::~daeTCPIPLog(void)
+{
+    Disconnect();
+}
+
+bool daeTCPIPLog::Connect(const string& strIPAddress, int nPort)
+{
+    daeConfig& cfg = daeConfig::GetConfig();
+	m_strIPAddress = strIPAddress.empty() ? cfg.Get<string>("daetools.logging.tcpipLogAddress", "127.0.0.1") : strIPAddress;
+    m_nPort	       = nPort <= 0 ? cfg.Get<int>("daetools.logging.tcpipLogPort", 51000) : nPort;
+
+	m_ptcpipSocket = boost::shared_ptr<tcp::socket>(new tcp::socket(m_ioService));
+	tcp::endpoint endpoint(boost::asio::ip::address::from_string(m_strIPAddress), m_nPort);
 	boost::system::error_code ec;
 	m_ptcpipSocket->connect(endpoint, ec);
 	
 	if(ec)
 	{
 		cout << "Error connecting TCPIPLog: " << ec.message() << endl;
+        return false;
 	}
+    
+    return true;
 }
 
-daeTCPIPLog::~daeTCPIPLog(void)
+bool daeTCPIPLog::IsConnected()
 {
-	m_ptcpipSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-	m_ptcpipSocket->close();
-	if(m_ptcpipSocket)
-		delete m_ptcpipSocket;
-	m_ptcpipSocket = NULL;
+	if(m_ptcpipSocket && m_ptcpipSocket->is_open())
+		return true;
+	else
+		return false;
+}
+
+bool daeTCPIPLog::Disconnect(void)
+{
+    if(!IsConnected())
+		return false;
+
+    //std::cout << "daeTCPIPLog::Disconnect1" << std::endl;
+	m_ptcpipSocket.reset();
+    //std::cout << "daeTCPIPLog::Disconnect2" << std::endl;
+    
+    return true;
 }
 
 void daeTCPIPLog::Message(const string& strMessage, size_t nSeverity)
@@ -62,16 +86,42 @@ daeTCPIPLogServer::daeTCPIPLogServer(int nPort) : m_nPort(nPort),
 											      m_acceptor(m_ioService, tcp::endpoint(tcp::v4(), nPort)), 
 											      m_tcpipSocket(m_ioService)
 {
-	m_pThread = new boost::thread(boost::bind(&daeTCPIPLogServer::thread, this));
 }
 
 daeTCPIPLogServer::~daeTCPIPLogServer(void)
 {
+    Stop();
+}
+
+void daeTCPIPLogServer::Stop(void)
+{
+    boost::system::error_code ec;
+    if(m_acceptor.is_open())
+    {
+        m_acceptor.cancel(ec);
+        m_acceptor.close();
+    }
+    
+    //std::cout << "daeTCPIPLogServer::Stop1" << std::endl;
+    m_pThread.reset();
+    //std::cout << "daeTCPIPLogServer::Stop2" << std::endl;
+}
+
+void daeTCPIPLogServer::Start(void)
+{
 	if(m_pThread)
 	{
-		delete m_pThread;
-		m_pThread = NULL;
-	}
+		daeDeclareException(exInvalidCall);
+		e << "TCPIPLogServer server has already been started";
+		throw e;
+	}	
+
+    m_pThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&daeTCPIPLogServer::thread, this)));
+}
+
+int daeTCPIPLogServer::GetPort() const
+{
+    return m_nPort;
 }
 
 void daeTCPIPLogServer::thread()
@@ -99,7 +149,7 @@ void daeTCPIPLogServer::thread()
 									  error); 
 			if(nRead == 0)
 			{
-				cout << "TCPIPLog socket disconnected, closing the receiving socket..." << endl;
+				cout << "TCPIPLogServer socket disconnected" << endl;
 				return;
 			}
 			if(nRead != sizeof(msgSize))
@@ -148,8 +198,13 @@ void daeTCPIPLogServer::thread()
 	}
 	catch (std::exception& e)
 	{
-		cout << "Exception in thread: " << e.what() << "\n";
+		cout << "TCPIPLogServer exception in thread: " << e.what() << "\n";
 	}
+}
+
+void daeTCPIPLogServer::MessageReceived(const char* strMessage)
+{
+    std::cout << "TCPIPLogServer: " << strMessage << std::endl;
 }
 
 }
