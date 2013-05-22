@@ -31,14 +31,14 @@ Running tutorials
   * GNU/Linux:
    Run ``Applications/Programming/daePlotter`` from the system menu or execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeplotter
       
   * MacOS:
    Execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeplotter
 
@@ -59,14 +59,14 @@ Running tutorials
   * GNU/Linux:
    Run ``Applications/Programming/DAE Tools Examples`` from the system menu or execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeexamples
 
   * MacOS:
    Execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeexamples
 
@@ -523,7 +523,7 @@ Optimizations, like simulations can be set-up to run in two modes:
     # Execute applications main loop
     app.exec_()
 
-2. From the shell: 
+2. From the shell:
  In **pyDAE**:
 
  .. code-block:: python

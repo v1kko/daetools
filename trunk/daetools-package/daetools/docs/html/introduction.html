@@ -58,240 +58,121 @@
 <h1>1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="what-is-dae-tools">
 <h2>1.1. What is DAE Tools?<a class="headerlink" href="#what-is-dae-tools" title="Permalink to this headline">¶</a></h2>
-<p><strong>DAE Tools</strong> is a collection of software tools for modelling, simulation and optimization
-of real-world processes. Process modelling and simulation can be defined as theoretical
-concepts and computational methods that describe, represent in a mathematical form and simulate
-the functioning of real-world processes. <strong>DAE Tools</strong> is initially developed to model and
-simulate processes in chemical process industry (mass, heat and momentum transfers, chemical
-reactions, separation processes, thermodynamics). However, <strong>DAE Tools</strong> can help you develop
-high-accuracy models of (in general) many different kind of processes/phenomena, simulate/optimize
-them, visualize and analyse the results. Its features should be sufficient to enable mathematical
-description of chemical, physical or socio/economic phenomena. The most common are initial value
-problems of implicit form, which can be formulated as systems of linear, non-linear, and (partial)
-differential algebraic equations.</p>
-</div>
-<div class="section" id="programming-paradigms">
-<h2>1.2. Programming paradigms<a class="headerlink" href="#programming-paradigms" title="Permalink to this headline">¶</a></h2>
-<p>In general, there are two types of approaches that can be applied to process modelling:
-Domain Specific Language approach and a general-purpose programming language approach (such as
-c/c++, Java or Python). A Domain Specific Language (DSL) is a special-purpose programming or
-specification language dedicated to a particular problem domain and so designed that it directly
-supports the key concepts necessary to describe the underlying problems. A domain-specific
-language is created specifically to solve problems in a particular domain and is usually not
-intended to be able to solve problems outside it (although that may be technically possible in
-some cases). In contrast, general-purpose languages are created to solve problems in a wide
-variety of application domains.</p>
-<p>Domain-specific languages are languages with very specific goals in design and implementation and
-commonly lack low-level functions for filesystem access, interprocess control, and other functions
-that characterize full-featured programming languages, scripting or otherwise.</p>
-<p>A good example of general purpose (multi-domain) domain specific language is <a class="reference external" href="http://www.modelica.org">Modelica</a>
-while single-domain (chemical processing industry related) DSLs are <a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a>,
-<a class="reference external" href="http://ascend4.org">Ascend</a>, <a class="reference external" href="http://www.aspentech.com">SpeedUp</a> etc.</p>
-<p>DAE Tools approach is a sort of the hybrid approach: it applies general-purpose programming languages
-such as c++ and Python, but offers a class-hierarchy/API that resembles a syntax of a DSL as much as
-possible, an access to the low-level functions, large number of standard and third party libraries and
-uses state of the art free/open-source software components to accomplish particular tasks (calculating
-derivatives and sensitivities, solving systems of differential and algebraic systems of equations and
-optimization problems, processing and plotting results etc).</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="50%" />
-<col width="50%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head"><strong>DSL Approach</strong></th>
-<th class="head"><strong>DAE Tools Approach</strong></th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>Domain-specific languages allow solutions to be expressed in the idiom and at the level of abstraction
-of the problem domain (direct support for all modelling concepts by the language syntax)</td>
-<td>Modelling concepts cannot be expressed directly in the programming language and have to be emulated in
-the API or in some other way</td>
-</tr>
-<tr class="row-odd"><td>Clean, concise, ellegant and natural way of building model descriptions: the code can be self documenting</td>
-<td>The support for modelling concepts is much more verbose and less elegant; however, DAE Tools can generate
-XML+MathML based model reports that can be either rendered in XHTML format using XSLT transformations
-(representing the code documentation) or used as an XML-based model exchange language.</td>
-</tr>
-<tr class="row-even"><td>Domain-specific languages could enhance quality, productivity, reliability, maintainability and portability</td>
-<td>&nbsp;</td>
-</tr>
-<tr class="row-odd"><td>DSLs could be and often are simulator independent making a model exchange easier</td>
-<td>Programming language dependent; however, a large number of scientific software libraries exposes its
-functionality to Python via Python wrappers</td>
-</tr>
-<tr class="row-even"><td>Cost of designing, implementing, and maintaining a domain-specific language as well as the tools required
-to develop with it (IDE): a compiler/lexical parser/interpreter must be developed with all burden that comes
-with it (such as error handling, grammar ambiguities, hidden bugs etc)</td>
-<td>A compiler/lexical parser/interpreter is an integral part of the programming language (c++, Python) with a
-robust error handling, universal grammar and massively tested</td>
-</tr>
-<tr class="row-odd"><td>Cost of learning a new language vs. its limited applicability: users are required to master a new language
-(yet another language grammar)</td>
-<td>No learning of a new language required (everything can get done in a favourite programming language)</td>
-</tr>
-<tr class="row-even"><td>Increased difficulty of integrating the DSL with other components: calling external functions/libraries and
-interaction with other software is limited by the existence of wrappers around a simulator engine
-(for instance some scripting languages like Python or javascript)</td>
-<td>Calling external functions/libraries is a natural and straightforward Interaction with other software is
-natural and straightforward</td>
-</tr>
-<tr class="row-odd"><td>Models usually cannot be created in the runtime/on the fly (or at least not easily) and cannot be modified
-in the runtime</td>
-<td>Models can be created in the runtime/on the fly and easily modified in the runtime</td>
-</tr>
-<tr class="row-even"><td>Setting up a simulation (ie. the values of parameters values, initial conditions, initially active states)
-is embedded in the language and it is typically difficult to do it on the fly or to obtain the values from
-some other software (for example to chain several software calls where outputs of previous calls represent
-inputs to the subsequent ones)</td>
-<td>Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software
-in a natural way (chaining several software calls is easy since a large number of libraries make Python wrappers
-available)</td>
-</tr>
-<tr class="row-odd"><td>Simulation operating procedures are not flexible; manipulation of model parameters, variables, equations,
-simulation results etc is limited to only those operations provided by the language</td>
-<td>Operating procedures are completely flexible (within the limits of a programming language itself) and a
-manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
-a user cosiders suitable for his/her problem</td>
-</tr>
-<tr class="row-even"><td>Only the type of results provided by the language/simulator is available; custom processing is usually not
-possible or if a simulator does provide a way to build extensions it is limited to the functionality made
-available to them</td>
-<td>The results processing can be done in any way which a user considers suitable(again within the limits of a
-programming language itself)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="model-development">
-<h2>1.3. Model development<a class="headerlink" href="#model-development" title="Permalink to this headline">¶</a></h2>
-<p>In general, three approaches to process modelling exist (<a class="footnote-reference" href="#morton2003" id="id1">[1]</a>):</p>
+<p><strong>DAE Tools</strong> is a free/open-source cross-platform object- and equation-oriented process
+modelling and optimization software. It is not a modelling language, rather a collection
+of software tools for:</p>
 <ul class="simple">
-<li>Sequential Modular (<strong>SeqM</strong>) approach</li>
-<li>Simultaneous Modular (<strong>SimM</strong>) approach</li>
-<li>Equation-Oriented (<strong>EO</strong>) approach</li>
+<li>Modelling development</li>
+<li>Simulation, optimization, and parameter estimation</li>
+<li>Processing of the results (plotting and exporting to various file formats)</li>
+<li>Report generation</li>
+<li>Code generation and model exchange</li>
 </ul>
-<p>The pros &amp; cons of the first two approaches are extensively studied in the literature. Under the <strong>EO</strong> approach we generate
-and gather together all equations and variables which constitute the model representing the process. The equations are solved
-simultaneously using a suitable mathematical algorithm (Morton, 2003 <a class="footnote-reference" href="#morton2003" id="id2">[1]</a>). Equation-oriented simulation requires
-simultaneous solution of a set of differential algebraic equations (<strong>DAE</strong>) which itself requires a solution of a set of
-nonlinear algebraic equations (<strong>NLAE</strong>) and linear algebraic equations (<strong>LAE</strong>). The Newton&#8217;s method or some variant of it
-is almost always used to solve problems described by NLAEs. A brief history of Equation-Oriented solvers and comparison of
-<strong>SeqM</strong> and <strong>EO</strong> approaches as well as descriptions of the simultaneous modular and equation-oriented methods can be found
-in Morton, 2003 (<a class="footnote-reference" href="#morton2003" id="id3">[1]</a>). Also a good overview of the equation-oriented approach and its application in
-<a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a> is given by Barton &amp; Pantelides (<a class="footnote-reference" href="#pantelides1" id="id5">[2]</a>, <a class="footnote-reference" href="#pantelides2" id="id6">[3]</a>, <a class="footnote-reference" href="#pantelides3" id="id7">[4]</a>).</p>
-<p><strong>DAE Tools</strong> use the Equation-Oriented approach to process modelling, and the following types of processes can be modelled:</p>
+<p><strong>DAE Tools</strong> is initially developed to model and simulate processes in chemical process industry
+(mass, heat and momentum transfers, chemical reactions, separation processes, thermodynamics).
+However, <strong>DAE Tools</strong> can be used to develop high-accuracy models of (in general) many different
+kind of processes/phenomena, simulate/optimize them, visualize and analyse the results.</p>
+<p>The following approaches/paradigms are adopted in <strong>DAE Tools</strong>:</p>
 <ul class="simple">
-<li>Lumped and distributed</li>
-<li>Steady-state and dynamic</li>
+<li>A hybrid approach between general-purpose programming languages (such as c++ and Python) and
+domain-specific modelling languages (such as <a class="reference external" href="http://www.modelica.org">Modelica</a>,
+<a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a>, <a class="reference external" href="http://ascend4.org">Ascend</a> etc.)
+(more information: <a class="reference internal" href="paradigms.html"><em>Programming paradigms</em></a>)</li>
+<li>An object-oriented approach to process modelling (more information: <a class="reference internal" href="oo_approach.html"><em>Object-Oriented approach</em></a>)</li>
+<li>An Equation-Oriented (acausal) approach where all model variables and equations are generated and
+gathered together and solved simultaneously using a suitable mathematical algorithm
+(more information: <a class="reference internal" href="eo_approach.html"><em>Equation-Oriented approach</em></a>)</li>
+<li>Separation of the model definition from the activities that can be carried out on that model.
+The structure of the model (parameters, variables, equations etc.) is given in the model
+class while the runtime information in the simulation class. This way we can have a
+single model definition, but one or more different simulation scenarios, and one or more
+optimization scenarios</li>
+<li>Core libraries are written in standard c++, however <a class="reference external" href="http://www.python.org">Python</a> is used as
+the main modelling language (more information: <a class="reference internal" href="programming_language.html"><em>Programming language</em></a>)</li>
 </ul>
-<p>Problems can be formulated as linear, non-linear, and (partial) differential algebraic systems (of index 1).
-The most common problems are initial value problems of implicit form. Equations can be ordinary or discontinuous,
-where discontinuities are automatically handled by the framework. A good overview of discontinuous equations and
-a procedure for location of equation discontinuities is given by Park &amp; Barton (<a class="footnote-reference" href="#parkbarton" id="id8">[5]</a>)
-and in <a class="reference external" href="https://computation.llnl.gov/casc/sundials/documentation/ida_guide/node3.html#SECTION00330000000000000000documentation">Sundials IDA</a>
-(used in DAE Tools).</p>
-<p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="morton2003" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>)</em> Morton, W., Equation-Oriented Simulation and Optimization. <em>Proc. Indian Natl. Sci. Acad.</em> 2003, 317-357.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="pantelides1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td>Pantelides, C. C., and P. I. Barton, Equation-oriented dynamic simulation current status and future perspectives, <em>Computers &amp; Chemical Engineering</em>, vol. 17, no. Supplement 1, pp. 263 - 285, 1993.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="pantelides2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[3]</a></td><td>Barton, P. I., and C. C. Pantelides, gPROMS - a Combined Discrete/Continuous Modelling Environment for Chemical Processing Systems, <em>Simulation Series</em>, vol. 25, no. 3, pp. 25-34, 1993.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="pantelides3" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[4]</a></td><td>Barton, P. I., and C. C. Pantelides, Modeling of combined discrete/continuous processes&#8221;, <em>AIChE Journal</em>, vol. 40, pp. 966-979, 1994.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="parkbarton" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[5]</a></td><td>Park, T., and P. I. Barton, State event location in differential-algebraic models&#8221;, <em>ACM Transactions on Modeling and Computer Simulation</em>, vol. 6, no. 2, New York, NY, USA, ACM, pp. 137-165, 1996.</td></tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="the-main-features">
-<h2>1.4. The main features<a class="headerlink" href="#the-main-features" title="Permalink to this headline">¶</a></h2>
-<p><strong>DAE Tools</strong> is a cross-platform equation-oriented process modelling and optimization system. All core libraries
-are written in standard ANSI/ISO c++ . It is highly portable - it can run on every platform with a decent c++ compiler,
-Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures making it suitable for
-use in embedded systems). <strong>DAE Tools</strong> core libraries are small and fast, and each module can be easily extended.
-Models can be developed in Python (<strong>pyDAE</strong> module) or c++ (<strong>cDAE</strong> module), compiled into an independent
+<p>Class of problems that can be solved by <strong>DAE Tools</strong>:</p>
+<ul class="simple">
+<li>Initial value problems of implicit form, described by a system of linear, non-linear, and (partial-)differential
+algebraic equations</li>
+<li>Index-1 DAE systems</li>
+<li>With lumped or distributed parameters: Finite Difference or Finite Elements Methods (still experimental)</li>
+<li>Steady-state or dynamic</li>
+<li>Continuous with some elements of event-driven systems (discontinuous equations, state transition networks
+and discrete events)</li>
+</ul>
+<p>Type of activities that can be carried out with models developed in <strong>DAE Tools</strong>:</p>
+<ul class="simple">
+<li>Simulation<ul>
+<li>Steady-state or dynamic</li>
+<li>With simple or complex operating procedures</li>
+</ul>
+</li>
+<li>Optimization<ul>
+<li>NLP problems</li>
+<li>MINLP problems</li>
+</ul>
+</li>
+<li>Parameter estimation<ul>
+<li>The least squares method (Levenberg–Marquardt algorithm)</li>
+</ul>
+</li>
+<li>XML + MathML report generation</li>
+<li>Code generation for other modelling languages and general purpose programming languages<ul>
+<li><a class="reference external" href="http://www.modelica.org">Modelica</a></li>
+<li>ANSI C</li>
+<li><a class="reference external" href="https://www.fmi-standard.org">Functional Mockup Interface (FMI)</a></li>
+</ul>
+</li>
+<li>Export of the simulation results to various file formats</li>
+</ul>
+<p><strong>DAE Tools</strong> is not can be used to develop models in Multi-domain
+From chemical processing industry to biological neural networks
+DAE Tools is not a DSL but defines the basic modelling concepts such as models, parameters, variables, various types of equations (ordinary, differential, partial differential, discontinuous), state transition networks etc. that can be used as building blocks for a specific domain
+Example: a reference implementation simulator for NineML (xml-based modelling language for describing networks of spiking neurons)
+The key concepts from NineML are based on DAE Tools concepts: Neurone, Synapse, Population of neurones, Layers, Projections etc
+All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
+major operating systems (GNU/Linux, MacOS, Windows) and all platforms with a decent c++ compiler,
+Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures
+making it suitable for use in embedded systems). Models can be developed in Python
+(<strong>pyDAE</strong> module) or c++ (<strong>cDAE</strong> module), compiled into an independent
 executable and deployed without a need for any run time libraries.</p>
-<p>Various types of processes (lumped or distributed, steady-state or dynamic) can be modelled and optimized. They may
-range from very simple to those which require complex operating procedures. Equations can be ordinary or discontinuous,
-where discontinuities are automatically handled by the framework. Model reports  containing all information about
-a model can be exported in XML MathML format automatically creating a high quality documentation. The simulation
-results can be visualized, plotted and/or exported into various formats.</p>
-<p>Currently <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">Sundials IDAS</a> solver is used to solve DAE systems
-and calculate sensitivities, while <a class="reference external" href="https://projects.coin-or.org/Bonmin">BONMIN</a>,
-<a class="reference external" href="https://projects.coin-or.org/IPOPT">IPOPT</a>,
-and <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">NLOPT</a> solvers are used to solve NLP/MINLP problems.
+<p><strong>DAE Tools</strong> support a large number of solvers. Currently <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">Sundials IDAS</a>
+solver is used to solve DAE systems and calculate sensitivities, while <a class="reference external" href="https://projects.coin-or.org/Bonmin">BONMIN</a>,
+<a class="reference external" href="https://projects.coin-or.org/IPOPT">IPOPT</a>, and <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">NLOPT</a>
+solvers are used to solve NLP/MINLP problems.
 <strong>DAE Tools</strong> support direct dense and sparse matrix linear solvers (sequential and multi-threaded versions)
 at the moment. In addition to the built-in Sundials linear solvers, several third party libraries are interfaced:
 <a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">SuperLU/SuperLU_MT</a>,
 <a class="reference external" href="http://software.intel.com/en-us/intel-mkl">Intel Pardiso</a>, <a class="reference external" href="http://www.amd.com/acml">AMD ACML</a>,
 <a class="reference external" href="http://trilinos.sandia.gov/packages/amesos/">Trilinos Amesos</a> (KLU, Umfpack, SuperLU, Lapack),
 and <a class="reference external" href="http://trilinos.sandia.gov/packages/aztecoo">Trilinos AztecOO</a> (with built-in, Ifpack or ML preconditioners)
-which can take advantage of multi-core/cpu computers. Linear solvers that exploit general-purpose graphics processing
+which can take advantage of multi-core/cpu computers.
+Linear solvers that exploit general-purpose graphics processing
 units (<a class="reference external" href="http://en.wikipedia.org/wiki/GPGPU">GPGPU</a>, such as <a class="reference external" href="http://www.nvidia.com/object/cuda_home_new.html">NVidia CUDA</a>)
 are also available ([[SuperLU_CUDA]], <a class="reference external" href="http://code.google.com/p/cusp-library">CUSP</a>) but in an early development stage.</p>
-<p>DAE Tools models can be exported into some other modelling languages. At the moment, models can be exported into
-pyDAE (python) and cDAE (c++) but other languages will be supported in the future (such as OpenModelica, EMSO ...).</p>
 </div>
-<div class="section" id="system-overview">
-<h2>1.5. System overview<a class="headerlink" href="#system-overview" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="architecture">
+<h2>1.2. Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-center" id="figure-architecture" style="width: 450pt">
+<img alt="_images/daetools-architecture.png" src="_images/daetools-architecture.png" style="width: 400pt;" />
+<p class="caption"><strong>Figure 1.</strong> <strong>DAE Tools</strong> architecture</p>
 </div>
-<div class="section" id="programming-language">
-<h2>1.6. Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h2>
-<p><strong>DAE Tools</strong> core libraries are written in standard c++. However, <a class="reference external" href="http://www.python.org">Python</a> programming language is
-used as the main modelling language. The main reason for use of Python is (as the authors say):
-<em>&#8220;Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple
-but effective approach to object-oriented programming. Python&#8217;s elegant syntax and dynamic typing, together with its
-interpreted nature, make it an ideal language for scripting and rapid application development in many areas on
-most platforms&#8221;</em> <a class="reference external" href="http://docs.python.org/tutorial">link</a>.</p>
-<p>And: &#8220;<em>Often, programmers fall in love with Python because of the increased productivity it provides. Since there is no
-compilation step, the edit-test-debug cycle is incredibly fast&#8221;</em> <a class="reference external" href="http://www.python.org/doc/essays/blurb">link</a>. Also, please
-have a look on <a class="reference external" href="http://www.python.org/doc/essays/comparisons">a comparison to the other languages</a>. Based on the information
-available online, and according to the personal experience, the python programs are much shorter and take an order of magnitude
-less time to develop it. Initially I developed daePlotter module in c++; it took me about one month of part time coding. But,
-then I moved to python: reimplementing it in PyQt took me just two days (with several new features added), while the code size
-shrank from 24 cpp modules to four python modules only!</p>
-<p><em>&#8220;Where Python code is typically 3-5 times shorter than equivalent Java code, it is often 5-10 times shorter than equivalent
-C++ code! Anecdotal evidence suggests that one Python programmer can finish in two months what two C++ programmers can&#8217;t
-complete in a year. Python shines as a glue language, used to combine components written in C++&#8221;</em>
-<a class="reference external" href="http://www.python.org/doc/essays/comparisons">link</a>.
-Obviously, not everything can be developed in python; for complex projects I still prefer the heavy c++ artillery.</p>
 </div>
 <div class="section" id="licence">
-<h2>1.7. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<h2>1.3. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> is <a class="reference external" href="http://www.gnu.org/">free software</a> and you can redistribute it and/or modify it under the terms of
 the <a class="reference external" href="http://www.gnu.org/licenses/licenses.html#GPL">GNU General Public Licence</a> version 3 as published by
 the Free Software Foundation (<a class="reference external" href="http://www.gnu.org/philosophy/free-sw.html">GNU philosophy</a>).</p>
 </div>
 <div class="section" id="history">
-<h2>1.8. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<h2>1.4. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><strong>&#8220;Necessity, who is the mother of invention&#8221;</strong></dt>
 <dd><em>Plato, Greek author &amp; philosopher (427 BC - 347 BC), The Republic</em></dd>
 <dt><strong>&#8220;Every good work of software starts by scratching a developer&#8217;s personal itch&#8221;</strong></dt>
 <dd><em>Eric S. Raymond, hacker, The Cathedral and the Bazaar, 1997</em></dd>
 </dl>
-<p>The latter cannot be more true <a class="footnote-reference" href="#ericraymond" id="id11">[6]</a>.
+<p>The latter cannot be more true <a class="footnote-reference" href="#ericraymond" id="id2">[1]</a>.
 The early ideas of starting a project like this go back into 2007. At that time I have been working on my
 PhD thesis using one of commercially available process modelling software. It was everything nice and well
 until I discovered some annoying bugs and lack of certain highly appreciated features. The developers of that
@@ -299,8 +180,8 @@ proprietary program (as it is a case with all proprietary computer programs) had
 what they wanted to fix and introducing new features that they anticipated. Although I was able to improve
 the code and introduce certain features which will help (not only) me - I was helpless. The source code was
 not available and nobody will ever consider giving it to me to create patches with bugs fixes/new features.
-Not even if I swear on the holy (c++) bible!!
-Very soon the contours of a new process modelling software slowly began to form. It took me a while until
+Not even if I swear on the holy (c++) bible!!</p>
+<p>Very soon the contours of a new process modelling software slowly began to form. It took me a while until
 I made a definite plan and initial features, and I had to abandon a couple of initial versions...</p>
 <dl class="docutils">
 <dt><strong>&#8220;Plan to throw one away; you will, anyhow&#8221;</strong></dt>
@@ -311,12 +192,12 @@ The new project was officially born early next year - 2008.</p>
 <table class="docutils footnote" frame="void" id="ericraymond" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id11">[6]</a></td><td>However, I do not agree with Eric Raymond and the Open Source Iniative views - they miss the point IMO, but let us leave it beside at the moment.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>However, I do not agree with Eric Raymond and the Open Source Iniative views - they miss the point IMO, but let us leave it beside at the moment.</td></tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="acknowledgements">
-<h2>1.9. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<h2>1.5. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
 <p>DAE Tools use the following third party free software libraries (GNU GPL, GNU LGPL, CPL, EPL, BSD or some other type of free/permissive/copy-left licences):</p>
 <ul class="simple">
 <li>Sundials IDAS: <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">https://computation.llnl.gov/casc/sundials/main.html</a></li>
@@ -338,7 +219,7 @@ The new project was officially born early next year - 2008.</p>
 <li>NLOPT: <a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">http://ab-initio.mit.edu/wiki/index.php/NLopt</a></li>
 <li>CUSP: <a class="reference external" href="http://code.google.com/p/cusp-library">http://code.google.com/p/cusp-library</a></li>
 </ul>
-<p>DAE Tools can optionally use the following proprietary software libraries:</p>
+<p><strong>DAE Tools</strong> can optionally use the following proprietary software libraries:</p>
 <ul class="simple">
 <li>AMD ACML linear solver (pyAmdACML module): <a class="reference external" href="http://www.amd.com/acml">http://www.amd.com/acml</a></li>
 <li>Intel MKL linear solvers (pyIntelMKL and pyIntelPardiso modules): <a class="reference external" href="http://software.intel.com/en-us/articles/intel-mkl">http://software.intel.com/en-us/articles/intel-mkl</a></li>
@@ -346,7 +227,7 @@ The new project was officially born early next year - 2008.</p>
 <p>Please see the corresponding websites for more details about the licences.</p>
 </div>
 <div class="section" id="how-to-cite">
-<h2>1.10. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
+<h2>1.6. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
 <p>If you use <strong>DAE Tools</strong> in your work then please cite it in the following way:
 D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference external" href="http://www.daetools.com">http://www.daetools.com</a></p>
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
@@ -366,15 +247,11 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
   <ul>
 <li><a class="reference internal" href="#">1. Introduction</a><ul>
 <li><a class="reference internal" href="#what-is-dae-tools">1.1. What is DAE Tools?</a></li>
-<li><a class="reference internal" href="#programming-paradigms">1.2. Programming paradigms</a></li>
-<li><a class="reference internal" href="#model-development">1.3. Model development</a></li>
-<li><a class="reference internal" href="#the-main-features">1.4. The main features</a></li>
-<li><a class="reference internal" href="#system-overview">1.5. System overview</a></li>
-<li><a class="reference internal" href="#programming-language">1.6. Programming language</a></li>
-<li><a class="reference internal" href="#licence">1.7. Licence</a></li>
-<li><a class="reference internal" href="#history">1.8. History</a></li>
-<li><a class="reference internal" href="#acknowledgements">1.9. Acknowledgements</a></li>
-<li><a class="reference internal" href="#how-to-cite">1.10. How to cite</a></li>
+<li><a class="reference internal" href="#architecture">1.2. Architecture</a></li>
+<li><a class="reference internal" href="#licence">1.3. Licence</a></li>
+<li><a class="reference internal" href="#history">1.4. History</a></li>
+<li><a class="reference internal" href="#acknowledgements">1.5. Acknowledgements</a></li>
+<li><a class="reference internal" href="#how-to-cite">1.6. How to cite</a></li>
 </ul>
 </li>
 </ul>
@@ -427,7 +304,7 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
     </div>
     <div class="footer">
         &copy; Copyright 2008-2013, Dragan Nikolic.
-      Last updated on May 21, 2013.
+      Last updated on May 22, 2013.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

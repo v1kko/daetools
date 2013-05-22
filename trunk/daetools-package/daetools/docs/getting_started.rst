@@ -31,14 +31,14 @@ Running tutorials
   * GNU/Linux:
    Run ``Applications/Programming/daePlotter`` from the system menu or execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeplotter
       
   * MacOS:
    Execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeplotter
 
@@ -59,14 +59,14 @@ Running tutorials
   * GNU/Linux:
    Run ``Applications/Programming/DAE Tools Examples`` from the system menu or execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeexamples
 
   * MacOS:
    Execute the following shell command:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         daeexamples
 
