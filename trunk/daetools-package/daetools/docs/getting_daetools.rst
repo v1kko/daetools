@@ -208,7 +208,8 @@ development.
 
 .. code-block:: bash
 
-    # 'lsb_release' command might be missing on some GNU/Linux platforms and has to be installed before proceeding.
+    # 'lsb_release' command might be missing on some GNU/Linux platforms
+    # and has to be installed before proceeding.
     # On Debian based systems:
     # sudo apt-get install lsb-release
     # On red Hat based systems:
@@ -230,7 +231,7 @@ the libraries.
 
 **Note 1:**
 There is a bug in Sundials IDAS library. When compiling fails, go to the folder ``trunk/idas`` and change the line 24
-(or somewhere around it) in the ``Makefile``: ``top_builddir = `` to ``top_builddir = .``.
+(or somewhere around it) in the ``Makefile``: ``top_builddir =`` to ``top_builddir = .``.
 
 **Note 2:**
 There are known problems to compile the older bonmin and trilinos libraries using GNU GCC 4.6. This has been fixed

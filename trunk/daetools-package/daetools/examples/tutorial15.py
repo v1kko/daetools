@@ -88,7 +88,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial15")
-        self.m.Description = "This tutorial introdces nested state transitions."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))

@@ -16,6 +16,8 @@ Currently only Mozilla Firefox and Opera 12+ browsers are supported for viewing 
 (MathML rendering issue).
 
 
+.. _whats_the_time:
+
 What's the time? (AKA: Hello world!)
 ====================================
 .. rubric:: Description
@@ -33,6 +35,8 @@ Runtime model report    `whats_the_time-rt.xml <../../examples/whats_the_time-rt
 Source code             `whats_the_time.py <../../examples/whats_the_time.html>`_
 =====================   =================================================================
 
+.. _tutorial_1:
+    
 Tutorial 1
 ==========
 .. rubric:: Description
@@ -50,6 +54,8 @@ Runtime model report    `tutorial1-rt.xml <../../examples/tutorial1-rt.xml>`_
 Source code             `tutorial1.py <../../examples/tutorial1.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_2:
 
 Tutorial 2
 ==========
@@ -69,6 +75,8 @@ Source code             `tutorial2.py <../../examples/tutorial2.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_3:
+
 Tutorial 3
 ==========
 .. rubric:: Description
@@ -86,6 +94,8 @@ Runtime model report    `tutorial3-rt.xml <../../examples/tutorial3-rt.xml>`_
 Source code             `tutorial3.py <../../examples/tutorial3.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_4:
 
 Tutorial 4
 ==========
@@ -105,6 +115,8 @@ Source code             `tutorial4.py <../../examples/tutorial4.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_5:
+
 Tutorial 5
 ==========
 .. rubric:: Description
@@ -122,6 +134,8 @@ Runtime model report    `tutorial5-rt.xml <../../examples/tutorial5-rt.xml>`_
 Source code             `tutorial5.py <../../examples/tutorial5.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_6:
 
 Tutorial 6
 ==========
@@ -141,6 +155,8 @@ Source code             `tutorial6.py <../../examples/tutorial6.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_7:
+
 Tutorial 7
 ==========
 .. rubric:: Description
@@ -158,6 +174,8 @@ Runtime model report    `tutorial7-rt.xml <../../examples/tutorial7-rt.xml>`_
 Source code             `tutorial7.py <../../examples/tutorial7.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_8:
 
 Tutorial 8
 ==========
@@ -177,6 +195,8 @@ Source code             `tutorial8.py <../../examples/tutorial8.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_9:
+
 Tutorial 9
 ==========
 .. rubric:: Description
@@ -194,6 +214,8 @@ Runtime model report    `tutorial9-rt.xml <../../examples/tutorial9-rt.xml>`_
 Source code             `tutorial9.py <../../examples/tutorial9.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_10:
 
 Tutorial 10
 ===========
@@ -213,6 +235,8 @@ Source code             `tutorial10.py <../../examples/tutorial10.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_11:
+
 Tutorial 11
 ===========
 .. rubric:: Description
@@ -230,6 +254,8 @@ Runtime model report    `tutorial11-rt.xml <../../examples/tutorial11-rt.xml>`_
 Source code             `tutorial11.py <../../examples/tutorial11.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_12:
 
 Tutorial 12
 ===========
@@ -249,6 +275,8 @@ Source code             `tutorial12.py <../../examples/tutorial12.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_13:
+
 Tutorial 13
 ===========
 .. rubric:: Description
@@ -266,6 +294,8 @@ Runtime model report    `tutorial13-rt.xml <../../examples/tutorial13-rt.xml>`_
 Source code             `tutorial13.py <../../examples/tutorial13.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_14:
 
 Tutorial 14
 ===========
@@ -285,6 +315,8 @@ Source code             `tutorial14.py <../../examples/tutorial14.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_15:
+
 Tutorial 15
 ===========
 .. rubric:: Description
@@ -302,6 +334,8 @@ Runtime model report    `tutorial15-rt.xml <../../examples/tutorial15-rt.xml>`_
 Source code             `tutorial15.py <../../examples/tutorial15.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_16:
 
 Tutorial 16
 ===========
@@ -321,6 +355,8 @@ Source code             `tutorial16.py <../../examples/tutorial16.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_17:
+
 Tutorial 17
 ===========
 .. rubric:: Description
@@ -338,6 +374,8 @@ Runtime model report    `tutorial17-rt.xml <../../examples/tutorial17-rt.xml>`_
 Source code             `tutorial17.py <../../examples/tutorial17.html>`_
 =====================   =================================================================
 
+
+.. _opt_tutorial_1:
 
 Optimization tutorial 1
 =======================
@@ -357,6 +395,8 @@ Source code             `opt_tutorial1.py <../../examples/opt_tutorial1.html>`_
 =====================   =================================================================
 
 
+.. _opt_tutorial_2:
+
 Optimization tutorial 2
 =======================
 .. rubric:: Description
@@ -374,6 +414,8 @@ Runtime model report    `opt_tutorial2-rt.xml <../../examples/opt_tutorial2-rt.x
 Source code             `opt_tutorial2.py <../../examples/opt_tutorial2.html>`_
 =====================   =================================================================
 
+
+.. _opt_tutorial_3:
 
 Optimization tutorial 3
 =======================
@@ -393,6 +435,8 @@ Source code             `opt_tutorial3.py <../../examples/opt_tutorial3.html>`_
 =====================   =================================================================
 
 
+.. _opt_tutorial_4:
+
 Optimization tutorial 4
 =======================
 .. rubric:: Description
@@ -411,6 +455,8 @@ Source code             `opt_tutorial4.py <../../examples/opt_tutorial4.html>`_
 =====================   =================================================================
 
 
+.. _opt_tutorial_5:
+
 Optimization tutorial 5
 =======================
 .. rubric:: Description
@@ -428,6 +474,8 @@ Runtime model report    `opt_tutorial5-rt.xml <../../examples/opt_tutorial5-rt.x
 Source code             `opt_tutorial5.py <../../examples/opt_tutorial5.html>`_
 =====================   =================================================================
 
+
+.. _opt_tutorial_6:
 
 Optimization tutorial 6
 =======================

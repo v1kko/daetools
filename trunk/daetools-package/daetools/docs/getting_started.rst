@@ -44,7 +44,8 @@ Running tutorials
 
   * Windows:
    Run ``Start/Programs/DAE Tools/daePlotter`` from the Start menu.
-   The ``daePlotter`` main window should appear (given in :ref:`Figure 1. <Figure-1>`)
+
+  The ``daePlotter`` main window should appear (given in :ref:`Figure-1`)
 
     .. _Figure-1:
     .. figure:: _static/Screenshot-DAEPlotter.png
@@ -52,7 +53,7 @@ Running tutorials
        :figwidth: 300 pt
        :align: center
 
-       **Figure 1.** daePlotter main window.
+       daePlotter main window.
 
 2. Start ``DAE Tools Examples`` program to try some examples:
 
@@ -73,8 +74,8 @@ Running tutorials
   * Windows:
    Run ``Start/Programs/DAE Tools/DAE Tools Examples`` from the Start menu.
 
-The main window of ``DAE Tools Examples`` application is given in :ref:`Figure 2a. <Figure-2a>` while
-the output from the simulation run in :ref:`Figure 2b. <Figure-2b>`. Users can select one of several tutorials,
+The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-2a` while
+the output from the simulation run in :ref:`Figure-2b`. Users can select one of several tutorials,
 run them, and inspect their source code or model reports.
 Model reports open in a new window of the system's default web browser (however, only Mozilla Firefox is currently
 supported because of the MathML rendering issue).
@@ -85,7 +86,7 @@ supported because of the MathML rendering issue).
    :figwidth: 400 pt
    :align: center
 
-   **Figure 2a.** DAE Tools Examples main window
+   DAE Tools Examples main window
 
 .. _Figure-2b:
 .. figure:: _static/Screenshot-DAEToolsTutorials-Run.png
@@ -93,7 +94,7 @@ supported because of the MathML rendering issue).
    :figwidth: 400 pt
    :align: center
 
-   **Figure 2b.** A typical optimization output from DAE Tools
+   A typical optimization output from DAE Tools
 
 Tutorials can also be started from the shell:
 
@@ -105,7 +106,7 @@ Tutorials can also be started from the shell:
     
     python tutorial1.py console
 
-The sample output is given in :ref:`Figure 3. <Figure-3>`:
+The sample output is given in :ref:`Figure-3`:
 
 .. _Figure-3:
 .. figure:: _static/Screenshot-RunningSimulation.png
@@ -113,7 +114,7 @@ The sample output is given in :ref:`Figure 3. <Figure-3>`:
    :figwidth: 400 pt
    :align: center
 
-   **Figure 3.** Shell output from the simulation
+   Shell output from the simulation
 
 
 Models
@@ -606,35 +607,35 @@ Processing the results
 
 The simulation/optimization results can be easily plotted by using **DAE Plotter** application.
 It is possible to choose between 2D and 3D plots. After choosing a desired type, a **Choose variable**
-(given in :ref:`Figure 5. <Figure-5>`) dialog appears where a variable to be plotted can be selected and information
+(given in :ref:`Figure-5`) dialog appears where a variable to be plotted can be selected and information
 about domains specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
 (to create a 2D plot one domain must remain free, while for a 3D plot two domains).
 
-    .. _Figure-5:
-    .. figure:: _static/Screenshot-ChooseVariable.png
-       :width: 350 pt
-       :figwidth: 400 pt
-       :align: center
+.. _Figure-5:
+.. figure:: _static/Screenshot-ChooseVariable.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
 
-       **Figure 5.** Choose variable dialog for a 2D plot
+    Choose variable dialog for a 2D plot
 
-Typical 2D and 3D plots are given in :ref:`Figure 6. <Figure-6>` and :ref:`Figure 7. <Figure-7>`.
+Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
 
-    .. _Figure-6:
-    .. figure:: _static/Screenshot-2Dplot.png
-       :width: 350 pt
-       :figwidth: 400 pt
-       :align: center
+.. _Figure-6:
+.. figure:: _static/Screenshot-2Dplot.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
 
-       **Figure 6.** Example 2D plot (produced by Matplotlib)
+    Example 2D plot (produced by Matplotlib)
 
-    .. _Figure-7:
-    .. figure:: _static/Screenshot-3Dplot.png
-       :width: 350 pt
-       :figwidth: 400 pt
-       :align: center
+.. _Figure-7:
+.. figure:: _static/Screenshot-3Dplot.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
 
-       **Figure 7.** Example 3D plot (produced by Mayavi2)
+    Example 3D plot (produced by Mayavi2)
 
 
        

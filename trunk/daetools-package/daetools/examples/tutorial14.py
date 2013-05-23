@@ -115,12 +115,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial14")
-        self.m.Description = "In this example we use the same conduction problem as in the tutorial 5." \
-                             "Here we introduce the external functions concept that can handle and evaluate" \
-                             "functions in external libraries. Here we use daeScalarExternalFunction class" \
-                             "derived external function object to calculate the power." \
-                             "A support for external functions is still experimental and the goal is" \
-                             "to support certain software components such as thermodynamic property packages etc."
+        self.m.Description = __doc__
                                 
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))

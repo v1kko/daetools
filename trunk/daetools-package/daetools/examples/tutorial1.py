@@ -200,9 +200,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial1")
-        self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
-                             "and variables, how to define distributed domains, declare distributed equations and set " \
-                             "their boundary and initial conditions."
+        self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
         # In this example we use the center-finite difference method (CFDM) of 2nd order to discretize the domains x and y.

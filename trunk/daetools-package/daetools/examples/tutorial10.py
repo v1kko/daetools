@@ -111,9 +111,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial10")
-        self.m.Description = "This tutorial explains how to use daeModel functions d() and dt() " \
-                             "that calculate time- and partial-derivative of an expression (not of a single variable), " \
-                             "how to use initialization files (.init) and how to evaluate integrals of a function."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 25

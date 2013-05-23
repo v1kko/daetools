@@ -129,9 +129,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial8")
-        self.m.Description = "This tutorial explains how to create custom data reporters and how to " \
-                             "create a composite data reporter which delegates " \
-                             "the data processing to other data reporters. "
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))

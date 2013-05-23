@@ -111,9 +111,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial2")
-        self.m.Description = "This tutorial explains how to define Arrays (discrete distribution domains) and " \
-                             "distributed parameters, how to calculate the number of degrees of freedom (NDOF) " \
-                             "and how to fix it, and how to set initial guesses of the variables."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 25

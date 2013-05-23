@@ -17,33 +17,49 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-What is the time? (AKA Hello world!) is a very simple simulation.
-It shows the basic structure of the model and the simulation classes.
-A typical simulation includes 8 basic tasks:
+What is the time? (AKA Hello world!) is a very simple model. The model consists of
+a single variable (called 'time') and a single differential equation::
+                        d(time)
+                        ------- = 1
+                           dt
+This way, the value of the variable 'time' is equal to the elapsed time in the
+simulation at any moment.
 
-1. How to import the pyDAE module(s)
-2. How to declare variable types daeVariableType
-3. How to define a model by deriving a class from the base daeModel
-   and which functions must be implemented by every model
-   (daeModel.__init__, daeModel.DeclareEquations):
+This tutorial presents the basic structure of the daeModel and the daeSimulation
+classes. A typical DAETools simulation requires the following 8 tasks:
 
-   - how to declare parameters and variables in daeModel.__init__ function
-   - how to declare equations and their residuals in daeModel.DeclareEquations
-     function
+1. Importing DAE Tools pyDAE module(s)
+
+2. Importing or declaration of units and variable types
+   (unit and daeVariableType classes)
    
-4. How to define a simulation by deriving a class from the base daeSimulation
-   and which functions must be implemented by every simulation (daeSimulation.__init__,
-   daeSimulation.SetUpParametersAndDomains, daeSimulation.SetUpVariables):
+3. Developing a model by deriving a class from the base daeModel class and:
 
-   - how to set specify a model to be used in simulation in daeSimulation.__init__ function
-   - how to set values of parameters in daeSimulation.SetUpParametersAndDomains function
-   - how to set initial conditions in daeSimulation.SetUpVariables` function
+   - Declaring domains, parameters and variables in the daeModel.__init__ function
+   - Declaring equations and their residual expressions in the
+     daeModel.DeclareEquations function
+     
+4. Setting up a simulation by deriving a class from the base daeSimulation class and:
 
-5. How to create auxiliary objects required for the simulation
-   (DAE solver, data reporter and logging objects)
-6. How to set simulation's additional settings
-7. How to connect a data reporter
-8. How to run a simulation
+   - Specify a model to be used in the simulation in the daeSimulation.__init__ function
+   - Setting the values of parameters in the daeSimulation.SetUpParametersAndDomains function
+   - Set initial conditions in the daeSimulation.SetUpVariables function
+   
+5. Declaring auxiliary objects required for the simulation
+
+   - DAE solver object
+   - Data reporter object
+   - Log object
+   
+6. Setting the run-time options for the simulation:
+
+   - ReportingInterval
+   - TimeHorizon
+
+7. Connecting a data reporter
+
+8. Initializing, running and finalizing the simulation
+
 """
 
 # 1. Import the modules
@@ -55,28 +71,33 @@ from time import localtime, strftime
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 """
-2b. Define variable types
-   Variable types are typically declared outside of model classes since they define common, reusable types.
-   The daeVariable constructor takes 6 arguments:
-    - Name: string
-    - Units: unit object
-    - LowerBound: float (not enforced at the moment)
-    - UpperBound: float (not enforced at the moment)
-    - InitialGuess: float
-    - AbsoluteTolerance: float
-   Standard variable types are defined in variable_types.py
-   Here, a very simple dimensionless variable type is declared:
+2b. Import or declare variable types
+    Variable types are typically declared outside of model classes since
+    they define common, reusable types.
+    The daeVariable constructor takes 6 arguments:
+     - Name: string
+     - Units: unit object
+     - LowerBound: float (not enforced at the moment)
+     - UpperBound: float (not enforced at the moment)
+     - InitialGuess: float
+     - AbsoluteTolerance: float
+    
+    Standard variable types are defined in variable_types.py and can be
+    import with:
+
+    >> from variable_types import length_t, volume_t, area_t ...
+    
+    Here, a very simple dimensionless variable type is declared: typeNone
 """
 typeNone = daeVariableType("typeNone", unit(), 0, 1E10,   0, 1e-5)
 
 """
-3. Define a model
-   New models are derived from the base daeModel class.
+3. Declare a model by deriving a class from the base daeModel class.
 """
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         """
-        3.1 Declare domains/parameters/variables/ports
+        3.1 Declare domains/parameters/variables/ports etc.
             Domains, parameters, variables, ports, etc has to be defined in the constructor: __init__
             First, the base class constructor has to be called.
             Then, all domains, parameters, variables, ports etc have to be declared as members of
@@ -100,42 +121,45 @@ class modTutorial(daeModel):
             In this example we use Greek character 'τ' to name the variable 'tau'.
         """
         daeModel.__init__(self, Name, Parent, Description)
+        
         self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process")
 
     def DeclareEquations(self):
         """
         3.2 Declare equations and state transition networks
             All models must implement DeclareEquations function and all equations must be specified here.
-            Equations are created by the function CreateEquation in daeModel class. In this example we declare only
-            one equation. CreateEquation accepts two arguments: equation name and description (optional). All naming
-            conventions apply here as well. Equations are written in the form of a residual, which is accepted by DAE
-            equation system solvers:
-                                  'residual expression' = 0
-            Residuals are defined by creating the above expression using the basic mathematical operations (+, -, *, /)
+            Equations are created in the daeModel.CreateEquation function. In this example we declare only
+            one equation. CreateEquation accepts two arguments: equation name and description (optional).
+            All naming conventions apply here as well. Equations are written in an implicit form (as a residual):
+                           'residual expression' = 0
+            Residual expressions are defined by using the basic mathematical operations (+, -, *, /)
             and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several
             useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation
             evaluation trees. adouble objects are used only for building the equation evaluation trees during the
             simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative
-            (required for construction of a Jacobian matrix) and the tree evaluation information.
-             - operator () which returns adouble object that calculates the variable value
-             - function dt() which returns adouble object thatcalculates a time derivative of the variable
-             - function d() and d2() which return adouble object that calculates a partial derivative of the variable
+            (required for construction of a Jacobian matrix) and the tree evaluation information. The most
+            otenly used functions are:
+             - operator () which returns adouble object that holds the variable value
+             - function dt() which returns adouble object that holds a time derivative of the variable
+             - function d() and d2() which return adouble object that holds a partial derivative of the variable
                of the 1st and the 2nd order, respectively
             In this example we simply write that the variable time derivative is equal to 1:
                                  d(tau) / dt = 1
-            which calculates the time as the current time elapsed in the simulation (normally, the built-in function Time()
-            should be used to get the current time in the simulation; this is just an example explaining the basic daetools
-            concepts). Note that the variable objects should be declared as members of the models they belong to and
+            with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation
+            (normally, the built-in function Time() should be used to get the current time in the simulation;
+            however, this is just an example explaining the basic daetools concepts).
+            Note that the variable objects should be declared as data members of the models they belong to and
             therefore accessed through the model objects.
 
-            As of the version 1.2.0 all daetools objects use quantities with physical dimensions and unit-consistency is
-            strictly enforced (although it can be turned off in daetools.cfg config file, typically located in /etc/daetools
-            folder). All values and constants must be declared with the information about their units. Units of variables,
-            parameters and domains are specified in their constructor while constants and arrays of constants are instantiated
-            with the built-in Constant() and Array() functions. Obviously, the very strict unit-consistency requires an extra
-            effort during the model building phase and makes models more verbose. However, it helps eliminate some very hard
-            to find errors and might save some NASA orbiters :-)
-            'quantity' objects consist of the value and the units. The pyDAE.pyUnits module declares the following units:
+            As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)
+            and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,
+            typically located in /etc/daetools folder). All values and constants must be declared with the information
+            about their units. Units of variables, parameters and domains are specified in their constructor while constants
+            and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very
+            strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.
+            However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.
+            'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following
+            predefined units:
               - All base SI units: m, kg, s, A, K, cd, mol
               - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc
                 (see units_pool.h file in trunk/Units folder)
@@ -153,8 +177,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.tau.dt() - Constant(1.0 * 1/s)
 
-# 4. Define a simulation
-#    Simulations are derived from the base daeSimulation class
+# 4. Declare a simulation by deriving a class from the base daeSimulation class
 class simTutorial(daeSimulation):
     def __init__(self):
         """
@@ -166,20 +189,11 @@ class simTutorial(daeSimulation):
         daeSimulation.__init__(self)
 
         self.m = modTutorial("whats_the_time")
-        self.m.Description = "What is the time? (AKA Hello world) is the simplest simulation. It shows the basic structure of the model and the simulation classes. " \
-                             "The basic 8 steps are explained: \n" \
-                             "1. How to import pyDAE module \n" \
-                             "2. How to declare variable types \n" \
-                             "3. How to define a model by deriving a class from the base daeModel, etc \n" \
-                             "4. How to define a simulation by deriving a class from the base daeSimulation, etc \n" \
-                             "5. How to create auxiliary objects required for the simulation (DAE solver, data reporter and logging objects) \n" \
-                             "6. How to set simulation's additional settings \n" \
-                             "7. How to connect the TCP/IP data reporter \n" \
-                             "8. How to run a simulation \n"
-
+        self.m.Description = __doc__
+        
     def SetUpParametersAndDomains(self):
         """
-        4.2 Define the domains and parameters
+        4.2 Initialize domains and parameters
             Every simulation class must implement SetUpParametersAndDomains method, even if it is empty.
             It is used to set the values of the parameters, initialize domains etc.
             In this example nothing has to be done.
@@ -190,8 +204,8 @@ class simTutorial(daeSimulation):
         """
         4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.
             Every simulation class must implement SetUpVariables method, even if it is empty.
-            In this example the only thing needed to be done is to set the initial condition for the variable tau to 0.
-            That can be done by using SetInitialCondition function:
+            In this example the only thing needed to be done is to set the initial condition for the
+            variable tau to 0. That can be done by using SetInitialCondition function.
         """
         self.m.tau.SetInitialCondition(0)
 
@@ -208,10 +222,12 @@ def guiRun(app):
 def consoleRun():
     """
     5. Create Log, Solver, DataReporter and Simulation object
-      Every simulation requires the following four objects:
-       - log is used to send the messages from other parts of the framework, informs us about the simulation progress or errors
+       Every simulation requires the following four objects:
+       - log is used to send the messages from other parts of the framework, informs us about the simulation
+         progress or errors
        - solver is DAE solver used to solve the underlying system of differential and algebraic equations
-       - datareporter is used to send the data from the solver to daePlotter
+       - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).
+         Very often data reporters hold the results and do not send the data.
        - simulation object
     """
     log          = daePythonStdOutLog()
@@ -221,11 +237,12 @@ def consoleRun():
 
     """
     6. Additional settings
-    Here some additional information can be entered. The most common are:
-     - TimeHorizon: the duration of the simulation
-     - ReportingInterval: the interval to send the variable values
-     - Selection of the variables which values will be reported. It can be set individually for each variable by using the property var.ReportingOn = True/False,
-       or by the function SetReportingOn in daeModel class which enables reporting of all variables in that model
+       Here some additional information can be entered. The most common are:
+       - TimeHorizon: the duration of the simulation
+       - ReportingInterval: the interval to send the variable values
+       - Selection of the variables whose values will be reported. It can be set individually for each variable
+         by using the property var.ReportingOn = True/False, or by the function SetReportingOn in daeModel class
+         which enables reporting of all variables in that model
     """
     simulation.TimeHorizon = 500
     simulation.ReportingInterval = 10
@@ -233,10 +250,11 @@ def consoleRun():
 
     """
     7. Connect the data reporter
-       daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the daePlotter.
+       daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the data receiver (daePlotter).
        It contains the function Connect which accepts two arguments:
          - TCP/IP address and port as a string in the following form: '127.0.0.1:50000'.
-           The default is an empty string which allows the data reporter to connect to the local (on this machine) daePlotter listening on the port 50000.
+           The default is an empty string which allows the data reporter to connect to the local
+           (on this machine) daePlotter listening on the port 50000.
          - Process name; in this example we use the combination of the simulation name and the current date and time
     """
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -246,12 +264,14 @@ def consoleRun():
     """
     8. Run the simulation
      8.1 The simulation initialization
-         The first task is to initialize the simulation by calling the function Initialize. As the 4th argument, it accepts  an optional
-         CalculateSensitivities (bool; default is False) which can enable calculation of sensitivities for given opt. variables.
-         After the successful initialization the model report can be saved.
-         The function SaveModelReport exports the model report in the XML format which can be opened in a web browser
-         (like Mozilla Firefox, or others that support XHTML+MathMl standard).
-         The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
+         The first task is to initialize the simulation by calling the function Initialize.
+         As the 4th argument, it accepts an optional CalculateSensitivities (bool; default is False) which can
+         enable calculation of sensitivities for given opt. variables.
+         After the successful initialization the model reports can be generated (if desired).
+         The function SaveModelReport exports the model report in the XML format which can be rendered
+         in a web browser such Mozilla Firefox, or others that support XHTML+MathMl standard.
+         The function SaveRuntimeModelReport creates a runtime sort of the model report
+         (with all run-time information and all equations fully expanded)
     """
     simulation.Initialize(daesolver, datareporter, log)
 
@@ -267,7 +287,8 @@ def consoleRun():
 
     """
     8.3 Call the function Run from the daeSimulation class to start the simulation.
-        It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval number of seconds
+        It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval
+        number of seconds.
     """
     simulation.Run()
 
@@ -276,9 +297,9 @@ def consoleRun():
 
 """
 This part of the code executes if the python script is executed from a shell
-1) If you use: "python whats_the_time.py console" the simulation will be launched from the console
-2) If you use: "python whats_the_time.py gui" the simulation will be launched from a GUI
-   The default is "gui" and you can omit it.
+1) If called as: "python whats_the_time.py console" the simulation will be launched in the console
+2) If called as: "python whats_the_time.py gui" the simulation will be launched with a GUI
+   The default is "gui" and can be omitted.
 """
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

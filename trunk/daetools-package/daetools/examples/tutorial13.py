@@ -193,14 +193,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial13")
-        self.m.Description = "In this example we use the same problem as in the tutorial 5. \n" \
-                             "Here we introduce: \n" \
-                             "  - The event ports \n" \
-                             "  - ON_CONDITION() function showing the new types of actions that can be executed " \
-                             "during state transitions \n" \
-                             "  - ON_EVENT() function showing the new types of actions that can be executed " \
-                             "when an event is triggered \n" \
-                             "  - User defined actions" \
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))

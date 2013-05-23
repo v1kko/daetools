@@ -18,7 +18,7 @@ What is DAE Tools?
 modelling and optimization software. It is not a modelling language, rather a collection
 of software tools for:
     
-* Modelling development
+* Model development
 * Simulation, optimization, and parameter estimation
 * Processing of the results (plotting and exporting to various file formats)
 * Report generation
@@ -34,13 +34,13 @@ The following approaches/paradigms are adopted in **DAE Tools**:
 * A hybrid approach between general-purpose programming languages (such as c++ and Python) and
   domain-specific modelling languages (such as `Modelica <http://www.modelica.org>`_,
   `gPROMS <http://www.psenterprise.com/gproms>`_, `Ascend <http://ascend4.org>`_ etc.)
-  (more information: :doc:`paradigms`)
+  (more information: :ref:`hybrid_approach`)
   
-* An object-oriented approach to process modelling (more information: :doc:`oo_approach`)
+* An object-oriented approach to process modelling (more information: :ref:`object_oriented_approach`)
 
 * An Equation-Oriented (acausal) approach where all model variables and equations are generated and
   gathered together and solved simultaneously using a suitable mathematical algorithm
-  (more information: :doc:`eo_approach`)
+  (more information: :ref:`equation_oriented_approach`)
   
 * Separation of the model definition from the activities that can be carried out on that model.
   The structure of the model (parameters, variables, equations etc.) is given in the model
@@ -49,7 +49,7 @@ The following approaches/paradigms are adopted in **DAE Tools**:
   optimization scenarios
 
 * Core libraries are written in standard c++, however `Python <http://www.python.org>`_ is used as
-  the main modelling language (more information: :doc:`programming_language`)
+  the main modelling language (more information: :ref:`python_programming_language`)
 
 Class of problems that can be solved by **DAE Tools**:
     
@@ -87,9 +87,6 @@ Type of activities that can be carried out with models developed in **DAE Tools*
 
 * Export of the simulation results to various file formats
 
-**DAE Tools** is not can be used to develop models in Multi-domain
-From chemical processing industry to biological neural networks
-
 All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
 major operating systems (GNU/Linux, MacOS, Windows) and all platforms with a decent c++ compiler,
 Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures
@@ -111,17 +108,6 @@ which can take advantage of multi-core/cpu computers.
 Linear solvers that exploit general-purpose graphics processing
 units (`GPGPU <http://en.wikipedia.org/wiki/GPGPU>`_, such as `NVidia CUDA <http://www.nvidia.com/object/cuda_home_new.html>`_)
 are also available ([[SuperLU_CUDA]], `CUSP <http://code.google.com/p/cusp-library>`_) but in an early development stage.
-
-Architecture
-============
-
-.. _Figure-Architecture:
-.. figure:: _static/daetools-architecture.png
-   :width: 400 pt
-   :figwidth: 450 pt
-   :align: center
-
-   **Figure 1.** **DAE Tools** architecture
 
 Licence
 =======

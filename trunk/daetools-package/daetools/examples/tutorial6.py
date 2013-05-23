@@ -93,11 +93,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial6")
-        self.m.Description = "This tutorial explains how to define and connect ports. \n" \
-                             "A simple port type 'portSimple' is defined which contains only one variable 't'. " \
-                             "Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'. " \
-                             "The wrapper model 'modTutorial' instantiate these two models as its units and connects them " \
-                             "by connecting their ports. "
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass

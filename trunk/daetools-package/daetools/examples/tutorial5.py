@@ -96,13 +96,8 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial5")
-        self.m.Description = "This tutorial explains how to define and use another type of discontinuous equations: " \
-                             "non-symmetric state transition networks (daeSTN). \n" \
-                             "A piece of copper (a plate) is at one side exposed to the source of heat and at the " \
-                             "other to the surroundings. The process starts at the temperature of the metal of 283K. " \
-                             "The metal is allowed to warm up, and then its temperature is kept in the interval " \
-                             "[320 - 340] for at least 350 seconds. After 350s the heat source is removed and the metal" \
-                             "cools down slowly again to the ambient temperature."
+        self.m.Description = __doc__
+        
     def SetUpParametersAndDomains(self):
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.m.SetValue(1 * kg)

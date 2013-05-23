@@ -88,7 +88,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial11")
-        self.m.Description = ""
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 5

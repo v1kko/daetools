@@ -191,7 +191,7 @@ latex_elements = {
 'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': '\usepackage[margin=0.7in]{geometry}',
 
 'tableofcontents' : '\setcounter{tocdepth}{2} \n\\tableofcontents'
 }

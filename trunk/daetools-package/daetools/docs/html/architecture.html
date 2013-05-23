@@ -1,0 +1,315 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. Architecture &mdash; DAE Tools Project 1.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
+    <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
+    <link rel="next" title="4. Getting DAE Tools" href="getting_daetools.html" />
+    <link rel="prev" title="2. Programming paradigms" href="paradigms.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_daetools.html" title="4. Getting DAE Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="paradigms.html" title="2. Programming paradigms"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="architecture">
+<span id="id1"></span><h1>3. Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
+<p><strong>DAE Tools</strong> consists of several interdependent components:</p>
+<ul class="simple">
+<li>Model</li>
+<li>Simulation</li>
+<li>Optimization</li>
+<li>DAE solver</li>
+<li>LA solver</li>
+<li>NLP solver</li>
+<li>Log</li>
+<li>Data reporter</li>
+<li>Data receiver</li>
+</ul>
+<p>The components are located in the following modules:</p>
+<ul class="simple">
+<li>pyCore module (Model and Log components)</li>
+<li>pyActivity module (Simulation and Optimization components)</li>
+<li>pyIDAS module (DAE solver component)</li>
+<li>pyDataReporting module (Data reporter and Data receiver components)</li>
+<li>pyUnits module</li>
+<li>Large number of third party linear equation solver modules (LA solver component):
+pySuperLU, pySuperLU_MT, pyTrilinos</li>
+<li>Large number of third party NLP/MINLP solver modules (NLP solver component):
+pyIPOPT, pyBONMIN, pyNLOPT</li>
+</ul>
+<p>An overview of <strong>DAE Tools</strong> components and their interdepedency is presented in the
+<a class="reference internal" href="#figure-architecture"><em>DAE Tools architecture</em></a>.</p>
+<div class="figure align-center" id="figure-architecture" style="width: 450pt">
+<img alt="_images/daetools-architecture.png" src="_images/daetools-architecture.png" style="width: 400pt;" />
+<p class="caption"><strong>DAE Tools</strong> architecture</p>
+</div>
+<div class="section" id="pycore-module">
+<h2>3.1. pyCore module<a class="headerlink" href="#pycore-module" title="Permalink to this headline">¶</a></h2>
+<p>pyCore module defines the key modelling concepts such as:</p>
+<ul class="simple">
+<li>Model</li>
+</ul>
+<blockquote>
+<div>A model of the process is a simplified abstraction of real world process/phenomena describing its most important/driving elements and their interactions. In <strong>DAE Tools</strong> models are created by defining their parameters, distribution domains, variables, equations, and ports.</div></blockquote>
+<ul class="simple">
+<li>Distribution domain</li>
+</ul>
+<blockquote>
+<div>Domain is a general term used to define an array of different objects (parameters, variables, equations but models and ports as well).</div></blockquote>
+<ul class="simple">
+<li>Parameter</li>
+</ul>
+<blockquote>
+<div>Parameter can be defined as a time invariant quantity that will not change during a simulation.</div></blockquote>
+<ul class="simple">
+<li>Variable</li>
+</ul>
+<blockquote>
+<div>Variable can be defined as a time variant quantity, also called a <em>state variable</em>.</div></blockquote>
+<ul class="simple">
+<li>Equation</li>
+</ul>
+<blockquote>
+<div>Equation can be defined as an expression used to calculate a variable value, which can be created
+by performing basic mathematical operations (+, -, <a href="#id2"><span class="problematic" id="id3">*</span></a>, /) and functions (such as sin, cos, tan, sqrt, log, ln, exp, pow, abs etc)
+on parameter and variable values (and time and partial derivatives as well).</div></blockquote>
+<ul class="simple">
+<li>State transition network</li>
+</ul>
+<blockquote>
+<div>State transition networks are used to model a special type of equations:
+<em>discontinuous equation*s. Discontinuous equations are equations that take different forms subject to certain conditions.
+They are composed of a finite number of *states</em>.</div></blockquote>
+<ul class="simple">
+<li>State</li>
+</ul>
+<blockquote>
+<div>States can be defined as a set of actions (in our case a set of equations) under current operating conditions.
+In addition, every state contains a set of state transitions which describe conditions
+when the state changes occur.</div></blockquote>
+<ul class="simple">
+<li>OnEvent and OnCondition event handlers</li>
+<li>Port</li>
+</ul>
+<blockquote>
+<div>Ports are objects used to connect two model instances and exchange continuous information.
+Like models, they may contain domains, parameters and variables.</div></blockquote>
+<ul class="simple">
+<li>EventPort</li>
+</ul>
+<blockquote>
+<div>Event ports are objects used to connect two model instances and exchange discrete information (events/messages).</div></blockquote>
+<ul class="simple">
+<li>Log</li>
+</ul>
+<blockquote>
+<div>Log is defined as an object used to send messages from the various parts of <strong>DAE Tools</strong> framework
+(messages from solvers or simulation).</div></blockquote>
+</div>
+<div class="section" id="pyactivity-module">
+<h2>3.2. pyActivity module<a class="headerlink" href="#pyactivity-module" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Simulation</li>
+</ul>
+<blockquote>
+<div>Simulation of a process can be considered as the model run for certain input conditions.
+To define a simulation, several tasks are necessary such as: specifying information about domains and parameters,
+fixing the degrees of freedom by assigning values to certain variables, setting the initial conditions and many other
+(setting the initial guesses, absolute tolerances, etc).</div></blockquote>
+<ul class="simple">
+<li>Optimization</li>
+</ul>
+<blockquote>
+<div><p>Process optimization can be considered as a process adjustment so as to minimize or maximize a specified goal while
+satisfying imposed set of constraints. The most common goals are minimizing cost, maximizing throughput, and/or
+efficiency. In general there are three types of parameters that can be adjusted to affect optimal performance:</p>
+<ul class="simple">
+<li>Equipment optimization</li>
+<li>Operating procedures</li>
+<li>Control optimization</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="pydatareporting-module">
+<h2>3.3. pyDataReporting module<a class="headerlink" href="#pydatareporting-module" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Data Reporter</li>
+</ul>
+<blockquote>
+<div>Data reporter is defined as an object used to report the results of a simulation/optimization.
+They can either keep the results internally (and export them into a file, for instance) or send them via
+TCP/IP protocol to the <strong>DAE Tools</strong> plotter.</div></blockquote>
+<ul class="simple">
+<li>Data Receiver</li>
+</ul>
+<blockquote>
+<div>Data receiver can be defined as on object which duty is to receive the results from a data reporter.
+These data can be later plotted or processed in some other ways.</div></blockquote>
+</div>
+<div class="section" id="pyidas-module">
+<h2>3.4. pyIDAS module<a class="headerlink" href="#pyidas-module" title="Permalink to this headline">¶</a></h2>
+<p>Contains an implementation of the <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">Sundials IDAS</a>
+DAE solver.</p>
+</div>
+<div class="section" id="pyunits-module">
+<h2>3.5. pyUnits module<a class="headerlink" href="#pyunits-module" title="Permalink to this headline">¶</a></h2>
+<p>Defines two key concepts:</p>
+<ul class="simple">
+<li>Unit (SI)</li>
+</ul>
+<blockquote>
+<div>7 fundamental dimensions (length, mass, time, electrical current, temperature, luminous intensity, amount of substance)
+* Multiplier
+* Offset</div></blockquote>
+<ul class="simple">
+<li>Quantity</li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li>Value</li>
+<li>Unit</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="nlp-minlp-modules">
+<h2>3.6. NLP/MINLP modules<a class="headerlink" href="#nlp-minlp-modules" title="Permalink to this headline">¶</a></h2>
+<p>Contain implementations of various NLP/MINLP solvers:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://projects.coin-or.org/IPOPT">IPOPT</a> in the pyIPOPTmodule</li>
+<li><a class="reference external" href="http://ab-initio.mit.edu/wiki/index.php/NLopt">NLOPT</a> in the pyNLOPT module</li>
+<li><a class="reference external" href="https://projects.coin-or.org/Bonmin">BONMIN</a> in the pyBONMIN module</li>
+</ul>
+</div>
+<div class="section" id="la-solver-modules">
+<h2>3.7. LA solver modules<a class="headerlink" href="#la-solver-modules" title="Permalink to this headline">¶</a></h2>
+<p>Contain implementations of various third party linear equation solvers:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://trilinos.sandia.gov/packages/amesos">Trilinos Amesos</a> in the pyTrilinos module</li>
+<li><a class="reference external" href="http://trilinos.sandia.gov/packages/aztecoo">Trilinos AztecOO</a> in the pyTrilinos module</li>
+<li><a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">SuperLU</a> in the pySuperLU module</li>
+<li><a class="reference external" href="http://crd.lbl.gov/~xiaoye/SuperLU/index.html">SuperLU_MT</a> in the pySuperLU_MT module</li>
+<li><a class="reference external" href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a> in the pyTrilinos module</li>
+</ul>
+<img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/[d][a][e]_Tools_project.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3. Architecture</a><ul>
+<li><a class="reference internal" href="#pycore-module">3.1. pyCore module</a></li>
+<li><a class="reference internal" href="#pyactivity-module">3.2. pyActivity module</a></li>
+<li><a class="reference internal" href="#pydatareporting-module">3.3. pyDataReporting module</a></li>
+<li><a class="reference internal" href="#pyidas-module">3.4. pyIDAS module</a></li>
+<li><a class="reference internal" href="#pyunits-module">3.5. pyUnits module</a></li>
+<li><a class="reference internal" href="#nlp-minlp-modules">3.6. NLP/MINLP modules</a></li>
+<li><a class="reference internal" href="#la-solver-modules">3.7. LA solver modules</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="paradigms.html"
+                        title="previous chapter">2. Programming paradigms</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="getting_daetools.html"
+                        title="next chapter">4. Getting DAE Tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/architecture.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="getting_daetools.html" title="4. Getting DAE Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="paradigms.html" title="2. Programming paradigms"
+             >previous</a> |</li>
+        <li><a href="index.html">DAE Tools Project 1.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008-2013, Dragan Nikolic.
+      Last updated on May 22, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

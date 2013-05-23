@@ -54,11 +54,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("opt_tutorial5")
-        self.m.Description = "This tutorial shows the interoperability between DAE Tools and 3rd party optimization " \
-                             "software (scipy.optimize) used to fit the simple function with experimental data. " \
-                             "DAE Tools simulation object is used to calculate the objective function and its gradients, " \
-                             "while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder) " \
-                             "implementing Levenberg-Marquardt algorithm is used to estimate the parameters."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass

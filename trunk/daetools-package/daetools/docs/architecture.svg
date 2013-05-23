@@ -14,7 +14,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="architecture.png">
+   sodipodi:docname="architecture.svg">
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -22,9 +22,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="339.58381"
-     inkscape:cy="408.2971"
+     inkscape:zoom="0.35205078"
+     inkscape:cx="-18.319832"
+     inkscape:cy="592.61916"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -67,16 +67,17 @@
        style="fill:#ffffff"
        id="rect4750"
        width="624.27423"
-       height="835.39618"
+       height="1000.1451"
        x="36.36549"
-       y="51.806087"
+       y="13.057123"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173" />
     <flowRoot
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot3755"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       transform="translate(0,126)"><flowRegion
          id="flowRegion3757"><rect
            y="359.50504"
            x="321.42856"
@@ -85,34 +86,40 @@
            id="rect3759" /></flowRegion><flowPara
          id="flowPara3761">core</flowPara><flowPara
          id="flowPara3763" /></flowRoot>    <g
-       id="g4027"
-       transform="translate(-167.14285,-210.21429)"
+       id="g3154"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
-      <rect
-         style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         id="rect2985"
-         width="147.14285"
-         height="107.14286"
-         x="215.71429"
-         y="275.21933" />
-      <flowRoot
-         xml:space="preserve"
-         id="flowRoot3765"
-         style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans"
-         transform="translate(26.149002,-230.90399)"><flowRegion
-           id="flowRegion3767"><rect
-             id="rect3769"
-             width="120"
-             height="77.14286"
-             x="241.42857"
-             y="545.2193"
-             style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Sans;-inkscape-font-specification:Sans" /></flowRegion><flowPara
-           id="flowPara3771">Core</flowPara></flowRoot>    </g>
+      <g
+         inkscape:export-ydpi="173"
+         inkscape:export-xdpi="173"
+         inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
+         transform="translate(-167.14285,-252.21429)"
+         id="g4027">
+        <rect
+           y="275.21933"
+           x="215.71429"
+           height="107.14286"
+           width="147.14285"
+           id="rect2985"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <flowRoot
+           transform="translate(17.779861,-228.90692)"
+           style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans"
+           id="flowRoot3765"
+           xml:space="preserve"><flowRegion
+             id="flowRegion3767"><rect
+               style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Sans;-inkscape-font-specification:Sans"
+               y="545.2193"
+               x="241.42857"
+               height="77.14286"
+               width="120"
+               id="rect3769" /></flowRegion><flowPara
+             id="flowPara3771">Model</flowPara></flowRoot>      </g>
+    </g>
     <g
        id="g4055"
-       transform="translate(-138.608,-148.32143)"
+       transform="translate(-138.608,-22.32143)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -138,7 +145,7 @@
            id="flowPara3771-3">Simulation</flowPara></flowRoot>    </g>
     <g
        id="g4048"
-       transform="translate(-514.12222,199.28572)"
+       transform="translate(-514.12222,325.28572)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -164,7 +171,7 @@
            id="flowPara3771-6">DAE solver</flowPara></flowRoot>    </g>
     <g
        id="g4076"
-       transform="translate(113.0714,-277.57143)"
+       transform="translate(113.0714,-151.57143)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -190,7 +197,7 @@
            id="flowPara3771-6-1">Data reporter</flowPara></flowRoot>    </g>
     <g
        id="g4069"
-       transform="translate(446.85714,-522.35714)"
+       transform="translate(446.85714,-564.35714)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -215,9 +222,10 @@
              style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Sans;-inkscape-font-specification:Sans" /></flowRegion><flowPara
            id="flowPara3771-6-1-8">Log</flowPara></flowRoot>    </g>
     <flowRoot
-       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot3927"
-       xml:space="preserve"><flowRegion
+       xml:space="preserve"
+       transform="translate(0,126)"><flowRegion
          id="flowRegion3929"><rect
            y="256.64789"
            x="172.85715"
@@ -226,7 +234,7 @@
            id="rect3931" /></flowRegion><flowPara
          id="flowPara3933" /></flowRoot>    <g
        id="g4041"
-       transform="translate(100.76507,226.42857)"
+       transform="translate(100.76507,352.42857)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -252,7 +260,7 @@
            id="flowPara3771-4">NLP solver</flowPara></flowRoot>    </g>
     <g
        id="g4034"
-       transform="translate(-313.57141,655.14286)"
+       transform="translate(-313.57141,781.14286)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -278,7 +286,7 @@
            id="flowPara3771-9">LA solver</flowPara></flowRoot>    </g>
     <g
        id="g4062"
-       transform="translate(250.18888,-229.75002)"
+       transform="translate(250.18888,-103.75002)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173">
@@ -304,7 +312,7 @@
            id="flowPara3771-2">Optimization</flowPara></flowRoot>    </g>
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 122.14287,583.79076 0,-411.64286"
+       d="m 122.14287,709.79076 0,-579.64286"
        id="path4459"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -317,7 +325,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 348.78569,389.04075 0,-122.10714"
+       d="m 348.78569,515.04075 0,-122.10714"
        id="path4461"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -330,7 +338,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 122.14287,690.93362 0,80.14284"
+       d="m 122.14287,816.93362 0,80.14284"
        id="path4469"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -343,7 +351,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 159.61275,172.1479 311.31581,389.04075"
+       d="M 146.81909,130.1479 324.10947,515.04075"
        id="path4475"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -356,7 +364,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 386.25558,389.04075 537.95867,172.1479"
+       d="M 373.46192,515.04075 550.75234,130.1479"
        id="path4477"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -369,7 +377,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 195.7143,118.57647 306.14284,0"
+       d="m 195.7143,76.57647 306.14284,2e-6"
        id="path4479"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -382,7 +390,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 575.42857,389.04075 0,-216.89285"
+       d="m 575.42857,515.04075 0,-384.89285"
        id="path4483"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -395,7 +403,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 501.85714,442.61218 -79.50002,0"
+       d="m 501.85714,568.61218 -79.50002,0"
        id="path4485"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -408,7 +416,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 184.48731,583.79076 286.44125,496.18361"
+       d="M 184.48731,709.79076 286.44125,622.18361"
        id="path4487"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -421,7 +429,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 411.13015,496.18361 101.95396,87.60714"
+       d="m 411.13015,622.18361 101.95396,87.60714"
        id="path4489"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -434,7 +442,7 @@
        inkscape:export-ydpi="173" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 575.42857,496.18361 0,87.60714"
+       d="m 575.42857,622.18361 0,87.60714"
        id="path4491"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3"
@@ -445,23 +453,11 @@
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 195.7143,637.36219 306.14284,-1e-5"
-       id="path4495"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="3"
-       inkscape:connection-start="#g4048"
-       inkscape:connection-start-point="d4"
-       inkscape:connection-end="#g4041"
-       inkscape:connection-end-point="d4"
-       inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
-       inkscape:export-xdpi="173"
-       inkscape:export-ydpi="173" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4497"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(0,126)"><flowRegion
          id="flowRegion4499"><rect
            id="rect4501"
            width="224.28572"
@@ -471,27 +467,33 @@
          id="flowPara4503">Obj</flowPara></flowRoot>    <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="340.37891"
-       y="610.64789"
+       x="774.41345"
+       y="222.63559"
        id="text4505"
        sodipodi:linespacing="125%"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
-       inkscape:export-ydpi="173"><tspan
+       inkscape:export-ydpi="173"
+       transform="matrix(0.76040595,0.64944806,-0.64944806,0.76040595,0,0)"><tspan
          sodipodi:role="line"
          id="tspan4507"
-         x="342.92578"
-         y="610.64789"
-         style="font-size:16px;text-align:center;text-anchor:middle">Obj. function, constraints </tspan><tspan
+         x="774.41345"
+         y="222.63559"
+         style="font-size:16px;text-align:center;text-anchor:middle">Obj. function,</tspan><tspan
          sodipodi:role="line"
-         x="340.37891"
-         y="630.64789"
+         x="774.41345"
+         y="242.63559"
          style="font-size:16px;text-align:center;text-anchor:middle"
-         id="tspan4756">and their gradients</tspan></text>
+         id="tspan4756">constraints and</tspan><tspan
+         sodipodi:role="line"
+         x="774.41345"
+         y="262.63559"
+         style="font-size:16px;text-align:center;text-anchor:middle"
+         id="tspan3082">their gradients</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-439.57898"
+       x="-593.57898"
        y="110.45341"
        id="text4505-9"
        sodipodi:linespacing="125%"
@@ -501,14 +503,14 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-2"
-         x="-439.57898"
+         x="-593.57898"
          y="110.45341"
-         style="font-size:16px">Residuals, Jacobian</tspan></text>
+         style="font-size:16px">Calculate residuals, Jacobian, root functions</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        x="324.21179"
-       y="111.38703"
+       y="69.387016"
        id="text4505-5"
        sodipodi:linespacing="125%"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
@@ -517,28 +519,28 @@
          sodipodi:role="line"
          id="tspan4507-7"
          x="324.21179"
-         y="111.38703"
-         style="font-size:16px">Messages</tspan></text>
+         y="69.387016"
+         style="font-size:16px">Sends messages</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-10.320486"
-       y="555.58789"
+       x="-188.93362"
+       y="573.89905"
        id="text4505-5-5"
        sodipodi:linespacing="125%"
-       transform="matrix(0.55919291,-0.82903757,0.82903757,0.55919291,0,0)"
+       transform="matrix(0.40673664,-0.91354546,0.91354546,0.40673664,0,0)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-5"
-         x="-10.320486"
-         y="555.58789"
-         style="font-size:16px">Messages</tspan></text>
+         x="-188.93362"
+         y="573.89905"
+         style="font-size:16px">Sends messages</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-319.2355"
+       x="-397.2355"
        y="569.41168"
        id="text4505-5-6"
        sodipodi:linespacing="125%"
@@ -548,30 +550,30 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-7"
-         x="-319.2355"
+         x="-397.2355"
          y="569.41168"
-         style="font-size:16px">Messages</tspan></text>
+         style="font-size:16px">Sends messages</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="309.22635"
-       y="-16.38118"
+       x="338.77969"
+       y="-61.894783"
        id="text4505-5-5-6"
        sodipodi:linespacing="125%"
-       transform="matrix(0.57357644,0.81915204,-0.81915204,0.57357644,0,0)"
+       transform="matrix(0.42261826,0.90630779,-0.90630779,0.42261826,0,0)"
        inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
        inkscape:export-xdpi="173"
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-5-8"
-         x="309.22635"
-         y="-16.38118"
-         style="font-size:16.00000002px">Model information</tspan></text>
+         x="338.77969"
+         y="-61.894783"
+         style="font-size:16px">Model information</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-348.66409"
-       y="343.41168"
+       x="-476.66409"
+       y="321.41168"
        id="text4505-5-6-8"
        sodipodi:linespacing="125%"
        transform="matrix(0,-1,1,0,0,0)"
@@ -580,14 +582,19 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-7-7"
-         x="-348.66409"
-         y="343.41168"
-         style="font-size:16px">Results</tspan></text>
+         x="-476.66409"
+         y="321.41168"
+         style="font-size:16px">Reports </tspan><tspan
+         sodipodi:role="line"
+         x="-476.66409"
+         y="341.41168"
+         style="font-size:16px"
+         id="tspan3152">results</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-209.26085"
-       y="556.72943"
+       x="-291.92389"
+       y="651.82159"
        id="text4505-5-5-4"
        sodipodi:linespacing="125%"
        transform="matrix(0.75470959,-0.65605902,0.65605902,0.75470959,0,0)"
@@ -596,13 +603,13 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-5-84"
-         x="-209.26085"
-         y="556.72943"
-         style="font-size:15.99999998px">Solve</tspan></text>
+         x="-291.92389"
+         y="651.82159"
+         style="font-size:16px">Solve</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-554.6001"
+       x="-680.6001"
        y="569.80127"
        id="text4505-5-6-0"
        sodipodi:linespacing="125%"
@@ -612,13 +619,13 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-7-5"
-         x="-554.6001"
+         x="-680.6001"
          y="569.80127"
          style="font-size:16px">Solve</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="-746.44037"
+       x="-872.44037"
        y="115.61069"
        id="text4505-5-6-0-7"
        sodipodi:linespacing="125%"
@@ -628,8 +635,75 @@
        inkscape:export-ydpi="173"><tspan
          sodipodi:role="line"
          id="tspan4507-7-7-5-2"
-         x="-746.44037"
+         x="-872.44037"
          y="115.61069"
          style="font-size:16px">Solve</tspan></text>
+    <g
+       id="g3119"
+       transform="translate(-340.74551,-209.90846)"
+       inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
+       inkscape:export-xdpi="173"
+       inkscape:export-ydpi="173">
+      <g
+         inkscape:export-ydpi="173"
+         inkscape:export-xdpi="173"
+         inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
+         transform="translate(453.81691,-127.08461)"
+         id="g4076-7">
+        <rect
+           y="437.36218"
+           x="162.14287"
+           height="107.14286"
+           width="147.14285"
+           id="rect2985-7-9-0"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <flowRoot
+           transform="translate(-21.390198,-31.546292)"
+           style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans"
+           id="flowRoot3765-3-9-8"
+           xml:space="preserve"><flowRegion
+             id="flowRegion3767-5-6-8"><rect
+               style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Sans;-inkscape-font-specification:Sans"
+               y="508.07645"
+               x="190"
+               height="62.682449"
+               width="198.24692"
+               id="rect3769-1-2-0" /></flowRegion><flowPara
+             id="flowPara3771-6-1-7">Data receiver</flowPara></flowRoot>      </g>
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 348.78569,285.79075 0,-78.27878"
+       id="path3127"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#g4076"
+       inkscape:connection-start-point="d4"
+       inkscape:connection-end="#g3119"
+       inkscape:connection-end-point="d4"
+       inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
+       inkscape:export-xdpi="173"
+       inkscape:export-ydpi="173" />
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-273.15421"
+       y="321.72351"
+       id="text4505-5-6-8-6"
+       sodipodi:linespacing="125%"
+       transform="matrix(0,-1,1,0,0,0)"
+       inkscape:export-filename="/home/ciroki/Data/daetools/trunk/daetools-package/daetools/docs/_static/daetools-architecture.png"
+       inkscape:export-xdpi="173"
+       inkscape:export-ydpi="173"><tspan
+         sodipodi:role="line"
+         id="tspan4507-7-7-7-3"
+         x="-273.15421"
+         y="321.72351"
+         style="font-size:16px">Sends</tspan><tspan
+         sodipodi:role="line"
+         x="-273.15421"
+         y="341.72351"
+         style="font-size:16px"
+         id="tspan3150">results</tspan></text>
   </g>
 </svg>

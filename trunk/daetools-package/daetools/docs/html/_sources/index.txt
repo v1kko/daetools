@@ -13,8 +13,10 @@ Contents
 .. toctree::
    :numbered:
    :maxdepth: 1
-
+ 
    introduction
+   paradigms
+   architecture
    getting_daetools
    getting_started
    pyDAE_user_guide

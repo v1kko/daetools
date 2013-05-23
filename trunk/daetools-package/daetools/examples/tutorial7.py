@@ -85,8 +85,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial7")
-        self.m.Description = "This tutorial explains how to create custom operating procedures, how to re-set the values of " \
-                             "assigned variables and how to re-set the initial conditions. "
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 25

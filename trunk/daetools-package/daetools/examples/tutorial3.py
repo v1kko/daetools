@@ -178,9 +178,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial3")
-        self.m.Description = "This tutorial explains how to define arrays of variable values and " \
-                             "functions that operate on these arrays, constants and vectors, " \
-                             "and how to define a non-uniform domain grid."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 10

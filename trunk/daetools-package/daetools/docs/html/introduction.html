@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/[d][a][e].ico"/>
     <link rel="top" title="DAE Tools Project 1.3.1 documentation" href="index.html" />
-    <link rel="next" title="2. Getting DAE Tools" href="getting_daetools.html" />
+    <link rel="next" title="2. Programming paradigms" href="paradigms.html" />
     <link rel="prev" title="Contents" href="index.html" /> 
   </head>
   <body>
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_daetools.html" title="2. Getting DAE Tools"
+          <a href="paradigms.html" title="2. Programming paradigms"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Contents"
@@ -62,7 +62,7 @@
 modelling and optimization software. It is not a modelling language, rather a collection
 of software tools for:</p>
 <ul class="simple">
-<li>Modelling development</li>
+<li>Model development</li>
 <li>Simulation, optimization, and parameter estimation</li>
 <li>Processing of the results (plotting and exporting to various file formats)</li>
 <li>Report generation</li>
@@ -77,18 +77,18 @@ kind of processes/phenomena, simulate/optimize them, visualize and analyse the r
 <li>A hybrid approach between general-purpose programming languages (such as c++ and Python) and
 domain-specific modelling languages (such as <a class="reference external" href="http://www.modelica.org">Modelica</a>,
 <a class="reference external" href="http://www.psenterprise.com/gproms">gPROMS</a>, <a class="reference external" href="http://ascend4.org">Ascend</a> etc.)
-(more information: <a class="reference internal" href="paradigms.html"><em>Programming paradigms</em></a>)</li>
-<li>An object-oriented approach to process modelling (more information: <a class="reference internal" href="oo_approach.html"><em>Object-Oriented approach</em></a>)</li>
+(more information: <a class="reference internal" href="paradigms.html#hybrid-approach"><em>The Hybrid approach</em></a>)</li>
+<li>An object-oriented approach to process modelling (more information: <a class="reference internal" href="paradigms.html#object-oriented-approach"><em>The Object-Oriented approach</em></a>)</li>
 <li>An Equation-Oriented (acausal) approach where all model variables and equations are generated and
 gathered together and solved simultaneously using a suitable mathematical algorithm
-(more information: <a class="reference internal" href="eo_approach.html"><em>Equation-Oriented approach</em></a>)</li>
+(more information: <a class="reference internal" href="paradigms.html#equation-oriented-approach"><em>The Equation-Oriented approach</em></a>)</li>
 <li>Separation of the model definition from the activities that can be carried out on that model.
 The structure of the model (parameters, variables, equations etc.) is given in the model
 class while the runtime information in the simulation class. This way we can have a
 single model definition, but one or more different simulation scenarios, and one or more
 optimization scenarios</li>
 <li>Core libraries are written in standard c++, however <a class="reference external" href="http://www.python.org">Python</a> is used as
-the main modelling language (more information: <a class="reference internal" href="programming_language.html"><em>Programming language</em></a>)</li>
+the main modelling language (more information: <a class="reference internal" href="paradigms.html#python-programming-language"><em>Programming language</em></a>)</li>
 </ul>
 <p>Class of problems that can be solved by <strong>DAE Tools</strong>:</p>
 <ul class="simple">
@@ -125,12 +125,7 @@ and discrete events)</li>
 </li>
 <li>Export of the simulation results to various file formats</li>
 </ul>
-<p><strong>DAE Tools</strong> is not can be used to develop models in Multi-domain
-From chemical processing industry to biological neural networks
-DAE Tools is not a DSL but defines the basic modelling concepts such as models, parameters, variables, various types of equations (ordinary, differential, partial differential, discontinuous), state transition networks etc. that can be used as building blocks for a specific domain
-Example: a reference implementation simulator for NineML (xml-based modelling language for describing networks of spiking neurons)
-The key concepts from NineML are based on DAE Tools concepts: Neurone, Synapse, Population of neurones, Layers, Projections etc
-All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
+<p>All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
 major operating systems (GNU/Linux, MacOS, Windows) and all platforms with a decent c++ compiler,
 Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures
 making it suitable for use in embedded systems). Models can be developed in Python
@@ -151,21 +146,14 @@ Linear solvers that exploit general-purpose graphics processing
 units (<a class="reference external" href="http://en.wikipedia.org/wiki/GPGPU">GPGPU</a>, such as <a class="reference external" href="http://www.nvidia.com/object/cuda_home_new.html">NVidia CUDA</a>)
 are also available ([[SuperLU_CUDA]], <a class="reference external" href="http://code.google.com/p/cusp-library">CUSP</a>) but in an early development stage.</p>
 </div>
-<div class="section" id="architecture">
-<h2>1.2. Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
-<div class="figure align-center" id="figure-architecture" style="width: 450pt">
-<img alt="_images/daetools-architecture.png" src="_images/daetools-architecture.png" style="width: 400pt;" />
-<p class="caption"><strong>Figure 1.</strong> <strong>DAE Tools</strong> architecture</p>
-</div>
-</div>
 <div class="section" id="licence">
-<h2>1.3. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<h2>1.2. Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
 <p><strong>DAE Tools</strong> is <a class="reference external" href="http://www.gnu.org/">free software</a> and you can redistribute it and/or modify it under the terms of
 the <a class="reference external" href="http://www.gnu.org/licenses/licenses.html#GPL">GNU General Public Licence</a> version 3 as published by
 the Free Software Foundation (<a class="reference external" href="http://www.gnu.org/philosophy/free-sw.html">GNU philosophy</a>).</p>
 </div>
 <div class="section" id="history">
-<h2>1.4. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<h2>1.3. History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><strong>&#8220;Necessity, who is the mother of invention&#8221;</strong></dt>
 <dd><em>Plato, Greek author &amp; philosopher (427 BC - 347 BC), The Republic</em></dd>
@@ -197,7 +185,7 @@ The new project was officially born early next year - 2008.</p>
 </table>
 </div>
 <div class="section" id="acknowledgements">
-<h2>1.5. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<h2>1.4. Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
 <p>DAE Tools use the following third party free software libraries (GNU GPL, GNU LGPL, CPL, EPL, BSD or some other type of free/permissive/copy-left licences):</p>
 <ul class="simple">
 <li>Sundials IDAS: <a class="reference external" href="https://computation.llnl.gov/casc/sundials/main.html">https://computation.llnl.gov/casc/sundials/main.html</a></li>
@@ -227,7 +215,7 @@ The new project was officially born early next year - 2008.</p>
 <p>Please see the corresponding websites for more details about the licences.</p>
 </div>
 <div class="section" id="how-to-cite">
-<h2>1.6. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
+<h2>1.5. How to cite<a class="headerlink" href="#how-to-cite" title="Permalink to this headline">¶</a></h2>
 <p>If you use <strong>DAE Tools</strong> in your work then please cite it in the following way:
 D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference external" href="http://www.daetools.com">http://www.daetools.com</a></p>
 <img alt="" src="http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;amp;rec=1&amp;amp;url=wiki/" />
@@ -247,11 +235,10 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
   <ul>
 <li><a class="reference internal" href="#">1. Introduction</a><ul>
 <li><a class="reference internal" href="#what-is-dae-tools">1.1. What is DAE Tools?</a></li>
-<li><a class="reference internal" href="#architecture">1.2. Architecture</a></li>
-<li><a class="reference internal" href="#licence">1.3. Licence</a></li>
-<li><a class="reference internal" href="#history">1.4. History</a></li>
-<li><a class="reference internal" href="#acknowledgements">1.5. Acknowledgements</a></li>
-<li><a class="reference internal" href="#how-to-cite">1.6. How to cite</a></li>
+<li><a class="reference internal" href="#licence">1.2. Licence</a></li>
+<li><a class="reference internal" href="#history">1.3. History</a></li>
+<li><a class="reference internal" href="#acknowledgements">1.4. Acknowledgements</a></li>
+<li><a class="reference internal" href="#how-to-cite">1.5. How to cite</a></li>
 </ul>
 </li>
 </ul>
@@ -260,8 +247,8 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
   <p class="topless"><a href="index.html"
                         title="previous chapter">Contents</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="getting_daetools.html"
-                        title="next chapter">2. Getting DAE Tools</a></p>
+  <p class="topless"><a href="paradigms.html"
+                        title="next chapter">2. Programming paradigms</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/introduction.txt"
@@ -294,7 +281,7 @@ D. Nikolic, DAE Tools process modelling software, 2010. <a class="reference exte
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_daetools.html" title="2. Getting DAE Tools"
+          <a href="paradigms.html" title="2. Programming paradigms"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Contents"

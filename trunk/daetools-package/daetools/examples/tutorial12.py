@@ -89,7 +89,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial12")
-        self.m.Description = "This tutorial explains how to create 3rd party linear solvers. "
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         n = 20

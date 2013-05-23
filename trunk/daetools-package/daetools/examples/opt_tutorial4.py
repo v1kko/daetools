@@ -52,11 +52,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("opt_tutorial4")
-        self.m.Description = "This tutorial shows the interoperability between DAE Tools and 3rd party optimization " \
-                             "software (scipy.optimize) used to minimize the Rosenbrock function. \n" \
-                             "DAE Tools simulation is used to calculate the objective function and its gradients, " \
-                             "while scipy.optimize.fmin function (Nelder-Mead Simplex algorithm) to find the " \
-                             "minimum of the Rosenbrock function."
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass
