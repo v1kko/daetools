@@ -41,9 +41,9 @@ classes. A typical DAETools simulation requires the following 8 tasks:
      
 4. Setting up a simulation by deriving a class from the base daeSimulation class and:
 
-   - Specify a model to be used in the simulation in the daeSimulation.__init__ function
+   - Specifying a model to be used in the simulation in the daeSimulation.__init__ function
    - Setting the values of parameters in the daeSimulation.SetUpParametersAndDomains function
-   - Set initial conditions in the daeSimulation.SetUpVariables function
+   - Setting initial conditions in the daeSimulation.SetUpVariables function
    
 5. Declaring auxiliary objects required for the simulation
 

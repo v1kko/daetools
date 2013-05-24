@@ -217,6 +217,9 @@ An ordinary parameter can be declared in the following way:</p>
 declared in the following way:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">myParam</span> <span class="o">=</span> <span class="n">daeParameter</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">parentModel</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">)</span>
 <span class="n">myParam</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain</span><span class="p">)</span>
+
+<span class="c"># Or simply:</span>
+<span class="n">myParam</span> <span class="o">=</span> <span class="n">daeParameter</span><span class="p">(</span><span class="s">&quot;myParam&quot;</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">parentModel</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">myDomain</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -246,17 +249,19 @@ object that holds an array of parameter values</li>
 <li>Distributed parameters have the <a class="reference internal" href="core.html#pyCore.daeParameter.npyValues" title="pyCore.daeParameter.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">pyCore.daeParameter.npyValues</span></tt></a> property which
 returns the parameter values as a numpy multi-dimensional array (with <tt class="docutils literal"><span class="pre">numpy.float</span></tt> data type)</li>
 <li>The functions <a class="reference internal" href="core.html#pyCore.daeParameter.SetValue" title="pyCore.daeParameter.SetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter.SetValue</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeParameter.GetValue" title="pyCore.daeParameter.GetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter.GetValue</span></tt></a>
-which get/set the parameter value as <tt class="docutils literal"><span class="pre">float</span></tt></li>
+which get/set the parameter value as <tt class="docutils literal"><span class="pre">float</span></tt> or the <a class="reference internal" href="units.html#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.quantity</span></tt></a> object</li>
 </ul>
 <p><strong>Note</strong>: The functions <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.__call__()</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a>
-can only be used in equations residual expressions. On the other hand, the functions
+can only be used to build equations&#8217; residual expressions. On the other hand, the functions
 <a class="reference internal" href="core.html#pyCore.daeParameter.GetValue" title="pyCore.daeParameter.GetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter.GetValue</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeParameter.SetValue" title="pyCore.daeParameter.SetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter.SetValue</span></tt></a> and
 <a class="reference internal" href="core.html#pyCore.daeParameter.npyValues" title="pyCore.daeParameter.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">pyCore.daeParameter.npyValues</span></tt></a> can be use to access the parameters real data at any point.</p>
 <ol class="arabic">
 <li><p class="first">To get a value of the ordinary parameter the <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.__call__()</span></tt></a>
 function (<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">()</span></tt>) can be used. For instance, if we want the variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be
-equal to the sum of the parameter <tt class="docutils literal"><span class="pre">myParam</span></tt> and <tt class="docutils literal"><span class="pre">15</span></tt>: <img class="math" src="_images/math/519e4678f4293f3ab6d55cef233d972b7a43d657.png" alt="myVar = myParam + 15"/>,
-we can write the following:</p>
+equal to the sum of the parameter <tt class="docutils literal"><span class="pre">myParam</span></tt> and <tt class="docutils literal"><span class="pre">15</span></tt>:</p>
+<div class="math">
+<p><img src="_images/math/581dc484581d9fbacb0f3987b9afb04e57197d6c.png" alt="myVar = myParam + 15"/></p>
+</div><p>we can write the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
 <span class="c">#  - eq is a daeEquation object</span>
 <span class="c">#  - myParam is an ordinary daeParameter object (not distributed)</span>
@@ -268,8 +273,10 @@ we can write the following:</p>
 <li><p class="first">To get a value of a distributed parameter the <a class="reference internal" href="core.html#pyCore.daeParameter.__call__" title="pyCore.daeParameter.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.__call__()</span></tt></a>
 function (<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">()</span></tt>) can be used again. For instance, if we want the distributed
 variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal to the sum of the parameter <tt class="docutils literal"><span class="pre">myParam</span></tt> and <tt class="docutils literal"><span class="pre">15</span></tt> at each
-point of the domain <tt class="docutils literal"><span class="pre">myDomain</span></tt>: <img class="math" src="_images/math/48f6e004f2e166bd452a7cdaa4340ffb8ade3cf8.png" alt="myVar(d) = myParam(d) + 15; \forall d \in [0, d_n]"/>,
-we can write:</p>
+point of the domain <tt class="docutils literal"><span class="pre">myDomain</span></tt>:</p>
+<div class="math">
+<p><img src="_images/math/b408bc56ecbacb6e22be96ad8a67bd282d38b034.png" alt="myVar(i) = myParam(i) + 15; \forall i \in [0, d_n]"/></p>
+</div><p>we can write:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
 <span class="c">#  - myDomain is daeDomain object</span>
 <span class="c">#  - n is the number of points in the myDomain</span>
@@ -281,16 +288,12 @@ we can write:</p>
 <span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">-</span> <span class="n">myParam</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">-</span> <span class="mi">15</span>
 </pre></div>
 </div>
-<p>This code translates into <tt class="docutils literal"><span class="pre">n</span></tt> equations that is equivalent to writing:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">0</span> <span class="n">to</span> <span class="n">n</span><span class="p">:</span>
-    <span class="n">myVar</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">=</span> <span class="n">myParam</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="mi">15</span>
-</pre></div>
-</div>
-<p>which internally transforms into <tt class="docutils literal"><span class="pre">n</span></tt> separate equations.</p>
+<p>This code translates into a set of <tt class="docutils literal"><span class="pre">n</span></tt> equations.</p>
 <p>Obviously, a parameter can be distributed on more than one domain. If we want to
-write an identical equation like in the previous case:
-<img class="math" src="_images/math/f41b32cb546893e494eb0a8bb1d7d0a294d79380.png" alt="myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]"/>
-we can write the following:</p>
+write an identical equation like in the previous case:</p>
+<div class="math">
+<p><img src="_images/math/91ce3d6097caf47ebfdbefb8bf415e29653ef00e.png" alt="myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]"/></p>
+</div><p>we can write the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
 <span class="c">#  - myDomain1, myDomain2 are daeDomain objects</span>
 <span class="c">#  - n is the number of points in the myDomain1</span>
@@ -305,8 +308,8 @@ we can write the following:</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">To get an array of parameter values we can use the function
-<a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a> which returns the <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object.
+<li><p class="first">To get an array of parameter values the function <a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a>
+can be used, which returns the <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object.
 Arrays of values can only be used in conjunction with mathematical functions that operate
 on <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> objects such as:
 <a class="reference internal" href="core.html#pyCore.Sum" title="pyCore.Sum"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Sum()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.Product" title="pyCore.Product"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Product()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.Sqrt" title="pyCore.Sqrt"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Sqrt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.Sin" title="pyCore.Sin"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Sin()</span></tt></a>,
@@ -314,91 +317,104 @@ on <a class="reference internal" href="core.html#pyCore.adouble_array" title="py
 <a class="reference internal" href="core.html#pyCore.Log10" title="pyCore.Log10"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Log10()</span></tt></a>, etc.</p>
 <p>For instance, if we want the variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal to the sum of values of the parameter
 <tt class="docutils literal"><span class="pre">myParam</span></tt> for all points in the domain <tt class="docutils literal"><span class="pre">myDomain</span></tt>, we can use the function
-<a class="reference internal" href="core.html#pyCore.Sum" title="pyCore.Sum"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Sum()</span></tt></a> which accepts the <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.adouble_array()</span></tt></a> objects.
-Arguments for the <a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a> function are <a class="reference internal" href="core.html#pyCore.daeIndexRange" title="pyCore.daeIndexRange"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeIndexRange</span></tt></a>
-objects obtained by the call to the <a class="reference internal" href="core.html#pyCore.daeDomain.__call__" title="pyCore.daeDomain.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeDomain.__call__()</span></tt></a> function (<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">()</span></tt>).
-Thus, we can write the following:</p>
+<a class="reference internal" href="core.html#pyCore.Sum" title="pyCore.Sum"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.Sum()</span></tt></a> which accepts the <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.adouble_array()</span></tt></a> objects.</p>
+<p>The <a class="reference internal" href="core.html#pyCore.daeParameter.array" title="pyCore.daeParameter.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeParameter.array()</span></tt></a> function accepts the following arguments:</p>
+<ul class="simple">
+<li>plain integer (to select a single index from a domain)</li>
+<li>python list (to select a list of indexes from a domain)</li>
+<li>python slice (to select a portion of indexes from a domain: startIndex, endIindex, step)</li>
+<li>character <tt class="docutils literal"><span class="pre">*</span></tt> (to select all points from a domain)</li>
+<li>integer <tt class="docutils literal"><span class="pre">-1</span></tt> (to select all points from a domain)</li>
+<li>empty python list <tt class="docutils literal"><span class="pre">[]</span></tt> (to select all points from a domain)</li>
+</ul>
+<p>Basically all arguments listed above are internally used to create the
+<a class="reference internal" href="core.html#pyCore.daeIndexRange" title="pyCore.daeIndexRange"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeIndexRange</span></tt></a> object. <a class="reference internal" href="core.html#pyCore.daeIndexRange" title="pyCore.daeIndexRange"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeIndexRange</span></tt></a> constructor has
+three variants:</p>
+<ol class="arabic simple">
+<li>The first one accepts a single argument: <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a> object.
+In this case the returned <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object will contain the
+parameter values at all points in the specified domain.</li>
+<li>The second one accepts two arguments: <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a> object and a list
+of integer that represent indexes within the specified domain.
+In this case the returned <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object will contain the
+parameter values at the selected points in the specified domain.</li>
+<li>The third one accepts four arguments: <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a> object, and three
+integers: <tt class="docutils literal"><span class="pre">startIndex</span></tt>, <tt class="docutils literal"><span class="pre">endIndex</span></tt> and <tt class="docutils literal"><span class="pre">step</span></tt> (which is basically a slice, that is
+a portion of a list of indexes: <tt class="docutils literal"><span class="pre">start</span></tt> through <tt class="docutils literal"><span class="pre">end-1</span></tt>, by the increment <tt class="docutils literal"><span class="pre">step</span></tt>).
+More info about slices can be found in the
+<a class="reference external" href="http://docs.python.org/2/library/functions.html?highlight=slice#slice">Python documentation</a>.
+In this case the returned <a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object will contain the
+parameter values at the points in the specified domain defined by the slice object.</li>
+</ol>
+<p>Let assume that we want the variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal to the sum of values in
+the array <tt class="docutils literal"><span class="pre">values</span></tt> that holds values from the parameter <tt class="docutils literal"><span class="pre">myParam</span></tt> at the
+specified indexes in the domains <tt class="docutils literal"><span class="pre">myDomain1</span></tt> and <tt class="docutils literal"><span class="pre">myDomain2</span></tt>:</p>
+<div class="math">
+<p><img src="_images/math/a0c3b0bc30f8db9e4ca78be6fadf74bf4e5a82a3.png" alt="myVar = \sum values"/></p>
+</div><p>Now we can explore different scenarios for creating the array <tt class="docutils literal"><span class="pre">values</span></tt> from the parameter
+<tt class="docutils literal"><span class="pre">myParam</span></tt> distributed on two domains:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
-<span class="c">#  - myDomain is daeDomain object</span>
-<span class="c">#  - n is the number of points in the domain myDomain</span>
+<span class="c">#  - myDomain1, myDomain2 are daeDomain objects</span>
 <span class="c">#  - eq is daeEquation object</span>
 <span class="c">#  - myVar is daeVariable object</span>
-<span class="c">#  - myParam is daeParameter object distributed on the myDomain</span>
-<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="n">Sum</span><span class="p">(</span> <span class="n">myParam</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">myDomain</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+<span class="c">#  - myParam is daeParameter object distributed on myDomain1 and myDomain2</span>
+<span class="c">#  - values is the adouble_array object</span>
+
+<span class="c"># Case 1. An array contains the following values from the myParam:</span>
+<span class="c">#  - at the first point in the domain myDomain1</span>
+<span class="c">#  - all points from the domain myDomain2</span>
+<span class="c"># All expressions below are equivalent:</span>
+<span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[])</span>
+
+<span class="n">eq1</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="n">Sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+<span class="c"># Case 2. An array contains the following values from the myParam:</span>
+<span class="c">#  - the first three points in the domain myDomain1</span>
+<span class="c">#  - all even points from the domain myDomain2</span>
+<span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">myDomain2</span><span class="o">.</span><span class="n">NumberOfPoints</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">eq2</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="n">Sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This code translates into:
-<img class="math" src="_images/math/fddab2ec00cc27f5ef67d67cd32a5a0d992acd86.png" alt="myVar = \sum myParam.array( myDomain() )"/>.</p>
-<p>The above example could also be written in the following form:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># points_range is daeDomainRange object</span>
-<span class="n">points_range</span> <span class="o">=</span> <span class="n">daeDomainRange</span><span class="p">(</span><span class="n">myDomain</span><span class="p">)</span>
-<span class="c"># arr is adouble_array object</span>
-<span class="n">arr</span> <span class="o">=</span> <span class="n">myVar2</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points_range</span><span class="p">)</span>
-<span class="c"># Finally:</span>
-<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>On the other hand, if we want variable myVar to be equal to the sum of
-values of the parameter myParam only for certain points in the myDomain,
-there are two ways to do it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
-<span class="c">#  - myDomain is daeDomain object</span>
-<span class="c">#  - n is the number of points in the domain myDomain</span>
-<span class="c">#  - eq is a daeEquation object</span>
-<span class="c">#  - myVar is an ordinary daeVariable object</span>
-<span class="c">#  - myParam is a daeParameter object distributed on the myDomain</span>
-<span class="c"># 1) For a given array of points; the points must be in the range [0,n-1]</span>
-<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">myParam</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">myDomain</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-<span class="c"># 2) For a given slice of points in the domain;</span>
-<span class="c">#    slices are defined by 3 arguments: start_index, end_index, step</span>
-<span class="c">#    in this example: start_index = 1</span>
-<span class="c">#                     end_index = 10</span>
-<span class="c">#                     step = 2</span>
-<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">myParam</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">myDomain</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-</pre></div>
-</div>
-<p>The code sample 1) translates into:
-<img class="math" src="_images/math/be43127f0fabaf44c01651e0daf1f9ef85118709.png" alt="myVar = myParam(0) + myParam(1) + ... + myParam(n)"/></p>
-<p>The code sample 2) translates into:</p>
-<p><img class="math" src="_images/math/c8fa3c86b72e2728470c0dfd78c481594118514a.png" alt="myVar = myParam(0) + myParam(5) + myParam(12)"/></p>
-<p>&#8216;&#8217;&#8216;NOTE: &#8216;&#8217;&#8216;One may argue that the function <cite>array</cite> calls can be
-somewhat simpler and directly accept python lists or slices as its
-arguments. For instance it would be possible to write:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">myParam</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
-</pre></div>
-</div>
-<p>or:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">myParam</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-</pre></div>
-</div>
-<p>However, that would be more error prone since it does not check whether
-a valid domain is used for that index and whether specified indexes lay
-within the domain bounds (which should be done by the user).</p>
-</li>
+<p>The <tt class="docutils literal"><span class="pre">case</span> <span class="pre">1.</span></tt> translates into:</p>
+<div class="math">
+<p><img src="_images/math/1f7411c8c8e2a2b73c70ac20ecd301526219c60a.png" alt="myVar = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2)"/></p>
+</div><p>where <tt class="docutils literal"><span class="pre">n2</span></tt> is the number of points in the domain <tt class="docutils literal"><span class="pre">myDomain2</span></tt>.</p>
+<p>The <tt class="docutils literal"><span class="pre">case</span> <span class="pre">2.</span></tt> translates into:</p>
+<div class="math">
+<p><img src="_images/math/a134fa3f664d65f8fec1af1b0cd54e63862b5971.png" alt="myVar = &amp; myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + \\
+        &amp; myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + \\
+        &amp; myParam(2,0) + myParam(2,2) + myParam(2,4) + ..."/></p>
+</div></li>
 </ol>
 <p>More information about parameters can be found in the API reference <a class="reference internal" href="core.html#pyCore.daeParameter" title="pyCore.daeParameter"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeParameter</span></tt></a>
 and in <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 </div>
-<div class="section" id="variables">
-<h3>6.2.2. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
-<p>There are two types of variables in <strong>DAE Tools</strong>: ordinary and distributed. Functions to get a variable value
-(function call operator <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">__call__()</span></tt></a>), a time or a partial derivative
-(<a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">dt()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">d()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">d2()</span></tt></a>) or
-functions to obtain an array of values, time or partial derivatives (<a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">array()</span></tt></a>,
-<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">d_array()</span></tt></a>, or <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">d2_array()</span></tt></a>)
-have been defined. In addition, distributed variables have <a class="reference internal" href="core.html#pyCore.daeVariable.npyValues" title="pyCore.daeVariable.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">npyValues</span></tt></a> property to get
-the values as a numpy multi-dimensional array.</p>
-<p>Variables in <strong>pyDAE</strong> can be defined by the following statement:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">)</span>
+<div class="section" id="variable-types">
+<h3>6.2.2. Variable types<a class="headerlink" href="#variable-types" title="Permalink to this headline">¶</a></h3>
+<p>Variable types are used in <strong>DAE Tools</strong> to describe variables. They hold
+the following information:</p>
+<ul class="simple">
+<li>Name: string</li>
+<li>Units: <a class="reference internal" href="units.html#pyUnits.unit" title="pyUnits.unit"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.unit</span></tt></a> object</li>
+<li>LowerBound: float</li>
+<li>UpperBound: float</li>
+<li>InitialGuess: float</li>
+<li>AbsoluteTolerance: float</li>
+</ul>
+<p>Declaration of variable types is commonly done outside of the model
+definition (in the module scope).</p>
+<div class="section" id="declaring-variable-types">
+<h4>6.2.2.1. Declaring variable types<a class="headerlink" href="#declaring-variable-types" title="Permalink to this headline">¶</a></h4>
+<p>A variable type can be declared in the following way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Temperature, units: Kelvin, limits: 100 - 1000K, Def.value: 273K, Abs.Tol: 1E-5</span>
+<span class="n">typeTemperature</span> <span class="o">=</span> <span class="n">daeVariableType</span><span class="p">(</span><span class="s">&quot;Temperature&quot;</span><span class="p">,</span> <span class="s">&quot;K&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">273</span><span class="p">,</span> <span class="mf">1E-5</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>while in <strong>cDAE</strong>:</p>
-<div class="highlight-cpp"><div class="highlight"><pre><span class="n">daeVariable</span> <span class="n">myVar</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Parent_Model_or_Port</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">);</span>
-</pre></div>
 </div>
-<p>More information about variables can be found in <a class="reference internal" href=""><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeVariable" title="pyCore.daeVariable"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable</span></tt></a>.
-Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="distribution-domains">
 <h3>6.2.3. Distribution domains<a class="headerlink" href="#distribution-domains" title="Permalink to this headline">¶</a></h3>
@@ -428,8 +444,188 @@ scientific python libraries <a class="reference external" href="http://numpy.sci
 <p>More information about domains can be found in <a class="reference internal" href=""><em>pyDAE User Guide</em></a> and <a class="reference internal" href="core.html#pyCore.daeDomain" title="pyCore.daeDomain"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeDomain</span></tt></a>.
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
+<div class="section" id="variables">
+<h3>6.2.4. Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<p>There are various types of variables in <strong>DAE Tools</strong>.
+They can be:</p>
+<ul class="simple">
+<li>Ordinary</li>
+<li>Distributed</li>
+</ul>
+<p>and:</p>
+<ul class="simple">
+<li>Algebraic</li>
+<li>Differential</li>
+<li>Constant (that is their value is assigned by fixing the number of degrees of freedom)</li>
+</ul>
+<p>The process of defining variables is two-fold:</p>
+<ul class="simple">
+<li>Declaring a variable in the model</li>
+<li>Initialize it (by assigning its value or setting an initial condition) in the simulation</li>
+</ul>
+<div class="section" id="declaring-variables">
+<h4>6.2.4.1. Declaring variables<a class="headerlink" href="#declaring-variables" title="Permalink to this headline">¶</a></h4>
+<p>Variables are declared in the <a class="reference internal" href="core.html#pyCore.daeModel.__init__" title="pyCore.daeModel.__init__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeModel.__init__()</span></tt></a> function.
+An ordinary variable can be declared in the following way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">parentModel</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Variables can be distributed on domains. A distributed variable can be
+declared in the following way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">parentModel</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">)</span>
+<span class="n">myVar</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain</span><span class="p">)</span>
+
+<span class="c"># Or simply:</span>
+<span class="n">myVar</span> <span class="o">=</span> <span class="n">daeVariable</span><span class="p">(</span><span class="s">&quot;myVar&quot;</span><span class="p">,</span> <span class="n">variableType</span><span class="p">,</span> <span class="n">parentModel</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">myDomain</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="initializing-variables">
+<h4>6.2.4.2. Initializing variables<a class="headerlink" href="#initializing-variables" title="Permalink to this headline">¶</a></h4>
+<p>Variables are initialized in the <a class="reference internal" href="activity.html#pyActivity.daeSimulation.SetUpVariables" title="pyActivity.daeSimulation.SetUpVariables"><tt class="xref py py-meth docutils literal"><span class="pre">pyActivity.daeSimulation.SetUpVariables()</span></tt></a>
+function:</p>
+<ul>
+<li><p class="first">To assign the variable value/fix the degrees of freedom use the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span><span class="o">.</span><span class="n">AssignValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or, if the variable is distributed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">myDomain</span><span class="o">.</span><span class="n">NumberOfPoints</span><span class="p">):</span>
+    <span class="n">myVar</span><span class="o">.</span><span class="n">AssignValue</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the <tt class="docutils literal"><span class="pre">value</span></tt> can be either a <tt class="docutils literal"><span class="pre">float</span></tt> or the <a class="reference internal" href="units.html#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.quantity</span></tt></a> object
+(for instance <tt class="docutils literal"><span class="pre">1.34</span> <span class="pre">*</span> <span class="pre">W/(m*K)</span></tt>).</p>
+</li>
+<li><p class="first">To set an initial condition use the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myVar</span><span class="o">.</span><span class="n">SetInitialCondition</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or, if the variable is distributed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">myDomain</span><span class="o">.</span><span class="n">NumberOfPoints</span><span class="p">):</span>
+    <span class="n">myVar</span><span class="o">.</span><span class="n">SetInitialCondition</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the <tt class="docutils literal"><span class="pre">value</span></tt> can again be either a <tt class="docutils literal"><span class="pre">float</span></tt> or the <a class="reference internal" href="units.html#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.quantity</span></tt></a> object.</p>
+</li>
+<li><p class="first">To set an absolute tolerance the following can be used:</p>
+</li>
+<li><p class="first">To set an initial guess use the following:</p>
+<p>or, if the variable is distributed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">myDomain</span><span class="o">.</span><span class="n">NumberOfPoints</span><span class="p">):</span>
+    <span class="n">myVar</span><span class="o">.</span><span class="n">SetInitialGuess</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the <tt class="docutils literal"><span class="pre">value</span></tt> can again be either a <tt class="docutils literal"><span class="pre">float</span></tt> or the <a class="reference internal" href="units.html#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.quantity</span></tt></a> object.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="using-variables">
+<h4>6.2.4.3. Using variables<a class="headerlink" href="#using-variables" title="Permalink to this headline">¶</a></h4>
+<p>The most commonly used functions are:</p>
+<ul class="simple">
+<li>The function call operator <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.__call__()</span></tt></a> (<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">()</span></tt>)
+which returns the <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble</span></tt></a> object that holds the variable value</li>
+<li>The function <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt()</span></tt></a> which returns the <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble</span></tt></a> object
+that holds the value of a time derivative of the variable</li>
+<li>The functions <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d()</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d2()</span></tt></a> which return
+the <a class="reference internal" href="core.html#pyCore.adouble" title="pyCore.adouble"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble</span></tt></a> object that holds the value of a partial derivative of the variable
+of the first and second order, respectively</li>
+<li>The functions <a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt_array()</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d_array()</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d2_array()</span></tt></a> which return the
+<a class="reference internal" href="core.html#pyCore.adouble_array" title="pyCore.adouble_array"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.adouble_array</span></tt></a> object that holds an array of variable values, time derivatives,
+partial derivative of the first order and partial derivative of the second order, respectively</li>
+<li>Distributed parameters have the <a class="reference internal" href="core.html#pyCore.daeVariable.npyValues" title="pyCore.daeVariable.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">pyCore.daeVariable.npyValues</span></tt></a> property which
+returns the variable values as a numpy multi-dimensional array (with <tt class="docutils literal"><span class="pre">numpy.float</span></tt> data type)</li>
+<li>The functions <a class="reference internal" href="core.html#pyCore.daeVariable.SetValue" title="pyCore.daeVariable.SetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable.SetValue</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeVariable.GetValue" title="pyCore.daeVariable.GetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable.GetValue</span></tt></a>
+which get/set the variable value as <tt class="docutils literal"><span class="pre">float</span></tt> or the <a class="reference internal" href="units.html#pyUnits.quantity" title="pyUnits.quantity"><tt class="xref py py-class docutils literal"><span class="pre">pyUnits.quantity</span></tt></a> object</li>
+<li>The functions <a class="reference internal" href="core.html#pyCore.daeVariable.ReAssignValue" title="pyCore.daeVariable.ReAssignValue"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.ReAssignValue()</span></tt></a> and
+<a class="reference internal" href="core.html#pyCore.daeVariable.ReSetInitialCondition" title="pyCore.daeVariable.ReSetInitialCondition"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.ReSetInitialCondition()</span></tt></a> can be used to re-assign or re-initialize
+variables <strong>only during a simulation</strong> (in the function <a class="reference internal" href="activity.html#pyActivity.daeSimulation.Run" title="pyActivity.daeSimulation.Run"><tt class="xref py py-meth docutils literal"><span class="pre">pyActivity.daeSimulation.Run()</span></tt></a>)</li>
+</ul>
+<p><strong>Note</strong>: The functions <a class="reference internal" href="core.html#pyCore.daeVariable.__call__" title="pyCore.daeVariable.__call__"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.__call__()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt()</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d2()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.array" title="pyCore.daeVariable.array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.array()</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.dt_array" title="pyCore.daeVariable.dt_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt_array()</span></tt></a>, <a class="reference internal" href="core.html#pyCore.daeVariable.d_array" title="pyCore.daeVariable.d_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d_array()</span></tt></a> and
+<a class="reference internal" href="core.html#pyCore.daeVariable.d2_array" title="pyCore.daeVariable.d2_array"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d2_array()</span></tt></a> can only be used to build equations&#8217; residual expressions.
+On the other hand, the functions <a class="reference internal" href="core.html#pyCore.daeVariable.GetValue" title="pyCore.daeVariable.GetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable.GetValue</span></tt></a>,
+<a class="reference internal" href="core.html#pyCore.daeVariable.SetValue" title="pyCore.daeVariable.SetValue"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable.SetValue</span></tt></a> and <a class="reference internal" href="core.html#pyCore.daeVariable.npyValues" title="pyCore.daeVariable.npyValues"><tt class="xref py py-attr docutils literal"><span class="pre">pyCore.daeVariable.npyValues</span></tt></a> can be used
+to access the variables real data at any point.</p>
+<p>All above mentioned functions are called in the same way as explained in <a class="reference internal" href="#using-parameters">Using parameters</a>.
+More information will be given here on getting time and partial derivatives.</p>
+<ol class="arabic">
+<li><p class="first">To get a time derivative of the ordinary variable the function <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt()</span></tt></a>
+can be used. For instance, if we want a time derivative of the variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal
+to some constant, let&#8217;s say 1.0:</p>
+<div class="math">
+<p><img src="_images/math/e2926105d20753092e5566784f059938cc8f400b.png" alt="{ d(myVar) \over {d}{t} } = 1"/></p>
+</div><p>we can write the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
+<span class="c">#  - eq is a daeEquation object</span>
+<span class="c">#  - myVar is an ordinary daeVariable (not distributed)</span>
+<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="o">.</span><span class="n">dt</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">To get a time derivative of a distributed variable the <a class="reference internal" href="core.html#pyCore.daeVariable.dt" title="pyCore.daeVariable.dt"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.dt()</span></tt></a>
+function can be used again. For instance, if we want a time derivative of the distributed variable
+<tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal to some constant at each point of the domain <tt class="docutils literal"><span class="pre">myDomain</span></tt>:</p>
+<div class="math">
+<p><img src="_images/math/b6b5226a4d75b20ffbc5c8c6da616d4b7e1ba01a.png" alt="{\partial myVar(i) \over \partial t} = 1; \forall i \in [0, d_n]"/></p>
+</div><p>we can write:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
+<span class="c">#  - myDomain is daeDomain object</span>
+<span class="c">#  - n is the number of points in the myDomain</span>
+<span class="c">#  - eq is a daeEquation object distributed on the myDomain</span>
+<span class="c">#  - d is daeDEDI object (used to iterate through the domain points)</span>
+<span class="c">#  - myVar is daeVariable object distributed on the myDomain</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain</span><span class="p">,</span> <span class="n">eClosedClosed</span><span class="p">)</span>
+<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="o">.</span><span class="n">dt</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+<p>This code translates into a set of <tt class="docutils literal"><span class="pre">n</span></tt> equations.</p>
+<p>Obviously, a variable can be distributed on more than one domain. If we want to
+write an identical equation like in the previous case:</p>
+<div class="math">
+<p><img src="_images/math/e4d3dbbc20a575c8c3b62d31bb0100927c367f41.png" alt="{d(myVar(d_1, d_2)) \over dt} = 1; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]"/></p>
+</div><p>we can write the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
+<span class="c">#  - myDomain1, myDomain2 are daeDomain objects</span>
+<span class="c">#  - n is the number of points in the myDomain1</span>
+<span class="c">#  - m is the number of points in the myDomain2</span>
+<span class="c">#  - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2</span>
+<span class="c">#  - d is daeDEDI object (used to iterate through the domain points)</span>
+<span class="c">#  - myVar is daeVariable object distributed on the myDomaina and myDomain2</span>
+<span class="n">d1</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain1</span><span class="p">,</span> <span class="n">eClosedClosed</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain2</span><span class="p">,</span> <span class="n">eClosedClosed</span><span class="p">)</span>
+<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="o">.</span><span class="n">dt</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">To get a partial derivative of a distributed variable the functions <a class="reference internal" href="core.html#pyCore.daeVariable.d" title="pyCore.daeVariable.d"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d()</span></tt></a>
+and <a class="reference internal" href="core.html#pyCore.daeVariable.d2" title="pyCore.daeVariable.d2"><tt class="xref py py-meth docutils literal"><span class="pre">pyCore.daeVariable.d2()</span></tt></a> can be used. For instance, if we want a partial derivative of
+the distributed variable <tt class="docutils literal"><span class="pre">myVar</span></tt> to be equal to 0.0 at each point of the domain <tt class="docutils literal"><span class="pre">myDomain</span></tt>:</p>
+<div class="math">
+<p><img src="_images/math/f15aae5266383028046f7c8edfcae2ec29264248.png" alt="{\partial myVar(i) \over \partial myDomain} = 0.0; \forall i \in [0, d_n]"/></p>
+</div><p>we can write:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
+<span class="c">#  - myDomain is daeDomain object</span>
+<span class="c">#  - n is the number of points in the myDomain</span>
+<span class="c">#  - eq is a daeEquation object distributed on the myDomain</span>
+<span class="c">#  - d is daeDEDI object (used to iterate through the domain points)</span>
+<span class="c">#  - myVar is daeVariable object distributed on the myDomain</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">DistributeOnDomain</span><span class="p">(</span><span class="n">myDomain</span><span class="p">,</span> <span class="n">eClosedClosed</span><span class="p">)</span>
+<span class="n">eq</span><span class="o">.</span><span class="n">Residual</span> <span class="o">=</span> <span class="n">myVar</span><span class="o">.</span><span class="n">d</span><span class="p">(</span><span class="n">myDomain</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.0</span>
+</pre></div>
+</div>
+<p>Again, this code translates into a set of <tt class="docutils literal"><span class="pre">n</span></tt> equations.</p>
+</li>
+</ol>
+<p>More information about variables can be found in the API reference <a class="reference internal" href="core.html#pyCore.daeVariable" title="pyCore.daeVariable"><tt class="xref py py-class docutils literal"><span class="pre">pyCore.daeVariable</span></tt></a>
+and in <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
+</div>
+</div>
 <div class="section" id="equations">
-<h3>6.2.4. Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.5. Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h3>
 <p>There are three types of equations in <strong>DAE Tools</strong>:
 * Ordinary
 * Distributed
@@ -499,7 +695,7 @@ CC.png|thumb|200px|Figure 1f.
 x: LB; y: UB
 x = x:sub:`0</cite>, y = y<sub>n</sub> &lt;Image:EquationBounds LB UB.png&gt;`__</p>
 <div class="section" id="defining-equations-equation-residual-expression">
-<h4>6.2.4.1. Defining equations (equation residual expression)<a class="headerlink" href="#defining-equations-equation-residual-expression" title="Permalink to this headline">¶</a></h4>
+<h4>6.2.5.1. Defining equations (equation residual expression)<a class="headerlink" href="#defining-equations-equation-residual-expression" title="Permalink to this headline">¶</a></h4>
 <p>The following statement can be used in <strong>pyDAE</strong> to create a residual
 expression of the ordinary equation:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Notation:</span>
@@ -523,7 +719,7 @@ statements can be used:</p>
 <p>:math:``</p>
 </div>
 <div class="section" id="defining-boundary-conditions">
-<h4>6.2.4.2. Defining boundary conditions<a class="headerlink" href="#defining-boundary-conditions" title="Permalink to this headline">¶</a></h4>
+<h4>6.2.5.2. Defining boundary conditions<a class="headerlink" href="#defining-boundary-conditions" title="Permalink to this headline">¶</a></h4>
 <p>Assume that we have a simple heat conduction through a very thin
 rectangular plate. At one side (Y = 0) we have a constant temperature
 (500 K) while at the opposide end we have a constant flux (1E6
@@ -623,7 +819,7 @@ Also, do not forget to have a look on <a class="reference internal" href="tutori
 </div>
 </div>
 <div class="section" id="state-transition-networks">
-<h3>6.2.5. State Transition Networks<a class="headerlink" href="#state-transition-networks" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.6. State Transition Networks<a class="headerlink" href="#state-transition-networks" title="Permalink to this headline">¶</a></h3>
 <p>Discontinuous equations are equations that take different forms subject to certain conditions. For example,
 if we want to model a flow through a pipe we may observe three different flow regimes:</p>
 <ul class="simple">
@@ -722,7 +918,7 @@ In <strong>pyDAE</strong> this type of state transitions is given by the followi
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="ports">
-<h3>6.2.6. Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.7. Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h3>
 <p>Ports are used to connect two models. Like models, they may contain domains, parameters and variables. For instance,
 in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">myPort</span><span class="p">(</span><span class="n">daePort</span><span class="p">):</span>
@@ -750,7 +946,7 @@ in <strong>pyDAE</strong> ports can be defined by the following statements:</p>
 Also, do not forget to have a look on <a class="reference internal" href="tutorials.html"><em>Tutorials</em></a>.</p>
 </div>
 <div class="section" id="event-ports">
-<h3>6.2.7. Event Ports<a class="headerlink" href="#event-ports" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.8. Event Ports<a class="headerlink" href="#event-ports" title="Permalink to this headline">¶</a></h3>
 <p>Event ports are also used to connect two models; however, they allow sending of discrete messages (events) between
 model instances. Events can be triggered manually or as a result of a state transition in a model. The main difference
 between event and ordinary ports is that the former allow a discrete communication between model instances while
@@ -806,16 +1002,25 @@ Also, do not forget to have a look on <a class="reference internal" href="tutori
 <li><a class="reference internal" href="#using-parameters">6.2.1.3. Using parameters</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#variables">6.2.2. Variables</a></li>
-<li><a class="reference internal" href="#distribution-domains">6.2.3. Distribution domains</a></li>
-<li><a class="reference internal" href="#equations">6.2.4. Equations</a><ul>
-<li><a class="reference internal" href="#defining-equations-equation-residual-expression">6.2.4.1. Defining equations (equation residual expression)</a></li>
-<li><a class="reference internal" href="#defining-boundary-conditions">6.2.4.2. Defining boundary conditions</a></li>
+<li><a class="reference internal" href="#variable-types">6.2.2. Variable types</a><ul>
+<li><a class="reference internal" href="#declaring-variable-types">6.2.2.1. Declaring variable types</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#state-transition-networks">6.2.5. State Transition Networks</a></li>
-<li><a class="reference internal" href="#ports">6.2.6. Ports</a></li>
-<li><a class="reference internal" href="#event-ports">6.2.7. Event Ports</a></li>
+<li><a class="reference internal" href="#distribution-domains">6.2.3. Distribution domains</a></li>
+<li><a class="reference internal" href="#variables">6.2.4. Variables</a><ul>
+<li><a class="reference internal" href="#declaring-variables">6.2.4.1. Declaring variables</a></li>
+<li><a class="reference internal" href="#initializing-variables">6.2.4.2. Initializing variables</a></li>
+<li><a class="reference internal" href="#using-variables">6.2.4.3. Using variables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#equations">6.2.5. Equations</a><ul>
+<li><a class="reference internal" href="#defining-equations-equation-residual-expression">6.2.5.1. Defining equations (equation residual expression)</a></li>
+<li><a class="reference internal" href="#defining-boundary-conditions">6.2.5.2. Defining boundary conditions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#state-transition-networks">6.2.6. State Transition Networks</a></li>
+<li><a class="reference internal" href="#ports">6.2.7. Ports</a></li>
+<li><a class="reference internal" href="#event-ports">6.2.8. Event Ports</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#simulation">6.3. Simulation</a><ul>

@@ -192,6 +192,9 @@ declared in the following way:
    myParam = daeParameter("myParam", units, parentModel, "description")
    myParam.DistributeOnDomain(myDomain)
 
+   # Or simply:
+   myParam = daeParameter("myParam", units, parentModel, "description", [myDomain])
+
 Initializing parameters
 ~~~~~~~~~~~~~~~~~~~~~~~
 Parameters are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
@@ -222,16 +225,20 @@ The most commonly used functions are:
 * Distributed parameters have the :py:attr:`pyCore.daeParameter.npyValues` property which
   returns the parameter values as a numpy multi-dimensional array (with ``numpy.float`` data type)
 * The functions :py:class:`pyCore.daeParameter.SetValue` and :py:class:`pyCore.daeParameter.GetValue`
-  which get/set the parameter value as ``float``
+  which get/set the parameter value as ``float`` or the :py:class:`pyUnits.quantity` object
 
 **Note**: The functions :py:meth:`pyCore.daeParameter.__call__` and :py:meth:`pyCore.daeParameter.array`
-can only be used in equations residual expressions. On the other hand, the functions
+can only be used to build equations' residual expressions. On the other hand, the functions
 :py:class:`pyCore.daeParameter.GetValue`, :py:class:`pyCore.daeParameter.SetValue` and
 :py:attr:`pyCore.daeParameter.npyValues` can be use to access the parameters real data at any point.
 
 1. To get a value of the ordinary parameter the :py:meth:`pyCore.daeParameter.__call__`
    function (``operator ()``) can be used. For instance, if we want the variable ``myVar`` to be
-   equal to the sum of the parameter ``myParam`` and ``15``: :math:`myVar = myParam + 15`,
+   equal to the sum of the parameter ``myParam`` and ``15``:
+
+   .. math::
+        myVar = myParam + 15
+   
    we can write the following:
 
    .. code-block:: python
@@ -245,7 +252,11 @@ can only be used in equations residual expressions. On the other hand, the funct
 2. To get a value of a distributed parameter the :py:meth:`pyCore.daeParameter.__call__`
    function (``operator ()``) can be used again. For instance, if we want the distributed
    variable ``myVar`` to be equal to the sum of the parameter ``myParam`` and ``15`` at each
-   point of the domain ``myDomain``: :math:`myVar(d) = myParam(d) + 15; \forall d \in [0, d_n]`,
+   point of the domain ``myDomain``:
+
+   .. math::
+        myVar(i) = myParam(i) + 15; \forall i \in [0, d_n]
+        
    we can write:
 
    .. code-block:: python
@@ -260,18 +271,14 @@ can only be used in equations residual expressions. On the other hand, the funct
      d = eq.DistributeOnDomain(myDomain, eClosedClosed)
      eq.Residual = myVar(d) - myParam(d) - 15
 
-   This code translates into ``n`` equations that is equivalent to writing:
-
-   .. code-block:: python
-
-     for d = 0 to n:
-         myVar(d) = myParam(d) + 15
-
-   which internally transforms into ``n`` separate equations.
+   This code translates into a set of ``n`` equations.
 
    Obviously, a parameter can be distributed on more than one domain. If we want to
    write an identical equation like in the previous case:
-   :math:`myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]`
+       
+   .. math::
+        myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
+   
    we can write the following:
 
    .. code-block:: python
@@ -300,110 +307,118 @@ can only be used in equations residual expressions. On the other hand, the funct
    ``myParam`` for all points in the domain ``myDomain``, we can use the function
    :py:meth:`pyCore.Sum` which accepts the :py:meth:`pyCore.adouble_array` objects.
 
-   Arguments for the :py:meth:`pyCore.daeParameter.array` function are :py:class:`pyCore.daeIndexRange`
-   objects obtained by the call to the :py:meth:`pyCore.daeDomain.__call__` function (``operator ()``).
-   Thus, we can write the following:
+   The :py:meth:`pyCore.daeParameter.array` function accepts the following arguments:
 
+   * plain integer (to select a single index from a domain)
+   * python list (to select a list of indexes from a domain)
+   * python slice (to select a portion of indexes from a domain: startIndex, endIindex, step)
+   * character ``*`` (to select all points from a domain)
+   * integer ``-1`` (to select all points from a domain)
+   * empty python list ``[]`` (to select all points from a domain)
+
+   Basically all arguments listed above are internally used to create the
+   :py:class:`pyCore.daeIndexRange` object. :py:class:`pyCore.daeIndexRange` constructor has
+   three variants:
+       
+   1. The first one accepts a single argument: :py:class:`pyCore.daeDomain` object.
+      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+      parameter values at all points in the specified domain.
+
+   2. The second one accepts two arguments: :py:class:`pyCore.daeDomain` object and a list
+      of integer that represent indexes within the specified domain.
+      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+      parameter values at the selected points in the specified domain.
+
+   3. The third one accepts four arguments: :py:class:`pyCore.daeDomain` object, and three
+      integers: ``startIndex``, ``endIndex`` and ``step`` (which is basically a slice, that is
+      a portion of a list of indexes: ``start`` through ``end-1``, by the increment ``step``).
+      More info about slices can be found in the
+      `Python documentation <http://docs.python.org/2/library/functions.html?highlight=slice#slice>`_.
+      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+      parameter values at the points in the specified domain defined by the slice object.
+
+   Let assume that we want the variable ``myVar`` to be equal to the sum of values in
+   the array ``values`` that holds values from the parameter ``myParam`` at the
+   specified indexes in the domains ``myDomain1`` and ``myDomain2``:
+
+   .. math::
+        myVar = \sum values
+
+   Now we can explore different scenarios for creating the array ``values`` from the parameter
+   ``myParam`` distributed on two domains:
+   
    .. code-block:: python
 
-     # Notation:
-     #  - myDomain is daeDomain object
-     #  - n is the number of points in the domain myDomain
-     #  - eq is daeEquation object
-     #  - myVar is daeVariable object
-     #  - myParam is daeParameter object distributed on the myDomain
-     eq.Residual = myVar() - Sum( myParam.array( myDomain() ) )
+        # Notation:
+        #  - myDomain1, myDomain2 are daeDomain objects
+        #  - eq is daeEquation object
+        #  - myVar is daeVariable object
+        #  - myParam is daeParameter object distributed on myDomain1 and myDomain2
+        #  - values is the adouble_array object 
 
-   This code translates into:
-   :math:`myVar = \sum myParam.array( myDomain() )`.
+        # Case 1. An array contains the following values from the myParam:
+        #  - at the first point in the domain myDomain1
+        #  - all points from the domain myDomain2
+        # All expressions below are equivalent:
+        values = self.T.array(0, '*')
+        values = self.T.array(0, -1)
+        values = self.T.array(0, [])
 
-   The above example could also be written in the following form:
+        eq1.Residual = myVar() - Sum(values)
+            
+        # Case 2. An array contains the following values from the myParam:
+        #  - the first three points in the domain myDomain1
+        #  - all even points from the domain myDomain2
+        values = self.T.array([0,1,2], slice(0, myDomain2.NumberOfPoints+1, 2))
 
-   .. code-block:: python
+        eq2.Residual = myVar() - Sum(values)
 
-     # points_range is daeDomainRange object
-     points_range = daeDomainRange(myDomain)
-     # arr is adouble_array object
-     arr = myVar2.array(points_range)
-     # Finally:
-     eq.Residual = myVar() - sum(arr)
+   The ``case 1.`` translates into:
 
-   On the other hand, if we want variable myVar to be equal to the sum of
-   values of the parameter myParam only for certain points in the myDomain,
-   there are two ways to do it:
+   .. math::
+      myVar = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2)
+      
+   where ``n2`` is the number of points in the domain ``myDomain2``.
 
-   .. code-block:: python
+   The ``case 2.`` translates into:
 
-     # Notation:
-     #  - myDomain is daeDomain object
-     #  - n is the number of points in the domain myDomain
-     #  - eq is a daeEquation object
-     #  - myVar is an ordinary daeVariable object
-     #  - myParam is a daeParameter object distributed on the myDomain
-     # 1) For a given array of points; the points must be in the range [0,n-1]
-     eq.Residual = myVar() - sum( myParam.array( myDomain( [0, 5, 12] ) ) )
-     # 2) For a given slice of points in the domain;
-     #    slices are defined by 3 arguments: start_index, end_index, step
-     #    in this example: start_index = 1
-     #                     end_index = 10
-     #                     step = 2
-     eq.Residual = myVar() - sum( myParam.array( myDomain(1, 10, 2) ) )
-
-   The code sample 1) translates into:
-   :math:`myVar = myParam(0) + myParam(1) + ... + myParam(n)`
-
-   The code sample 2) translates into:
-
-   :math:`myVar = myParam(0) + myParam(5) + myParam(12)`
-
-   '''NOTE: '''One may argue that the function `array` calls can be
-   somewhat simpler and directly accept python lists or slices as its
-   arguments. For instance it would be possible to write:
-
-   .. code-block:: python
-
-     eq.Residual = myVar() - sum( myParam.array( [0, 1, 3] ) )
-
-   or:
-
-   .. code-block:: python
-
-     eq.Residual = myVar() - sum( myParam.array( slice(1,10,2) ) )
-
-   However, that would be more error prone since it does not check whether
-   a valid domain is used for that index and whether specified indexes lay
-   within the domain bounds (which should be done by the user).
+   .. math::
+      myVar = & myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + \\
+              & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + \\
+              & myParam(2,0) + myParam(2,2) + myParam(2,4) + ...
 
 More information about parameters can be found in the API reference :py:class:`pyCore.daeParameter`
 and in :doc:`tutorials`.
 
-Variables
----------
-There are two types of variables in **DAE Tools**: ordinary and distributed. Functions to get a variable value
-(function call operator :py:meth:`~pyCore.daeVariable.__call__`), a time or a partial derivative
-(:py:meth:`~pyCore.daeVariable.dt`, :py:meth:`~pyCore.daeVariable.d`, or :py:meth:`~pyCore.daeVariable.d2`) or
-functions to obtain an array of values, time or partial derivatives (:py:meth:`~pyCore.daeVariable.array`,
-:py:meth:`~pyCore.daeVariable.dt_array`, :py:meth:`~pyCore.daeVariable.d_array`, or :py:meth:`~pyCore.daeVariable.d2_array`)
-have been defined. In addition, distributed variables have :py:attr:`~pyCore.daeVariable.npyValues` property to get
-the values as a numpy multi-dimensional array.
+Variable types
+--------------
 
-Variables in **pyDAE** can be defined by the following statement:
+Variable types are used in **DAE Tools** to describe variables. They hold
+the following information:
+
+* Name: string
+* Units: :py:class:`pyUnits.unit` object
+* LowerBound: float
+* UpperBound: float
+* InitialGuess: float
+* AbsoluteTolerance: float
+
+Declaration of variable types is commonly done outside of the model
+definition (in the module scope).
+
+Declaring variable types
+~~~~~~~~~~~~~~~~~~~~~~~~
+A variable type can be declared in the following way:
 
 .. code-block:: python
 
-    myVar = daeVariable("myVar", variableType, Parent_Model_or_Port, "Description")
+    # Temperature, units: Kelvin, limits: 100 - 1000K, Def.value: 273K, Abs.Tol: 1E-5
+    typeTemperature = daeVariableType("Temperature", "K", 100, 1000, 273, 1E-5)
 
-while in **cDAE**:
-
-.. code-block:: cpp
-
-    daeVariable myVar("myVar", variableType, &Parent_Model_or_Port, "Description");
-
-More information about variables can be found in :doc:`pyDAE_user_guide` and :py:class:`pyCore.daeVariable`.
-Also, do not forget to have a look on :doc:`tutorials`.
 
 Distribution domains
 --------------------
+
 There are two types of domains in **DAE Tools**: simple arrays and distributed domains (commonly used to distribute variables,
 parameters and equations in space). The distributed domains can have a uniform (default) or a user specified non-uniform grid.
 At the moment, only the following finite difference methods can be used to calculate partial derivatives:
@@ -435,8 +450,230 @@ while in **cDAE**:
 More information about domains can be found in :doc:`pyDAE_user_guide` and :py:class:`pyCore.daeDomain`.
 Also, do not forget to have a look on :doc:`tutorials`.
 
+    
+Variables
+---------
+There are various types of variables in **DAE Tools**.
+They can be:
+
+* Ordinary
+* Distributed
+
+and:
+
+* Algebraic
+* Differential
+* Constant (that is their value is assigned by fixing the number of degrees of freedom)
+
+The process of defining variables is two-fold:
+
+* Declaring a variable in the model
+* Initialize it (by assigning its value or setting an initial condition) in the simulation
+
+Declaring variables
+~~~~~~~~~~~~~~~~~~~
+Variables are declared in the :py:meth:`pyCore.daeModel.__init__` function.
+An ordinary variable can be declared in the following way:
+
+.. code-block:: python
+
+   myVar = daeVariable("myVar", variableType, parentModel, "description")
+
+Variables can be distributed on domains. A distributed variable can be
+declared in the following way:
+
+.. code-block:: python
+
+   myVar = daeVariable("myVar", variableType, parentModel, "description")
+   myVar.DistributeOnDomain(myDomain)
+
+   # Or simply:
+   myVar = daeVariable("myVar", variableType, parentModel, "description", [myDomain])
+   
+Initializing variables
+~~~~~~~~~~~~~~~~~~~~~~
+Variables are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpVariables`
+function:
+
+* To assign the variable value/fix the degrees of freedom use the following:
+
+  .. code-block:: python
+
+     myVar.AssignValue(value)
+
+  or, if the variable is distributed: 
+
+  .. code-block:: python
+
+     for i in range(0, myDomain.NumberOfPoints):
+         myVar.AssignValue(i, value)
+
+  where the ``value`` can be either a ``float`` or the :py:class:`pyUnits.quantity` object
+  (for instance ``1.34 * W/(m*K)``).
+
+* To set an initial condition use the following:
+
+  .. code-block:: python
+
+     myVar.SetInitialCondition(value)
+
+  or, if the variable is distributed:
+
+  .. code-block:: python
+
+     for i in range(0, myDomain.NumberOfPoints):
+         myVar.SetInitialCondition(i, value)
+
+  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object.
+
+* To set an absolute tolerance the following can be used:
+
+  .. code:: python
+
+     myVar.SetAbsoluteTolerances(1E-5)
+
+* To set an initial guess use the following:
+
+  .. code:: python
+
+     myVar.SetInitialGuess(value)
+
+  or, if the variable is distributed:
+
+  .. code-block:: python
+
+     for i in range(0, myDomain.NumberOfPoints):
+         myVar.SetInitialGuess(i, value)
+
+  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object.
+
+Using variables
+~~~~~~~~~~~~~~~
+The most commonly used functions are:
+
+* The function call operator :py:meth:`pyCore.daeVariable.__call__` (``operator ()``)
+  which returns the :py:class:`pyCore.adouble` object that holds the variable value
+  
+* The function :py:meth:`pyCore.daeVariable.dt` which returns the :py:class:`pyCore.adouble` object
+  that holds the value of a time derivative of the variable
+  
+* The functions :py:meth:`pyCore.daeVariable.d` and :py:meth:`pyCore.daeVariable.d2` which return
+  the :py:class:`pyCore.adouble` object that holds the value of a partial derivative of the variable
+  of the first and second order, respectively
+  
+* The functions :py:meth:`pyCore.daeVariable.array`, :py:meth:`pyCore.daeVariable.dt_array`,
+  :py:meth:`pyCore.daeVariable.d_array` and :py:meth:`pyCore.daeVariable.d2_array` which return the
+  :py:class:`pyCore.adouble_array` object that holds an array of variable values, time derivatives,
+  partial derivative of the first order and partial derivative of the second order, respectively
+  
+* Distributed parameters have the :py:attr:`pyCore.daeVariable.npyValues` property which
+  returns the variable values as a numpy multi-dimensional array (with ``numpy.float`` data type)
+  
+* The functions :py:class:`pyCore.daeVariable.SetValue` and :py:class:`pyCore.daeVariable.GetValue`
+  which get/set the variable value as ``float`` or the :py:class:`pyUnits.quantity` object
+
+* The functions :py:meth:`pyCore.daeVariable.ReAssignValue` and
+  :py:meth:`pyCore.daeVariable.ReSetInitialCondition` can be used to re-assign or re-initialize
+  variables **only during a simulation** (in the function :py:meth:`pyActivity.daeSimulation.Run`)
+
+**Note**: The functions :py:meth:`pyCore.daeVariable.__call__`, :py:meth:`pyCore.daeVariable.dt`,
+:py:meth:`pyCore.daeVariable.d`, :py:meth:`pyCore.daeVariable.d2`, :py:meth:`pyCore.daeVariable.array`,
+:py:meth:`pyCore.daeVariable.dt_array`, :py:meth:`pyCore.daeVariable.d_array` and
+:py:meth:`pyCore.daeVariable.d2_array` can only be used to build equations' residual expressions.
+On the other hand, the functions :py:class:`pyCore.daeVariable.GetValue`,
+:py:class:`pyCore.daeVariable.SetValue` and :py:attr:`pyCore.daeVariable.npyValues` can be used
+to access the variables real data at any point.
+
+All above mentioned functions are called in the same way as explained in `Using parameters`_.
+More information will be given here on getting time and partial derivatives.
+
+1. To get a time derivative of the ordinary variable the function :py:meth:`pyCore.daeVariable.dt`
+   can be used. For instance, if we want a time derivative of the variable ``myVar`` to be equal
+   to some constant, let's say 1.0:
+
+   .. math::
+        { d(myVar) \over {d}{t} } = 1
+
+   we can write the following:
+
+   .. code-block:: python
+
+     # Notation:
+     #  - eq is a daeEquation object
+     #  - myVar is an ordinary daeVariable (not distributed)
+     eq.Residual = myVar.dt() - 1.0
+
+2. To get a time derivative of a distributed variable the :py:meth:`pyCore.daeVariable.dt`
+   function can be used again. For instance, if we want a time derivative of the distributed variable
+   ``myVar`` to be equal to some constant at each point of the domain ``myDomain``:
+
+   .. math::
+        {\partial myVar(i) \over \partial t} = 1; \forall i \in [0, d_n]
+
+   we can write:
+
+   .. code-block:: python
+
+     # Notation:
+     #  - myDomain is daeDomain object
+     #  - n is the number of points in the myDomain
+     #  - eq is a daeEquation object distributed on the myDomain
+     #  - d is daeDEDI object (used to iterate through the domain points)
+     #  - myVar is daeVariable object distributed on the myDomain
+     d = eq.DistributeOnDomain(myDomain, eClosedClosed)
+     eq.Residual = myVar.dt(d) - 1.0
+
+   This code translates into a set of ``n`` equations.
+   
+   Obviously, a variable can be distributed on more than one domain. If we want to
+   write an identical equation like in the previous case:
+
+   .. math::
+        {d(myVar(d_1, d_2)) \over dt} = 1; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
+
+   we can write the following:
+
+   .. code-block:: python
+
+     # Notation:
+     #  - myDomain1, myDomain2 are daeDomain objects
+     #  - n is the number of points in the myDomain1
+     #  - m is the number of points in the myDomain2
+     #  - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2
+     #  - d is daeDEDI object (used to iterate through the domain points)
+     #  - myVar is daeVariable object distributed on the myDomaina and myDomain2
+     d1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)
+     d2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)
+     eq.Residual = myVar.dt(d1,d2) - 1.0
+
+3. To get a partial derivative of a distributed variable the functions :py:meth:`pyCore.daeVariable.d`
+   and :py:meth:`pyCore.daeVariable.d2` can be used. For instance, if we want a partial derivative of
+   the distributed variable ``myVar`` to be equal to 0.0 at each point of the domain ``myDomain``:
+
+   .. math::
+        {\partial myVar(i) \over \partial myDomain} = 0.0; \forall i \in [0, d_n]
+
+   we can write:
+
+   .. code-block:: python
+
+     # Notation:
+     #  - myDomain is daeDomain object
+     #  - n is the number of points in the myDomain
+     #  - eq is a daeEquation object distributed on the myDomain
+     #  - d is daeDEDI object (used to iterate through the domain points)
+     #  - myVar is daeVariable object distributed on the myDomain
+     d = eq.DistributeOnDomain(myDomain, eClosedClosed)
+     eq.Residual = myVar.d(myDomain, d) - 0.0
+
+   Again, this code translates into a set of ``n`` equations.
+
+More information about variables can be found in the API reference :py:class:`pyCore.daeVariable`
+and in :doc:`tutorials`.
+
 Equations
 ---------
+
 There are three types of equations in **DAE Tools**:
 * Ordinary
 * Distributed
