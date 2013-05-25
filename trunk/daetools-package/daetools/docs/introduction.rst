@@ -11,18 +11,26 @@ Introduction
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-What is DAE Tools?
-==================
+About DAE Tools
+===============
+
+.. begin-command
 
 **DAE Tools** is a free/open-source cross-platform object- and equation-oriented process
-modelling and optimization software. It is not a modelling language, rather a collection
-of software tools for:
+modelling and optimization software.
+It is not a modelling language, rather a collection of software packages with the API for:
     
 * Model development
 * Simulation, optimization, and parameter estimation
 * Processing of the results (plotting and exporting to various file formats)
 * Report generation
 * Code generation and model exchange
+
+**DAE Tools** runs on all major operating systems (Windows, GNU Linux and Mac OS X)
+and architectures (x86, x86_64, arm).
+
+It is free to use, since it is `free software <http://www.gnu.org/>`_ and released
+under the `GNU General Public Licence <http://www.gnu.org/licenses/licenses.html#GPL>`_.
 
 **DAE Tools** is initially developed to model and simulate processes in chemical process industry
 (mass, heat and momentum transfers, chemical reactions, separation processes, thermodynamics).
@@ -34,22 +42,22 @@ The following approaches/paradigms are adopted in **DAE Tools**:
 * A hybrid approach between general-purpose programming languages (such as c++ and Python) and
   domain-specific modelling languages (such as `Modelica <http://www.modelica.org>`_,
   `gPROMS <http://www.psenterprise.com/gproms>`_, `Ascend <http://ascend4.org>`_ etc.)
-  (more information: :ref:`hybrid_approach`)
+  (more information: :ref:`hybrid_approach`).
   
-* An object-oriented approach to process modelling (more information: :ref:`object_oriented_approach`)
+* An object-oriented approach to process modelling (more information: :ref:`object_oriented_approach`).
 
 * An Equation-Oriented (acausal) approach where all model variables and equations are generated and
   gathered together and solved simultaneously using a suitable mathematical algorithm
-  (more information: :ref:`equation_oriented_approach`)
+  (more information: :ref:`equation_oriented_approach`).
   
 * Separation of the model definition from the activities that can be carried out on that model.
-  The structure of the model (parameters, variables, equations etc.) is given in the model
-  class while the runtime information in the simulation class. This way we can have a
-  single model definition, but one or more different simulation scenarios, and one or more
-  optimization scenarios
+  The structure of the model (parameters, variables, equations, state transition networks etc.)
+  is given in the model class while the runtime information in the simulation class. This way,
+  based on a single model definition, one or more different simulation/optimization scenarios
+  can be defined.
 
 * Core libraries are written in standard c++, however `Python <http://www.python.org>`_ is used as
-  the main modelling language (more information: :ref:`python_programming_language`)
+  the main modelling language (more information: :ref:`python_programming_language`).
 
 Class of problems that can be solved by **DAE Tools**:
     
@@ -63,21 +71,13 @@ Class of problems that can be solved by **DAE Tools**:
 
 Type of activities that can be carried out with models developed in **DAE Tools**:
 
-* Simulation
+* Simulation (steady-state or dynamic, with simple or complex operating procedures)
 
-  * Steady-state or dynamic
-  * With simple or complex operating procedures
+* Optimization (NLP and MINLP problems)
 
-* Optimization
+* Parameter estimation (the least squares method: Levenberg–Marquardt algorithm)
 
-  * NLP problems
-  * MINLP problems
-
-* Parameter estimation
-
-  * The least squares method (Levenberg–Marquardt algorithm)
-
-* XML + MathML report generation
+* Model report generation (in XML + MathML format with XSL transformations for XHTML generation)
 
 * Code generation for other modelling languages and general purpose programming languages
 
@@ -86,6 +86,8 @@ Type of activities that can be carried out with models developed in **DAE Tools*
   * `Functional Mockup Interface (FMI) <https://www.fmi-standard.org>`_
 
 * Export of the simulation results to various file formats
+
+.. end-command
 
 All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
 major operating systems (GNU/Linux, MacOS, Windows) and all platforms with a decent c++ compiler,
