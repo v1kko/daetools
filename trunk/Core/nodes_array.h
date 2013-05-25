@@ -583,6 +583,36 @@ public:
 };
 
 /*********************************************************************************************
+	adSetupDomainNodeArray
+**********************************************************************************************/
+class DAE_CORE_API adSetupDomainNodeArray : public adNodeArrayImpl
+{
+public:
+	daeDeclareDynamicClass(adSetupDomainNodeArray)
+	adSetupDomainNodeArray(void);
+	adSetupDomainNodeArray(daeDomain* pDomain,
+						   const daeArrayRange& range);
+	virtual ~adSetupDomainNodeArray(void);
+
+public:
+	virtual size_t			GetSize(void) const;
+	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNodeArray*	Clone(void) const;
+	virtual void			Open(io::xmlTag_t* pTag);
+	virtual void			Save(io::xmlTag_t* pTag) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity	GetQuantity(void) const;
+
+public:
+	daeDomain*      m_pDomain;
+	daeArrayRange	m_Range;
+};
+
+/*********************************************************************************************
 	adSetupVariableNodeArray
 **********************************************************************************************/
 class DAE_CORE_API adSetupVariableNodeArray : public adNodeArrayImpl

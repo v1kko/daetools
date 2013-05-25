@@ -147,6 +147,7 @@ const char* DOCSTR_daeDomain = "";
     const char* DOCSTR_daeDomain_CreateDistributed = "";  
     const char* DOCSTR_daeDomain_getitem = "";  
     const char* DOCSTR_daeDomain_call = "";  
+    const char* DOCSTR_daeDomain_array = "";  
 
 const char* DOCSTR_daeDEDI = "";  
     const char* DOCSTR_daeDEDI_Domain = "";  

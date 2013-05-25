@@ -13,6 +13,9 @@ python tutorial11.py console
 python tutorial12.py console
 python tutorial13.py console
 python tutorial14.py console
+python tutorial15.py console
+python tutorial16.py console
+python tutorial17.py console
 
 python opt_tutorial1.py console
 python opt_tutorial2.py console

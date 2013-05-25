@@ -694,7 +694,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Units",					&daeDomain::GetUnits,               DOCSTR_daeDomain_Units)
         .add_property("npyPoints",              &daepython::GetNumPyArrayDomain,    DOCSTR_daeDomain_npyPoints)
         .add_property("Points",					&daepython::GetDomainPoints, 
-                                                &daepython::SetDomainPoints, DOCSTR_daeDomain_Points)
+                                                &daepython::SetDomainPoints, DOCSTR_daeDomain_Points) 
 
 		.def("__str__",	 					    &daepython::daeDomain__str__)
         .def("__repr__",						&daepython::daeDomain__repr__)
@@ -711,8 +711,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                 ), DOCSTR_daeDomain_CreateDistributed)
 		.def("__getitem__",						&daeDomain::operator[], ( arg("self"), arg("index") ), DOCSTR_daeDomain_getitem)
         .def("__call__",						&daeDomain::operator(), ( arg("self"), arg("index") ), DOCSTR_daeDomain_call) 
-		//.def("array",							&daepython::DomainArray1)
-		//.def("array",							&daepython::DomainArray2)
+		.def("array",							&daepython::DomainArray, ( arg("self"), arg("indexes") ), DOCSTR_daeDomain_array)
 		; 
     
     class_<daeDEDI, bases<daeObject>, boost::noncopyable>("daeDEDI", DOCSTR_daeDEDI, no_init)

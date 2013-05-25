@@ -293,6 +293,7 @@ public:
 	daeDomain
 *******************************************************************/
 class daePort;
+class daeArrayRange;
 class DAE_CORE_API daeDomain : virtual public daeObject,
 	                           virtual public daeDomain_t
 {
@@ -335,8 +336,9 @@ public:
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
-	adouble_array	array(void);
-	adouble_array	array(int start, int end, int step);
+	adouble_array array(void);
+    adouble_array array(const daeIndexRange& indexRange);
+    adouble_array array(const daeArrayRange& arrayRange);
 	
 	adouble	partial(daePartialDerivativeVariable& pdv) const;
 

@@ -534,50 +534,70 @@ daeeDiscretizationMethod daeDomain::GetDiscretizationMethod(void) const
 
 adouble_array daeDomain::array(void)
 {
-	daeDeclareAndThrowException(exNotImplemented)
+    daeIndexRange indexRange(this);
+    daeArrayRange arrayRange(indexRange);
+    
+    return daeDomain::array(arrayRange);
+}
 
-	adouble_array varArray; 
-	return varArray;
+adouble_array daeDomain::array(const daeIndexRange& indexRange)
+{
+    daeArrayRange arrayRange(indexRange);
+    
+    return daeDomain::array(arrayRange);
+}
+
+adouble_array daeDomain::array(const daeArrayRange& arrayRange)
+{
+    adouble_array varArray; 
+    
+    if(arrayRange.m_eType == eRangeDomainIndex)
+    {
+        if(arrayRange.m_domainIndex.m_eType == eDomainIterator || 
+           arrayRange.m_domainIndex.m_eType == eIncrementedDomainIterator)
+        {
+            daeDeclareException(exInvalidCall);
+			e << "Invalid argument for the daeDomain::array function (must not be the daeDEDI object)";
+			throw e;
+        }
+    }
+    
+    adSetupDomainNodeArray* node = new adSetupDomainNodeArray(this, arrayRange);
+    varArray.node = adNodeArrayPtr(node);
+    varArray.setGatherInfo(true);
+
+    return varArray;
+}
+
+/*
+adouble_array daeDomain::array(const std::vector<size_t>& narrIndexes)
+{
+    daeIndexRange indexRange(this, narrIndexes);
+    daeArrayRange arrayRange(indexRange);
+	
+    adouble_array varArray; 
+    
+    adSetupDomainNodeArray* node = new adSetupDomainNodeArray(this, arrayRange);
+    varArray.node = adNodeArrayPtr(node);
+    varArray.setGatherInfo(true);
+
+    return varArray;
 }
 
 adouble_array daeDomain::array(int start, int end, int step)
 {
-	daeDeclareAndThrowException(exNotImplemented)
-
+    daeIndexRange indexRange(this, start, end, step);
+    daeArrayRange arrayRange(indexRange);
+    
 	adouble_array varArray; 
 
-//	if(!m_pModel)
-//	{	
-//		daeDeclareException(exInvalidCall); 
-//		e << "Invalid parent model in domain [" << GetCanonicalName() << "]";
-//		throw e;
-//	}
-//	
-//	for(size_t i = 0; i < m_nNumberOfPoints; i++)
-//		varArray.m_arrValues.push_back((*this)[i]);
-//	
-//	if(m_pModel->m_pDataProxy->GetGatherInfo())
-//	{
-//		adRuntimeVariableNodeArray* node = new adRuntimeVariableNodeArray();
-//		varArray.node = adNodeArrayPtr(node);
-//		varArray.setGatherInfo(true);
-//		node->m_pVariable = const_cast<daeVariable*>(this);
-//		
-//		size_t size = varArray.m_arrValues.size();
-//		if(size == 0)
-//			daeDeclareAndThrowException(exInvalidCall); 
-//		
-//		node->m_ptrarrVariableNodes.resize(size);
-//		node->m_arrIndexes.resize(size);
-//		for(size_t i = 0; i < size; i++)
-//		{
-//			node->m_ptrarrVariableNodes[i] = varArray.m_arrValues[i].node;
-//			node->m_arrIndexes[i] = 0; // varArray.m_arrValues[i].node->;
-//		}
-//	}
+    adSetupDomainNodeArray* node = new adSetupDomainNodeArray(this, arrayRange);
+    varArray.node = adNodeArrayPtr(node);
+	varArray.setGatherInfo(true);
 
-	return varArray;
+    return varArray;
 }
+*/
 
 adouble daeDomain::operator()(size_t nIndex) const
 {

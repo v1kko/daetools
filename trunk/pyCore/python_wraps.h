@@ -292,8 +292,7 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild);
 	daeDomain
 *******************************************************/
 boost::python::object GetNumPyArrayDomain(daeDomain& domain);
-adouble_array DomainArray1(daeDomain& domain);
-adouble_array DomainArray2(daeDomain& domain, boost::python::slice s);
+adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
 //daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
 //daeIndexRange FunctionCallDomain2(daeDomain& domain, boost::python::list l);
 //daeIndexRange FunctionCallDomain3(daeDomain& domain);

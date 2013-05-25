@@ -182,18 +182,18 @@ An ordinary parameter can be declared in the following way:
 
 .. code-block:: python
 
-   myParam = daeParameter("myParam", units, parentModel, "description")
+   self.myParam = daeParameter("myParam", units, parentModel, "description")
 
 Parameters can be distributed on domains. A distributed parameter can be
 declared in the following way:
 
 .. code-block:: python
 
-   myParam = daeParameter("myParam", units, parentModel, "description")
-   myParam.DistributeOnDomain(myDomain)
+   self.myParam = daeParameter("myParam", units, parentModel, "description")
+   self.myParam.DistributeOnDomain(myDomain)
 
    # Or simply:
-   myParam = daeParameter("myParam", units, parentModel, "description", [myDomain])
+   self.myParam = daeParameter("myParam", units, parentModel, "description", [myDomain])
 
 Initializing parameters
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -419,36 +419,137 @@ A variable type can be declared in the following way:
 Distribution domains
 --------------------
 
-There are two types of domains in **DAE Tools**: simple arrays and distributed domains (commonly used to distribute variables,
-parameters and equations in space). The distributed domains can have a uniform (default) or a user specified non-uniform grid.
-At the moment, only the following finite difference methods can be used to calculate partial derivatives:
+There are two types of domains in **DAE Tools**:
+    
+* Simple arrays
+* Distributed domains (used to distribute variables,
+  parameters and equations in space)
+
+Distributed domains can have a uniform (default) or a user-specified non-uniform grid.
+At the moment, only the following finite difference methods are implemented:
 
 * Backward finite difference method (BFD)
 * Forward finite difference method (FFD)
 * Center finite difference method (CFD)
 
-In **DAE Tools** just anything can be distributed on domains: parameters, variables, equations even models and ports.
-Obviously it does not have a physical meaning to distribute a model on a domain, However that can be useful for modelling
-of complex processes where we can create an array of models where each point in a distributed domain have a corresponding
-model so that a user does not have to take care of number of points in the domain, etc. In addition, domain points values
-can be obtained as a **NumPy** one-dimensional array; this way **DAE Tools** can be easily used in conjuction with other
-scientific python libraries `NumPy <http://numpy.scipy.org>`_, `SciPy <http://www.scipy.org>`_, for instance and many
-`other <http://www.scipy.org/Projects>`_.
+In **DAE Tools** many objects can be distributed on domains: parameters, variables, equations,
+even models and ports. Obviously it does not have a physical meaning to distribute a model on
+a domain. However, that can be useful for modelling of complex processes where each point in
+a distributed domain have a corresponding model attached. In addition, domain points values
+can be obtained as numpy one-dimensional array; this way **DAE Tools** can be easily used in
+conjuction with other scientific python libraries: `NumPy <http://numpy.scipy.org>`_,
+`SciPy <http://www.scipy.org>`_ and many `other <http://www.scipy.org/Projects>`_.
 
-Domains in **pyDAE** can be defined by the following statement:
+The process of defining domains is two-fold:
+
+* Declaring a domain in the model
+* Initialize it in the simulation
+
+Declaring domains
+~~~~~~~~~~~~~~~~~
+Domains are declared in the :py:meth:`pyCore.daeModel.__init__` function.
 
 .. code-block:: python
 
-    myDomain = daeDomain("myDomain", Parent_Model_or_Port, Description)
+   self.myDomain = daeDomain("myDomain", parentModel, units, "description")
 
-while in **cDAE**:
+Initializing domains
+~~~~~~~~~~~~~~~~~~~~
+Domains are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
+function. To set up a domain as a simple array use the function
+:py:meth:`pyCore.daeDomain.CreateArray`:
 
-.. code-block:: cpp
+.. code-block:: python
 
-    daeDomain myDomain("myDomain", &Parent_Model_or_Port, Description);
+    # Array of 10 elements
+    myDomain.CreateArray(10)
 
-More information about domains can be found in :doc:`pyDAE_user_guide` and :py:class:`pyCore.daeDomain`.
-Also, do not forget to have a look on :doc:`tutorials`.
+while to set up a domain as distributed domain use the function
+:py:meth:`pyCore.daeDomain.CreateDistributed`:
+
+.. code-block:: python
+
+    # Center finite diff of the 2nd order with 10 elements and bounds: 0.0 to 1.0
+    myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,  1.0)
+
+Non-uniform grids
+~~~~~~~~~~~~~~~~~
+In certain situations it is not desired to have a uniform distribution
+of the points within the given interval, defined by the lower and upper bounds.
+In these cases, a non-uniform grid can be specified using the attribute
+:py:attr:`pyCore.daeDomain.Points` which contains the list of the points and that
+can be manipulated by the user:
+
+.. code-block:: python
+
+    # First create a distributed domain
+    myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,  1.0)
+
+    # The original 11 points are: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    # If we are have a stiff profile at the beginning of the domain,
+    # then we can place more points there
+    myDomain.Points = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.60, 1.00]
+
+The comparison of the effects of uniform and non-uniform grids is given
+in :ref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial_3`
+has been served as a basis for comparison). Here we have the following
+cases:
+
+* Blue line (10 intervals): uniform grid - a very rough prediction
+* Red line (10 intervals): non-uniform grid - more points at the beginning of the domain
+* Black line: the analytical solution
+
+.. _Figure-non_uniform_grid:
+.. figure:: _static/NonUniformGrid.png
+   :width: 400 pt
+   :figwidth: 450 pt
+   :align: center
+
+   Effect of uniform and non-uniform grids on numerical solution
+
+We can clearly observe that we get much more precise results by using
+denser grid at the beginning of the domain.
+
+Using domains
+~~~~~~~~~~~~~
+The most commonly used functions are:
+
+* The functions :py:meth:`pyCore.daeDomain.__call__` (``operator ()``) and
+  :py:meth:`pyCore.daeDomain.__getitem__` (``operator []``)
+  which return the :py:class:`pyCore.adouble` object that holds the value of the point
+  at the specified index within the domain. Both functions have the same functionality.
+* The :py:meth:`pyCore.daeDomain.array` function which returns the :py:class:`pyCore.adouble_array`
+  object that holds an array of points values
+* The :py:attr:`pyCore.daeDomain.npyPoints` property which returns the points in the domain
+  as a numpy one-dimensional array (with ``numpy.float`` data type)
+
+**Note**: The functions :py:meth:`pyCore.daeDomain.__call__`, :py:meth:`pyCore.daeDomain.__getitem__`
+and :py:meth:`pyCore.daeDomain.array` can only be used to build equations' residual expressions.
+On the other hand, the function :py:attr:`pyCore.daeDomain.npyPoints` can be used to access the
+domain points at any point.
+
+The function :py:meth:`pyCore.daeDomain.array` is called in the same way as explained in
+`Using parameters`_.
+
+1. To get a point at the specified index within the domain the :py:meth:`pyCore.daeDomain.__getitem__`
+   function (``operator []``) can be used. For instance, if we want the variable ``myVar`` to be
+   equal to the sixth point in the domain ``myDomain``:
+
+   .. math::
+        myVar = myDomain[5]
+
+   we can write the following:
+
+   .. code-block:: python
+
+     # Notation:
+     #  - eq is a daeEquation object
+     #  - myDomain is daeDomain object
+     #  - myVar is an daeVariable object
+     eq.Residual = myVar() - myDomain[5]
+
+More information about domains can be found in :py:class:`pyCore.daeDomain`
+and in on :doc:`tutorials`.
 
     
 Variables
@@ -477,18 +578,18 @@ An ordinary variable can be declared in the following way:
 
 .. code-block:: python
 
-   myVar = daeVariable("myVar", variableType, parentModel, "description")
+   self.myVar = daeVariable("myVar", variableType, parentModel, "description")
 
 Variables can be distributed on domains. A distributed variable can be
 declared in the following way:
 
 .. code-block:: python
 
-   myVar = daeVariable("myVar", variableType, parentModel, "description")
-   myVar.DistributeOnDomain(myDomain)
+   self.myVar = daeVariable("myVar", variableType, parentModel, "description")
+   self.myVar.DistributeOnDomain(myDomain)
 
    # Or simply:
-   myVar = daeVariable("myVar", variableType, parentModel, "description", [myDomain])
+   self.myVar = daeVariable("myVar", variableType, parentModel, "description", [myDomain])
    
 Initializing variables
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -528,13 +629,13 @@ function:
 
 * To set an absolute tolerance the following can be used:
 
-  .. code:: python
+  .. code-block:: python
 
      myVar.SetAbsoluteTolerances(1E-5)
 
 * To set an initial guess use the following:
 
-  .. code:: python
+  .. code-block:: python
 
      myVar.SetInitialGuess(value)
 
@@ -670,6 +771,71 @@ More information will be given here on getting time and partial derivatives.
 
 More information about variables can be found in the API reference :py:class:`pyCore.daeVariable`
 and in :doc:`tutorials`.
+
+Ports
+-----
+
+Ports are used to connect two models. Like models, ports
+can contain domains, parameters and variables.
+
+In **DAE Tools** ports
+are defined by deriving a new class from the base port class
+(:py:class:`pyCore.daePort`). A template/an empty port is given below:
+
+.. code-block:: python
+
+    class myPort(daePort):
+        def __init__(self, name, parent = None, description = ""):
+            daePort.__init__(self, name, type, parent, description)
+
+            # Declaration/instantiation of domains, parameters and variables
+            ...
+
+The process consists of the following steps:
+
+1. Call the base class constructor:
+
+   .. code-block:: python
+
+      daePort.__init__(self, name, type, parent, description)
+
+2. Declare all domains, parameters and variables in the
+   :py:meth:`pyCore.daePort.__init__` function
+
+   The same rules apply as described in the `Developing models`_ section.
+
+Two ports can be connected by using the :py:meth:`pyCore.daeModel.ConnectPorts` function.
+
+Instantiating ports
+~~~~~~~~~~~~~~~~~~~
+Ports are instantiated in the :py:meth:`pyCore.daeModel.__init__` function:
+
+.. code-block:: python
+
+   self.myPort = daePort("myPort", eInletPort, parentModel, "description")
+
+
+Event ports
+-----------
+
+Event ports are also used to connect two models; however, they allow sending of discrete messages
+(events) between models. Events can be triggered manually or when a specified condition
+is satisfied. The main difference between event and ordinary ports is that the former allow a discrete
+communication between models while latter allow a continuous exchange of information.
+Messages contain a floating point value that can be used by a recipient. Upon a reception of an event
+certain actions can be executed. The actions are specified in the :py:meth:`pyCore.daeModel.ON_EVENT` function.
+
+Two event ports can be connected by using the :py:meth:`pyCore.daeModel.ConnectEventPorts` function.
+A single outlet event port can be connected to unlimited number of inlet event ports. 
+
+Instantiating event ports
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Event ports are instantiated in the :py:meth:`pyCore.daeModel.__init__` function:
+
+.. code-block:: python
+
+   self.myEventPort = daeEventPort("myEventPort", eOutletPort, parentModel, "description")
+
 
 Equations
 ---------

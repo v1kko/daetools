@@ -1239,22 +1239,21 @@ void SetDomainPoints(daeDomain& domain, boost::python::list l)
 	domain.SetPoints(darrPoints);
 }
 
-adouble_array DomainArray1(daeDomain& domain)
+adouble_array DomainArray(daeDomain& domain, boost::python::object indexes)
 {
-	return domain.array();
-}
-
-adouble_array DomainArray2(daeDomain& domain, boost::python::slice s)
-{
-	extract<int> get_start(s.start());
-	extract<int> get_end(s.stop());
-	extract<int> get_step(s.step());
-
-	int start = get_start.check() ? get_start() : 0;
-	int end   = get_end.check()   ? get_end() : domain.GetNumberOfPoints()-1;
-	int step  = get_step.check()  ? get_step() : 1;
-
-	return domain.array(start, end, step);
+    daeArrayRange arrayRange = CreateArrayRange(indexes, &domain);
+    
+    if(arrayRange.m_eType == eRangeDomainIndex)
+    {
+        if(arrayRange.m_domainIndex.m_eType == eDomainIterator || arrayRange.m_domainIndex.m_eType == eIncrementedDomainIterator)
+        {
+            daeDeclareException(exInvalidCall);
+			e << "Invalid argument for the daeDomain::array function (must not be the daeDEDI object)";
+			throw e;
+        }
+    }
+    
+    return domain.array(arrayRange);
 }
 
 daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list CustomPoints)

@@ -41,6 +41,11 @@ help:
 #clean:
 #	-rm -rf $(BUILDDIR)/*
 
+documentation_html:
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/documentation_html
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/documentation_html."
+
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo

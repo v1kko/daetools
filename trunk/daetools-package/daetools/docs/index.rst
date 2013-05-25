@@ -1,5 +1,6 @@
-Contents
-=========
+*****************
+DAE Tools Project
+*****************
 ..
     Copyright (C) Dragan Nikolic, 2013
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -10,25 +11,14 @@ Contents
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. toctree::
-   :numbered:
-   :maxdepth: 1
- 
-   introduction
-   paradigms
-   architecture
-   getting_daetools
-   getting_started
-   pyDAE_user_guide
-   pyDAE_api_ref
-   tutorials
+More info in:
+    
+:doc:`news`
 
-Indices and tables
-==================
+:doc:`documentation`
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:doc:`superlu_cuda`
+
 
 .. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
     :alt:
