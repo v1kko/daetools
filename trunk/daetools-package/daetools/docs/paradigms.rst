@@ -30,28 +30,38 @@ Domain-specific languages are languages with very specific goals in design and i
 commonly lack low-level functions for filesystem access, interprocess control, and other functions
 that characterize full-featured programming languages, scripting or otherwise. 
 
-A good example of general purpose (multi-domain) domain specific language is `Modelica <http://www.modelica.org>`_
+A good example of a multi-domain modelling language is `Modelica <http://www.modelica.org>`_
 while single-domain (chemical processing industry related) DSLs are `gPROMS <http://www.psenterprise.com/gproms>`_,
 `Ascend <http://ascend4.org>`_, `SpeedUp <http://www.aspentech.com>`_ etc.
 
-**DAE Tools** approach is a sort of the hybrid approach: it applies general-purpose programming languages
-such as c++ and Python, but offers a class-hierarchy/API that resembles a syntax of a DSL as much as
-possible, an access to the low-level functions, large number of standard and third party libraries and
-uses state of the art free/open-source software components to accomplish particular tasks (calculating
-derivatives and sensitivities, solving systems of differential and algebraic systems of equations and
-optimization problems, processing and plotting results etc).
+**DAE Tools** approach is a sort of the hybrid approach:
+
+* it applies general-purpose programming languages such as c++ and Python
+  
+but offers:
+    
+* a class-hierarchy/API that resembles a syntax of a DSL as much as possible
+* an access to the low-level functions
+* an access to a large number of standard and third party libraries
+* state of the art free/open-source software components to accomplish particular tasks (calculating
+  derivatives and sensitivities, solving systems of differential and algebraic systems of equations and
+  optimization problems, processing and plotting results etc).
 
 .. |modelica_model| image:: _static/modelica_model.png
                      :width: 200 pt
+                     :target: _static/modelica_model.png
                         
 .. |gPROMS_model|   image:: _static/gPROMS_model.png
                      :width: 200 pt
+                     :target: _static/gPROMS_model.png 
                     
 .. |daetools_model| image:: _static/daetools_model.png
                      :width: 320 pt
+                     :target: _static/daetools_model.png
 
 API comparison between `Modelica <http://www.modelica.org>`_, `gPROMS <http://www.psenterprise.com/gproms>`_
-and **DAE Tools**:
+and **DAE Tools** for a very simple dynamical model (basically a tank with a liquid inside, an inlet and
+an outlet flow where the outlet flowrate depends on the liquid level in the tank):
 
 +-----------------------+---------------------+------------------------+
 +-----------------------+---------------------+------------------------+
@@ -168,28 +178,29 @@ The main characteristics of the Equation-oriented (acausal) approach:
   :math:`y` are degrees of freedom and :math:`p` are parameters.
 
 * Input-Output causality is not fixed
- The benefits are:
+
+  The benefits are:
      
- * Increased model re-use
- * Support for different simulation scenarios (based on a single model) by specifying
-   different degrees of freedom. For instance, an equation given in the following form:
+  * Increased model re-use
+  * Support for different simulation scenarios (based on a single model) by specifying
+    different degrees of freedom. For instance, an equation given in the following form:
 
-   .. math::
-      x_1 + x_2 + x_3 = 0
+    .. math::
+       x_1 + x_2 + x_3 = 0
 
-   can be used to determine either ``x1``, ``x2`` or ``x3`` depending on what combination
-   of variables is known:
+    can be used to determine either ``x1``, ``x2`` or ``x3`` depending on what combination
+    of variables is known:
 
-   .. math::
-      x_1 = -x_2 - x_3 \newline
+    .. math::
+       x_1 = -x_2 - x_3 \newline
 
-      \vee \newline
+       \vee \newline
 
-      x_2 = -x_1 - x_3 \newline
+       x_2 = -x_1 - x_3 \newline
 
-      \vee \newline
+       \vee \newline
 
-      x_3 = -x_1 - x_2
+       x_3 = -x_1 - x_2
 
 
 .. rubric:: Footnotes
@@ -214,7 +225,8 @@ The main characteristics of such an approach are:
 * Models are classes derived from the base daeModel class
 
 * Basically all OO concepts supported by the target language (c++, Python) are allowed,
-  except few exceptions:
+  except few exceptions
+  
   * Multiple inheritance is supported
   * Models can be parametrized (using templates in c++)
   * Derived classes always inherit all declared parameters, variables, equations etc. (polymorphism achieved through virtual functions where the declaration takes place)
@@ -249,7 +261,3 @@ complete in a year. Python shines as a glue language, used to combine components
 `link <http://www.python.org/doc/essays/comparisons>`_.
 Obviously, not everything can be developed in python; a heavy c++ artillery is still necessary for highly complex projects.
 
-
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

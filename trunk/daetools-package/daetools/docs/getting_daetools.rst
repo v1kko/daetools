@@ -32,7 +32,7 @@ System requirements
 Supported platforms:
     
 * GNU/Linux (i686, x86_64, arm)
-* Windows (32/64 bit)
+* Windows (32 bit and 32 bit version of DAE Tools on 64 bit)
 * MacOS (x86, x86_64)
 
 Supported python versions:
@@ -72,7 +72,7 @@ Getting the packages
 
 The instalation files can be downloaded from: `<https://sourceforge.net/projects/daetools/files>`_
 
-**Note**: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
+.. note:: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
 
 The naming convention of the installation files:
 
@@ -229,14 +229,18 @@ the libraries.
     sh compile_libraries_linux.sh
 
 
-**Note 1:**
-There is a bug in Sundials IDAS library. When compiling fails, go to the folder ``trunk/idas`` and change the line 24
-(or somewhere around it) in the ``Makefile``: ``top_builddir =`` to ``top_builddir = .``.
+.. note:: There is a bug in Sundials IDAS library. When compiling fails, go to the folder ``trunk/idas`` and change the line 24
+          (or somewhere around it) in the ``Makefile``:
 
-**Note 2:**
-There are known problems to compile the older bonmin and trilinos libraries using GNU GCC 4.6. This has been fixed
-in bonmin 1.5+ and trilinos 10.8+ versions. Therefore, either GCC 4.5 and below or the recent
-versions of bonmin/trilinos libraries should be used.
+          .. code-block:: bash
+
+              top_builddir =
+              to:
+              top_builddir = .
+
+.. note:: There are known problems to compile the older bonmin and trilinos libraries using GNU GCC 4.6. This has been fixed
+          in bonmin 1.5+ and trilinos 10.8+ versions. Therefore, either GCC 4.5 and below or the recent
+          versions of bonmin/trilinos libraries should be used.
 
 Finally, compile the **DAE Tools** libraries and python modules by executing ``compile_linux.sh`` shell script located
 in the ``trunk`` directory. The script accepts one argument specifying projects that should be compiled. Any of the
@@ -257,7 +261,7 @@ All python extensions should be placed in ``trunk/daetools-package/daetools/pyDA
     
 .. code-block:: bash
 
-    cd daetools-package
+    cd daetools/trunk/daetools-package
     sudo python setup.py install
 
 
@@ -314,9 +318,9 @@ Necessary tools: `QtCreator <http://qt.nokia.com/products/developer-tools>`_,
 `Microsoft VC++ <http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=14597>`_
 and `G95 Fortran <http://www.g95.org>`_ compiler (Mumps only).
 
-**Note:** Compiling all third party libraries and **DAE Tools** projects requires a mental gymnastics
-impossible to describe by any human language so that the pre-compiled libraries are provided in the downloads
-section (`windows libraries <https://sourceforge.net/projects/daetools/files/windows%20libraries>`_).
+.. note:: Compiling all third party libraries and **DAE Tools** projects requires a mental gymnastics
+          impossible to describe by any human language so that the pre-compiled libraries are provided in the downloads
+          section (`windows libraries <https://sourceforge.net/projects/daetools/files/windows%20libraries>`_).
 
 **DAE Tools** should be compiled from within QtCreator IDE:
     
@@ -330,15 +334,12 @@ section (`windows libraries <https://sourceforge.net/projects/daetools/files/win
  
 * Follow the instructions for compiling **DAE Tools** described in :ref:`From QtCreator IDE <from_qtcreator_ide>` section above.
 
-**Note:** superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.
+.. note:: superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.
 
 DAE Tools can be installed by using the folowing commands:
 
 .. code-block:: bash
 
-    cd daetools-package
+    cd daetools/trunk/daetools-package
     sudo python setup.py install
 
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

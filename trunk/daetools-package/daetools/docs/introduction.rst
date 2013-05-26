@@ -75,9 +75,10 @@ Type of activities that can be carried out with models developed in **DAE Tools*
 
 * Optimization (NLP and MINLP problems)
 
-* Parameter estimation (the least squares method: Levenberg–Marquardt algorithm)
+* Parameter estimation (the least squares method:
+  `Levenberg–Marquardt algorithm <https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm>`_)
 
-* Model report generation (in XML + MathML format with XSL transformations for XHTML generation)
+* Model report generation (in XML + MathML format with XSL transformations for XHTML code generation)
 
 * Code generation for other modelling languages and general purpose programming languages
 
@@ -185,6 +186,3 @@ How to cite
 If you use **DAE Tools** in your work then please cite it in the following way:
 D. Nikolic, DAE Tools process modelling software, 2010. http://www.daetools.com
 
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

@@ -11,9 +11,8 @@ Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-**Note**:
-Currently only Mozilla Firefox and Opera 12+ browsers are supported for viewing model reports
-(MathML rendering issue).
+.. note:: Currently only Mozilla Firefox and Opera 12+ browsers are supported for viewing
+          model reports (MathML rendering issue).
 
 
 .. _whats_the_time:
@@ -493,9 +492,5 @@ Model report            `opt_tutorial6.xml <../../examples/opt_tutorial6.xml>`_
 Runtime model report    `opt_tutorial6-rt.xml <../../examples/opt_tutorial6-rt.xml>`_
 Source code             `opt_tutorial6.py <../../examples/opt_tutorial6.html>`_
 =====================   =================================================================
-
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:
 
     

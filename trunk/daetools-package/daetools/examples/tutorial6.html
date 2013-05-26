@@ -26,20 +26,20 @@
 <span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;&quot;</span>
-<span style='color:#ff0000;'>This is the simple port demo.</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>This is the simple port demo.</span>
 
-<span style='color:#ff0000;'>Here we introduce:</span>
+<span style='color:#c00000;'>Here we introduce:</span>
 
-<span style='color:#ff0000;'>- Ports</span>
-<span style='color:#ff0000;'>- Port connections</span>
-<span style='color:#ff0000;'>- Units (instances of other models)</span>
+<span style='color:#c00000;'>- Ports</span>
+<span style='color:#c00000;'>- Port connections</span>
+<span style='color:#c00000;'>- Units (instances of other models)</span>
 
-<span style='color:#ff0000;'>A simple port type 'portSimple' is defined which contains only one variable 't'.</span>
-<span style='color:#ff0000;'>Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'.</span>
-<span style='color:#ff0000;'>The wrapper model 'modTutorial' instantiate these two models as its units and connects them</span>
-<span style='color:#ff0000;'>by connecting their ports.</span>
-<span style='color:#ff0000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>A simple port type 'portSimple' is defined which contains only one variable 't'.</span>
+<span style='color:#c00000;'>Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'.</span>
+<span style='color:#c00000;'>The wrapper model 'modTutorial' instantiate these two models as its units and connects them</span>
+<span style='color:#c00000;'>by connecting their ports.</span>
+<span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, tempfile
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
@@ -54,43 +54,43 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;
 <span style='color:#008000;'># variables are declared in the constructor __init__ and their constructor accepts ports as</span>
 <span style='color:#008000;'># the 'Parent' argument.</span>
 <b>class</b> portSimple(daePort):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daePort.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description)
 
-        <span style='color:#0000ff;'>self</span>.t <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#ff0000;'>&quot;t&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Time elapsed in the process&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.t <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;t&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Time elapsed in the process&quot;</span>)
 
 <span style='color:#008000;'># Here we define two models, 'modPortIn' and 'modPortOut' each having one port of type portSimple.</span>
 <span style='color:#008000;'># The model 'modPortIn' contains inlet port Pin while the model 'modPortOut' contains outlet port Pout.</span>
 <b>class</b> modPortIn(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.Pin <b><span style='color:#0000ff;'>=</span></b> portSimple(<span style='color:#ff0000;'>&quot;P_in&quot;</span>, eInletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;The simple port&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Pin <b><span style='color:#0000ff;'>=</span></b> portSimple(<span style='color:#c00000;'>&quot;P_in&quot;</span>, eInletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;The simple port&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 
 <b>class</b> modPortOut(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.Pout <b><span style='color:#0000ff;'>=</span></b> portSimple(<span style='color:#ff0000;'>&quot;P_out&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;The simple port&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.time <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#ff0000;'>&quot;time&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#ff0000;'>&quot;Time elapsed in the process&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Pout <b><span style='color:#0000ff;'>=</span></b> portSimple(<span style='color:#c00000;'>&quot;P_out&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;The simple port&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.time <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;time&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Time elapsed in the process&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;time&quot;</span>, <span style='color:#ff0000;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;time&quot;</span>, <span style='color:#c00000;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.time.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1.0</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#ff0000;'>&quot;Port_t&quot;</span>, <span style='color:#ff0000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Port_t&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Pout.t() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.time()
 
 <span style='color:#008000;'># Model 'modTutorial' declares two units mpin of type 'modPortIn' and 'mpout' of type 'modPortOut'.</span>
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.mpin  <b><span style='color:#0000ff;'>=</span></b> modPortIn(<span style='color:#ff0000;'>&quot;Port_In&quot;</span>, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.mpout <b><span style='color:#0000ff;'>=</span></b> modPortOut(<span style='color:#ff0000;'>&quot;Port_Out&quot;</span>, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.mpin  <b><span style='color:#0000ff;'>=</span></b> modPortIn(<span style='color:#c00000;'>&quot;Port_In&quot;</span>, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.mpout <b><span style='color:#0000ff;'>=</span></b> modPortOut(<span style='color:#c00000;'>&quot;Port_Out&quot;</span>, <span style='color:#0000ff;'>self</span>)
 
         <span style='color:#008000;'># Ports can be connected by using the function ConnectPorts from daeModel class. Apparently,</span>
         <span style='color:#008000;'># ports dont have to be of the same type but must contain the same number of parameters and variables.</span>
@@ -102,12 +102,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#ff0000;'>&quot;tutorial6&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;'>&quot;This tutorial explains how to define and connect ports. </span><span style='color:#ff0000;'>\n</span><span style='color:#ff0000;'>&quot;</span> \
-                             <span style='color:#ff0000;'>&quot;A simple port type 'portSimple' is defined which contains only one variable 't'. &quot;</span> \
-                             <span style='color:#ff0000;'>&quot;Two models 'modPortIn' and 'modPortOut' are defined, each having one port of type 'portSimple'. &quot;</span> \
-                             <span style='color:#ff0000;'>&quot;The wrapper model 'modTutorial' instantiate these two models as its units and connects them &quot;</span> \
-                             <span style='color:#ff0000;'>&quot;by connecting their ports. &quot;</span>
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial6&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
@@ -119,8 +115,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;
     pydae_model <b><span style='color:#0000ff;'>=</span></b> simulation.m.ExportObjects(objects_to_export, ePYDAE)
     cdae_model  <b><span style='color:#0000ff;'>=</span></b> simulation.m.ExportObjects(objects_to_export, eCDAE)
 
-    file_pydae <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;_export.py&quot;</span>, <span style='color:#ff0000;'>&quot;w&quot;</span>)
-    file_cdae  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;_export.h&quot;</span>,  <span style='color:#ff0000;'>&quot;w&quot;</span>)
+    file_pydae <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;_export.py&quot;</span>, <span style='color:#c00000;'>&quot;w&quot;</span>)
+    file_cdae  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;_export.h&quot;</span>,  <span style='color:#c00000;'>&quot;w&quot;</span>)
 
     file_pydae.write(pydae_model)
     file_cdae.write(cdae_model)
@@ -152,16 +148,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;
     simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
 
     <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#ff0000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#ff0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#ff0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
     <span style='color:#008000;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#ff0000;'>&quot;-rt.xml&quot;</span>)
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
     <span style='color:#008000;'># Export models and ports</span>
     export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])
@@ -173,8 +169,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#ff0000;
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#ff0000;'>'console'</span>):
+<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
         <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui

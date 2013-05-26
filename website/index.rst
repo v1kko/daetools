@@ -1,3 +1,6 @@
+*****************
+DAE Tools Project
+*****************
 ..
     Copyright (C) Dragan Nikolic, 2013
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -13,11 +16,10 @@
    :maxdepth: 1
 
    news
+   contact
    docs/index.rst
    superlu_cuda
 
-About DAE Tools
-===============
 
 .. include:: docs/introduction.rst
    :start-after: begin-command
@@ -31,10 +33,10 @@ Download
 
 The current version is 1.2.1. A new release 1.3.1 is in the beta state.
 
-Installation files can be found on the SourceForge website:
-`DAE Tools download <https://sourceforge.net/projects/daetools/files>`_
-while the subversion repository
-`DAE Tools SVN <https://sourceforge.net/p/daetools/code/HEAD/tree>`_.
+Installation files can be found on the SourceForge website 
+`download section <https://sourceforge.net/projects/daetools/files>`_,
+and the source code in the SourceForge
+`subversion repository <https://sourceforge.net/p/daetools/code/HEAD/tree>`_.
 
 More information on system requirements, downloading and installing **DAE Tools**
 can be found in :doc:`docs/getting_daetools`.
@@ -111,6 +113,12 @@ features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
 
 Full list of news can be found here: :doc:`news`
 
+Contact
+=======
+The author and the main developer is dr. Dragan Nikolic and can be contacted
+at dnikolic at daetools dot com.
+
+More information about the author can be found in :doc:`contact`.
 
 Documentation
 =============
@@ -125,8 +133,3 @@ This is a new DAE Tools subproject with the aim to provide
 a direct sparse linear equation solver which works with NVidia CUDA GPUs.
 More information: :doc:`superlu_cuda`.
 
-
-
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

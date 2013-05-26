@@ -73,9 +73,9 @@ class daePlotDataReporter(daeDataReporterLocal):
         '''
         ``args`` can be either:
 
-            a) Instances of daeVariable, or
-            b) Lists of daeVariable instances, or
-            c) A mixture of both.
+        a) Instances of daeVariable, or
+        b) Lists of daeVariable instances, or
+        c) A mixture of both.
 
         Each ``arg`` will get its own subplot. The subplots are all automatically
         arranged such that the resulting figure is as square-like as

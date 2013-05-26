@@ -12,8 +12,9 @@ SuperLU CUDA
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 This is a new DAE Tools subproject with the aim to provide a direct
-sparse linear equation solver which works with NVidia CUDA GPUs. Get the
-latest source code `superlu\_cuda-0.0.1.tar.gz`_.
+sparse linear equation solver which works with NVidia CUDA GPUs. The
+source code can be found
+`here <https://sourceforge.net/projects/daetools/files/SuperLU_CUDA/>`_.
 
 Current status
 --------------
@@ -62,6 +63,3 @@ com.
 .. _NVidia GPU Computing: http://forums.nvidia.com/index.php?s=35f6610fb56e3ab2e319eed132a93ef7&showforum=62
 
 
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

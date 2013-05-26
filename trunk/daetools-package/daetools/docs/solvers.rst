@@ -145,7 +145,3 @@ Parameter estimation solvers
 .. autoclass:: daetools.solvers.minpack.daeMinpackLeastSq
     :members:
     :undoc-members:
-
-    
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:

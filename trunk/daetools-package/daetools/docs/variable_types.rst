@@ -45,7 +45,3 @@ Overview
 .. autoattribute:: daetools.pyDAE.variable_types.diffusivity_t
 
 .. autoattribute:: daetools.pyDAE.variable_types.amount_adsorbed_t
-
-
-.. image:: http://sourceforge.net/apps/piwik/daetools/piwik.php?idsite=1&amp;rec=1&amp;url=wiki/
-    :alt:
