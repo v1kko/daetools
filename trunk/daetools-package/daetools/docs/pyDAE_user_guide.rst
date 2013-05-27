@@ -1278,7 +1278,7 @@ we can write:
                                   userDefinedActions = [ userDefinedAction, ... ] )
 
 where the first argument of the :py:meth:`~pyCore.daeModel.ON_EVENT` function is the
-:py:class:`~pyCore.daeEventPort` object to be monitored for events, while the rwst of the arguments
+:py:class:`~pyCore.daeEventPort` object to be monitored for events, while the rest of the arguments
 is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look

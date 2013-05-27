@@ -190,6 +190,9 @@ public:
 	virtual void Run(void);
 	virtual void Finalize(void);
 	
+    virtual void StartIterationRun(int iteration);
+    virtual void EndIterationRun(int iteration);
+    
 protected:
 	daeSimulation_t*			m_pSimulation;
 	daeLog_t*					m_pLog;

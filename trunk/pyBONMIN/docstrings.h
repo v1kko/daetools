@@ -5,6 +5,7 @@ const char* DOCSTR_daeCreateBONMINSolver = "";
 const char* DOCSTR_daeCreateIPOPTSolver = "";
 
 const char* DOCSTR_daeBONMIN = "";
+    const char* DOCSTR_daeBONMIN_init = "";
     const char* DOCSTR_daeBONMIN_Name = "";
     const char* DOCSTR_daeBONMIN_Initialize = "";
     const char* DOCSTR_daeBONMIN_Solve = "";

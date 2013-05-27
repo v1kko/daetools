@@ -171,7 +171,6 @@ class RunExamples(QtGui.QDialog):
         simName = str(self.ui.comboBoxExample.currentText())
         try:
             url   = QtCore.QUrl(join(_examples_dir, simName + ".html"))
-            print url
             title = simName + ".py"
             wv = daeWebView(url)
             wv.setWindowTitle(title)

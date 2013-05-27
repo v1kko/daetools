@@ -35,6 +35,8 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
 	m_pModel     = pModel;
 	m_pDAESolver = pDAESolver;
 	
+// Declare a dimensionless variable type
+// The correct units will be set in the SetResidual function
 	const daeVariableType varType("gradient_function_t", unit(), -1.0e+100, 1.0e+100, 0.0, abstol);
 
 	m_nEquationIndexInBlock = ULONG_MAX;
@@ -59,8 +61,16 @@ void daeFunctionWithGradients::SetResidual(adouble res)
 {
 	if(!m_pEquation)
 		daeDeclareAndThrowException(exInvalidPointer);
-		
-	m_pEquation->SetResidual( res - (*m_pVariable )() );
+    
+    // m_pVariable has been created dimensionless
+    // Now it is a good opportunity to set the correct units
+    if(res.node)
+    {    
+        unit u = res.node->GetQuantity().getUnits();
+        m_pVariable->m_VariableType.SetUnits(u);
+    }
+    
+    m_pEquation->SetResidual( res - (*m_pVariable )() );
 }
 
 adouble daeFunctionWithGradients::GetResidual(void) const

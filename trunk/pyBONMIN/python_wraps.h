@@ -50,30 +50,9 @@ public:
 };
 
 
-class daeBONMINWrapper : public daeBONMINSolver,
-                         public boost::python::wrapper<daeBONMINSolver>
-{
-public:
-    daeBONMINWrapper(void)
-    {
-    }
-	
-	void SetOptionS(const string& strOptionName, const string& strValue)
-	{
-		daeBONMINSolver::SetOption(strOptionName, strValue);
-	}
-	    
-	void SetOptionF(const string& strOptionName, real_t dValue)
-	{
-		daeBONMINSolver::SetOption(strOptionName, dValue);
-	}
-    
-	void SetOptionI(const string& strOptionName, int iValue)
-	{
-		daeBONMINSolver::SetOption(strOptionName, iValue);
-	}   
-};
-
+void SetOptionS(daeBONMINSolver& self, const string& strOptionName, const string& strValue);
+void SetOptionF(daeBONMINSolver& self, const string& strOptionName, real_t dValue);
+void SetOptionI(daeBONMINSolver& self, const string& strOptionName, int iValue);
 
 }
 

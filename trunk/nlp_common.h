@@ -27,6 +27,7 @@ class daeNLPCommon
 public:
 	daeNLPCommon(void)
 	{
+        m_pOptimization = NULL;
 		m_pSimulation	= NULL;
 		m_pDAESolver	= NULL;
 		m_pDataReporter	= NULL;
@@ -40,11 +41,14 @@ public:
 	}
 
 public:
-	void Init(daeSimulation_t*   pSimulation, 
+	void Init(daeOptimization_t* pOptimization,
+              daeSimulation_t*   pSimulation, 
 			  daeDAESolver_t*    pDAESolver, 
 			  daeDataReporter_t* pDataReporter, 
 			  daeLog_t*          pLog)
 	{
+        if(!pOptimization)
+			daeDeclareAndThrowException(exInvalidPointer);
 		if(!pSimulation)
 			daeDeclareAndThrowException(exInvalidPointer);
 		if(!pDAESolver)
@@ -62,6 +66,7 @@ public:
 			throw e;
 		}
 	
+        m_pOptimization = pOptimization;
 		m_pSimulation   = pSimulation;
 		m_pDAESolver    = pDAESolver;
 		m_pDataReporter	= pDataReporter;
@@ -245,6 +250,8 @@ protected:
 		
 		m_pSimulation->RegisterData((boost::format("Iter_%05d") % m_iRunCounter).str());
 
+        m_pOptimization->StartIterationRun(m_iRunCounter+1);
+        
 		if(m_iRunCounter == 0)
 		{
 		// 1. Re-assign the optimization variables
@@ -281,6 +288,8 @@ protected:
 		// 5. Run the simulation
 			m_pSimulation->Run();
 		}
+        
+        m_pOptimization->EndIterationRun(m_iRunCounter+1);
 		
 		m_iRunCounter++;
 		
@@ -466,6 +475,7 @@ protected:
 	
 public:
 	std::string			m_strModelName;
+    daeOptimization_t*  m_pOptimization;
 	daeSimulation_t*	m_pSimulation;
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;

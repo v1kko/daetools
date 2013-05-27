@@ -18,8 +18,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "activity.h"
 #include "datareporting.h"
-using namespace dae::activity;
 
+namespace dae
+{
+namespace activity
+{
+class daeOptimization_t;
+}
+}
+
+using namespace dae::activity;
 namespace dae
 {
 namespace nlpsolver
@@ -33,7 +41,8 @@ public:
 	virtual ~daeNLPSolver_t(void){}
 
 public:
-	virtual void Initialize(daeSimulation_t*   pSimulation,
+	virtual void Initialize(daeOptimization_t* pOptimization,
+                            daeSimulation_t*   pSimulation,
 						    daeDAESolver_t*    pDAESolver,
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog) = 0;
@@ -66,6 +75,9 @@ public:
 							daeLog_t*          pLog)  = 0;
 	virtual void Run(void)		= 0;
 	virtual void Finalize(void)	= 0;
+    
+    virtual void StartIterationRun(int iteration) = 0;
+    virtual void EndIterationRun(int iteration)   = 0;
 };
 
 }

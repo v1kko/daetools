@@ -118,7 +118,7 @@ def consoleRun():
     optimization = daeOptimization()
 
     # NLOPT algorithm must be set in its constructor
-    nlpsolver = pyNLOPT.daeCreateNLOPTSolver('NLOPT_LD_SLSQP')
+    nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
 
     # Do no print progress
     log.PrintProgress = False

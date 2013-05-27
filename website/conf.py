@@ -37,7 +37,7 @@ autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['docs/_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -93,11 +93,11 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+# modindex_common_prefix = []
 
 
 # pngmath
-#pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
+# pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
 
  
 # -- Options for HTML output ---------------------------------------------------
@@ -134,7 +134,7 @@ html_favicon = "docs/[d][a][e].ico"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_css']
+html_static_path = ['docs/_static', 'docs/_css']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

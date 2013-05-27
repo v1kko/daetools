@@ -49,15 +49,12 @@ but offers:
 
 .. |modelica_model| image:: _static/modelica_model.png
                      :width: 200 pt
-                     :target: _static/modelica_model.png
                         
 .. |gPROMS_model|   image:: _static/gPROMS_model.png
                      :width: 200 pt
-                     :target: _static/gPROMS_model.png 
                     
 .. |daetools_model| image:: _static/daetools_model.png
                      :width: 320 pt
-                     :target: _static/daetools_model.png
 
 API comparison between `Modelica <http://www.modelica.org>`_, `gPROMS <http://www.psenterprise.com/gproms>`_
 and **DAE Tools** for a very simple dynamical model (basically a tank with a liquid inside, an inlet and

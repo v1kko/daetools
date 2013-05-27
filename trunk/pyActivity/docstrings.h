@@ -70,5 +70,7 @@ const char* DOCSTR_daeOptimization = "";
     const char* DOCSTR_daeOptimization_Initialize = "";
     const char* DOCSTR_daeOptimization_Run = "";
     const char* DOCSTR_daeOptimization_Finalize = "";
+    const char* DOCSTR_daeOptimization_StartIteration = "";
+    const char* DOCSTR_daeOptimization_EndIteration = "";
 
 #endif

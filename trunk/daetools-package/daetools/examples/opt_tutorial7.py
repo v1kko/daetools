@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                            opt_tutorial1.py
+                            opt_tutorial7.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -17,13 +17,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial introduces IPOPT NLP solver, its setup and options.
+This tutorial introduces monitoring optimization progress.
 """
 
 import sys
 from daetools.pyDAE import *
 from daetools.solvers.ipopt import pyIPOPT
-from time import localtime, strftime
+from time import localtime, strftime, sleep
+from daetools.dae_simulator.optimization_progress_monitor import daeOptimizationProgressMonitor
 
 # Standard variable types are defined in variable_types.py
 
@@ -45,7 +46,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("opt_tutorial1")
+        self.m = modTutorial("opt_tutorial7")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -86,6 +87,63 @@ class simTutorial(daeSimulation):
         self.x3 = self.SetContinuousOptimizationVariable(self.m.x3, 1, 5, 2);
         self.x4 = self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
+class optTutorial(daeOptimization):
+    def __init__(self, app):
+        daeOptimization.__init__(self)
+
+        self.app = app
+        self.monitor = daeOptimizationProgressMonitor()
+        self.monitor.show()
+
+    def Initialize(self, simulation, nlpsolver, daesolver, datareporter, log):
+        daeOptimization.Initialize(self, simulation, nlpsolver, daesolver, datareporter, log)
+
+        opt_vars    = self.Simulation.OptimizationVariables
+        constraints = self.Simulation.Constraints
+        fobj        = self.Simulation.ObjectiveFunction
+
+        n   = 3
+        Nov = len(opt_vars)
+        Nc  = len(constraints)
+        m = max(Nov, Nc)
+
+        self.f_plot   = None
+        self.c_plots  = []
+        self.ov_plots = []
+
+        self.f_plot = self.monitor.addSubplot(n, m, 1, 'Fobj')
+
+        for i, ov in enumerate(opt_vars):
+            plot_no = m + 1 + i
+            self.ov_plots.append( self.monitor.addSubplot(n, m, plot_no, ov.Name) )
+        
+        for i, c in enumerate(constraints):
+            plot_no = 2*m + 1 + i
+            self.c_plots.append( self.monitor.addSubplot(n, m, plot_no, c.Name) )
+
+        self.monitor.figure.tight_layout()
+
+    def StartIterationRun(self, iteration):
+        pass
+
+    def EndIterationRun(self, iteration):
+        opt_vars    = self.Simulation.OptimizationVariables
+        constraints = self.Simulation.Constraints
+        fobj        = self.Simulation.ObjectiveFunction
+
+        subplot, line = self.f_plot
+        self.monitor.addIteration(subplot, line, fobj.Value)
+
+        for ov, (subplot, line) in zip(opt_vars, self.ov_plots):
+            self.monitor.addIteration(subplot, line, ov.Value)
+
+        for c, (subplot, line) in zip(constraints, self.c_plots):
+            self.monitor.addIteration(subplot, line, c.Value)
+
+        self.monitor.redraw()
+        self.app.processEvents()
+        sleep(1)
+
 def setOptions(nlpsolver):
     # 1) Set the options manually
     try:
@@ -101,11 +159,11 @@ def setOptions(nlpsolver):
         #nlpsolver.ClearOptions()
     except Exception as e:
         print str(e)
-        
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
-    opt = daeOptimization()
+    opt = optTutorial(app)
     nlp = pyIPOPT.daeIPOPT()
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
@@ -117,18 +175,18 @@ def guiRun(app):
     simulator.exec_()
 
 # Setup everything manually and run in a console
-def consoleRun():
+def consoleRun(app):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     nlpsolver    = pyIPOPT.daeIPOPT()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
-    optimization = daeOptimization()
+    optimization = optTutorial(app)
 
     # Do no print progress
     log.PrintProgress = False
-    
+
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -157,9 +215,12 @@ def consoleRun():
     optimization.Finalize()
 
 if __name__ == "__main__":
+    from PyQt4 import QtCore, QtGui
+    app = QtGui.QApplication(sys.argv)
+
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
+        consoleRun(app)
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
         guiRun(app)
+
+    app.exec_()

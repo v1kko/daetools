@@ -42,7 +42,8 @@ public:
 	virtual ~daeNLOPTSolver(void);
 
 public:
-	virtual void Initialize(daeSimulation_t*   pSimulation, 
+	virtual void Initialize(daeOptimization_t* pOptimization,
+                            daeSimulation_t*   pSimulation, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog);

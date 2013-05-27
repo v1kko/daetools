@@ -4,6 +4,7 @@
 const char* DOCSTR_daeCreateNLOPTSolver = "";
 
 const char* DOCSTR_daeNLOPT = "";
+    const char* DOCSTR_daeNLOPT_init = "";
     const char* DOCSTR_daeNLOPT_Name = "";
     const char* DOCSTR_daeNLOPT_Initialize = "";
     const char* DOCSTR_daeNLOPT_Solve = "";

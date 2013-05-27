@@ -60,7 +60,8 @@ class DAE_NLPSOLVER_API daeMINLP : public TMINLP,
 #endif
 {
 public:
-	daeMINLP(daeSimulation_t*   pSimulation, 
+	daeMINLP(daeOptimization_t* pOptimization,
+             daeSimulation_t*   pSimulation, 
 		     daeDAESolver_t*    pDAESolver, 
 		     daeDataReporter_t* pDataReporter, 
 		     daeLog_t*          pLog);
@@ -207,7 +208,8 @@ public:
 	virtual ~daeBONMINSolver(void);
 
 public:
-	virtual void Initialize(daeSimulation_t*   pSimulation, 
+	virtual void Initialize(daeOptimization_t* pOptimization,
+                            daeSimulation_t*   pSimulation, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
 							daeLog_t*          pLog);
@@ -224,6 +226,7 @@ public:
 	void LoadOptionsFile(const string& strOptionsFile);
 
 protected:
+    daeOptimization_t*  m_pOptimization;
 	daeSimulation_t*	m_pSimulation;
 	daeDAESolver_t*		m_pDAESolver;
 	daeLog_t*			m_pLog;

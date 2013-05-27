@@ -544,8 +544,8 @@ public:
 
 
 
-class daeOptimizationWrapper : public daeOptimization_t,
-							   public boost::python::wrapper<daeOptimization_t>
+class daeOptimization_tWrapper : public daeOptimization_t,
+							     public boost::python::wrapper<daeOptimization_t>
 {
 public:
 	void Initialize(daeSimulation_t*   pSimulation,
@@ -555,7 +555,12 @@ public:
 					daeLog_t*          pLog,
 					size_t			   nNumberOfObjectiveFunctions = 1)
 	{
-		this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog, nNumberOfObjectiveFunctions);
+		this->get_override("Initialize")(pSimulation, 
+                                         pNLPSolver, 
+                                         pDAESolver, 
+                                         pDataReporter, 
+                                         pLog, 
+                                         nNumberOfObjectiveFunctions);
 	}
 	
 	void Run(void)
@@ -565,10 +570,53 @@ public:
 	
 	void Finalize(void)
 	{
-		this->get_override("Run")();
+		this->get_override("Finalize")();
 	}
+    
+    void StartIterationRun(int iteration)
+    {
+        this->get_override("StartIterationRun")(iteration);
+    }
+    
+    void EndIterationRun(int iteration)
+    {
+        this->get_override("EndIterationRun")(iteration);
+    }
 };
 
+class daeOptimizationWrapper : public daeOptimization,
+							   public boost::python::wrapper<daeOptimization>
+{
+public:
+    void StartIterationRun(int iteration)
+    {
+        if(boost::python::override f = this->get_override("StartIterationRun"))
+            f(iteration);
+        else
+            this->daeOptimization::StartIterationRun(iteration);
+    }
+    void def_StartIterationRun(int iteration)
+    {
+        this->daeOptimization::StartIterationRun(iteration);
+    }
+    
+    void EndIterationRun(int iteration)
+    {
+        if(boost::python::override f = this->get_override("EndIterationRun"))
+            f(iteration);
+        else
+            this->daeOptimization::EndIterationRun(iteration);
+    }
+    void def_EndIterationRun(int iteration)
+    {
+        this->daeOptimization::EndIterationRun(iteration);
+    }
+    
+    daeSimulation_t* GetSimulation_(void) const
+	{
+		return m_pSimulation;
+	}
+};
 
 }
 

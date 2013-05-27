@@ -200,15 +200,19 @@ BOOST_PYTHON_MODULE(pyActivity)
 /**************************************************************
 	daeOptimization_t
 ***************************************************************/
-	class_<daepython::daeOptimizationWrapper, boost::noncopyable>("daeOptimization_t", no_init)
+	class_<daepython::daeOptimization_tWrapper, boost::noncopyable>("daeOptimization_t", no_init)
 		.def("Initialize",             pure_virtual(&daeOptimization_t::Initialize))
 		.def("Run",                    pure_virtual(&daeOptimization_t::Run))
 		.def("Finalize",               pure_virtual(&daeOptimization_t::Finalize))
+        .def("StartIterationRun",      pure_virtual(&daeOptimization_t::StartIterationRun))
+        .def("EndIterationRun",        pure_virtual(&daeOptimization_t::EndIterationRun))
 	;
 	
-	class_<daeOptimization, bases<daeOptimization_t>, boost::noncopyable>("daeOptimization", DOCSTR_daeOptimization, no_init)
+	class_<daepython::daeOptimizationWrapper, bases<daeOptimization_t>, boost::noncopyable>("daeOptimization", DOCSTR_daeOptimization, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeOptimization_init))
 
+        .add_property("Simulation",	   make_function(&daepython::daeOptimizationWrapper::GetSimulation_, return_internal_reference<>()))
+            
         .def("Initialize",             &daeOptimization::Initialize, ( arg("self"), 
                                                                        arg("simulation"),
                                                                        arg("nlpSolver"), 
@@ -218,8 +222,13 @@ BOOST_PYTHON_MODULE(pyActivity)
                                                                      ), DOCSTR_daeOptimization_Initialize)
 		.def("Run",                    &daeOptimization::Run,        ( arg("self") ), DOCSTR_daeOptimization_Run)
 		.def("Finalize",               &daeOptimization::Finalize,   ( arg("self") ), DOCSTR_daeOptimization_Finalize)
+            
+        .def("StartIterationRun",      &daeOptimization_t::StartIterationRun, &daepython::daeOptimizationWrapper::def_StartIterationRun,
+                                       ( arg("self"), arg("iteration") ), DOCSTR_daeOptimization_StartIteration)
+            
+        .def("EndIterationRun",        &daeOptimization_t::EndIterationRun, &daepython::daeOptimizationWrapper::def_EndIterationRun,
+                                       ( arg("self"), arg("iteration") ), DOCSTR_daeOptimization_EndIteration)
 	 ;
-
     
     
 }

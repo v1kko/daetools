@@ -18,6 +18,8 @@ BOOST_PYTHON_MODULE(pyNLOPT)
 		;
 	
     class_<daepython::daeNLOPTWrapper, bases<daeNLPSolver_t>, boost::noncopyable>("daeNLOPT", DOCSTR_daeNLOPT, no_init)
+        .def(init<string>(( boost::python::arg("self"), boost::python::arg("algorithm") ), DOCSTR_daeNLOPT_init))
+            
         .add_property("Name",		&daeNLOPTSolver::GetName, DOCSTR_daeNLOPT_Name)
         .add_property("xtol_rel",	&daeNLOPTSolver::get_xtol_rel,
                                     &daeNLOPTSolver::set_xtol_rel, DOCSTR_daeNLOPT_xtol_rel)
@@ -36,7 +38,5 @@ BOOST_PYTHON_MODULE(pyNLOPT)
         .def("Solve",				&daeNLOPTSolver::Solve, ( boost::python::arg("self") ), DOCSTR_daeNLOPT_Solve)
         .def("PrintOptions",		&daeNLOPTSolver::PrintOptions, ( boost::python::arg("self") ), DOCSTR_daeNLOPT_PrintOptions)
         ; 
-
-    def("daeCreateNLOPTSolver", daeCreateNLOPTSolver, return_value_policy<manage_new_object>(), ( boost::python::arg("algorithmName") ), DOCSTR_daeCreateNLOPTSolver);
 }
 

@@ -64,12 +64,13 @@ daeNLOPTSolver::~daeNLOPTSolver(void)
 		nlopt_destroy(m_nlopt);
 }
 
-void daeNLOPTSolver::Initialize(daeSimulation_t* pSimulation, 
+void daeNLOPTSolver::Initialize(daeOptimization_t* pOptimization,
+                                daeSimulation_t* pSimulation, 
 								daeDAESolver_t* pDAESolver, 
 								daeDataReporter_t* pDataReporter, 
 								daeLog_t* pLog)
 {
-	daeNLPCommon::Init(pSimulation, pDAESolver, pDataReporter, pLog);
+	daeNLPCommon::Init(pOptimization, pSimulation, pDAESolver, pDataReporter, pLog);
 	
 	daeNLPCommon::CheckProblem(m_ptrarrOptVariables);
 

@@ -13,7 +13,7 @@ Contact
 
 The author and the main developer is dr. Dragan Nikolic |LinkedIn|
 
-Please send your comments and questions at: dnikolic at daetools dot com
+Please send your comments and questions to: dnikolic at daetools dot com.
 
 .. |LinkedIn| image:: http://www.linkedin.com/img/webpromo/btn_liprofile_blue_80x15.png
                 :width: 80px

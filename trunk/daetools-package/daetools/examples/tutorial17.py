@@ -101,7 +101,7 @@ class tcpipLogServer(daeTCPIPLogServer):
 
 class tcpipLogServerMainWindow(QtGui.QMainWindow):
     def __init__(self, app):
-        QtGui.QDialog.__init__(self)
+        QtGui.QMainWindow.__init__(self)
 
         self.ui = Ui_tcpipLogServerMainWindow()
         self.ui.setupUi(self)

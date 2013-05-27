@@ -69,7 +69,7 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 	
 	m_pSimulation->SetSimulationMode(eOptimization);
 	m_pSimulation->Initialize(m_pDAESolver, m_pDataReporter, m_pLog, true);
-	m_pNLPSolver->Initialize(m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
+	m_pNLPSolver->Initialize(this, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
 
 	m_bIsInitialized = true;
 	
@@ -120,6 +120,16 @@ void daeOptimization::Finalize(void)
 	m_pDAESolver	= NULL;
 	
 	m_bIsInitialized = false;
+}
+
+void daeOptimization::StartIterationRun(int iteration)
+{
+    
+}
+
+void daeOptimization::EndIterationRun(int iteration)
+{
+    
 }
 
 }

@@ -8,9 +8,20 @@ using namespace boost::python;
   
 namespace daepython
 {
-daeNLPSolver_t* daeCreateNLPSolver(void)
+
+void SetOptionS(daeBONMINSolver& self, const string& strOptionName, const string& strValue)
 {
-    return new daeBONMINWrapper();
+    self.SetOption(strOptionName, strValue);
 }
+    
+void SetOptionF(daeBONMINSolver& self, const string& strOptionName, real_t dValue)
+{
+    self.SetOption(strOptionName, dValue);
+}
+
+void SetOptionI(daeBONMINSolver& self, const string& strOptionName, int iValue)
+{
+    self.SetOption(strOptionName, iValue);
+}   
 
 }

@@ -115,10 +115,17 @@ Full list of news can be found here: :doc:`news`
 
 Contact
 =======
-The author and the main developer is dr. Dragan Nikolic and can be contacted
-at dnikolic at daetools dot com.
+The author and the main developer is dr. Dragan Nikolic |LinkedIn|
+
+Please send your comments and questions to: dnikolic at daetools dot com.
 
 More information about the author can be found in :doc:`contact`.
+
+.. |LinkedIn| image:: http://www.linkedin.com/img/webpromo/btn_liprofile_blue_80x15.png
+                :width: 80px
+                :height: 15px
+                :target: http://rs.linkedin.com/in/dragannikolic
+                :alt: View Dragan Nikolić's profile on LinkedIn
 
 Documentation
 =============
