@@ -559,7 +559,7 @@ void adTimeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, da
 string adTimeNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
 	vector<string> domains;
-	return latexCreator::Variable(string("\\tau"), domains);
+	return latexCreator::Variable(string("{\\tau}"), domains);
 }
 
 void adTimeNode::Open(io::xmlTag_t* /*pTag*/)
@@ -1906,7 +1906,7 @@ string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 	strResult  = "{ "; // Start
 		strResult += "\\left( - ";
 		strResult += node->SaveAsLatex(c);
-		strResult += "\\right) ";
+		strResult += " \\right) ";
 	strResult  += "} "; // End
 		break;
 	case eSin:
@@ -3062,7 +3062,7 @@ string adScalarExternalFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) 
     daeExternalFunctionNodeMap_t::const_iterator iter;
     const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
 
-    strLatex += " \\left( ";
+    strLatex += " \left( ";
     for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
     {
         std::string               strName  = iter->first;

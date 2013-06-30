@@ -148,6 +148,8 @@ class modTutorial(daeModel):
         self.T.Description = "Temperature of the plate"
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         # To distribute an equation on a domain the function DistributeOnDomain can be again used.
         # However, when distributing equations the function DistributeOnDomain takes an additional argument.
         # The second argument, DomainBounds, can be either of type daeeDomainBounds or a list of integers.

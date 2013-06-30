@@ -58,7 +58,7 @@ class modPortIn(daeModel):
         self.Pin = portSimple("P_in", eInletPort, self, "The simple port")
 
     def DeclareEquations(self):
-        pass
+        daeModel.DeclareEquations(self)
 
 class modPortOut(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -68,6 +68,8 @@ class modPortOut(daeModel):
         self.time = daeVariable("time", time_t, self, "Time elapsed in the process")
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         eq = self.CreateEquation("time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.time.dt() - 1.0
 
@@ -87,8 +89,8 @@ class modTutorial(daeModel):
         self.ConnectPorts(self.mpout.Pout, self.mpin.Pin)
 
     def DeclareEquations(self):
-        pass
-    
+        daeModel.DeclareEquations(self)
+   
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)

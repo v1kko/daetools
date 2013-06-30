@@ -177,7 +177,8 @@ const char* DOCSTR_daeVariable = "";
     const char* DOCSTR_daeVariable_OverallIndex = "";  
     const char* DOCSTR_daeVariable_NumberOfPoints = "";  
     const char* DOCSTR_daeVariable_npyValues = "";  
-    const char* DOCSTR_daeVariable_npyIDs = "";  
+    const char* DOCSTR_daeVariable_npyTimeDerivatives = "";
+    const char* DOCSTR_daeVariable_npyIDs = "";
     const char* DOCSTR_daeVariable_DistributeOnDomain = "";  
     const char* DOCSTR_daeVariable_GetDomainIndexesMap = "";  
 
@@ -306,13 +307,17 @@ const char* DOCSTR_daeModel = "Base model class.";
 
 const char* DOCSTR_daeEquationExecutionInfo = "";  
     const char* DOCSTR_daeEquationExecutionInfo_Node = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_Name = "";  
     const char* DOCSTR_daeEquationExecutionInfo_VariableIndexes = "";  
     const char* DOCSTR_daeEquationExecutionInfo_EquationType = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_EquationIndex = "";  
+    const char* DOCSTR_daeEquationExecutionInfo_Equation = "";  
 
 const char* DOCSTR_daeEquation = "";  
     const char* DOCSTR_daeEquation_init = "";  
     const char* DOCSTR_daeEquation_Residual = "";  
     const char* DOCSTR_daeEquation_Scaling = "";  
+    const char* DOCSTR_daeEquation_CheckUnitConsistency = "";
     const char* DOCSTR_daeEquation_EquationExecutionInfos = "";  
     const char* DOCSTR_daeEquation_DistributedEquationDomainInfos = "";  
     const char* DOCSTR_daeEquation_EquationType = "";  

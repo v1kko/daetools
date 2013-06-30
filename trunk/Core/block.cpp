@@ -297,23 +297,23 @@ void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray
 	} 
 }
 
-void daeBlock::SetAllInitialConditions(real_t value)
-{
-	daeDeclareAndThrowException(exNotImplemented);
+//void daeBlock::SetAllInitialConditions(real_t value)
+//{
+//	daeDeclareAndThrowException(exNotImplemented);
 
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
+//	if(!m_pDataProxy)
+//		daeDeclareAndThrowException(exInvalidPointer);
 
-	size_t n = m_pDataProxy->GetTotalNumberOfVariables();
-	for(size_t i = 0; i < n; i++)
-	{
-		if(m_pDataProxy->GetVariableTypeGathered(i) == cnDifferential)
-		{
-			m_pDataProxy->SetInitialCondition(i, value, m_pDataProxy->GetInitialConditionMode());
-			m_pDataProxy->SetVariableType(i, cnDifferential);
-		}
-	}
-}
+//	size_t n = m_pDataProxy->GetTotalNumberOfVariables();
+//	for(size_t i = 0; i < n; i++)
+//	{
+//		if(m_pDataProxy->GetVariableTypeGathered(i) == cnDifferential)
+//		{
+//			m_pDataProxy->SetInitialCondition(i, value, m_pDataProxy->GetInitialConditionMode());
+//			m_pDataProxy->SetVariableType(i, cnDifferential);
+//		}
+//	}
+//}
 
 size_t daeBlock::FindVariableBlockIndex(size_t nVariableOverallIndex) const
 {
@@ -644,9 +644,16 @@ void daeBlock::AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecu
 	m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 }
 
-void daeBlock::GetEquationExecutionInfo(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
+void daeBlock::GetEquationExecutionInfos(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
 {
+    daeSTN* pSTN;
+    
 	ptrarrEquationExecutionInfos = m_ptrarrEquationExecutionInfos;
+    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+	{
+		pSTN = m_ptrarrSTNs[i];
+		pSTN->CollectEquationExecutionInfos(ptrarrEquationExecutionInfos);
+	}
 }
 
 size_t daeBlock::GetNumberOfEquations() const

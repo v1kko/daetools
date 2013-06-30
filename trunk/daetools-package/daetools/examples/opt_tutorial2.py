@@ -39,6 +39,8 @@ class modTutorial(daeModel):
         self.dummy = daeVariable("dummy", no_t, self, "A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model")
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         eq = self.CreateEquation("Dummy")
         eq.Residual = self.dummy()
 

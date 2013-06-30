@@ -130,51 +130,62 @@ class modTutorial(daeModel):
         """
         3.2 Declare equations and state transition networks
             All models must implement DeclareEquations function and all equations must be specified here.
-            Equations are created in the daeModel.CreateEquation function. In this example we declare only
-            one equation. CreateEquation accepts two arguments: equation name and description (optional).
-            All naming conventions apply here as well. Equations are written in an implicit form (as a residual):
-                           'residual expression' = 0
-            Residual expressions are defined by using the basic mathematical operations (+, -, *, /)
-            and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several
-            useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation
-            evaluation trees. adouble objects are used only for building the equation evaluation trees during the
-            simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative
-            (required for construction of a Jacobian matrix) and the tree evaluation information. The most
-            otenly used functions are:
-             - operator () which returns adouble object that holds the variable value
-             - function dt() which returns adouble object that holds a time derivative of the variable
-             - function d() and d2() which return adouble object that holds a partial derivative of the variable
-               of the 1st and the 2nd order, respectively
-            In this example we simply write that the variable time derivative is equal to 1:
-                                 d(tau) / dt = 1
-            with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation
-            (normally, the built-in function Time() should be used to get the current time in the simulation;
-            however, this is just an example explaining the basic daetools concepts).
-            Note that the variable objects should be declared as data members of the models they belong to and
-            therefore accessed through the model objects.
 
-            As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)
-            and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,
-            typically located in /etc/daetools folder). All values and constants must be declared with the information
-            about their units. Units of variables, parameters and domains are specified in their constructor while constants
-            and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very
-            strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.
-            However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.
-            'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following
-            predefined units:
-              - All base SI units: m, kg, s, A, K, cd, mol
-              - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc
-                (see units_pool.h file in trunk/Units folder)
-              - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-
-                using the symbols: da, h, k, M, G, T, P, E, Z, Y)
-              - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-
-                using the symbols: d, c, m, u, n, p, f, a, z, y
+            Tipically the user-defined DeclareEquations function should first call the DeclareEquations
+            function from the parent class (here daeModel). This is important when a model contains instances
+            of other models to allow DeclareEquations calls from those (child-)models. If a model is simple
+            (like in this example) there is no need for daeModel.DeclareEquations(self) call since it does nothing.
+            However, it is a good idea to call it always (to avoid mistakes).
+        """
+        daeModel.DeclareEquations(self)
 
-            ACHTUNG, ACHTUNG!!
-            Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!
+        """
+        In this example we declare only one equation.
+        CreateEquation function accepts two arguments: equation name and description (optional).
+        All naming conventions apply here as well. Equations are written in an implicit form (as a residual):
+                        'residual expression' = 0
+        Residual expressions are defined by using the basic mathematical operations (+, -, *, /)
+        and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several
+        useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation
+        evaluation trees. adouble objects are used only for building the equation evaluation trees during the
+        simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative
+        (required for construction of a Jacobian matrix) and the tree evaluation information. The most
+        otenly used functions are:
+            - operator () which returns adouble object that holds the variable value
+            - function dt() which returns adouble object that holds a time derivative of the variable
+            - function d() and d2() which return adouble object that holds a partial derivative of the variable
+            of the 1st and the 2nd order, respectively
+        In this example we simply write that the variable time derivative is equal to 1:
+                                d(tau) / dt = 1
+        with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation
+        (normally, the built-in function Time() should be used to get the current time in the simulation;
+        however, this is just an example explaining the basic daetools concepts).
+        Note that the variable objects should be declared as data members of the models they belong to and
+        therefore accessed through the model objects.
 
-            Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.
-            In this example we declare a quantity with the value of 1.0 and units s^-1:
+        As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)
+        and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,
+        typically located in /etc/daetools folder) or for particular equations by setting the equation's boolean
+        'CheckUnitsConsistency' property to false. All values and constants must be declared with the information
+        about their units. Units of variables, parameters and domains are specified in their constructor while constants
+        and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very
+        strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.
+        However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.
+        'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following
+        predefined units:
+            - All base SI units: m, kg, s, A, K, cd, mol
+            - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc
+            (see units_pool.h file in trunk/Units folder)
+            - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-
+            using the symbols: da, h, k, M, G, T, P, E, Z, Y)
+            - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-
+            using the symbols: d, c, m, u, n, p, f, a, z, y
+
+        ACHTUNG, ACHTUNG!!
+        Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!
+
+        Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.
+        In this example we declare a quantity with the value of 1.0 and units s^-1:
         """
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
         eq.Residual = self.tau.dt() - Constant(1.0 * 1/s)
@@ -209,7 +220,7 @@ class simTutorial(daeSimulation):
             In this example the only thing needed to be done is to set the initial condition for the
             variable tau to 0. That can be done by using SetInitialCondition function.
         """
-        self.m.tau.SetInitialCondition(0)
+        self.m.tau.SetInitialCondition(0.0)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -246,8 +257,8 @@ def consoleRun():
          by using the property var.ReportingOn = True/False, or by the function SetReportingOn in daeModel class
          which enables reporting of all variables in that model
     """
-    simulation.TimeHorizon = 500
-    simulation.ReportingInterval = 10
+    simulation.TimeHorizon = 10
+    simulation.ReportingInterval = 1
     simulation.m.SetReportingOn(True)
 
     """

@@ -72,6 +72,8 @@ class modTutorial(daeModel):
         self.Power_ext = daeVariable("Power_ext",  power_t,       self, "Power")
         
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         # Create external function
         # It has to be created in DeclareEquations since it accesses the params/vars values
         self.Pext = extfnPower("Power", self, W, self.m(), self.cp(), self.T.dt())

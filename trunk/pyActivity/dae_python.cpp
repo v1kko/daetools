@@ -76,8 +76,9 @@ BOOST_PYTHON_MODULE(pyActivity)
 		.add_property("m",                      &daepython::daeDefaultSimulationWrapper::GetModel_,
 												&daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_m) 
 
-        .add_property("InitialValues",          &daepython::daeDefaultSimulationWrapper::GetInitialValues,          DOCSTR_daeSimulation_InitialValues)
-        .add_property("InitialDerivatives",     &daepython::daeDefaultSimulationWrapper::GetInitialDerivatives,     DOCSTR_daeSimulation_InitialDerivatives)
+        .add_property("EquationExecutionInfos", &daepython::daeDefaultSimulationWrapper::GetEqExecutionInfos,       DOCSTR_daeSimulation_EquationExecutionInfos)
+        .add_property("Values",                 &daepython::daeDefaultSimulationWrapper::GetValues,                 DOCSTR_daeSimulation_Values)
+        .add_property("TimeDerivatives",        &daepython::daeDefaultSimulationWrapper::GetTimeDerivatives,        DOCSTR_daeSimulation_TimeDerivatives)
         .add_property("VariableTypes",          &daepython::daeDefaultSimulationWrapper::GetVariableTypes,          DOCSTR_daeSimulation_VariableTypes)
         .add_property("IndexMappings",          &daepython::daeDefaultSimulationWrapper::GetIndexMappings,          DOCSTR_daeSimulation_IndexMappings)
         .add_property("NumberOfEquations",      &daepython::daeDefaultSimulationWrapper::GetNumberOfEquations,      DOCSTR_daeSimulation_NumberOfEquations)
@@ -102,10 +103,10 @@ BOOST_PYTHON_MODULE(pyActivity)
                                                 &daepython::daeDefaultSimulationWrapper::SetReportingTimes, DOCSTR_daeSimulation_ReportingTimes)
         
 		.add_property("ActivityAction",			&daeSimulation::GetActivityAction,          DOCSTR_daeSimulation_ActivityAction)
-        .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,	
+        .add_property("InitialConditionMode",   &daeSimulation::GetInitialConditionMode,
                                                 &daeSimulation::SetInitialConditionMode,    DOCSTR_daeSimulation_InitialConditionMode)
         .add_property("SimulationMode",			&daeSimulation::GetSimulationMode,			
-                                                &daeSimulation::SetSimulationMode,         DOCSTR_daeSimulation_SimulationMode)
+                                                &daeSimulation::SetSimulationMode,          DOCSTR_daeSimulation_SimulationMode)
 
         .add_property("NumberOfObjectiveFunctions",		&daeSimulation::GetNumberOfObjectiveFunctions, 
                                                         &daeSimulation::SetNumberOfObjectiveFunctions,                      DOCSTR_daeSimulation_NumberOfObjectiveFunctions)

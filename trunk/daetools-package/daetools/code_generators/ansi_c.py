@@ -827,8 +827,8 @@ class daeCodeGenerator_ANSI_C(object):
         Ntotal             = runtimeInformation['TotalNumberOfVariables']
         Neq                = runtimeInformation['NumberOfEquations']
         IDs                = runtimeInformation['IDs']
-        initValues         = runtimeInformation['InitialValues']
-        initDerivatives    = runtimeInformation['InitialDerivatives']
+        initValues         = runtimeInformation['Values']
+        initDerivatives    = runtimeInformation['TimeDerivatives']
         indexMappings      = runtimeInformation['IndexMappings']
         absoluteTolerances = runtimeInformation['AbsoluteTolerances']
 

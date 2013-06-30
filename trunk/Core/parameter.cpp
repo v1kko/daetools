@@ -341,10 +341,24 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
 		{
 			if(m_ptrDomains[i] != indexes[i].m_pDEDI->m_pDomain)
 			{
-				daeDeclareException(exInvalidCall);
-                string msg = "Cannot use domain [%s] as %d. argument in the operator() call of the parameter [%s] (the domain [%s] must be used)";
-                e << (boost::format(msg) % indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() % (i+1) % m_ptrDomains[i]->GetCanonicalName()).str();
-				throw e;
+                // If it is not the same domain check the number of points
+                // It is acceptable to create a domain iterator on a domain 'x' and iterate over
+                // some other variable which is distributed over another domain but with
+                // the same number of points!
+                if(m_ptrDomains[i]->GetNumberOfPoints() != indexes[i].m_pDEDI->m_pDomain->GetNumberOfPoints())
+                {
+                    if(m_pModel->m_pDataProxy)
+                    {
+                        string f = "Warning: You should not call the operator() function with the domain iterator created on the domain [%s]; "
+                                   " use the domain [%s] instead "
+                                   "(or a domain with the same number of points) as %d. index argument in parameter [%s]";
+                        string msg = (boost::format(f) % indexes[i].m_pDEDI->m_pDomain->GetCanonicalName() %
+                                                         m_ptrDomains[i]->GetCanonicalName() %
+                                                         (i+1) %
+                                                         GetCanonicalName()).str();
+                        m_pModel->m_pDataProxy->LogMessage(msg, 0);
+                    }
+                }
 			}
 		}
 	}
@@ -457,11 +471,24 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
 			{
 				if(m_ptrDomains[i] != ranges[i].m_domainIndex.m_pDEDI->m_pDomain)
 				{
-					daeDeclareException(exInvalidCall);
-					e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() 
-					  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-					  << "in parameter [" << GetCanonicalName() << "] in function array()";
-					throw e;
+                    // If it is not the same domain check the number of points
+                    // It is acceptable to create a domain iterator on a domain 'x' and iterate over
+                    // some other variable which is distributed over another domain but with
+                    // the same number of points!
+                    if(m_ptrDomains[i]->GetNumberOfPoints() != ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetNumberOfPoints())
+                    {
+                        if(m_pModel->m_pDataProxy)
+                        {
+                            string f = "Warning: You should not call the array() function with the domain iterator created on the domain [%s]; "
+                                       " use the domain [%s] instead "
+                                       "(or a domain with the same number of points) as %d. index argument in parameter [%s]";
+                            string msg = (boost::format(f) % ranges[i].m_domainIndex.m_pDEDI->m_pDomain->GetCanonicalName() %
+                                                             m_ptrDomains[i]->GetCanonicalName() %
+                                                             (i+1) %
+                                                             GetCanonicalName()).str();
+                            m_pModel->m_pDataProxy->LogMessage(msg, 0);
+                        }
+                    }
 				}
 			}
 		}

@@ -12,7 +12,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, distutils.sysconfig, types
+import os, sys, distutils.sysconfig, types, json
 from os.path import join, realpath, dirname
 
 try:
@@ -76,6 +76,11 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D.setStatusTip('New 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
+        openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template', self)
+        openTemplate.setShortcut('Ctrl+T')
+        openTemplate.setStatusTip('Open 2D plot emplate')
+        self.connect(openTemplate, QtCore.SIGNAL('triggered()'), self.slotOpenTemplate)
+
         about = QtGui.QAction('About', self)
         about.setStatusTip('About')
         self.connect(about, QtCore.SIGNAL('triggered()'), self.slotAbout)
@@ -92,8 +97,10 @@ class daeMainWindow(QtGui.QMainWindow):
 
         plot = menubar.addMenu('&Plot')
         plot.addAction(plot2D)
+        plot.addAction(animatedPlot2D)
         plot.addAction(plot3D)
-        
+        plot.addAction(openTemplate)
+
         help = menubar.addMenu('&Help')
         help.addAction(about)
         help.addAction(docs)
@@ -103,6 +110,8 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(plot2D)
         self.toolbar.addAction(animatedPlot2D)
         self.toolbar.addAction(plot3D)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(openTemplate)
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
@@ -139,6 +148,33 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D = daeMayavi3DPlot(self.tcpipServer)
         if plot3D.newSurface() == False:
             del plot3D
+
+    #@QtCore.pyqtSlot()
+    def slotOpenTemplate(self):
+        try:
+            filename = QtGui.QFileDialog.getOpenFileName(self, "Open 2D plot template", "", "Templates (*.pt)")
+            if not filename:
+                return
+
+            f = open(filename, 'r')
+            s = f.read(-1)
+            export = json.loads(s)
+
+            try:
+                from plot2d import dae2DPlot
+            except Exception, e:
+                QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
+                return
+
+            plot2D = dae2DPlot(self, self.tcpipServer, updateInterval = 0)
+            if plot2D.newFromTemplate(export) == False:
+                plot2D.close()
+                del plot2D
+            else:
+                plot2D.show()
+
+        except Exception as e:
+            print str(e)
 
     #@QtCore.pyqtSlot()
     def slotAbout(self):

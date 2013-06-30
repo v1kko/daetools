@@ -50,6 +50,11 @@ public:
 	virtual daeMatrix<real_t>&			GetSensitivities(void);
 	virtual std::string					GetName(void) const;
 	
+    virtual void OnCalculateResiduals();
+    virtual void OnCalculateConditions() ;
+    virtual void OnCalculateJacobian();
+    virtual void OnCalculateSensitivityResiduals();
+    
 	void SetLASolver(daeeIDALASolverType eLASolverType);
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 

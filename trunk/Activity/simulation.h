@@ -105,6 +105,7 @@ public:
     size_t GetNumberOfObjectiveFunctions(void) const;
 	void   SetNumberOfObjectiveFunctions(size_t n);
 
+    std::vector<daeEquationExecutionInfo*> GetEquationExecutionInfos(void) const;
     size_t	GetNumberOfEquations(void) const;
     size_t	GetTotalNumberOfVariables(void) const; // including assigned
     

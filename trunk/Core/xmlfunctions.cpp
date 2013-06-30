@@ -726,7 +726,7 @@ string latexCreator::Variable(string name,
 	strResult += name;
 	if(domains.size() > 0)
 	{
-		strResult += "\\left( ";
+		strResult += " \\left( ";
 		strResult += "{ ";
 		for(size_t i = 0; i < domains.size(); i++)
 		{
@@ -762,21 +762,21 @@ string latexCreator::TimeDerivative(size_t order,
 	string strResult;
 	strResult  = "{ "; // Start
 
-		strResult += "{ \\partial ";
+		strResult += "{ \\partial { ";
 		if(order == 2)
 			strResult += "^2 ";
 	
 			strResult += "{ "; // Name
 			
 			if(bBracketsAroundName)
-				strResult += "\\left(";
+				strResult += "\\left( ";
 			strResult += name;
 			if(bBracketsAroundName)
-				strResult += "\\right)";
+				strResult += " \\right)";
 
 			if(domains.size() > 0)
 			{
-				strResult += "\\left( ";
+				strResult += " \\left( ";
 				strResult += "{ "; // Indexes
 				for(size_t i = 0; i < domains.size(); i++)
 				{
@@ -789,14 +789,14 @@ string latexCreator::TimeDerivative(size_t order,
 			}
 			strResult += " } "; // Name
 
-		strResult += " } "; // partial
+		strResult += " } } "; // partial
 
 		strResult += "\\over ";
 
-		strResult += "{ \\partial t ";
+		strResult += "{ \\partial { t ";
 		if(order == 2)
 			strResult += "^2 ";
-		strResult += "} ";
+		strResult += " } } ";
 
 	strResult  += "} "; // End
 	return strResult;
@@ -811,17 +811,17 @@ string latexCreator::PartialDerivative(size_t order,
 	string strResult;
 	strResult  = "{ "; // Start
 
-		strResult += "{ \\partial ";
+		strResult += "{ \\partial { ";
 		if(order == 2)
 			strResult += "^2 ";
 	
 			strResult += "{ "; // Name
 
 			if(bBracketsAroundName)
-				strResult += "\\left(";
+				strResult += "\\left( ";
 			strResult += name;
 			if(bBracketsAroundName)
-				strResult += "\\right)";
+				strResult += " \\right)";
 
 			if(domains.size() > 0)
 			{
@@ -838,14 +838,14 @@ string latexCreator::PartialDerivative(size_t order,
 			}
 			strResult += " } "; // Name
 
-		strResult += " } "; // partial
+		strResult += "} } "; // partial
 
 		strResult += "\\over ";
 
-		strResult += "{ \\partial ";
+		strResult += "{ \\partial {";
 		strResult += domain;
 		strResult += (order == 1 ? "" : " ^2");
-		strResult += " } ";
+		strResult += "} } ";
 
 	strResult  += "} "; // End
 	return strResult;

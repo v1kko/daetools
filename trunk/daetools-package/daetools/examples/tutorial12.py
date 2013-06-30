@@ -59,6 +59,8 @@ class modTutorial(daeModel):
         self.T.DistributeOnDomain(self.y)
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)

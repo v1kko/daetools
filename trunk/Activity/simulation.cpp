@@ -254,6 +254,19 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 					string(" s"), 0);
 }
 
+std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(void) const
+{
+    vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
+    
+    if(m_ptrarrBlocks.size() != 1)
+        daeDeclareAndThrowException(exInvalidCall);
+    
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrarrBlocks[0]);
+    
+    pBlock->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+    return ptrarrEquationExecutionInfos;
+}
+
 size_t daeSimulation::GetNumberOfEquations(void) const
 {
     if(m_ptrarrBlocks.size() != 1)
@@ -806,14 +819,17 @@ void daeSimulation::CheckSystem(void) const
 		throw e;
 	}
 	
-	if(mi.m_nNumberOfInitialConditions != mi.m_nNumberOfDifferentialVariables)
-	{
-		daeDeclareException(exRuntimeCheck);
-		e << "Simulation cowardly refused to initialize the problem:\n The number of differential variables is not equal to the number of initial conditions \n";
-		e << string("Number of differential variables: ") + toString(mi.m_nNumberOfDifferentialVariables) + string("\n");
-		e << string("Number of initial conditions: ")     + toString(mi.m_nNumberOfInitialConditions)     + string("\n");
-		throw e;
-	}
+    if(GetInitialConditionMode() == eAlgebraicValuesProvided)
+    {
+        if(mi.m_nNumberOfInitialConditions != mi.m_nNumberOfDifferentialVariables)
+        {
+            daeDeclareException(exRuntimeCheck);
+            e << "Simulation cowardly refused to initialize the problem:\n The number of differential variables is not equal to the number of initial conditions \n";
+            e << string("Number of differential variables: ") + toString(mi.m_nNumberOfDifferentialVariables) + string("\n");
+            e << string("Number of initial conditions: ")     + toString(mi.m_nNumberOfInitialConditions)     + string("\n");
+            throw e;
+        }
+    }
 }
 
 void daeSimulation::GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const
@@ -998,8 +1014,14 @@ void daeSimulation::LoadInitializationValues(const std::string& strFileName) con
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pDAESolver)
+        daeDeclareAndThrowException(exInvalidPointer);
 	
+// Load values into the m_pDataProxy->m_pdarrValuesReferences
 	m_pModel->LoadInitializationValues(strFileName);
+    
+// Request DAE solver to copy data from the block and reset itself
+    m_pDAESolver->Reset();    
 }
 
 void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)
@@ -1106,9 +1128,6 @@ void daeSimulation::Reinitialize(void)
 	if(m_dCurrentTime >= m_dTimeHorizon)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	daeeInitialConditionMode eMode = m_pModel->GetInitialConditionMode();
-	m_pDAESolver->SetInitialConditionMode(eMode);
-	
 	m_pDAESolver->Reinitialize(true);
 }
 

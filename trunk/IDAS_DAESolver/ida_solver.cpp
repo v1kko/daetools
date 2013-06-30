@@ -170,7 +170,7 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 	m_pSimulation			= pSimulation;
 	m_eInitialConditionMode = eMode;
 	
-	m_nNumberOfEquations      = m_pBlock->GetNumberOfEquations();
+	m_nNumberOfEquations    = m_pBlock->GetNumberOfEquations();
 
 // Create data IDA vectors etc
 	CreateArrays();
@@ -219,23 +219,20 @@ void daeIDASolver::SetInitialOptions(void)
 	pInitialConditionsTypes = NV_DATA_S(m_pIDASolverData->m_vectorInitialConditionsTypes);
 	pAbsoluteTolerances		= NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
 
+    /*
+       We have to fill the initial values of Variables and Time derivatives, set the
+       Variable types (whether the variable is algebraic or differential) and set the
+       Absolute tolerances from the model.
+       To do so first we create/initialize arrays which will be used to copy the values
+       by the function FillAbsoluteTolerancesInitialConditionsAndInitialGuesses().
+    */
 	m_arrValues.InitArray(m_nNumberOfEquations,				  pVariableValues);
 	m_arrTimeDerivatives.InitArray(m_nNumberOfEquations,	  pTimeDerivatives);
 	arrInitialConditionsTypes.InitArray(m_nNumberOfEquations, pInitialConditionsTypes);
 	arrAbsoluteTolerances.InitArray(m_nNumberOfEquations,     pAbsoluteTolerances);
 
-/* 
-   I have to fill initial values of:
-             - Variables
-			 - Time derivatives
-			 - Variable IC types (that is whether the initial conditions are algebraic or differential)
-			 - Absolute tolerances
-   from the model.
-   To do so first I set arrays into which I have to copy and then actually copy values,
-   by the function FillAbsoluteTolerancesInitialConditionsAndInitialGuesses().
-*/
 	if(m_eInitialConditionMode == eQuasySteadyState)
-		m_pBlock->SetAllInitialConditions(0.0);
+        memset(pTimeDerivatives, 0, m_nNumberOfEquations*sizeof(realtype));
 
 	m_pBlock->FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(m_arrValues, 
 	                                                                   m_arrTimeDerivatives, 
@@ -302,6 +299,31 @@ void daeIDASolver::CreateIDA(void)
 		e << "Sundials IDAS solver cowardly refused to set residual data; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+    
+    real_t fval;
+    bool bval;
+    daeConfig& cfg = daeConfig::GetConfig();
+    
+    IDASetMaxOrd(m_pIDA,      cfg.Get<int>("daetools.IDAS.MaxOrd",      5));
+    IDASetMaxNumSteps(m_pIDA, cfg.Get<int>("daetools.IDAS.MaxNumSteps", 500));
+    
+    fval = cfg.Get<real_t>("daetools.IDAS.InitStep", 0.0);
+    if(fval > 0.0)
+        IDASetInitStep(m_pIDA, fval);
+    
+    fval = cfg.Get<real_t>("daetools.IDAS.MaxStep", 0.0);
+    if(fval > 0.0)
+        IDASetInitStep(m_pIDA, fval);
+    
+    IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 10));
+    IDASetMaxNonlinIters(m_pIDA,    cfg.Get<int>   ("daetools.IDAS.MaxNonlinIters",  4));
+    IDASetMaxConvFails(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxConvFails",    10));
+    IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 7));
+    IDASetNonlinConvCoef(m_pIDA,    cfg.Get<real_t>("daetools.IDAS.NonlinConvCoef",  0.33));
+    IDASetSuppressAlg(m_pIDA,       cfg.Get<bool>  ("daetools.IDAS.SuppressAlg",     false));
+    bval = cfg.Get<bool>("daetools.IDAS.NoInactiveRootWarn", false);
+    if(bval)
+        IDASetNoInactiveRootWarn(m_pIDA);
 	
 // After a successful initialization we do not need some data; therefore free whatever is possible
 // Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
@@ -519,10 +541,16 @@ void daeIDASolver::SolveInitial(void)
 		throw e;
 	}
 	
+    daeConfig& cfg = daeConfig::GetConfig();
+    
+    IDASetNonlinConvCoefIC(m_pIDA,  cfg.Get<real_t>("daetools.IDAS.NonlinConvCoefIC", 0.0033));
+    IDASetMaxNumStepsIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumStepsIC",    5));
+    IDASetMaxNumJacsIC(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxNumJacsIC",     4));
+    IDASetMaxNumItersIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumItersIC",    10));
+    IDASetLineSearchOffIC(m_pIDA,   cfg.Get<bool>  ("daetools.IDAS.LineSearchOffIC",  false));
+    
 	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
 		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
-		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
 	else if(m_eInitialConditionMode == eQuasySteadyState)
 		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
 	else
@@ -531,9 +559,26 @@ void daeIDASolver::SolveInitial(void)
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
-		e << "Sundials IDAS solver cowardly failed to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
+		e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+    
+// Get the corrected IC and send them to the block
+    retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives); 
+    if(!CheckFlag(retval)) 
+	{
+		daeDeclareException(exMiscellanous);
+		e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = 0; " << CreateIDAErrorMessage(retval);
+		throw e;
+	}
+    
+    realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
+    realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
+
+    m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+    m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+
+    m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 
 // Here I have a problem. If the model is steady-state then IDACalcIC does nothing!
 // The system is not solved!! I have to do something?
@@ -541,7 +586,7 @@ void daeIDASolver::SolveInitial(void)
 // But what if IDASolve fails?
 	if(!m_bIsModelDynamic)
 	{
-		retval = IDASolve(m_pIDA, 
+		retval = IDASolve(m_pIDA,
 						  m_dNextTimeAfterReinitialization, 
 						  &m_dCurrentTime, 
 						  m_pIDASolverData->m_vectorVariables, 
@@ -572,16 +617,11 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 	}
 	
 	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
-	
-	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
-		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eDifferentialValuesProvided)
-		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eQuasySteadyState)
-		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	else
-		daeDeclareAndThrowException(exNotImplemented);
-	
+
+    // Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
+    // The reason is that in this phase we may have been reinitialized the diff. variables
+    // with the new values and using the eQuasySteadyState flag would be meaningless.
+    retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
@@ -675,7 +715,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
 	for(;;)
 	{
-	// We should not use the 'tstop' time as the 'tout' time!! That limits the step size and affects the integration speed!!
+// We should not use the 'tstop' time as the 'tout' time!! That limits the step size and affects the integration speed!!
 //		retval = IDASetStopTime(m_pIDA, m_dTargetTime);
 //		if(!CheckFlag(retval)) 
 //		{
@@ -694,7 +734,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 		}
 		
 	// Now we have to copy the values *from* the solver *to* the block.
-	// Achtung, Achtung: This is extremely import to do, for we must be able to re-set the
+	// Achtung, Achtung: This is extremely important to do, for we must be able to re-set the
 	//                   variables' values or initial conditions after any IntegrateXXX function,
 	//                   and to evaluate conditional expressions in state transitions.
 		realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
@@ -922,12 +962,32 @@ void daeIDASolver::CalculateGradients(void)
 	                                                  m_arrTimeDerivatives,
 													  m_matSValues);
 	
-	if(m_bPrintInfo)
+    if(m_bPrintInfo)
 	{
 		cout << "CalculateGradients function:" << endl;
 		cout << "Gradients matrix:" << endl;
 		m_matSValues.Print();
 	}
+}
+
+void daeIDASolver::OnCalculateResiduals()
+{
+    
+}
+
+void daeIDASolver::OnCalculateConditions()
+{
+    
+}
+
+void daeIDASolver::OnCalculateJacobian() 
+{
+    
+}
+
+void daeIDASolver::OnCalculateSensitivityResiduals()
+{
+    
 }
 
 int residuals(realtype	time, 
@@ -967,7 +1027,9 @@ int residuals(realtype	time,
 							   pSolver->m_arrResiduals, 
 							   pSolver->m_arrTimeDerivatives);
 
-	if(pSolver->m_bPrintInfo)
+    pSolver->OnCalculateResiduals();
+
+    if(pSolver->m_bPrintInfo)
 	{
 		cout << "---- Residuals function ----" << endl;
 		cout << "Values pointer: " << pdValues << endl;
@@ -1014,7 +1076,9 @@ int roots(realtype	time,
 								pSolver->m_arrTimeDerivatives, 
 								pSolver->m_arrRoots);
 
-	return 0;
+    pSolver->OnCalculateConditions();
+	
+    return 0;
 }
 
 int jacobian(long int    Neq, 
@@ -1058,6 +1122,8 @@ int jacobian(long int    Neq,
 							  pSolver->m_matJacobian, 
 							  dInverseTimeStep);
 	
+    pSolver->OnCalculateJacobian();
+    
 	if(pSolver->m_bPrintInfo)
 	{
 		cout << "---- Jacobian function ----" << endl;
@@ -1129,7 +1195,8 @@ int sens_residuals(int		 Ns,
 										  pSolver->m_matSValues,
 										  pSolver->m_matSTimeDerivatives,
 										  pSolver->m_matSResiduals);
-	
+    
+    pSolver->OnCalculateSensitivityResiduals();
 	
 	if(pSolver->m_bPrintInfo)
 	{

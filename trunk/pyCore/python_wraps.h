@@ -651,6 +651,7 @@ public:
 };
 
 boost::python::object daeVariable_Values(daeVariable& var);
+boost::python::object daeVariable_TimeDerivatives(daeVariable& var);
 boost::python::object daeVariable_IDs(daeVariable& var);
 
 adouble VariableFunctionCall0(daeVariable& var);
@@ -942,8 +943,8 @@ boost::python::list GetEventPortEventsList(daeEventPort& self);
 /*******************************************************
 	daeEquation
 *******************************************************/
-daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, daeeDomainBounds eDomainBounds);
-daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l);
+daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l, const string& strName = string(""));
 boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
 boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
 

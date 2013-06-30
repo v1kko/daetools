@@ -63,6 +63,8 @@ class modTutorial(daeModel):
         self.area = daeVariable("area", area_t, self, "Area of the semi-circle")
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         # All equations are written so that they use only functions d() and dt()
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)

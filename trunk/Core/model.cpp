@@ -1979,14 +1979,7 @@ void daeModel::SetReportingOn(bool bOn)
 
 void daeModel::DeclareEquations()
 {
-	daeDeclareException(exNotImplemented);
-	e << "DeclareEquations() function MUST be implemented in daeModel derived classes, model [" << GetCanonicalName() << "]";
-	throw e;
-}
-
-void daeModel::DeclareEquationsBase()
-{
-	size_t i;
+    size_t i;
 	daeModel* pModel;
 	daeModelArray* pModelArray;
 
@@ -2003,6 +1996,11 @@ void daeModel::DeclareEquationsBase()
 		pModelArray = m_ptrarrComponentArrays[i];
 		pModelArray->DeclareEquations();
 	}
+}
+
+void daeModel::DeclareEquationsBase()
+{
+    daeDeclareException(exNotImplemented);
 }
 
 void daeModel::CreatePortConnectionEquations(void)
@@ -2082,7 +2080,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 
 			for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2114,7 +2112,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
 			for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2150,7 +2148,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
 			for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2190,7 +2188,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
 			for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2234,7 +2232,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
 			for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2283,7 +2281,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
 			for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2336,7 +2334,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
 			for(d7 = 0; d7 < pDistrEqnDomainInfo7->m_narrDomainPoints.size(); d7++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2395,7 +2393,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 			for(d7 = 0; d7 < pDistrEqnDomainInfo7->m_narrDomainPoints.size(); d7++)
 			for(d8 = 0; d8 < pDistrEqnDomainInfo8->m_narrDomainPoints.size(); d8++)
 			{
-				pEquationExecutionInfo = new daeEquationExecutionInfo;
+				pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 				pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 				//pEquationExecutionInfo->m_pEquation = pEquation;
 				//pEquationExecutionInfo->m_pModel    = this;
@@ -2438,7 +2436,7 @@ void daeModel::CreateEquationExecutionInfo(daeEquation* pEquation, vector<daeEqu
 	}
 	else
 	{
-		pEquationExecutionInfo = new daeEquationExecutionInfo;
+		pEquationExecutionInfo = new daeEquationExecutionInfo(pEquation);
 		pEquationExecutionInfo->m_dScaling = pEquation->m_dScaling;
 		//pEquationExecutionInfo->m_pEquation = pEquation;
 		//pEquationExecutionInfo->m_pModel = this;
@@ -2516,8 +2514,6 @@ void daeModel::BuildUpSTNsAndEquations()
         
 	// Declare equations in this model	
 		DeclareEquations();
-	// Declare equations in child models and model arrays
-		DeclareEquationsBase();
         
         if(m_ptrarrStackSTNs.size() > 0)
             daeDeclareAndThrowException(exInvalidCall);

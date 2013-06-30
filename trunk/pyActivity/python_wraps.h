@@ -27,6 +27,17 @@
 namespace daepython
 {
 template<typename ITEM>
+boost::python::list getListFromVector(const std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+   
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(boost::ref(arrItems[i]));
+
+    return l;
+}
+
+template<typename ITEM>
 boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
@@ -204,20 +215,26 @@ public:
 		return model;
 	}
 
-    boost::python::list GetInitialValues(void) const
+    boost::python::list GetValues(void) const
 	{
+        boost::python::list l;
         boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
-        size_t  nVars      = pDataProxy->GetTotalNumberOfVariables();
-        real_t* pInitVals  = pDataProxy->GetInitialValuesPointer();        
-        return getListFromVectorByValue(pInitVals, nVars);
+        const std::vector<real_t*>& valRefs = pDataProxy->GetValuesReferences();
+        for(size_t i = 0; i < valRefs.size(); i++)
+            l.append(*valRefs[i]);
+    
+        return l;
 	}
 
-    boost::python::list GetInitialDerivatives(void) const
+    boost::python::list GetTimeDerivatives(void) const
 	{
+        boost::python::list l;
         boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
-        size_t  nVars      = pDataProxy->GetTotalNumberOfVariables();
-        real_t* pInitConds = pDataProxy->GetInitialConditionsPointer();        
-        return getListFromVectorByValue(pInitConds, nVars);
+        const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
+        for(size_t i = 0; i < dtRefs.size(); i++)
+            l.append(*dtRefs[i]);
+    
+        return l;
 	}
 
     boost::python::list GetVariableTypes(void) const
@@ -232,7 +249,13 @@ public:
     
         return l;
 	}
-
+    
+    boost::python::list GetEqExecutionInfos(void) const
+    {
+        std::vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos = GetEquationExecutionInfos();
+        return getListFromVector(ptrarrEquationExecutionInfos);
+    }
+    
     real_t GetRelativeTolerance(void) const
     {
         if(!m_pDAESolver)

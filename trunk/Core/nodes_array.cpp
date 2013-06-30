@@ -435,7 +435,7 @@ void adVectorNodeArray::Export(std::string& strContent, daeeModelLanguage eLangu
 
 string adVectorNodeArray::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
-    return "Array \\left( \\left[" + toString(m_qarrValues) + "\\right] )";
+    return "Array \\left( \\left[ " + toString(m_qarrValues) + " \\right] )";
 }
 
 void adVectorNodeArray::Open(io::xmlTag_t* pTag)
@@ -1080,16 +1080,16 @@ string adRuntimeSpecialFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) 
 		strResult += "min";
 		strResult += " \\left( ";
 		strResult += node->SaveAsLatex(c);
-		strResult += " \\right( ";
+		strResult += " \right( ";
 		break;
 	case eMaxInArray:
 		strResult += "max";
 		strResult += " \\left( ";
 		strResult += node->SaveAsLatex(c);
-		strResult += " \\right( ";
+		strResult += " \right( ";
 		break;
 	case eAverage:
-		strResult += "\\overline";
+		strResult += "\overline";
 		strResult += " { ";
 		strResult += node->SaveAsLatex(c);
 		strResult += " } ";
@@ -1343,11 +1343,11 @@ string adRuntimeIntegralNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 	switch(eFunction)
 	{
 	case eSingleIntegral:
-		strResult += "\\int";
+		strResult += "\int";
 		strResult += " { ";
 		strResult += node->SaveAsLatex(c);
 		strResult += " ";
-		strResult += "\\mathrm{d}";
+		strResult += "\mathrm{d}";
 		strResult += strDomain;
 		strResult += " } ";
 		break;
@@ -1889,7 +1889,7 @@ string adUnaryNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		strResult += "- ";
 		strResult += "\\left( ";
 		strResult += node->SaveAsLatex(c);
-		strResult += "\\right) ";
+		strResult += " \\right) ";
 		strResult  += "} "; // End
 		break;
 	case eSin:

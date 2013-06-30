@@ -794,29 +794,19 @@ void xmlTag::SetValue(unsigned int Value)
 } 
 void xmlTag::SetValue(float Value)
 {
-	if( (float)((int)Value) == Value )
-	{
-		m_strValue = toString<int>(Value);
-	}
-	else
-	{
-		m_strValue = toStringFormatted<float>(Value, -1, 7, false);
-		LTrim(m_strValue, ' ');
-		RTrim(m_strValue, '0');
-	}
+    if(Value < std::fabs(1E-5) || Value > std::fabs(1E5))
+        m_strValue = toStringFormatted<float>(Value, -1, std::numeric_limits<float>::digits10, true, true);
+    else
+        m_strValue = toStringFormatted<float>(Value, -1, std::numeric_limits<float>::digits10, false, true);
+    LTrim(m_strValue, ' ');
 } 
 void xmlTag::SetValue(double Value)
 {
-	if( (double)((int)Value) == Value )
-	{
-		m_strValue = toString<int>(Value);
-	}
-	else
-	{
-		m_strValue = toStringFormatted<double>(Value, -1, 16, false);
-		LTrim(m_strValue, ' ');
-		RTrim(m_strValue, '0');
-	}
+    if(Value < std::fabs(1E-5) || Value > std::fabs(1E5))
+        m_strValue = toStringFormatted<double>(Value, -1, std::numeric_limits<double>::digits10, true, true);
+    else
+        m_strValue = toStringFormatted<double>(Value, -1, std::numeric_limits<double>::digits10, false, true);
+    LTrim(m_strValue, ' ');
 } 
 void xmlTag::SetValue(bool Value)
 {
@@ -1210,11 +1200,19 @@ void xmlAttribute::SetValue(unsigned int Value)
 } 
 void xmlAttribute::SetValue(float Value)
 {
-	m_strValue = toStringFormatted<float>(Value, -1, 14, false, true);
+    if(Value < std::fabs(1E-5) || Value > std::fabs(1E5))
+    	m_strValue = toStringFormatted<float>(Value, -1, std::numeric_limits<float>::digits10, true, true);
+    else
+        m_strValue = toStringFormatted<float>(Value, -1, std::numeric_limits<float>::digits10, false, true);
+    LTrim(m_strValue, ' ');
 } 
 void xmlAttribute::SetValue(double Value)
 {
-	m_strValue = toStringFormatted<double>(Value, -1, 20, false, true);
+    if(Value < std::fabs(1E-5) || Value > std::fabs(1E5))
+        m_strValue = toStringFormatted<double>(Value, -1, std::numeric_limits<double>::digits10, true, true);
+    else
+        m_strValue = toStringFormatted<double>(Value, -1, std::numeric_limits<double>::digits10, false, true);
+    LTrim(m_strValue, ' ');
 } 
 void xmlAttribute::SetValue(bool Value)
 {

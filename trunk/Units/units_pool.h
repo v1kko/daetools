@@ -45,8 +45,12 @@ const base_unit mol = base_unit(1.0, 0, 0, 0, 0, 0, 0, 1);
 const base_unit rad = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Radian
 const base_unit sr  = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Steradian
 
+// Mass
+const base_unit g   = milli * kg;
+const base_unit t   = kilo * kg;
+
 // Time
-const base_unit ms   = milli  * s;
+const base_unit ms   = milli * s;
 const base_unit us   = micro * s;
 const base_unit min  = 60    * s;
 const base_unit hour = 3600  * s;
@@ -58,11 +62,12 @@ const base_unit Hz   = s^(-1);
 // Length related:
 const base_unit km = kilo  * m;
 const base_unit cm = centi * m;
-const base_unit mm = milli  * m;
+const base_unit mm = milli * m;
 
 // Volume:
 const base_unit l  = 1E-3 * (m^3);
 const base_unit dl = deci * l;
+const base_unit ml = milli * l;
 
 // Energy:
 const base_unit N  = kg * m / (s^2); // Newtown
@@ -145,6 +150,8 @@ DECLARE_UNIT(cd);
 DECLARE_UNIT(A);
 DECLARE_UNIT(mol);
 const unit kg  = unit("kg",  1);
+const unit g   = unit("g",   1);
+const unit t   = unit("t",   1);
 const unit K   = unit("K",   1);
 const unit rad = unit("rad", 1);
 const unit sr  = unit("sr",  1);
@@ -157,6 +164,7 @@ const unit day  = unit("day",  1);
 // Volume:
 const unit l  = unit("l",  1);
 const unit dl = unit("dl", 1);
+const unit ml = unit("ml", 1);
 
 // Energy:
 DECLARE_UNIT(N);

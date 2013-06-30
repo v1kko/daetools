@@ -42,9 +42,11 @@ create_base_units::create_base_units()
 	base_unit rad = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Radian
 	base_unit sr  = base_unit(1.0, 0, 0, 0, 0, 0, 0, 0); // Steradian
 	
-	// Time
-	base_unit ms   = milli  * s;
-	base_unit us   = micro * s;
+    // Mass
+    base_unit g    = milli * kg;
+    base_unit t    = kilo  * kg;
+
+    // Time
 	base_unit min  = 60    * s;
 	base_unit hour = 3600  * s;
 	base_unit day  = 43200 * s;
@@ -53,13 +55,12 @@ create_base_units::create_base_units()
 	base_unit Hz   = s^(-1);
 	
 	// Length related:
-	base_unit km = kilo  * m;
 	base_unit cm = centi * m;
-	base_unit mm = milli  * m;
 	
 	// Volume:
 	base_unit l  = 1E-3 * (m^3);
 	base_unit dl = deci * l;
+    base_unit ml = milli * l;
 	
 	// Energy:
 	base_unit N  = kg * m / (s^2); // Newtown
@@ -173,7 +174,10 @@ create_base_units::create_base_units()
 	__base_units__.insert(__scaled_units__.begin(), __scaled_units__.end());
 	
 	__base_units__["kg"] = kg;
-	__base_units__["K"]  = K;
+    __base_units__["g"]  = g;
+    __base_units__["t"]  = t;
+
+    __base_units__["K"]  = K;
 	
 	__base_units__["rad"] = rad;
 	__base_units__["sr"]  = sr;
@@ -184,6 +188,7 @@ create_base_units::create_base_units()
 
 	__base_units__["l"]  = l;
 	__base_units__["dl"] = dl;
+    __base_units__["ml"] = ml;
 	
 //	for(std::map<std::string, base_unit>::iterator iter = __base_units__.begin(); iter != __base_units__.end(); iter++)
 //		std::cout << (*iter).first << " = " << (*iter).second << std::endl;

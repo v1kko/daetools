@@ -16,6 +16,10 @@
 
 namespace daepython
 {
+
+real_t daeArray_GetItem(daeArray<real_t>& self, size_t index);
+boost::python::list daeArray_GetValues(daeArray<real_t>& self);
+
 /*******************************************************
 	daeDAESolver
 *******************************************************/
@@ -44,6 +48,27 @@ public:
 	{
 		return this->get_override("GetLog")();
 	}
+    
+    void OnCalculateResiduals() 
+    {
+        this->get_override("OnCalculateResiduals")();
+    }
+    
+    void OnCalculateConditions() 
+    {
+        this->get_override("OnCalculateConditions")();
+	}
+    
+    void OnCalculateJacobian() 
+    {
+        this->get_override("OnCalculateJacobian")();
+	}
+    
+    void OnCalculateSensitivityResiduals()
+    {
+        this->get_override("OnCalculateSensitivityResiduals")();
+	}
+    
 };
 
 
@@ -79,6 +104,53 @@ public:
 		daeIDASolver::SetLASolver(pLASolver);
 	}
 	
+    void OnCalculateResiduals()
+    {
+        if(boost::python::override f = this->get_override("OnCalculateResiduals"))
+            f();
+		else
+			this->daeIDASolver::OnCalculateResiduals();
+	}
+	void def_OnCalculateResiduals()
+	{
+        this->daeIDASolver::OnCalculateResiduals();
+	}
+
+    void OnCalculateConditions() 
+    {
+        if(boost::python::override f = this->get_override("OnCalculateConditions"))
+            f();
+		else
+			this->daeIDASolver::OnCalculateConditions();
+	}
+	void def_OnCalculateConditions()
+	{
+        this->daeIDASolver::OnCalculateConditions();
+	}
+    
+    void OnCalculateJacobian() 
+    {
+        if(boost::python::override f = this->get_override("OnCalculateJacobian"))
+            f();
+		else
+			this->daeIDASolver::OnCalculateJacobian();
+	}
+	void def_OnCalculateJacobian()
+	{
+        this->daeIDASolver::OnCalculateJacobian();
+	}
+    
+    void OnCalculateSensitivityResiduals()
+    {
+        if(boost::python::override f = this->get_override("OnCalculateSensitivityResiduals"))
+            f();
+		else
+			this->daeIDASolver::OnCalculateSensitivityResiduals();
+	}
+	void def_OnCalculateSensitivityResiduals()
+	{
+        this->daeIDASolver::OnCalculateSensitivityResiduals();
+	}
 
 };
 

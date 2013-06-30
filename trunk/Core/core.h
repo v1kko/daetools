@@ -69,7 +69,6 @@ enum daeeInitialConditionMode
 {
 	eICTUnknown = 0,
 	eAlgebraicValuesProvided,
-	eDifferentialValuesProvided,
 	eQuasySteadyState
 };
 
@@ -793,8 +792,6 @@ public:
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;
 	
-	virtual void	SetAllInitialConditions(real_t value) = 0;
-
 	virtual void	CalcNonZeroElements(int& NNZ) = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
 	

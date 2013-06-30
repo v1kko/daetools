@@ -45,6 +45,8 @@ class modTutorial(daeModel):
         self.theta = daeVariable("&theta;", no_t, self)
 
     def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
         eq = self.CreateEquation("y")
         eq.Residual = self.y() - self.A() * Sin(2 * numpy.pi * self.k() * self.x() + self.theta())
 

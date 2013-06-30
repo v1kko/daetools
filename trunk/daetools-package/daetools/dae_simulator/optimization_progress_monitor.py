@@ -61,8 +61,9 @@ class daeOptimizationProgressMonitor(QtGui.QDialog):
         # Add an empty curve
         line, = subplot.plot([], [])
 
-        #subplot.set_xlabel('Iteration', fontproperties=self.fp)
-        subplot.set_ylabel(y_label,     fontproperties=self.fp)
+        subplot.set_xlabel('',      fontproperties=self.fp)
+        subplot.set_ylabel(y_label, fontproperties=self.fp)
+        subplot.set_title('',       fontproperties=self.fp)
 
         for xlabel in subplot.get_xticklabels():
             xlabel.set_fontproperties(self.fp)

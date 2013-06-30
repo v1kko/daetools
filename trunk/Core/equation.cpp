@@ -11,9 +11,13 @@ namespace core
 /******************************************************************
 	daeEquationExecutionInfo
 *******************************************************************/
-daeEquationExecutionInfo::daeEquationExecutionInfo()
+daeEquationExecutionInfo::daeEquationExecutionInfo(daeEquation* pEquation)
 {
-	m_dScaling = 1.0;
+    if(!pEquation)
+        daeDeclareAndThrowException(exInvalidPointer);
+        
+	m_dScaling  = 1.0;
+    m_pEquation = pEquation;
 }
 
 daeEquationExecutionInfo::~daeEquationExecutionInfo()
@@ -136,6 +140,19 @@ adNode* daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr(void) const
 daeeEquationType daeEquationExecutionInfo::GetEquationType(void) const
 {
     return DetectEquationType(m_EquationEvaluationNode);
+}
+
+daeEquation* daeEquationExecutionInfo::GetEquation(void) const
+{
+    return m_pEquation;
+}
+
+std::string daeEquationExecutionInfo::GetName(void) const
+{
+    std::string strName = m_pEquation->GetCanonicalName();
+    if(!m_narrDomainIndexes.empty())
+        strName += "(" + toString(m_narrDomainIndexes, string(",")) + ")";
+    return strName;
 }
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
@@ -647,9 +664,12 @@ bool daeDistributedEquationDomainInfo::CheckObject(vector<string>& strarrErrors)
 *******************************************************************/
 daeEquation::daeEquation()
 {
-	m_dScaling      = 1.0;
-	m_pParentState	= NULL;
-	m_pModel		= NULL;
+    daeConfig& cfg = daeConfig::GetConfig();
+    
+    m_bCheckUnitsConsistency = cfg.Get<bool>("daetools.core.checkUnitsConsistency", true);
+	m_dScaling               = 1.0;
+	m_pParentState           = NULL;
+	m_pModel                 = NULL;
 }
 
 daeEquation::~daeEquation()
@@ -859,7 +879,7 @@ void daeEquation::SaveRuntime(io::xmlTag_t* pTag) const
 
 void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
 {
-	string strName, strValue;
+	string strName, strValue, strDEDI, strDomain;
 	daeNodeSaveAsContext c(m_pModel); //, m_ptrarrDistributedEquationDomainInfos);
 	adNode* node = m_pResidualNode.get();
 
@@ -916,13 +936,14 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 				mrow1->AddTag(strName, strValue);
 			}
 
-			if(pDedi->m_eDomainBounds == eLowerBound ||
+            strDEDI   = pDedi->GetName();
+            strDomain = pDedi->GetDomain()->GetName();
+			
+            if(pDedi->m_eDomainBounds == eLowerBound ||
 			   pDedi->m_eDomainBounds == eUpperBound)
 			{
 				strName  = "mi";
-				strValue = pDedi->GetName();
-				//mrow1->AddTag(strName, strValue);
-				xml::xmlPresentationCreator::WrapIdentifier(mrow1, strValue);
+				xml::xmlPresentationCreator::WrapIdentifier(mrow1, strDEDI);
 	
 				strName  = "mo";
 				strValue = "=";
@@ -935,9 +956,7 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 					io::xmlTag_t* msub1 = mrow1->AddTag(strName, strValue);
 	
 					strName  = "mi";
-					strValue = pDedi->GetName();
-					//msub1->AddTag(strName, strValue);
-					xml::xmlPresentationCreator::WrapIdentifier(msub1, strValue);
+					xml::xmlPresentationCreator::WrapIdentifier(msub1, strDomain);
 	
 					strName  = "mi";
 					strValue = "0"; 
@@ -950,9 +969,7 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 					io::xmlTag_t* msub1 = mrow1->AddTag(strName, strValue);
 	
 					strName  = "mi";
-					strValue = pDedi->GetName();
-					//msub1->AddTag(strName, strValue);
-					xml::xmlPresentationCreator::WrapIdentifier(msub1, strValue);
+					xml::xmlPresentationCreator::WrapIdentifier(msub1, strDomain);
 	
 					strName  = "mi";
 					strValue = "n";
@@ -966,9 +983,7 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 				mrow1->AddTag(strName, strValue);
 
 				strName  = "mi";
-				strValue = pDedi->GetName();
-				//mrow1->AddTag(strName, strValue);
-				xml::xmlPresentationCreator::WrapIdentifier(mrow1, strValue);
+				xml::xmlPresentationCreator::WrapIdentifier(mrow1, strDEDI);
 	
 				strName  = "mo";
 				strValue = "&isin;";
@@ -1024,9 +1039,7 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 					io::xmlTag_t* msub1 = mrow1->AddTag(strName, strValue);
 	
 					strName  = "mi";
-					strValue = pDedi->GetName();
-					//msub1->AddTag(strName, strValue);
-					xml::xmlPresentationCreator::WrapIdentifier(msub1, strValue);
+					xml::xmlPresentationCreator::WrapIdentifier(msub1, strDomain);
 	
 					strName  = "mi";
 					strValue = "0";
@@ -1041,9 +1054,7 @@ void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectNa
 					io::xmlTag_t* msub2 = mrow1->AddTag(strName, strValue);
 	
 					strName  = "mi";
-					strValue = pDedi->GetName();
-					//msub2->AddTag(strName, strValue);
-					xml::xmlPresentationCreator::WrapIdentifier(msub2, strValue);
+					xml::xmlPresentationCreator::WrapIdentifier(msub2, strDomain);
 	
 					strName  = "mi";
 					strValue = "n";
@@ -1162,27 +1173,37 @@ void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeE
     node = m_pResidualNode->Evaluate(&EC).node;
 }
 
-daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds)
+daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName)
 {
 	daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo(this, &rDomain, eDomainBounds);
-	pDEDI->SetName(/*GetCanonicalName() + "." +*/ rDomain.GetName());
+    
+    if(strName.empty())
+    	pDEDI->SetName(rDomain.GetName());
+    else
+        pDEDI->SetName(strName);
+    
     pDEDI->SetModel(m_pModel);
 	//SetModelAndCanonicalName(pDEDI);
 	dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
 	return pDEDI;
 }
 
-daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const vector<size_t>& narrDomainIndexes)
+daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const vector<size_t>& narrDomainIndexes, const string& strName)
 {
 	daeDistributedEquationDomainInfo* pDEDI = new daeDistributedEquationDomainInfo(this, &rDomain, narrDomainIndexes);
-	pDEDI->SetName(/*GetCanonicalName() + "." +*/ rDomain.GetName());
+    
+    if(strName.empty())
+    	pDEDI->SetName(rDomain.GetName());
+    else
+        pDEDI->SetName(strName);
+    
     pDEDI->SetModel(m_pModel);
 	//SetModelAndCanonicalName(pDEDI);
 	dae_push_back(m_ptrarrDistributedEquationDomainInfos, pDEDI);
 	return pDEDI;
 }
 
-daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n)
+daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName)
 {
 	vector<size_t> narrDomainIndexes;
 	
@@ -1190,7 +1211,7 @@ daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, const size_t* pnarr
 	for(size_t i = 0; i < n; i++)
 		narrDomainIndexes[i] = pnarrDomainIndexes[i];
 
-	return DistributeOnDomain(rDomain, narrDomainIndexes);	
+	return DistributeOnDomain(rDomain, narrDomainIndexes, strName);	
 }
 
 void daeEquation::GetDomainDefinitions(vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo)
@@ -1245,6 +1266,16 @@ void daeEquation::SetScaling(real_t dScaling)
 	m_dScaling = dScaling;
 }
 
+bool daeEquation::GetCheckUnitsConsistency(void) const
+{
+	return m_bCheckUnitsConsistency;
+}
+
+void daeEquation::SetCheckUnitsConsistency(bool bCheck)
+{
+	m_bCheckUnitsConsistency = bCheck;
+}
+
 bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
@@ -1267,8 +1298,7 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 	}
 	
 // Check unit-consistency of the equation	
-	daeConfig& cfg = daeConfig::GetConfig();
-	if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+	if(m_bCheckUnitsConsistency)
 	{
 		try
 		{

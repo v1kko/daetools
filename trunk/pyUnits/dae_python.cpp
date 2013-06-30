@@ -124,7 +124,7 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def(double() >= self)
 		;
 	
-	std::map<std::string, base_unit>& bu = unit::get_base_units();
+    std::map<std::string, base_unit>& bu = unit::get_base_units();
 	for(std::map<std::string, base_unit>::iterator iter = bu.begin(); iter != bu.end(); iter++)
 		scope().attr((*iter).first.c_str()) = unit((*iter).first, 1.0);
 }

@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys, numpy
+import sys, numpy, json
 from os.path import join, realpath, dirname
 from daetools.pyDAE import *
 from choose_variable import daeChooseVariable, daeTableDialog
@@ -86,6 +86,11 @@ class dae2DPlot(QtGui.QDialog):
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.close)
 
+        export = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Export template', self)
+        export.setShortcut('Ctrl+X')
+        export.setStatusTip('Export template')
+        self.connect(export, QtCore.SIGNAL('triggered()'), self.slotExportTemplate)
+
         properties = QtGui.QAction(QtGui.QIcon(join(images_dir, 'preferences.png')), 'Options', self)
         properties.setShortcut('Ctrl+P')
         properties.setStatusTip('Options')
@@ -137,6 +142,7 @@ class dae2DPlot(QtGui.QDialog):
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.toolbar_widget, False)
         
         #self.mpl_toolbar.addSeparator()
+        self.mpl_toolbar.addAction(export)
         self.mpl_toolbar.addAction(csv)
         self.mpl_toolbar.addAction(viewdata)
         self.mpl_toolbar.addSeparator()
@@ -194,6 +200,25 @@ class dae2DPlot(QtGui.QDialog):
         except Exception as e:
             print(str(e))
         
+    #@QtCore.pyqtSlot()
+    def slotExportTemplate(self):
+        try:
+            export = []
+            for line, variable, domainIndexes, domainPoints, fun in self.curves:
+                export.append((variable.Name, domainIndexes, domainPoints))
+            s = json.dumps(export)
+
+            filename = QtGui.QFileDialog.getSaveFileName(self, "Open 2D plot template", "", "Templates (*.pt)")
+            if not filename:
+                return
+
+            f = open(filename, 'w')
+            f.write(s)
+            f.close()
+
+        except Exception as e:
+            print str(e)
+            
     #@QtCore.pyqtSlot()
     def slotProperties(self):
         figure_edit(self.canvas, self)
@@ -285,6 +310,39 @@ class dae2DPlot(QtGui.QDialog):
                     self.reformatPlot()
                     return
 
+    def newFromTemplate(self, template):
+        """
+        template is a list of 'variableName', 'domainIndexes', 'domainPoints' items
+        """
+        if len(self.tcpipServer.DataReceivers) == 0:
+            return
+        
+        processes = {}
+        for dataReceiver in self.tcpipServer.DataReceivers:
+            processes[dataReceiver.Process.Name] = dataReceiver.Process
+
+        if len(template) == 0:
+            return False
+        
+        for i, (variableName, domainIndexes, domainPoints) in enumerate(template):
+            processName, ok =  QtGui.QInputDialog.getItem(self,
+                                                          "Select process for variable {0} (of {1})".format(i+1, len(template)),
+                                                          "Variable: {0}({1})".format(variableName,
+                                                          ','.join(domainPoints)),
+                                                          processes.keys(),
+                                                          0,
+                                                          False)
+            if not ok:
+                return False
+
+            process = processes[str(processName)]
+            for variable in process.Variables:
+                if variableName == variable.Name:
+                    variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = daeChooseVariable.get2DData(variable, domainIndexes, domainPoints)
+                    self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime)
+
+        return True
+        
     #@QtCore.pyqtSlot()
     def newCurve(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
@@ -295,7 +353,11 @@ class dae2DPlot(QtGui.QDialog):
             return False
             
         variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = cv.getPlot2DData()
+        self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime)
 
+        return True
+        
+    def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime):
         domains = "("
         for i in range(0, len(domainPoints)):
             if i != 0:
@@ -307,8 +369,6 @@ class dae2DPlot(QtGui.QDialog):
         self.setWindowTitle(yAxisLabel + domains)
 
         self.curves.append( (line, variable, domainIndexes, domainPoints, daeChooseVariable.get2DData) )
-        
-        return True
         
     def addLine(self, xAxisLabel, yAxisLabel, xPoints, yPoints, domains):
         no_lines = len(self.canvas.axes.get_lines())

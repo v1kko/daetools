@@ -402,7 +402,7 @@ class DAE_CORE_API daeEquationExecutionInfo : public io::daeSerializable
 {
 public:
 	daeDeclareDynamicClass(daeEquationExecutionInfo)
-	daeEquationExecutionInfo(void);
+	daeEquationExecutionInfo(daeEquation* pEquation);
 	virtual ~daeEquationExecutionInfo(void);
 
 public:	
@@ -427,12 +427,16 @@ public:
     adNode* GetEquationEvaluationNodeRawPtr(void) const;
     
     daeeEquationType GetEquationType(void) const;
+    daeEquation* GetEquation(void) const;
+    
+    std::string GetName(void) const;
 	
 protected:
 	real_t					 m_dScaling;
 	size_t					 m_nEquationIndexInBlock;
 	std::vector<size_t>		 m_narrDomainIndexes;
 	std::map<size_t, size_t> m_mapIndexes;
+    daeEquation*             m_pEquation;
 	adNodePtr				 m_EquationEvaluationNode;
 	friend class daeEquation;
 	friend class daeSTN;
@@ -687,9 +691,14 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0 || (!m_pdInitialValues))
+            if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
 			{
-				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
+				m_pLog->Message(string("Simulation has not been initialized"), 0);
+				return;
+			}
+            if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
+			{
+				m_pLog->Message(string("Invalid number of variables"), 0);
 				return;
 			}
 
@@ -728,7 +737,7 @@ public:
 			while(file.good() && counter < m_nTotalNumberOfVariables)
 			{
 				file.read((char*)(&dValue), sizeof(double));
-				m_pdInitialValues[counter] = static_cast<real_t>(dValue);
+                *(m_pdarrValuesReferences[counter]) = static_cast<real_t>(dValue);
 				counter++;
 			}
 			
@@ -766,9 +775,14 @@ public:
 			if(!m_pLog)
 				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
 			
-			if(m_nTotalNumberOfVariables == 0 || (!m_pdInitialValues))
+			if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
 			{
-				m_pLog->Message(string("daeDataProxy_t has not been initialized"), 0);
+				m_pLog->Message(string("Simulation has not been initialized"), 0);
+				return;
+			}
+            if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
+			{
+				m_pLog->Message(string("Invalid number of variables"), 0);
 				return;
 			}
 			
@@ -784,7 +798,7 @@ public:
 			
 			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
 			{
-				dValue = m_pdInitialValues[i];
+				dValue = *(m_pdarrValuesReferences[i]);
 				file.write((char*)(&dValue), sizeof(double));
 			}
 			
@@ -864,10 +878,6 @@ public:
 			{
 				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
 			}
-			else if(eMode == eDifferentialValuesProvided)
-			{
-				*(m_pdarrValuesReferences[nOverallIndex]) = Value;
-			}
 			else
 			{
 				daeDeclareAndThrowException(exNotImplemented);
@@ -876,10 +886,6 @@ public:
 		else if(m_pdInitialValues)
 		{
 			if(eMode == eAlgebraicValuesProvided)
-			{
-				m_pdInitialValues[nOverallIndex] = Value;
-			}
-			else if(eMode == eDifferentialValuesProvided)
 			{
 				m_pdInitialValues[nOverallIndex] = Value;
 			}
@@ -1097,7 +1103,17 @@ public:
 	}	
 /* End of integration phase functions */
 
-	void LogMessage(const string& strMessage, size_t nSeverity) const
+    const std::vector<real_t*>& GetValuesReferences(void) const
+	{
+		return m_pdarrValuesReferences;
+	}
+	
+	const std::vector<real_t*>& GetTimeDerivativesReferences(void) const
+	{
+		return m_pdarrTimeDerivativesReferences;
+	}
+
+    void LogMessage(const string& strMessage, size_t nSeverity) const
 	{
 		if(m_pLog)
 			m_pLog->Message(strMessage, nSeverity);
@@ -1411,8 +1427,6 @@ public:
 	virtual bool	              CheckForDiscontinuities(void);
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void);
 	
-	virtual void	SetAllInitialConditions(real_t value);
-	
 	virtual void	CalcNonZeroElements(int& NNZ);
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);
 
@@ -1456,7 +1470,7 @@ public:
 
 public:
 	void AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
-	void GetEquationExecutionInfo(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
+	void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
 
 	bool CheckOverlappingAndAddVariables(const std::vector<size_t>& narrVariablesInEquation);
 	void AddVariables(const std::map<size_t, size_t>& mapIndexes);
@@ -3117,9 +3131,12 @@ public:
 	real_t	GetScaling(void) const;
 	void	SetScaling(real_t dScaling);
 
-	daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds);
-	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes);
-	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n);
+    bool GetCheckUnitsConsistency(void) const;
+	void SetCheckUnitsConsistency(bool bCheck);
+	
+    daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
+	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
 
 	daeeEquationType GetEquationType(void) const;
 
@@ -3151,6 +3168,7 @@ protected:
     
 protected:
 	real_t												m_dScaling;
+    bool                                                m_bCheckUnitsConsistency;
 	daeState*											m_pParentState;
 	adNodePtr											m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
