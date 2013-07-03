@@ -2515,12 +2515,17 @@ void daeModel::BuildUpSTNsAndEquations()
 	// Declare equations in this model	
 		DeclareEquations();
         
+    // Create ports' variable equality equations
+        CreatePortConnectionEquations();
+
         if(m_ptrarrStackSTNs.size() > 0)
             daeDeclareAndThrowException(exInvalidCall);
         while(m_ptrarrStackStates.size() > 0)
             daeDeclareAndThrowException(exInvalidCall);
+
 	// Create indexes in DEDIs (they are not created in the moment of declaration!)
 		InitializeDEDIs();
+
 	// Create runtime condition nodes based on setup nodes
 		InitializeSTNs();		
 		InitializeOnEventAndOnConditionActions();	
@@ -2594,21 +2599,21 @@ void daeModel::InitializeDEDIs(void)
 	}
 }
 
-void daeModel::BuildUpPortConnectionEquations()
-{
-	if(!m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer);
+//void daeModel::BuildUpPortConnectionEquations()
+//{
+//	if(!m_pDataProxy)
+//		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExecutionContext EC;
-	EC.m_pDataProxy               = m_pDataProxy.get();
-	EC.m_eEquationCalculationMode = eCreateFunctionsIFsSTNs;
+//	daeExecutionContext EC;
+//	EC.m_pDataProxy               = m_pDataProxy.get();
+//	EC.m_eEquationCalculationMode = eCreateFunctionsIFsSTNs;
 
-	m_pDataProxy->SetGatherInfo(true);
-	PropagateGlobalExecutionContext(&EC);
-		CreatePortConnectionEquations();
-	m_pDataProxy->SetGatherInfo(false);
-	PropagateGlobalExecutionContext(NULL);
-}
+//	m_pDataProxy->SetGatherInfo(true);
+//	PropagateGlobalExecutionContext(&EC);
+//		CreatePortConnectionEquations();
+//	m_pDataProxy->SetGatherInfo(false);
+//	PropagateGlobalExecutionContext(NULL);
+//}
 
 void daeModel::InitializeParameters()
 {
@@ -3753,9 +3758,6 @@ void daeModel::InitializeStage3(daeLog_t* pLog)
 			e << *it << "\n";
 		throw e;
 	}
-	
-// Now, after port connections have been checked, create port connection equations
-	BuildUpPortConnectionEquations();
 
 // Set default initial guesses and abs. tolerances
 	SetDefaultInitialGuesses();

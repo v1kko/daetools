@@ -199,7 +199,7 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 // Create linear solver 
 	CreateLinearSolver();
 	
-// Set root function
+// Rebuild the expression map and set the number of roots
 	RefreshRootFunctions();
 }
 
@@ -519,6 +519,7 @@ void daeIDASolver::RefreshRootFunctions(void)
 	if(!m_pBlock)
 		daeDeclareAndThrowException(exInvalidPointer);
 
+    m_pBlock->RebuildExpressionMap();
 	nNoRoots = m_pBlock->GetNumberOfRoots();
 
 	retval = IDARootInit(m_pIDA, (int)nNoRoots, roots);
@@ -616,7 +617,9 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 		m_pLog->Message(strMessage, 0);
 	}
 	
-	ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);	
+    RefreshRootFunctions();
+
+    ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);
 
     // Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
     // The reason is that in this phase we may have been reinitialized the diff. variables
@@ -629,6 +632,24 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 		  << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+
+// Get the corrected IC and send them to the block
+    retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
+    if(!CheckFlag(retval))
+    {
+        daeDeclareException(exMiscellanous);
+        e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = "
+          << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+        throw e;
+    }
+
+    realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
+    realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
+
+    m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+    m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+
+    m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 }
 
 void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
@@ -758,7 +779,6 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 				
 				if(eDiscontinuityType == eModelDiscontinuity)
 				{ 
-					RefreshRootFunctions();
 					Reinitialize(false);
 					
 				// The data will be reported again ONLY if there was a discontinuity
@@ -770,7 +790,6 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 				}
 				else if(eDiscontinuityType == eModelDiscontinuityWithDataChange)
 				{ 
-					RefreshRootFunctions();
 					Reinitialize(true);
 					
 				// The data will be reported again ONLY if there was a discontinuity

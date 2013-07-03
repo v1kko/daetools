@@ -526,12 +526,10 @@ daeeDiscontinuityType daeBlock::ExecuteOnConditionActions(void)
 	if(m_pDataProxy->GetReinitializationFlag() && m_pDataProxy->GetCopyDataFromBlock())
 	{
 		eResult = eModelDiscontinuityWithDataChange;
-		RebuildExpressionMap();
 	}
 	else if(m_pDataProxy->GetReinitializationFlag())
 	{
 		eResult = eModelDiscontinuity;
-		RebuildExpressionMap();
 	}
 	else
 	{

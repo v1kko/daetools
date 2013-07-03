@@ -1004,25 +1004,69 @@ size_t daePortConnection::GetTotalNumberOfEquations(void) const
 void daePortConnection::CreateEquations(void)
 {
 	string strName;
-	size_t j, k, iNoVars, nNoDomains;
-	daeDomain *pDomain;
+	size_t j, k, iNoVarsFrom, iNoVarsTo, nNoDomains;
+	daeDomain *pDomain, *pDomainFrom, *pDomainTo;
 	daeVariable *pVarFrom, *pVarTo;
 	daePortEqualityEquation* pEquation;
 
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
-	
-// Check if there is equal number of variables in each port
-	iNoVars = m_pPortFrom->m_ptrarrVariables.size();
+    if(!m_pPortFrom)
+		daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pPortTo)
+		daeDeclareAndThrowException(exInvalidPointer);
 
-	for(j = 0; j < iNoVars; j++)
+// Check if there is equal number of variables in each port
+	iNoVarsFrom = m_pPortFrom->m_ptrarrVariables.size();
+	iNoVarsTo   = m_pPortTo->m_ptrarrVariables.size();
+	if(iNoVarsFrom != iNoVarsTo)
+	{
+        daeDeclareException(exInvalidCall);
+		string strError = "Number of variables in port [ " + m_pPortFrom->GetCanonicalName()
+		                  + "] and [" + m_pPortTo->GetCanonicalName() + "] must be equal";
+        e << strError;
+        throw e;
+	}
+
+	for(j = 0; j < iNoVarsFrom; j++)
 	{
 		pVarFrom = m_pPortFrom->m_ptrarrVariables[j];
 		pVarTo   = m_pPortTo->m_ptrarrVariables[j];
 
-		nNoDomains = pVarFrom->m_ptrDomains.size();
+        if(pVarFrom->m_ptrDomains.size() != pVarTo->m_ptrDomains.size())
+        {
+            daeDeclareException(exInvalidCall);
+            string strError = "Number of domains in variable [ " + pVarFrom->GetCanonicalName() +
+                              "] and variable [" + pVarTo->GetCanonicalName() + "] is not equal" +
+                              " in port connection [" + GetCanonicalName() + "]";
+            e << strError;
+            throw e;
+        }
 
-		pEquation = new daePortEqualityEquation();
+        nNoDomains = pVarFrom->m_ptrDomains.size();
+
+        for(k = 0; k < nNoDomains; k++)
+		{
+			pDomainFrom = pVarFrom->m_ptrDomains[k];
+			if(!pDomainFrom)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+			pDomainTo = pVarTo->m_ptrDomains[k];
+			if(!pDomainTo)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+			if(pDomainFrom->GetNumberOfPoints() != pDomainTo->GetNumberOfPoints())
+			{
+                daeDeclareException(exInvalidCall);
+				string strError = "Number of points in domains in variable [ " + pVarFrom->GetCanonicalName() +
+				                  "] and variable [" + pVarTo->GetCanonicalName() + "] is not equal" +
+	   				              " in port connection [" + GetCanonicalName() + "]";
+                e << strError;
+                throw e;
+			}
+		}
+
+        pEquation = new daePortEqualityEquation();
 		pEquation->Initialize(pVarFrom, pVarTo);
 		//SetModelAndCanonicalName(pEquation);
         pEquation->SetModel(m_pModel);

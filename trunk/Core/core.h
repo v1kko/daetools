@@ -786,12 +786,13 @@ public:
 	virtual size_t	GetNumberOfEquations(void) const = 0;
 	virtual size_t	GetNumberOfRoots(void) const = 0;
 
-	virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) = 0;
+    virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives) = 0;
 	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives) = 0;
 	
 	virtual bool	              CheckForDiscontinuities(void) = 0;
 	virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;
-	
+    virtual void	              RebuildExpressionMap(void) = 0;
+
 	virtual void	CalcNonZeroElements(int& NNZ) = 0;
 	virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;	
 	

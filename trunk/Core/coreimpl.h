@@ -1048,11 +1048,16 @@ public:
 			throw e;
 		}
 		*(m_pdarrValuesReferences[nOverallIndex]) = Value;
+
+        SetReinitializationFlag(true);
+        SetCopyDataFromBlock(true);
 	}
 	
 	void ReAssignValue(size_t nOverallIndex, real_t Value)
 	{
 		m_mapAssignedValues[nOverallIndex] = Value;
+
+        SetReinitializationFlag(true);
 	}
 	
 	real_t GetReAssignedValue(size_t nOverallIndex) const
@@ -1421,7 +1426,6 @@ public:
 	                                                                         daeArray<real_t>& arrAbsoluteTolerances);
 
 	virtual size_t	GetNumberOfEquations(void) const;
-
 	virtual size_t	GetNumberOfRoots(void) const;
 
 	virtual bool	              CheckForDiscontinuities(void);
@@ -1432,6 +1436,7 @@ public:
 
 	virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
 	virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives);
+    virtual void	RebuildExpressionMap(void);
 
 	virtual real_t	GetTime(void) const;
 	virtual void	SetTime(real_t time);
@@ -1505,8 +1510,6 @@ protected:
 
 	void				SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals);
 	daeMatrix<real_t>*	GetSResidualsMatrix(void) const;
-
-	void				RebuildExpressionMap(void);
 	
 public:
 	bool	m_bInitializeMode;
@@ -2685,7 +2688,7 @@ protected:
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
 	void		BuildUpSTNsAndEquations(void);
-	void		BuildUpPortConnectionEquations();
+	//void		BuildUpPortConnectionEquations();
 	void		CreatePortConnectionEquations(void);
 
 	void		PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy);

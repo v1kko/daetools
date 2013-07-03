@@ -208,7 +208,7 @@ class dae2DPlot(QtGui.QDialog):
                 export.append((variable.Name, domainIndexes, domainPoints))
             s = json.dumps(export)
 
-            filename = QtGui.QFileDialog.getSaveFileName(self, "Open 2D plot template", "", "Templates (*.pt)")
+            filename = QtGui.QFileDialog.getSaveFileName(self, "Open 2D plot template", "template.pt", "Templates (*.pt)")
             if not filename:
                 return
 
@@ -325,13 +325,10 @@ class dae2DPlot(QtGui.QDialog):
             return False
         
         for i, (variableName, domainIndexes, domainPoints) in enumerate(template):
-            processName, ok =  QtGui.QInputDialog.getItem(self,
-                                                          "Select process for variable {0} (of {1})".format(i+1, len(template)),
-                                                          "Variable: {0}({1})".format(variableName,
-                                                          ','.join(domainPoints)),
-                                                          processes.keys(),
-                                                          0,
-                                                          False)
+            windowTitle = "Select process for variable {0} (of {1})".format(i+1, len(template))
+            label       = "Variable: {0}({1})".format(variableName, ','.join(domainPoints))
+            items       = sorted(processes.keys())
+            processName, ok = self.showSelectProcessDialog(windowTitle, label, items)
             if not ok:
                 return False
 
@@ -342,7 +339,22 @@ class dae2DPlot(QtGui.QDialog):
                     self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime)
 
         return True
-        
+
+    def showSelectProcessDialog(self, windowTitle, label, items):
+        dlg = QtGui.QInputDialog(self)
+        dlg.resize(500, 300)
+        dlg.setWindowTitle(windowTitle)
+        dlg.setLabelText(label)
+        dlg.setComboBoxItems(items)
+
+        dlg.setComboBoxEditable(False)
+        dlg.setOption(QtGui.QInputDialog.UseListViewForComboBoxItems)
+
+        if dlg.exec_() == QtGui.QDialog.Accepted:
+            return str(dlg.textValue()), True
+        else:
+            return '', False
+            
     #@QtCore.pyqtSlot()
     def newCurve(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]

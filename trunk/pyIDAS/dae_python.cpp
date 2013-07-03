@@ -29,12 +29,12 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .def("__getitem__",	     &daepython::daeArray_GetItem)
     ;
     
-    class_<daeDenseMatrix, boost::noncopyable>("daeDenseMatrix", no_init)  
+    class_<daeDenseMatrix, boost::noncopyable>("daeDenseMatrix", no_init)
         .add_property("N",	 &daeDenseMatrix::GetNrows)
         .add_property("M",	 &daeDenseMatrix::GetNcols)
         .def("__getitem__",	 &daeDenseMatrix::GetItem)
     ;
-    
+
 /**************************************************************
 	daeSolver
 ***************************************************************/
@@ -53,7 +53,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
                                                 ( arg("self") ), DOCSTR_daeDAESolver_t_OnCalculateConditions)
         .def("OnCalculateJacobian",		        pure_virtual(&daeDAESolver_t::OnCalculateJacobian), 
                                                 ( arg("self") ), DOCSTR_daeDAESolver_t_OnCalculateJacobian)
-        .def("OnCalculateSensitivityResiduals",	pure_virtual(&daeDAESolver_t::OnCalculateSensitivityResiduals), 
+        .def("OnCalculateSensitivityResiduals",	pure_virtual(&daeDAESolver_t::OnCalculateSensitivityResiduals),
                                                 ( arg("self") ), DOCSTR_daeDAESolver_t_OnCalculateSensitivityResiduals)
 		;
    
