@@ -3102,6 +3102,10 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 
 			pSTN->CollectVariableIndexes(mapVariableIndexes);
 		}
+
+        // Now add variable indexes from STNs/IFs to the block
+        pBlock->AddVariables(mapVariableIndexes);
+
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 		

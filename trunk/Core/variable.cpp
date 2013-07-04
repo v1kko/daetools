@@ -1596,7 +1596,7 @@ void daeVariable::ReSetInitialConditions(real_t dInitialConditions)
 	size_t nTotalNumberOfVariables = GetNumberOfPoints();
 	for(size_t i = 0; i < nTotalNumberOfVariables; i++)
 	{
-		if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnDifferential)
+		if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnDifferential)
 		{
 			daeDeclareException(exInvalidCall);
 			e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1615,7 +1615,7 @@ void daeVariable::ReSetInitialCondition(real_t dInitialCondition)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	size_t nIndex = m_nOverallIndex + CalculateIndex(NULL, 0);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1634,7 +1634,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, real_t dInitialCondition)
 
 	size_t indexes[1] = {nD1};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 1);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1653,7 +1653,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, real_t dInitialC
 
 	size_t indexes[2] = {nD1, nD2};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 2);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1672,7 +1672,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, real
 
 	size_t indexes[3] = {nD1, nD2, nD3};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 3);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1691,7 +1691,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 
 	size_t indexes[4] = {nD1, nD2, nD3, nD4};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 4);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1710,7 +1710,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 
 	size_t indexes[5] = {nD1, nD2, nD3, nD4, nD5};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 5);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1729,7 +1729,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 
 	size_t indexes[6] = {nD1, nD2, nD3, nD4, nD5, nD6};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 6);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1748,7 +1748,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 
 	size_t indexes[7] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 7);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";
@@ -1767,7 +1767,7 @@ void daeVariable::ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size
 
 	size_t indexes[8] = {nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8};
 	size_t nIndex = m_nOverallIndex + CalculateIndex(indexes, 8);
-	if(m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
+	if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(nIndex) != cnDifferential)
 	{
 		daeDeclareException(exInvalidCall);
 		e << "Invalid call: you cannot reset initial condition of the non-differential variable for [" << GetCanonicalName() << "] variable";

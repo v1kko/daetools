@@ -203,10 +203,13 @@ class dae2DPlot(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotExportTemplate(self):
         try:
-            export = []
+            curves = []
+            template = {'curves': curves, 'updateInterval' : self.updateInterval}
+
             for line, variable, domainIndexes, domainPoints, fun in self.curves:
-                export.append((variable.Name, domainIndexes, domainPoints))
-            s = json.dumps(export)
+                curves.append((variable.Name, domainIndexes, domainPoints))
+            
+            s = json.dumps(template)
 
             filename = QtGui.QFileDialog.getSaveFileName(self, "Open 2D plot template", "template.pt", "Templates (*.pt)")
             if not filename:

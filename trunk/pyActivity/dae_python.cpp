@@ -7,7 +7,7 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pyActivity)
 {
-    import_array(); 
+    import_array();
     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
     
     docstring_options doc_options(true, true, false);

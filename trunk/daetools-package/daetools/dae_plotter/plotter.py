@@ -158,16 +158,19 @@ class daeMainWindow(QtGui.QMainWindow):
 
             f = open(filename, 'r')
             s = f.read(-1)
-            export = json.loads(s)
-
+            template = json.loads(s)
+            
+            updateInterval = template['updateInterval']
+            curves         = template['curves']
+            
             try:
                 from plot2d import dae2DPlot
             except Exception, e:
                 QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
                 return
 
-            plot2D = dae2DPlot(self, self.tcpipServer, updateInterval = 0)
-            if plot2D.newFromTemplate(export) == False:
+            plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
+            if plot2D.newFromTemplate(curves) == False:
                 plot2D.close()
                 del plot2D
             else:
