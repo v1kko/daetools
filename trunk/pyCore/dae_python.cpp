@@ -1397,7 +1397,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction", DOCSTR_daeScalarExternalFunction, no_init)
         .def(init<const string&, daeModel*, const unit&, boost::python::dict>(( arg("self"), 
                                                                                 arg("name"), 
-                                                                                arg("parentModel"), 
+                                                                                arg("parentModel"),
                                                                                 arg("units"),
                                                                                 arg("arguments")
                                                                               ), DOCSTR_daeScalarExternalFunction_init))

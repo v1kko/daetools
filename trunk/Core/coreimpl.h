@@ -3400,12 +3400,12 @@ void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeD
 /*********************************************************************************************
 	daeExternalFunction_t
 **********************************************************************************************/
-typedef boost::variant<adouble, adouble_array>										daeExternalFunctionArgument_t;
-typedef std::map<std::string, daeExternalFunctionArgument_t>						daeExternalFunctionArgumentMap_t;
-typedef boost::variant<adouble, std::vector<adouble> >								daeExternalFunctionArgumentValue_t;
-typedef std::map<std::string, daeExternalFunctionArgumentValue_t>					daeExternalFunctionArgumentValueMap_t;
-typedef boost::variant<adNodePtr, adNodeArrayPtr >	daeExternalFunctionNode_t;
-typedef std::map<std::string, daeExternalFunctionNode_t>							daeExternalFunctionNodeMap_t;
+typedef boost::variant<adouble, adouble_array>						  daeExternalFunctionArgument_t;
+typedef std::map<std::string, daeExternalFunctionArgument_t>		  daeExternalFunctionArgumentMap_t;
+typedef boost::variant<adouble, std::vector<adouble> >				  daeExternalFunctionArgumentValue_t;
+typedef std::map<std::string, daeExternalFunctionArgumentValue_t>	  daeExternalFunctionArgumentValueMap_t;
+typedef boost::variant<adNodePtr, adNodeArrayPtr >	                  daeExternalFunctionNode_t;
+typedef std::map<std::string, daeExternalFunctionNode_t>			  daeExternalFunctionNodeMap_t;
 
 class DAE_CORE_API daeExternalFunction_t : public daeObject
 {
@@ -3416,14 +3416,14 @@ public:
 public:
 	void									InitializeArguments(const daeExecutionContext* pExecutionContext);
 	void									SetArguments(const daeExternalFunctionArgumentMap_t& mapArguments);
-	const daeExternalFunctionNodeMap_t&		GetArgumentNodes(void) const;
+	const daeExternalFunctionArgumentMap_t&	GetArgumentNodes(void) const;
     const daeExternalFunctionNodeMap_t&		GetSetupArgumentNodes(void) const;
     unit									GetUnits(void) const;
 
 protected:
-	unit							m_Unit;
-	daeExternalFunctionNodeMap_t	m_mapSetupArgumentNodes;
-	daeExternalFunctionNodeMap_t	m_mapArgumentNodes;
+	unit							 m_Unit;
+	daeExternalFunctionNodeMap_t	 m_mapSetupArgumentNodes;
+	daeExternalFunctionArgumentMap_t m_mapArgumentNodes;
 };
 
 /*********************************************************************************************

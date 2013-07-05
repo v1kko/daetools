@@ -746,29 +746,38 @@ adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* 
 		return tmp;
 	}
 	
-	daeExternalFunctionArgumentValue_t value;
+    daeExternalFunctionArgumentValue_t value;
 	daeExternalFunctionArgumentValueMap_t mapValues;
-	daeExternalFunctionNodeMap_t::const_iterator iter;
-	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
-	
+	daeExternalFunctionArgumentMap_t::const_iterator iter;
+	const daeExternalFunctionArgumentMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
+
 	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
 	{
-		std::string               strName  = iter->first;
-		daeExternalFunctionNode_t argument = iter->second;
-		
-		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
-		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
-		
+		std::string                   strName  = iter->first;
+		daeExternalFunctionArgument_t argument = iter->second;
+
+        adouble*       ad    = boost::get<adouble>(&argument);
+		adouble_array* adarr = boost::get<adouble_array>(&argument);
+
 		if(ad)
-			value = (*ad)->Evaluate(pExecutionContext);
+		{
+            value = (*ad).node->Evaluate(pExecutionContext);
+        }
 		else if(adarr)
-			value = (*adarr)->Evaluate(pExecutionContext).m_arrValues;
+		{
+            size_t n = adarr->m_arrValues.size();
+            std::vector<adouble> tmp;
+            tmp.resize(n);
+            for(size_t i = 0; i < n; i++)
+                tmp[i] = adarr->m_arrValues[i].node->Evaluate(pExecutionContext);
+            value = tmp;
+        }
 		else
 			daeDeclareAndThrowException(exInvalidCall);
-		
-		mapValues[strName] = value;		
+
+		mapValues[strName] = value;
 	}
-	
+
 	tmp.m_arrValues = m_pExternalFunction->Calculate(mapValues);
 	return tmp;
 }
@@ -819,21 +828,22 @@ void adVectorExternalFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& 
 	if(!m_pExternalFunction)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeExternalFunctionNodeMap_t::const_iterator iter;
-	const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
-	
+    daeExternalFunctionArgumentMap_t::const_iterator iter;
+	const daeExternalFunctionArgumentMap_t& mapArgumentNodes = m_pExternalFunction->GetArgumentNodes();
+
 	// This operates on RuntimeNodes!!
 	for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
 	{
-		daeExternalFunctionNode_t argument = iter->second;
-		
-		adNodePtr*      ad    = boost::get<adNodePtr >     (&argument);
-		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr >(&argument);
-		
+		daeExternalFunctionArgument_t argument = iter->second;
+
+        adouble*       ad    = boost::get<adouble>(&argument);
+		adouble_array* adarr = boost::get<adouble_array>(&argument);
+
 		if(ad)
-			(*ad)->AddVariableIndexToArray(mapIndexes, bAddFixed);
+			(*ad).node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 		else if(adarr)
-			(*adarr)->AddVariableIndexToArray(mapIndexes, bAddFixed);
+            for(size_t i = 0; i < adarr->m_arrValues.size(); i++)
+    			adarr->m_arrValues[i].node->AddVariableIndexToArray(mapIndexes, bAddFixed);
 		else
 			daeDeclareAndThrowException(exInvalidCall);
 	}

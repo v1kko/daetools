@@ -1496,11 +1496,17 @@ public:
 				std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
 				
 				if(ad)
+                {
 					values[iter->first] = *ad;
+                }
 				else if(adarr)
-					values[iter->first] = *adarr;
+                {
+					values[iter->first] = getListFromVector(*adarr);
+                }
 				else
+                {
 					daeDeclareAndThrowException(exInvalidCall);
+                }
 			}
 			
 			boost::python::object res = f(values);

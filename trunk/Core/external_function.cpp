@@ -47,10 +47,14 @@ void daeExternalFunction_t::SetArguments(const daeExternalFunctionArgumentMap_t&
 		
 		if(ad)
 		{
+            if(!(*ad).node)
+                daeDeclareAndThrowException(exInvalidPointer);
 			m_mapSetupArgumentNodes[strName] = (*ad).node;
 		}
 		else if(adarr)
 		{
+            if(!(*adarr).node)
+                daeDeclareAndThrowException(exInvalidPointer);
 			m_mapSetupArgumentNodes[strName] = (*adarr).node;
 		}
 		else
@@ -60,7 +64,7 @@ void daeExternalFunction_t::SetArguments(const daeExternalFunctionArgumentMap_t&
 	}
 }
 
-const daeExternalFunctionNodeMap_t& daeExternalFunction_t::GetArgumentNodes(void) const
+const daeExternalFunctionArgumentMap_t& daeExternalFunction_t::GetArgumentNodes(void) const
 {
 // Achtung, Achtung!!
 // Returns Runtime nodes!!!
@@ -89,16 +93,22 @@ void daeExternalFunction_t::InitializeArguments(const daeExecutionContext* pExec
 		strName    = iter->first;
 		setup_node = iter->second;
 		
-		adNodePtr*      ad    = boost::get<adNodePtr >     (&setup_node);
+		adNodePtr*      ad    = boost::get<adNodePtr >    (&setup_node);
 		adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&setup_node);
 		
 		if(ad)
 		{
-			m_mapArgumentNodes[strName] = (*ad)->Evaluate(pExecutionContext).node;
+            adouble val = (*ad)->Evaluate(pExecutionContext);
+            if(!val.node)
+                daeDeclareAndThrowException(exInvalidPointer);
+			m_mapArgumentNodes[strName] = val;
 		}
 		else if(adarr)
 		{
-			m_mapArgumentNodes[strName] = (*adarr)->Evaluate(pExecutionContext).node;
+            adouble_array val = (*adarr)->Evaluate(pExecutionContext);
+            if(val.m_arrValues.empty())
+                daeDeclareAndThrowException(exInvalidCall);
+			m_mapArgumentNodes[strName] = val;
 		}
 		else
 		{
