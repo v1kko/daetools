@@ -49,9 +49,10 @@ const char* DOCSTR_adouble_array = "Class adouble_array operates on arrays of va
     const char* DOCSTR_adouble_array_Node = "Contains the equation evaluation node.";
     const char* DOCSTR_adouble_array_Resize = "Resizes the adouble_array object to the new size.";
     const char* DOCSTR_adouble_array_len = "Returns the size of the adouble_array object.";
-    const char* DOCSTR_adouble_array_getitem = "Gets an adouble object at the specified index.";
-    const char* DOCSTR_adouble_array_setitem = "Sets an adouble object at the specified index.";
+    const char* DOCSTR_adouble_array_getitem = "Gets an adouble object at the specified integer index.";
+    const char* DOCSTR_adouble_array_setitem = "Sets an adouble object at the specified integer index.";
     const char* DOCSTR_adouble_array_items = "Returns an iterator over adouble items in adouble_array object.";
+    const char* DOCSTR_adouble_array_call = "Returns an adouble object at the specified daeDomainIndex (used in equation residals)";
 
 const char* DOCSTR_daeCondition = "";
     const char* DOCSTR_daeCondition_EventTolerance = "";

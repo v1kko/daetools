@@ -733,6 +733,8 @@ public:
 	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
 	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
 	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual bool            IsLinear(void) const;
+	virtual bool            IsFunctionOfVariables(void) const;
 	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity	GetQuantity(void) const;

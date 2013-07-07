@@ -602,7 +602,7 @@ string daeBlock::GetCanonicalName(void) const
 
 string daeBlock::GetName(void) const
 {
-	return m_strName;
+    return m_strName;
 }
 
 void daeBlock::SetName(const string& strName)

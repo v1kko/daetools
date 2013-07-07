@@ -10,7 +10,7 @@ using namespace std;
 #include <idas/idas_spgmr.h>
 
 #define JACOBIAN(A) (A->cols)
- 
+
 namespace dae
 {
 namespace solver
@@ -97,17 +97,20 @@ daeIDASolver::daeIDASolver(void)
 	m_dTargetTime			         = 0;
 	m_bCalculateSensitivities        = false;
 	m_bIsModelDynamic				 = false;
+    m_bInInitializationPhase         = false;
+    m_bSTNRebuildNeeded              = false;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
 	
 	m_pIDASolverData.reset(new daeIDASolverData);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	m_dRelTolerance						= cfg.Get<real_t>("daetools.IDAS.relativeTolerance",               1e-5);
-	m_dNextTimeAfterReinitialization	= cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization",   1e-2);
-	m_strSensitivityMethod				= cfg.Get<string>("daetools.IDAS.sensitivityMethod",               "Simultaneous");
-	m_bErrorControl						= cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					   false);
-	m_bPrintInfo						= cfg.Get<bool>  ("daetools.IDAS.printInfo",                       false);
-	m_bResetLAMatrixAfterDiscontinuity	= cfg.Get<bool>  ("daetools.core.resetLAMatrixAfterDiscontinuity", true);
+	m_dRelTolerance                             = cfg.Get<real_t>("daetools.IDAS.relativeTolerance",                    1e-5);
+	m_dNextTimeAfterReinitialization            = cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization",        1e-2);
+	m_strSensitivityMethod                      = cfg.Get<string>("daetools.IDAS.sensitivityMethod",                    "Simultaneous");
+	m_bErrorControl                             = cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					        false);
+	m_bPrintInfo                                = cfg.Get<bool>  ("daetools.IDAS.printInfo",                            false);
+	m_bResetLAMatrixAfterDiscontinuity          = cfg.Get<bool>  ("daetools.core.resetLAMatrixAfterDiscontinuity",      true);
+    m_iNumberOfSTNRebuildsDuringInitialization  = cfg.Get<int>("daetools.IDAS.numberOfSTNRebuildsDuringInitialization", 1000);
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -533,7 +536,7 @@ void daeIDASolver::RefreshRootFunctions(void)
 
 void daeIDASolver::SolveInitial(void)
 {
-	int retval = -1;
+	int retval, iCounter;
 
 	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
@@ -550,20 +553,48 @@ void daeIDASolver::SolveInitial(void)
     IDASetMaxNumItersIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumItersIC",    10));
     IDASetLineSearchOffIC(m_pIDA,   cfg.Get<bool>  ("daetools.IDAS.LineSearchOffIC",  false));
     
-	if(m_eInitialConditionMode == eAlgebraicValuesProvided)
-		retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
-	else if(m_eInitialConditionMode == eQuasySteadyState)
-		retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
-	else
-		daeDeclareAndThrowException(exNotImplemented);
-	
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
-		throw e;
-	}
-    
+    m_bInInitializationPhase = true;
+    m_bSTNRebuildNeeded      = false;
+    for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
+    {
+        if(m_eInitialConditionMode == eAlgebraicValuesProvided)
+            retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dNextTimeAfterReinitialization);
+        else if(m_eInitialConditionMode == eQuasySteadyState)
+            retval = IDACalcIC(m_pIDA, IDA_Y_INIT, m_dNextTimeAfterReinitialization);
+        else
+            daeDeclareAndThrowException(exNotImplemented);
+
+        //std::cout << "retval = " << retval << std::endl;
+        //std::cout << "iCounter = " << iCounter << std::endl;
+
+        if(!CheckFlag(retval))
+        {
+            if(retval == IDA_RES_FAIL && m_bSTNRebuildNeeded)
+            {
+                RefreshRootFunctions();
+                ResetIDASolver(true, m_dCurrentTime);
+            }
+            else
+            {
+                daeDeclareException(exMiscellanous);
+                e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
+                throw e;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    m_bInInitializationPhase = false;
+
+    if(iCounter >= m_iNumberOfSTNRebuildsDuringInitialization)
+    {
+        daeDeclareException(exMiscellanous);
+        e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0: Max number of STN rebuilds reached; " << CreateIDAErrorMessage(retval);
+        throw e;
+    }
+
 // Get the corrected IC and send them to the block
     retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives); 
     if(!CheckFlag(retval)) 
@@ -609,7 +640,7 @@ void daeIDASolver::Reset(void)
 
 void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 {
-	int retval;
+	int retval, iCounter;
 	
 	if(m_bPrintInfo)
 	{
@@ -618,20 +649,49 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 	}
 	
     RefreshRootFunctions();
-
     ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);
 
-    // Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
-    // The reason is that in this phase we may have been reinitialized the diff. variables
-    // with the new values and using the eQuasySteadyState flag would be meaningless.
-    retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-	if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; " 
+    m_bInInitializationPhase = true;
+    m_bSTNRebuildNeeded      = false;
+    for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
+    {
+        // Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
+        // The reason is that in this phase we may have been reinitialized the diff. variables
+        // with the new values and using the eQuasySteadyState flag would be meaningless.
+        retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
+
+        //std::cout << "retval = " << retval << std::endl;
+        //std::cout << "iCounter = " << iCounter << std::endl;
+
+        if(!CheckFlag(retval))
+        {
+            if(retval == IDA_RES_FAIL && m_bSTNRebuildNeeded)
+            {
+                RefreshRootFunctions();
+                ResetIDASolver(true, m_dCurrentTime);
+            }
+            else
+            {
+                daeDeclareException(exMiscellanous);
+                e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; "
+                  << CreateIDAErrorMessage(retval);
+                throw e;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    m_bInInitializationPhase = false;
+
+    if(iCounter >= m_iNumberOfSTNRebuildsDuringInitialization)
+    {
+        daeDeclareException(exMiscellanous);
+		e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << ": Max number of STN rebuilds reached; "
 		  << CreateIDAErrorMessage(retval);
 		throw e;
-	}
+    }
 
 // Get the corrected IC and send them to the block
     retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
@@ -1025,6 +1085,19 @@ int residuals(realtype	time,
 	if(!pBlock)
 		return -1;
 
+    // We have to check if there are discontinuities with CheckForDiscontinuities since the current
+    // active states might change during the initialization phase which in turn requires
+    // rebuilding of equation execution infos and updating the root functions.
+    if(pSolver->m_bInInitializationPhase)
+    {
+        if(pBlock->CheckForDiscontinuities())
+        {
+            pBlock->ExecuteOnConditionActions();
+            pSolver->m_bSTNRebuildNeeded = true;
+            return -1;
+        }
+    }
+
 	size_t N = pBlock->GetNumberOfEquations();
 
 	pdValues			= NV_DATA_S(vectorVariables); 
@@ -1034,12 +1107,6 @@ int residuals(realtype	time,
 	pSolver->m_arrValues.InitArray(N, pdValues);
 	pSolver->m_arrTimeDerivatives.InitArray(N, pdTimeDerivatives);
 	pSolver->m_arrResiduals.InitArray(N, pdResiduals);
-
-	// We do not need to call CheckForDiscontinuities since we are not interested in 
-	// whether there are discontinuitues or not, just to execute the actions which
-	// may lead to state/variable changes and/or to event triggers
-	if(time == 0)
-		pBlock->ExecuteOnConditionActions();
 
 	pBlock->CalculateResiduals(time, 
 		                       pSolver->m_arrValues, 
@@ -1121,6 +1188,21 @@ int jacobian(long int    Neq,
 	daeBlock_t* pBlock = pSolver->m_pBlock;
 	if(!pBlock)
 		return -1;
+
+    // We have to check if there are discontinuities with CheckForDiscontinuities since the current
+    // active states might change during the initialization phase which in turn requires
+    // rebuilding of equation execution infos and updating the root functions.
+    // THIS MIGHT NOT BE NEEDED HERE IN jacobian FUNCTION SINCE IT IS (THE MOST LIKELY) HANDLED BY THE
+    // residual FUNCTION. ANYWAY, CAN'T HURT TO CHECK IT ANYWAY.
+    if(pSolver->m_bInInitializationPhase)
+    {
+        if(pBlock->CheckForDiscontinuities())
+        {
+            pBlock->ExecuteOnConditionActions();
+            pSolver->m_bSTNRebuildNeeded = true;
+            return -1;
+        }
+    }
 
 	size_t N = pBlock->GetNumberOfEquations();
 

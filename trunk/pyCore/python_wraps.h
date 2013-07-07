@@ -276,6 +276,8 @@ const adouble adarr_max(const adouble_array& a);
 const adouble adarr_average(const adouble_array& a);
 const adouble adarr_integral(const adouble_array& a);
 
+adouble adouble_array__call__(adouble_array& a, boost::python::object index);
+
 /*******************************************************
 	adouble_array
 *******************************************************/
@@ -1477,7 +1479,7 @@ public:
 		SetArguments(mapArguments);
 	}
 	
-	boost::python::object Calculate_(boost::python::tuple arguments, boost::python::dict values)
+	boost::python::object Calculate_(boost::python::dict values)
 	{
 		daeDeclareAndThrowException(exNotImplemented);
 		return boost::python::object();
@@ -1485,7 +1487,6 @@ public:
 
 	adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
 	{
-		boost::python::tuple arguments;
 		boost::python::dict values;
 
         if(boost::python::override f = this->get_override("Calculate"))
@@ -1524,6 +1525,7 @@ public:
 		else
 		{
 			daeDeclareAndThrowException(exInvalidCall);
+            return adouble();
 		}
 	}
     
@@ -1571,7 +1573,7 @@ public:
 		SetArguments(mapArguments);
 	}
 	
-	boost::python::list Calculate_(boost::python::tuple arguments, boost::python::dict values)
+	boost::python::object Calculate_(boost::python::dict values)
 	{
 		daeDeclareAndThrowException(exNotImplemented);
 		return boost::python::list();
@@ -1581,7 +1583,6 @@ public:
 	{
 		std::vector<adouble> arrResults;
 		boost::python::list results;
-		boost::python::tuple arguments;
 		boost::python::dict values;
         
 		if(boost::python::override f = this->get_override("Calculate"))
@@ -1594,13 +1595,14 @@ public:
 				if(ad)
 					values[iter->first] = *ad;
 				else if(adarr)
-					values[iter->first] = *adarr;
+					values[iter->first] = getListFromVector(*adarr);
 				else
 					daeDeclareAndThrowException(exInvalidCall);
 			}
 			
-			results = f(*arguments, **values);
-			
+			boost::python::object res = f(values);
+            results = boost::python::extract<boost::python::list>(res);
+
 			boost::python::ssize_t n = boost::python::len(results);
 			arrResults.resize(n);
 			
@@ -1616,7 +1618,8 @@ public:
 		}
 		else
 		{
-			return daeVectorExternalFunctionWrapper::Calculate(mapValues);
+            daeDeclareAndThrowException(exInvalidCall);
+            return arrResults;
 		}
 	}
     

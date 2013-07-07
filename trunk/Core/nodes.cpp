@@ -3071,7 +3071,7 @@ string adScalarExternalFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) 
     daeExternalFunctionNodeMap_t::const_iterator iter;
     const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
 
-    strLatex += " \left( ";
+    strLatex += " \\left( ";
     for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
     {
         std::string               strName  = iter->first;
@@ -3110,17 +3110,24 @@ void adScalarExternalFunctionNode::Open(io::xmlTag_t* pTag)
 
 void adScalarExternalFunctionNode::Save(io::xmlTag_t* pTag) const
 {
-    pTag->Save(string("ExternalFunction"), m_pExternalFunction->GetName());
+    string strName, strValue;
+    daeExternalFunctionNode_t argument;
 
-    io::xmlTag_t* pArgumentsTag = pTag->AddTag(string("Arguments"));
+    strName = "Name";
+	strValue = m_pExternalFunction->GetName();
+    pTag->Save(strName, strValue);
+
+
+    strName = "Arguments";
+    io::xmlTag_t* pArgumentsTag = pTag->AddTag(strName);
 
     daeExternalFunctionNodeMap_t::const_iterator iter;
     const daeExternalFunctionNodeMap_t& mapArgumentNodes = m_pExternalFunction->GetSetupArgumentNodes();
 
     for(iter = mapArgumentNodes.begin(); iter != mapArgumentNodes.end(); iter++)
     {
-        std::string               strName  = iter->first;
-        daeExternalFunctionNode_t argument = iter->second;
+        strName  = iter->first;
+        argument = iter->second;
 
         adNodePtr*      ad    = boost::get<adNodePtr>     (&argument);
         adNodeArrayPtr* adarr = boost::get<adNodeArrayPtr>(&argument);

@@ -1167,6 +1167,19 @@ const adouble adarr_integral(const adouble_array& a)
 	return Integral(a);
 }
 
+adouble adouble_array__call__(adouble_array& a, boost::python::object index)
+{
+    daeDomainIndex domainIndex = CreateDomainIndex(index);
+
+    if(!a.node)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid adouble_array specified for function call (__call__) function";
+        throw e;
+    }
+    return a(domainIndex);
+}
+
 /*******************************************************
 	adouble_array
 *******************************************************/

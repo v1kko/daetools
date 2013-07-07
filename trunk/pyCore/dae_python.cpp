@@ -301,7 +301,10 @@ BOOST_PYTHON_MODULE(pyCore)
     
     class_<adSetupDomainIteratorNode, bases<adNode>, boost::noncopyable>("adSetupDomainIteratorNode", no_init)
     ;
-    
+
+    class_<adSetupValueInArrayAtIndexNode, bases<adNode>, boost::noncopyable>("adSetupValueInArrayAtIndexNode", no_init)
+    ;
+
     class_<adSetupParameterNode, bases<adNode>, boost::noncopyable>("adSetupParameterNode", no_init)
         .add_property("Parameter",      make_function(&daepython::adSetupParameterNode_Parameter, return_internal_reference<>()))
         .add_property("DomainIndexes",	&daepython::adSetupParameterNode_Domains)
@@ -537,7 +540,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__setitem__", &adouble_array::SetItem, ( arg("self"), arg("index"), arg("value") ),   DOCSTR_adouble_array_setitem)
         .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end), 
                             DOCSTR_adouble_array_items)
-            
+         .def("__call__",   &daepython::adouble_array__call__, ( arg("self"), arg("index") ), DOCSTR_adouble_array_call)
+
         .def("__str__",     &daepython::adouble_array__str__)
         .def("__repr__",    &daepython::adouble_array__repr__)
 
@@ -1415,10 +1419,11 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                         arg("name"), 
                                                                                         arg("parentModel"), 
                                                                                         arg("units"),
-                                                                                        arg("numberOfXXX"),
+                                                                                        arg("numberOfResults"),
                                                                                         arg("arguments")
                                                                                       ), DOCSTR_daeVectorExternalFunction_init))
-        .add_property("Name",	&daepython::daeVectorExternalFunctionWrapper::GetName)
+        .add_property("Name",	         &daepython::daeVectorExternalFunctionWrapper::GetName)
+        .add_property("NumberOfResults", &daepython::daeVectorExternalFunctionWrapper::GetNumberOfResults)
 
         .def("Calculate",	pure_virtual(&daepython::daeVectorExternalFunctionWrapper::Calculate_), 
                             ( arg("self"), arg("values") ), DOCSTR_daeVectorExternalFunction_Calculate)

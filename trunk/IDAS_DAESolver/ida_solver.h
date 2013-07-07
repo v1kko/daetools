@@ -109,6 +109,9 @@ public:
 	bool								m_bErrorControl;
 	bool								m_bPrintInfo;
 	bool								m_bResetLAMatrixAfterDiscontinuity;
+    bool                                m_bInInitializationPhase;
+    bool                                m_bSTNRebuildNeeded;
+    int                                 m_iNumberOfSTNRebuildsDuringInitialization;
 };
 
 

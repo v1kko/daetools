@@ -201,7 +201,17 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
 		
 		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-		EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
+        try
+        {
+            EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
+        }
+        catch(daeException& e)
+        {
+            std::cout << GetName() << std::endl;
+            std::cout << "EquationIndexInBlock = " << m_nEquationIndexInBlock << std::endl;
+            std::cout << "VariableIndexInBlock = " << iter->second << std::endl;
+            throw e;
+        }
 	}
 }
 

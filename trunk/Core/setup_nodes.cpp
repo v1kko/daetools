@@ -240,6 +240,157 @@ bool adSetupDomainIteratorNode::IsFunctionOfVariables(void) const
 	return false;
 }
 
+
+
+
+/*********************************************************************************************
+	adSetupValueInArrayAtIndexNode
+**********************************************************************************************/
+adSetupValueInArrayAtIndexNode::adSetupValueInArrayAtIndexNode(const daeDomainIndex& domainIndex, adNodeArrayPtr n)
+                              : m_domainIndex(domainIndex), node(n)
+{
+}
+
+adSetupValueInArrayAtIndexNode::adSetupValueInArrayAtIndexNode()
+{
+}
+
+adSetupValueInArrayAtIndexNode::~adSetupValueInArrayAtIndexNode()
+{
+}
+
+adouble adSetupValueInArrayAtIndexNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	size_t nIndex = m_domainIndex.GetCurrentIndex();
+    adouble_array adarr = node->Evaluate(pExecutionContext);
+
+    return adarr[nIndex];
+}
+
+const quantity adSetupValueInArrayAtIndexNode::GetQuantity(void) const
+{
+	if(!node)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return node->GetQuantity();
+}
+
+adNode* adSetupValueInArrayAtIndexNode::Clone(void) const
+{
+	return new adSetupValueInArrayAtIndexNode(*this);
+}
+
+void adSetupValueInArrayAtIndexNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+    daeDeclareAndThrowException(exNotImplemented);
+}
+//string adSetupValueInArrayAtIndexNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
+//{
+//}
+
+string adSetupValueInArrayAtIndexNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+    string strResult;
+
+	strResult  = "{ "; // Start
+		strResult += "\\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+
+        strResult += "\\left( ";
+		strResult += m_domainIndex.GetIndexAsString();
+		strResult += " \\right) ";
+    strResult  += "} "; // End
+
+    return strResult;
+}
+
+void adSetupValueInArrayAtIndexNode::Open(io::xmlTag_t* /*pTag*/)
+{
+}
+
+void adSetupValueInArrayAtIndexNode::Save(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+    strName = "DomainIndex";
+    pTag->SaveObject(strName, &m_domainIndex);
+
+	strName = "node";
+	adNodeArray::SaveNode(pTag, strName, node.get());
+}
+
+void adSetupValueInArrayAtIndexNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+}
+
+void adSetupValueInArrayAtIndexNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    string strName, strValue;
+	io::xmlTag_t *mrownode, *mrow;
+
+	strName  = "mrow";
+	strValue = "";
+	mrow = pTag->AddTag(strName, strValue);
+
+    strName  = "mo";
+    strValue = "(";
+    mrow->AddTag(strName, strValue);
+        strName  = "mrow";
+        strValue = "";
+        mrownode = mrow->AddTag(strName, strValue);
+        node->SaveAsPresentationMathML(mrownode, c);
+    strName  = "mo";
+    strValue = ")";
+    mrow->AddTag(strName, strValue);
+
+    strName  = "mo";
+    strValue = "(";
+    mrow->AddTag(strName, strValue);
+
+    strName  = "mi";
+    strValue = m_domainIndex.GetIndexAsString();
+    mrow->AddTag(strName, strValue);
+
+    strName  = "mo";
+    strValue = ")";
+    mrow->AddTag(strName, strValue);
+}
+
+void adSetupValueInArrayAtIndexNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adSetupValueInArrayAtIndexNode::IsLinear(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return node->IsLinear();
+}
+
+bool adSetupValueInArrayAtIndexNode::IsFunctionOfVariables(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidCall);
+
+	return node->IsFunctionOfVariables();
+}
+
+bool adSetupValueInArrayAtIndexNode::IsDifferential(void) const
+{
+    if(!node)
+		daeDeclareAndThrowException(exInvalidPointer);
+	return node->IsDifferential();
+}
+
 /*********************************************************************************************
 	adSetupVariableNode
 **********************************************************************************************/

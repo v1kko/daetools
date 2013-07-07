@@ -92,8 +92,11 @@ adouble& adouble_array::operator[](size_t nIndex)
 	else
 	{
 		if(nIndex >= m_arrValues.size())
-			daeDeclareAndThrowException(exInvalidCall);
-		
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid index [" << nIndex << "] in adouble_array::operator[] call; adouble_array size is " << GetSize();
+			throw e;
+		}
 		return m_arrValues[nIndex];
 	}
 }
@@ -110,10 +113,22 @@ const adouble& adouble_array::operator[](size_t nIndex) const
 	else
 	{
 		if(nIndex >= m_arrValues.size())
-			daeDeclareAndThrowException(exInvalidCall);
-		
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid index [" << nIndex << "] in adouble_array::operator[] call; adouble_array size is " << GetSize();
+			throw e;
+		}
+
 		return m_arrValues[nIndex];
 	}
+}
+
+adouble adouble_array::operator()(const daeDomainIndex& domainIndex)
+{
+    adouble tmp;
+    tmp.setGatherInfo(true);
+    tmp.node = adNodePtr(new adSetupValueInArrayAtIndexNode(domainIndex, CLONE_NODE_ARRAY(node)));
+    return tmp;
 }
 
 adouble adouble_array::GetItem(size_t nIndex)
@@ -128,8 +143,12 @@ adouble adouble_array::GetItem(size_t nIndex)
 	else
 	{
 		if(nIndex >= m_arrValues.size())
-			daeDeclareAndThrowException(exInvalidCall);
-		
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid index [" << nIndex << "] in adouble_array::GetItem call; adouble_array size is " << GetSize();
+			throw e;
+		}
+
 		return m_arrValues[nIndex];
 	}
 }
@@ -137,8 +156,12 @@ adouble adouble_array::GetItem(size_t nIndex)
 void adouble_array::SetItem(size_t nIndex, adouble& a)
 {
     if(nIndex >= m_arrValues.size())
-        daeDeclareAndThrowException(exInvalidCall);
-		
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid index [" << nIndex << "] in adouble_array::SetItem call; adouble_array size is " << GetSize();
+        throw e;
+    }
+
 	m_arrValues[nIndex] = a;
 }
 

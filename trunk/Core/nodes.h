@@ -542,7 +542,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	daeParameter*			m_pParameter;
+	daeParameter*			    m_pParameter;
 	std::vector<daeDomainIndex>	m_arrDomains;
 };
 
@@ -576,6 +576,37 @@ public:
 };
 
 /*********************************************************************************************
+	adSetupValueInArrayAtIndexNode
+**********************************************************************************************/
+class DAE_CORE_API adSetupValueInArrayAtIndexNode : public adNodeImpl
+{
+public:
+	daeDeclareDynamicClass(adSetupValueInArrayAtIndexNode)
+	adSetupValueInArrayAtIndexNode(void);
+	adSetupValueInArrayAtIndexNode(const daeDomainIndex& domainIndex, adNodeArrayPtr n);
+	virtual ~adSetupValueInArrayAtIndexNode(void);
+
+public:
+	virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNode* Clone(void) const;
+	virtual void	Open(io::xmlTag_t* pTag);
+	virtual void	Save(io::xmlTag_t* pTag) const;
+	virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
+    virtual bool    IsDifferential(void) const;
+	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity GetQuantity(void) const;
+
+public:
+    daeDomainIndex	m_domainIndex;
+    adNodeArrayPtr  node;
+};
+
+/*********************************************************************************************
 	adSetupVariableNode
 **********************************************************************************************/
 class DAE_CORE_API adSetupVariableNode : public adNodeImpl
@@ -602,7 +633,7 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	daeVariable*			m_pVariable;
+	daeVariable*			    m_pVariable;
 	std::vector<daeDomainIndex>	m_arrDomains;
 };
 
@@ -633,8 +664,8 @@ public:
     virtual bool    IsDifferential(void) const;
 
 public:
-	daeVariable*			m_pVariable;
-	size_t					m_nDegree;
+	daeVariable*			    m_pVariable;
+	size_t					    m_nDegree;
 	std::vector<daeDomainIndex>	m_arrDomains;
 };
 
@@ -665,9 +696,9 @@ public:
 	virtual const quantity GetQuantity(void) const;
 
 public:
-	daeVariable*			m_pVariable;
-	daeDomain*				m_pDomain;
-	size_t					m_nDegree;
+	daeVariable*			    m_pVariable;
+	daeDomain*				    m_pDomain;
+	size_t					    m_nDegree;
 	std::vector<daeDomainIndex>	m_arrDomains;
 };
 

@@ -311,6 +311,7 @@ std::ostream& operator<<(std::ostream& out, const adouble& a);
 /******************************************************************
 	adouble_array
 *******************************************************************/
+class daeDomainIndex;
 class DAE_CORE_API adouble_array
 {
 public:
@@ -327,7 +328,9 @@ public:
 	
     adouble&       operator[](size_t n);
 	const adouble& operator[](size_t n) const;
-	
+
+    adouble operator() (const daeDomainIndex& domainIndex);
+
     std::vector<adouble>::iterator begin();
     std::vector<adouble>::iterator end();
     
