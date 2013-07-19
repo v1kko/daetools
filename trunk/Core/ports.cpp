@@ -625,6 +625,48 @@ void daePort::SetVariablesStartingIndex(size_t nVariablesStartingIndex)
 	m_nVariablesStartingIndex = nVariablesStartingIndex;
 }
 
+void daePort::CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                             const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+{
+	size_t i, nOverallIndex, nBlockIndex;
+    string strName;
+	daeVariable* pVariable;
+
+    std::map<size_t, std::vector<size_t> > mapDomainsIndexes;
+    std::map<size_t, std::vector<size_t> >::iterator iterDomainsIndexes;
+    std::map<size_t, size_t>::const_iterator iter;
+    std::pair<size_t, string> p;
+
+	for(i = 0; i < m_ptrarrVariables.size(); i++)
+	{
+		pVariable = m_ptrarrVariables[i];
+
+        // Get <index within variable, domain points> map
+        mapDomainsIndexes.clear();
+        pVariable->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+
+        for(iterDomainsIndexes = mapDomainsIndexes.begin(); iterDomainsIndexes != mapDomainsIndexes.end(); iterDomainsIndexes++)
+        {
+            nOverallIndex = pVariable->m_nOverallIndex + iterDomainsIndexes->first;
+
+            iter = mapOverallIndex_BlockIndex.find(nOverallIndex);
+            if(iter != mapOverallIndex_BlockIndex.end()) // if found
+                nBlockIndex = iter->second;
+            else
+                nBlockIndex = ULONG_MAX;
+
+            if(iterDomainsIndexes->second.empty())
+                strName = pVariable->GetCanonicalName();
+            else
+                strName = pVariable->GetCanonicalName() + "(" + toString(iterDomainsIndexes->second, ",") + ")";
+
+            p.first  = nBlockIndex;
+            p.second = strName;
+            mapOverallIndex_BlockIndex_VariableName[nOverallIndex] = p;
+        }
+	}
+}
+
 daeObject_t* daePort::FindObjectFromRelativeName(string& strRelativeName)
 {
 // Parse string to get an array from the string 'object_1.object_2.[...].object_n'

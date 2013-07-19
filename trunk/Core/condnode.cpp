@@ -385,10 +385,12 @@ bool condExpressionNode::Evaluate(const daeExecutionContext* pExecutionContext) 
 	case eEQ:
 		return (left == right);
 	case eGT:
+        //std::cout << toStringFormatted(left, -1, 20) << " > " << toStringFormatted(right, -1, 20) << std::endl;
 		return (left > right);
 	case eGTEQ:
 		return (left >= right);
 	case eLT:
+        //std::cout << toStringFormatted(left, -1, 20) << " < " << toStringFormatted(right, -1, 20) << std::endl;
 		return (left < right);
 	case eLTEQ:
 		return (left <= right);
@@ -452,7 +454,10 @@ void condExpressionNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpre
 
 // If not set, set it to some default value
 	if(dEventTolerance == 0)
-		dEventTolerance = 1E-7;
+    {
+        daeConfig& cfg  = daeConfig::GetConfig();
+        dEventTolerance = cfg.Get<real_t>("daetools.core.eventTolerance", 1E-7);
+    }
 
 /*
 	Depending on the type I have to add some additional expressions

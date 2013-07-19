@@ -2152,7 +2152,10 @@ public:
 	const std::vector<daeDomain*>& Domains() const;
 	const std::vector<daeParameter*>& Parameters() const;
 	const std::vector<daeVariable*>& Variables() const;
-	
+
+    void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                       const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
+
 protected:
 	void			InitializeParameters(void);
 	void			InitializeVariables(void);
@@ -2675,6 +2678,9 @@ public:
 	void RemoveModelArray(daeModelArray* pObject);
 	void RemoveExternalFunction(daeExternalFunction_t* pObject);
 
+    void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                       const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
+
 // Internal functions
 protected:
 	void		InitializeParameters(void);
@@ -2824,7 +2830,9 @@ protected:
     virtual bool CheckDiscontinuities(void)                                                                                         = 0;
     virtual void AddExpressionsToBlock(daeBlock* pBlock)                                                                            = 0;
     virtual void ExecuteOnConditionActions(void)                                                                                    = 0;
-	
+    virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                               const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)          = 0;
+
 protected:
 	virtual void Create(void);
 	daeModel_t*	GetModel(std::vector<size_t>& narrIndexes);
@@ -2907,6 +2915,8 @@ protected:
 	virtual void InitializeVariables(void)			= 0;
 	virtual void SetDefaultAbsoluteTolerances(void)	= 0;
 	virtual void SetDefaultInitialGuesses(void)		= 0;	
+    virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                               const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
 
 protected:
 	virtual void Create(void);

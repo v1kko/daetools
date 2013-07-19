@@ -55,8 +55,14 @@ public:
     virtual void OnCalculateJacobian();
     virtual void OnCalculateSensitivityResiduals();
     
-	void SetLASolver(daeeIDALASolverType eLASolverType);
+    std::vector<real_t> GetEstLocalErrors();
+    std::vector<real_t> GetErrWeights();
+
+    void SetLASolver(daeeIDALASolverType eLASolverType);
 	void SetLASolver(daeIDALASolver_t* pLASolver);
+
+    void SetLastIDASError(const string& strLastError);
+    string CreateIDAErrorMessage(int flag);
 
 protected:
 	virtual void CreateArrays(void);
@@ -68,7 +74,6 @@ protected:
 	void CalculateGradients(void);
 
 	bool CheckFlag(int flag);
-	string CreateIDAErrorMessage(int flag);
 	
 	void ResetIDASolver(bool bCopyDataFromBlock, real_t t0);
 	
@@ -109,9 +114,8 @@ public:
 	bool								m_bErrorControl;
 	bool								m_bPrintInfo;
 	bool								m_bResetLAMatrixAfterDiscontinuity;
-    bool                                m_bInInitializationPhase;
-    bool                                m_bSTNRebuildNeeded;
     int                                 m_iNumberOfSTNRebuildsDuringInitialization;
+    std::string                         m_strLastIDASError;
 };
 
 

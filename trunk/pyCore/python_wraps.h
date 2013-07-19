@@ -1304,20 +1304,22 @@ public:
 						   ptrarrUserDefinedActions);
     }
 	
-//	daeEquation* CreateEquation1(string strName, string strDescription, real_t dScaling)
-//	{
-//		return daeModel::CreateEquation(strName, strDescription, dScaling);
-//	}
+    boost::python::dict GetOverallIndex_BlockIndex_VariableNameMap()
+    {
+        boost::python::dict d;
+        std::map<size_t, std::pair<size_t, string> > mapOverallIndex_BlockIndex_VariableName;
+        std::map<size_t, std::pair<size_t, string> >::iterator iter;
+        const std::map<size_t, size_t>& mapOverallIndex_BlockIndex = m_pDataProxy->GetBlock()->m_mapVariableIndexes;
 
-//	daeEquation* CreateEquation2(string strName, string strDescription)
-//	{
-//		return daeModel::CreateEquation(strName, strDescription);
-//	}
+        CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
 
-//	daeEquation* CreateEquation3(string strName)
-//	{
-//		return daeModel::CreateEquation(strName);
-//	}
+        for(iter = mapOverallIndex_BlockIndex_VariableName.begin(); iter != mapOverallIndex_BlockIndex_VariableName.end(); iter++)
+        {
+            d[iter->first] = boost::python::make_tuple(iter->second.first, iter->second.second);
+        }
+
+        return d;
+    }
 
 	void DeclareData()
 	{

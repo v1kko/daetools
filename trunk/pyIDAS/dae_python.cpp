@@ -65,7 +65,10 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .def_readonly("Residuals",              &daepython::daeIDASolverWrapper::m_arrResiduals)
         .def_readonly("Jacobian",               &daepython::daeIDASolverWrapper::m_matJacobian)
         .def_readonly("SensitivityResiduals",	&daepython::daeIDASolverWrapper::m_matSResiduals)
-        
+
+        .add_property("EstLocalErrors",		   &daepython::daeIDASolverWrapper::GetEstLocalErrors_, DOCSTR_daeDAESolver_EstLocalErrors)
+        .add_property("ErrWeights",		   	   &daepython::daeIDASolverWrapper::GetErrWeights_,     DOCSTR_daeDAESolver_ErrWeights)
+
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("laSolverType") ), DOCSTR_daeIDAS_SetLASolver1)
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("laSolver") ),     DOCSTR_daeIDAS_SetLASolver2)
         .def("SaveMatrixAsXPM",	&daeIDASolver::SaveMatrixAsXPM,                ( arg("self"), arg("xpmFilename") ),  DOCSTR_daeIDAS_SaveMatrixAsXPM)

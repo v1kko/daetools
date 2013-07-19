@@ -2888,6 +2888,80 @@ void daeModel::InitializeEquations()
 	}
 }
 
+void daeModel::CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                             const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+{
+	size_t i, nOverallIndex, nBlockIndex;
+    string strName;
+	daePort* pPort;
+	daeModel* pModel;
+	daeVariable* pVariable;
+	daeModelArray* pModelArray;
+	daePortArray* pPortArray;
+
+    std::map<size_t, std::vector<size_t> > mapDomainsIndexes;
+    std::map<size_t, std::vector<size_t> >::iterator iterDomainsIndexes;
+    std::map<size_t, size_t>::const_iterator iter;
+    std::pair<size_t, string> p;
+
+	for(i = 0; i < m_ptrarrVariables.size(); i++)
+	{
+		pVariable = m_ptrarrVariables[i];
+
+        // Get <index within variable, domain points> map
+        mapDomainsIndexes.clear();
+        pVariable->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+
+        for(iterDomainsIndexes = mapDomainsIndexes.begin(); iterDomainsIndexes != mapDomainsIndexes.end(); iterDomainsIndexes++)
+        {
+            nOverallIndex = pVariable->m_nOverallIndex + iterDomainsIndexes->first;
+
+            iter = mapOverallIndex_BlockIndex.find(nOverallIndex);
+            if(iter != mapOverallIndex_BlockIndex.end()) // if found
+                nBlockIndex = iter->second;
+            else
+                nBlockIndex = ULONG_MAX;
+
+            if(iterDomainsIndexes->second.empty())
+                strName = pVariable->GetCanonicalName();
+            else
+                strName = pVariable->GetCanonicalName() + "(" + toString(iterDomainsIndexes->second, ",") + ")";
+
+            p.first  = nBlockIndex;
+            p.second = strName;
+            mapOverallIndex_BlockIndex_VariableName[nOverallIndex] = p;
+        }
+	}
+
+// Then, initialize all variables in the contained ports
+	for(i = 0; i < m_ptrarrPorts.size(); i++)
+	{
+		pPort = m_ptrarrPorts[i];
+		pPort->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+	}
+
+// Then, initialize all variables in the child-models
+	for(i = 0; i < m_ptrarrComponents.size(); i++)
+	{
+		pModel = m_ptrarrComponents[i];
+		pModel->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+	}
+
+// Next, initialize all variables in the portarrays
+	for(i = 0; i < m_ptrarrPortArrays.size(); i++)
+	{
+		pPortArray = m_ptrarrPortArrays[i];
+		pPortArray->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+	}
+
+// Finally, initialize all variables in the modelarrays
+	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+	{
+		pModelArray = m_ptrarrComponentArrays[i];
+		pModelArray->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+	}
+}
+
 void daeModel::CollectAllSTNs(vector<daeSTN*>& ptrarrSTNs) const
 {
 	size_t i;

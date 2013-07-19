@@ -13,8 +13,7 @@ namespace core
 **********************************************************************************************/
 daeCondition::daeCondition()
 {
-	daeConfig& cfg = daeConfig::GetConfig();
-	m_dEventTolerance = cfg.Get<real_t>("daetools.core.eventTolerance", 1E-7);
+	m_dEventTolerance = 0.0;
 }
 
 daeCondition::daeCondition(condNodePtr condition)
@@ -22,10 +21,9 @@ daeCondition::daeCondition(condNodePtr condition)
 	if(!condition)
 		daeDeclareAndThrowException(exInvalidPointer); 
 
-	daeConfig& cfg = daeConfig::GetConfig();
 	m_pConditionNode  = condition;
 	m_pModel          = NULL;
-	m_dEventTolerance = cfg.Get<real_t>("daetools.core.eventTolerance", 1E-7);
+	m_dEventTolerance = 0.0;
 }
 
 daeCondition::~daeCondition()
@@ -60,6 +58,9 @@ void daeCondition::Save(io::xmlTag_t* pTag) const
 
 	strName = "MathML";
 	SaveNodeAsMathML(pTag, strName);
+
+    strName = "EventTolerance";
+	pTag->Save(strName, m_dEventTolerance);
 }
 
 void daeCondition::OpenRuntime(io::xmlTag_t* /*pTag*/)

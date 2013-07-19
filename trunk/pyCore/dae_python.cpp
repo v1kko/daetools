@@ -1266,6 +1266,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                          DOCSTR_daeModel_IsModelDynamic)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                            DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
+        .add_property("OverallIndex_BlockIndex_VariableNameMap", &daepython::daeModelWrapper::GetOverallIndex_BlockIndex_VariableNameMap,
+                                                                 DOCSTR_daeModel_OverallIndex_BlockIndex_VariableNameMap)
 
         .def("__str__",           &daepython::daeModel__str__)
         .def("__repr__",          &daepython::daeModel__repr__)  
@@ -1407,7 +1409,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                               ), DOCSTR_daeScalarExternalFunction_init))
         .add_property("Name",	&daepython::daeScalarExternalFunctionWrapper::GetName, DOCSTR_daeScalarExternalFunction_Name)
 
-        .def("Calculate",	pure_virtual(&daepython::daeScalarExternalFunctionWrapper::Calculate_), 
+        .def("Calculate",	pure_virtual(&daepython::daeScalarExternalFunctionWrapper::Calculate_),
                             ( arg("self"), arg("values") ), DOCSTR_daeScalarExternalFunction_Calculate)
 		.def("__call__",	&daeScalarExternalFunction::operator(), ( arg("self") ), DOCSTR_daeScalarExternalFunction_call)
         .def("__str__",		&daepython::daeScalarExternalFunctionWrapper::__str__)

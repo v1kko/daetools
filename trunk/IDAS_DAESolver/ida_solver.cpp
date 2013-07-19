@@ -84,6 +84,12 @@ int jac_times_vector(realtype time,
 				     N_Vector tmp1, 
 					 N_Vector tmp2);
 
+void error_function(int error_code,
+				    const char *module,
+                    const char *function,
+				    char *msg,
+                    void *pUserData);
+
 daeIDASolver::daeIDASolver(void)
 {
 	m_pLog					         = NULL;
@@ -97,8 +103,6 @@ daeIDASolver::daeIDASolver(void)
 	m_dTargetTime			         = 0;
 	m_bCalculateSensitivities        = false;
 	m_bIsModelDynamic				 = false;
-    m_bInInitializationPhase         = false;
-    m_bSTNRebuildNeeded              = false;
 	m_eInitialConditionMode          = eAlgebraicValuesProvided;
 	
 	m_pIDASolverData.reset(new daeIDASolverData);
@@ -321,13 +325,15 @@ void daeIDASolver::CreateIDA(void)
     IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 10));
     IDASetMaxNonlinIters(m_pIDA,    cfg.Get<int>   ("daetools.IDAS.MaxNonlinIters",  4));
     IDASetMaxConvFails(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxConvFails",    10));
-    IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 7));
     IDASetNonlinConvCoef(m_pIDA,    cfg.Get<real_t>("daetools.IDAS.NonlinConvCoef",  0.33));
     IDASetSuppressAlg(m_pIDA,       cfg.Get<bool>  ("daetools.IDAS.SuppressAlg",     false));
     bval = cfg.Get<bool>("daetools.IDAS.NoInactiveRootWarn", false);
     if(bval)
         IDASetNoInactiveRootWarn(m_pIDA);
 	
+    // Set error function
+    IDASetErrHandlerFn(m_pIDA, error_function, this);
+
 // After a successful initialization we do not need some data; therefore free whatever is possible
 // Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
 // Here it does not matter who owns the data in the vectors; IDA keeps track of it and wont free the data it does not own
@@ -553,8 +559,6 @@ void daeIDASolver::SolveInitial(void)
     IDASetMaxNumItersIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumItersIC",    10));
     IDASetLineSearchOffIC(m_pIDA,   cfg.Get<bool>  ("daetools.IDAS.LineSearchOffIC",  false));
     
-    m_bInInitializationPhase = true;
-    m_bSTNRebuildNeeded      = false;
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {
         if(m_eInitialConditionMode == eAlgebraicValuesProvided)
@@ -564,21 +568,27 @@ void daeIDASolver::SolveInitial(void)
         else
             daeDeclareAndThrowException(exNotImplemented);
 
-        //std::cout << "retval = " << retval << std::endl;
-        //std::cout << "iCounter = " << iCounter << std::endl;
-
         if(!CheckFlag(retval))
         {
-            if(retval == IDA_RES_FAIL && m_bSTNRebuildNeeded)
+            daeDeclareException(exMiscellanous);
+            e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
+            e << string("\n") << m_strLastIDASError;
+            throw e;
+        }
+
+        if(m_pBlock->CheckForDiscontinuities())
+        {
+            m_pBlock->ExecuteOnConditionActions();
+            RefreshRootFunctions();
+            ResetIDASolver(true, m_dCurrentTime);
+
+            // debug
+            if(m_bPrintInfo)
             {
-                RefreshRootFunctions();
-                ResetIDASolver(true, m_dCurrentTime);
-            }
-            else
-            {
-                daeDeclareException(exMiscellanous);
-                e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
-                throw e;
+                retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
+                if(!CheckFlag(retval))
+                    daeDeclareAndThrowException(exInvalidCall);
+                m_pSimulation->ReportData(m_dCurrentTime);
             }
         }
         else
@@ -586,7 +596,6 @@ void daeIDASolver::SolveInitial(void)
             break;
         }
     }
-    m_bInInitializationPhase = false;
 
     if(iCounter >= m_iNumberOfSTNRebuildsDuringInitialization)
     {
@@ -651,31 +660,34 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
     RefreshRootFunctions();
     ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);
 
-    m_bInInitializationPhase = true;
-    m_bSTNRebuildNeeded      = false;
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {
         // Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
         // The reason is that in this phase we may have been reinitialized the diff. variables
         // with the new values and using the eQuasySteadyState flag would be meaningless.
         retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
-
-        //std::cout << "retval = " << retval << std::endl;
-        //std::cout << "iCounter = " << iCounter << std::endl;
-
         if(!CheckFlag(retval))
         {
-            if(retval == IDA_RES_FAIL && m_bSTNRebuildNeeded)
+            daeDeclareException(exMiscellanous);
+            e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; "
+              << CreateIDAErrorMessage(retval);
+            e << string("\n") << m_strLastIDASError;
+            throw e;
+        }
+
+        if(m_pBlock->CheckForDiscontinuities())
+        {
+            m_pBlock->ExecuteOnConditionActions();
+            RefreshRootFunctions();
+            ResetIDASolver(true, m_dCurrentTime);
+
+            // debug
+            if(m_bPrintInfo)
             {
-                RefreshRootFunctions();
-                ResetIDASolver(true, m_dCurrentTime);
-            }
-            else
-            {
-                daeDeclareException(exMiscellanous);
-                e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; "
-                  << CreateIDAErrorMessage(retval);
-                throw e;
+                retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
+                if(!CheckFlag(retval))
+                    daeDeclareAndThrowException(exInvalidCall);
+                m_pSimulation->ReportData(m_dCurrentTime);
             }
         }
         else
@@ -683,7 +695,6 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
             break;
         }
     }
-    m_bInInitializationPhase = false;
 
     if(iCounter >= m_iNumberOfSTNRebuildsDuringInitialization)
     {
@@ -796,21 +807,22 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
 	for(;;)
 	{
-// We should not use the 'tstop' time as the 'tout' time!! That limits the step size and affects the integration speed!!
-//		retval = IDASetStopTime(m_pIDA, m_dTargetTime);
-//		if(!CheckFlag(retval)) 
-//		{
-//			daeDeclareException(exMiscellanous);
-//			e << "Sundials IDAS solver cravenly refused to set the stop time at TIME = " << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
-//			throw e;
-//		}
-
 		retval = IDASolve(m_pIDA, m_dTargetTime, &m_dCurrentTime, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives, IDA_NORMAL);
-		if(!CheckFlag(retval)) 
+		if(retval == IDA_TOO_MUCH_WORK)
+        {
+            m_pLog->Message(string("Warning: IDAS solver error at TIME = ") + toString(m_dCurrentTime) + string(" [IDA_TOO_MUCH_WORK]"), 0);
+            m_pLog->Message(string("  Try to increase daetools.IDAS.MaxNumSteps option in daetools.cfg"), 0);
+            realtype tolsfac = 0;
+            retval = IDAGetTolScaleFactor(m_pIDA, &tolsfac);
+            m_pLog->Message(string("  Suggested factor by which the user’s tolerances should be scaled is ") + toString(tolsfac), 0);
+            continue;
+        }
+        else if(!CheckFlag(retval))
 		{
 			daeDeclareException(exMiscellanous);
 			e << "Sundials IDAS solver cowardly failed to solve the system at TIME = " << m_dCurrentTime 
 			  << "; time horizon [" << m_dTargetTime << "]; " << CreateIDAErrorMessage(retval);
+            e << string("\n") << m_strLastIDASError;
 			throw e;
 		}
 		
@@ -892,6 +904,37 @@ bool daeIDASolver::CheckFlag(int flag)
 		return false;
 	else
 		return true;
+}
+
+void daeIDASolver::SetLastIDASError(const string& strLastError)
+{
+    m_strLastIDASError = strLastError;
+}
+
+std::vector<real_t> daeIDASolver::GetEstLocalErrors()
+{
+    std::vector<real_t> le;
+    le.resize(m_nNumberOfEquations);
+    N_Vector vectorLocalErrors = N_VMake_Serial(m_nNumberOfEquations, &le[0]);
+
+    int retval = IDAGetEstLocalErrors(m_pIDA, vectorLocalErrors);
+    if(!CheckFlag(retval))
+        daeDeclareAndThrowException(exMiscellanous);
+
+    return le;
+}
+
+std::vector<real_t> daeIDASolver::GetErrWeights()
+{
+    std::vector<real_t> ew;
+    ew.resize(m_nNumberOfEquations);
+    N_Vector vectorErrWeights = N_VMake_Serial(m_nNumberOfEquations, &ew[0]);
+
+    int retval = IDAGetErrWeights(m_pIDA, vectorErrWeights);
+    if(!CheckFlag(retval))
+        daeDeclareAndThrowException(exMiscellanous);
+
+    return ew;
 }
 
 string daeIDASolver::CreateIDAErrorMessage(int flag)
@@ -1085,19 +1128,6 @@ int residuals(realtype	time,
 	if(!pBlock)
 		return -1;
 
-    // We have to check if there are discontinuities with CheckForDiscontinuities since the current
-    // active states might change during the initialization phase which in turn requires
-    // rebuilding of equation execution infos and updating the root functions.
-    if(pSolver->m_bInInitializationPhase)
-    {
-        if(pBlock->CheckForDiscontinuities())
-        {
-            pBlock->ExecuteOnConditionActions();
-            pSolver->m_bSTNRebuildNeeded = true;
-            return -1;
-        }
-    }
-
 	size_t N = pBlock->GetNumberOfEquations();
 
 	pdValues			= NV_DATA_S(vectorVariables); 
@@ -1188,21 +1218,6 @@ int jacobian(long int    Neq,
 	daeBlock_t* pBlock = pSolver->m_pBlock;
 	if(!pBlock)
 		return -1;
-
-    // We have to check if there are discontinuities with CheckForDiscontinuities since the current
-    // active states might change during the initialization phase which in turn requires
-    // rebuilding of equation execution infos and updating the root functions.
-    // THIS MIGHT NOT BE NEEDED HERE IN jacobian FUNCTION SINCE IT IS (THE MOST LIKELY) HANDLED BY THE
-    // residual FUNCTION. ANYWAY, CAN'T HURT TO CHECK IT ANYWAY.
-    if(pSolver->m_bInInitializationPhase)
-    {
-        if(pBlock->CheckForDiscontinuities())
-        {
-            pBlock->ExecuteOnConditionActions();
-            pSolver->m_bSTNRebuildNeeded = true;
-            return -1;
-        }
-    }
 
 	size_t N = pBlock->GetNumberOfEquations();
 
@@ -1589,6 +1604,22 @@ int jac_times_vector(realtype time,
 	arr.Print();
 */
 	return 0;
+}
+
+void error_function(int error_code,
+				    const char *module,
+                    const char *function,
+				    char *msg,
+                    void *pUserData)
+{
+    daeIDASolver* pSolver = (daeIDASolver*)pUserData;
+	if(!pSolver)
+		return;
+
+    string strErrorCode = pSolver->CreateIDAErrorMessage(error_code);
+    string msgFormat    = "IDAS solver error in module '%s' in function '%s': %s [%s]";
+    string strError     = (boost::format(msgFormat) % module % function % msg % strErrorCode).str();
+    pSolver->SetLastIDASError(strError);
 }
 
 }

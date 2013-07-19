@@ -37,7 +37,14 @@ public:
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
 			it->CleanUpSetupData();
 	}
-	
+
+    virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
+                                                               const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+			it->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+    }
+
 protected:
 	virtual void InitializeParameters(void)
 	{

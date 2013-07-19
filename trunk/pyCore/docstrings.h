@@ -282,7 +282,8 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_InitialConditionMode = "A mode used to calculate initial conditions ...";
     const char* DOCSTR_daeModel_IsModelDynamic = "Boolean flag that determines whether the model is synamic or steady-state.";
     const char* DOCSTR_daeModel_ModelType = "A type of the model ().";
-    
+    const char* DOCSTR_daeModel_OverallIndex_BlockIndex_VariableNameMap = "";
+
     const char* DOCSTR_daeModel_CreateEquation = "Creates a new equation. Used to add equations to models or "
                                                  "states in state transition networks";
     const char* DOCSTR_daeModel_DeclareEquations = "User-defined function where all model equations ans state transition networks "

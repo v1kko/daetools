@@ -16,6 +16,16 @@
 
 namespace daepython
 {
+template<typename ITEM>
+boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
+{
+    boost::python::list l;
+
+    for(size_t i = 0; i < arrItems.size(); i++)
+        l.append(arrItems[i]);
+
+    return l;
+}
 
 real_t daeArray_GetItem(daeArray<real_t>& self, size_t index);
 boost::python::list daeArray_GetValues(daeArray<real_t>& self);
@@ -152,6 +162,17 @@ public:
         this->daeIDASolver::OnCalculateSensitivityResiduals();
 	}
 
+    boost::python::list GetEstLocalErrors_()
+    {
+        std::vector<real_t> arr = daeIDASolver::GetEstLocalErrors();
+        return getListFromVectorByValue(arr);
+    }
+
+    boost::python::list GetErrWeights_()
+    {
+        std::vector<real_t> arr = daeIDASolver::GetErrWeights();
+        return getListFromVectorByValue(arr);
+    }
 };
 
 }
