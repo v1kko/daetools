@@ -34,6 +34,10 @@ public:
 		m_pLog			= NULL;
 		m_iRunCounter	= 0;
 		m_bPrintInfo	= false;
+
+        char buffer[L_tmpnam];
+        tmpnam(buffer);
+        m_strReinitializationFileName = buffer;
 	}
 	
 	virtual ~daeNLPCommon(void)
@@ -261,17 +265,23 @@ protected:
 				pOptVariable->SetValue(x[i]);
 			}
 			
-		// 2. Calculate initial conditions
+        // 2a. Calculate initial conditions
 			m_pSimulation->SolveInitial();
+
+        // 2b. Save initialization values in a temp file
+            m_pSimulation->StoreInitializationValues(m_strReinitializationFileName);
 			
 		// 3. Run the simulation
 			m_pSimulation->Run();
 		}
 		else
 		{		
-		// 1. Set again the initial conditions, values, tolerances, active states etc
+        // 1a. Set again the initial conditions, values, tolerances, active states etc
 			m_pSimulation->SetUpVariables();
-			
+
+        // 1b. Save initialization values in a temp file
+            m_pSimulation->LoadInitializationValues(m_strReinitializationFileName);
+
 		// 2. Re-assign the optimization variables
 			for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 			{
@@ -279,12 +289,13 @@ protected:
 				pOptVariable->SetValue(x[i]);
 			}
 				
-		// 3. Reset simulation and DAE solver
+        // 3. Reset simulation and DAE solver (will reset sensitivities to zero)
 			m_pSimulation->Reset();
 		
-		// 4. Calculate initial conditions
-			m_pSimulation->SolveInitial();
-		
+        // 4. Reinitialize the system and report the results
+            m_pSimulation->Reinitialize();
+            m_pSimulation->ReportData(m_pSimulation->GetCurrentTime());
+
 		// 5. Run the simulation
 			m_pSimulation->Run();
 		}
@@ -488,8 +499,9 @@ public:
 	std::vector<daeOptimizationVariable_t*>    m_ptrarrOptVariables;
 	std::vector<daeMeasuredVariable_t*>		   m_ptrarrMeasuredVariables;
 	
-	int  m_iRunCounter;
-	bool m_bPrintInfo;
+    int         m_iRunCounter;
+    bool        m_bPrintInfo;
+    std::string m_strReinitializationFileName;
 };
 
 }

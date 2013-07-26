@@ -588,7 +588,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		return IDA_LSETUP_FAIL;		
 	}
 	
-	PrintStats();
+    //PrintStats();
 #endif
 	
 #ifdef daeSuperLU_CUDA

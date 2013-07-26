@@ -15,7 +15,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 /**************************************************************
     Enums
 ***************************************************************/
-	enum_<daeeIDALASolverType>("daeeIDALASolverType")
+    enum_<daeeIDALASolverType>("daeeIDALASolverType")
 		.value("eSundialsLU",		dae::solver::eSundialsLU)
         .value("eSundialsLapack",	dae::solver::eSundialsLapack) 
 		.value("eSundialsGMRES",	dae::solver::eSundialsGMRES)

@@ -115,6 +115,9 @@ daeIDASolver::daeIDASolver(void)
 	m_bPrintInfo                                = cfg.Get<bool>  ("daetools.IDAS.printInfo",                            false);
 	m_bResetLAMatrixAfterDiscontinuity          = cfg.Get<bool>  ("daetools.core.resetLAMatrixAfterDiscontinuity",      true);
     m_iNumberOfSTNRebuildsDuringInitialization  = cfg.Get<int>("daetools.IDAS.numberOfSTNRebuildsDuringInitialization", 1000);
+
+    m_dSensRelTolerance                         = cfg.Get<real_t>("daetools.IDAS.sensRelativeTolerance",                1e-5);
+    m_dSensAbsTolerance                         = cfg.Get<real_t>("daetools.IDAS.sensAbsoluteTolerance",                1e-5);
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -357,11 +360,21 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 // Create matrixes S, SD and Sres
 	m_pIDASolverData->CreateSensitivityArrays(Ns);
 	
-	if(m_strSensitivityMethod == "Simultaneous")
-		iSensMethod = IDA_SIMULTANEOUS;
-	else
-		iSensMethod = IDA_STAGGERED;
-	
+    if(m_strSensitivityMethod == "Simultaneous")
+    {
+        iSensMethod = IDA_SIMULTANEOUS;
+    }
+    else if(m_strSensitivityMethod == "Staggered")
+    {
+        iSensMethod = IDA_STAGGERED;
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "IDAS solver error: invalid sensitivity method " << m_strSensitivityMethod;
+        throw e;
+    }
+
 	retval = IDASensInit(m_pIDA, Ns, iSensMethod, sens_residuals, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
 	if(!CheckFlag(retval)) 
 	{
@@ -370,8 +383,11 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		throw e;
 	}
 
-	retval = IDASensEEtolerances(m_pIDA);
-	if(!CheckFlag(retval)) 
+    //retval = IDASensEEtolerances(m_pIDA);
+    std::vector<real_t> arrAbsTols;
+    arrAbsTols.resize(Ns, m_dSensAbsTolerance);
+    retval = IDASensSStolerances(m_pIDA, m_dSensRelTolerance, &arrAbsTols[0]);
+    if(!CheckFlag(retval))
 	{
 		daeDeclareException(exMiscellanous);
 		e << "Sundials IDAS solver abjectly refused to setup sensitivity error tolerances; " << CreateIDAErrorMessage(retval);
@@ -385,6 +401,16 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 		e << "Sundials IDAS solver abjectly refused to setup sensitivity error control; " << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    int nNonlinIters = cfg.Get<int>("daetools.IDAS.maxNonlinIters", 3);
+    retval = IDASetSensMaxNonlinIters(m_pIDA, nNonlinIters);
+    if(!CheckFlag(retval))
+    {
+        daeDeclareException(exMiscellanous);
+        e << "Sundials IDAS solver abjectly refused to setup sensitivity maximal number of nonlinear iterations; " << CreateIDAErrorMessage(retval);
+        throw e;
+    }
 }
 
 // Think about possibility to initialize matrix m_matSValues only once;
@@ -558,7 +584,7 @@ void daeIDASolver::SolveInitial(void)
     IDASetMaxNumJacsIC(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxNumJacsIC",     4));
     IDASetMaxNumItersIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumItersIC",    10));
     IDASetLineSearchOffIC(m_pIDA,   cfg.Get<bool>  ("daetools.IDAS.LineSearchOffIC",  false));
-    
+
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {
         if(m_eInitialConditionMode == eAlgebraicValuesProvided)
@@ -580,7 +606,7 @@ void daeIDASolver::SolveInitial(void)
         {
             m_pBlock->ExecuteOnConditionActions();
             RefreshRootFunctions();
-            ResetIDASolver(true, m_dCurrentTime);
+            ResetIDASolver(true, m_dCurrentTime, false);
 
             // debug
             if(m_bPrintInfo)
@@ -621,9 +647,22 @@ void daeIDASolver::SolveInitial(void)
 
     m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 
-// Here I have a problem. If the model is steady-state then IDACalcIC does nothing!
-// The system is not solved!! I have to do something?
-// I can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
+// Get the corrected sensitivity IC
+    if(m_bCalculateSensitivities)
+    {
+        retval = IDAGetSensConsistentIC(m_pIDA, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Could not get the corrected sensitivity initial conditions from the Sundials IDAS solver at TIME = "
+              << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+    }
+
+// Here we have a problem. If the model is steady-state then IDACalcIC does nothing!
+// The system is not solved!! We have to do something?
+// We can run the system for a small period of time and then return (here only for one step: IDA_ONE_STEP).
 // But what if IDASolve fails?
 	if(!m_bIsModelDynamic)
 	{
@@ -644,10 +683,12 @@ void daeIDASolver::SolveInitial(void)
 
 void daeIDASolver::Reset(void)
 {
-	ResetIDASolver(true, 0);
+    // Achtung, Achtung!!
+    // Resets sensitivities, too!
+    ResetIDASolver(true, 0, true);
 }
 
-void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
+void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities)
 {
 	int retval, iCounter;
 	
@@ -658,7 +699,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
 	}
 	
     RefreshRootFunctions();
-    ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime);
+    ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime, bResetSensitivities);
 
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {
@@ -679,7 +720,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
         {
             m_pBlock->ExecuteOnConditionActions();
             RefreshRootFunctions();
-            ResetIDASolver(true, m_dCurrentTime);
+            ResetIDASolver(true, m_dCurrentTime, false);
 
             // debug
             if(m_bPrintInfo)
@@ -721,13 +762,24 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock)
     m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
 
     m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
+
+// Get the corrected sensitivity IC
+    if(m_bCalculateSensitivities)
+    {
+        retval = IDAGetSensConsistentIC(m_pIDA, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Could not get the corrected sensitivity initial conditions from the Sundials IDAS solver at TIME = "
+              << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+    }
 }
 
-void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
+void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0, bool bResetSensitivities)
 {
-	int retval;
-	size_t N;
-	realtype *pdValues, *pdTimeDerivatives;
+    int retval, iSensMethod;
 
 	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
@@ -739,7 +791,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 // Set the current time
 	m_dCurrentTime = t0;
 	m_pBlock->SetTime(t0);
-	
+
 /*
 ******************************************************************************
    This part is not needed now, since I directly access the solver's data; 
@@ -780,16 +832,47 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0)
 		  << CreateIDAErrorMessage(retval);
 		throw e;
 	}
+
+// ReInit sensitivities
+    if(m_bCalculateSensitivities && bResetSensitivities)
+    {
+        size_t Ns = m_narrParametersIndexes.size();
+        for(size_t i = 0; i < Ns; i++)
+            N_VConst(0, m_pIDASolverData->m_pvectorSVariables[i]);
+        for(size_t i = 0; i < Ns; i++)
+            N_VConst(0, m_pIDASolverData->m_pvectorSTimeDerivatives[i]);
+
+        if(m_strSensitivityMethod == "Simultaneous")
+        {
+            iSensMethod = IDA_SIMULTANEOUS;
+        }
+        else if(m_strSensitivityMethod == "Staggered")
+        {
+            iSensMethod = IDA_STAGGERED;
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "IDAS solver error: invalid sensitivity method " << m_strSensitivityMethod;
+            throw e;
+        }
+
+        retval = IDASensReInit(m_pIDA, iSensMethod, m_pIDASolverData->m_pvectorSVariables, m_pIDASolverData->m_pvectorSTimeDerivatives);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Sundials IDAS solver abjectly refused to re-init sensitivity calculation; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+    }
 }
 
 real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
 {
- 	int retval, retvalr;
-	int* rootsfound;
-	size_t nNoRoots;
+    int retval;
 	daeeDiscontinuityType eDiscontinuityType;
 
-	if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
+    if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
 	{
 		daeDeclareException(exMiscellanous);
 		e << "Sundials IDAS solver cravenly refuses to solve the system: the solver has not been initialized";
@@ -807,7 +890,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
 	for(;;)
 	{
-		retval = IDASolve(m_pIDA, m_dTargetTime, &m_dCurrentTime, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives, IDA_NORMAL);
+        retval = IDASolve(m_pIDA, m_dTargetTime, &m_dCurrentTime, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives, IDA_NORMAL);
 		if(retval == IDA_TOO_MUCH_WORK)
         {
             m_pLog->Message(string("Warning: IDAS solver error at TIME = ") + toString(m_dCurrentTime) + string(" [IDA_TOO_MUCH_WORK]"), 0);
@@ -851,7 +934,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 				
 				if(eDiscontinuityType == eModelDiscontinuity)
 				{ 
-					Reinitialize(false);
+                    Reinitialize(false, false);
 					
 				// The data will be reported again ONLY if there was a discontinuity
 					if(bReportDataAroundDiscontinuities)
@@ -862,7 +945,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 				}
 				else if(eDiscontinuityType == eModelDiscontinuityWithDataChange)
 				{ 
-					Reinitialize(true);
+                    Reinitialize(true, false);
 					
 				// The data will be reported again ONLY if there was a discontinuity
 					if(bReportDataAroundDiscontinuities)

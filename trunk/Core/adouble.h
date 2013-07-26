@@ -66,9 +66,9 @@ class daeDomain;
 class daeModel;
 class daeExecutionContext;
 
-typedef boost::intrusive_ptr<adNode>      adNodePtr;
-typedef boost::intrusive_ptr<adNodeArray> adNodeArrayPtr;
-typedef boost::intrusive_ptr<condNode>    condNodePtr;
+typedef boost::shared_ptr<adNode>      adNodePtr;
+typedef boost::shared_ptr<adNodeArray> adNodeArrayPtr;
+typedef boost::shared_ptr<condNode>    condNodePtr;
 
 class DAE_CORE_API daeCondition : public io::daeSerializable,
 							      public daeExportable_t
@@ -476,8 +476,7 @@ static const string strarrUnaryFns[12]={"minus",
 										};
 
 class daeNodeSaveAsContext;
-class DAE_CORE_API adNode : public daeReferenceCountable,
-                            public daeExportable_t
+class DAE_CORE_API adNode : public daeExportable_t
 
 {
 public:
@@ -523,8 +522,7 @@ public:
 /*********************************************************************************************
 	adNodeArray
 **********************************************************************************************/
-class DAE_CORE_API adNodeArray : public daeReferenceCountable,
-                                 public daeExportable_t
+class DAE_CORE_API adNodeArray : public daeExportable_t
 {
 public:
 	virtual ~adNodeArray(void){}
@@ -568,8 +566,7 @@ public:
 /*********************************************************************************************
 	condNode
 **********************************************************************************************/
-class DAE_CORE_API condNode : public daeReferenceCountable,
-                              public daeExportable_t
+class DAE_CORE_API condNode : public daeExportable_t
 {
 public:
 	virtual ~condNode(void){}

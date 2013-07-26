@@ -25,7 +25,7 @@ daeSimulation::daeSimulation(void)
 	m_bIsInitialized				= false;
 	m_bIsSolveInitial				= false;
 	m_bCalculateSensitivities		= false;
-	m_nNumberOfObjectiveFunctions	= 1;
+    m_nNumberOfObjectiveFunctions	= 1;
 }
 
 daeSimulation::~daeSimulation(void)
@@ -137,13 +137,13 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 	if(bPrintInfo)
 	{
 		m_pLog->Message(string("***********************************************************************"), 0);
-		m_pLog->Message(string("                          @@@@@                                        "), 0);
+        m_pLog->Message(string("       @                  @@@@@                                        "), 0);
 		m_pLog->Message(string("       @                    @                                          "), 0);
-		m_pLog->Message(string("       @   @@@@@     @@@@@  @                DAE Tools                 "), 0);
-		m_pLog->Message(string("  @@@@@@        @   @     @       Version:   ") + daeVersion(true),        0);
+        m_pLog->Message(string("  @@@@@@   @@@@@     @@@@@  @                DAE Tools                 "), 0);
+        m_pLog->Message(string(" @     @        @   @     @       Version:   ") + daeVersion(true),        0);
 		m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2011      "), 0);
 		m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
-		m_pLog->Message(string("  @@@@@    @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
+        m_pLog->Message(string("  @@@@@@   @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
 		m_pLog->Message(string("                                                                       "), 0);
 		m_pLog->Message(string("***********************************************************************"), 0);
 		m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
@@ -1020,7 +1020,7 @@ void daeSimulation::LoadInitializationValues(const std::string& strFileName) con
 // Load values into the m_pDataProxy->m_pdarrValuesReferences
 	m_pModel->LoadInitializationValues(strFileName);
     
-// Request DAE solver to copy data from the block and reset itself
+// Request DAE solver to copy data from the block and reset itself (will reset sensitivities, too)
     m_pDAESolver->Reset();    
 }
 
@@ -1128,7 +1128,7 @@ void daeSimulation::Reinitialize(void)
 	if(m_dCurrentTime >= m_dTimeHorizon)
 		daeDeclareAndThrowException(exInvalidCall);
 
-	m_pDAESolver->Reinitialize(true);
+    m_pDAESolver->Reinitialize(true, false);
 }
 
 void daeSimulation::EnterConditionalIntegrationMode(void)

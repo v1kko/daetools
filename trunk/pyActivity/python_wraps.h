@@ -131,10 +131,9 @@ public:
 	void Initialize(daeDAESolver_t* pDAESolver, 
 					daeDataReporter_t* pDataReporter, 
 					daeLog_t* pLog,
-					bool bCalculateSensitivities = false,
-					size_t nNumberOfObjectiveFunctions = 1)
+                    bool bCalculateSensitivities = false)
 	{
-		this->get_override("Initialize")(pDAESolver, pDataReporter, pLog, bCalculateSensitivities, nNumberOfObjectiveFunctions);
+        this->get_override("Initialize")(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
 	}
 	
 	void Reinitialize(void)
@@ -195,20 +194,20 @@ public:
 		this->m_pModel = pModel;
 	}
 
-	void Initialize(boost::python::object DAESolver, 
-		 		    boost::python::object DataReporter, 
-					boost::python::object Log, 
-					bool bCalculateSensitivities = false)
-	{
-		daesolver    = DAESolver;
-		datareporter = DataReporter;
-		log          = Log;
+//	void Initialize(boost::python::object DAESolver,
+//		 		    boost::python::object DataReporter,
+//					boost::python::object Log,
+//					bool bCalculateSensitivities = false)
+//	{
+//		daesolver    = DAESolver;
+//		datareporter = DataReporter;
+//		log          = Log;
 		
-		daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
-		daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
-		daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
-		daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
-	}
+//		daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
+//		daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
+//		daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
+//		daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
+//	}
 	
 	boost::python::object GetModel_(void) const
 	{
@@ -288,20 +287,20 @@ public:
         return d;        
     }
     
-	boost::python::object GetDataReporter_(void) const
-	{
-		return datareporter;
-	}
+    boost::python::object GetDataReporter_(void)
+    {
+        return boost::python::object(boost::ref(m_pDataReporter));
+    }
     
-	boost::python::object GetLog_(void) const
-	{
-		return log;
-	}
+    boost::python::object GetLog_(void)
+    {
+        return boost::python::object(boost::ref(m_pLog));
+    }
 
-	boost::python::object GetDAESolver_(void) const
-	{
-		return daesolver;
-	}
+    boost::python::object GetDAESolver_(void)
+    {
+        return boost::python::object(boost::ref(m_pDAESolver));
+    }
 
 	void SetUpParametersAndDomains(void)
 	{
@@ -560,9 +559,6 @@ public:
 
 public:
 	boost::python::object model;	
-	boost::python::object log;	
-	boost::python::object daesolver;	
-	boost::python::object datareporter;	
 };
 
 

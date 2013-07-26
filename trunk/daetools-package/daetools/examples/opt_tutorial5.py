@@ -100,7 +100,7 @@ def Function(p, simulation, xin, ymeas, calc_values):
         
         # Run the simulation
         simulation.Reset()
-        simulation.SolveInitial()
+        simulation.Reinitialize()
         simulation.Run()
         
         # Get the results

@@ -45,7 +45,7 @@ public:
 	virtual daeBlock_t*					GetBlock(void) const;
 	virtual daeLog_t*					GetLog(void) const;
 	virtual void						RefreshRootFunctions(void);
-	virtual void						Reinitialize(bool bCopyDataFromBlock);
+    virtual void						Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities = false);
 	virtual void						Reset(void);
 	virtual daeMatrix<real_t>&			GetSensitivities(void);
 	virtual std::string					GetName(void) const;
@@ -75,7 +75,7 @@ protected:
 
 	bool CheckFlag(int flag);
 	
-	void ResetIDASolver(bool bCopyDataFromBlock, real_t t0);
+    void ResetIDASolver(bool bCopyDataFromBlock, real_t t0, bool bResetSensitivities);
 	
 public:
 	void SaveMatrixAsXPM(const std::string& strFilename);
@@ -90,7 +90,9 @@ public:
 	daeIDALASolver_t*					m_pLASolver;
 	size_t								m_nNumberOfEquations;
 	real_t								m_dRelTolerance;
-	real_t								m_timeStart;
+    real_t								m_dSensRelTolerance;
+    real_t								m_dSensAbsTolerance;
+    real_t								m_timeStart;
 	real_t								m_dCurrentTime;
 	real_t								m_dTargetTime;
 	real_t								m_dNextTimeAfterReinitialization;

@@ -86,7 +86,8 @@ public:
 	virtual daeBlock_t*					GetBlock(void) const										= 0;
 	virtual daeLog_t*					GetLog(void) const											= 0;
 	virtual void						RefreshRootFunctions(void)									= 0;
-	virtual void						Reinitialize(bool bCopyDataFromBlock)						= 0;
+    virtual void						Reinitialize(bool bCopyDataFromBlock,
+                                                     bool bResetSensitivities = false)				= 0;
 	virtual void						Reset(void)													= 0;
 	virtual daeMatrix<real_t>&			GetSensitivities(void)										= 0;
 	virtual std::string					GetName(void) const											= 0;

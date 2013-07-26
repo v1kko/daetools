@@ -1402,7 +1402,7 @@ public:
 	{
         return getListFromVector(m_ptrarrPortConnections);
     }
-    
+
 	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
 	{
 		daeObject* pObject;

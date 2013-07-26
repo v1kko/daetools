@@ -89,9 +89,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()), 
                                                                                                             DOCSTR_daeSimulation_LastSatisfiedCondition)
             
-		.add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_,  DOCSTR_daeSimulation_DataReporter)
-		.add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_,           DOCSTR_daeSimulation_Log)
-		.add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_,     DOCSTR_daeSimulation_DAESolver)  
+        .add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_,  DOCSTR_daeSimulation_DataReporter)
+        .add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_,           DOCSTR_daeSimulation_Log)
+        .add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_,     DOCSTR_daeSimulation_DAESolver)
 
         .add_property("CurrentTime",			&daeSimulation::GetCurrentTime,                             DOCSTR_daeSimulation_CurrentTime)  
         .add_property("TimeHorizon",			&daeSimulation::GetTimeHorizon,			
@@ -148,7 +148,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       &daeSimulation::Pause,  ( arg("self") ), DOCSTR_daeSimulation_Pause)
         .def("Resume",                      &daeSimulation::Resume, ( arg("self") ), DOCSTR_daeSimulation_Resume)
    
-        .def("Initialize",					&daepython::daeDefaultSimulationWrapper::Initialize, 
+        .def("Initialize",					&daeSimulation::Initialize,
                                             ( arg("self"), arg("daeSolver"), arg("dataReporter"), arg("log"), arg("calculateSensitivities") = false ), DOCSTR_daeSimulation_Initialize)
         .def("Reinitialize",                &daeSimulation::Reinitialize, 
                                             ( arg("self") ), DOCSTR_daeSimulation_Reinitialize)  
