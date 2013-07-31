@@ -1,6 +1,6 @@
                               DAE Tools Project
 
-Copyright: Dragan Nikolic, 2010
+Copyright: Dragan Nikolic, 2013
 E-mail: dnikolic@daetools.com
 Homepage:  http://daetools.sourceforge.net  
 Licence: GNU GPL 3

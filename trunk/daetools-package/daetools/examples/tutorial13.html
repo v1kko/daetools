@@ -111,6 +111,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.ConnectEventPorts(<span style='color:#0000ff;'>self</span>.epIn, <span style='color:#0000ff;'>self</span>.epOut)
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
 

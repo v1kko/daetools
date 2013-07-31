@@ -158,6 +158,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.T.Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;Temperature of the plate&quot;</span>
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
         <span style='color:#008000;'># To distribute an equation on a domain the function DistributeOnDomain can be again used.</span>
         <span style='color:#008000;'># However, when distributing equations the function DistributeOnDomain takes an additional argument.</span>
         <span style='color:#008000;'># The second argument, DomainBounds, can be either of type daeeDomainBounds or a list of integers.</span>

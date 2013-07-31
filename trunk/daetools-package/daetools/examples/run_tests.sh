@@ -46,13 +46,13 @@ python tutorial13.py console
 echo tutorial14.py
 python tutorial14.py console
 
-echo tutorial1.py
+echo tutorial15.py
 python tutorial15.py console
 
-echo tutorial1.py
+echo tutorial16.py
 python tutorial16.py console
 
-echo tutorial1.py
+echo tutorial17.py
 python tutorial17.py console
 
 echo opt_tutorial1.py
@@ -73,3 +73,5 @@ python opt_tutorial5.py console
 echo opt_tutorial6.py
 python opt_tutorial6.py console
 
+echo opt_tutorial7.py
+python opt_tutorial7.py console

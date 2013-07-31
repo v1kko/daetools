@@ -27,7 +27,7 @@ Classes
     :members:
     :undoc-members:
     :exclude-members: Initialize, SolveInitial, DAESolver, Log, DataReporter, RelativeTolerance, AbsoluteTolerances, LoadInitializationValues, StoreInitializationValues,
-                      InitialValues, InitialDerivatives, TotalNumberOfVariables, NumberOfEquations, m, model, Model,
+                      TotalNumberOfVariables, NumberOfEquations, m, model, Model,
                       CleanUpSetupData, Finalize,
                       SetUpParametersAndDomains, SetUpVariables,
                       SetUpOptimization, CreateInequalityConstraint, CreateEqualityConstraint, SetContinuousOptimizationVariable, SetIntegerOptimizationVariable, SetBinaryOptimizationVariable, OptimizationVariables, Constraints, ObjectiveFunction,
@@ -60,8 +60,6 @@ Classes
 
     .. automethod:: LoadInitializationValues
     .. automethod:: StoreInitializationValues
-    .. autoattribute:: InitialValues
-    .. autoattribute:: InitialDerivatives
     
     .. rubric:: Clean up methods
 

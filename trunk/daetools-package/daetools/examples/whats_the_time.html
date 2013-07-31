@@ -140,51 +140,62 @@ typeNone <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span styl
         <span style='color:#008000;'>&quot;&quot;&quot;</span>
 <span style='color:#008000;'>        3.2 Declare equations and state transition networks</span>
 <span style='color:#008000;'>            All models must implement DeclareEquations function and all equations must be specified here.</span>
-<span style='color:#008000;'>            Equations are created in the daeModel.CreateEquation function. In this example we declare only</span>
-<span style='color:#008000;'>            one equation. CreateEquation accepts two arguments: equation name and description (optional).</span>
-<span style='color:#008000;'>            All naming conventions apply here as well. Equations are written in an implicit form (as a residual):</span>
-<span style='color:#008000;'>                           'residual expression' = 0</span>
-<span style='color:#008000;'>            Residual expressions are defined by using the basic mathematical operations (+, -, *, /)</span>
-<span style='color:#008000;'>            and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several</span>
-<span style='color:#008000;'>            useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation</span>
-<span style='color:#008000;'>            evaluation trees. adouble objects are used only for building the equation evaluation trees during the</span>
-<span style='color:#008000;'>            simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative</span>
-<span style='color:#008000;'>            (required for construction of a Jacobian matrix) and the tree evaluation information. The most</span>
-<span style='color:#008000;'>            otenly used functions are:</span>
-<span style='color:#008000;'>             - operator () which returns adouble object that holds the variable value</span>
-<span style='color:#008000;'>             - function dt() which returns adouble object that holds a time derivative of the variable</span>
-<span style='color:#008000;'>             - function d() and d2() which return adouble object that holds a partial derivative of the variable</span>
-<span style='color:#008000;'>               of the 1st and the 2nd order, respectively</span>
-<span style='color:#008000;'>            In this example we simply write that the variable time derivative is equal to 1:</span>
-<span style='color:#008000;'>                                 d(tau) / dt = 1</span>
-<span style='color:#008000;'>            with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation</span>
-<span style='color:#008000;'>            (normally, the built-in function Time() should be used to get the current time in the simulation;</span>
-<span style='color:#008000;'>            however, this is just an example explaining the basic daetools concepts).</span>
-<span style='color:#008000;'>            Note that the variable objects should be declared as data members of the models they belong to and</span>
-<span style='color:#008000;'>            therefore accessed through the model objects.</span>
 
-<span style='color:#008000;'>            As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)</span>
-<span style='color:#008000;'>            and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,</span>
-<span style='color:#008000;'>            typically located in /etc/daetools folder). All values and constants must be declared with the information</span>
-<span style='color:#008000;'>            about their units. Units of variables, parameters and domains are specified in their constructor while constants</span>
-<span style='color:#008000;'>            and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very</span>
-<span style='color:#008000;'>            strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.</span>
-<span style='color:#008000;'>            However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.</span>
-<span style='color:#008000;'>            'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following</span>
-<span style='color:#008000;'>            predefined units:</span>
-<span style='color:#008000;'>              - All base SI units: m, kg, s, A, K, cd, mol</span>
-<span style='color:#008000;'>              - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc</span>
-<span style='color:#008000;'>                (see units_pool.h file in trunk/Units folder)</span>
-<span style='color:#008000;'>              - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-</span>
-<span style='color:#008000;'>                using the symbols: da, h, k, M, G, T, P, E, Z, Y)</span>
-<span style='color:#008000;'>              - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-</span>
-<span style='color:#008000;'>                using the symbols: d, c, m, u, n, p, f, a, z, y</span>
+<span style='color:#008000;'>            Tipically the user-defined DeclareEquations function should first call the DeclareEquations</span>
+<span style='color:#008000;'>            function from the parent class (here daeModel). This is important when a model contains instances</span>
+<span style='color:#008000;'>            of other models to allow DeclareEquations calls from those (child-)models. If a model is simple</span>
+<span style='color:#008000;'>            (like in this example) there is no need for daeModel.DeclareEquations(self) call since it does nothing.</span>
+<span style='color:#008000;'>            However, it is a good idea to call it always (to avoid mistakes).</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
-<span style='color:#008000;'>            ACHTUNG, ACHTUNG!!</span>
-<span style='color:#008000;'>            Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!</span>
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        In this example we declare only one equation.</span>
+<span style='color:#008000;'>        CreateEquation function accepts two arguments: equation name and description (optional).</span>
+<span style='color:#008000;'>        All naming conventions apply here as well. Equations are written in an implicit form (as a residual):</span>
+<span style='color:#008000;'>                        'residual expression' = 0</span>
+<span style='color:#008000;'>        Residual expressions are defined by using the basic mathematical operations (+, -, *, /)</span>
+<span style='color:#008000;'>        and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several</span>
+<span style='color:#008000;'>        useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation</span>
+<span style='color:#008000;'>        evaluation trees. adouble objects are used only for building the equation evaluation trees during the</span>
+<span style='color:#008000;'>        simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative</span>
+<span style='color:#008000;'>        (required for construction of a Jacobian matrix) and the tree evaluation information. The most</span>
+<span style='color:#008000;'>        otenly used functions are:</span>
+<span style='color:#008000;'>            - operator () which returns adouble object that holds the variable value</span>
+<span style='color:#008000;'>            - function dt() which returns adouble object that holds a time derivative of the variable</span>
+<span style='color:#008000;'>            - function d() and d2() which return adouble object that holds a partial derivative of the variable</span>
+<span style='color:#008000;'>            of the 1st and the 2nd order, respectively</span>
+<span style='color:#008000;'>        In this example we simply write that the variable time derivative is equal to 1:</span>
+<span style='color:#008000;'>                                d(tau) / dt = 1</span>
+<span style='color:#008000;'>        with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation</span>
+<span style='color:#008000;'>        (normally, the built-in function Time() should be used to get the current time in the simulation;</span>
+<span style='color:#008000;'>        however, this is just an example explaining the basic daetools concepts).</span>
+<span style='color:#008000;'>        Note that the variable objects should be declared as data members of the models they belong to and</span>
+<span style='color:#008000;'>        therefore accessed through the model objects.</span>
 
-<span style='color:#008000;'>            Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.</span>
-<span style='color:#008000;'>            In this example we declare a quantity with the value of 1.0 and units s^-1:</span>
+<span style='color:#008000;'>        As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)</span>
+<span style='color:#008000;'>        and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,</span>
+<span style='color:#008000;'>        typically located in /etc/daetools folder) or for particular equations by setting the equation's boolean</span>
+<span style='color:#008000;'>        'CheckUnitsConsistency' property to false. All values and constants must be declared with the information</span>
+<span style='color:#008000;'>        about their units. Units of variables, parameters and domains are specified in their constructor while constants</span>
+<span style='color:#008000;'>        and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very</span>
+<span style='color:#008000;'>        strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.</span>
+<span style='color:#008000;'>        However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.</span>
+<span style='color:#008000;'>        'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following</span>
+<span style='color:#008000;'>        predefined units:</span>
+<span style='color:#008000;'>            - All base SI units: m, kg, s, A, K, cd, mol</span>
+<span style='color:#008000;'>            - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc</span>
+<span style='color:#008000;'>            (see units_pool.h file in trunk/Units folder)</span>
+<span style='color:#008000;'>            - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-</span>
+<span style='color:#008000;'>            using the symbols: da, h, k, M, G, T, P, E, Z, Y)</span>
+<span style='color:#008000;'>            - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-</span>
+<span style='color:#008000;'>            using the symbols: d, c, m, u, n, p, f, a, z, y</span>
+
+<span style='color:#008000;'>        ACHTUNG, ACHTUNG!!</span>
+<span style='color:#008000;'>        Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!</span>
+
+<span style='color:#008000;'>        Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.</span>
+<span style='color:#008000;'>        In this example we declare a quantity with the value of 1.0 and units s^-1:</span>
 <span style='color:#008000;'>        &quot;&quot;&quot;</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Time&quot;</span>, <span style='color:#c00000;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.tau.dt() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>1.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>s)
@@ -219,7 +230,7 @@ typeNone <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span styl
 <span style='color:#008000;'>            In this example the only thing needed to be done is to set the initial condition for the</span>
 <span style='color:#008000;'>            variable tau to 0. That can be done by using SetInitialCondition function.</span>
 <span style='color:#008000;'>        &quot;&quot;&quot;</span>
-        <span style='color:#0000ff;'>self</span>.m.tau.SetInitialCondition(<span style='color:#c000c0;'>0</span>)
+        <span style='color:#0000ff;'>self</span>.m.tau.SetInitialCondition(<span style='color:#c000c0;'>0.0</span>)
 
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
@@ -256,8 +267,8 @@ typeNone <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span styl
 <span style='color:#008000;'>         by using the property var.ReportingOn = True/False, or by the function SetReportingOn in daeModel class</span>
 <span style='color:#008000;'>         which enables reporting of all variables in that model</span>
 <span style='color:#008000;'>    &quot;&quot;&quot;</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'>&quot;&quot;&quot;</span>

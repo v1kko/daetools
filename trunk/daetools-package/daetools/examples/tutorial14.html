@@ -82,6 +82,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.Power_ext <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Power_ext&quot;</span>,  power_t,       <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Power&quot;</span>)
         
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
         <span style='color:#008000;'># Create external function</span>
         <span style='color:#008000;'># It has to be created in DeclareEquations since it accesses the params/vars values</span>
         <span style='color:#0000ff;'>self</span>.Pext <b><span style='color:#0000ff;'>=</span></b> extfnPower(<span style='color:#c00000;'>&quot;Power&quot;</span>, <span style='color:#0000ff;'>self</span>, W, <span style='color:#0000ff;'>self</span>.m(), <span style='color:#0000ff;'>self</span>.cp(), <span style='color:#0000ff;'>self</span>.T.dt())

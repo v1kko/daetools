@@ -493,4 +493,23 @@ Runtime model report    `opt_tutorial6-rt.xml <../../examples/opt_tutorial6-rt.x
 Source code             `opt_tutorial6.py <../../examples/opt_tutorial6.html>`_
 =====================   =================================================================
 
-    
+
+.. _opt_tutorial_7:
+
+Optimization tutorial 7
+=======================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.opt_tutorial7
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `opt_tutorial7.xml <../../examples/opt_tutorial7.xml>`_
+Runtime model report    `opt_tutorial7-rt.xml <../../examples/opt_tutorial7-rt.xml>`_
+Source code             `opt_tutorial7.py <../../examples/opt_tutorial7.html>`_
+=====================   =================================================================
+
