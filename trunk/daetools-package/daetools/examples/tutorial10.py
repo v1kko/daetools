@@ -139,7 +139,10 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
 
-        # Load initialization file previously saved after the successful initialization phase (see below)
+        # Load initialization file previously saved after the successful initialization phase.
+        # The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, however
+        # here the system is still being built and the initial conditions/guesses etc. will be copied
+        # automatically to the DAE solver at later stage.
         self.LoadInitializationValues("tutorial10.init")
 
 # Use daeSimulator class

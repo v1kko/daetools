@@ -1019,9 +1019,6 @@ void daeSimulation::LoadInitializationValues(const std::string& strFileName) con
 	
 // Load values into the m_pDataProxy->m_pdarrValuesReferences
 	m_pModel->LoadInitializationValues(strFileName);
-    
-// Request DAE solver to copy data from the block and reset itself (will reset sensitivities, too)
-    m_pDAESolver->Reset();    
 }
 
 void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)

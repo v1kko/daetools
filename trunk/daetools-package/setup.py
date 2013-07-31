@@ -130,7 +130,7 @@ elif platform.system() == 'Darwin':
 #print 'solibs = ', solibs
 
 setup(name = 'daetools',
-      version = '1.3.1',
+      version = '1.3.0',
       description = 'DAE Tools',
       long_description = 'A cross-platform equation-oriented process modelling, simulation and optimization software (pyDAE modules).',
       author = 'Dragan Nikolic',

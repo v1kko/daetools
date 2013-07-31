@@ -152,7 +152,7 @@ def consoleRun():
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Export models and ports
-    export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])
+    #export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

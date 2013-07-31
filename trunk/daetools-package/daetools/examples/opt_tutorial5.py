@@ -157,6 +157,7 @@ def run():
         sys.exit()
 
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
+    simulation.SolveInitial()
 
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
@@ -165,7 +166,7 @@ def run():
     A, k, theta = [10, 33.33333333, 0.523598333]
 
     # Starting point for parameters
-    p0 = [8, 43.47826087, 1.047196667]
+    p0 = [9.0, 43.0, 0.3]
 
     # Input data for the model
     x = numpy.arange(0, 0.06, 0.002)

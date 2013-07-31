@@ -450,7 +450,7 @@ protected:
 	daeDomainIndex
 **********************************************************************************************/
 class daeDistributedEquationDomainInfo;
-struct DAE_CORE_API daeDomainIndex
+class DAE_CORE_API daeDomainIndex
 {
 public:
 	daeDomainIndex(void);
@@ -528,7 +528,7 @@ typedef daeDistributedEquationDomainInfo daeDEDI;
 /*********************************************************************************************
 	daeArrayRange
 **********************************************************************************************/
-struct DAE_CORE_API daeArrayRange
+class DAE_CORE_API daeArrayRange
 {
 public:
 	daeArrayRange(void);
