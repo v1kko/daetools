@@ -42,6 +42,14 @@ const adouble_array Array(const std::vector<real_t>& darrValues)
 	return tmp;
 }
 
+const adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes)
+{
+	adouble_array tmp;
+	tmp.setGatherInfo(true);
+	tmp.node = adNodeArrayPtr(new adSetupCustomNodeArray(ptrarrNodes));
+	return tmp;
+}
+
 /*********************************************************************************************
 	adNodeArray
 **********************************************************************************************/
@@ -915,211 +923,163 @@ bool adRuntimePartialDerivativeNodeArray::IsFunctionOfVariables(void) const
 }
 */
 /*********************************************************************************************
-	adRuntimeSpecialFunctionNode
+	adRuntimeSpecialFunctionForLargeArraysNode
 **********************************************************************************************/
-/*
-adRuntimeSpecialFunctionNode::adRuntimeSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-													       daeModel* pModel,
-														   adNodeArrayPtr n)
+adRuntimeSpecialFunctionForLargeArraysNode::adRuntimeSpecialFunctionForLargeArraysNode(daeeSpecialUnaryFunctions eFun,
+   														                               const std::vector<adNodePtr>& ptrarrRuntimeNodes)
 {
-	eFunction = eFun;
-	m_pModel  = pModel;
-	node      = n;
+	eFunction            = eFun;
+	m_ptrarrRuntimeNodes = ptrarrRuntimeNodes;
 }
 
-adRuntimeSpecialFunctionNode::adRuntimeSpecialFunctionNode()
+adRuntimeSpecialFunctionForLargeArraysNode::adRuntimeSpecialFunctionForLargeArraysNode()
 {
-	m_pModel  = NULL;
 	eFunction = eSUFUnknown;
 }
 
-adRuntimeSpecialFunctionNode::~adRuntimeSpecialFunctionNode()
+adRuntimeSpecialFunctionForLargeArraysNode::~adRuntimeSpecialFunctionForLargeArraysNode()
 {
 }
 
-adouble adRuntimeSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+adouble adRuntimeSpecialFunctionForLargeArraysNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-#ifdef DAE_DEBUG
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);
-#endif
-	
 	adouble tmp;
-	adouble_array ad;
 	
-	ad = node->Evaluate(pExecutionContext);
-	
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    size_t N = m_ptrarrRuntimeNodes.size();
+
+    //std::cout << "    Start evaluating node in adRuntimeSpecialFunctionForLargeArraysNode of size " << N << std::endl;
 	switch(eFunction)
 	{
 	case eSum:
-        tmp = ad[0];
-        for(size_t i = 1; i < ad.GetSize(); i++)
-            tmp = tmp + ad[i];
-//		tmp = m_pModel->__sum__(ad);
+        tmp = m_ptrarrRuntimeNodes[0]->Evaluate(pExecutionContext);
+        for(size_t i = 1; i < N; i++)
+        {
+            tmp = tmp + m_ptrarrRuntimeNodes[i]->Evaluate(pExecutionContext);
+            //std::cout << "       evaluated item " << i << std::endl;
+        }
 		break;
 		
 	case eProduct:
-        tmp = ad[0];
-        for(size_t i = 1; i < ad.GetSize(); i++)
-            tmp = tmp * ad[i];
-//		tmp = m_pModel->__product__(ad);
-		break;
-		
-	case eAverage:
-        tmp = ad[0];
-        for(size_t i = 1; i < ad.GetSize(); i++)
-            tmp = tmp + ad[i];
-        tmp = tmp / ad.m_arrValues.size();
-//		tmp = m_pModel->__average__(ad);
-		break;
-
-	case eMinInArray:
-        tmp = ad[0];
-        for(size_t i = 1; i < ad.GetSize(); i++)
-            tmp = dae::core::__min__(tmp, ad[i]);
-//		tmp = m_pModel->__min__(ad);
-		break;
-		
-	case eMaxInArray:
-        tmp = ad[0];
-        for(size_t i = 1; i < ad.GetSize(); i++)
-            tmp = dae::core::__max__(tmp, ad[i]);
-//		tmp = m_pModel->__max__(ad);
+        tmp = m_ptrarrRuntimeNodes[0]->Evaluate(pExecutionContext);
+        for(size_t i = 1; i < N; i++)
+            tmp = tmp * m_ptrarrRuntimeNodes[i]->Evaluate(pExecutionContext);
 		break;
 		
 	default:
-		daeDeclareAndThrowException(exInvalidCall);
+		daeDeclareAndThrowException(exNotImplemented);
 	}
+    //std::cout << "    End evaluating node in adRuntimeSpecialFunctionForLargeArraysNode" << std::endl;
 
 	return tmp;
 }
 
-const quantity adRuntimeSpecialFunctionNode::GetQuantity(void) const
+const quantity adRuntimeSpecialFunctionForLargeArraysNode::GetQuantity(void) const
 {
-	quantity q = node->GetQuantity();
-	size_t   n = node->GetSize();
-	
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    size_t i;
+    quantity q;
+    size_t N = m_ptrarrRuntimeNodes.size();
+
 	switch(eFunction)
 	{
 	case eSum:
-		return q;
-	case eProduct:
-		return q ^ n;
-	case eAverage:
-		return q;
-	case eMinInArray:
-		return q;
-	case eMaxInArray:
-		return q;
-	default:
-		daeDeclareAndThrowException(exInvalidPointer);
-		return quantity();
+        q = m_ptrarrRuntimeNodes[0]->GetQuantity();
+        for(i = 1; i < N; i++)
+            q = q + m_ptrarrRuntimeNodes[i]->GetQuantity();
+        break;
+
+    case eProduct:
+        q = m_ptrarrRuntimeNodes[0]->GetQuantity();
+        for(i = 1; i < N; i++)
+            q = q * m_ptrarrRuntimeNodes[i]->GetQuantity();
+        break;
+
+    default:
+        daeDeclareAndThrowException(exNotImplemented);
 	}
+
+    return q;
 }
 
-adNode* adRuntimeSpecialFunctionNode::Clone(void) const
+adNode* adRuntimeSpecialFunctionForLargeArraysNode::Clone(void) const
 {
-	return new adRuntimeSpecialFunctionNode(*this);
+	return new adRuntimeSpecialFunctionForLargeArraysNode(*this);
 }
 
-//string adRuntimeSpecialFunctionNode::SaveAsPlainText(const daeNodeSaveAsContext* c) const
-//{
-//	string strResult;
-//	switch(eFunction)
-//	{
-//	case eSum:
-//		strResult += "sum(";
-//		strResult += node->SaveAsPlainText(c);
-//		strResult += ")";
-//		break;
-//	case eProduct:
-//		strResult += "product(";
-//		strResult += node->SaveAsPlainText(c);
-//		strResult += ")";
-//		break;
-//	case eMinInArray:
-//		strResult += "min(";
-//		strResult += node->SaveAsPlainText(c);
-//		strResult += ")";
-//		break;
-//	case eMaxInArray:
-//		strResult += "max(";
-//		strResult += node->SaveAsPlainText(c);
-//		strResult += ")";
-//		break;
-//	case eAverage:
-//		strResult += "average(";
-//		strResult += node->SaveAsPlainText(c);
-//		strResult += ")";
-//		break;
-//	default:
-//		daeDeclareAndThrowException(exInvalidPointer);
-//	}
-//	return strResult;
-//}
-
-string adRuntimeSpecialFunctionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+string adRuntimeSpecialFunctionForLargeArraysNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
+    size_t i;
 	string strResult;
+    size_t N = m_ptrarrRuntimeNodes.size();
 
 	switch(eFunction)
 	{
 	case eSum:
-		strResult += "\\sum ";
 		strResult += " { ";
-		strResult += node->SaveAsLatex(c);
+        for(i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strResult += " + ";
+            strResult += m_ptrarrRuntimeNodes[i]->SaveAsLatex(c);
+        }
 		strResult += " } ";
 		break;
-	case eProduct:
-		strResult += "\\prod";
+
+    case eProduct:
 		strResult += " { ";
-		strResult += node->SaveAsLatex(c);
+        for(i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strResult += " \\times ";
+            strResult += m_ptrarrRuntimeNodes[i]->SaveAsLatex(c);
+        }
 		strResult += " } ";
 		break;
-	case eMinInArray:
-		strResult += "min";
-		strResult += " \\left( ";
-		strResult += node->SaveAsLatex(c);
-		strResult += " \right( ";
-		break;
-	case eMaxInArray:
-		strResult += "max";
-		strResult += " \\left( ";
-		strResult += node->SaveAsLatex(c);
-		strResult += " \right( ";
-		break;
-	case eAverage:
-		strResult += "\overline";
-		strResult += " { ";
-		strResult += node->SaveAsLatex(c);
-		strResult += " } ";
-		break;
-	default:
-		daeDeclareAndThrowException(exXMLIOError);
+
+    default:
+        daeDeclareAndThrowException(exNotImplemented);
 	}
 
 	return strResult;
 }
 
-void adRuntimeSpecialFunctionNode::Open(io::xmlTag_t* pTag)
+void adRuntimeSpecialFunctionForLargeArraysNode::Open(io::xmlTag_t* pTag)
 {
-	daeDeclareAndThrowException(exNotImplemented)
+	daeDeclareAndThrowException(exNotImplemented);
 }
 
-void adRuntimeSpecialFunctionNode::Save(io::xmlTag_t* pTag) const
+void adRuntimeSpecialFunctionForLargeArraysNode::Save(io::xmlTag_t* pTag) const
 {
-	daeDeclareAndThrowException(exNotImplemented)
+    string strName;
+
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+	strName = "Function";
+	SaveEnum(pTag, strName, eFunction);
+
+    strName = "RuntimeNodes";
+	pTag->SaveObjectArray(strName, m_ptrarrRuntimeNodes);
 }
 
-void adRuntimeSpecialFunctionNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+void adRuntimeSpecialFunctionForLargeArraysNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
+    daeDeclareAndThrowException(exNotImplemented);
 }
 
-void adRuntimeSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+void adRuntimeSpecialFunctionForLargeArraysNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
+    size_t i;
 	string strName, strValue;
-	io::xmlTag_t *mrow, *temp;
+	io::xmlTag_t *mrow;
 	
+    size_t N = m_ptrarrRuntimeNodes.size();
+
 	strName  = "mrow";
 	strValue = "";
 	mrow = pTag->AddTag(strName, strValue);
@@ -1127,114 +1087,86 @@ void adRuntimeSpecialFunctionNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, 
 	switch(eFunction)
 	{
 	case eSum:
-		strName  = "mo";
-		strValue = "&sum;";
-		mrow->AddTag(strName, strValue);
-
-		strName  = "mo";
-		strValue = "(";
-		mrow->AddTag(strName, strValue);
-		
-		node->SaveAsPresentationMathML(mrow, c);
-
-		strName  = "mo";
-		strValue = ")";
-		mrow->AddTag(strName, strValue);
+        for(i = 0; i < N; i++)
+        {
+            if(i != 0)
+            {
+                strName  = "mo";
+                strValue = "+";
+                mrow->AddTag(strName, strValue);
+            }
+            m_ptrarrRuntimeNodes[i]->SaveAsPresentationMathML(mrow, c);
+        }
 
 		break;
-	case eProduct:
-		strName  = "mo";
-		strValue = "&prod;";
-		mrow->AddTag(strName, strValue);
 
-		strName  = "mo";
-		strValue = "(";
-		mrow->AddTag(strName, strValue);
-		
-		node->SaveAsPresentationMathML(mrow, c);
-
-		strName  = "mo";
-		strValue = ")";
-		mrow->AddTag(strName, strValue);
+    case eProduct:
+        for(i = 0; i < N; i++)
+        {
+            if(i != 0)
+            {
+                strName  = "mo";
+                strValue = "&InvisibleTimes;";
+                mrow->AddTag(strName, strValue);
+            }
+            m_ptrarrRuntimeNodes[i]->SaveAsPresentationMathML(mrow, c);
+        }
 
 		break; 
-	case eMinInArray:
-	case eMaxInArray:
-	case eAverage:
-		strName  = "mo";
-		if(eFunction == eMinInArray)
-			strValue = "min";
-		else if(eFunction == eMaxInArray)
-			strValue = "max";
-		else if(eFunction == eAverage)
-			strValue = "average";
-		temp = mrow->AddTag(strName, strValue);		
-		temp->AddAttribute(string("mathvariant"), string("italic"));
 
-		strName  = "mo";
-		strValue = "(";
-		mrow->AddTag(strName, strValue);
-		
-		node->SaveAsPresentationMathML(mrow, c);
-
-		strName  = "mo";
-		strValue = ")";
-		mrow->AddTag(strName, strValue);
-		break; 
-
-	default:
-		daeDeclareAndThrowException(exXMLIOError)
+    default:
+        daeDeclareAndThrowException(exNotImplemented);
 	}
 }
 
-void adRuntimeSpecialFunctionNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+void adRuntimeSpecialFunctionForLargeArraysNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-	if(!node)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-	node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < m_ptrarrRuntimeNodes.size(); i++)
+        m_ptrarrRuntimeNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
-bool adRuntimeSpecialFunctionNode::IsLinear(void) const
+bool adRuntimeSpecialFunctionForLargeArraysNode::IsLinear(void) const
 {
-	bool lin, isFun;
-	Linearity type;
-	
-	if(!node)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-	lin   = node->IsLinear();
-	isFun = node->IsFunctionOfVariables();
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
 
-	if(lin && (!isFun))
-		type = LIN;
-	else if(lin && isFun)
-		type = LIN_FUN;
-	else
-		type = NON_LIN;
-	
-	switch(eFunction)
-	{
-	case eSum:
-	case eAverage:
-	case eMinInArray:
-	case eMaxInArray:
-		if(type == LIN || type == LIN_FUN)
-			return true;
-		break;
-	}
-
-	return false;
+    for(size_t i = 0; i < m_ptrarrRuntimeNodes.size(); i++)
+    {
+        if(!m_ptrarrRuntimeNodes[i]->IsLinear())
+            return false;
+    }
+    return true;
 }
 
-bool adRuntimeSpecialFunctionNode::IsFunctionOfVariables(void) const
+bool adRuntimeSpecialFunctionForLargeArraysNode::IsFunctionOfVariables(void) const
 {
-	if(!node)
-		daeDeclareAndThrowException(exInvalidPointer)
-		
-	return node->IsFunctionOfVariables();
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < m_ptrarrRuntimeNodes.size(); i++)
+    {
+        if(m_ptrarrRuntimeNodes[i]->IsFunctionOfVariables())
+            return true;
+    }
+    return false;
 }
-*/
+
+bool adRuntimeSpecialFunctionForLargeArraysNode::IsDifferential(void) const
+{
+    if(m_ptrarrRuntimeNodes.empty())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < m_ptrarrRuntimeNodes.size(); i++)
+    {
+        if(m_ptrarrRuntimeNodes[i]->IsDifferential())
+            return true;
+    }
+    return false;
+}
+
 /*********************************************************************************************
 	adRuntimeIntegralNode
 **********************************************************************************************/
@@ -2963,16 +2895,19 @@ bool adBinaryNodeArray::IsDifferential(void) const
 /*********************************************************************************************
 	adSetupSpecialFunctionNode
 **********************************************************************************************/
-adSetupSpecialFunctionNode::adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-													   adNodeArrayPtr n)
+adSetupSpecialFunctionNode::adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun,
+													   adNodeArrayPtr n,
+                                                       bool bIsLargeArray)
 {
-	node      = n;
-	eFunction = eFun;
+	node            = n;
+	eFunction       = eFun;
+    m_bIsLargeArray = bIsLargeArray;
 }
 
 adSetupSpecialFunctionNode::adSetupSpecialFunctionNode()
 {
-	eFunction = eSUFUnknown;
+	eFunction       = eSUFUnknown;
+    m_bIsLargeArray = false;
 }
 
 adSetupSpecialFunctionNode::~adSetupSpecialFunctionNode()
@@ -2983,23 +2918,51 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
 {
     adouble tmp;
     adouble_array adarr;
+    std::vector<adNodePtr> ptrarrRuntimeNodes;
 
+    // Achtung, Achtung!!!
+    // This evaluates to adouble_array with m_arrValues filled with adouble having its node as a runtime node tree
     adarr = node->Evaluate(pExecutionContext);
+
+    if(adarr.GetSize() == 0)
+        daeDeclareAndThrowException(exInvalidCall);
 
     switch(eFunction)
 	{
 	case eSum:
-        tmp = adarr[0];
-        for(size_t i = 1; i < adarr.GetSize(); i++)
-            tmp = tmp + adarr[i];
+        if(m_bIsLargeArray)
+        {
+            ptrarrRuntimeNodes.resize(adarr.m_arrValues.size());
+            for(size_t i = 0; i < adarr.m_arrValues.size(); i++)
+                ptrarrRuntimeNodes[i] = adarr.m_arrValues[i].node;
+
+            tmp.node = adNodePtr(new adRuntimeSpecialFunctionForLargeArraysNode(eFunction, ptrarrRuntimeNodes));
+        }
+        else
+        {
+            tmp = adarr[0];
+            for(size_t i = 1; i < adarr.GetSize(); i++)
+                tmp = tmp + adarr[i];
+        }
         return tmp;
 //  13.10.2012
 //        return m_pModel->__sum__(node->Evaluate(pExecutionContext));
 
     case eProduct:
-        tmp = adarr[0];
-        for(size_t i = 1; i < adarr.GetSize(); i++)
-            tmp = tmp * adarr[i];
+        if(m_bIsLargeArray)
+        {
+            ptrarrRuntimeNodes.resize(adarr.m_arrValues.size());
+            for(size_t i = 0; i < adarr.m_arrValues.size(); i++)
+                ptrarrRuntimeNodes[i] = adarr.m_arrValues[i].node;
+
+            tmp.node = adNodePtr(new adRuntimeSpecialFunctionForLargeArraysNode(eFunction, ptrarrRuntimeNodes));
+        }
+        else
+        {
+            tmp = adarr[0];
+            for(size_t i = 1; i < adarr.GetSize(); i++)
+                tmp = tmp * adarr[i];
+        }
         return tmp;
 //  13.10.2012
 //        return m_pModel->__product__(node->Evaluate(pExecutionContext));

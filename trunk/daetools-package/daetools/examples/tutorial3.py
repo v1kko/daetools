@@ -161,6 +161,8 @@ class modTutorial(daeModel):
         arr1.Resize(2)
         arr1[0] = self.Qb()
         arr1[1] = self.Qt()
+        # Or simply:
+        #arr1 = adouble_array.FromList([self.Qb(), self.Qt()])
         print arr1, len(arr1)
         for a in arr1.items():
             print a
@@ -169,6 +171,8 @@ class modTutorial(daeModel):
         arr2.Resize(2)
         arr2[0] = self.k() * self.T.d(self.y, 0, 0)
         arr2[1] = self.k() * self.T.d(self.y, 1, 0)
+        # Or simply:
+        #arr2 = adouble_array.FromList([self.k() * self.T.d(self.y, 0, 0), self.k() * self.T.d(self.y, 1, 0)])
         print arr2, len(arr2)
         for a in arr2.items():
             print a

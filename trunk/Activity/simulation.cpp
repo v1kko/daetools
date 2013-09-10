@@ -209,7 +209,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 			throw e;
 		}
 	}
-	
+
 // Create model/port arrays and initialize variable indexes
 	m_pModel->InitializeStage2();
 

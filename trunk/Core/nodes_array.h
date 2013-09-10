@@ -252,41 +252,7 @@ public:
 	std::vector<daeArrayRange>				m_arrRanges;
 };
 */
-/*********************************************************************************************
-	adRuntimeSpecialFunctionNode
-**********************************************************************************************/
-/*
-class DAE_CORE_API adRuntimeSpecialFunctionNode : public adNodeImpl
-{
-public:
-	daeDeclareDynamicClass(adRuntimeSpecialFunctionNode)
-	adRuntimeSpecialFunctionNode(void);
-	adRuntimeSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-					             daeModel* pModel,
-								 adNodeArrayPtr n);
-	virtual ~adRuntimeSpecialFunctionNode(void);
 
-public:
-	virtual adouble	Evaluate(const daeExecutionContext* pExecutionContext) const;
-	virtual adNode*	Clone(void) const;
-	virtual void	Open(io::xmlTag_t* pTag);
-	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-	virtual bool	IsLinear(void) const;
-	virtual bool	IsFunctionOfVariables(void) const;
-	virtual const quantity GetQuantity(void) const;
-
-public:
-// Runtime part
-	daeModel*						m_pModel;
-	adNodeArrayPtr	node;
-// Report/GUI part
-	daeeSpecialUnaryFunctions		eFunction;
-};
-*/
 /*********************************************************************************************
 	adRuntimeIntegralNode
 **********************************************************************************************/
@@ -324,6 +290,39 @@ public:
 	std::vector<const real_t*>		m_pdarrPoints;
 };
 */
+
+/*********************************************************************************************
+	adRuntimeSpecialFunctionForLargeArraysNode
+**********************************************************************************************/
+class DAE_CORE_API adRuntimeSpecialFunctionForLargeArraysNode : public adNodeImpl
+{
+public:
+	daeDeclareDynamicClass(adRuntimeSpecialFunctionForLargeArraysNode)
+	adRuntimeSpecialFunctionForLargeArraysNode(void);
+	adRuntimeSpecialFunctionForLargeArraysNode(daeeSpecialUnaryFunctions eFun,
+								               const std::vector<adNodePtr>& ptrarrRuntimeNodes);
+	virtual ~adRuntimeSpecialFunctionForLargeArraysNode(void);
+
+public:
+	virtual adouble	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNode*	Clone(void) const;
+	virtual void	Open(io::xmlTag_t* pTag);
+	virtual void	Save(io::xmlTag_t* pTag) const;
+	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual bool	IsLinear(void) const;
+	virtual bool	IsFunctionOfVariables(void) const;
+    virtual bool    IsDifferential(void) const;
+	virtual const quantity GetQuantity(void) const;
+
+public:
+// Runtime part
+	std::vector<adNodePtr>     m_ptrarrRuntimeNodes;
+	daeeSpecialUnaryFunctions  eFunction;
+};
+
 /*********************************************************************************************
 	adUnaryNodeArray
 **********************************************************************************************/
@@ -400,7 +399,8 @@ public:
 	daeDeclareDynamicClass(adSetupSpecialFunctionNode)
 	adSetupSpecialFunctionNode(void);
 	adSetupSpecialFunctionNode(daeeSpecialUnaryFunctions eFun, 
-							   adNodeArrayPtr n);
+							   adNodeArrayPtr n,
+                               bool bIsLargeArray = false);
 	virtual ~adSetupSpecialFunctionNode(void);
 
 public:
@@ -421,6 +421,7 @@ public:
 public:
 	adNodeArrayPtr              node;
 	daeeSpecialUnaryFunctions	eFunction;
+    bool                        m_bIsLargeArray;
 };
 
 /*********************************************************************************************
@@ -611,6 +612,69 @@ public:
 	daeDomain*      m_pDomain;
 	daeArrayRange	m_Range;
 };
+
+/*********************************************************************************************
+	adSetupCustomNodeArray
+**********************************************************************************************/
+class DAE_CORE_API adSetupCustomNodeArray : public adNodeArrayImpl
+{
+public:
+	daeDeclareDynamicClass(adSetupCustomNodeArray)
+	adSetupCustomNodeArray(void);
+	adSetupCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes);
+	virtual ~adSetupCustomNodeArray(void);
+
+public:
+	virtual size_t			GetSize(void) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
+	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNodeArray*	Clone(void) const;
+	virtual void			Open(io::xmlTag_t* pTag);
+	virtual void			Save(io::xmlTag_t* pTag) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity	GetQuantity(void) const;
+
+public:
+	std::vector<adNodePtr> m_ptrarrNodes;
+};
+
+/*********************************************************************************************
+	adRuntimeCustomNodeArray
+**********************************************************************************************/
+/*
+class DAE_CORE_API adRuntimeCustomNodeArray : public adNodeArrayImpl
+{
+public:
+	daeDeclareDynamicClass(adRuntimeCustomNodeArray)
+	adRuntimeCustomNodeArray(void);
+	adRuntimeCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes);
+	virtual ~adRuntimeCustomNodeArray(void);
+
+public:
+	virtual size_t			GetSize(void) const;
+	virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
+	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const;
+	virtual adNodeArray*	Clone(void) const;
+	virtual void			Open(io::xmlTag_t* pTag);
+	virtual void			Save(io::xmlTag_t* pTag) const;
+	virtual string			SaveAsLatex(const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+	virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+	virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+	virtual const quantity	GetQuantity(void) const;
+    virtual bool            IsLinear(void) const;
+	virtual bool            IsFunctionOfVariables(void) const;
+    virtual bool            IsDifferential(void) const;
+
+public:
+	std::vector<adNodePtr> m_ptrarrNodes;
+};
+*/
 
 /*********************************************************************************************
 	adSetupVariableNodeArray

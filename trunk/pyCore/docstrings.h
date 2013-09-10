@@ -53,6 +53,8 @@ const char* DOCSTR_adouble_array = "Class adouble_array operates on arrays of va
     const char* DOCSTR_adouble_array_setitem = "Sets an adouble object at the specified integer index.";
     const char* DOCSTR_adouble_array_items = "Returns an iterator over adouble items in adouble_array object.";
     const char* DOCSTR_adouble_array_call = "Returns an adouble object at the specified daeDomainIndex (used in equation residals)";
+    const char* DOCSTR_adouble_array_FromList = "Returns adouble_array object from the list of adouble objects";
+    const char* DOCSTR_adouble_array_FromNumpyArray = "Returns adouble_array object from the ndarray of adouble objects";
 
 const char* DOCSTR_daeCondition = "";
     const char* DOCSTR_daeCondition_EventTolerance = "";
@@ -66,7 +68,7 @@ const char* DOCSTR_Time = "";
 const char* DOCSTR_Constant_c = "";  
 const char* DOCSTR_Constant_q = "";  
 const char* DOCSTR_Array = "";  
-    
+
 const char* DOCSTR_Sum = "";  
 const char* DOCSTR_Product = "";  
 const char* DOCSTR_Integral = "";  

@@ -43,7 +43,7 @@ Supported python versions:
 Supported numpy versions:
     
 * GNU/Linux (1.5, 1.6, 1.7)
-* Windows (1.6)
+* Windows (1.6, 1.7)
 * MacOS (1.6)
 
 Mandatory packages:
@@ -119,7 +119,7 @@ the following shell command:
 MacOS
 -----
 
-First install the mandatory packages: **python 2.7**, **numpy 1.6**, **scipy**, **matplotlib** and **pyqt4**.
+First install the mandatory packages: python 2.7, numpy 1.6, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
 * Python 2.7: `<http://www.python.org/ftp/python/2.7.3/python-2.7.3-macosx10.6.dmg>`_
@@ -141,12 +141,12 @@ Windows
 
 **DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
-First install the mandatory packages: python 2.7, numpy 1.6, scipy, matplotlib and pyqt4.
+First install the mandatory packages: python 2.7, numpy 1.6/1.7, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
 * Python 2.7: `<http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi>`_
-* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe/download>`_
-* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-win32-superpack-python2.7.exe/download>`_
+* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.7.1/numpy-1.7.1-win32-superpack-python2.7.exe/download>`_
+* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.12.0/scipy-0.12.0-win32-superpack-python2.7.exe/download>`_
 * Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.win32-py2.7.exe/download>`_
 * PyQt4: `<http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4 download section>`_
 

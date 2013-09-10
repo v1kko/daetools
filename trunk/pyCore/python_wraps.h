@@ -251,6 +251,8 @@ const adouble ad_d(const adouble& a, daeDomain& domain);
 const adouble ad_Constant_q(const quantity& q);
 const adouble ad_Constant_c(real_t c);
 const adouble_array adarr_Array(boost::python::list Values);
+const adouble_array adarr_FromNumpyArray(boost::python::numeric::array ndValues);
+const adouble_array adarr_FromList(boost::python::list lValues);
 
 /*******************************************************
 	adouble_array
@@ -269,8 +271,8 @@ const adouble_array adarr_asin(const adouble_array& a);
 const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
 
-const adouble adarr_sum(const adouble_array& a);
-const adouble adarr_product(const adouble_array& a);
+const adouble adarr_sum(const adouble_array& a, bool bIsLargeArray = false);
+const adouble adarr_product(const adouble_array& a, bool bIsLargeArray = false);
 const adouble adarr_min(const adouble_array& a);
 const adouble adarr_max(const adouble_array& a);
 const adouble adarr_average(const adouble_array& a);

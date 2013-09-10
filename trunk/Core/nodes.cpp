@@ -2416,9 +2416,14 @@ const quantity adBinaryNode::GetQuantity(void) const
 
 adNode* adBinaryNode::Clone(void) const
 {
-	adNodePtr l = adNodePtr( (left  ? left->Clone()  : NULL) );
-	adNodePtr r = adNodePtr( (right ? right->Clone() : NULL) );
-	return new adBinaryNode(eFunction, l, r);
+    // Achtung, Achtung!!!
+    // May we safely do a "shallow" copy and not a "deep" copy of operand-nodes?
+    //
+	//adNodePtr l = adNodePtr( (left  ? left->Clone()  : NULL) );
+	//adNodePtr r = adNodePtr( (right ? right->Clone() : NULL) );
+	//return new adBinaryNode(eFunction, l, r);
+
+    return new adBinaryNode(eFunction, left, right);
 }
 
 void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const

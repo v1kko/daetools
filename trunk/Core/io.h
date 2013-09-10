@@ -472,7 +472,7 @@ public:
 	}
 
 	template<class TYPE>
-	void SaveObjectArray(const string& strObjectArrayName, const std::vector< boost::intrusive_ptr<TYPE> >& ptrarrObjects, string strObjectName = string("Object"))
+	void SaveObjectArray(const string& strObjectArrayName, const std::vector< boost::shared_ptr<TYPE> >& ptrarrObjects, string strObjectName = string("Object"))
 	{
 		xmlTag_t* pChildTag = this->AddTag(strObjectArrayName);
 		if(!pChildTag)

@@ -101,11 +101,15 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
 # Older GCCs complain about -Wno-unused-but-set-variable
-unix::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
-                                -Wno-unused-parameter \
-                                -Wno-unused-variable \
-                                -Wno-unused-but-set-variable
+linux-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
+                                     -Wno-unused-parameter \
+                                     -Wno-unused-variable \
+                                     -Wno-unused-but-set-variable
 
+macx-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
+                                    -Wno-unused-parameter \
+                                    -Wno-unused-variable
+               
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
 unix::QMAKE_CXXFLAGS_RELEASE -= -O2
 

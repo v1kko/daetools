@@ -346,7 +346,6 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<adVectorExternalFunctionNode, bases<adNode>, boost::noncopyable>("adVectorExternalFunctionNode", no_init)
     ;
 
-    
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
         .def_readonly("Index",   &adDomainIndexNode::m_nIndex)
         .add_property("Domain",  make_function(&daepython::adDomainIndexNode_Domain, return_internal_reference<>()))
@@ -376,30 +375,35 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("DomainIndexes",	&daepython::adRuntimeTimeDerivativeNode_Domains)
     ;
 
-    
+    class_<adRuntimeSpecialFunctionForLargeArraysNode, bases<adNode>, boost::noncopyable>("adRuntimeSpecialFunctionForLargeArraysNode", no_init)
+    ;
+
 
     class_<adSingleNodeArray, bases<adNode>, boost::noncopyable>("adSingleNodeArray", no_init)
     ;
     
-    class_<adVectorNodeArray, bases<adNode>, boost::noncopyable>("adVectorNodeArray", no_init)
+    class_<adVectorNodeArray, bases<adNodeArray>, boost::noncopyable>("adVectorNodeArray", no_init)
     ;
     
-    class_<adUnaryNodeArray, bases<adNode>, boost::noncopyable>("adUnaryNodeArray", no_init)
+    class_<adUnaryNodeArray, bases<adNodeArray>, boost::noncopyable>("adUnaryNodeArray", no_init)
     ;
     
-    class_<adBinaryNodeArray, bases<adNode>, boost::noncopyable>("adBinaryNodeArray", no_init)
+    class_<adBinaryNodeArray, bases<adNodeArray>, boost::noncopyable>("adBinaryNodeArray", no_init)
     ;
     
-    class_<adSetupVariableNodeArray, bases<adNode>, boost::noncopyable>("adSetupVariableNodeArray", no_init)
+    class_<adSetupVariableNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupVariableNodeArray", no_init)
     ;
     
-    class_<adSetupParameterNodeArray, bases<adNode>, boost::noncopyable>("adSetupParameterNodeArray", no_init)
+    class_<adSetupParameterNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupParameterNodeArray", no_init)
     ;
     
-    class_<adSetupTimeDerivativeNodeArray, bases<adNode>, boost::noncopyable>("adSetupTimeDerivativeNodeArray", no_init)
+    class_<adSetupTimeDerivativeNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupTimeDerivativeNodeArray", no_init)
     ;
     
-    class_<adSetupPartialDerivativeNodeArray, bases<adNode>, boost::noncopyable>("adSetupPartialDerivativeNodeArray", no_init)
+    class_<adSetupPartialDerivativeNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupPartialDerivativeNodeArray", no_init)
+    ;
+
+    class_<adSetupCustomNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupCustomNodeArray", no_init)
     ;
 
     
@@ -524,10 +528,10 @@ BOOST_PYTHON_MODULE(pyCore)
     def("d",	 &daepython::ad_d,  (arg("ad")), DOCSTR_d);
 
 	def("Time",			&Time, DOCSTR_Time);
-	def("Constant",		&daepython::ad_Constant_c, (arg("value")),  DOCSTR_Constant_c);
-	def("Constant",		&daepython::ad_Constant_q, (arg("value")),  DOCSTR_Constant_q);
-	def("Array",		&daepython::adarr_Array,   (arg("values")), DOCSTR_Array);
-	
+	def("Constant",		&daepython::ad_Constant_c,      (arg("value")),  DOCSTR_Constant_c);
+	def("Constant",		&daepython::ad_Constant_q,      (arg("value")),  DOCSTR_Constant_q);
+	def("Array",		&daepython::adarr_Array,        (arg("values")), DOCSTR_Array);
+
 	class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
         .def(init< optional<bool, adNodeArray*> >( ( arg("self"), arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_array_init))
             
@@ -540,10 +544,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__setitem__", &adouble_array::SetItem, ( arg("self"), arg("index"), arg("value") ),   DOCSTR_adouble_array_setitem)
         .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end), 
                             DOCSTR_adouble_array_items)
-         .def("__call__",   &daepython::adouble_array__call__, ( arg("self"), arg("index") ), DOCSTR_adouble_array_call)
+        .def("__call__",    &daepython::adouble_array__call__, ( arg("self"), arg("index") ), DOCSTR_adouble_array_call)
 
         .def("__str__",     &daepython::adouble_array__str__)
         .def("__repr__",    &daepython::adouble_array__repr__)
+
+        .def("FromList",	   &daepython::adarr_FromList,   (arg("values")), DOCSTR_adouble_array_FromList)
+            .staticmethod("FromList")
+        .def("FromNumpyArray", &daepython::adarr_FromNumpyArray, (arg("values")), DOCSTR_adouble_array_FromNumpyArray)
+            .staticmethod("FromNumpyArray")
 
         .def(- self)
 		.def(self + self)
@@ -583,8 +592,8 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Ceil",		&daepython::adarr_ceil);
 	def("Floor",	&daepython::adarr_floor);
       
-    def("Sum",		 &daepython::adarr_sum,      (arg("adarray")), DOCSTR_Sum);
-    def("Product",   &daepython::adarr_product,  (arg("adarray")), DOCSTR_Product); 
+    def("Sum",		 &daepython::adarr_sum,      (arg("adarray"), arg("isLargeArray") = false), DOCSTR_Sum);
+    def("Product",   &daepython::adarr_product,  (arg("adarray"), arg("isLargeArray") = false), DOCSTR_Product);
     def("Integral",  &daepython::adarr_integral, (arg("adarray")), DOCSTR_Integral);
     def("Min",		 &daepython::adarr_min,      (arg("adarray")), DOCSTR_Min_adarr);
     def("Max",		 &daepython::adarr_max,      (arg("adarray")), DOCSTR_Max_adarr);

@@ -805,11 +805,23 @@ string adouble__repr__(const adouble& self)
 
 string adouble_array__str__(const adouble_array& self)
 {
-    string strValues = "[";
-    for(size_t i = 0; i < self.m_arrValues.size(); i++)
-        strValues += (boost::format("%1%%2%") % (i==0 ? "" : ", ") % adouble__str__(self.m_arrValues[i])).str();
-    strValues += "]";
-    return strValues;
+    string str;
+    if(self.node)
+    {
+        daeModelExportContext c;
+        c.m_nPythonIndentLevel = 0;
+        c.m_bExportDefinition  = true;
+        c.m_pModel             = NULL;
+        self.node->Export(str, ePYDAE, c);
+    }
+    else
+    {
+        str = "[";
+        for(size_t i = 0; i < self.m_arrValues.size(); i++)
+            str += (boost::format("%1%%2%") % (i==0 ? "" : ", ") % adouble__str__(self.m_arrValues[i])).str();
+        str += "]";
+    }
+    return str;
 }
 
 string adouble_array__repr__(const adouble_array& self)
@@ -937,7 +949,13 @@ const adouble_array adarr_Array(boost::python::list Values)
 	boost::python::ssize_t i, n;
 
 	n = boost::python::len(Values);
-	
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid size of the list in Array function (it is empty)";
+        throw e;
+    }
+
 	qarrValues.resize(n);
 	for(i = 0; i < n; i++)
 	{
@@ -951,12 +969,84 @@ const adouble_array adarr_Array(boost::python::list Values)
 		else
 		{
 			daeDeclareException(exInvalidCall);
-			e << "Invalid item for Vector function (must be a floating point value or a quantity object)";
+			e << "Invalid item for Array function (must be a floating point value or a quantity object)";
 			throw e;
 		}
 	}
-	
+
 	return Array(qarrValues);
+}
+
+const adouble_array adarr_FromNumpyArray(boost::python::numeric::array ndValues)
+{
+    adouble ad;
+    std::vector<adNodePtr> ptrarrValues;
+	boost::python::ssize_t i, n;
+
+    n = boost::python::len(ndValues);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid size of the list in CustomArray function (it is empty)";
+        throw e;
+    }
+
+	ptrarrValues.resize(n);
+
+    for(i = 0; i < n; i++)
+	{
+        boost::python::extract<adouble> get_adouble(ndValues[i]);
+
+        if(get_adouble.check())
+        {
+            ad = get_adouble();
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid item for CustomArray function (must be the adouble object)";
+            throw e;
+        }
+        ptrarrValues[i] = ad.node; // Should we Clone it???
+	}
+
+	return Array(ptrarrValues);
+}
+
+const adouble_array adarr_FromList(boost::python::list lValues)
+{
+    adouble ad;
+    std::vector<adNodePtr> ptrarrValues;
+	boost::python::ssize_t i, n;
+
+    n = boost::python::len(lValues);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid size of the list in CustomArray function (it is empty)";
+        throw e;
+    }
+
+	ptrarrValues.resize(n);
+
+    for(i = 0; i < n; i++)
+	{
+        boost::python::extract<adouble> get_adouble(lValues[i]);
+
+        if(get_adouble.check())
+        {
+            ad = get_adouble();
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid item for CustomArray function (must be the adouble object)";
+            throw e;
+        }
+        ptrarrValues[i] = ad.node; // Should we Clone it???
+	}
+
+	return Array(ptrarrValues);
 }
 
 const adouble ad_exp(const adouble &a)
@@ -1142,13 +1232,13 @@ const adouble_array adarr_atan(const adouble_array& a)
 	return atan(a);
 }
 
-const adouble adarr_sum(const adouble_array& a)
+const adouble adarr_sum(const adouble_array& a, bool bIsLargeArray)
 {
-	return Sum(a);
+	return Sum(a, bIsLargeArray);
 }
-const adouble adarr_product(const adouble_array& a)
+const adouble adarr_product(const adouble_array& a, bool bIsLargeArray)
 {
-	return Product(a);
+	return Product(a, bIsLargeArray);
 }
 const adouble adarr_min(const adouble_array& a)
 {

@@ -390,8 +390,8 @@ DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_arra
 DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
 
-DAE_CORE_API const adouble Sum(const adouble_array& a);
-DAE_CORE_API const adouble Product(const adouble_array& a);
+DAE_CORE_API const adouble Sum(const adouble_array& a, bool bIsLargeArray = false);
+DAE_CORE_API const adouble Product(const adouble_array& a, bool bIsLargeArray = false);
 DAE_CORE_API const adouble Min(const adouble_array& a);
 DAE_CORE_API const adouble Max(const adouble_array& a);
 DAE_CORE_API const adouble Average(const adouble_array& a);
@@ -419,6 +419,7 @@ DAE_CORE_API const adouble Constant(const quantity& q);
 DAE_CORE_API const adouble Constant(real_t c);
 DAE_CORE_API const adouble_array Array(const std::vector<quantity>& arrq);
 DAE_CORE_API const adouble_array Array(const std::vector<real_t>& darrValues);
+DAE_CORE_API const adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes);
 
 
 /*********************************************************************************************

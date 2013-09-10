@@ -258,6 +258,382 @@ void adSetupParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& map
 }
 
 /*********************************************************************************************
+	adSetupCustomNodeArray
+**********************************************************************************************/
+adSetupCustomNodeArray::adSetupCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes)
+                      : m_ptrarrNodes(ptrarrNodes)
+{
+}
+
+adSetupCustomNodeArray::adSetupCustomNodeArray()
+{
+}
+
+adSetupCustomNodeArray::~adSetupCustomNodeArray()
+{
+}
+
+void adSetupCustomNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+{
+}
+
+size_t adSetupCustomNodeArray::GetSize(void) const
+{
+    return m_ptrarrNodes.size();
+}
+
+// Here we have to evaluate every node and return adouble_array with adRuntimeCustomNodeArray as a node
+adouble_array adSetupCustomNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+	adouble_array tmp;
+	size_t N = m_ptrarrNodes.size();
+
+    tmp.Resize(N);
+	for(size_t i = 0; i < N; i++)
+        tmp[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext);
+
+	return tmp;
+
+//	if(m_ptrarrNodes.empty())
+//		daeDeclareAndThrowException(exInvalidCall);
+
+//	adouble_array tmp;
+//    std::vector<adNodePtr> ptrarrRuntimeNodes;
+//	size_t N = m_ptrarrNodes.size();
+
+//    ptrarrRuntimeNodes.resize(N);
+//	for(size_t i = 0; i < N; i++)
+//        ptrarrRuntimeNodes[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext).node;
+//	tmp.node = adNodeArrayPtr(new adRuntimeCustomNodeArray(ptrarrRuntimeNodes));
+
+//	return tmp;
+}
+
+const quantity adSetupCustomNodeArray::GetQuantity(void) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	return m_ptrarrNodes[0]->GetQuantity();
+}
+
+adNodeArray* adSetupCustomNodeArray::Clone(void) const
+{
+	return new adSetupCustomNodeArray(*this);
+}
+
+void adSetupCustomNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+    size_t N = m_ptrarrNodes.size();
+
+    if(eLanguage == eCDAE)
+	{
+        strContent += "CustomArray(";
+        for(size_t i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strContent += ", ";
+            m_ptrarrNodes[i]->Export(strContent, eLanguage, c);
+        }
+        strContent += ")";
+    }
+	else if(eLanguage == ePYDAE)
+    {
+        strContent += "CustomArray(";
+        for(size_t i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strContent += ", ";
+            m_ptrarrNodes[i]->Export(strContent, eLanguage, c);
+        }
+        strContent += ")";
+    }
+	else
+    {
+		daeDeclareAndThrowException(exNotImplemented);
+    }
+}
+//string adSetupCustomNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
+//{
+//}
+
+string adSetupCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+	string strResult;
+
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    strResult  = "{ ";
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(i != 0)
+            strResult += ", ";
+        strResult += m_ptrarrNodes[i]->SaveAsLatex(c);
+    }
+
+    strResult  += "} ";
+	return strResult;
+}
+
+void adSetupCustomNodeArray::Open(io::xmlTag_t* /*pTag*/)
+{
+}
+
+void adSetupCustomNodeArray::Save(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	strName = "Nodes";
+	pTag->SaveObjectArray(strName, m_ptrarrNodes);
+}
+
+void adSetupCustomNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    daeDeclareAndThrowException(exNotImplemented);
+}
+
+void adSetupCustomNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    string strName, strValue;
+	io::xmlTag_t *mrow;
+
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    strName  = "mrow";
+	strValue = "";
+	mrow = pTag->AddTag(strName, strValue);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(i != 0)
+        {
+            strName  = "mo";
+            strValue = ",";
+            mrow->AddTag(strName, strValue);
+        }
+        m_ptrarrNodes[i]->SaveAsPresentationMathML(mrow, c);
+    }
+}
+
+void adSetupCustomNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+	daeDeclareAndThrowException(exInvalidCall)
+}
+
+/*********************************************************************************************
+	adRuntimeCustomNodeArray
+**********************************************************************************************/
+/*
+// This is equivalent to adSetupCustomNodeArray, just the nodes here are runtime nodes
+adRuntimeCustomNodeArray::adRuntimeCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes)
+                        : m_ptrarrNodes(ptrarrNodes)
+{
+}
+
+adRuntimeCustomNodeArray::adRuntimeCustomNodeArray()
+{
+}
+
+adRuntimeCustomNodeArray::~adRuntimeCustomNodeArray()
+{
+}
+
+void adRuntimeCustomNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+{
+}
+
+size_t adRuntimeCustomNodeArray::GetSize(void) const
+{
+    return m_ptrarrNodes.size();
+}
+
+adouble_array adRuntimeCustomNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+	if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+	adouble_array tmp;
+	size_t N = m_ptrarrNodes.size();
+
+    tmp.Resize(N);
+	for(size_t i = 0; i < N; i++)
+        tmp[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext);
+
+	return tmp;
+}
+
+const quantity adRuntimeCustomNodeArray::GetQuantity(void) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+	return m_ptrarrNodes[0]->GetQuantity();
+}
+
+adNodeArray* adRuntimeCustomNodeArray::Clone(void) const
+{
+	return new adRuntimeCustomNodeArray(*this);
+}
+
+void adRuntimeCustomNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+    size_t N = m_ptrarrNodes.size();
+
+    if(eLanguage == eCDAE)
+	{
+        strContent += "Array(";
+        for(size_t i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strContent += ", ";
+            m_ptrarrNodes[i]->Export(strContent, eLanguage, c);
+        }
+        strContent += ")";
+    }
+	else if(eLanguage == ePYDAE)
+    {
+        strContent += "Array(";
+        for(size_t i = 0; i < N; i++)
+        {
+            if(i != 0)
+                strContent += ", ";
+            m_ptrarrNodes[i]->Export(strContent, eLanguage, c);
+        }
+        strContent += ")";
+    }
+	else
+    {
+		daeDeclareAndThrowException(exNotImplemented);
+    }
+}
+//string adRuntimeCustomNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
+//{
+//}
+
+string adRuntimeCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+	string strResult;
+
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    strResult  = "{ ";
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(i != 0)
+            strResult += ", ";
+        strResult += m_ptrarrNodes[i]->SaveAsLatex(c);
+    }
+
+    strResult  += "} ";
+	return strResult;
+}
+
+void adRuntimeCustomNodeArray::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adRuntimeCustomNodeArray::Save(io::xmlTag_t* pTag) const
+{
+	string strName;
+
+	strName = "Nodes";
+	pTag->SaveObjectArray(strName, m_ptrarrNodes);
+}
+
+void adRuntimeCustomNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+}
+
+void adRuntimeCustomNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    string strName, strValue;
+	io::xmlTag_t *mrow;
+
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    strName  = "mrow";
+	strValue = "";
+	mrow = pTag->AddTag(strName, strValue);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(i != 0)
+        {
+            strName  = "mo";
+            strValue = ",";
+            mrow->AddTag(strName, strValue);
+        }
+        m_ptrarrNodes[i]->SaveAsPresentationMathML(mrow, c);
+    }
+}
+
+void adRuntimeCustomNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        m_ptrarrNodes[i]->AddVariableIndexToArray(mapIndexes, bAddFixed);
+    }
+}
+
+bool adRuntimeCustomNodeArray::IsLinear(void) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(!m_ptrarrNodes[i]->IsLinear())
+            return false;
+    }
+    return true;
+}
+
+bool adRuntimeCustomNodeArray::IsFunctionOfVariables(void) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(m_ptrarrNodes[i]->IsFunctionOfVariables())
+            return true;
+    }
+    return false;
+}
+
+bool adRuntimeCustomNodeArray::IsDifferential(void) const
+{
+    if(m_ptrarrNodes.empty())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    size_t N = m_ptrarrNodes.size();
+    for(size_t i = 0; i < N; i++)
+    {
+        if(m_ptrarrNodes[i]->IsDifferential())
+            return true;
+    }
+    return false;
+}
+*/
+
+/*********************************************************************************************
 	adSetupVariableNodeArray
 **********************************************************************************************/
 adSetupVariableNodeArray::adSetupVariableNodeArray(daeVariable* pVariable,

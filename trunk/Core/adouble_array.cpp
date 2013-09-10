@@ -633,14 +633,16 @@ const adouble Average(const adouble_array& a)
 	return tmp;
 }
 
-const adouble Sum(const adouble_array& a)
+const adouble Sum(const adouble_array& a, bool bIsLargeArray)
 {
 	adouble tmp;
     if(a.getGatherInfo())
     {
         tmp.setGatherInfo(true);
-        tmp.node = adNodePtr( new adSetupSpecialFunctionNode(eSum, 
-                                                             CLONE_NODE_ARRAY(a.node) ) );
+        tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eSum,
+                                                            CLONE_NODE_ARRAY(a.node),
+                                                            bIsLargeArray)
+                             );
         return tmp;
     }
     
@@ -651,7 +653,7 @@ const adouble Sum(const adouble_array& a)
 	return tmp;
 }
 
-const adouble Product(const adouble_array& a)
+const adouble Product(const adouble_array& a, bool bIsLargeArray)
 {
 	adouble tmp;
 	
@@ -659,7 +661,9 @@ const adouble Product(const adouble_array& a)
     {
         tmp.setGatherInfo(true);
         tmp.node = adNodePtr(new adSetupSpecialFunctionNode(eProduct,
-                                                            CLONE_NODE_ARRAY(a.node) ));
+                                                            CLONE_NODE_ARRAY(a.node),
+                                                            bIsLargeArray)
+                            );
         return tmp;
     }
     

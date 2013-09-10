@@ -70,6 +70,8 @@ class modTutorial(daeModel):
         
         self.Power     = daeVariable("Power",      power_t,       self, "Power")
         self.Power_ext = daeVariable("Power_ext",  power_t,       self, "Power")
+
+        self.extFun_ = None
         
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -86,6 +88,7 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Power_ext", "")
         eq.Residual = self.Power_ext() - self.Pext()
+        self.extFun_ = eq
 
         self.stnRegulator = self.STN("Regulator")
 
@@ -154,7 +157,7 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.5
+    simulation.ReportingInterval = 10
     simulation.TimeHorizon = 500
 
     # Connect data reporter
@@ -164,6 +167,7 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
+    print simulation.m.extFun_.EquationExecutionInfos[0].VariableIndexes
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

@@ -86,7 +86,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("RelativeTolerance",      &daepython::daeDefaultSimulationWrapper::GetRelativeTolerance,      DOCSTR_daeSimulation_RelativeTolerance)
         .add_property("AbsoluteTolerances",     &daepython::daeDefaultSimulationWrapper::GetAbsoluteTolerances,     DOCSTR_daeSimulation_AbsoluteTolerances)
             
-        .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()), 
+        .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()),
                                                                                                             DOCSTR_daeSimulation_LastSatisfiedCondition)
             
         .add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_,  DOCSTR_daeSimulation_DataReporter)
