@@ -133,8 +133,10 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 	m_ProblemCreationStart = dae::GetTimeInSeconds();
 	
 	daeConfig& cfg = daeConfig::GetConfig();
-	bool bPrintInfo = cfg.Get<bool>("daetools.activity.printHeader", true);
-	if(bPrintInfo)
+    bool bPrintHeader = cfg.Get<bool>("daetools.activity.printHeader", true);
+    bool bPrintInfo   = cfg.Get<bool>("daetools.core.printInfo", false);
+
+    if(bPrintHeader)
 	{
 		m_pLog->Message(string("***********************************************************************"), 0);
         m_pLog->Message(string("       @                  @@@@@                                        "), 0);
@@ -160,14 +162,24 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
 	m_pLog->Message(string("Creating the system... "), 0);
 	
+    if(bPrintInfo)
+        m_pLog->Message(string("  Initializing the simulation... "), 0);
+
 // Create data proxy and propagate it
-	m_pModel->InitializeStage1();
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage1"), 0);
+    m_pModel->InitializeStage1();
 
 // Initialize params and domains
-	SetUpParametersAndDomains();
+    if(bPrintInfo)
+        m_pLog->Message(string("    SetUpParametersAndDomains"), 0);
+    SetUpParametersAndDomains();
 
 // Define the optimization problem: objective function and constraints
-	if(m_eSimulationMode == eOptimization)
+    if(bPrintInfo)
+        m_pLog->Message(string("    Setup optimization/sensitivity analysis"), 0);
+
+    if(m_eSimulationMode == eOptimization)
 	{
 		if(!m_bCalculateSensitivities)
 			m_bCalculateSensitivities = true;
@@ -211,35 +223,45 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 	}
 
 // Create model/port arrays and initialize variable indexes
-	m_pModel->InitializeStage2();
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage2"), 0);
+    m_pModel->InitializeStage2();
 
 // Create data storage for variables, derivatives, var. types, tolerances, etc
-	m_pModel->InitializeStage3(m_pLog);
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage3"), 0);
+    m_pModel->InitializeStage3(m_pLog);
 
 // Set initial values, initial conditions, fix variables, set initial guesses, abs tolerances, etc
-	SetUpVariables();
+    if(bPrintInfo)
+        m_pLog->Message(string("    SetUpVariables"), 0);
+    SetUpVariables();
 	
 // Create equation execution infos in models and stns
-	m_pModel->InitializeStage4();
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage4"), 0);
+    m_pModel->InitializeStage4();
 
-//// Set the solver's InitialConditionMode
-//	daeeInitialConditionMode eMode = GetInitialConditionMode();
-//	m_pDAESolver->SetInitialConditionMode(eMode);
-//	if(eMode == eQuasySteadyState)
-//		SetInitialConditionsToZero();
-
-// Now I have everything set up and I should check for inconsistences
-	CheckSystem();
+// Now we have everything set up and we should check for inconsistences
+    if(bPrintInfo)
+        m_pLog->Message(string("    CheckSystem"), 0);
+    CheckSystem();
 
 // Do the block decomposition if needed (at the moment only one block is created)
-	m_ptrarrBlocks.EmptyAndFreeMemory();
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage5"), 0);
+    m_ptrarrBlocks.EmptyAndFreeMemory();
 	m_pModel->InitializeStage5(false, m_ptrarrBlocks);
 
 // Setup DAE solver and sensitivities
-	SetupSolver();
+    if(bPrintInfo)
+        m_pLog->Message(string("    Setup DAE Solver"), 0);
+    SetupSolver();
 	
 // Register model if in simulation mode; otherwise it will be done later by the optimization/param.estimation
-	m_dCurrentTime = 0;
+    if(bPrintInfo)
+        m_pLog->Message(string("    RegisterData"), 0);
+    m_dCurrentTime = 0;
 	CollectVariables(m_pModel);
 	if(m_eSimulationMode == eSimulation)
 		RegisterData("");
@@ -588,8 +610,6 @@ void daeSimulation::Run(void)
 
 void daeSimulation::CleanUpSetupData(void)
 {
-//std::cout << "daeSimulation::CleanUpSetupData" << std::endl;
-
 // Clean up what can be cleaned up in the Models/DataProxy
 	m_pModel->GetDataProxy()->CleanUpSetupData();
 }

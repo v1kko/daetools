@@ -177,6 +177,12 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
 
+    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+    {
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Residual for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
+    }
+
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
@@ -193,13 +199,33 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad;
-	map<size_t, size_t>::iterator iter;
+    map<size_t, size_t>::iterator iter;
+    size_t counter   = 0;
+    size_t count     = m_mapIndexes.size();
+    double startTime, endTime;
+
+
+    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+    {
+        startTime = dae::GetTimeInSeconds();
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Jacobian for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     Map of variable indexes (size = ") + toString(count) + string("):"), 0);
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
+    }
 
 // m_mapIndexes<OverallIndex, IndexInBlock>
 	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
 	{
 		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
-		
+
+//        if(bPrintInfo)
+//        {
+//            m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("    Jac.item ") + toString(counter) + string("/") + toString(count) +
+//                                                            string(" (for oi=") + toString(iter->first) + string(", bi=") + toString(iter->second) + string(")"), 0);
+//            counter++;
+//        }
+
 		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
         try
         {
@@ -207,12 +233,18 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         }
         catch(daeException& e)
         {
-            std::cout << GetName() << std::endl;
+            std::cout << "Cannot set Jacobian item for " << GetName() << std::endl;
             std::cout << "EquationIndexInBlock = " << m_nEquationIndexInBlock << std::endl;
             std::cout << "VariableIndexInBlock = " << iter->second << std::endl;
-            throw e;
+            throw;
         }
 	}
+
+    if(bPrintInfo)
+    {
+        endTime = dae::GetTimeInSeconds();
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Evaluation time = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+    }
 }
 
 void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
@@ -221,6 +253,10 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
+
+    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+        std::cout << "  SensitivityResidual for " << GetName() << std::endl;
 
 	EC.m_pEquationExecutionInfo = this;
 
@@ -242,7 +278,11 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 	if(!EC.m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	
+
+    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+        std::cout << "  SensitivityParametersGradient for " << GetName() << std::endl;
+
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad;

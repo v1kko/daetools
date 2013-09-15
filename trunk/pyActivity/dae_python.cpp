@@ -56,7 +56,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("LoadInitializationValues",    pure_virtual(&daeSimulation_t::LoadInitializationValues))
 
         .def("Pause",                       pure_virtual(&daeSimulation_t::Pause))
-        .def("Resume",                      pure_virtual(&daeSimulation_t::Resume)) 
+        .def("Resume",                      pure_virtual(&daeSimulation_t::Resume))
         
         .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize), ( boost::python::arg("CalculateSensitivities") = false ) )
         .def("Reinitialize",                pure_virtual(&daeSimulation_t::Reinitialize))

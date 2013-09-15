@@ -49,6 +49,9 @@ void daeBlock::CalculateConditions(real_t				dTime,
 {
 	map<size_t, daeExpressionInfo>::iterator iter;
 
+    if(m_pDataProxy->PrintInfo())
+        m_pDataProxy->LogMessage(string("Evaluate conditions at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
+
 	SetTime(dTime);
 	m_pDataProxy->SetCurrentTime(dTime);
 	SetValuesArray(&arrValues);
@@ -75,6 +78,9 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	size_t i;
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
+
+    if(m_pDataProxy->PrintInfo())
+        m_pDataProxy->LogMessage(string("Calculate residuals at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
 
 	SetTime(dTime);
 	m_pDataProxy->SetCurrentTime(dTime);
@@ -115,7 +121,10 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
-	SetTime(dTime);
+    if(m_pDataProxy->PrintInfo())
+        m_pDataProxy->LogMessage(string("Calculate Jacobian at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
+
+    SetTime(dTime);
 	m_pDataProxy->SetCurrentTime(dTime);
 	SetValuesArray(&arrValues);
 	SetTimeDerivativesArray(&arrTimeDerivatives);
@@ -158,6 +167,9 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
 
+    if(m_pDataProxy->PrintInfo())
+        m_pDataProxy->LogMessage(string("Calculate sensitivity residuals at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
+
 	SetTime(dTime);
 	m_pDataProxy->SetCurrentTime(dTime);
 	SetValuesArray(&arrValues);
@@ -198,6 +210,9 @@ void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>
 	size_t i;
 	daeSTN* pSTN;
 	daeEquationExecutionInfo* pEquationExecutionInfo;
+
+    if(m_pDataProxy->PrintInfo())
+        m_pDataProxy->LogMessage(string("Calculate sensitivity gradients..."), 0);
 
 	SetValuesArray(&arrValues);
 	SetTimeDerivativesArray(&arrTimeDerivatives);
@@ -484,7 +499,7 @@ bool daeBlock::CheckForDiscontinuities(void)
 	daeSTN* pSTN;
 
 	if(m_dCurrentTime > 0 && m_pDataProxy->PrintInfo())
-		m_pDataProxy->LogMessage(string("Checking state transitions at time [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("]..."), 0);
+        m_pDataProxy->LogMessage(string("Checking state transitions at time ") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("..."), 0);
     
     m_pDataProxy->SetLastSatisfiedCondition(NULL);
     
