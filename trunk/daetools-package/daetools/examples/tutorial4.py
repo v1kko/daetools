@@ -60,6 +60,7 @@ class modTutorial(daeModel):
         daeModel.DeclareEquations(self)
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
+        eq.BuildJacobianExpressions = True
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
         # Symmetrical STNs in DAE Tools can be created by using IF/ELSE_IF/ELSE/END_IF statements.
@@ -163,7 +164,13 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-
+    
+    for eq in simulation.m.Equations:
+        print eq.CanonicalName, ':'
+        for eei in eq.EquationExecutionInfos:
+            print '    {0}:'.format(eei.Name)
+            print '      {0}'.format(eei.JacobianExpressions)
+            
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

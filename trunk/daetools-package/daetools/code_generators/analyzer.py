@@ -70,10 +70,10 @@ class daeCodeGeneratorAnalyzer(object):
         result['Class'] = port.__class__.__name__
         
         if len(port.Domains) > 0:
-            raise RuntimeError('Modelica ports cannot contain domains')
+            raise RuntimeError('Ports cannot contain domains')
 
         if len(port.Parameters) > 0:
-            raise RuntimeError('Modelica ports cannot contain domains')
+            raise RuntimeError('Ports cannot contain parameters')
 
         # Domains
         for domain in port.Domains:
@@ -101,7 +101,7 @@ class daeCodeGeneratorAnalyzer(object):
 
         for variable in port.Variables:
             if len(variable.Domains) > 0:
-                raise RuntimeError('Modelica ports cannot contain distributed variables')
+                raise RuntimeError('Ports cannot contain distributed variables')
 
             data = {}
             data['Name']              = variable.Name
@@ -141,11 +141,16 @@ class daeCodeGeneratorAnalyzer(object):
                    'Domains'              : [],
                    'Variables'            : [],
                    'Ports'                : [],
+                   'EventPorts'           : [],
                    'Components'           : [],
                    'Equations'            : [],
                    'PortConnections'      : [],
                    'EventPortConnections' : [],
-                   'STNs'                 : []
+                   'STNs'                 : [],
+                   'OnConditionActions'   : [],
+                   'OnEventActions'       : [],
+                   'PortArrays'           : [], # ??
+                   'ComponentArrays'      : []  # ??
                  }
  
         result['Class']         = model.__class__.__name__
@@ -214,6 +219,14 @@ class daeCodeGeneratorAnalyzer(object):
 
             result['PortConnections'].append(data)
 
+        # EventPortConnections
+        for event_port_connection in model.EventPortConnections:
+            data = {}
+            data['PortFrom']  = daeGetRelativeName(model, event_port_connection.PortFrom)
+            data['PortTo']    = daeGetRelativeName(model, event_port_connection.PortTo)
+
+            result['EventPortConnections'].append(data)
+        
         # Ports
         for port in model.Ports:
             data = {}
@@ -223,12 +236,28 @@ class daeCodeGeneratorAnalyzer(object):
             data['Description']       = port.Description
 
             result['Ports'].append(data)
+        
+        # EventPorts
+        for event_port in model.EventPorts:
+            data = {}
+            data['Name']              = event_port.Name
+            data['Class']             = event_port.__class__.__name__
+            data['Type']              = str(event_port.Type)
+            data['Description']       = event_port.Description
 
-        # equations
+            result['EventPorts'].append(data)
+
+        # Equations
         result['Equations'] = self._processEquations(model.Equations, model)
 
         # StateTransitionNetworks
         result['STNs'] = self._processSTNs(model.STNs, model)
+        
+        # OnConditionActions
+        result['OnConditionActions'] = self._processOnConditionActions(model.OnConditionActions, model)
+        
+        # OnEventActions
+        result['OnEventActions'] = self._processOnEventActions(model.OnEventActions, model)
 
         # Components
         for component in model.Components:
@@ -238,6 +267,14 @@ class daeCodeGeneratorAnalyzer(object):
             data['Description']       = component.Description
 
             result['Components'].append(data)
+
+        # PortArrays
+        if len(model.PortArrays) > 0:
+            raise RuntimeError('PortArrays are not supported by the code analyzer')
+
+        # ComponentArrays
+        if len(model.ComponentArrays) > 0:
+            raise RuntimeError('ComponentArrays are not supported by the code analyzer')
 
         return result
 
@@ -266,7 +303,8 @@ class daeCodeGeneratorAnalyzer(object):
             data['DistributedEquationDomainInfos'] = []
             for dedi in equation.DistributedEquationDomainInfos:
                 dedi_data = {}
-                dedi_data['Domain']       = dedi.Domain.Name
+                # Get a name relative to the equation's parent model 
+                dedi_data['Domain']       = daeGetRelativeName(equation.Model, dedi.Domain)
                 dedi_data['DomainBounds'] = str(dedi.DomainBounds)
                 dedi_data['DomainPoints'] = dedi.DomainPoints
                 
@@ -304,19 +342,11 @@ class daeCodeGeneratorAnalyzer(object):
             data['States']   = []
             for i, state in enumerate(stn.States):
                 state_data = {}
-                state_data['Name']              = state.Name
-                state_data['Equations']         = self._processEquations(state.Equations, model)
-                state_data['NestedSTNs']        = self._processSTNs(state.NestedSTNs, model)
-                state_data['StateTransitions']  = []
-                for state_transition in state.StateTransitions:
-                    st_data = {}
-                    st_data['ConditionSetupNode']   = state_transition.Condition.SetupNode
-                    st_data['ConditionRuntimeNode'] = state_transition.Condition.RuntimeNode
-                    st_data['EventTolerance']       = state_transition.Condition.EventTolerance
-                    st_data['Expressions']          = state_transition.Condition.Expressions
-                    st_data['Actions']              = self._processActions(state_transition.Actions, model)
-
-                    state_data['StateTransitions'].append(st_data)
+                state_data['Name']               = state.Name
+                state_data['Equations']          = self._processEquations(state.Equations, model)
+                state_data['NestedSTNs']         = self._processSTNs(state.NestedSTNs, model)
+                state_data['OnConditionActions'] = self._processOnConditionActions(state.OnConditionActions, model)
+                state_data['OnEventActions']     = self._processOnEventActions(state.OnEventActions, model)
 
                 data['States'].append(state_data)
 
@@ -324,6 +354,35 @@ class daeCodeGeneratorAnalyzer(object):
 
         return stns
 
+    def _processOnConditionActions(self, on_condition_actions, model):
+        sOnConditionActions = []
+        for on_condition_action in on_condition_actions:
+            oca_data = {}
+            oca_data['ConditionSetupNode']   = on_condition_action.Condition.SetupNode
+            oca_data['ConditionRuntimeNode'] = on_condition_action.Condition.RuntimeNode
+            oca_data['EventTolerance']       = on_condition_action.Condition.EventTolerance
+            oca_data['Expressions']          = on_condition_action.Condition.Expressions
+            oca_data['Actions']              = self._processActions(on_condition_action.Actions, model)
+            if len(on_condition_action.UserDefinedActions) > 0:
+                raise RuntimeError('UserDefinedActions cannot be exported')
+
+            sOnConditionActions.append(oca_data)
+
+        return sOnConditionActions
+    
+    def _processOnEventActions(self, on_event_actions, model):
+        sOnEventActions = []
+        for on_event_action in on_event_actions:
+            oea_data = {}
+            oea_data['EventPort']            = daeGetRelativeName(model, on_event_action.EventPort)
+            oea_data['Actions']              = self._processActions(on_event_action.Actions, model)
+            if len(on_event_action.UserDefinedActions) > 0:
+                raise RuntimeError('UserDefinedActions cannot be exported')
+            
+            sOnEventActions.append(oea_data)
+
+        return sOnEventActions
+    
     def _processActions(self, actions, model):
         sActions = []
         for action in actions:

@@ -270,6 +270,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Quantity",               &adNode::GetQuantity)
         
         .def("SaveAsLatex", &adNode::SaveAsLatex)
+
+        .def("__str__",		   &daepython::adNode__str__)
+        .def("__repr__",	   &daepython::adNode__repr__)
     ;
     
     class_<adNodeArray, boost::noncopyable>("adNodeArray", no_init)
@@ -1272,7 +1275,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		.add_property("PortArrays",				&daepython::daeModelWrapper::GetPortArrays,         DOCSTR_daeModel_PortArrays)
 		.add_property("ComponentArrays",		&daepython::daeModelWrapper::GetComponentArrays,    DOCSTR_daeModel_ComponentArrays)
         .add_property("PortConnections",		&daepython::daeModelWrapper::GetPortConnections,    DOCSTR_daeModel_PortConnections)
-		.add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                          DOCSTR_daeModel_IsModelDynamic)
+        .add_property("EventPortConnections",	&daepython::daeModelWrapper::GetEventPortConnections,DOCSTR_daeModel_EventPortConnections)
+        .add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                          DOCSTR_daeModel_IsModelDynamic)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                            DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode, &daeModel::SetInitialConditionMode, DOCSTR_daeModel_InitialConditionMode)
         .add_property("OverallIndex_BlockIndex_VariableNameMap", &daepython::daeModelWrapper::GetOverallIndex_BlockIndex_VariableNameMap,
@@ -1342,19 +1346,21 @@ BOOST_PYTHON_MODULE(pyCore)
 		;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", DOCSTR_daeEquationExecutionInfo, no_init)
-        .add_property("Node",	          make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()),
-                                          DOCSTR_daeEquationExecutionInfo_Node)
-        .add_property("Name",             &daeEquationExecutionInfo::GetName, DOCSTR_daeEquationExecutionInfo_Name)
-        .add_property("VariableIndexes",  &daepython::daeEquationExecutionInfo_GetVariableIndexes, DOCSTR_daeEquationExecutionInfo_VariableIndexes)
-        .add_property("EquationIndex",	  &daeEquationExecutionInfo::GetEquationIndexInBlock, DOCSTR_daeEquationExecutionInfo_EquationIndex)
-        .add_property("EquationType",	  &daeEquationExecutionInfo::GetEquationType, DOCSTR_daeEquationExecutionInfo_EquationType)
-        .add_property("Equation",         make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()), 
-                                          DOCSTR_daeEquationExecutionInfo_Equation)
+        .add_property("Node",	             make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()),
+                                             DOCSTR_daeEquationExecutionInfo_Node)
+        .add_property("Name",                &daeEquationExecutionInfo::GetName, DOCSTR_daeEquationExecutionInfo_Name)
+        .add_property("VariableIndexes",     &daepython::daeEquationExecutionInfo_GetVariableIndexes, DOCSTR_daeEquationExecutionInfo_VariableIndexes)
+        .add_property("EquationIndex",       &daeEquationExecutionInfo::GetEquationIndexInBlock, DOCSTR_daeEquationExecutionInfo_EquationIndex)
+        .add_property("EquationType",	     &daeEquationExecutionInfo::GetEquationType, DOCSTR_daeEquationExecutionInfo_EquationType)
+        .add_property("JacobianExpressions", &daepython::daeEquationExecutionInfo_JacobianExpressions, DOCSTR_daeEquationExecutionInfo_JacobianExpressions)
+        .add_property("Equation",            make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()),
+                                             DOCSTR_daeEquationExecutionInfo_Equation)
     ;
 
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)
         .add_property("Residual",                       &daeEquation::GetResidual, &daeEquation::SetResidual, DOCSTR_daeEquation_Residual)
         .add_property("Scaling",                        &daeEquation::GetScaling,  &daeEquation::SetScaling, DOCSTR_daeEquation_Scaling)
+        .add_property("BuildJacobianExpressions",       &daeEquation::GetBuildJacobianExpressions,  &daeEquation::SetBuildJacobianExpressions, DOCSTR_daeEquation_BuildJacobianExpressions)
         .add_property("CheckUnitsConsistency",          &daeEquation::GetCheckUnitsConsistency,  &daeEquation::SetCheckUnitsConsistency, DOCSTR_daeEquation_CheckUnitConsistency)
         .add_property("EquationExecutionInfos",	        &daepython::daeEquation_GetEquationExecutionInfos, DOCSTR_daeEquation_EquationExecutionInfos)
         .add_property("DistributedEquationDomainInfos",	&daepython::daeEquation_DistributedEquationDomainInfos, DOCSTR_daeEquation_DistributedEquationDomainInfos)

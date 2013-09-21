@@ -355,18 +355,37 @@ class daeCodeGenerator_Modelica(object):
         return result
     
     def _processModel(self, data, indent):
-        sParameters      = []
-        sVariables       = []
-        sPorts           = []
-        sComponents      = []
-        sPortConnections = []
-        sEquations       = []
-        sSTNs            = []
+        sParameters         = []
+        sVariables          = []
+        sPorts              = []
+        sComponents         = []
+        sPortConnections    = []
+        sEquations          = []
+        sSTNs               = []
+        sOnConditionActions = []
+        sOnEventActions     = []
 
         s_indent = indent * self.defaultIndent
 
         # Achtung, Achtung!!
         self.exprFormatter.modelCanonicalName = data['CanonicalName']
+        
+        # These concepts are not supported by the Modelica code-generator:
+        #  - EventPortConnections
+        #  - EventPorts
+        #  - PortArrays
+        #  - ComponentArrays
+        #  - OnEventActions
+        if len(data['EventPortConnections']) > 0:
+            raise RuntimeError('Modelica code generator: EventPortConnections are not supported')
+        if len(data['EventPorts']) > 0:
+            raise RuntimeError('Modelica code generator: EventPorts are not supported')
+        if len(data['PortArrays']) > 0:
+            raise RuntimeError('Modelica code generator: PortArrays are not supported')
+        if len(data['ComponentArrays']) > 0:
+            raise RuntimeError('Modelica code generator: ComponentArrays are not supported')
+        if len(data['OnEventActions']) > 0:
+            raise RuntimeError('Modelica code generator: OnEventActions are not supported')
         
         # Domains
         for domain in data['Domains']:

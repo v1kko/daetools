@@ -155,6 +155,11 @@ std::string daeEquationExecutionInfo::GetName(void) const
     return strName;
 }
 
+const std::vector<adNodePtr>& daeEquationExecutionInfo::GetJacobianExpressions() const
+{
+    return m_ptrarrJacobianExpressions;
+}
+
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
 {
 // Here m_pDataProxy->GatherInfo is true!!
@@ -165,6 +170,10 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* 
 
 // Get a runtime node by evaluating the setup node
 	pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
+
+// If requested, build a Jacobian expression
+    if(pEquation->m_bBuildJacobianExpressions)
+        BuildJacobianExpressions();
 
 // Restore NULL as a global execution context
 	pModel->PropagateGlobalExecutionContext(NULL);
@@ -204,7 +213,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
     size_t count     = m_mapIndexes.size();
     double startTime, endTime;
 
-
     bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
     if(bPrintInfo)
     {
@@ -231,12 +239,12 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         {
             EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
         }
-        catch(daeException& e)
+        catch(std::exception& exc)
         {
-            std::cout << "Cannot set Jacobian item for " << GetName() << std::endl;
-            std::cout << "EquationIndexInBlock = " << m_nEquationIndexInBlock << std::endl;
-            std::cout << "VariableIndexInBlock = " << iter->second << std::endl;
-            throw;
+            daeDeclareException(exInvalidCall);
+            e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
+              << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
+            throw e;
         }
 	}
 
@@ -293,6 +301,33 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
 	}
+}
+
+// Operates on adRuntimeNodes
+void daeEquationExecutionInfo::BuildJacobianExpressions()
+{
+    adNodePtr  scaling;
+    map<size_t, size_t>::iterator iter;
+    size_t counter;
+
+    m_ptrarrJacobianExpressions.clear();
+    m_ptrarrJacobianExpressions.resize(m_mapIndexes.size());
+
+// m_mapIndexes<OverallIndex, IndexInBlock>
+    for(counter = 0, iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++, counter++)
+    {
+        adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
+
+        if(m_dScaling == 1)
+        {
+            m_ptrarrJacobianExpressions[counter] = jacob.derivative;
+        }
+        else
+        {
+            scaling = adNodePtr( new adConstantNode(m_dScaling) );
+            m_ptrarrJacobianExpressions[counter] = adNodePtr( new adBinaryNode(eMulti, jacob.derivative, scaling) );
+        }
+    }
 }
 
 void daeEquationExecutionInfo::AddVariableInEquation(size_t nIndex)
@@ -716,10 +751,11 @@ daeEquation::daeEquation()
 {
     daeConfig& cfg = daeConfig::GetConfig();
     
-    m_bCheckUnitsConsistency = cfg.Get<bool>("daetools.core.checkUnitsConsistency", true);
-	m_dScaling               = 1.0;
-	m_pParentState           = NULL;
-	m_pModel                 = NULL;
+    m_bCheckUnitsConsistency    = cfg.Get<bool>("daetools.core.checkUnitsConsistency", true);
+    m_bBuildJacobianExpressions = false;
+    m_dScaling                  = 1.0;
+    m_pParentState              = NULL;
+    m_pModel                    = NULL;
 }
 
 daeEquation::~daeEquation()
@@ -1314,6 +1350,16 @@ real_t daeEquation::GetScaling(void) const
 void daeEquation::SetScaling(real_t dScaling)
 {
 	m_dScaling = dScaling;
+}
+
+bool daeEquation::GetBuildJacobianExpressions(void) const
+{
+    return m_bBuildJacobianExpressions;
+}
+
+void daeEquation::SetBuildJacobianExpressions(bool bBuildJacobianExpressions)
+{
+    m_bBuildJacobianExpressions = bBuildJacobianExpressions;
 }
 
 bool daeEquation::GetCheckUnitsConsistency(void) const

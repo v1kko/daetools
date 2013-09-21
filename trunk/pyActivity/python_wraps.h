@@ -231,8 +231,13 @@ public:
         boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
         for(size_t i = 0; i < dtRefs.size(); i++)
-            l.append(*dtRefs[i]);
-    
+        {
+        // Assigned variables have no time derivatives mapped; thus, those items are left uninitialized (NULL)
+            if(!dtRefs[i])
+                l.append(0.0);
+            else
+                l.append(*dtRefs[i]);
+        }
         return l;
 	}
 

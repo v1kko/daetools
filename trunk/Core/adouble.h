@@ -476,6 +476,20 @@ static const string strarrUnaryFns[12]={"minus",
 										"abs"
 										};
 
+class DAE_CORE_API adJacobian
+{
+public:
+    adJacobian(adNodePtr val, adNodePtr deriv)
+    {
+        value      = val;
+        derivative = deriv;
+    }
+
+public:
+    adNodePtr value;
+    adNodePtr derivative;
+};
+
 class daeNodeSaveAsContext;
 class DAE_CORE_API adNode : public daeExportable_t
 
@@ -512,6 +526,7 @@ public:
 									 const adNode* node, 
 									 const daeNodeSaveAsContext* c, 
 									 bool bAppendEqualToZero = false);
+    static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
 };
 
 #define CLONE_NODE(NODE, VALUE) (  adNodePtr(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )

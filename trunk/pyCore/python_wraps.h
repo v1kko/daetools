@@ -122,6 +122,8 @@ string daeCondition__str__(const daeCondition& self);
 string daeCondition__repr__(const daeCondition& self);
 string adouble__str__(const adouble& self);
 string adouble__repr__(const adouble& self);
+string adNode__str__(const adNode& self);
+string adNode__repr__(const adNode& self);
 string adouble_array__str__(const adouble_array& self);
 string adouble_array__repr__(const adouble_array& self);
 
@@ -956,6 +958,7 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
 	daeEquationExecutionInfo
 *******************************************************/
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
+boost::python::list daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 
 /*******************************************************
 	daeDEDI
@@ -1403,6 +1406,11 @@ public:
     boost::python::list GetPortConnections(void)
 	{
         return getListFromVector(m_ptrarrPortConnections);
+    }
+
+    boost::python::list GetEventPortConnections(void)
+    {
+        return getListFromVector(m_ptrarrEventPortConnections);
     }
 
 	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const

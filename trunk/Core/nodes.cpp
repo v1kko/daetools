@@ -5,6 +5,7 @@
 using namespace dae;
 #include "xmlfunctions.h"
 #include "units_io.h"
+#include "../Units/units_pool.h"
 #include <typeinfo>
 using namespace dae::xml;
 using namespace boost;
@@ -330,6 +331,304 @@ void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag,
 	}
 }
 
+adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
+{
+    adNodePtr val_, deriv_;
+
+    adNode* n = node_.get();
+
+    if(dynamic_cast<adRuntimeVariableNode*>(n))
+    {
+        adRuntimeVariableNode* node = dynamic_cast<adRuntimeVariableNode*>(n);
+
+        val_ = adNodePtr(node_->Clone());
+        if(node->m_nOverallIndex == nOverallVariableIndex)
+            deriv_ = adNodePtr(new adConstantNode(1.0));
+        else
+            deriv_ = adNodePtr();
+    }
+    else if(dynamic_cast<adRuntimeTimeDerivativeNode*>(n))
+    {
+        adRuntimeTimeDerivativeNode* node = dynamic_cast<adRuntimeTimeDerivativeNode*>(n);
+
+        val_ = adNodePtr(node_->Clone());
+        if(node->m_nOverallIndex == nOverallVariableIndex)
+            deriv_ = adNodePtr(new adInverseTimeStepNode());
+        else
+            deriv_ = adNodePtr();
+    }
+    else if(dynamic_cast<adBinaryNode*>(n))
+    {
+        adBinaryNode* node = dynamic_cast<adBinaryNode*>(n);
+
+        adJacobian jacl = adNode::Derivative(node->left,  nOverallVariableIndex);
+        adJacobian jacr = adNode::Derivative(node->right, nOverallVariableIndex);
+
+        adNodePtr l  = jacl.value;
+        adNodePtr r  = jacr.value;
+        adNodePtr dl = jacl.derivative;
+        adNodePtr dr = jacr.derivative;
+
+        if(node->eFunction == ePlus)
+        {
+            val_ = adNodePtr(new adBinaryNode(ePlus, l, r));
+
+            if(dl && dr)
+                deriv_ = adNodePtr(new adBinaryNode(ePlus, dl, dr));
+            else if(dl)
+                deriv_ = dl;
+            else if(dr)
+                deriv_ = dr;
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eMinus)
+        {
+            val_ = adNodePtr(new adBinaryNode(eMinus, l, r));
+
+            if(dl && dr)
+                deriv_ = adNodePtr(new adBinaryNode(eMinus, dl, dr));
+            else if(dl)
+                deriv_ = dl;
+            else if(dr)
+                deriv_ = adNodePtr(new adUnaryNode(eSign, dr));
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eMulti)
+        {
+            val_ = adNodePtr(new adBinaryNode(eMulti, l, r));
+
+            //l * dr + r * dl
+            if(dl && dr)
+            {
+                adNodePtr t1(new adBinaryNode(eMulti, l, dr)); // l * dr
+                adNodePtr t2(new adBinaryNode(eMulti, r, dl)); // r * dl
+                deriv_ = adNodePtr(new adBinaryNode(ePlus, t1, t2));
+            }
+            else if(dl)
+            {
+                deriv_ = adNodePtr(new adBinaryNode(eMulti, r, dl)); // r * dl
+            }
+            else if(dr)
+            {
+                deriv_ = adNodePtr(new adBinaryNode(eMulti, l, dr)); // l * dr
+            }
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eDivide)
+        {
+            val_ = adNodePtr(new adBinaryNode(eDivide, l, r));
+
+            //(r * dl - l * dr) / (r * r)
+            if(dl && dr)
+            {
+                adNodePtr t1(new adBinaryNode(eMulti, r, dl));          // r * dl
+                adNodePtr t2(new adBinaryNode(eMulti, l, dr));          // l * dr
+                adNodePtr t3(new adBinaryNode(eMinus, t1, t2));         // r * dl - l * dr
+                adNodePtr t4(new adBinaryNode(eMulti, r, r));           // r * r
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, t3, t4));  // (r * dl - l * dr)/(r * r)
+            }
+            else if(dl)
+            {
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dl, r));   // dl / r
+            }
+            else if(dr)
+            {
+                adNodePtr t1(new adBinaryNode(eMulti, l, dr));          // l * dr
+                adNodePtr t2(new adUnaryNode(eSign, t1));               // -(l * dr)
+                adNodePtr t3(new adBinaryNode(eMulti, r, r));           // r * r
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, t2, t3));  // -(l * dr)/(r * r)
+            }
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == ePower)
+        {
+            val_ = adNodePtr(new adBinaryNode(ePower, l, r));
+
+            adNodePtr u  = l;
+            adNodePtr v  = r;
+            adNodePtr du = dl;
+            adNodePtr dv = dr;
+
+            adNodePtr t1(new adConstantNode(1));                // 1
+            adNodePtr t2(new adBinaryNode(eMinus, v, t1));      // v-1
+            adNodePtr t3(new adBinaryNode(ePower, u, t2));      // u^(v-1)
+            adNodePtr t4(new adBinaryNode(eMulti, v, t3));      // v * u^(v-1)
+            adNodePtr t5(new adBinaryNode(eMulti, t4, du));     // v * u^(v-1) * du
+
+            adNodePtr t6(new adBinaryNode(ePower, u, v));       // u^v
+            adNodePtr t7(new adUnaryNode(eLn, u));              // log(u)
+            adNodePtr t8(new adBinaryNode(eMulti, t6, t7));     // u^v * log(u)
+            adNodePtr t9(new adBinaryNode(eMulti, t8, dv));     // u^v * log(u) * dv
+
+            // v * u^(v-1) * du + u^v * ln(u) * dv
+            if(dl && dr)
+            {
+                deriv_ = adNodePtr(new adBinaryNode(ePlus, t5, t9)); // v * u^(v-1) * du + u^v * ln(u) * dv
+            }
+            else if(dl)
+            {
+                deriv_ = t5; // v * u^(v-1) * du
+            }
+            else if(dr)
+            {
+                deriv_ = t9; // u^v * ln(u) * dv
+            }
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eMin)
+        {
+            val_   = adNodePtr(new adBinaryNode(eMin, l, r));
+            deriv_ = adNodePtr(new adBinaryNode(eMin, dl, dr)); // min(dl, dr)
+        }
+        else if(node->eFunction == eMax)
+        {
+            val_   = adNodePtr(new adBinaryNode(eMax, l, r));
+            deriv_ = adNodePtr(new adBinaryNode(eMax, dl, dr)); // max(dl, dr)
+        }
+        else
+        {
+            daeDeclareAndThrowException(exInvalidCall);
+        }
+    }
+    else if(dynamic_cast<adUnaryNode*>(n))
+    {
+        adUnaryNode* node = dynamic_cast<adUnaryNode*>(n);
+
+        adJacobian jac = adNode::Derivative(node->node, nOverallVariableIndex);
+
+        adNodePtr no = jac.value;
+        adNodePtr dn = jac.derivative;
+
+        // Values is always the same function 'eFunction' of jac.value
+        val_   = adNodePtr(new adUnaryNode(node->eFunction, no));
+
+        deriv_ = adNodePtr(new adUnaryNode(node->eFunction, dn));
+
+        if(node->eFunction == eSign)
+        {
+            if(dn)
+                deriv_ = adNodePtr(new adUnaryNode(eSign, dn));
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eSin)
+        {
+            adNodePtr t1(new adUnaryNode(eCos, no));                    // cos(n)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eMulti, t1, dn));   // cos(n) * dn
+        }
+        else if(node->eFunction == eCos)
+        {
+            adNodePtr t1(new adUnaryNode(eSin, no));                    // sin(n)
+            adNodePtr t2(new adUnaryNode(eSign, t1));                   // -sin(n)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eMulti, t2, dn));   // -sin(n) * dn
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eTan)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eArcSin)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eArcCos)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eArcTan)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eSqrt)
+        {
+            adNodePtr t1(new adUnaryNode(eSqrt, no));                   // sqrt(n)
+            adNodePtr t2(new adConstantNode(2));                        // 2
+            adNodePtr t3(new adBinaryNode(eMulti, t2, t1));             // 2 * sqrt(n)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t3));  // dn / (2 * sqrt(n))
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eExp)
+        {
+            adNodePtr t1(new adUnaryNode(eExp, no));                    // exp(n)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eMulti, t1, dn));   // exp(n) * dn
+        }
+        else if(node->eFunction == eLn)
+        {
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, no));  // dn / n
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eLog)
+        {
+            adNodePtr t1(new adConstantNode(10));                       // 10
+            adNodePtr t2(new adUnaryNode(eLog, t1));                    // log10(10)
+            adNodePtr t3(new adBinaryNode(eMulti, t2, no));             // log10(10) * n
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t3));  // dn / (log10(10) * n)
+            else
+                deriv_ = adNodePtr();
+        }
+        else if(node->eFunction == eAbs)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eCeil)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else if(node->eFunction == eFloor)
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+        else
+        {
+            daeDeclareAndThrowException(exInvalidCall);
+        }
+    }
+    else if(dynamic_cast<adConstantNode*>(n)         ||
+            dynamic_cast<adDomainIndexNode*>(n)      ||
+            dynamic_cast<adTimeNode*>(n)             ||
+            dynamic_cast<adRuntimeParameterNode*>(n) ||
+            dynamic_cast<adEventPortDataNode*>(n)    ||
+            dynamic_cast<adInverseTimeStepNode*>(n)
+           )
+    {
+    // Here a derivative is always 0 (NULL)
+        val_   = adNodePtr(node_->Clone());
+        deriv_ = adNodePtr();
+    }
+    else if(dynamic_cast<adScalarExternalFunctionNode*>(n))
+    {
+        adScalarExternalFunctionNode* node = dynamic_cast<adScalarExternalFunctionNode*>(n);
+        daeDeclareAndThrowException(exNotImplemented);
+    }
+    else if(dynamic_cast<adRuntimeSpecialFunctionForLargeArraysNode*>(n))
+    {
+        adRuntimeSpecialFunctionForLargeArraysNode* node = dynamic_cast<adRuntimeSpecialFunctionForLargeArraysNode*>(n);
+        daeDeclareAndThrowException(exNotImplemented);
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Unrecognized type of node for Jacobian expressions.";
+        throw e;
+    }
+
+    return adJacobian(val_, deriv_);
+}
+
 /*********************************************************************************************
 	adNodeImpl
 **********************************************************************************************/
@@ -437,16 +736,17 @@ adConstantNode::~adConstantNode()
 
 adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble tmp;
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		tmp.setGatherInfo(true);
+        adouble tmp;
+        tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
 		return tmp;
 	}
-	
-	tmp.setValue(m_quantity.getValue());
-	return tmp;
+    else
+    {
+        return adouble(m_quantity.getValue());
+    }
 }
 
 const quantity adConstantNode::GetQuantity(void) const
@@ -718,14 +1018,17 @@ adRuntimeParameterNode::~adRuntimeParameterNode()
 
 adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-    adouble tmp(m_dValue);
-
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		tmp.setGatherInfo(true);
+        adouble tmp(m_dValue);
+        tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
+        return tmp;
 	}
-    return tmp;
+    else
+    {
+        return adouble(m_dValue);
+    }
 }
 
 const quantity adRuntimeParameterNode::GetQuantity(void) const
@@ -863,19 +1166,21 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
 // Here I check if I am inside of the GatherInfo mode and if I am
 // I clone the node (which is an equivalent for creation of a runtime node)
 // If I am not - I return the value of the point for the given index.
-	if(!m_pdPointValue)
-		daeDeclareAndThrowException(exInvalidCall);
 
-    adouble tmp(*m_pdPointValue);
+    if(!m_pdPointValue)
+        daeDeclareAndThrowException(exInvalidCall);
 
-	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-		adouble tmp;
-		tmp.setGatherInfo(true);
+        adouble tmp(*m_pdPointValue);
+        tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
-	}
-
-    return tmp;
+        return tmp;
+    }
+    else
+    {
+        return adouble(*m_pdPointValue);
+    }
 }
 
 const quantity adDomainIndexNode::GetQuantity(void) const
@@ -1410,6 +1715,78 @@ void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& m
 bool adRuntimeTimeDerivativeNode::IsDifferential(void) const
 {
     return true;
+}
+
+/*********************************************************************************************
+    adInverseTimeStepNode
+**********************************************************************************************/
+// Used only in Jacobian expressions!
+adInverseTimeStepNode::adInverseTimeStepNode()
+{
+}
+
+adInverseTimeStepNode::~adInverseTimeStepNode()
+{
+}
+
+adouble adInverseTimeStepNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    return adouble(pExecutionContext->m_dInverseTimeStep);
+}
+
+const quantity adInverseTimeStepNode::GetQuantity(void) const
+{
+    return (1.0 * units::units_pool::s ^ (-1));
+}
+
+adNode* adInverseTimeStepNode::Clone(void) const
+{
+    return new adInverseTimeStepNode(*this);
+}
+
+void adInverseTimeStepNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+    strContent += "(1/TimeStep)";
+}
+
+string adInverseTimeStepNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+void adInverseTimeStepNode::Open(io::xmlTag_t* pTag)
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+void adInverseTimeStepNode::Save(io::xmlTag_t* pTag) const
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+void adInverseTimeStepNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+void adInverseTimeStepNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+void adInverseTimeStepNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+bool adInverseTimeStepNode::IsLinear(void) const
+{
+    return true;
+}
+
+bool adInverseTimeStepNode::IsFunctionOfVariables(void) const
+{
+    return false;
 }
 
 /*********************************************************************************************

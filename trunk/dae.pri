@@ -65,18 +65,21 @@ COPY_FILES = cp -fa
 #####################################################################################
 #                           System + Machine + Python info
 #####################################################################################
-PYTHON_MAJOR = $$system(python -c \"import sys; print(sys.version_info[0])\")
-PYTHON_MINOR = $$system(python -c \"import sys; print(sys.version_info[1])\")
+PYTHON       = python
+PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
+PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
+
+message(python: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON})
 
 # Numpy version
-NUMPY_VERSION = $$system(python -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
+NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
 
 # System := {'Linux', 'Windows', 'Darwin'}
-DAE_SYSTEM   = $$system(python -c \"import platform; print(platform.system())\")
+DAE_SYSTEM   = $$system($${PYTHON} -c \"import platform; print(platform.system())\")
 
 # Machine := {'i386', ..., 'i686', 'AMD64'}
 MACHINE_COMMAND = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
-DAE_MACHINE = $$system(python -c \"$${MACHINE_COMMAND}\")
+DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -148,10 +151,10 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 #####################################################################################
 #                                PYTHON + NUMPY
 #####################################################################################
-PYTHON_INCLUDE_DIR       = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
-PYTHON_SITE_PACKAGES_DIR = $$system(python -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
-unix::PYTHON_LIB_DIR     = $$system(python -c \"import sys; print(sys.prefix)\")/lib
-win32::PYTHON_LIB_DIR    = $$system(python -c \"import sys; print(sys.prefix)\")/libs
+PYTHON_INCLUDE_DIR       = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+unix::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
+win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
 
 message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR})
 

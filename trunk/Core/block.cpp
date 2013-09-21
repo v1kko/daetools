@@ -20,6 +20,10 @@ daeBlock::daeBlock(void)
 	m_nTotalNumberOfVariables           = 0;
 	m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
 
+    m_dTotalTimeForResiduals            = 0;
+    m_dTotalTimeForJacobian             = 0;
+    m_dTotalTimeForSensitivityResiduals = 0;
+
 #if defined(DAE_MPI)
 	m_nEquationIndexesStart = ULONG_MAX;
 	m_nEquationIndexesEnd   = ULONG_MAX;
@@ -95,6 +99,13 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculate;
 	
+    double startTime, endTime;
+    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+    {
+        startTime = dae::GetTimeInSeconds();
+    }
+
 // First calculate normal equations (non-STN)
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
@@ -108,6 +119,14 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 		pSTN = m_ptrarrSTNs[i];
 		pSTN->CalculateResiduals(EC);
 	}
+
+    if(bPrintInfo)
+    {
+        endTime = dae::GetTimeInSeconds();
+        m_dTotalTimeForResiduals += (endTime - startTime);
+        m_pDataProxy->LogMessage(string("Total time for the current residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+        m_pDataProxy->LogMessage(string("Cumulative time for all residuals evaluations = ") + toStringFormatted(m_dTotalTimeForResiduals, -1, 10) + string("s"), 0);
+    }
 }
 
 void daeBlock::CalculateJacobian(real_t				dTime, 
@@ -139,6 +158,13 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateJacobian;
 	
+    double startTime, endTime;
+    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+    {
+        startTime = dae::GetTimeInSeconds();
+    }
+
 // First calculate normal equations (non-STN)
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
@@ -152,6 +178,14 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 		pSTN = m_ptrarrSTNs[i];
 		pSTN->CalculateJacobian(EC);
 	}
+
+    if(bPrintInfo)
+    {
+        endTime = dae::GetTimeInSeconds();
+        m_dTotalTimeForJacobian += (endTime - startTime);
+        m_pDataProxy->LogMessage(string("Total time for the current Jacobian evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+        m_pDataProxy->LogMessage(string("Cumulative time for all Jacobian evaluations = ") + toStringFormatted(m_dTotalTimeForJacobian, -1, 10) + string("s"), 0);
+    }
 }
 
 // For dynamic models
@@ -185,6 +219,13 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
 
+    double startTime, endTime;
+    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+    {
+        startTime = dae::GetTimeInSeconds();
+    }
+
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{
 		pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
@@ -199,6 +240,14 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	}
 	
 	m_pDataProxy->ResetSensitivityMatrixes();
+
+    if(bPrintInfo)
+    {
+        endTime = dae::GetTimeInSeconds();
+        m_dTotalTimeForSensitivityResiduals += (endTime - startTime);
+        m_pDataProxy->LogMessage(string("Total time for the current sensitivity residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+        m_pDataProxy->LogMessage(string("Cumulative time for all sensitivity residuals evaluations = ") + toStringFormatted(m_dTotalTimeForSensitivityResiduals, -1, 10) + string("s"), 0);
+    }
 }
 
 // For steady-state models

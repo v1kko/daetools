@@ -430,7 +430,12 @@ public:
     daeEquation* GetEquation(void) const;
     
     std::string GetName(void) const;
-	
+
+    const std::vector<adNodePtr>& GetJacobianExpressions() const;
+
+protected:
+    void BuildJacobianExpressions();
+
 protected:
 	real_t					 m_dScaling;
 	size_t					 m_nEquationIndexInBlock;
@@ -438,7 +443,8 @@ protected:
 	std::map<size_t, size_t> m_mapIndexes;
     daeEquation*             m_pEquation;
 	adNodePtr				 m_EquationEvaluationNode;
-	friend class daeEquation;
+    std::vector<adNodePtr>	 m_ptrarrJacobianExpressions;
+    friend class daeEquation;
 	friend class daeSTN;
 	friend class daeIF;
 	friend class daeModel;
@@ -1025,7 +1031,14 @@ public:
 			e << "Cannot get the time derivative for the system has not been initialized yet"; 
 			throw e;
 		}
-		return *(m_pdarrTimeDerivativesReferences[nOverallIndex]);
+        // Assigned variables do not have time derivatives indexes mapped!!
+        if(m_pdarrTimeDerivativesReferences[nOverallIndex] == NULL)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot get the time derivative for the assigned variable";
+            throw e;
+        }
+        return *(m_pdarrTimeDerivativesReferences[nOverallIndex]);
 	}
 	
 	void SetTimeDerivative(size_t nOverallIndex, real_t Value)
@@ -1176,8 +1189,13 @@ public:
 	
 /*
   The mappings sets the pointers to actual data so there is no need to copy the data back and forth from/to the DAE solver.
-  ACHTUNG! These pointers cannot be used for calculating residuals/jacobian/sensitivities. Therefore, adNode_XXX classes
-           MUST access the data through functions from daeBlock (using block indexes).
+
+  ACHTUNG #1:
+     These pointers cannot be used for calculating residuals/jacobian/sensitivities. Therefore, adNode_XXX classes
+     MUST access the data through functions from daeBlock (using block indexes).
+
+  ACHTUNG #2:
+     Some of time derivatives remain unset (those of assigned variables, for instance) and their pointers are NULL!!
 */
 	void CreateIndexMappings(const std::map<size_t, size_t>& mapVariableIndexes, real_t* pdValues, real_t* pdTimeDerivatives)
 	{
@@ -1534,6 +1552,10 @@ public:
 	daeArray<real_t>*	m_parrTimeDerivatives; 
 	daeArray<real_t>*	m_parrResidual; 
 	daeMatrix<real_t>*	m_pmatJacobian; 
+
+    double m_dTotalTimeForResiduals;
+    double m_dTotalTimeForJacobian;
+    double m_dTotalTimeForSensitivityResiduals;
 
 #if defined(DAE_MPI)
 	size_t m_nEquationIndexesStart;
@@ -3146,7 +3168,10 @@ public:
 
     bool GetCheckUnitsConsistency(void) const;
 	void SetCheckUnitsConsistency(bool bCheck);
-	
+
+    bool GetBuildJacobianExpressions(void) const;
+    void SetBuildJacobianExpressions(bool bBuildJacobianExpressions);
+
     daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
 	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
@@ -3182,7 +3207,8 @@ protected:
 protected:
 	real_t												m_dScaling;
     bool                                                m_bCheckUnitsConsistency;
-	daeState*											m_pParentState;
+    bool                                                m_bBuildJacobianExpressions;
+    daeState*											m_pParentState;
 	adNodePtr											m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
 // This vector is redundant - all EquationExecutionInfos already exist in models and states

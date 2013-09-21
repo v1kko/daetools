@@ -266,6 +266,32 @@ public:
 };
 
 /*********************************************************************************************
+    adInverseTimeStepNode
+**********************************************************************************************/
+// Used only in Jacobian expressions!
+class DAE_CORE_API adInverseTimeStepNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adInverseTimeStepNode)
+    adInverseTimeStepNode(void);
+    virtual ~adInverseTimeStepNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual const quantity GetQuantity(void) const;
+};
+
+/*********************************************************************************************
 	adRuntimePartialDerivativeNode
 **********************************************************************************************/
 /*

@@ -771,6 +771,24 @@ string daeCondition__repr__(const daeCondition& self)
                            self.SaveNodeAsPlainText() % self.GetEventTolerance()).str();
 }
 
+string adNode__str__(const adNode& self)
+{
+    string str;
+    daeModelExportContext c;
+
+    c.m_nPythonIndentLevel = 0;
+    c.m_bExportDefinition  = true;
+    c.m_pModel             = NULL;
+    self.Export(str, ePYDAE, c);
+
+    return str;
+}
+
+string adNode__repr__(const adNode& self)
+{
+    return adNode__str__(self);
+}
+
 string adouble__str__(const adouble& self)
 {
     string str;
@@ -1631,9 +1649,9 @@ adouble_array ParameterArray8(daeParameter& param, object o1, object o2, object 
 /*******************************************************
 	daeVariable
 *******************************************************/
-boost::python::object daeVariable_Values(daeVariable& var)
+boost::python::object daeVariable_TimeDerivatives(daeVariable& var)
 {
-	size_t i, k, nType, nDomains, nStart, nEnd;
+    size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
 	vector<daeDomain_t*> ptrarrDomains;
 
@@ -1642,15 +1660,20 @@ boost::python::object daeVariable_Values(daeVariable& var)
 	nDomains = ptrarrDomains.size();
     daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
     boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
-    
+    const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
+
     if(nDomains == 0)
     {
-        return boost::python::object(pDataProxy->GetTimeDerivative(var.GetOverallIndex()));
+        // Assigned variables do not have time derivatives mapped!!
+        if(dtRefs[var.GetOverallIndex()])
+            return boost::python::object(*dtRefs[var.GetOverallIndex()]);
+        else
+            return boost::python::object(0.0);
     }
     else
     {
         dimensions = new npy_intp[nDomains];
-        for(size_t i = 0; i < nDomains; i++)
+        for(i = 0; i < nDomains; i++)
             dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
         nStart = var.GetOverallIndex();
         nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
@@ -1658,15 +1681,21 @@ boost::python::object daeVariable_Values(daeVariable& var)
         boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
         real_t* values = static_cast<real_t*>(PyArray_DATA(numpy_array.ptr()));
         
+        // Assigned variables do not have time derivatives mapped!!
         for(k = 0, i = nStart; i < nEnd; i++, k++)
-            values[k] = pDataProxy->GetTimeDerivative(i);
-    
+        {
+            if(dtRefs[i])
+                values[k] = *dtRefs[i];
+            else
+                values[k] = 0.0;
+        }
+
         delete[] dimensions;
         return numpy_array;
     }
 }
 
-boost::python::object daeVariable_TimeDerivatives(daeVariable& var)
+boost::python::object daeVariable_Values(daeVariable& var)
 {
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
@@ -1685,7 +1714,7 @@ boost::python::object daeVariable_TimeDerivatives(daeVariable& var)
     else
     {
         dimensions = new npy_intp[nDomains];
-        for(size_t i = 0; i < nDomains; i++)
+        for(i = 0; i < nDomains; i++)
             dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
         nStart = var.GetOverallIndex();
         nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
@@ -2718,6 +2747,17 @@ boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecu
     std::vector<size_t> narr;
     self.GetVariableIndexes(narr);
     return getListFromVectorByValue(narr);
+}
+
+boost::python::list daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self)
+{
+    boost::python::list l;
+    const std::vector<adNodePtr>& ptrarrJacobExpr = self.GetJacobianExpressions();
+
+    for(size_t i = 0; i < ptrarrJacobExpr.size(); i++)
+        l.append(boost::cref(ptrarrJacobExpr[i].get()));
+
+    return l;
 }
 
 /*******************************************************

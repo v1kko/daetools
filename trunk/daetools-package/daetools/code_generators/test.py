@@ -300,11 +300,15 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    #from modelica import daeCodeGenerator_Modelica
-    #cg = daeCodeGenerator_Modelica()
-    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
-    #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    from modelica import daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    import pprint
+    pprint.pprint(cg.analyzer.models, indent=4)
+    return
+    
+    cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
     #import os
     #from ansi_c import daeCodeGenerator_ANSI_C
@@ -312,11 +316,11 @@ def consoleRun():
     #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
     #cg.generateSimulation(simulation, projectDirectory = folder)
 
-    import os
-    from fmi import daeCodeGenerator_FMI
-    cg = daeCodeGenerator_FMI()
-    folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, projectDirectory = folder)
+    #import os
+    #from fmi import daeCodeGenerator_FMI
+    #cg = daeCodeGenerator_FMI()
+    #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
+    #cg.generateSimulation(simulation, projectDirectory = folder)
 
     # Run
     simulation.Run()

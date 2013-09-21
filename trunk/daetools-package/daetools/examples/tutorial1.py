@@ -266,11 +266,8 @@ def consoleRun():
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 200
+    simulation.TimeHorizon = 1000
 
-    #simulation.ReportingTimes = [10, 11, 124, 125, 356, 980, 1000]
-    #print simulation.ReportingTimes
-    
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(datareporter.Connect("", simName) == False):
