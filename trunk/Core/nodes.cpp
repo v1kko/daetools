@@ -483,12 +483,14 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         else if(node->eFunction == eMin)
         {
             val_   = adNodePtr(new adBinaryNode(eMin, l, r));
-            deriv_ = adNodePtr(new adBinaryNode(eMin, dl, dr)); // min(dl, dr)
+
+            daeDeclareAndThrowException(exNotImplemented);
         }
         else if(node->eFunction == eMax)
         {
             val_   = adNodePtr(new adBinaryNode(eMax, l, r));
-            deriv_ = adNodePtr(new adBinaryNode(eMax, dl, dr)); // max(dl, dr)
+
+            daeDeclareAndThrowException(exNotImplemented);
         }
         else
         {
@@ -533,19 +535,27 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         }
         else if(node->eFunction == eTan)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Tan are not available";
+            throw e;
         }
         else if(node->eFunction == eArcSin)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function ASin are not available";
+            throw e;
         }
         else if(node->eFunction == eArcCos)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function ACos are not available";
+            throw e;
         }
         else if(node->eFunction == eArcTan)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function ATan are not available";
+            throw e;
         }
         else if(node->eFunction == eSqrt)
         {
@@ -582,15 +592,21 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         }
         else if(node->eFunction == eAbs)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Abs are not available";
+            throw e;
         }
         else if(node->eFunction == eCeil)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Ceil are not available";
+            throw e;
         }
         else if(node->eFunction == eFloor)
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Floor are not available";
+            throw e;
         }
         else
         {
@@ -612,12 +628,18 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
     else if(dynamic_cast<adScalarExternalFunctionNode*>(n))
     {
         adScalarExternalFunctionNode* node = dynamic_cast<adScalarExternalFunctionNode*>(n);
-        daeDeclareAndThrowException(exNotImplemented);
+
+        daeDeclareException(exNotImplemented);
+        e << "Jacobian derivative expressions for the ScalarExternalFunctions are not available";
+        throw e;
     }
     else if(dynamic_cast<adRuntimeSpecialFunctionForLargeArraysNode*>(n))
     {
         adRuntimeSpecialFunctionForLargeArraysNode* node = dynamic_cast<adRuntimeSpecialFunctionForLargeArraysNode*>(n);
-        daeDeclareAndThrowException(exNotImplemented);
+
+        daeDeclareException(exNotImplemented);
+        e << "Jacobian derivative expressions for the function Sum(adarr, isLargeArray = True) are not available";
+        throw e;
     }
     else
     {

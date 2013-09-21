@@ -490,7 +490,34 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def(real_t() >  self)
 		.def(real_t() >= self)
 		.def(real_t() != self)
-		;
+
+    // Math. functions declared as members to enable numpy support
+    // For instance, the following will be possible to write in python:
+    //  x = np.empty(n, dtype=object)
+    //  x[:] = [self.x(i) for i in range(n)]
+    //  y = numpy.exp(x)
+        .def("exp",     &daepython::ad_exp)
+        .def("log",     &daepython::ad_log)
+        .def("log10",   &daepython::ad_log10)
+        .def("sqrt",    &daepython::ad_sqrt)
+        .def("sin",     &daepython::ad_sin)
+        .def("cos",     &daepython::ad_cos)
+        .def("tan",     &daepython::ad_tan)
+        .def("arcsin",  &daepython::ad_asin)
+        .def("arccos",  &daepython::ad_acos)
+        .def("arctan",  &daepython::ad_atan)
+        .def("sinh",    &daepython::ad_sinh)
+        .def("cosh",    &daepython::ad_cosh)
+        .def("tanh",    &daepython::ad_tanh)
+        .def("arcsinh", &daepython::ad_asinh)
+        .def("arccosh", &daepython::ad_acosh)
+        .def("arctanh", &daepython::ad_atanh)
+        .def("arctan2", &daepython::ad_atan2)
+
+        .def("abs",   &daepython::ad_abs)
+        .def("ceil",  &daepython::ad_ceil)
+        .def("floor", &daepython::ad_floor)
+        ;
     ;
     
 	def("Exp",   &daepython::ad_exp);
