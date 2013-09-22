@@ -3232,6 +3232,21 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 
 		}
 
+    // Now, after associating overall and block indexes build Jacobian expressions, if requested
+        for(i = 0; i < ptrarrEEIfromModels.size(); i++)
+        {
+            pEquationExec = ptrarrEEIfromModels[i];
+
+            if(pEquationExec->m_pEquation->m_bBuildJacobianExpressions)
+                pEquationExec->BuildJacobianExpressions();
+        }
+
+        for(i = 0; i < ptrarrAllSTNs.size(); i++)
+        {
+            pSTN = ptrarrAllSTNs[i];
+            pSTN->BuildJacobianExpressions();
+        }
+
 	// Initialize the block
 		pBlock->Initialize();
 

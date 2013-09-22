@@ -532,7 +532,7 @@ const adouble sqrt(const adouble &a)
 	{
 		daeDeclareException(exRuntimeCheck);
 		e << "Sqrt function called with a negative argument: sqrt(" 
-		  << toStringFormatted<real_t>(a.m_dValue, -1, 5, true)
+          << toStringFormatted<real_t>(a.m_dValue, -1, 15, true)
 		  << ")";
 		throw e;
 	}

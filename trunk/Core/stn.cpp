@@ -452,6 +452,34 @@ void daeSTN::SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, siz
 	nEquationIndex = nTempEquationIndex;
 }
 
+void daeSTN::BuildJacobianExpressions()
+{
+    size_t i, k, m;
+    daeSTN* pSTN;
+    daeState* pState;
+    daeEquationExecutionInfo* pEquationExecutionInfo;
+
+    for(i = 0; i < m_ptrarrStates.size(); i++)
+    {
+        pState = m_ptrarrStates[i];
+
+        for(k = 0; k < pState->m_ptrarrEquationExecutionInfos.size(); k++)
+        {
+            pEquationExecutionInfo = pState->m_ptrarrEquationExecutionInfos[k];
+
+            if(pEquationExecutionInfo->m_pEquation->m_bBuildJacobianExpressions)
+                pEquationExecutionInfo->BuildJacobianExpressions();
+        }
+
+    // Nested STNs
+        for(m = 0; m < pState->m_ptrarrSTNs.size(); m++)
+        {
+            pSTN = pState->m_ptrarrSTNs[m];
+            pSTN->BuildJacobianExpressions();
+        }
+    }
+}
+
 void daeSTN::AddExpressionsToBlock(daeBlock* pBlock)
 {
 	size_t i;

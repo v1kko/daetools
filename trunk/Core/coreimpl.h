@@ -3088,6 +3088,7 @@ protected:
 	void			CollectEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo);
 	void			CollectVariableIndexes(std::map<size_t, size_t>& mapVariableIndexes);
 	void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
+    void            BuildJacobianExpressions();
 
 	void			CalculateResiduals(daeExecutionContext& EC);
 	void			CalculateJacobian(daeExecutionContext& EC);
@@ -3215,7 +3216,8 @@ protected:
 // However, it is useful when saving RuntimeReport and generating code
 	std::vector<daeEquationExecutionInfo*>				m_ptrarrEquationExecutionInfos;
 	
-	friend class daeModel;
+    friend class daeSTN;
+    friend class daeModel;
 	friend class daeState;
 	friend class daeEquationExecutionInfo;
 };

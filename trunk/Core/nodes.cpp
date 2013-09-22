@@ -482,19 +482,21 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         }
         else if(node->eFunction == eMin)
         {
-            val_   = adNodePtr(new adBinaryNode(eMin, l, r));
-
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Min are not available";
+            throw e;
         }
         else if(node->eFunction == eMax)
         {
-            val_   = adNodePtr(new adBinaryNode(eMax, l, r));
-
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function Max are not available";
+            throw e;
         }
         else
         {
-            daeDeclareAndThrowException(exInvalidCall);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function = [" << node->eFunction << "] are not available";
+            throw e;
         }
     }
     else if(dynamic_cast<adUnaryNode*>(n))

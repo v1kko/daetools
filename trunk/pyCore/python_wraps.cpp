@@ -2756,7 +2756,7 @@ boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExec
     const std::map< size_t, std::pair<size_t, adNodePtr> >& mapJacobianExpressions = self.GetJacobianExpressions();
 
     for(iter = mapJacobianExpressions.begin(); iter != mapJacobianExpressions.end(); iter++)
-        d[iter->first] = boost::python::make_tuple(iter->second.first, iter->second.second);
+        d[iter->first] = boost::python::make_tuple(iter->second.first, boost::cref(iter->second.second.get()));
 
     return d;
 }

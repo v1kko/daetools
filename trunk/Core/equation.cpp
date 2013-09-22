@@ -171,10 +171,6 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* 
 // Get a runtime node by evaluating the setup node
 	pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
 
-// If requested, build a Jacobian expression
-    if(pEquation->m_bBuildJacobianExpressions)
-        BuildJacobianExpressions();
-
 // Restore NULL as a global execution context
 	pModel->PropagateGlobalExecutionContext(NULL);
 }
@@ -194,8 +190,17 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
 	EC.m_pEquationExecutionInfo = this;
 
-	adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-	EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
+    try
+    {
+        adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+        EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
+    }
+    catch(std::exception& exc)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Exception raised during calculation of the Residual of the equation [" << GetName() << "]; " << exc.what();
+        throw e;
+    }
 }
 
 void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
@@ -220,13 +225,40 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
     }
 
+    if(m_mapJacobianExpressions.empty() && m_pEquation->m_bBuildJacobianExpressions)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "JacobianExpressions not built for the equation [" << GetName() << "]";
+        throw e;
+    }
+
     if(m_mapJacobianExpressions.empty())
     {
+        //std::cout << "  Jacobian of the equation [" << GetName() << "]" << std::endl;
+        //std::cout << "    ";
+
+        // Achtung, Achtung!!
+        // Evaluation trees must be calculated using the eCalculateJacobian mode
+        EC.m_eEquationCalculationMode = eCalculateJacobian;
+
         // m_mapIndexes<OverallIndex, IndexInBlock>
         for(map<size_t, size_t>::iterator iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
         {
             EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
-            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+            try
+            {
+                __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+
+                //std::cout << toStringFormatted<real_t>(__ad.getDerivative(), -1, 10, true) << " [" << iter->second << "], ";
+            }
+            catch(std::exception& exc)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
+                  << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
+                throw e;
+            }
+
             try
             {
                 EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
@@ -239,17 +271,38 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
                 throw e;
             }
         }
+        //std::cout << std::endl;
     }
     else
     {
+        //std::cout << "  JacobianExpressions of the equation [" << GetName() << "]" << std::endl;
+        //std::cout << "    ";
+
+        // Achtung, Achtung!!
+        // Jacobian expressions must be calculated using the eCalculate mode (not eCalculateJacobian)
+        EC.m_eEquationCalculationMode = eCalculate;
+
         //map<overallIndex, pair<blockIndex, derivNode>>
         for(map< size_t, std::pair<size_t, adNodePtr> >::iterator iter = m_mapJacobianExpressions.begin(); iter != m_mapJacobianExpressions.end(); iter++)
         {
-            EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
-            __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
+            EC.m_nCurrentVariableIndexForJacobianEvaluation = -1;
             try
             {
-                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getDerivative());
+                __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
+
+                //std::cout << toStringFormatted<real_t>(__ad.getValue(), -1, 10, true) << " [" << iter->second.first << "], ";
+            }
+            catch(std::exception& exc)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
+                  << "VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
+                throw e;
+            }
+
+            try
+            {
+                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getValue());
             }
             catch(std::exception& exc)
             {
@@ -259,6 +312,8 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
                 throw e;
             }
         }
+        //std::cout << std::endl;
+        //std::cout << std::endl;
     }
 
     if(bPrintInfo)
@@ -287,9 +342,30 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation             = narrParameterIndexes[i];
 		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
 		
-		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-		EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
-	}
+        try
+        {
+            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+        }
+        catch(std::exception& exc)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Exception raised during calculation of the SensitivityResiduals of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
+              << "ParameterIndex=" << i << "; " << exc.what();
+            throw e;
+        }
+
+        try
+        {
+            EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
+        }
+        catch(std::exception& exc)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot set SensitivityResiduals item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
+              << "ParameterIndex=" << i << "; " << exc.what();
+            throw e;
+        }
+    }
 }
 
 // Should not be used anymore, but double-check
@@ -319,7 +395,6 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 // Operates on adRuntimeNodes
 void daeEquationExecutionInfo::BuildJacobianExpressions()
 {
-    adNodePtr  scaling, deriv;
     map<size_t, size_t>::iterator iter;
 
     //map<overallIndex, pair<blockIndex, derivNode>>
@@ -330,17 +405,8 @@ void daeEquationExecutionInfo::BuildJacobianExpressions()
     {
         adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
 
-        if(m_dScaling == 1)
-        {
-            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
-        }
-        else
-        {
-            scaling = adNodePtr( new adConstantNode(m_dScaling) );
-            deriv   = adNodePtr( new adBinaryNode(eMulti, jacob.derivative, scaling) );
-
-            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, deriv);
-        }
+        // Achtung!! Jacobian items are with no scaling!
+        m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
     }
 }
 
