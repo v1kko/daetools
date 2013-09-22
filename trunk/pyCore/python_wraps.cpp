@@ -1250,9 +1250,9 @@ const adouble_array adarr_atan(const adouble_array& a)
 	return atan(a);
 }
 
-const adouble adarr_sum(const adouble_array& a, bool bIsLargeArray)
+const adouble adarr_sum(const adouble_array& a)
 {
-	return Sum(a, bIsLargeArray);
+    return Sum(a, false);
 }
 const adouble adarr_product(const adouble_array& a, bool bIsLargeArray)
 {
@@ -2749,15 +2749,16 @@ boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecu
     return getListFromVectorByValue(narr);
 }
 
-boost::python::list daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self)
+boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self)
 {
-    boost::python::list l;
-    const std::vector<adNodePtr>& ptrarrJacobExpr = self.GetJacobianExpressions();
+    boost::python::dict d;
+    std::map< size_t, std::pair<size_t, adNodePtr> >::const_iterator iter;
+    const std::map< size_t, std::pair<size_t, adNodePtr> >& mapJacobianExpressions = self.GetJacobianExpressions();
 
-    for(size_t i = 0; i < ptrarrJacobExpr.size(); i++)
-        l.append(boost::cref(ptrarrJacobExpr[i].get()));
+    for(iter = mapJacobianExpressions.begin(); iter != mapJacobianExpressions.end(); iter++)
+        d[iter->first] = boost::python::make_tuple(iter->second.first, iter->second.second);
 
-    return l;
+    return d;
 }
 
 /*******************************************************

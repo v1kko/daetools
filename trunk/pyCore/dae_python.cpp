@@ -259,7 +259,7 @@ BOOST_PYTHON_MODULE(pyCore)
     Nodes
 ********************************/
     class_<daeNodeSaveAsContext>("daeNodeSaveAsContext")
-        .def(init<daeModel*>())
+        .def(init< optional<daeModel*> >((arg("self"), arg("model") = NULL)))
         .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel) 
     ; 
 
@@ -506,6 +506,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("arcsin",  &daepython::ad_asin)
         .def("arccos",  &daepython::ad_acos)
         .def("arctan",  &daepython::ad_atan)
+        /*
         .def("sinh",    &daepython::ad_sinh)
         .def("cosh",    &daepython::ad_cosh)
         .def("tanh",    &daepython::ad_tanh)
@@ -513,10 +514,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("arccosh", &daepython::ad_acosh)
         .def("arctanh", &daepython::ad_atanh)
         .def("arctan2", &daepython::ad_atan2)
-
-        .def("abs",   &daepython::ad_abs)
-        .def("ceil",  &daepython::ad_ceil)
-        .def("floor", &daepython::ad_floor)
+        */
+        .def("fabs",   &daepython::ad_abs)
+        .def("ceil",   &daepython::ad_ceil)
+        .def("floor",  &daepython::ad_floor)
         ;
     ;
     
@@ -557,10 +558,11 @@ BOOST_PYTHON_MODULE(pyCore)
     def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
     def("d",	 &daepython::ad_d,  (arg("ad")), DOCSTR_d);
 
-	def("Time",			&Time, DOCSTR_Time);
-	def("Constant",		&daepython::ad_Constant_c,      (arg("value")),  DOCSTR_Constant_c);
-	def("Constant",		&daepython::ad_Constant_q,      (arg("value")),  DOCSTR_Constant_q);
-	def("Array",		&daepython::adarr_Array,        (arg("values")), DOCSTR_Array);
+    def("Time",             &Time,                                           DOCSTR_Time);
+    def("Constant",         &daepython::ad_Constant_c,      (arg("value")),  DOCSTR_Constant_c);
+    def("Constant",         &daepython::ad_Constant_q,      (arg("value")),  DOCSTR_Constant_q);
+    def("Array",            &daepython::adarr_Array,        (arg("values")), DOCSTR_Array);
+
 
 	class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
         .def(init< optional<bool, adNodeArray*> >( ( arg("self"), arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_array_init))
@@ -620,9 +622,9 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("Log10",	&daepython::adarr_log10);
 	def("Abs",		&daepython::adarr_abs);
 	def("Ceil",		&daepython::adarr_ceil);
-	def("Floor",	&daepython::adarr_floor);
+    def("Floor",	&daepython::adarr_floor);
       
-    def("Sum",		 &daepython::adarr_sum,      (arg("adarray"), arg("isLargeArray") = false), DOCSTR_Sum);
+    def("Sum",		 &daepython::adarr_sum,      (arg("adarray")), DOCSTR_Sum);
     def("Product",   &daepython::adarr_product,  (arg("adarray"), arg("isLargeArray") = false), DOCSTR_Product);
     def("Integral",  &daepython::adarr_integral, (arg("adarray")), DOCSTR_Integral);
     def("Min",		 &daepython::adarr_min,      (arg("adarray")), DOCSTR_Min_adarr);

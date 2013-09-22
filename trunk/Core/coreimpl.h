@@ -431,19 +431,19 @@ public:
     
     std::string GetName(void) const;
 
-    const std::vector<adNodePtr>& GetJacobianExpressions() const;
+    const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
 
 protected:
     void BuildJacobianExpressions();
 
 protected:
-	real_t					 m_dScaling;
-	size_t					 m_nEquationIndexInBlock;
-	std::vector<size_t>		 m_narrDomainIndexes;
-	std::map<size_t, size_t> m_mapIndexes;
-    daeEquation*             m_pEquation;
-	adNodePtr				 m_EquationEvaluationNode;
-    std::vector<adNodePtr>	 m_ptrarrJacobianExpressions;
+    real_t                      m_dScaling;
+    size_t                      m_nEquationIndexInBlock;
+    std::vector<size_t>         m_narrDomainIndexes;
+    std::map<size_t, size_t>    m_mapIndexes;
+    daeEquation*                m_pEquation;
+    adNodePtr                   m_EquationEvaluationNode;
+    std::map< size_t, std::pair<size_t, adNodePtr> > m_mapJacobianExpressions;
     friend class daeEquation;
 	friend class daeSTN;
 	friend class daeIF;

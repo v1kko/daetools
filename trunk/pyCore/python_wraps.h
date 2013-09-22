@@ -273,7 +273,7 @@ const adouble_array adarr_asin(const adouble_array& a);
 const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
 
-const adouble adarr_sum(const adouble_array& a, bool bIsLargeArray = false);
+const adouble adarr_sum(const adouble_array& a);
 const adouble adarr_product(const adouble_array& a, bool bIsLargeArray = false);
 const adouble adarr_min(const adouble_array& a);
 const adouble adarr_max(const adouble_array& a);
@@ -958,7 +958,7 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
 	daeEquationExecutionInfo
 *******************************************************/
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
-boost::python::list daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
+boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 
 /*******************************************************
 	daeDEDI

@@ -379,8 +379,8 @@ class case_daeParameter(unittest.TestCase):
             for i2 in range(d2.NumberOfPoints):
                 param.SetValue(i1, i2, float(ndValues[i1][i2]))
 
-        print ndValues
-        print param.npyValues
+        #print ndValues
+        #print param.npyValues
 
         self.assertEqual(len(param.Domains),        2)
         self.assertEqual(param.Units,               unit)
@@ -514,8 +514,8 @@ class case_daeParameter(unittest.TestCase):
                 for i3 in range(d3.NumberOfPoints):
                     param.SetValue(i1, i2, i3, float(ndValues[i1][i2][i3]))
 
-        print ndValues
-        print param.npyValues
+        #print ndValues
+        #print param.npyValues
 
         self.assertEqual(len(param.Domains),        3)
         self.assertEqual(param.Units,               unit)
@@ -658,8 +658,8 @@ class case_daeParameter(unittest.TestCase):
                     for i4 in range(d4.NumberOfPoints):
                         param.SetValue(i1, i2, i3, i4, float(ndValues[i1][i2][i3][i4]))
 
-        print ndValues
-        print param.npyValues
+        #print ndValues
+        #print param.npyValues
 
         self.assertEqual(len(param.Domains),        4)
         self.assertEqual(param.Units,               unit)

@@ -402,9 +402,9 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
             //l * dr + r * dl
             if(dl && dr)
             {
-                adNodePtr t1(new adBinaryNode(eMulti, l, dr)); // l * dr
-                adNodePtr t2(new adBinaryNode(eMulti, r, dl)); // r * dl
-                deriv_ = adNodePtr(new adBinaryNode(ePlus, t1, t2));
+                adNodePtr t1(new adBinaryNode(eMulti, l, dr));       // l * dr
+                adNodePtr t2(new adBinaryNode(eMulti, r, dl));       // r * dl
+                deriv_ = adNodePtr(new adBinaryNode(ePlus, t1, t2)); // l * dr + r * dl
             }
             else if(dl)
             {
@@ -428,7 +428,7 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
                 adNodePtr t2(new adBinaryNode(eMulti, l, dr));          // l * dr
                 adNodePtr t3(new adBinaryNode(eMinus, t1, t2));         // r * dl - l * dr
                 adNodePtr t4(new adBinaryNode(eMulti, r, r));           // r * r
-                deriv_ = adNodePtr(new adBinaryNode(eDivide, t3, t4));  // (r * dl - l * dr)/(r * r)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, t3, t4));  // (r * dl - l * dr) / (r * r)
             }
             else if(dl)
             {
@@ -523,6 +523,8 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
             adNodePtr t1(new adUnaryNode(eCos, no));                    // cos(n)
             if(dn)
                 deriv_ = adNodePtr(new adBinaryNode(eMulti, t1, dn));   // cos(n) * dn
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eCos)
         {
@@ -535,27 +537,52 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         }
         else if(node->eFunction == eTan)
         {
-            daeDeclareException(exNotImplemented);
-            e << "Jacobian derivative expressions for the function Tan are not available";
-            throw e;
+            adNodePtr t1(new adUnaryNode(eCos, no));                    // cos(n)
+            adNodePtr t2(new adConstantNode(2));                        // 2
+            adNodePtr t3(new adBinaryNode(ePower, t1, t2));             // cos(n) ^ 2
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t3));  // dn / (cos(n) ^ 2)
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eArcSin)
         {
-            daeDeclareException(exNotImplemented);
-            e << "Jacobian derivative expressions for the function ASin are not available";
-            throw e;
+            adNodePtr t1(new adUnaryNode(eArcSin, no));                 // arcsin(n)
+            adNodePtr t2(new adConstantNode(2));                        // 2
+            adNodePtr t3(new adBinaryNode(ePower, t1, t2));             // arcsin(n) ^ 2
+            adNodePtr t4(new adConstantNode(1));                        // 1
+            adNodePtr t5(new adBinaryNode(eMinus, t4, t3));             // 1 - arcsin(n) ^ 2
+            adNodePtr t6(new adUnaryNode(eSqrt, t5));                   // sqrt(1 - arcsin(n) ^ 2)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t6));  // dn / sqrt(1 - arcsin(n) ^ 2)
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eArcCos)
         {
-            daeDeclareException(exNotImplemented);
-            e << "Jacobian derivative expressions for the function ACos are not available";
-            throw e;
+            adNodePtr t1(new adUnaryNode(eArcCos, no));                 // arccos(n)
+            adNodePtr t2(new adConstantNode(2));                        // 2
+            adNodePtr t3(new adBinaryNode(ePower, t1, t2));             // arccos(n) ^ 2
+            adNodePtr t4(new adConstantNode(1));                        // 1
+            adNodePtr t5(new adBinaryNode(eMinus, t4, t3));             // 1 - arccos(n) ^ 2
+            adNodePtr t6(new adUnaryNode(eSqrt, t5));                   // sqrt(1 - arccos(n) ^ 2)
+            adNodePtr t7(new adUnaryNode(eSign, t6));                   // -sqrt(1 - arccos(n) ^ 2)
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t7));  // dn / (-sqrt(1 - arccos(n) ^ 2))
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eArcTan)
         {
-            daeDeclareException(exNotImplemented);
-            e << "Jacobian derivative expressions for the function ATan are not available";
-            throw e;
+            adNodePtr t1(new adUnaryNode(eArcTan, no));                 // arctan(n)
+            adNodePtr t2(new adConstantNode(2));                        // 2
+            adNodePtr t3(new adBinaryNode(ePower, t1, t2));             // arctan(n) ^ 2
+            adNodePtr t4(new adConstantNode(1));                        // 1
+            adNodePtr t5(new adBinaryNode(ePlus, t4, t3));              // 1 + arctan(n) ^ 2
+            if(dn)
+                deriv_ = adNodePtr(new adBinaryNode(eDivide, dn, t5));  // dn / (1 + arctan(n) ^ 2)
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eSqrt)
         {
@@ -572,6 +599,8 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
             adNodePtr t1(new adUnaryNode(eExp, no));                    // exp(n)
             if(dn)
                 deriv_ = adNodePtr(new adBinaryNode(eMulti, t1, dn));   // exp(n) * dn
+            else
+                deriv_ = adNodePtr();
         }
         else if(node->eFunction == eLn)
         {
@@ -610,7 +639,9 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         }
         else
         {
-            daeDeclareAndThrowException(exInvalidCall);
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function = [" << node->eFunction << "] are not available";
+            throw e;
         }
     }
     else if(dynamic_cast<adConstantNode*>(n)         ||
@@ -1742,6 +1773,7 @@ bool adRuntimeTimeDerivativeNode::IsDifferential(void) const
 /*********************************************************************************************
     adInverseTimeStepNode
 **********************************************************************************************/
+// Only runtime node
 // Used only in Jacobian expressions!
 adInverseTimeStepNode::adInverseTimeStepNode()
 {
@@ -1768,12 +1800,12 @@ adNode* adInverseTimeStepNode::Clone(void) const
 
 void adInverseTimeStepNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-    strContent += "(1/TimeStep)";
+    strContent += "InverseTimeStep()";
 }
 
 string adInverseTimeStepNode::SaveAsLatex(const daeNodeSaveAsContext* /*c*/) const
 {
-    daeDeclareAndThrowException(exInvalidCall);
+    return "InverseTimeStep()";
 }
 
 void adInverseTimeStepNode::Open(io::xmlTag_t* pTag)

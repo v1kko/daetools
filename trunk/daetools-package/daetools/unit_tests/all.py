@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import unittest
-import tests_object, tests_domain
+import tests_object, tests_domain, tests_parameter
+import tests_jacobian_expressions
 
 if __name__ == "__main__":
     alltests = []
     loader = unittest.TestLoader()
     alltests.extend( loader.loadTestsFromModule(tests_object) )
     alltests.extend( loader.loadTestsFromModule(tests_domain) )
+    alltests.extend( loader.loadTestsFromModule(tests_parameter) )
+    alltests.extend( loader.loadTestsFromModule(tests_jacobian_expressions) )
     
     suite = unittest.TestSuite(alltests)
     textRunner = unittest.TextTestRunner(verbosity = 2)

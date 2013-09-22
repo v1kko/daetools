@@ -155,9 +155,9 @@ std::string daeEquationExecutionInfo::GetName(void) const
     return strName;
 }
 
-const std::vector<adNodePtr>& daeEquationExecutionInfo::GetJacobianExpressions() const
+const std::map< size_t, std::pair<size_t, adNodePtr> >& daeEquationExecutionInfo::GetJacobianExpressions() const
 {
-    return m_ptrarrJacobianExpressions;
+    return m_mapJacobianExpressions;
 }
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
@@ -208,45 +208,58 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 	EC.m_pEquationExecutionInfo = this;
 
 	adouble __ad;
-    map<size_t, size_t>::iterator iter;
-    size_t counter   = 0;
-    size_t count     = m_mapIndexes.size();
     double startTime, endTime;
 
     bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
     if(bPrintInfo)
     {
+        size_t count = m_mapIndexes.size();
         startTime = dae::GetTimeInSeconds();
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Jacobian for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     Map of variable indexes (size = ") + toString(count) + string("):"), 0);
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
     }
 
-// m_mapIndexes<OverallIndex, IndexInBlock>
-	for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
-	{
-		EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
-
-//        if(bPrintInfo)
-//        {
-//            m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("    Jac.item ") + toString(counter) + string("/") + toString(count) +
-//                                                            string(" (for oi=") + toString(iter->first) + string(", bi=") + toString(iter->second) + string(")"), 0);
-//            counter++;
-//        }
-
-		__ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-        try
+    if(m_mapJacobianExpressions.empty())
+    {
+        // m_mapIndexes<OverallIndex, IndexInBlock>
+        for(map<size_t, size_t>::iterator iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
         {
-            EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
+            EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
+            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+            try
+            {
+                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
+            }
+            catch(std::exception& exc)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
+                  << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
+                throw e;
+            }
         }
-        catch(std::exception& exc)
+    }
+    else
+    {
+        //map<overallIndex, pair<blockIndex, derivNode>>
+        for(map< size_t, std::pair<size_t, adNodePtr> >::iterator iter = m_mapJacobianExpressions.begin(); iter != m_mapJacobianExpressions.end(); iter++)
         {
-            daeDeclareException(exInvalidCall);
-            e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-              << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
-            throw e;
+            EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
+            __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
+            try
+            {
+                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getDerivative());
+            }
+            catch(std::exception& exc)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
+                  << "VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
+                throw e;
+            }
         }
-	}
+    }
 
     if(bPrintInfo)
     {
@@ -306,26 +319,27 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 // Operates on adRuntimeNodes
 void daeEquationExecutionInfo::BuildJacobianExpressions()
 {
-    adNodePtr  scaling;
+    adNodePtr  scaling, deriv;
     map<size_t, size_t>::iterator iter;
-    size_t counter;
 
-    m_ptrarrJacobianExpressions.clear();
-    m_ptrarrJacobianExpressions.resize(m_mapIndexes.size());
+    //map<overallIndex, pair<blockIndex, derivNode>>
+    m_mapJacobianExpressions.clear();
 
-// m_mapIndexes<OverallIndex, IndexInBlock>
-    for(counter = 0, iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++, counter++)
+    // m_mapIndexes<OverallIndex, IndexInBlock>
+    for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
     {
         adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
 
         if(m_dScaling == 1)
         {
-            m_ptrarrJacobianExpressions[counter] = jacob.derivative;
+            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
         }
         else
         {
             scaling = adNodePtr( new adConstantNode(m_dScaling) );
-            m_ptrarrJacobianExpressions[counter] = adNodePtr( new adBinaryNode(eMulti, jacob.derivative, scaling) );
+            deriv   = adNodePtr( new adBinaryNode(eMulti, jacob.derivative, scaling) );
+
+            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, deriv);
         }
     }
 }

@@ -1011,6 +1011,14 @@ const adouble Time(void)
 	return tmp;
 }
 
+const adouble InverseTimeStep(void)
+{
+    adouble tmp;
+    tmp.setGatherInfo(true);
+    tmp.node = adNodePtr(new adInverseTimeStepNode());
+    return tmp;
+}
+
 const adouble Constant(const quantity& q)
 {
 	adouble tmp;

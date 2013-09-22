@@ -415,6 +415,7 @@ DAE_CORE_API const adouble_array atan(const adouble_array& a);
 
 
 DAE_CORE_API const adouble Time(void);
+DAE_CORE_API const adouble InverseTimeStep(void);
 DAE_CORE_API const adouble Constant(const quantity& q);
 DAE_CORE_API const adouble Constant(real_t c);
 DAE_CORE_API const adouble_array Array(const std::vector<quantity>& arrq);
