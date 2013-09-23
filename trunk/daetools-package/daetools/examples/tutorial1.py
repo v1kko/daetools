@@ -197,7 +197,7 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.T.d(self.x, x, y)
-
+        
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
@@ -231,18 +231,6 @@ class simTutorial(daeSimulation):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
-
-def export(simulation, objects_to_export):
-    pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)
-    cdae_model  = simulation.m.ExportObjects(objects_to_export, eCDAE)
-
-    file_pydae = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.py", "w")
-    file_cdae  = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.h",  "w")
-
-    file_pydae.write(pydae_model)
-    file_cdae.write(cdae_model)
-    file_pydae.close()
-    file_cdae.close()
 
 # Use daeSimulator class
 def guiRun(app):
@@ -280,13 +268,6 @@ def consoleRun():
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    # Models and ports now can be exported into some other modelling language
-    # At the moment, models can be exported into pyDAE (python) and cDAE (c++)
-    # but other languages will be supported in the future (such as OpenModelica, EMSO ...)
-    # export() auxiliary function exports the model into pyDAE and cDAE and saves the
-    # exported models into the temporary folder (/tmp or c:\temp)
-    export(simulation, [simulation.m])
-    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

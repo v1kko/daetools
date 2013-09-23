@@ -3392,13 +3392,16 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
 		adouble adres = rtnode->m_pVariable->Calculate_dt(&rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
 		tmp = adres.node;
 	}
-	else if( dynamic_cast<adRuntimeParameterNode*>(adnode)  || 
-			 dynamic_cast<adDomainIndexNode*>(adnode)       ||
-			 dynamic_cast<adConstantNode*>(adnode)           )
+    else if( dynamic_cast<adConstantNode*>(adnode)          ||
+             dynamic_cast<adTimeNode*>(adnode)              ||
+             dynamic_cast<adDomainIndexNode*>(adnode)       ||
+             dynamic_cast<adRuntimeParameterNode*>(adnode)  ||
+             dynamic_cast<adEventPortDataNode*>(adnode)     ||
+             dynamic_cast<adInverseTimeStepNode*>(adnode) )
 	{
 		tmp = adNodePtr(new adConstantNode(0));
 	}
-	else
+    else
 	{
 		daeDeclareException(exInvalidCall);
 		e << "The function dt() does not accept expressions containing special functions or time/partial derivatives";
@@ -3674,42 +3677,16 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain*
 			tmp = adres.node;
 		}
 	}
-//	else if( dynamic_cast<adRuntimePartialDerivativeNode*>(adnode) )
-//	{
-//		adRuntimePartialDerivativeNode* rtnode = dynamic_cast<adRuntimePartialDerivativeNode*>(adnode);
-//		if(rtnode->m_nDegree == 2)
-//		{
-//			if(rtnode->m_pDomain == pDomain)
-//			{
-//				daeDeclareException(exInvalidCall);
-//				e << "The function d() cannot create partial derivatives of order higher than 2";
-//				throw e;
-//			}
-//			else // It is permitted (calculate the derivative of the expression node)
-//			{
-//				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 			
-//			}
-//		}
-//		else // m_nDegree == 1
-//		{
-//			if(rtnode->m_pDomain == pDomain) // Clone it and increase the order to 2
-//			{
-//				adouble adres = rtnode->m_pVariable->partial(2, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
-//				tmp = adres.node;
-//			}
-//			else // // It is permitted (calculate the derivative of the expression node)
-//			{
-//				tmp = calc_d(rtnode->pardevnode, pDomain, pExecutionContext); 
-//			}
-//		}
-//	}
-	else if( dynamic_cast<adRuntimeParameterNode*>(adnode) || 
-			 dynamic_cast<adDomainIndexNode*>(adnode)	   ||
-			 dynamic_cast<adConstantNode*>(adnode)          )
-	{
+    else if( dynamic_cast<adConstantNode*>(adnode)          ||
+             dynamic_cast<adTimeNode*>(adnode)              ||
+             dynamic_cast<adDomainIndexNode*>(adnode)       ||
+             dynamic_cast<adRuntimeParameterNode*>(adnode)  ||
+             dynamic_cast<adEventPortDataNode*>(adnode)     ||
+             dynamic_cast<adInverseTimeStepNode*>(adnode) )
+    {
 		tmp = adNodePtr(new adConstantNode(0));
 	}
-	else
+    else
 	{
 		daeDeclareException(exInvalidCall);
 		e << "The function d() does not accept expressions containing special functions, time derivatives, etc";

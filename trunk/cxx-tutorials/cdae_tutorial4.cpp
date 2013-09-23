@@ -36,7 +36,6 @@ using units_pool::J;
 using units_pool::W;
 using units_pool::s;
 
-
 class modTutorial4 : public daeModel
 {
 daeDeclareDynamicClass(modTutorial4)
@@ -184,8 +183,9 @@ int main(int argc, char *argv[])
     pSimulation->SetReportingInterval(10);
     pSimulation->SetTimeHorizon(500);
     pSimulation->GetModel()->SetReportingOn(true);
-    
+
     pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
+
     pSimulation->SolveInitial();
     
     pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");

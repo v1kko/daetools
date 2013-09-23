@@ -331,6 +331,10 @@ void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag,
 	}
 }
 
+//adNodePtr _one_(new adConstantNode(1.0));
+//adNodePtr _two_(new adConstantNode(2.0));
+//adNodePtr _invTimeStep_(new adInverseTimeStepNode());
+
 adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
 {
     adNodePtr val_, deriv_;
