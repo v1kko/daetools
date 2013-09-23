@@ -219,10 +219,11 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
     if(bPrintInfo)
     {
         size_t count = m_mapIndexes.size();
-        startTime = dae::GetTimeInSeconds();
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Jacobian for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
-        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     Map of variable indexes (size = ") + toString(count) + string("):"), 0);
-        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     Map of variable indexes (size = ") + toString(count) + string(")"), 0);
+        //m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
+
+        startTime = dae::GetTimeInSeconds();
     }
 
     if(m_mapJacobianExpressions.empty() && m_pEquation->m_bBuildJacobianExpressions)

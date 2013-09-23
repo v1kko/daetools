@@ -54,97 +54,81 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['((tutorial.m() * tutorial.c_p()) * (InverseTimeStep())) + ((tutorial.alpha() * tutorial.A()) * Constant(1))']
         
         eq = self.CreateEquation("test_0")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
-        eq.Residual = self.t0() + self.T()
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1)', 'Constant(1)']
+        eq.Residual = self.t0() + self.T() * (self.Qin() - self.m() * self.cp() * self.T.dt()) / (self.m() * self.cp() * self.T() - self.T() ** 0.5)
 
         eq = self.CreateEquation("test_1")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t1() - self.T()
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['(-Constant(1))', 'Constant(1)']
 
         eq = self.CreateEquation("test_2")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t2() * self.T()
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['tutorial.t2() * Constant(1)', 'tutorial.T() * Constant(1)']
 
         eq = self.CreateEquation("test_3")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t3() / self.T()
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['((-tutorial.t3() * Constant(1))) / (tutorial.T() * tutorial.T())', 'Constant(1) / tutorial.T()']
 
         eq = self.CreateEquation("test_4")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t4() + Sqrt(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / (Constant(2) * Sqrt(tutorial.T()))', 'Constant(1)']
 
         eq = self.CreateEquation("test_5")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t5() + Exp(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Exp(tutorial.T()) * Constant(1)', 'Constant(1)']
 
         eq = self.CreateEquation("test_6")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t6() + Log(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / tutorial.T()', 'Constant(1)']
 
         eq = self.CreateEquation("test_7")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
-        eq.Residual = self.t7() #+ Log10(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / (Log10(Constant(10)) * tutorial.T())', 'Constant(1)']
+        eq.Residual = self.t7() + Log10(self.T())
 
         eq = self.CreateEquation("test_8")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t8() + Pow(self.T(), 2)
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['(Constant(2) * (tutorial.T() ** (Constant(2) - Constant(1)))) * Constant(1)', 'Constant(1)']
 
         eq = self.CreateEquation("test_9")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t9() + Sin(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Cos(tutorial.T()) * Constant(1)', 'Constant(1)']
 
         eq = self.CreateEquation("test_10")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t10() + Cos(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['((-Sin(tutorial.T()))) * Constant(1)', 'Constant(1)']
 
         eq = self.CreateEquation("test_11")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t11() #+ Tan(self.T())
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / (Cos(tutorial.T()) ** Constant(2))', 'Constant(1)']
 
         eq = self.CreateEquation("test_12")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t12() #+ ASin(self.T() / 283)
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / Sqrt(Constant(1) - (ASin(tutorial.T()) ** Constant(2)))', 'Constant(1)']
 
         eq = self.CreateEquation("test_13")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t13() #+ ACos(self.T() / 283)
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / ((-Sqrt(Constant(1) - (ACos(tutorial.T()) ** Constant(2)))))', 'Constant(1)']
 
         eq = self.CreateEquation("test_14")
         eq.BuildJacobianExpressions = self.UseJacobianExpressions
         eq.CheckUnitsConsistency    = False
         eq.Residual = self.t14() #+ ATan(self.T() / 283)
-        self.expectedJacobianExpressions[eq.CanonicalName] = ['Constant(1) / (Constant(1) + (ATan(tutorial.T()) ** Constant(2)))', 'Constant(1)']
         
 class simTutorial(daeSimulation):
     def __init__(self, UseJacobianExpressions):
@@ -183,8 +167,9 @@ def simulate(UseJacobianExpressions):
     #for eq in simulation.m.Equations:
     #    name = eq.CanonicalName
     #    eei = eq.EquationExecutionInfos[0]
-    #    print name
-    #    print eei.JacobianExpressions
+    #    if len(eei.JacobianExpressions) > 0:
+    #        print name
+    #        print eei.JacobianExpressions
     
     return datareporter
         
@@ -199,8 +184,10 @@ class case_JacobianExpressions(unittest.TestCase):
         # Compare the results
         for v, v_jac in zip(dr.Process.Variables, dr_jac.Process.Variables):
             for val1, val2 in zip(v.Values, v_jac.Values):
-                print v.Name, abs(val1 - val2), val1, val2
-                self.assertTrue(abs(val1 - val2) < 1e-10)
+                test = (abs(val1 - val2) < 1e-7)
+                #if not test:
+                #    print v.Name, abs(val1 - val2), val1, val2
+                self.assertTrue(test)
         
 if __name__ == "__main__":
     unittest.main()
