@@ -1254,9 +1254,9 @@ const adouble adarr_sum(const adouble_array& a)
 {
     return Sum(a, false);
 }
-const adouble adarr_product(const adouble_array& a, bool bIsLargeArray)
+const adouble adarr_product(const adouble_array& a)
 {
-	return Product(a, bIsLargeArray);
+    return Product(a, false);
 }
 const adouble adarr_min(const adouble_array& a)
 {

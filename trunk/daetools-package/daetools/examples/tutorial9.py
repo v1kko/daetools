@@ -40,7 +40,7 @@ try:
     from daetools.solvers.trilinos import pyTrilinos
     #from daetools.solvers.superlu import pySuperLU
     #from daetools.solvers.superlu_mt import pySuperLU_MT
-    #from daetools.solvers import.intel_pardiso pyIntelPardiso
+    #from daetools.solvers.intel_pardiso import pyIntelPardiso
 except ImportError as e:
     print('Unable to import LA solver: {0}'.format(e))
 
@@ -135,16 +135,10 @@ def consoleRun():
 
     # The default linear solver is Sundials dense sequential solver (LU decomposition).
     # The following 3rd party direct linear solvers are supported:
-    #  1. Sparse solvers:
-    #      - IntelPardiso (multi-threaded - OMP)
-    #      - SuperLU (sequential)
-    #      - SuperLU_MT (multi-threaded - pthreads, OMP)
-    #      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack
-    #  3. Dense lapack wrappers:
-    #      - Amd ACML (OMP)
-    #      - Intel MKL (OMP)
-    #      - Generic Lapack (Sequential)
-    #      - Magma lapack (GPU)
+    #   - IntelPardiso (multi-threaded - OMP)
+    #   - SuperLU (sequential)
+    #   - SuperLU_MT (multi-threaded - pthreads, OMP)
+    #   - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack
     # If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).
     # If you are using OMP capable solvers you should set the number of threads to the number of cores.
     # For instance:
@@ -158,12 +152,19 @@ def consoleRun():
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
-    #lasolver     = pyAmdACML.daeCreateLapackSolver()
-    #lasolver     = pyIntelMKL.daeCreateLapackSolver()
-    #lasolver     = pyLapack.daeCreateLapackSolver()
-    #lasolver     = pyAtlas.daeCreateLapackSolver()
     daesolver.SetLASolver(lasolver)
-
+    
+    """"
+    # Intel Pardiso in/out parameters (iparm array)
+    iparm = lasolver.get_iparm()
+    print iparm
+    # Set/get varios options
+    iparm[19] = 1
+    # Set it back
+    lasolver.set_iparm(iparm)    
+    print lasolver.get_iparm()
+    """
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -185,6 +186,7 @@ def consoleRun():
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
+    print lasolver.get_iparm()
 
     # Run
     simulation.Run()

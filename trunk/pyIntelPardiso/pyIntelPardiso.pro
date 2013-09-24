@@ -13,9 +13,8 @@
 
 include(../dae.pri)
 QT -= core gui
-TARGET = cdaeIntelPardiso_LASolver
+TARGET = pyIntelPardiso
 TEMPLATE = lib
-CONFIG += staticlib
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
@@ -25,15 +24,30 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
-LIBS += $${BOOST_PYTHON_LIB} \
+LIBS += $${DAE_INTEL_PARDISO_SOLVER_LIB} \
+        $${BOOST_PYTHON_LIB} \
         $${INTEL_MKL_LIBS}
 
 SOURCES += stdafx.cpp \
-    dllmain.cpp \
-    mkl_pardiso_sparse_la_solver.cpp \
-    ../mmio.c
+           dllmain.cpp \
+           dae_python.cpp \
+           python_wraps.cpp
 
 HEADERS += stdafx.h \
-    mkl_pardiso_sparse_la_solver.h \
-    ../mmio.h
+           python_wraps.h \
+           docstrings.h
 
+#######################################################
+#                Install files
+#######################################################
+win32{
+QMAKE_POST_LINK = move /y \
+    $${DAE_DEST_DIR}/pyIntelPardiso11.dll \
+    $${SOLVERS_DIR}/pyIntelPardiso.pyd
+}
+
+unix{
+QMAKE_POST_LINK = cp -f \
+    $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+    $${SOLVERS_DIR}/$${TARGET}.$${SHARED_LIB_EXT}
+}

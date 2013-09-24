@@ -9,7 +9,7 @@ if [ "$1" = "" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]
   echo "  - core: build core daetools c++ libraries and python wrapper modules (no 3rd party LA/(MI)NLP solvers)"
   echo "  - pydae: build daetools core python wrapper modules only"
   echo "  - solvers: build all solvers and their python wrapper modules"
-  echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt: build particular solver and its python wrapper module"
+  echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt, intel_pardiso: build particular solver and its python wrapper module"
   return
 fi
 
@@ -102,6 +102,9 @@ case ${PROJECTS} in
 
         compile LA_Trilinos_Amesos "-j1"
         compile pyTrilinos         "-j1"
+        
+        #compile LA_Intel_MKL   "-j1"
+        #compile pyIntelPardiso "-j1"
 
         compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
         compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
@@ -135,6 +138,9 @@ case ${PROJECTS} in
             compile LA_Trilinos_Amesos "-j1"
             compile pyTrilinos         "-j1"
 
+            #compile LA_Intel_MKL      "-j1"
+            #compile pyIntelPardiso    "-j1"
+            
             compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
             compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
 
@@ -167,6 +173,11 @@ case ${PROJECTS} in
   trilinos) echo Compile trilinos project
             compile LA_Trilinos_Amesos "-j1"
             compile pyTrilinos         "-j1"
+        ;;
+
+  intel_pardiso) echo Compile intel_pardiso project
+                      compile LA_Intel_MKL   "-j1"
+                      compile pyIntelPardiso "-j1"
         ;;
 
   bonmin) echo Compile bonmin project

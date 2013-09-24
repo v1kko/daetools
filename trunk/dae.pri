@@ -364,6 +364,76 @@ macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/
                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos -lumfpack -lamd \
                            $${SUPERLU_LIBS}
 
+
+######################################################################################
+#                                INTEL Pardiso
+######################################################################################
+# Version: 11.1
+# LD_LIBRARY_PATH should be set
+# MKL_NUM_THREADS=Ncpu should be set
+# http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
+#####################################################################################
+win32-msvc2008::MKLPATH =
+linux-g++::MKLPATH      = /opt/Intel/mkl
+macx-g++::MKLPATH       =
+
+INTEL_MKL_INCLUDE = $${MKLPATH}/include
+ARCH = $$QMAKE_HOST.arch
+
+win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c.lib mkl_core.lib mkl_intel_thread.lib libiomp5md.lib -Qopenmp
+win32-msvc2008::MKL_LIBS = $${MKLPATH}\ia32\lib
+
+contains($$ARCH, x86) {
+    message(Using 32 bit MKL)
+    linux-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
+    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                                -Wl,--start-group \
+                                    $${MKL_LIBS}/libmkl_intel.a \
+                                    $${MKL_LIBS}/libmkl_core.a \
+                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
+                                -Wl,--end-group \
+                                -ldl -lpthread -lm
+    linux-g++::QMAKE_LFLAGS   += -fopenmp -m32
+    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m32
+
+    macx-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
+    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                               -Wl,--start-group \
+                                   $${MKL_LIBS}/libmkl_intel.a \
+                                   $${MKL_LIBS}/libmkl_core.a \
+                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
+                               -Wl,--end-group \
+                               -ldl -lpthread -lm
+    macx-g++::QMAKE_LFLAGS   += -fopenmp -m32
+    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m32
+}
+
+contains(ARCH, x86_64) {
+    message(Using 64 bit MKL)
+    linux-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
+    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                                -Wl,--start-group \
+                                    $${MKL_LIBS}/libmkl_intel_lp64.a \
+                                    $${MKL_LIBS}/libmkl_core.a \
+                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
+                                -Wl,--end-group \
+                                -ldl -lpthread -lm
+    linux-g++::QMAKE_LFLAGS   += -fopenmp -m64
+    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+
+    macx-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
+    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                               -Wl,--start-group \
+                                   $${MKL_LIBS}/libmkl_intel_lp64.a \
+                                   $${MKL_LIBS}/libmkl_core.a \
+                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
+                               -Wl,--end-group \
+                               -ldl -lpthread -lm
+    macx-g++::QMAKE_LFLAGS   += -fopenmp -m64
+    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+}
+
+
 #####################################################################################
 #                                 MPI SUPPORT
 #####################################################################################
@@ -387,31 +457,33 @@ unix::MPI_LIBS  = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32::DAE_CORE_LIB                = cdaeCore.lib
-win32::DAE_DATAREPORTING_LIB       = cdaeDataReporting.lib
-win32::DAE_ACTIVITY_LIB            = cdaeActivity.lib
-win32::DAE_IDAS_SOLVER_LIB         = cdaeIDAS_DAESolver.lib
-win32::DAE_UNITS_LIB               = cdaeUnits.lib
-win32::DAE_SUPERLU_SOLVER_LIB      = cdaeSuperLU_LASolver.lib
-win32::DAE_SUPERLU_MT_SOLVER_LIB   = cdaeSuperLU_MT_LASolver.lib
-win32::DAE_SUPERLU_CUDA_SOLVER_LIB = cdaeSuperLU_CUDA_LASolver.lib
-win32::DAE_BONMIN_SOLVER_LIB       = cdaeBONMIN_MINLPSolver.lib
-win32::DAE_IPOPT_SOLVER_LIB        = cdaeIPOPT_NLPSolver.lib
-win32::DAE_NLOPT_SOLVER_LIB        = cdaeNLOPT_NLPSolver.lib
-win32::DAE_TRILINOS_SOLVER_LIB     = cdaeTrilinos_LASolver.lib
+win32::DAE_CORE_LIB                 = cdaeCore.lib
+win32::DAE_DATAREPORTING_LIB        = cdaeDataReporting.lib
+win32::DAE_ACTIVITY_LIB             = cdaeActivity.lib
+win32::DAE_IDAS_SOLVER_LIB          = cdaeIDAS_DAESolver.lib
+win32::DAE_UNITS_LIB                = cdaeUnits.lib
+win32::DAE_SUPERLU_SOLVER_LIB       = cdaeSuperLU_LASolver.lib
+win32::DAE_SUPERLU_MT_SOLVER_LIB    = cdaeSuperLU_MT_LASolver.lib
+win32::DAE_SUPERLU_CUDA_SOLVER_LIB  = cdaeSuperLU_CUDA_LASolver.lib
+win32::DAE_BONMIN_SOLVER_LIB        = cdaeBONMIN_MINLPSolver.lib
+win32::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
+win32::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
+win32::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
+win32::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
 
-unix::DAE_CORE_LIB                = -lcdaeCore
-unix::DAE_DATAREPORTING_LIB       = -lcdaeDataReporting
-unix::DAE_ACTIVITY_LIB            = -lcdaeActivity
-unix::DAE_IDAS_SOLVER_LIB         = -lcdaeIDAS_DAESolver
-unix::DAE_UNITS_LIB               = -lcdaeUnits
-unix::DAE_SUPERLU_SOLVER_LIB      = -lcdaeSuperLU_LASolver
-unix::DAE_SUPERLU_MT_SOLVER_LIB   = -lcdaeSuperLU_MT_LASolver
-unix::DAE_SUPERLU_CUDA_SOLVER_LIB = -lcdaeSuperLU_CUDA_LASolver
-unix::DAE_BONMIN_SOLVER_LIB       = -lcdaeBONMIN_MINLPSolver
-unix::DAE_IPOPT_SOLVER_LIB        = -lcdaeIPOPT_NLPSolver
-unix::DAE_NLOPT_SOLVER_LIB        = -lcdaeNLOPT_NLPSolver
-unix::DAE_TRILINOS_SOLVER_LIB     = -lcdaeTrilinos_LASolver
+unix::DAE_CORE_LIB                 = -lcdaeCore
+unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
+unix::DAE_ACTIVITY_LIB             = -lcdaeActivity
+unix::DAE_IDAS_SOLVER_LIB          = -lcdaeIDAS_DAESolver
+unix::DAE_UNITS_LIB                = -lcdaeUnits
+unix::DAE_SUPERLU_SOLVER_LIB       = -lcdaeSuperLU_LASolver
+unix::DAE_SUPERLU_MT_SOLVER_LIB    = -lcdaeSuperLU_MT_LASolver
+unix::DAE_SUPERLU_CUDA_SOLVER_LIB  = -lcdaeSuperLU_CUDA_LASolver
+unix::DAE_BONMIN_SOLVER_LIB        = -lcdaeBONMIN_MINLPSolver
+unix::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
+unix::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
+unix::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
+unix::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

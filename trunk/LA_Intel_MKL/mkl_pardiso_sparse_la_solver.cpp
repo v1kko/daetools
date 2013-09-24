@@ -33,6 +33,49 @@ daeIntelPardisoSolver::daeIntelPardisoSolver(void)
 {
 	m_pBlock = NULL;
 	m_vecB   = NULL;
+
+    for(size_t i = 0; i < 64; i++)
+    {
+        pt[i]    = 0;
+        iparm[i] = 0;
+    }
+
+    maxfct    = 1; /* Maximum number of numerical factorizations. */
+    mnum      = 1; /* Which factorization to use. */
+    msglvl    = 0; /* Print statistical information in file */
+    mtype     = 11;/* Real unsymmetric matrix */
+    nrhs      = 1; /* Number of right hand sides. */
+
+    iparm[0] = 1; /* 0: Defaults  1: No solver default */
+    iparm[1] = 2; /* Fill-in reordering from METIS */
+    /* Numbers of processors, value of OMP_NUM_THREADS */
+    iparm[2] = 1;
+    iparm[3] = 0; /* No iterative-direct algorithm */
+    iparm[4] = 0; /* No user fill-in reducing permutation */
+    iparm[5] = 0; /* Write solution into x */
+    iparm[6] = 0; /* Not in use */
+    iparm[7] = 2; /* Max numbers of iterative refinement steps */
+    iparm[8] = 0; /* Not in use */
+    iparm[9] = 13; /* Perturb the pivot elements with 1E-13 */
+    iparm[10] = 1; /* Use nonsymmetric permutation and scaling MPS */
+    iparm[11] = 0; /* Not in use */
+    iparm[12] = 1; /* Maximum weighted matching algorithm is switched-on (default for non-symmetric) */
+    iparm[13] = 0; /* Output: Number of perturbed pivots */
+    iparm[14] = 0; /* Not in use */
+    iparm[15] = 0; /* Not in use */
+    iparm[16] = 0; /* Not in use */
+    iparm[17] = -1; /* Output: Number of nonzeros in the factor LU */
+    iparm[18] = -1; /* Output: Mflops for LU factorization */
+    iparm[19] = 0; /* Output: Numbers of CG Iterations */
+
+    iparm[26] = 1; /* check the sparse matrix representation */
+
+    if(typeid(real_t) == typeid(double))
+        iparm[27] = 0; /* Double precision */
+    else
+        iparm[27] = 1; /* Single precision */
+
+    iparm[34] = 1; /* Zero-based indexing: columns and rows indexing in arrays ia, ja, and perm starts from 0.  */
 }
 
 daeIntelPardisoSolver::~daeIntelPardisoSolver(void)
@@ -169,49 +212,6 @@ void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
 	m_nJacobianEvaluations	= 0;
 	m_vecB					= (real_t*)malloc(m_nNoEquations * sizeof(real_t));
 	
-	for(size_t i = 0; i < 64; i++) 
-	{
-		pt[i]    = 0;
-		iparm[i] = 0;
-	}
-	
-	maxfct    = 1; /* Maximum number of numerical factorizations. */
-	mnum      = 1; /* Which factorization to use. */
-	msglvl    = 0; /* Print statistical information in file */
-	mtype     = 11;/* Real unsymmetric matrix */
-	nrhs      = 1; /* Number of right hand sides. */
-
-	iparm[0] = 1; /* 0: Defaults  1: No solver default */
-	iparm[1] = 2; /* Fill-in reordering from METIS */
-	/* Numbers of processors, value of OMP_NUM_THREADS */
-	iparm[2] = 1;
-	iparm[3] = 0; /* No iterative-direct algorithm */
-	iparm[4] = 0; /* No user fill-in reducing permutation */
-	iparm[5] = 0; /* Write solution into x */
-	iparm[6] = 0; /* Not in use */
-	iparm[7] = 2; /* Max numbers of iterative refinement steps */
-	iparm[8] = 0; /* Not in use */
-	iparm[9] = 13; /* Perturb the pivot elements with 1E-13 */
-	iparm[10] = 1; /* Use nonsymmetric permutation and scaling MPS */
-	iparm[11] = 0; /* Not in use */
-	iparm[12] = 1; /* Maximum weighted matching algorithm is switched-on (default for non-symmetric) */
-	iparm[13] = 0; /* Output: Number of perturbed pivots */
-	iparm[14] = 0; /* Not in use */
-	iparm[15] = 0; /* Not in use */
-	iparm[16] = 0; /* Not in use */
-	iparm[17] = -1; /* Output: Number of nonzeros in the factor LU */
-	iparm[18] = -1; /* Output: Mflops for LU factorization */
-	iparm[19] = 0; /* Output: Numbers of CG Iterations */
-
-	iparm[26] = 1; /* check the sparse matrix representation */
-	
-	if(typeid(real_t) == typeid(double))
-		iparm[27] = 0; /* Double precision */
-	else
-		iparm[27] = 1; /* Single precision */
-
-    iparm[34] = 1; /* Zero-based indexing: columns and rows indexing in arrays ia, ja, and perm starts from 0.  */
-
     m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
 }
 

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
-#include "mkl_pardiso_sparse_la_solver.h"
+#include "python_wraps.h"
 using namespace boost::python;
 using namespace dae::solver;
 
@@ -16,7 +16,9 @@ BOOST_PYTHON_MODULE(pyIntelPardiso)
 
 	class_<daeIntelPardisoSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeIntelPardisoSolver")
 		.add_property("Name",			&daeIntelPardisoSolver::GetName)
-		.def("SaveAsXPM",				&daeIntelPardisoSolver::SaveAsXPM)
+        .def("get_iparm",               &daepython::daeIntelPardisoSolver_get_iparm)
+        .def("set_iparm",               &daepython::daeIntelPardisoSolver_set_iparm)
+        .def("SaveAsXPM",				&daeIntelPardisoSolver::SaveAsXPM)
 		.def("SaveAsMatrixMarketFile",	&daeIntelPardisoSolver::SaveAsMatrixMarketFile)
 		;
 

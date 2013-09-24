@@ -274,7 +274,7 @@ const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
 
 const adouble adarr_sum(const adouble_array& a);
-const adouble adarr_product(const adouble_array& a, bool bIsLargeArray = false);
+const adouble adarr_product(const adouble_array& a);
 const adouble adarr_min(const adouble_array& a);
 const adouble adarr_max(const adouble_array& a);
 const adouble adarr_average(const adouble_array& a);
