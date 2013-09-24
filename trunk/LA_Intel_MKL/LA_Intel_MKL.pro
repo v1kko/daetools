@@ -14,48 +14,75 @@
 include(../dae.pri)
 QT -= core \
     gui
-TARGET = IntelPardiso
+TARGET = pyIntelPardiso
 TEMPLATE = lib
 
 ######################################################################################
 # INTEL MKL solvers
 ######################################################################################
+# Version: 11.1
 # LD_LIBRARY_PATH should be set
 # MKL_NUM_THREADS=Ncpu should be set
 # http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #####################################################################################
-win32-msvc2008::MKLPATH = c:\Intel\MKL\10.2.5.035
-linux-g++::MKLPATH = /opt/intel/mkl/10.2.5.035
-linux-g++-64::MKLPATH = /opt/intel/mkl/10.2.5.035
-
-win32-msvc2008::MKL_LIBS = $${MKLPATH}\ia32\lib
-linux-g++::MKL_LIBS = $${MKLPATH}/lib/32
-linux-g++-64::MKL_LIBS = $${MKLPATH}/lib/em64t
+win32-msvc2008::MKLPATH =
+linux-g++::MKLPATH      = /opt/Intel/mkl
+macx-g++::MKLPATH       =
 
 INTEL_MKL_INCLUDE = $${MKLPATH}/include
+ARCH = $$QMAKE_HOST.arch
 
-# Sequential
-#win32-msvc2008::INTEL_MKL_LIBS =  -L$${MKL_LIBS} mkl_solver_sequential.lib mkl_intel_c.lib mkl_sequential.lib mkl_core.lib
-# OpenMP
-win32-msvc2008::INTEL_MKL_LIBS =  -L$${MKL_LIBS} mkl_solver.lib mkl_intel_c.lib mkl_intel_thread.lib mkl_core.lib libiomp5mt.lib -Qopenmp
+win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c.lib mkl_core.lib mkl_intel_thread.lib libiomp5md.lib -Qopenmp
+win32-msvc2008::MKL_LIBS = $${MKLPATH}\ia32\lib
 
-linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-                          $${MKL_LIBS}/libmkl_solver.a \
-                          -Wl,--start-group \
-                              $${MKL_LIBS}/libmkl_intel.a \
-                              $${MKL_LIBS}/libmkl_intel_thread.a \
-                              $${MKL_LIBS}/libmkl_core.a \
-                          -Wl,--end-group \
-                          -liomp5 -lpthread
+contains($$ARCH, x86) {
+    message(Using 32 bit MKL)
+    linux-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
+    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                                -Wl,--start-group \
+                                    $${MKL_LIBS}/libmkl_intel.a \
+                                    $${MKL_LIBS}/libmkl_core.a \
+                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
+                                -Wl,--end-group \
+                                -ldl -lpthread -lm
+    linux-g++::QMAKE_LFLAGS   += -fopenmp -m32
+    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m32
 
-linux-g++-64::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-								$${MKL_LIBS}/libmkl_solver_lp64.a \
-								-Wl,--start-group \
-								    $${MKL_LIBS}/libmkl_intel_lp64.a \
-								    $${MKL_LIBS}/libmkl_intel_thread.a \
-								    $${MKL_LIBS}/libmkl_core.a \
-								-Wl,--end-group \
-								-liomp5 -lpthread
+    macx-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
+    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                               -Wl,--start-group \
+                                   $${MKL_LIBS}/libmkl_intel.a \
+                                   $${MKL_LIBS}/libmkl_core.a \
+                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
+                               -Wl,--end-group \
+                               -ldl -lpthread -lm
+    macx-g++::QMAKE_LFLAGS   += -fopenmp -m32
+    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m32
+}
+contains(ARCH, x86_64) {
+    message(Using 64 bit MKL)
+    linux-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
+    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                                -Wl,--start-group \
+                                    $${MKL_LIBS}/libmkl_intel_lp64.a \
+                                    $${MKL_LIBS}/libmkl_core.a \
+                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
+                                -Wl,--end-group \
+                                -ldl -lpthread -lm
+    linux-g++::QMAKE_LFLAGS   += -fopenmp -m64
+    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+
+    macx-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
+    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
+                               -Wl,--start-group \
+                                   $${MKL_LIBS}/libmkl_intel_lp64.a \
+                                   $${MKL_LIBS}/libmkl_core.a \
+                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
+                               -Wl,--end-group \
+                               -ldl -lpthread -lm
+    macx-g++::QMAKE_LFLAGS   += -fopenmp -m64
+    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+}
 
 ####################################################################################
 #                       Suppress some warnings
@@ -69,20 +96,38 @@ INCLUDEPATH += $${BOOSTDIR} \
     $${PYTHON_SITE_PACKAGES_DIR} \
     $${SUNDIALS_INCLUDE} \
     $${INTEL_MKL_INCLUDE}
+
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
+
 LIBS += $${BOOST_PYTHON_LIB} \
     $${INTEL_MKL_LIBS}
+
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \
-    mkl_pardiso_sparse_la_solver.cpp
-HEADERS += stdafx.h \
-    mkl_pardiso_sparse_la_solver.h
+    mkl_pardiso_sparse_la_solver.cpp \
+    ../mmio.c
 
-win32-msvc2008::QMAKE_POST_LINK = move /y \
-    $${DAE_DEST_DIR}/IntelPardiso1.dll \
-    $${DAE_DEST_DIR}/pyIntelPardiso.pyd
-unix::QMAKE_POST_LINK = cp \
-    -f \
+HEADERS += stdafx.h \
+    mkl_pardiso_sparse_la_solver.h \
+    ../mmio.h
+
+#win32-msvc2008::QMAKE_POST_LINK = move /y \
+#    $${DAE_DEST_DIR}/IntelPardiso1.dll \
+#    $${DAE_DEST_DIR}/pyIntelPardiso.pyd
+#unix::QMAKE_POST_LINK = cp \
+#    -f \
+#    $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+#    $${DAE_DEST_DIR}/py$${TARGET}.$${SHARED_LIB_EXT}
+
+win32{
+QMAKE_POST_LINK = move /y \
+    $${DAE_DEST_DIR}/pyIntelPardiso11.dll \
+    $${SOLVERS_DIR}/pyIntelPardiso.pyd
+}
+
+unix{
+QMAKE_POST_LINK = cp -f \
     $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${DAE_DEST_DIR}/py$${TARGET}.$${SHARED_LIB_EXT}
+    $${SOLVERS_DIR}/$${TARGET}.$${SHARED_LIB_EXT}
+}

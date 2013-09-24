@@ -145,7 +145,7 @@ std::string daeIntelPardisoSolver::GetName(void) const
 void daeIntelPardisoSolver::ResetMatrix(size_t nnz)
 {
 	m_vecB = (real_t*)realloc(m_vecB, m_nNoEquations * sizeof(real_t));
-	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_FORTRAN_STYLE);
+    m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
 }
 
 bool daeIntelPardisoSolver::CheckData() const
@@ -210,7 +210,9 @@ void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
 	else
 		iparm[27] = 1; /* Single precision */
 
-	m_matJacobian.Reset(m_nNoEquations, nnz, CSR_FORTRAN_STYLE);
+    iparm[34] = 1; /* Zero-based indexing: columns and rows indexing in arrays ia, ja, and perm starts from 0.  */
+
+    m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
 }
 
 int daeIntelPardisoSolver::Init(void* ida)

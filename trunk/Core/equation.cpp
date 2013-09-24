@@ -256,7 +256,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             {
                 daeDeclareException(exInvalidCall);
                 e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
+                  << " VariableIndexInBlock=" << iter->second << "; " << exc.what();
                 throw e;
             }
 
@@ -268,7 +268,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             {
                 daeDeclareException(exInvalidCall);
                 e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << "VariableIndexInBlock=" << iter->second << "; " << exc.what();
+                  << " VariableIndexInBlock=" << iter->second << "; " << exc.what();
                 throw e;
             }
         }
@@ -297,7 +297,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             {
                 daeDeclareException(exInvalidCall);
                 e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << "VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
+                  << " VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
                 throw e;
             }
 
@@ -309,7 +309,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             {
                 daeDeclareException(exInvalidCall);
                 e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << "VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
+                  << " VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
                 throw e;
             }
         }
@@ -351,7 +351,7 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
         {
             daeDeclareException(exInvalidCall);
             e << "Exception raised during calculation of the SensitivityResiduals of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-              << "ParameterIndex=" << i << "; " << exc.what();
+              << " ParameterIndex=" << i << "; " << exc.what();
             throw e;
         }
 
@@ -363,7 +363,7 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
         {
             daeDeclareException(exInvalidCall);
             e << "Cannot set SensitivityResiduals item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-              << "ParameterIndex=" << i << "; " << exc.what();
+              << " ParameterIndex=" << i << "; " << exc.what();
             throw e;
         }
     }

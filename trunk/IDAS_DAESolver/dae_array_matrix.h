@@ -493,10 +493,10 @@ public:
 		JA  = NULL;
 		BTF = NULL;
 	}
-	
+
     FLOAT& operator()(size_t i, size_t j)
-	{
-		INT index = CalcIndex(i, j);
+    {
+        INT index = CalcIndex(i, j);
         if(index < 0)
 		{
 			daeDeclareException(exMiscellanous);
@@ -508,17 +508,17 @@ public:
 	
     FLOAT GetItem(size_t i, size_t j) const
 	{
-		INT index = CalcIndex(i, j);
-		if(index < 0)
+        INT index = CalcIndex(i, j);
+        if(index < 0)
 			return 0.0;
 		else
 			return A[index];
 	}
 	
-	void SetItem(size_t i, size_t j, FLOAT val)
+    void SetItem(size_t i, size_t j, FLOAT val)
 	{
-		INT index = CalcIndex(i, j);
-		if(index < 0)
+        INT index = CalcIndex(i, j);
+        if(index < 0)
 		{
 			daeDeclareException(exMiscellanous);
 			e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";

@@ -74,9 +74,9 @@ public:
 	daeDAESolver_t*		m_pDAESolver;
 	size_t				m_nJacobianEvaluations;
 	
-	daeDenseArray		m_arrValues;
-	daeDenseArray		m_arrTimeDerivatives;
-	daeDenseArray		m_arrResiduals;
+    daeArray<real_t>	m_arrValues;
+    daeArray<real_t>	m_arrTimeDerivatives;
+    daeArray<real_t>	m_arrResiduals;
 	daeMKLMatrix		m_matJacobian;
 };
 

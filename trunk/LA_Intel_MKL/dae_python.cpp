@@ -20,6 +20,6 @@ BOOST_PYTHON_MODULE(pyIntelPardiso)
 		.def("SaveAsMatrixMarketFile",	&daeIntelPardisoSolver::SaveAsMatrixMarketFile)
 		;
 
-	def("daeCreateIntelPardisoSolver", daeCreateIntelPardisoSolver);
+    def("daeCreateIntelPardisoSolver", daeCreateIntelPardisoSolver, return_value_policy<manage_new_object>());
 
 }
