@@ -57,6 +57,12 @@ elif [ ${DISTRIBUTOR_ID} = "suse linux" ]; then
                  blas lapack libqt4 libqt4-devel qt-creator \
                  automake make autoconf gcc gcc-c++ gcc-fortran binutils cmake \
                  wget subversion devel_rpm_build libbz2-devel
+                 
+elif [ ${DISTRIBUTOR_ID} = "archlinux" ]; then
+  sudo pacman -S python2-pyqt4 python2-numpy python2-scipy python2-matplotlib mayavi \
+                 lapack blas libsuitesparse qt4 qtcreator \
+                 automake make pkg-config autoconf gcc gcc-fortran binutils cmake \
+                 wget subversion fakeroot swig libpng libxext bzip2
 
 else
   echo "ERROR: unsupported GNU/Linux distribution; please edit the script to add support for: ${DISTRIBUTOR_ID}/${CODENAME}"
