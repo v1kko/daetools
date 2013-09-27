@@ -563,7 +563,7 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Array",            &daepython::adarr_Array,        (arg("values")), DOCSTR_Array);
 
 
-	class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
+    class_<adouble_array>("adouble_array", DOCSTR_adouble_array, no_init)
         .def(init< optional<bool, adNodeArray*> >( ( arg("self"), arg("gatherInfo") = false, arg("node") = NULL ), DOCSTR_adouble_array_init))
             
         .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo,                DOCSTR_adouble_array_GatherInfo)
@@ -625,7 +625,7 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Floor",	&daepython::adarr_floor);
       
     def("Sum",		 &daepython::adarr_sum,      (arg("adarray")), DOCSTR_Sum);
-    def("Product",   &daepython::adarr_product,  (arg("adarray"), arg("isLargeArray") = false), DOCSTR_Product);
+    def("Product",   &daepython::adarr_product,  (arg("adarray")), DOCSTR_Product);
     def("Integral",  &daepython::adarr_integral, (arg("adarray")), DOCSTR_Integral);
     def("Min",		 &daepython::adarr_min,      (arg("adarray")), DOCSTR_Min_adarr);
     def("Max",		 &daepython::adarr_max,      (arg("adarray")), DOCSTR_Max_adarr);

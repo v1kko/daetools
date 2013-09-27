@@ -9,6 +9,8 @@
 #error Trilinos Amesos LA Solver does not support single precision floating point values
 #endif
 
+extern "C" void openblas_set_num_threads(int);
+
 namespace dae
 {
 namespace solver
@@ -83,7 +85,10 @@ daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName, const std
 	: m_Comm(MPI_COMM_WORLD)
 #endif
 {
-	m_pBlock				= NULL;
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
+    m_pBlock				= NULL;
 	m_strSolverName			= strSolverName;
 	m_strPreconditionerName = strPreconditionerName;
 	m_nNoEquations			= 0;

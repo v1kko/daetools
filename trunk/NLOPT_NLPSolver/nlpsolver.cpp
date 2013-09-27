@@ -5,6 +5,8 @@
 #include <time.h>
 using namespace std;
 
+extern "C" void openblas_set_num_threads(int);
+
 namespace dae
 {
 namespace nlpsolver
@@ -48,13 +50,19 @@ double constraint(unsigned n, const double *x, double *grad, void *data)
 *******************************************************************/
 daeNLOPTSolver::daeNLOPTSolver(nlopt_algorithm algorithm)
 {
-	m_nlopt			  = NULL;
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
+    m_nlopt			  = NULL;
 	m_nlopt_algorithm = algorithm;
 }
 
 daeNLOPTSolver::daeNLOPTSolver(const string& algorithm)
 {
-	m_nlopt	= NULL;
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
+    m_nlopt	= NULL;
 	SetAlgorithm(algorithm);
 }
 

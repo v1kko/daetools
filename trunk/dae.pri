@@ -211,8 +211,6 @@ unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$
 #####################################################################################
 #                                 BLAS/LAPACK
 #####################################################################################
-# Install openblas to replace reference blas with an optimized GotoBLAS2
-#####################################################################################
 win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
 unix::BLAS_LAPACK_LIBDIR  = /usr/lib
 
@@ -220,11 +218,18 @@ win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
-#unix::BLAS_LAPACK_LIBS = -llapack -lblas -lm
+# 1. System's default dynamically linked;
+#    install openblas to replace a reference BLAS with GotoBLAS2:
+unix::BLAS_LAPACK_LIBS = -llapack -lblas -lm
+
+# 2. System's default statically linked;
+#    install openblas to replace a reference BLAS with GotoBLAS2:
+#unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a \
+#                         $${BLAS_LAPACK_LIBDIR}/libblas.a \
+#                         -lgfortran -lm
+
+# 3. daetools compiled reference BLAS and Lapack statically linked:
 #unix::BLAS_LAPACK_LIBS = ../lapack/liblapack.a ../lapack/librefblas.a -lgfortran -lm
-unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a \
-                         $${BLAS_LAPACK_LIBDIR}/libblas.a \
-                         -lgfortran -lm
 
 
 #####################################################################################
@@ -390,63 +395,43 @@ macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/
 # http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #####################################################################################
 win32-msvc2008::MKLPATH =
-linux-g++::MKLPATH      = /opt/Intel/mkl
-macx-g++::MKLPATH       =
+linux-g++::MKLPATH      = /opt/intel
+macx-g++::MKLPATH       = /opt/intel
 
-INTEL_MKL_INCLUDE = $${MKLPATH}/include
+INTEL_MKL_INCLUDE = $${MKLPATH}/mkl/include
 ARCH = $$QMAKE_HOST.arch
 
-win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c.lib mkl_core.lib mkl_intel_thread.lib libiomp5md.lib -Qopenmp
-win32-msvc2008::MKL_LIBS = $${MKLPATH}\ia32\lib
+win32-msvc2008::MKL_LIBS       = $${MKLPATH}\ia32\lib
+win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c_dll.lib mkl_core_dll.lib mkl_intel_thread_dll.lib libiomp5md.lib
 
 contains($$ARCH, x86) {
     message(Using 32 bit MKL)
-    linux-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
-    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-                                -Wl,--start-group \
-                                    $${MKL_LIBS}/libmkl_intel.a \
-                                    $${MKL_LIBS}/libmkl_core.a \
-                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
-                                -Wl,--end-group \
+    linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
+                                -lmkl_rt \
                                 -ldl -lpthread -lm
-    linux-g++::QMAKE_LFLAGS   += -fopenmp -m32
-    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m32
+    linux-g++::QMAKE_LFLAGS   += -m32
+    linux-g++::QMAKE_CXXFLAGS += -m32
 
-    macx-g++::MKL_LIBS       = $${MKLPATH}/lib/ia32
-    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-                               -Wl,--start-group \
-                                   $${MKL_LIBS}/libmkl_intel.a \
-                                   $${MKL_LIBS}/libmkl_core.a \
-                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
-                               -Wl,--end-group \
+    macx-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
+                               -lmkl_rt \
                                -ldl -lpthread -lm
-    macx-g++::QMAKE_LFLAGS   += -fopenmp -m32
-    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m32
+    macx-g++::QMAKE_LFLAGS   += -m32
+    macx-g++::QMAKE_CXXFLAGS += -m32
 }
 
 contains(ARCH, x86_64) {
     message(Using 64 bit MKL)
-    linux-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
-    linux-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-                                -Wl,--start-group \
-                                    $${MKL_LIBS}/libmkl_intel_lp64.a \
-                                    $${MKL_LIBS}/libmkl_core.a \
-                                    $${MKL_LIBS}/libmkl_gnu_thread.a \
-                                -Wl,--end-group \
+    linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/mkl/lib/intel64 \
+                                -lmkl_rt \
                                 -ldl -lpthread -lm
-    linux-g++::QMAKE_LFLAGS   += -fopenmp -m64
-    linux-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+    linux-g++::QMAKE_LFLAGS   += -m64
+    linux-g++::QMAKE_CXXFLAGS += -m64
 
-    macx-g++::MKL_LIBS   = $${MKLPATH}/lib/intel64
-    macx-g++::INTEL_MKL_LIBS = -L$${MKL_LIBS} \
-                               -Wl,--start-group \
-                                   $${MKL_LIBS}/libmkl_intel_lp64.a \
-                                   $${MKL_LIBS}/libmkl_core.a \
-                                   $${MKL_LIBS}/libmkl_gnu_thread.a \
-                               -Wl,--end-group \
+    macx-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/intel64 -L$${MKLPATH}/mkl/lib/intel64 \
+                               -lmkl_rt \
                                -ldl -lpthread -lm
-    macx-g++::QMAKE_LFLAGS   += -fopenmp -m64
-    macx-g++::QMAKE_CXXFLAGS += -fopenmp -m64
+    macx-g++::QMAKE_LFLAGS   += -m64
+    macx-g++::QMAKE_CXXFLAGS += -m64
 }
 
 

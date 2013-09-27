@@ -2,6 +2,9 @@
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
 #include "../config.h"
+#include <stdlib.h>
+
+extern "C" void openblas_set_num_threads(int);
 
 namespace dae
 {
@@ -41,10 +44,13 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_bFactorizationDone		= false;
 	m_solve						= 0;
 	m_factorize					= 0;
-	
+
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
-	m_perm_c	= NULL;
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
+    m_perm_c	= NULL;
 	m_perm_r	= NULL;
     m_work		= NULL;
     m_lwork		= 0;
@@ -72,7 +78,10 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 #endif
 	
 #ifdef daeSuperLU
-	daeConfig& cfg = daeConfig::GetConfig();
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
+    daeConfig& cfg = daeConfig::GetConfig();
 	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
 	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
     m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",     2.0);

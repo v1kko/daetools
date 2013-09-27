@@ -649,11 +649,16 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 #endif
 }
 
+extern "C" void openblas_set_num_threads(int);
+
 /******************************************************************
 	daeBONMINSolver
 *******************************************************************/
 daeBONMINSolver::daeBONMINSolver(void)
 {
+// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
+    openblas_set_num_threads(1);
+
     m_pOptimization      = NULL;
 	m_pSimulation	     = NULL;
 	m_pDAESolver		 = NULL;

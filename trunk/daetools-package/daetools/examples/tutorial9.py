@@ -186,7 +186,6 @@ def consoleRun():
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
-    print lasolver.get_iparm()
 
     # Run
     simulation.Run()

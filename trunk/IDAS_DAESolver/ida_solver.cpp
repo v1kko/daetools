@@ -92,7 +92,7 @@ void error_function(int error_code,
 
 daeIDASolver::daeIDASolver(void)
 {
-	m_pLog					         = NULL;
+    m_pLog					         = NULL;
 	m_pBlock				         = NULL;
 	m_pIDA					         = NULL;
 	m_eLASolver				         = eSundialsLU;
