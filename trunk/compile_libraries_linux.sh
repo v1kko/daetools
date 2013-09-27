@@ -63,6 +63,7 @@ echo $DAE_COMPILER_FLAGS
 
 vBOOST=1.49.0
 vBOOST_=1_49_0
+vSUITESPARSE=4.2.1
 vBONMIN=1.7.0
 vLAPACK=3.4.1
 vSUPERLU=4.1
@@ -82,6 +83,7 @@ BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
 TRILINOS_HTTP=http://trilinos.sandia.gov/download/files
 NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
+SUITE_SPARSE_HTTP=https://www.cise.ufl.edu/research/sparse/SuiteSparse
 
 # ACHTUNG! cd to TRUNK (in case the script is called from some other folder)
 cd ${TRUNK}
@@ -121,31 +123,62 @@ fi
 cd ${TRUNK}
 
 #######################################################
+#                   SUITESPARSE                       #
+#######################################################
+# if [ ! -e suitesparse ]; then
+#   echo "Setting-up suitesparse..."
+#   if [ ! -e SuiteSparse-${vSUITESPARSE}.tar.gz ]; then
+#     wget ${SUITE_SPARSE_HTTP}/SuiteSparse-${vSUITESPARSE}.tar.gz
+#   fi
+#   if [ ! -e SuiteSparse_config.mk ]; then
+#     wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
+#   fi
+#   tar -xzf SuiteSparse-${vSUITESPARSE}.tar.gz
+#   cd SuiteSparse
+# 
+#   mkdir build
+#   echo "./configure --prefix=${TRUNK}/suitesparse/build --with-pic --enable-static=yes --enable-shared=no F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
+#   make INSTALL_LIB=${TRUNK}/suitesparse/build INSTALL_INCLUDE=${TRUNK}/suitesparse/build/include --with-pic --enable-static=yes --enable-shared=no F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
+#   cd ${TRUNK}
+# fi
+# cd idas
+# if [ ! -e build/lib/libsundials_idas.a ]; then
+#   echo "Building idas..."
+#   make
+#   make install
+#   make clean
+# else
+#   echo "   idas library already built"
+# fi
+# cd ${TRUNK}
+
+
+#######################################################
 #                   LAPACK + BLAS                     #
 #######################################################
-if [ ! -e lapack ]; then
-  echo "Setting-up lapack..."
-  if [ ! -e lapack-${vLAPACK}.tgz ]; then
-    wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
-  fi
-  if [ ! -e daetools_lapack_make.inc ]; then
-    wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
-  fi
-  tar -xzf lapack-${vLAPACK}.tgz
-  mv lapack-${vLAPACK} lapack
-  cp daetools_lapack_make.inc lapack/make.inc
-  cd ${TRUNK}
-fi
-cd lapack
-if [ ! -e liblapack.a ]; then
-  echo "Building lapack..."
-  make -j${Ncpu} lapacklib
-  make -j${Ncpu} blaslib
-  make clean
-else
-  echo "   lapack library already built"
-fi
-cd ${TRUNK}
+# if [ ! -e lapack ]; then
+#   echo "Setting-up lapack..."
+#   if [ ! -e lapack-${vLAPACK}.tgz ]; then
+#     wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
+#   fi
+#   if [ ! -e daetools_lapack_make.inc ]; then
+#     wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
+#   fi
+#   tar -xzf lapack-${vLAPACK}.tgz
+#   mv lapack-${vLAPACK} lapack
+#   cp daetools_lapack_make.inc lapack/make.inc
+#   cd ${TRUNK}
+# fi
+# cd lapack
+# if [ ! -e liblapack.a ]; then
+#   echo "Building lapack..."
+#   make -j${Ncpu} lapacklib
+#   make -j${Ncpu} blaslib
+#   make clean
+# else
+#   echo "   lapack library already built"
+# fi
+# cd ${TRUNK}
 
 #######################################################
 #                       IDAS                          #

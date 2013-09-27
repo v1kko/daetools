@@ -211,15 +211,20 @@ unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$
 #####################################################################################
 #                                 BLAS/LAPACK
 #####################################################################################
+# Install openblas to replace reference blas with an optimized GotoBLAS2
+#####################################################################################
 win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
-unix::BLAS_LAPACK_LIBDIR  =
+unix::BLAS_LAPACK_LIBDIR  = /usr/lib
 
 win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
 #unix::BLAS_LAPACK_LIBS = -llapack -lblas -lm
-unix::BLAS_LAPACK_LIBS = ../lapack/liblapack.a ../lapack/librefblas.a -lgfortran -lm
+#unix::BLAS_LAPACK_LIBS = ../lapack/liblapack.a ../lapack/librefblas.a -lgfortran -lm
+unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a \
+                         $${BLAS_LAPACK_LIBDIR}/libblas.a \
+                         -lgfortran -lm
 
 
 #####################################################################################
@@ -343,6 +348,15 @@ win32::CUDA_LIBS     =
 linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 
 
+######################################################################################
+#                                   SuiteSparse
+######################################################################################
+#SUITESPARSE_LIBPATH = /usr/lib
+
+#win32::SUITE_SPARSE_LIBS =
+#unix::SUITE_SPARSE_LIBS  = $${SUITESPARSE_LIBPATH}/libumfpack.a $${SUITESPARSE_LIBPATH}/libamd.a
+
+
 #####################################################################################
 #                                  TRILINOS 
 #####################################################################################
@@ -357,12 +371,14 @@ win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                         aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
 
 linux-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos -lumfpack -lamd \
+                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+                            -lumfpack -lamd \
                             $${SUPERLU_LIBS}
 
 macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/local/lib \
-                           -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos -lumfpack -lamd \
-                           $${SUPERLU_LIBS}
+                           -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+                            -lumfpack -lamd \
+                            $${SUPERLU_LIBS}
 
 
 ######################################################################################
