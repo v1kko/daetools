@@ -65,7 +65,7 @@ COPY_FILES = cp -fa
 #####################################################################################
 #                           System + Machine + Python info
 #####################################################################################
-PYTHON       = /home/ciroki/Data/daetools/Python-2.7.2/install_numpy_1.7.1/bin/python
+PYTHON       = python
 PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
 PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
 
