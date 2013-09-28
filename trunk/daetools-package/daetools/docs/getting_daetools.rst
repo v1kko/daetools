@@ -53,19 +53,19 @@ Mandatory packages:
 * Scipy: `<http://www.scipy.org>`_
 * Matplotlib: `<http://matplotlib.sourceforge.net>`_
 * pyQt4 (4.x): `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
+* OpenBLAS: `<http://www.openblas.net>`_
 
 Optional packages (3rd party linear solvers):
 
 * Intel Pardiso (proprietary)
-* AMD ACML (proprietary)
 
 For more information on how to install packages please refer to the documentation for the specific library.
 By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU and Lapack linear
 solvers, SuperLU, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
 Trilinos AztecOO (with built-in support for Ifpack and ML preconditioners), NLOPT and IPOPT/BONMIN
 (with MUMPS linear solver and  PORD ordering). Standalone SuperLU_MT is available on GNU/Linux and
-MacOS versions only. Additional linear solvers: AMD ACML and Intel Pardiso must be downloaded separately
-and compiled from source since they are not free software.
+MacOS versions only. Additional linear solvers (such as Intel Pardiso) must be downloaded separately
+since they are not free software.
 
 Getting the packages
 ====================
@@ -95,19 +95,33 @@ GNU/Linux
 
 First install the mandatory packages: python 2.7, numpy 1.5/1.6/1.7, scipy, matplotlib and pyqt4.
 
-In Debian GNU/Linux and derivatives use the Synaptic Package Manager or type the following commands:
+Use the system's package manager or install from shell:
+
+* Debian GNU/Linux and derivatives (Ubuntu, Linux Mint)
     
-.. code-block:: bash
+  .. code-block:: bash
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
+    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 libopenblas-base lapack3gf mayavi2
 
-
-In Red Hat and derivatives use the package manager or type the following commands:
+* Red Hat and derivatives (Fedora, CentOS):
     
-.. code-block:: bash
+  .. code-block:: bash
 
-    sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi
+    sudo yum install numpy scipy python-matplotlib PyQt4 openblas lapack Mayavi
 
+* SUSE Linux:
+
+  .. code-block:: bash
+
+    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 openblas lapack
+
+* Arch Linux:
+
+  .. code-block:: bash
+
+    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 openblas lapack mayavi
+
+    
 Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
 the following shell command:
 

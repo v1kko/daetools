@@ -74,6 +74,9 @@ vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0
 vCHOLMOD=2.1.2
+vCAMD=2.3.1
+vCOLAMD=2.8.0
+vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
@@ -91,6 +94,9 @@ UMFPACK_HTTP=http://www.cise.ufl.edu/research/sparse/umfpack
 AMD_HTTP=http://www.cise.ufl.edu/research/sparse/amd
 METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
 CHOLMOD_HTTP=http://www.cise.ufl.edu/research/sparse/cholmod
+CAMD_HTTP=http://www.cise.ufl.edu/research/sparse/camd
+COLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/colamd
+CCOLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/ccolamd
 SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
 
 # ACHTUNG! cd to TRUNK (in case the script is called from some other folder)
@@ -147,6 +153,15 @@ if [ ! -e umfpack ]; then
   if [ ! -e AMD-${vAMD}.tar.gz ]; then
     wget ${AMD_HTTP}/AMD-${vAMD}.tar.gz
   fi
+  if [ ! -e CAMD-${vCAMD}.tar.gz ]; then
+    wget ${CAMD_HTTP}/CAMD-${vCAMD}.tar.gz
+  fi
+  if [ ! -e COLAMD-${vCOLAMD}.tar.gz ]; then
+    wget ${COLAMD_HTTP}/COLAMD-${vCOLAMD}.tar.gz
+  fi
+  if [ ! -e CCOLAMD-${vCCOLAMD}.tar.gz ]; then
+    wget ${CCOLAMD_HTTP}/CCOLAMD-${vCCOLAMD}.tar.gz
+  fi
   if [ ! -e UMFPACK-${vUMFPACK}.tar.gz ]; then
     wget ${UMFPACK_HTTP}/UMFPACK-${vUMFPACK}.tar.gz
   fi
@@ -163,6 +178,9 @@ if [ ! -e umfpack ]; then
   tar -xzf ../SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   tar -xzf ../CHOLMOD-${vCHOLMOD}.tar.gz
   tar -xzf ../AMD-${vAMD}.tar.gz
+  tar -xzf ../CAMD-${vCAMD}.tar.gz
+  tar -xzf ../COLAMD-${vCOLAMD}.tar.gz
+  tar -xzf ../CCOLAMD-${vCCOLAMD}.tar.gz
   tar -xzf ../UMFPACK-${vUMFPACK}.tar.gz
   cp ../SuiteSparse_config.mk SuiteSparse_config
   cp ../metis.h metis-${vMETIS}/include
@@ -201,6 +219,54 @@ else
 fi
 
 cd ${TRUNK}
+cd umfpack/AMD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libamd.a ]; then
+  echo "Building amd..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   amd library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/CAMD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcamd.a ]; then
+  echo "Building camd..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   camd library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/COLAMD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcolamd.a ]; then
+  echo "Building colamd..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   colamd library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/CCOLAMD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libccolamd.a ]; then
+  echo "Building ccolamd..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   ccolamd library already built"
+fi
+
+cd ${TRUNK}
 cd umfpack/CHOLMOD
 if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcholmod.a ]; then
   echo "Building cholmod..."
@@ -222,18 +288,6 @@ if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libumfpack.${vUMFPACK}.a ]; then
   make clean
 else
   echo "   umfpack library already built"
-fi
-
-cd ${TRUNK}
-cd umfpack/AMD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libamd.${vAMD}.a ]; then
-  echo "Building amd..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
-  make clean
-else
-  echo "   amd library already built"
 fi
 
 cd ${TRUNK}
@@ -423,9 +477,9 @@ if [ ! -e trilinos ]; then
   echo $TRILINOS_HOME
 
   if [ ${PLATFORM} = "Darwin" ]; then
-    SUITE_SPARSE_DIR="/opt/local/include/ufsparse"
+    UMFPACK_INCLUDE_DIR="/opt/local/include/ufsparse"
   else
-    SUITE_SPARSE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
+    UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   fi
   
   cmake \
@@ -442,7 +496,8 @@ if [ ! -e trilinos ]; then
     -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
     -DTPL_SuperLU_LIBRARIES:STRING=superlu_4.1 \
     -DTPL_ENABLE_UMFPACK:BOOL=ON \
-    -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${SUITE_SPARSE_DIR} \
+    -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${UMFPACK_INCLUDE_DIR} \
+    -DTPL_UMFPACK_LIBRARIES:STRING=umfpack \
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \

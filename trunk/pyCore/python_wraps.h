@@ -211,6 +211,8 @@ boost::python::list adRuntimeTimeDerivativeNode_Domains(adRuntimeTimeDerivativeN
 daeDomain* adDomainIndexNode_Domain(adDomainIndexNode& node);
 real_t adDomainIndexNode_Value(adDomainIndexNode& node);
 
+boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRuntimeSpecialFunctionForLargeArraysNode& node);
+
 /*******************************************************
 	adouble
 *******************************************************/

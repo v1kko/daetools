@@ -948,6 +948,12 @@ real_t adDomainIndexNode_Value(adDomainIndexNode& node)
     return (*node.m_pdPointValue);
 }
 
+boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRuntimeSpecialFunctionForLargeArraysNode& node)
+{
+    return getListFromVector(node.m_ptrarrRuntimeNodes);
+}
+
+
 /*******************************************************
 	adouble
 *******************************************************/

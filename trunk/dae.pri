@@ -365,8 +365,11 @@ UMFPACK_LIBPATH = ../umfpack/build/lib
 
 win32::UMFPACK_LIBS     =
 linux-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
-                          $${UMFPACK_LIBPATH}/libamd.a \
                           $${UMFPACK_LIBPATH}/libcholmod.a \
+                          $${UMFPACK_LIBPATH}/libamd.a \
+                          $${UMFPACK_LIBPATH}/libcamd.a \
+                          $${UMFPACK_LIBPATH}/libcolamd.a \
+                          $${UMFPACK_LIBPATH}/libccolamd.a \
                           $${UMFPACK_LIBPATH}/libsuitesparseconfig.a \
                           $${UMFPACK_LIBPATH}/libmetis.a
 macx-g++::UMFPACK_LIBS  = -lumfpack -lamd

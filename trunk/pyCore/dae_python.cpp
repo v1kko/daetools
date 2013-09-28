@@ -379,6 +379,8 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adRuntimeSpecialFunctionForLargeArraysNode, bases<adNode>, boost::noncopyable>("adRuntimeSpecialFunctionForLargeArraysNode", no_init)
+        .def_readonly("Function",	&adRuntimeSpecialFunctionForLargeArraysNode::eFunction)
+        .add_property("Nodes",      &daepython::adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes)
     ;
 
 
