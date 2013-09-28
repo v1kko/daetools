@@ -224,6 +224,7 @@ public:
     void PrintOptions(void);
     void PrintUserOptions(void);
 	void LoadOptionsFile(const string& strOptionsFile);
+    void SetOpenBLASNoThreads(int n);
 
 protected:
     daeOptimization_t*  m_pOptimization;

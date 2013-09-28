@@ -49,6 +49,7 @@ public:
 	int SaveAsXPM(const std::string& strFileName);
 	int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
 	string GetName(void) const;
+    void SetOpenBLASNoThreads(int n);
 
 	int Init(void* ida);
 	int Setup(void* ida,

@@ -4,7 +4,9 @@
 #include "../config.h"
 #include <stdlib.h>
 
+#ifdef DAE_USE_OPEN_BLAS
 extern "C" void openblas_set_num_threads(int);
+#endif
 
 namespace dae
 {
@@ -38,7 +40,11 @@ daeIDALASolver_t* daeCreateSuperLU_MTSolver(void)
 
 daeSuperLUSolver::daeSuperLUSolver(void)
 {
-	m_pBlock					= NULL;
+// Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
+// It can be changed later on by the user
+    SetOpenBLASNoThreads(1);
+
+    m_pBlock					= NULL;
 	m_vecB						= NULL;
 	m_vecX						= NULL;
 	m_bFactorizationDone		= false;
@@ -47,9 +53,6 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 
 // The user shoud be able to set parameters right after the construction of the solver
 #ifdef daeSuperLU_MT
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
-
     m_perm_c	= NULL;
 	m_perm_r	= NULL;
     m_work		= NULL;
@@ -119,6 +122,13 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 daeSuperLUSolver::~daeSuperLUSolver(void)
 {
 	FreeMemory();
+}
+
+void daeSuperLUSolver::SetOpenBLASNoThreads(int n)
+{
+#ifdef DAE_USE_OPEN_BLAS
+    openblas_set_num_threads(n);
+#endif
 }
 
 int daeSuperLUSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)

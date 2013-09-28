@@ -44,11 +44,12 @@ BOOST_PYTHON_MODULE(pyIPOPT)
         .def("SetOption",			&daepython::SetOptionF, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionN)
         .def("SetOption",			&daepython::SetOptionI, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ), DOCSTR_daeBONMIN_SetOptionI)
 		
-        .def("ClearOptions",		&daeBONMINSolver::ClearOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_ClearOptions)
-        .def("PrintOptions",		&daeBONMINSolver::PrintOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintOptions)
-        .def("PrintUserOptions",	&daeBONMINSolver::PrintUserOptions, ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintUserOptions)
-        .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile,  ( boost::python::arg("self"), boost::python::arg("optionsFilename") ), DOCSTR_daeBONMIN_LoadOptionsFile)
-        ; 
+        .def("ClearOptions",		&daeBONMINSolver::ClearOptions,         ( boost::python::arg("self") ), DOCSTR_daeBONMIN_ClearOptions)
+        .def("PrintOptions",		&daeBONMINSolver::PrintOptions,         ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintOptions)
+        .def("PrintUserOptions",	&daeBONMINSolver::PrintUserOptions,     ( boost::python::arg("self") ), DOCSTR_daeBONMIN_PrintUserOptions)
+        .def("LoadOptionsFile",		&daeBONMINSolver::LoadOptionsFile,      ( boost::python::arg("self"), boost::python::arg("optionsFilename") ), DOCSTR_daeBONMIN_LoadOptionsFile)
+        .def("SetOpenBLASNoThreads",&daeBONMINSolver::SetOpenBLASNoThreads, ( boost::python::arg("self"), boost::python::arg("noThreads") ))
+        ;
 }
 
 

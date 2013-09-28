@@ -15,7 +15,7 @@ enum daeeIDALASolverType
 	eSundialsGMRES,
 	eThirdParty
 };
-	
+
 class daeIDALASolver_t
 {
 public:

@@ -148,10 +148,12 @@ def consoleRun():
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
     print "Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
+    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
+    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
+    lasolver.SetOpenBLASNoThreads(4)
+    lasolver.AmesosOptions.Print()
     daesolver.SetLASolver(lasolver)
     
     """"
@@ -179,7 +181,8 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-
+    return
+    
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

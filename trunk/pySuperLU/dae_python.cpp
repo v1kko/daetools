@@ -65,7 +65,9 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
                                         ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
         .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
                                         ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
-		;
+        .def("SetOpenBLASNoThreads",	&daeSuperLUSolver::SetOpenBLASNoThreads,
+                                        ( boost::python::arg("self"), boost::python::arg("noThreads") ))
+        ;
 #endif
 	
 #ifdef daeSuperLU_CUDA
@@ -112,7 +114,9 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
                                         ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
         .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
                                         ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
-		;
+        .def("SetOpenBLASNoThreads",	&daeSuperLUSolver::SetOpenBLASNoThreads,
+                                        ( boost::python::arg("self"), boost::python::arg("noThreads") ))
+        ;
 	
 #endif
 	

@@ -5,7 +5,9 @@
 #include <time.h>
 using namespace std;
 
+#ifdef DAE_USE_OPEN_BLAS
 extern "C" void openblas_set_num_threads(int);
+#endif
 
 namespace dae
 {
@@ -50,8 +52,9 @@ double constraint(unsigned n, const double *x, double *grad, void *data)
 *******************************************************************/
 daeNLOPTSolver::daeNLOPTSolver(nlopt_algorithm algorithm)
 {
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
+// Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
+// It can be changed later on by the user
+    SetOpenBLASNoThreads(1);
 
     m_nlopt			  = NULL;
 	m_nlopt_algorithm = algorithm;
@@ -59,8 +62,9 @@ daeNLOPTSolver::daeNLOPTSolver(nlopt_algorithm algorithm)
 
 daeNLOPTSolver::daeNLOPTSolver(const string& algorithm)
 {
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
+// Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
+// It can be changed later on by the user
+    SetOpenBLASNoThreads(1);
 
     m_nlopt	= NULL;
 	SetAlgorithm(algorithm);
@@ -70,6 +74,13 @@ daeNLOPTSolver::~daeNLOPTSolver(void)
 {
 	if(m_nlopt)
 		nlopt_destroy(m_nlopt);
+}
+
+void daeNLOPTSolver::SetOpenBLASNoThreads(int n)
+{
+#ifdef DAE_USE_OPEN_BLAS
+    openblas_set_num_threads(n);
+#endif
 }
 
 void daeNLOPTSolver::Initialize(daeOptimization_t* pOptimization,

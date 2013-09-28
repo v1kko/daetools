@@ -214,9 +214,14 @@ unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$
 win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
 unix::BLAS_LAPACK_LIBDIR  = /usr/lib
 
-win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
+win32::BLAS_LAPACK_LIBS = ../openblas/lib/libopenblas.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
+
+# Define DAE_USE_OPEN_BLAS if using OpenBLAS
+win32::QMAKE_CXXFLAGS     += -DDAE_USE_OPEN_BLAS
+linux-g++::QMAKE_CXXFLAGS += -DDAE_USE_OPEN_BLAS
+macx-g++::QMAKE_CXXFLAGS  +=
 
 # 1. System's default dynamically linked;
 #    install openblas to replace a reference BLAS with GotoBLAS2:
@@ -354,13 +359,17 @@ linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 
 
 ######################################################################################
-#                                   SuiteSparse
+#                           Umfpack + AMD + CHOLMOD + Metis
 ######################################################################################
-#SUITESPARSE_LIBPATH = /usr/lib
+UMFPACK_LIBPATH = ../umfpack/build/lib
 
-#win32::SUITE_SPARSE_LIBS =
-#unix::SUITE_SPARSE_LIBS  = $${SUITESPARSE_LIBPATH}/libumfpack.a $${SUITESPARSE_LIBPATH}/libamd.a
-
+win32::UMFPACK_LIBS     =
+linux-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
+                          $${UMFPACK_LIBPATH}/libamd.a \
+                          $${UMFPACK_LIBPATH}/libcholmod.a \
+                          $${UMFPACK_LIBPATH}/libsuitesparseconfig.a \
+                          $${UMFPACK_LIBPATH}/libmetis.a
+macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 
 #####################################################################################
 #                                  TRILINOS 
@@ -377,12 +386,12 @@ win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
 
 linux-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                             -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-                            -lumfpack -lamd \
+                            $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
 
 macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/local/lib \
                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-                            -lumfpack -lamd \
+                            $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
 
 
@@ -405,7 +414,6 @@ win32-msvc2008::MKL_LIBS       = $${MKLPATH}\ia32\lib
 win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c_dll.lib mkl_core_dll.lib mkl_intel_thread_dll.lib libiomp5md.lib
 
 contains($$ARCH, x86) {
-    message(Using 32 bit MKL)
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm
@@ -420,7 +428,6 @@ contains($$ARCH, x86) {
 }
 
 contains(ARCH, x86_64) {
-    message(Using 64 bit MKL)
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/mkl/lib/intel64 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm

@@ -5,11 +5,13 @@
 #include "trilinos_amesos_la_solver.h"
 
 
+#ifdef DAE_USE_OPEN_BLAS
+extern "C" void openblas_set_num_threads(int);
+#endif
+
 #ifdef DAE_SINGLE_PRECISION
 #error Trilinos Amesos LA Solver does not support single precision floating point values
 #endif
-
-extern "C" void openblas_set_num_threads(int);
 
 namespace dae
 {
@@ -85,8 +87,9 @@ daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName, const std
 	: m_Comm(MPI_COMM_WORLD)
 #endif
 {
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
+// Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
+// It can be changed later on by the user
+    SetOpenBLASNoThreads(1);
 
     m_pBlock				= NULL;
 	m_strSolverName			= strSolverName;
@@ -188,6 +191,13 @@ daeTrilinosSolver::daeTrilinosSolver(const std::string& strSolverName, const std
 		}
 		m_eTrilinosSolver = eAmesos;
 	}
+}
+
+void daeTrilinosSolver::SetOpenBLASNoThreads(int n)
+{
+#ifdef DAE_USE_OPEN_BLAS
+    openblas_set_num_threads(n);
+#endif
 }
 
 daeTrilinosSolver::~daeTrilinosSolver(void)

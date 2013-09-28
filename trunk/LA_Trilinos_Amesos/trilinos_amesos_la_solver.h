@@ -254,7 +254,9 @@ public:
 	Teuchos::ParameterList& GetAztecOOOptions(void);
 	Teuchos::ParameterList& GetIfpackOptions(void);
 	Teuchos::ParameterList& GetMLOptions(void);
-	
+
+    void SetOpenBLASNoThreads(int n);
+
 protected:
 	bool CheckData() const;
 	void AllocateMemory(void);

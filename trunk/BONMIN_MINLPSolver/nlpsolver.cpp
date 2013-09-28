@@ -5,6 +5,10 @@
 #include <time.h>
 using namespace std;
 
+#ifdef DAE_USE_OPEN_BLAS
+extern "C" void openblas_set_num_threads(int);
+#endif
+
 namespace dae
 {
 namespace nlpsolver
@@ -649,15 +653,14 @@ void daeMINLP::finalize_solution(TMINLP::SolverReturn status,
 #endif
 }
 
-extern "C" void openblas_set_num_threads(int);
-
 /******************************************************************
 	daeBONMINSolver
 *******************************************************************/
 daeBONMINSolver::daeBONMINSolver(void)
 {
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
+// Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
+// It can be changed later on by the user
+    SetOpenBLASNoThreads(1);
 
     m_pOptimization      = NULL;
 	m_pSimulation	     = NULL;
@@ -699,6 +702,13 @@ daeBONMINSolver::daeBONMINSolver(void)
 
 daeBONMINSolver::~daeBONMINSolver(void)
 {
+}
+
+void daeBONMINSolver::SetOpenBLASNoThreads(int n)
+{
+#ifdef DAE_USE_OPEN_BLAS
+    openblas_set_num_threads(n);
+#endif
 }
 
 void daeBONMINSolver::Initialize(daeOptimization_t* pOptimization,

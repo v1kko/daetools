@@ -70,7 +70,8 @@ public:
 	void set_maxeval(int eval);
 	
 	void PrintOptions(void);
-	
+    void SetOpenBLASNoThreads(int n);
+
 protected:
 	string CreateNLOPTErrorMessage(nlopt_result status);
 	void PrintSolution(const double* x, double obj_value, nlopt_result status);

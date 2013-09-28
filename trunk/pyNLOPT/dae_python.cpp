@@ -37,6 +37,7 @@ BOOST_PYTHON_MODULE(pyNLOPT)
                                                                  ), DOCSTR_daeNLOPT_Initialize)
         .def("Solve",				&daeNLOPTSolver::Solve, ( boost::python::arg("self") ), DOCSTR_daeNLOPT_Solve)
         .def("PrintOptions",		&daeNLOPTSolver::PrintOptions, ( boost::python::arg("self") ), DOCSTR_daeNLOPT_PrintOptions)
-        ; 
+        .def("SetOpenBLASNoThreads",&daeNLOPTSolver::SetOpenBLASNoThreads, ( boost::python::arg("self"), boost::python::arg("noThreads") ))
+        ;
 }
 

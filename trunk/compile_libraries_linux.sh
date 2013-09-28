@@ -63,7 +63,6 @@ echo $DAE_COMPILER_FLAGS
 
 vBOOST=1.49.0
 vBOOST_=1_49_0
-vSUITESPARSE=4.2.1
 vBONMIN=1.7.0
 vLAPACK=3.4.1
 vSUPERLU=4.1
@@ -71,6 +70,11 @@ vSUPERLU_MT=2.0
 vNLOPT=2.2.4
 vIDAS=1.1.0
 vTRILINOS=10.8.0
+vUMFPACK=5.6.2
+vAMD=2.3.1
+vMETIS=5.1.0
+vCHOLMOD=2.1.2
+vSUITESPARSE_CONFIG=4.2.1
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -83,7 +87,11 @@ BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
 TRILINOS_HTTP=http://trilinos.sandia.gov/download/files
 NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
-SUITE_SPARSE_HTTP=https://www.cise.ufl.edu/research/sparse/SuiteSparse
+UMFPACK_HTTP=http://www.cise.ufl.edu/research/sparse/umfpack
+AMD_HTTP=http://www.cise.ufl.edu/research/sparse/amd
+METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
+CHOLMOD_HTTP=http://www.cise.ufl.edu/research/sparse/cholmod
+SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
 
 # ACHTUNG! cd to TRUNK (in case the script is called from some other folder)
 cd ${TRUNK}
@@ -123,34 +131,112 @@ fi
 cd ${TRUNK}
 
 #######################################################
-#                   SUITESPARSE                       #
+#                      UMFPACK                        #
 #######################################################
-# if [ ! -e suitesparse ]; then
-#   echo "Setting-up suitesparse..."
-#   if [ ! -e SuiteSparse-${vSUITESPARSE}.tar.gz ]; then
-#     wget ${SUITE_SPARSE_HTTP}/SuiteSparse-${vSUITESPARSE}.tar.gz
-#   fi
-#   if [ ! -e SuiteSparse_config.mk ]; then
-#     wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
-#   fi
-#   tar -xzf SuiteSparse-${vSUITESPARSE}.tar.gz
-#   cd SuiteSparse
-# 
-#   mkdir build
-#   echo "./configure --prefix=${TRUNK}/suitesparse/build --with-pic --enable-static=yes --enable-shared=no F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
-#   make INSTALL_LIB=${TRUNK}/suitesparse/build INSTALL_INCLUDE=${TRUNK}/suitesparse/build/include --with-pic --enable-static=yes --enable-shared=no F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
-#   cd ${TRUNK}
-# fi
-# cd idas
-# if [ ! -e build/lib/libsundials_idas.a ]; then
-#   echo "Building idas..."
-#   make
-#   make install
-#   make clean
-# else
-#   echo "   idas library already built"
-# fi
-# cd ${TRUNK}
+if [ ! -e umfpack ]; then
+  echo "Setting-up umfpack..."
+  if [ ! -e metis-${vMETIS}.tar.gz ]; then
+    wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
+  fi
+  if [ ! -e SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz ]; then
+    wget ${SUITESPARSE_CONFIG_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
+  fi 
+  if [ ! -e CHOLMOD-${vCHOLMOD}.tar.gz ]; then
+    wget ${CHOLMOD_HTTP}/CHOLMOD-${vCHOLMOD}.tar.gz
+  fi
+  if [ ! -e AMD-${vAMD}.tar.gz ]; then
+    wget ${AMD_HTTP}/AMD-${vAMD}.tar.gz
+  fi
+  if [ ! -e UMFPACK-${vUMFPACK}.tar.gz ]; then
+    wget ${UMFPACK_HTTP}/UMFPACK-${vUMFPACK}.tar.gz
+  fi
+  if [ ! -e SuiteSparse_config.mk ]; then
+    wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
+  fi
+  if [ ! -e metis.h ]; then
+    wget ${DAETOOLS_HTTP}/metis.h
+  fi
+  
+  mkdir umfpack
+  cd umfpack
+  tar -xzf ../metis-${vMETIS}.tar.gz
+  tar -xzf ../SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
+  tar -xzf ../CHOLMOD-${vCHOLMOD}.tar.gz
+  tar -xzf ../AMD-${vAMD}.tar.gz
+  tar -xzf ../UMFPACK-${vUMFPACK}.tar.gz
+  cp ../SuiteSparse_config.mk SuiteSparse_config
+  cp ../metis.h metis-${vMETIS}/include
+  
+  mkdir build
+  mkdir build/lib
+  mkdir build/include
+  cd ${TRUNK}
+fi
+
+DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
+export DAE_UMFPACK_INSTALL_DIR
+
+cd ${TRUNK}
+cd umfpack/metis-${vMETIS}
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libmetis.a ]; then
+  echo "Building metis..."
+  echo "make config prefix=${DAE_UMFPACK_INSTALL_DIR} shared=0 -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
+  make config prefix=${DAE_UMFPACK_INSTALL_DIR} -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
+  make install
+  make clean
+else
+  echo "   metis library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/SuiteSparse_config
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libsuitesparseconfig.a ]; then
+  echo "Building suitesparseconfig..."
+  echo "make cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   suitesparseconfig library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/CHOLMOD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcholmod.a ]; then
+  echo "Building cholmod..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   cholmod library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/UMFPACK
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libumfpack.${vUMFPACK}.a ]; then
+  echo "Building umfpack..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   umfpack library already built"
+fi
+
+cd ${TRUNK}
+cd umfpack/AMD
+if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libamd.${vAMD}.a ]; then
+  echo "Building amd..."
+  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make install
+  make clean
+else
+  echo "   amd library already built"
+fi
+
+cd ${TRUNK}
 
 
 #######################################################
@@ -339,7 +425,7 @@ if [ ! -e trilinos ]; then
   if [ ${PLATFORM} = "Darwin" ]; then
     SUITE_SPARSE_DIR="/opt/local/include/ufsparse"
   else
-    SUITE_SPARSE_DIR="/usr/include/suitesparse"
+    SUITE_SPARSE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   fi
   
   cmake \

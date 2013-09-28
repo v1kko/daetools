@@ -105,10 +105,11 @@ BOOST_PYTHON_MODULE(pyTrilinos)
         .add_property("PreconditionerName",	&daeTrilinosSolver::GetPreconditionerName,  DOCSTR_daeTrilinosSolver_PreconditionerName)
         .def_readwrite("NumIters",			&daeTrilinosSolver::m_nNumIters,            DOCSTR_daeTrilinosSolver_NumIters)
         .def_readwrite("Tolerance",			&daeTrilinosSolver::m_dTolerance,           DOCSTR_daeTrilinosSolver_Tolerance)
-		
+
         .def("SaveAsXPM",				&daeTrilinosSolver::SaveAsXPM,               ( boost::python::arg("self"), boost::python::arg("xpmFilename") ), DOCSTR_daeTrilinosSolver_SaveAsXPM)
         .def("SaveAsMatrixMarketFile",	&daeTrilinosSolver::SaveAsMatrixMarketFile,  ( boost::python::arg("self"), boost::python::arg("filename"), boost::python::arg("matrixName"), boost::python::arg("description") ), DOCSTR_daeTrilinosSolver_SaveAsMatrixMarketFile)
         .def("PrintPreconditionerInfo",	&daeTrilinosSolver::PrintPreconditionerInfo, ( boost::python::arg("self") ), DOCSTR_daeTrilinosSolver_PrintPreconditionerInfo)
+        .def("SetOpenBLASNoThreads",	&daeTrilinosSolver::SetOpenBLASNoThreads,    ( boost::python::arg("self"), boost::python::arg("noThreads") ))
 
         .add_property("AztecOOOptions",		make_function(&daeTrilinosSolver::GetAztecOOOptions, return_internal_reference<>()), DOCSTR_daeTrilinosSolver_AztecOOOptions)
         .add_property("IfpackOptions",		make_function(&daeTrilinosSolver::GetIfpackOptions,  return_internal_reference<>()), DOCSTR_daeTrilinosSolver_IfpackOptions)
