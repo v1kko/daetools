@@ -411,7 +411,10 @@ void daeEquationExecutionInfo::BuildJacobianExpressions()
         adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
 
         // Achtung!! Jacobian items are with no scaling!
-        m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
+        if(jacob.derivative)
+            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
+        else
+            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, adNodePtr(new adConstantNode(0.0)));
     }
 }
 

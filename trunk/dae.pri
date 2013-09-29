@@ -104,23 +104,23 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
 # If compiling from the compile_linux.sh shell script supress all warnings
-shellCompile:message(shellCompile) {
-unix::QMAKE_CXXFLAGS_WARN_ON -= -Wall -Wextra -W
-unix::QMAKE_CFLAGS_WARN_ON   -= -Wall -Wextra -W
+shellCompile:message(Compiling from the script) {
 
-unix::QMAKE_CXXFLAGS_WARN_ON += -w
-unix::QMAKE_CFLAGS_WARN_ON   += -w
+unix::QMAKE_CXXFLAGS_WARN_ON = -w
+unix::QMAKE_CFLAGS_WARN_ON   = -w
 }
 # If compiling from the GUI enable warnings
-!shellCompile:message(NOT shellCompile) {
-linux-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
-                                     -Wno-unused-parameter \
-                                     -Wno-unused-variable \
-                                     -Wno-unused-but-set-variable
-
-macx-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
+!shellCompile:message(Compiling from the GUI) {
+linux-g++::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
+                                    -Wno-sign-compare \
                                     -Wno-unused-parameter \
-                                    -Wno-unused-variable
+                                    -Wno-unused-variable \
+                                    -Wno-unused-but-set-variable
+
+macx-g++::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
+                                   -Wno-sign-compare \
+                                   -Wno-unused-parameter \
+                                   -Wno-unused-variable
 }
 
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
@@ -254,8 +254,8 @@ SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
 win32::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/sundials_idas.lib \
                        $${SUNDIALS_LIBDIR}/sundials_nvecserial.lib
-unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/sundials_idas.a \
-                       $${SUNDIALS_LIBDIR}/sundials_nvecserial.a
+unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
+                       $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 
 
 #####################################################################################

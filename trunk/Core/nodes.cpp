@@ -339,6 +339,9 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
 {
     adNodePtr val_, deriv_;
 
+    if(!node_)
+        return adJacobian(val_, deriv_);
+
     adNode* n = node_.get();
 
     if(dynamic_cast<adRuntimeVariableNode*>(n))

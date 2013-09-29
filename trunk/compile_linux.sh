@@ -70,7 +70,7 @@ compile () {
   fi
 
   echo "***** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
-  qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG} 
+  qmake -makefile $1.pro -r CONFIG+=release CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
   
   echo "***** EXECUTE: make clean -w"
   make clean -w
@@ -89,25 +89,25 @@ case ${PROJECTS} in
 
         compile dae                "-j$Ncpu"
 
-        compile LA_SuperLU         "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
-        compile pySuperLU          "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
+        compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
+        compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
 
-        compile LA_SuperLU         "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
-        compile pySuperLU          "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
+        compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
+        compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
 
-        #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
-        #compile pySuperLU          "-j1 --file=gpuMakefile"  "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
+        #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
+        #compile pySuperLU          "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
 
         #compile LA_CUSP            "-j1 --file=cudaMakefile"
 
         compile LA_Trilinos_Amesos "-j1"
         compile pyTrilinos         "-j1"
 
-        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
-        compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
+        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+        compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
 
-        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
-        compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
+        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+        compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
 
         compile NLOPT_NLPSolver    "-j1"
         compile pyNLOPT            "-j1"
@@ -131,20 +131,20 @@ case ${PROJECTS} in
          ;;
 
   solvers)  echo Compile all solvers and their python wrappers
-            compile LA_SuperLU         "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
-            compile pySuperLU          "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
+            compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
+            compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
 
-            compile LA_SuperLU         "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
-            compile pySuperLU          "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
+            compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
+            compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
 
             compile LA_Trilinos_Amesos "-j1"
             compile pyTrilinos         "-j1"
             
-            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
-            compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
+            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+            compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
 
-            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
-            compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
+            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+            compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
 
             compile NLOPT_NLPSolver    "-j1"
             compile pyNLOPT            "-j1"
@@ -156,18 +156,18 @@ case ${PROJECTS} in
         ;;
 
   superlu) echo Compile superlu project
-           compile LA_SuperLU "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
-           compile pySuperLU  "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU"
+           compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU"
+           compile pySuperLU  "-j1" "CONFIG+=shellSuperLU"
         ;;
 
   superlu_mt) echo Compile superlu_mt project
-              compile LA_SuperLU "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
-              compile pySuperLU  "-j1" "CONFIG+=shellCompile CONFIG+=shellSuperLU_MT"
+              compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU_MT"
+              compile pySuperLU  "-j1" "CONFIG+=shellSuperLU_MT"
         ;;
 
   superlu_cuda) echo Compile superlu_cuda project
-                compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
-                compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellCompile CONFIG+=shellSuperLU_CUDA"
+                compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
+                compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
         ;;
 
   cusp) echo Compile cusp project
@@ -185,13 +185,13 @@ case ${PROJECTS} in
         ;;
 
   bonmin) echo Compile bonmin project
-          compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
-          compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
+          compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+          compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
         ;;
 
   ipopt) echo Compile ipopt project
-         compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
-         compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellIPOPT"
+         compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+         compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
         ;;
 
   nlopt) echo Compile nlopt project
