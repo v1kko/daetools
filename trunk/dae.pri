@@ -211,30 +211,24 @@ unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$
 #####################################################################################
 #                                 BLAS/LAPACK
 #####################################################################################
-win32::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
-unix::BLAS_LAPACK_LIBDIR  = /usr/lib
+win32::BLAS_LAPACK_LIBDIR     = ../clapack/LIB/Win32
+linux-g++::BLAS_LAPACK_LIBDIR = ../lapack
+macx-g++::BLAS_LAPACK_LIBDIR  = ../lapack
 
-win32::BLAS_LAPACK_LIBS = ../openblas/lib/libopenblas.lib \
+# Define DAE_USE_OPEN_BLAS if using OpenBLAS
+win32::QMAKE_CXXFLAGS     +=
+linux-g++::QMAKE_CXXFLAGS += #-DDAE_USE_OPEN_BLAS
+macx-g++::QMAKE_CXXFLAGS  +=
+
+win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                           $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
-# Define DAE_USE_OPEN_BLAS if using OpenBLAS
-win32::QMAKE_CXXFLAGS     += -DDAE_USE_OPEN_BLAS
-linux-g++::QMAKE_CXXFLAGS += -DDAE_USE_OPEN_BLAS
-macx-g++::QMAKE_CXXFLAGS  +=
-
-# 1. System's default dynamically linked;
-#    install openblas to replace a reference BLAS with GotoBLAS2:
-unix::BLAS_LAPACK_LIBS = -llapack -lblas -lm
-
-# 2. System's default statically linked;
-#    install openblas to replace a reference BLAS with GotoBLAS2:
-#unix::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a \
-#                         $${BLAS_LAPACK_LIBDIR}/libblas.a \
-#                         -lgfortran -lm
-
-# 3. daetools compiled reference BLAS and Lapack statically linked:
-#unix::BLAS_LAPACK_LIBS = ../lapack/liblapack.a ../lapack/librefblas.a -lgfortran -lm
+# 1. OpenBLAS dynamically linked:
+#linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
+# 2. daetools compiled reference BLAS and Lapack statically linked:
+linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/librefblas.a -lgfortran -lm
+macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/librefblas.a -lgfortran -lm
 
 
 #####################################################################################
@@ -371,6 +365,7 @@ linux-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
                           $${UMFPACK_LIBPATH}/libcolamd.a \
                           $${UMFPACK_LIBPATH}/libccolamd.a \
                           $${UMFPACK_LIBPATH}/libsuitesparseconfig.a
+#linux-g++::UMFPACK_LIBS = -lumfpack -lamd
 macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 
 #####################################################################################

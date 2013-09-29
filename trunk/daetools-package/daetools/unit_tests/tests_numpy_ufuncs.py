@@ -218,8 +218,8 @@ def simulate(n, useNumpy):
     
     return datareporter
         
-class case_JacobianExpressions(unittest.TestCase):
-    def test_JacobianExpressions(self):
+class case_numpy_ufuncs(unittest.TestCase):
+    def test_numpy_ufuncs(self):
         # Do a simulation using daetools functions
         dr = simulate(5, False)
         

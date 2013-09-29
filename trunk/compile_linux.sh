@@ -102,11 +102,6 @@ case ${PROJECTS} in
 
         compile LA_Trilinos_Amesos "-j1"
         compile pyTrilinos         "-j1"
-        
-        if [ ${PLATFORM} = "Linux" ]; then
-          compile LA_Intel_MKL     "-j1"
-          compile pyIntelPardiso   "-j1"
-        fi
 
         compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
         compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
@@ -116,6 +111,11 @@ case ${PROJECTS} in
 
         compile NLOPT_NLPSolver    "-j1"
         compile pyNLOPT            "-j1"
+        
+        #if [ ${PLATFORM} = "Linux" ]; then
+        #  compile LA_Intel_MKL     "-j1"
+        #  compile pyIntelPardiso   "-j1"
+        #fi
         ;;
 
   core)  echo Compile Core projects
@@ -139,11 +139,6 @@ case ${PROJECTS} in
 
             compile LA_Trilinos_Amesos "-j1"
             compile pyTrilinos         "-j1"
-
-            if [ ${PLATFORM} = "Linux" ]; then
-              compile LA_Intel_MKL     "-j1"
-              compile pyIntelPardiso   "-j1"
-            fi
             
             compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
             compile pyBONMIN           "-j1" "CONFIG+=shellCompile CONFIG+=shellBONMIN"
@@ -153,6 +148,11 @@ case ${PROJECTS} in
 
             compile NLOPT_NLPSolver    "-j1"
             compile pyNLOPT            "-j1"
+
+            #if [ ${PLATFORM} = "Linux" ]; then
+            #  compile LA_Intel_MKL     "-j1"
+            #  compile pyIntelPardiso   "-j1"
+            #fi
         ;;
 
   superlu) echo Compile superlu project

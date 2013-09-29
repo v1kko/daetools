@@ -81,9 +81,6 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 #endif
 	
 #ifdef daeSuperLU
-// If using OpenBLAS we should use only one thread (OpenBLAS can't decide based on the matrix size)
-    openblas_set_num_threads(1);
-
     daeConfig& cfg = daeConfig::GetConfig();
 	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
 	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);

@@ -78,6 +78,7 @@ vCAMD=2.3.1
 vCOLAMD=2.8.0
 vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
+vOPENBLAS=0.2.8
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -133,6 +134,63 @@ if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so
   cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+fi
+cd ${TRUNK}
+
+#######################################################
+#                   OpenBLAS                          #
+#######################################################
+# if [ ! -e openblas ]; then
+#   echo "Setting-up openblas..."
+#   if [ ! -e openblas-${vOPENBLAS}.tar.gz ]; then
+#     wget ${DAETOOLS_HTTP}/openblas-${vOPENBLAS}.tar.gz
+#   fi
+#   if [ ! -e Makefile-openblas.rule ]; then
+#     wget ${DAETOOLS_HTTP}/Makefile-openblas.rule
+#   fi
+#   tar -xzf openblas-${vOPENBLAS}.tar.gz
+#   cp Makefile-openblas.rule openblas/Makefile.rule
+#   cd openblas
+#   mkdir build
+#   cd ${TRUNK}
+# fi
+# cd openblas
+# if [ ! -e libopenblas.so ]; then
+#   echo "Building openblas..."
+#   make -j${Ncpu} libs
+#   make 
+#   make prefix=build install
+#   cp -a libopenblas_daetools* ../daetools-package/solibs
+#   make clean
+# else
+#   echo "   openblas library already built"
+# fi
+# cd ${TRUNK}
+
+#######################################################
+#                   LAPACK + BLAS                     #
+#######################################################
+if [ ! -e lapack ]; then
+  echo "Setting-up lapack..."
+  if [ ! -e lapack-${vLAPACK}.tgz ]; then
+    wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
+  fi
+  if [ ! -e daetools_lapack_make.inc ]; then
+    wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
+  fi
+  tar -xzf lapack-${vLAPACK}.tgz
+  mv lapack-${vLAPACK} lapack
+  cp daetools_lapack_make.inc lapack/make.inc
+  cd ${TRUNK}
+fi
+cd lapack
+if [ ! -e liblapack.a ]; then
+  echo "Building lapack..."
+  make -j${Ncpu} lapacklib
+  make -j${Ncpu} blaslib
+  make clean
+else
+  echo "   lapack library already built"
 fi
 cd ${TRUNK}
 
@@ -298,34 +356,6 @@ else
 fi
 
 cd ${TRUNK}
-
-
-#######################################################
-#                   LAPACK + BLAS                     #
-#######################################################
-# if [ ! -e lapack ]; then
-#   echo "Setting-up lapack..."
-#   if [ ! -e lapack-${vLAPACK}.tgz ]; then
-#     wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
-#   fi
-#   if [ ! -e daetools_lapack_make.inc ]; then
-#     wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
-#   fi
-#   tar -xzf lapack-${vLAPACK}.tgz
-#   mv lapack-${vLAPACK} lapack
-#   cp daetools_lapack_make.inc lapack/make.inc
-#   cd ${TRUNK}
-# fi
-# cd lapack
-# if [ ! -e liblapack.a ]; then
-#   echo "Building lapack..."
-#   make -j${Ncpu} lapacklib
-#   make -j${Ncpu} blaslib
-#   make clean
-# else
-#   echo "   lapack library already built"
-# fi
-# cd ${TRUNK}
 
 #######################################################
 #                       IDAS                          #
