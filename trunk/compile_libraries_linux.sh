@@ -140,10 +140,10 @@ cd ${TRUNK}
 #                      UMFPACK                        #
 #######################################################
 if [ ! -e umfpack ]; then
-  echo "Setting-up umfpack..."
-  if [ ! -e metis-${vMETIS}.tar.gz ]; then
-    wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
-  fi
+  echo "Setting-up umfpack and friends..."
+  #if [ ! -e metis-${vMETIS}.tar.gz ]; then
+  #  wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
+  #fi
   if [ ! -e SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz ]; then
     wget ${SUITESPARSE_CONFIG_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   fi 
@@ -168,13 +168,17 @@ if [ ! -e umfpack ]; then
   if [ ! -e SuiteSparse_config.mk ]; then
     wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
   fi
-  if [ ! -e metis.h ]; then
-    wget ${DAETOOLS_HTTP}/metis.h
-  fi
+  #if [ ! -e metis.h ]; then
+  #  wget ${DAETOOLS_HTTP}/metis.h
+  #fi
+  #if [ ! -e Makefile-CHOLMOD.patch ]; then
+  #  wget ${DAETOOLS_HTTP}/Makefile-CHOLMOD.patch
+  #fi
   
   mkdir umfpack
   cd umfpack
-  tar -xzf ../metis-${vMETIS}.tar.gz
+  #tar -xzf ../metis-${vMETIS}.tar.gz
+  #cp ../metis.h metis-${vMETIS}/include
   tar -xzf ../SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   tar -xzf ../CHOLMOD-${vCHOLMOD}.tar.gz
   tar -xzf ../AMD-${vAMD}.tar.gz
@@ -183,7 +187,10 @@ if [ ! -e umfpack ]; then
   tar -xzf ../CCOLAMD-${vCCOLAMD}.tar.gz
   tar -xzf ../UMFPACK-${vUMFPACK}.tar.gz
   cp ../SuiteSparse_config.mk SuiteSparse_config
-  cp ../metis.h metis-${vMETIS}/include
+
+  # Apply Metis 5.1.0 patch for CHOLMOD
+  #cd CHOLMOD/Lib
+  #patch < ../../../Makefile-CHOLMOD.patch
   
   mkdir build
   mkdir build/lib
@@ -194,17 +201,17 @@ fi
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-cd ${TRUNK}
-cd umfpack/metis-${vMETIS}
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libmetis.a ]; then
-  echo "Building metis..."
-  echo "make config prefix=${DAE_UMFPACK_INSTALL_DIR} shared=0 -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
-  make config prefix=${DAE_UMFPACK_INSTALL_DIR} -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
-  make install
-  make clean
-else
-  echo "   metis library already built"
-fi
+# cd ${TRUNK}
+# cd umfpack/metis-${vMETIS}
+# if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libmetis.a ]; then
+#   echo "Building metis..."
+#   echo "make config prefix=${DAE_UMFPACK_INSTALL_DIR} shared=0 -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
+#   make config prefix=${DAE_UMFPACK_INSTALL_DIR} -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
+#   make install
+#   make clean
+# else
+#   echo "   metis library already built"
+# fi
 
 cd ${TRUNK}
 cd umfpack/SuiteSparse_config

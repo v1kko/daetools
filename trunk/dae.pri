@@ -359,7 +359,7 @@ linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 
 
 ######################################################################################
-#                           Umfpack + AMD + CHOLMOD + Metis
+#                           Umfpack + AMD + CHOLMOD
 ######################################################################################
 UMFPACK_LIBPATH = ../umfpack/build/lib
 
@@ -370,8 +370,7 @@ linux-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
                           $${UMFPACK_LIBPATH}/libcamd.a \
                           $${UMFPACK_LIBPATH}/libcolamd.a \
                           $${UMFPACK_LIBPATH}/libccolamd.a \
-                          $${UMFPACK_LIBPATH}/libsuitesparseconfig.a \
-                          $${UMFPACK_LIBPATH}/libmetis.a
+                          $${UMFPACK_LIBPATH}/libsuitesparseconfig.a
 macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 
 #####################################################################################
