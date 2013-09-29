@@ -401,6 +401,10 @@ void daeEquationExecutionInfo::BuildJacobianExpressions()
     //map<overallIndex, pair<blockIndex, derivNode>>
     m_mapJacobianExpressions.clear();
 
+    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    if(bPrintInfo)
+        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("    Building Jacobian Expressions for equation ") + GetName() + string(" ..."), 0);
+
     // m_mapIndexes<OverallIndex, IndexInBlock>
     for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
     {

@@ -103,7 +103,16 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
-# Older GCCs complain about -Wno-unused-but-set-variable
+# If compiling from the compile_linux.sh shell script supress all warnings
+shellCompile:message(shellCompile) {
+unix::QMAKE_CXXFLAGS_WARN_ON -= -Wall -Wextra -W
+unix::QMAKE_CFLAGS_WARN_ON   -= -Wall -Wextra -W
+
+unix::QMAKE_CXXFLAGS_WARN_ON += -w
+unix::QMAKE_CFLAGS_WARN_ON   += -w
+}
+# If compiling from the GUI enable warnings
+!shellCompile:message(NOT shellCompile) {
 linux-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
                                      -Wno-unused-parameter \
                                      -Wno-unused-variable \
@@ -112,7 +121,8 @@ linux-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
 macx-g++::QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wno-sign-compare \
                                     -Wno-unused-parameter \
                                     -Wno-unused-variable
-               
+}
+
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
 unix::QMAKE_CXXFLAGS_RELEASE -= -O2
 
@@ -242,10 +252,10 @@ SUNDIALS = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR = $${SUNDIALS}/lib
 
-win32::SUNDIALS_LIBS = sundials_idas.lib \
-                       sundials_nvecserial.lib
-unix::SUNDIALS_LIBS = -lsundials_idas \
-                      -lsundials_nvecserial
+win32::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/sundials_idas.lib \
+                       $${SUNDIALS_LIBDIR}/sundials_nvecserial.lib
+unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/sundials_idas.a \
+                       $${SUNDIALS_LIBDIR}/sundials_nvecserial.a
 
 
 #####################################################################################
