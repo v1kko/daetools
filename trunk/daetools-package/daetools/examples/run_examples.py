@@ -98,6 +98,13 @@ except Exception, e:
     print '[daeRunExamples]: Cannot load opt_tutorial6 module\n Error: ', str(e)
 
 try:
+    import opt_tutorial7
+except Exception, e:
+    exc_traceback = sys.exc_info()[2]
+    print '\n'.join(traceback.format_tb(exc_traceback))
+    print '[daeRunExamples]: Cannot load opt_tutorial7 module\n Error: ', str(e)
+
+try:
     _examples_dir = dirname(__file__)
 except:
     # In case we are running the module on its own (i.e. as __main__)
@@ -161,6 +168,7 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("opt_tutorial4", QtCore.QVariant(opt_tutorial4))
         self.ui.comboBoxExample.addItem("opt_tutorial5", QtCore.QVariant(opt_tutorial5))
         self.ui.comboBoxExample.addItem("opt_tutorial6", QtCore.QVariant(opt_tutorial6))
+        self.ui.comboBoxExample.addItem("opt_tutorial7", QtCore.QVariant(opt_tutorial7))
 
     def slotTutorialChanged(self, index):
         module = self.ui.comboBoxExample.itemData(index).toPyObject()
@@ -243,6 +251,8 @@ class RunExamples(QtGui.QDialog):
                 self.consoleRunAndShowResults(opt_tutorial5)
             elif simName == "opt_tutorial6":
                 self.consoleRunAndShowResults(opt_tutorial6)
+            elif simName == "opt_tutorial7":
+                opt_tutorial7.guiRun(self.app)
             else:
                 pass
         

@@ -50,7 +50,6 @@ class daeSimulator(QtGui.QDialog):
     (laSundialsLU, laSuperLU, laSuperLU_MT) = range(0, 3)
     (laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = range(3, 8)
     (laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = range(8, 15)
-
     (nlpIPOPT, nlpNLOPT, nlpBONMIN) = range(0, 3)
 
     def __init__(self, app, **kwargs):
@@ -75,27 +74,16 @@ class daeSimulator(QtGui.QDialog):
         self.ui.textEdit.setFont(font)
         self.setWindowTitle("DAE Tools Simulator v" + daeVersion(True))
 
+        self.available_la_solvers  = []
+        self.available_nlp_solvers = []
+        self.FillAvailableSolvers()
+
         self.ui.DAESolverComboBox.addItem("Sundials IDAS")
+        for la in self.available_la_solvers:
+            self.ui.LASolverComboBox.addItem(la[0], userData = QtCore.QVariant(la[1]))
         
-        self.ui.LASolverComboBox.addItem("Sundials LU (dense, sequential)")
-        self.ui.LASolverComboBox.addItem("SuperLU (sparse, sequential, direct)")
-        self.ui.LASolverComboBox.addItem("SuperLU_MT (sparse, POSIX threads, direct)")
-        self.ui.LASolverComboBox.addItem("Trilinos Amesos - KLU (sparse, sequential, direct)")
-        self.ui.LASolverComboBox.addItem("Trilinos Amesos - SuperLU (sparse, sequential, direct)")
-        self.ui.LASolverComboBox.addItem("Trilinos Amesos - Umfpack (sparse, sequential, direct)")
-        self.ui.LASolverComboBox.addItem("Trilinos Amesos - Lapack (dense, sequential, direct)")
-        self.ui.LASolverComboBox.addItem("Trilinos AztecOO - Krylov (sparse, sequential, iterative)")
-        #self.ui.LASolverComboBox.addItem("Intel Pardiso (sparse, OpenMP, direct)")
-        #self.ui.LASolverComboBox.addItem("Intel MKL Lapack (dense, OpenMP, direct)")
-        #self.ui.LASolverComboBox.addItem("AMD ACML Lapack (dense, OpenMP, direct)")
-        #self.ui.LASolverComboBox.addItem("Lapack (dense, sequential, direct)")
-        #self.ui.LASolverComboBox.addItem("Magma Lapack (dense, CUDA, direct)")
-        #self.ui.LASolverComboBox.addItem("SuperLU_CUDA (sparse, CUDA, direct)")
-        #self.ui.LASolverComboBox.addItem("CUSP (sparse, CUDA, iterative)")
-        
-        self.ui.MINLPSolverComboBox.addItem("IPOPT NLP")
-        self.ui.MINLPSolverComboBox.addItem("NLOPT NLP")
-        self.ui.MINLPSolverComboBox.addItem("BONMIN MINLP")
+        for nlp in self.available_nlp_solvers:
+            self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = QtCore.QVariant(nlp[1]))
 
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
@@ -214,129 +202,13 @@ class daeSimulator(QtGui.QDialog):
             minlpsolverIndex = -1
 
             # If nlpsolver is not sent then choose it from the selection
-            if (self.nlpsolver == None):
-                minlpsolverIndex = self.ui.MINLPSolverComboBox.currentIndex()
+            if self.nlpsolver == None and len(self.available_nlp_solvers) > 0:
+                minlpsolverIndex = self.ui.MINLPSolverComboBox.itemData(self.ui.MINLPSolverComboBox.currentIndex()).toInt()[0]
 
             # If lasolver is not sent then create it based on the selection
-            if (self.lasolver == None):
-                lasolverIndex = self.ui.LASolverComboBox.currentIndex()
-
-                if lasolverIndex == self.laSundialsLU:
-                    pass
-
-                elif lasolverIndex == self.laSuperLU:
-                    try:
-                        from daetools.solvers.superlu import pySuperLU
-                        self.lasolver = pySuperLU.daeCreateSuperLUSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create SuperLU LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laSuperLU_MT:
-                    try:
-                        from daetools.solvers.superlu_mt import pySuperLU_MT
-                        self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create SuperLU_MT LA solver\nError: " + str(e))
-                        return
-                elif lasolverIndex == self.laAmesos_Klu:
-                    try:
-                        from daetools.solvers.trilinos import pyTrilinos
-                        self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-                    except Exception as e:
-                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laAmesos_Superlu:
-                    try:
-                        from daetools.solvers.trilinos import pyTrilinos
-                        self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
-                    except Exception as e:
-                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laAmesos_Umfpack:
-                    try:
-                        from daetools.solvers.trilinos import pyTrilinos
-                        self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-                    except Exception as e:
-                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laAmesos_Lapack:
-                    try:
-                        from daetools.solvers.trilinos import pyTrilinos
-                        self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
-                    except Exception as e:
-                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laAztecOO:
-                    try:
-                        from daetools.solvers.trilinos import pyTrilinos
-                        self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
-                    except Exception as e:
-                        self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laIntelPardiso:
-                    try:
-                        from daetools.solvers.intel_pardiso import pyIntelPardiso
-                        self.lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create IntelPardiso LA solver\nError: " + str(e))
-                        return
-                
-                elif lasolverIndex == self.laIntelMKL:
-                    try:
-                        from daetools.solvers import pyIntelMKL
-                        self.lasolver = pyIntelMKL.daeCreateLapackSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create IntelMKL LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laAmdACML:
-                    try:
-                        from daetools.solvers import pyAmdACML
-                        self.lasolver = pyAmdACML.daeCreateLapackSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create AmdACML LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laLapack:
-                    try:
-                        from daetools.solvers import pyLapack
-                        self.lasolver = pyLapack.daeCreateLapackSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create Lapack LA solver\nError: " + str(e))
-                        return
-
-                elif lasolverIndex == self.laMagmaLapack:
-                    try:
-                        from daetools.solvers import pyMagma
-                        self.lasolver = pyMagma.daeCreateLapackSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create Magma Lapack LA solver\nError: " + str(e))
-                        return
-                
-                elif lasolverIndex == self.laSuperLU_CUDA:
-                    try:
-                        from daetools.solvers.superlu_cuda import pySuperLU_CUDA
-                        self.lasolver = pySuperLU_CUDA.daeCreateSuperLUSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
-                        return
-                
-                elif lasolverIndex == self.laCUSP:
-                    try:
-                        from daetools.solvers import pyCUSP
-                        self.lasolver = pyCUSP.daeCreateCUSPSolver()
-                    except Exception as e:
-                        self.showMessage("Cannot create CUSP LA solver\nError: " + str(e))
-                        return
-                
-                else:
-                    raise RuntimeError("Unsupported LA Solver selected")
+            if self.lasolver == None and len(self.available_la_solvers) > 0:
+                lasolverIndex = self.ui.LASolverComboBox.itemData(self.ui.LASolverComboBox.currentIndex()).toInt()[0]
+                self.CreateLinearSolver(lasolverIndex)
 
             self.ui.RunButton.setEnabled(False)
             self.ui.MINLPSolverComboBox.setEnabled(False)
@@ -374,45 +246,7 @@ class daeSimulator(QtGui.QDialog):
             else:
                 # If nlpsolver is not sent then create it based on the selection
                 if(self.nlpsolver == None):
-                    if minlpsolverIndex == self.nlpIPOPT:
-                        try:
-                            from daetools.solvers.ipopt import pyIPOPT
-                            self.nlpsolver = pyIPOPT.daeIPOPT()
-                        except Exception as e:
-                            self.showMessage("Cannot create IPOPT NLP solver\nError: " + str(e))
-                            return
-
-                    elif minlpsolverIndex == self.nlpNLOPT:
-                        try:
-                            from daetools.solvers.nlopt import pyNLOPT
-                            from PyQt4 import QtCore, QtGui
-                            algorithms = ['NLOPT_GN_DIRECT','NLOPT_GN_DIRECT_L','NLOPT_GN_DIRECT_L_RAND','NLOPT_GN_DIRECT_NOSCAL','NLOPT_GN_DIRECT_L_NOSCAL',
-                                        'NLOPT_GN_DIRECT_L_RAND_NOSCAL','NLOPT_GN_ORIG_DIRECT','NLOPT_GN_ORIG_DIRECT_L','NLOPT_GD_STOGO','NLOPT_GD_STOGO_RAND',
-                                        'NLOPT_LD_LBFGS_NOCEDAL','NLOPT_LD_LBFGS','NLOPT_LN_PRAXIS','NLOPT_LD_VAR1','NLOPT_LD_VAR2','NLOPT_LD_TNEWTON',
-                                        'NLOPT_LD_TNEWTON_RESTART','NLOPT_LD_TNEWTON_PRECOND','NLOPT_LD_TNEWTON_PRECOND_RESTART','NLOPT_GN_CRS2_LM',
-                                        'NLOPT_GN_MLSL','NLOPT_GD_MLSL','NLOPT_GN_MLSL_LDS','NLOPT_GD_MLSL_LDS','NLOPT_LD_MMA','NLOPT_LN_COBYLA',
-                                        'NLOPT_LN_NEWUOA','NLOPT_LN_NEWUOA_BOUND','NLOPT_LN_NELDERMEAD','NLOPT_LN_SBPLX','NLOPT_LN_AUGLAG','NLOPT_LD_AUGLAG',
-                                        'NLOPT_LN_AUGLAG_EQ','NLOPT_LD_AUGLAG_EQ','NLOPT_LN_BOBYQA','NLOPT_GN_ISRES',
-                                        'NLOPT_AUGLAG','NLOPT_AUGLAG_EQ','NLOPT_G_MLSL','NLOPT_G_MLSL_LDS','NLOPT_LD_SLSQP']
-                            # Show the input box to choose the algorithm (the default is len(algorithms)-1 that is: NLOPT_LD_SLSQP)
-                            algorithm, ok = QtGui.QInputDialog.getItem(None, "NLOPT Algorithm", "Choose the NLOPT algorithm:", algorithms, len(algorithms)-1, False)
-                            if not ok:
-                                algorithm = 'NLOPT_LD_SLSQP'
-                            self.nlpsolver = pyNLOPT.daeNLOPT(str(algorithm))
-                        except Exception as e:
-                            self.showMessage("Cannot create NLOPT NLP solver\nError: " + str(e))
-                            return
-
-                    elif minlpsolverIndex == self.nlpBONMIN:
-                        try:
-                            from daetools.solvers.bonmin import pyBONMIN
-                            self.nlpsolver = pyBONMIN.daeBONMIN()
-                        except Exception as e:
-                            self.showMessage("Cannot create BONMIN MINLP solver\nError: " + str(e))
-                            return
-
-                    else:
-                        raise RuntimeError("Unsupported (MI)NLP Solver selected")
+                    self.CreateNLPSolver(minlpsolverIndex)
 
                 self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
 
@@ -457,3 +291,218 @@ class daeSimulator(QtGui.QDialog):
             fileName = QtGui.QFileDialog.getSaveFileName(self, "Save File", self.simulation.m.Name +".mtx", "Matrix Market Format Files (*.mtx)")
             if(str(fileName) != ""):
                 self.lasolver.SaveAsMatrixMarketFile(str(fileName), self.simulation.m.Name + " matrix", self.simulation.m.Name + " description")
+
+    def CreateLinearSolver(self, lasolverIndex):
+        if lasolverIndex == self.laSundialsLU:
+            pass
+
+        elif lasolverIndex == self.laSuperLU:
+            try:
+                from daetools.solvers.superlu import pySuperLU
+                self.lasolver = pySuperLU.daeCreateSuperLUSolver()
+            except Exception as e:
+                self.showMessage("Cannot create SuperLU LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laSuperLU_MT:
+            try:
+                from daetools.solvers.superlu_mt import pySuperLU_MT
+                self.lasolver = pySuperLU_MT.daeCreateSuperLUSolver()
+            except Exception as e:
+                self.showMessage("Cannot create SuperLU_MT LA solver\nError: " + str(e))
+                return
+        elif lasolverIndex == self.laAmesos_Klu:
+            try:
+                from daetools.solvers.trilinos import pyTrilinos
+                self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+            except Exception as e:
+                self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laAmesos_Superlu:
+            try:
+                from daetools.solvers.trilinos import pyTrilinos
+                self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
+            except Exception as e:
+                self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laAmesos_Umfpack:
+            try:
+                from daetools.solvers.trilinos import pyTrilinos
+                self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
+            except Exception as e:
+                self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laAmesos_Lapack:
+            try:
+                from daetools.solvers.trilinos import pyTrilinos
+                self.lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
+            except Exception as e:
+                self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laAztecOO:
+            try:
+                from daetools.solvers.trilinos import pyTrilinos
+                self.lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
+            except Exception as e:
+                self.showMessage("Cannot create TrilinosAmesos LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laIntelPardiso:
+            try:
+                from daetools.solvers.intel_pardiso import pyIntelPardiso
+                self.lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
+            except Exception as e:
+                self.showMessage("Cannot create IntelPardiso LA solver\nError: " + str(e))
+                return
+        
+        elif lasolverIndex == self.laIntelMKL:
+            try:
+                from daetools.solvers import pyIntelMKL
+                self.lasolver = pyIntelMKL.daeCreateLapackSolver()
+            except Exception as e:
+                self.showMessage("Cannot create IntelMKL LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laAmdACML:
+            try:
+                from daetools.solvers import pyAmdACML
+                self.lasolver = pyAmdACML.daeCreateLapackSolver()
+            except Exception as e:
+                self.showMessage("Cannot create AmdACML LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laLapack:
+            try:
+                from daetools.solvers import pyLapack
+                self.lasolver = pyLapack.daeCreateLapackSolver()
+            except Exception as e:
+                self.showMessage("Cannot create Lapack LA solver\nError: " + str(e))
+                return
+
+        elif lasolverIndex == self.laMagmaLapack:
+            try:
+                from daetools.solvers import pyMagma
+                self.lasolver = pyMagma.daeCreateLapackSolver()
+            except Exception as e:
+                self.showMessage("Cannot create Magma Lapack LA solver\nError: " + str(e))
+                return
+        
+        elif lasolverIndex == self.laSuperLU_CUDA:
+            try:
+                from daetools.solvers.superlu_cuda import pySuperLU_CUDA
+                self.lasolver = pySuperLU_CUDA.daeCreateSuperLUSolver()
+            except Exception as e:
+                self.showMessage("Cannot create SuperLU_CUDA LA solver\nError: " + str(e))
+                return
+        
+        elif lasolverIndex == self.laCUSP:
+            try:
+                from daetools.solvers import pyCUSP
+                self.lasolver = pyCUSP.daeCreateCUSPSolver()
+            except Exception as e:
+                self.showMessage("Cannot create CUSP LA solver\nError: " + str(e))
+                return
+        
+        else:
+            raise RuntimeError("Unsupported LA Solver selected")
+
+    def CreateNLPSolver(self, minlpsolverIndex):
+        if minlpsolverIndex == self.nlpIPOPT:
+            try:
+                from daetools.solvers.ipopt import pyIPOPT
+                self.nlpsolver = pyIPOPT.daeIPOPT()
+            except Exception as e:
+                self.showMessage("Cannot create IPOPT NLP solver\nError: " + str(e))
+                return
+
+        elif minlpsolverIndex == self.nlpNLOPT:
+            try:
+                from daetools.solvers.nlopt import pyNLOPT
+                from PyQt4 import QtCore, QtGui
+                algorithms = ['NLOPT_GN_DIRECT','NLOPT_GN_DIRECT_L','NLOPT_GN_DIRECT_L_RAND','NLOPT_GN_DIRECT_NOSCAL','NLOPT_GN_DIRECT_L_NOSCAL',
+                              'NLOPT_GN_DIRECT_L_RAND_NOSCAL','NLOPT_GN_ORIG_DIRECT','NLOPT_GN_ORIG_DIRECT_L','NLOPT_GD_STOGO','NLOPT_GD_STOGO_RAND',
+                              'NLOPT_LD_LBFGS_NOCEDAL','NLOPT_LD_LBFGS','NLOPT_LN_PRAXIS','NLOPT_LD_VAR1','NLOPT_LD_VAR2','NLOPT_LD_TNEWTON',
+                              'NLOPT_LD_TNEWTON_RESTART','NLOPT_LD_TNEWTON_PRECOND','NLOPT_LD_TNEWTON_PRECOND_RESTART','NLOPT_GN_CRS2_LM',
+                              'NLOPT_GN_MLSL','NLOPT_GD_MLSL','NLOPT_GN_MLSL_LDS','NLOPT_GD_MLSL_LDS','NLOPT_LD_MMA','NLOPT_LN_COBYLA',
+                              'NLOPT_LN_NEWUOA','NLOPT_LN_NEWUOA_BOUND','NLOPT_LN_NELDERMEAD','NLOPT_LN_SBPLX','NLOPT_LN_AUGLAG','NLOPT_LD_AUGLAG',
+                              'NLOPT_LN_AUGLAG_EQ','NLOPT_LD_AUGLAG_EQ','NLOPT_LN_BOBYQA','NLOPT_GN_ISRES',
+                              'NLOPT_AUGLAG','NLOPT_AUGLAG_EQ','NLOPT_G_MLSL','NLOPT_G_MLSL_LDS','NLOPT_LD_SLSQP']
+                # Show the input box to choose the algorithm (the default is len(algorithms)-1 that is: NLOPT_LD_SLSQP)
+                algorithm, ok = QtGui.QInputDialog.getItem(None, "NLOPT Algorithm", "Choose the NLOPT algorithm:", algorithms, len(algorithms)-1, False)
+                if not ok:
+                    algorithm = 'NLOPT_LD_SLSQP'
+                self.nlpsolver = pyNLOPT.daeNLOPT(str(algorithm))
+            
+            except Exception as e:
+                self.showMessage("Cannot create NLOPT NLP solver\nError: " + str(e))
+                return
+
+        elif minlpsolverIndex == self.nlpBONMIN:
+            try:
+                from daetools.solvers.bonmin import pyBONMIN
+                self.nlpsolver = pyBONMIN.daeBONMIN()
+            except Exception as e:
+                self.showMessage("Cannot create BONMIN MINLP solver\nError: " + str(e))
+                return
+
+        else:
+            raise RuntimeError("Unsupported (MI)NLP Solver selected")
+                    
+    def FillAvailableSolvers(self):
+        try:
+            from daetools.solvers.ipopt import pyIPOPT
+            self.available_nlp_solvers.append(("IPOPT NLP", self.nlpIPOPT))
+        except Exception as e:
+            pass
+        
+        try:
+            from daetools.solvers.nlopt import pyNLOPT
+            self.available_nlp_solvers.append(("NLOPT NLP", self.nlpNLOPT))
+        except Exception as e:
+            pass
+        
+        try:
+            from daetools.solvers.bonmin import pyBONMIN
+            self.available_nlp_solvers.append(("BONMIN MINLP", self.nlpBONMIN))
+        except Exception as e:
+            pass
+
+        self.available_la_solvers.append(("Sundials LU (dense, sequential, direct)", self.laSundialsLU))
+        try:
+            from daetools.solvers.superlu import pySuperLU
+            self.available_la_solvers.append(("SuperLU (sparse, sequential, direct)", self.laSuperLU))
+        except Exception as e:
+            pass
+
+        try:
+            from daetools.solvers.superlu_mt import pySuperLU_MT
+            self.available_la_solvers.append(("SuperLU_MT (sparse, pthreads, direct)", self.laSuperLU_MT))
+        except Exception as e:
+            pass
+
+        try:
+            from daetools.solvers.trilinos import pyTrilinos
+            suppSolvers = pyTrilinos.daeTrilinosSupportedSolvers()
+            if 'Amesos_Klu' in suppSolvers:
+                self.available_la_solvers.append(("Trilinos Amesos - KLU (sparse, sequential, direct)", self.laAmesos_Klu))
+            if 'Amesos_Superlu' in suppSolvers:
+                self.available_la_solvers.append(("Trilinos Amesos - SuperLU (sparse, sequential, direct)", self.laAmesos_Superlu))
+            if 'Amesos_Umfpack' in suppSolvers:
+                self.available_la_solvers.append(("Trilinos Amesos - Umfpack (sparse, sequential, direct)", self.laAmesos_Umfpack))
+            if 'Amesos_Lapack' in suppSolvers:
+                self.available_la_solvers.append(("Trilinos Amesos - Lapack (dense, sequential, direct)", self.laAmesos_Lapack))
+            if 'AztecOO' in suppSolvers:
+                self.available_la_solvers.append(("Trilinos AztecOO - Krylov (sparse, sequential, iterative)", self.laAztecOO))
+        except Exception as e:
+            pass
+
+        try:
+            from daetools.solvers.intel_pardiso import pyIntelPardiso
+            self.available_la_solvers.append(("Intel Pardiso (sparse, OpenMP, direct)", self.laIntelPardiso))
+        except Exception as e:
+            pass
+        
