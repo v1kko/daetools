@@ -43,12 +43,12 @@ macx-g++::SHARED_LIB_APPEND  = $${VERSION}.dylib
 
 # Set CONFIG += enable_mpi to use MPI libraries
 
-CONFIG(debug, debug|release):message(debug){
+CONFIG(debug, debug|release) {
     DAE_DEST_DIR = ../debug
     OBJECTS_DIR = debug
 }
 
-CONFIG(release, debug|release):message(release){
+CONFIG(release, debug|release) {
 	DAE_DEST_DIR = ../release
     OBJECTS_DIR = release
 }
@@ -68,8 +68,6 @@ COPY_FILES = cp -fa
 PYTHON       = python
 PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
 PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
-
-message(python: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON})
 
 # Numpy version
 NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
@@ -104,7 +102,7 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
 # If compiling from the compile_linux.sh shell script supress all warnings
-shellCompile:message(Compiling from the script) {
+shellCompile {
 
 unix::QMAKE_CXXFLAGS_WARN_ON = -w
 unix::QMAKE_CFLAGS_WARN_ON   = -w
@@ -166,7 +164,7 @@ PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; 
 unix::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
 win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
 
-message(Python dirs: v$${PYTHON_MAJOR}.$${PYTHON_MINOR} - $${PYTHON_INCLUDE_DIR} - $${PYTHON_SITE_PACKAGES_DIR})
+message(python$${PYTHON_MAJOR}.$${PYTHON_MINOR}: $${PYTHON_LIB_DIR})
 
 win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy

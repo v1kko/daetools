@@ -31,7 +31,7 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
-echo "Number of threads: ${Ncpu}"
+#echo "Number of threads: ${Ncpu}"
 
 cd ${TRUNK}
 
@@ -43,8 +43,9 @@ compile () {
   DIR=$1
   MAKEARG=$2
   CONFIG=$3
+  echo ""
   echo "****************************************************************"
-  echo "Compiling the project $DIR ... ($1, $2, $3)"
+  echo "                Build the project: $DIR"
   echo "****************************************************************"
   
   if [ ${DIR} = "dae" ]; then
@@ -69,20 +70,28 @@ compile () {
     cd ${DIR}
   fi
 
-  echo "***** EXECUTE: qmake -makefile $1.pro -r CONFIG+=release -spec ${SPEC} ${CONFIG}"
-  qmake -makefile $1.pro -r CONFIG+=release CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
+  echo ""
+  echo "[*] Configuring the project with ($2, $3)..."
+  echo ""
+  qmake -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
   
-  echo "***** EXECUTE: make clean -w"
+  echo ""
+  echo "[*] Cleaning the project..."
+  echo ""
   make clean -w
   
-  echo "***** EXECUTE: make ${MAKEARG} -w"
+  echo ""
+  echo "[*] Compiling the project..."
+  echo ""
   make ${MAKEARG} -w
   
+  echo ""
+  echo "[*] Done!"
   cd ${TRUNK}
 }
 
 case ${PROJECTS} in
-  all)  echo Compile ALL projects
+  all)  echo [all]
         cd ${TRUNK}/release
         rm -rf *
         cd ${TRUNK}
@@ -118,11 +127,11 @@ case ${PROJECTS} in
         #fi
         ;;
 
-  core)  echo Compile Core projects
+  core)  echo [core] ...
          compile dae "-j$Ncpu"
         ;;
 
-  pydae) echo Compiling only DAE python wrappers...
+  pydae) echo [pydae] ...
          compile pyCore           "-j1"
          compile pyActivity       "-j1"
          compile pyDataReporting  "-j1"
@@ -130,7 +139,7 @@ case ${PROJECTS} in
          compile pyUnits          "-j1"
          ;;
 
-  solvers)  echo Compile all solvers and their python wrappers
+  solvers)  echo [solvers]
             compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
             compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
 
@@ -155,46 +164,46 @@ case ${PROJECTS} in
             #fi
         ;;
 
-  superlu) echo Compile superlu project
+  superlu) echo [superlu]
            compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU"
            compile pySuperLU  "-j1" "CONFIG+=shellSuperLU"
         ;;
 
-  superlu_mt) echo Compile superlu_mt project
+  superlu_mt) echo [superlu_mt]
               compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU_MT"
               compile pySuperLU  "-j1" "CONFIG+=shellSuperLU_MT"
         ;;
 
-  superlu_cuda) echo Compile superlu_cuda project
+  superlu_cuda) echo [superlu_cuda]
                 compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
                 compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
         ;;
 
-  cusp) echo Compile cusp project
+  cusp) echo [cusp]
         compile LA_CUSP "-j1 --file=cudaMakefile"
         ;;
 
-  trilinos) echo Compile trilinos project
+  trilinos) echo [trilinos]
             compile LA_Trilinos_Amesos "-j1"
             compile pyTrilinos         "-j1"
         ;;
 
-  intel_pardiso) echo Compile intel_pardiso project
+  intel_pardiso) echo [intel_pardiso]
                       compile LA_Intel_MKL   "-j1"
                       compile pyIntelPardiso "-j1"
         ;;
 
-  bonmin) echo Compile bonmin project
+  bonmin) echo [bonmin]
           compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
           compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
         ;;
 
-  ipopt) echo Compile ipopt project
+  ipopt) echo [ipopt]
          compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
          compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
         ;;
 
-  nlopt) echo Compile nlopt project
+  nlopt) echo [nlopt]
          compile NLOPT_NLPSolver "-j1"
          compile pyNLOPT         "-j1"
         ;;

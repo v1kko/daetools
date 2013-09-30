@@ -23,7 +23,7 @@ CONFIG += SuperLU
 #####################################################################
 # Small hack used when compiling from compile_linux.sh shell script
 #####################################################################
-shellCompile:message(shellCompile) {
+shellCompile {
 shellSuperLU {
   CONFIG += SuperLU
 }
