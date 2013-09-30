@@ -17,28 +17,28 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
-                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
+                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
-                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
+                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
-                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake \
+                       autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   #sudo yum check-update
   sudo yum install PyQt4 numpy scipy python-matplotlib python-tk \
                    blas blas-devel lapack lapack-devel qt-creator qt-devel \
-                   automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
+                   automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake patch \
                    wget subversion fakeroot rpm-build libbz2-devel
 
 elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
@@ -47,7 +47,7 @@ elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
   # Should be manually installed, ie. from http://pkgs.org
   sudo yum install PyQt4 numpy python-matplotlib python-tk python-devel \
                    blas blas-devel lapack lapack-devel qt-devel \
-                   automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake \
+                   automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake patch \
                    wget subversion fakeroot rpm-build libbz2-devel
 
 elif [ ${DISTRIBUTOR_ID} = "suse linux" ]; then
@@ -55,13 +55,13 @@ elif [ ${DISTRIBUTOR_ID} = "suse linux" ]; then
   # Should be manually installed, ie. from http://pkgs.org
   sudo zypper in python-qt4 python-numpy python-matplotlib python-tk python-devel \
                  blas lapack libqt4 libqt4-devel qt-creator \
-                 automake make autoconf gcc gcc-c++ gcc-fortran binutils cmake \
+                 automake make autoconf gcc gcc-c++ gcc-fortran binutils cmake patch \
                  wget subversion devel_rpm_build libbz2-devel
                  
 elif [ ${DISTRIBUTOR_ID} = "arch" ]; then
   sudo pacman -S python2-pyqt4 python2-numpy python2-scipy python2-matplotlib mayavi \
                  blas lapack qt4 qtcreator \
-                 base-devel automake make pkg-config autoconf gcc gcc-fortran binutils cmake \
+                 base-devel automake make pkg-config autoconf gcc gcc-fortran binutils cmake patch \
                  wget subversion fakeroot swig libpng libxext bzip2
 
 else

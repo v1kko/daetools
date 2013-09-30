@@ -361,26 +361,29 @@ cd ${TRUNK}
 #                       IDAS                          #
 #######################################################
 if [ ! -e idas ]; then
-  echo "Setting-up idas..."
+  echo "[*] Setting-up idas..."
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
     wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
+  fi
+  if [ ! -e idasMakefile.in.patch ]; then
+    wget ${DAETOOLS_HTTP}/idasMakefile.in.patch
   fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
   cd idas
+  patch < ../idasMakefile.in.patch
   mkdir build
-  echo "./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
   ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
   cd ${TRUNK}
 fi
 cd idas
 if [ ! -e build/lib/libsundials_idas.a ]; then
-  echo "Building idas..."
-  make
+  echo "[*] Building idas..."
+  make 
   make install
   make clean
 else
-  echo "   idas library already built"
+  echo "[*] idas library already built"
 fi
 cd ${TRUNK}
 
@@ -388,7 +391,7 @@ cd ${TRUNK}
 #                     SUPERLU                         #
 #######################################################
 if [ ! -e superlu ]; then
-  echo "Setting-up superlu..."
+  echo "[*] Setting-up superlu..."
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
@@ -403,10 +406,10 @@ if [ ! -e superlu ]; then
 fi
 cd superlu
 if [ ! -e lib/libsuperlu_${vSUPERLU}.a ]; then
-  echo "Building superlu..."
+  echo "[*] Building superlu..."
   make superlulib
 else
-  echo "   superlu library already built"
+  echo "[*] superlu library already built"
 fi
 cd ${TRUNK}
 
@@ -414,7 +417,7 @@ cd ${TRUNK}
 #                    SUPERLU_MT                       #
 #######################################################
 if [ ! -e superlu_mt ]; then
-  echo "Setting-up superlu_mt..."
+  echo "[*] Setting-up superlu_mt..."
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
@@ -429,10 +432,10 @@ if [ ! -e superlu_mt ]; then
 fi
 cd superlu_mt
 if [ ! -e lib/libsuperlu_mt_${vSUPERLU_MT}.a ]; then
-  echo "Building superlu_mt..."
+  echo "[*] Building superlu_mt..."
   make lib
 else
-  echo "   superlu_mt library already built"
+  echo "[*] superlu_mt library already built"
 fi
 cd ${TRUNK}
 
@@ -440,7 +443,7 @@ cd ${TRUNK}
 #                      BONMIN                         #
 #######################################################
 if [ ! -e bonmin ]; then
-  echo "Setting-up bonmin..."
+  echo "[*] Setting-up bonmin..."
   if [ ! -e Bonmin-${vBONMIN}.zip ]; then
     wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
   fi
@@ -457,13 +460,13 @@ if [ ! -e bonmin ]; then
 fi
 cd bonmin/build
 if [ ! -e lib/libbonmin.a ]; then
-  echo "Building bonmin..."
+  echo "[*] Building bonmin..."
   make -j${Ncpu}
   make test
   make install
   make clean
 else
-  echo "   bonmin library already built"
+  echo "[*] bonmin library already built"
 fi
 cd ${TRUNK}
 
@@ -471,7 +474,7 @@ cd ${TRUNK}
 #                      NLOPT                          #
 #######################################################
 if [ ! -e nlopt ]; then
-  echo "Setting-up nlopt..."
+  echo "[*] Setting-up nlopt..."
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
     wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
@@ -485,12 +488,12 @@ if [ ! -e nlopt ]; then
 fi
 cd nlopt/build
 if [ ! -e lib/libnlopt.a ]; then
-  echo "Building nlopt..."
+  echo "[*] Building nlopt..."
   make
   make install
   make clean
 else
-  echo "   nlopt library already built"
+  echo "[*] nlopt library already built"
 fi
 cd ${TRUNK}
 
@@ -498,7 +501,7 @@ cd ${TRUNK}
 #                   TRILINOS                          #
 #######################################################
 if [ ! -e trilinos ]; then
-  echo "Setting-up trilinos..."
+  echo "[*] Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
@@ -549,12 +552,12 @@ fi
 
 cd trilinos/build
 if [ ! -e lib/libamesos.a ]; then
-  echo "Building trilinos..."
+  echo "[*] Building trilinos..."
   make -j${Ncpu}
   make install
   make clean
 else
-  echo "   trilinos library already built"
+  echo "[*] trilinos library already built"
 fi
 cd ${TRUNK}
 
