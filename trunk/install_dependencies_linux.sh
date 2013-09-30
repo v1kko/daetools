@@ -58,10 +58,10 @@ elif [ ${DISTRIBUTOR_ID} = "suse linux" ]; then
                  automake make autoconf gcc gcc-c++ gcc-fortran binutils cmake \
                  wget subversion devel_rpm_build libbz2-devel
                  
-elif [ ${DISTRIBUTOR_ID} = "archlinux" ]; then
+elif [ ${DISTRIBUTOR_ID} = "arch" ]; then
   sudo pacman -S python2-pyqt4 python2-numpy python2-scipy python2-matplotlib mayavi \
                  blas lapack qt4 qtcreator \
-                 automake make pkg-config autoconf gcc gcc-fortran binutils cmake \
+                 base-devel automake make pkg-config autoconf gcc gcc-fortran binutils cmake \
                  wget subversion fakeroot swig libpng libxext bzip2
 
 else

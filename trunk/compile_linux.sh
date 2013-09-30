@@ -73,7 +73,7 @@ compile () {
   echo ""
   echo "[*] Configuring the project with ($2, $3)..."
   echo ""
-  qmake -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
+  qmake-qt4 -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
   
   echo ""
   echo "[*] Cleaning the project..."
