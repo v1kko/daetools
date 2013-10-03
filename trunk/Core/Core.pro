@@ -72,7 +72,6 @@ HEADERS += xmlfunctions.h \
     inlines_portarray.h \
     inlines_modelarray.h \
     inlines_io.h \
-    inlines_equation.h \
     inlines_varparam_templates.h \
     helpers.h \
     definitions.h \

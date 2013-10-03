@@ -1,52 +1,56 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
-if [ "$1" = "" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
-  echo "Usage: compile_linux [commands]"
-  echo "Commands: all | core | pydae | trilinos | superlu | superlu_mt | superlu_cuda | bonmin | ipopt | nlopt"
-  echo "  - all: build all daetools libraries, solvers and python wrapper modules"
-  echo "  - core: build core daetools c++ libraries and python wrapper modules (no 3rd party LA/(MI)NLP solvers)"
-  echo "  - pydae: build daetools core python wrapper modules only"
-  echo "  - solvers: build all solvers and their python wrapper modules"
-  echo "  - trilinos, superlu, superlu_mt, superlu_cuda, bonmin, ipopt, nlopt, intel_pardiso: build particular solver and its python wrapper module"
-  return
-fi
+usage()
+{
+cat << EOF
+usage: $0 [options] projects
 
-PROJECTS=$1
+This script compiles specified daetools libraries and python extension modules.
+Typical use (compiles all daetools libraries and python extension modules):
+    sh compile_linux.sh all
 
-HOST_ARCH=`uname -m`
-PLATFORM=`uname -s`
-TRUNK="$( cd "$( dirname "$0" )" && pwd )"
+OPTIONS:
+   -h | --help                      Show this message.
+   One of the following:
+        --with-python-binary        Path to python binary to use.
+        --with-python-version       Version of the system's python.
+                                    Format: major.minor (i.e 2.7).
 
-if [ ${PLATFORM} = "Darwin" ]; then
-  Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
-  SPEC=macx-g++
+PROJECTS:
+    all             Build all daetools c++ libraries, solvers and python extension modules.
+                    Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt
+    dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP solvers).
+                    Equivalent to: units data_reporting idas core activity
+    solvers         Build all solvers and their python extension modules.
+    pydae           Build daetools core python extension modules only.
+    
+    Individual projects:
+    core            Build Core c++ library and its python extension module.
+    activity        Build Activity c++ library and its python extension module.
+    data_reporting  Build DataReporting c++ library and its python extension module.
+    idas            Build IDAS c++ library and its python extension module.
+    units           Build Units c++ library and its python extension module.
+    trilinos        Build Trilinos Amesos/AztecOO linear solver and its python extension module.
+    superlu         Build SuperLU linear solver and its python extension module.
+    superlu_mt      Build SuperLU_MT linear solver and its python extension module.
+    intel_pardiso   Build Intel PARDISO linear solver and its python extension module.
+    bonmin          Build BONMIN minlp solver and its python extension module.
+    ipopt           Build IPOPT nlp solver and its python extension module.
+    nlopt           Build NLOPT nlp solver and its python extension module.
+EOF
+}
 
-else
-  Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  SPEC=linux-g++
-fi
-
-if [ ${Ncpu} -gt 1 ]; then
-  Ncpu=$(($Ncpu+1))
-fi
-#echo "Number of threads: ${Ncpu}"
-
-cd ${TRUNK}
-
-if [ ! -d release ]; then
-    mkdir release
-fi
-
-compile () {
+compile() 
+{
   DIR=$1
   MAKEARG=$2
   CONFIG=$3
   echo ""
-  echo "****************************************************************"
+  echo "*******************************************************************************"
   echo "                Build the project: $DIR"
-  echo "****************************************************************"
+  echo "*******************************************************************************"
   
   if [ ${DIR} = "dae" ]; then
     cd ${TRUNK}
@@ -72,14 +76,14 @@ compile () {
 
   echo ""
   echo "[*] Configuring the project with ($2, $3)..."
-  echo ""
-  qmake-qt4 -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile -spec ${SPEC} ${CONFIG}
+
+  qmake-qt4 -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${SPEC} ${CONFIG}
   
   echo ""
   echo "[*] Cleaning the project..."
   echo ""
   make clean -w
-  
+
   echo ""
   echo "[*] Compiling the project..."
   echo ""
@@ -87,130 +91,233 @@ compile () {
   
   echo ""
   echo "[*] Done!"
-  cd ${TRUNK}
+  cd "${TRUNK}"
 }
 
-case ${PROJECTS} in
-  all)  echo [all]
-        cd ${TRUNK}/release
-        rm -rf *
-        cd ${TRUNK}
+# Default python binary:
+PYTHON=`python -c "import sys; print sys.executable"`
+HOST_ARCH=`uname -m`
+PLATFORM=`uname -s`
+TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 
-        compile dae                "-j$Ncpu"
+if [ ${PLATFORM} = "Darwin" ]; then
+  Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+  SPEC=macx-g++
+else
+  Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
+  SPEC=linux-g++
+fi
 
-        compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
-        compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
+if [ ${Ncpu} -gt 1 ]; then
+  Ncpu=$(($Ncpu+1))
+fi
 
-        compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
-        compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
+cd "${TRUNK}"
 
-        #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
-        #compile pySuperLU          "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
+if [ ! -d release ]; then
+    mkdir release
+fi
 
-        #compile LA_CUSP            "-j1 --file=cudaMakefile"
+args=`getopt -a -o "hp:v:" -l "help,with-python-binary:,with-python-version:" -n "compile_linux" -- $*`
 
-        compile LA_Trilinos_Amesos "-j1"
-        compile pyTrilinos         "-j1"
+# Process options
+for i; do
+  case "$i" in
+    -h|--help)  usage
+                exit 1
+                ;;
+                  
+       --with-python-binary)  PYTHON=`$2 -c "import sys; print sys.executable"`
+                              shift ; shift 
+                              ;;
+                            
+       --with-python-version )  PYTHON=`python$2 -c "import sys; print sys.executable"`
+                                shift ; shift 
+                                ;;
+                                    
+    --) shift; break 
+        ;;
+  esac
+done
 
-        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
-        compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
+# Check if any project is specified
+if [ -z "$@" ]; then
+  usage
+  exit
+fi
 
-        compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
-        compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
+# Check if requested projects exist
+for project in "$@"
+do
+  case "$project" in
+    all)              ;;
+    core)             ;;
+    activity)         ;;
+    data_reporting)   ;;
+    idas)             ;;
+    units)            ;;
+    dae)              ;;
+    pydae)            ;;
+    solvers)          ;;
+    trilinos)         ;;
+    superlu)          ;;
+    superlu_mt)       ;;
+    intel_pardiso)    ;;
+    bonmin)           ;;
+    ipopt)            ;;
+    nlopt)            ;; 
+    *) echo Unrecognized project: "$project"
+       exit
+       ;;
+  esac
+done
 
-        compile NLOPT_NLPSolver    "-j1"
-        compile pyNLOPT            "-j1"
+echo ""
+echo "###############################################################################"
+echo "Proceed with the following options:"
+echo "  - Qmake-spec:           ${SPEC}"
+echo "  - Python:               ${PYTHON}"
+echo "  - Platform:             $PLATFORM"
+echo "  - Archicteture:         $HOST_ARCH"
+echo "  - Number of threads:    ${Ncpu}"
+echo "  - Projects to compile:  $@"
+echo "###############################################################################"
+echo ""
+
+# Process arguments
+for project in "$@"
+do
+    case "$project" in
+        all)    cd ${TRUNK}/release
+                rm -rf *
+                cd ${TRUNK}
+
+                compile dae                "-j$Ncpu"
+
+                compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
+                compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
+
+                compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
+                compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
+
+                #compile LA_SUPERLU         "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
+                #compile pySuperLU          "-j1 --file=gpuMakefile"  "CONFIG+=shellSuperLU_CUDA"
+
+                #compile LA_CUSP            "-j1 --file=cudaMakefile"
+
+                compile LA_Trilinos_Amesos "-j1"
+                compile pyTrilinos         "-j1"
+
+                compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+                compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
+
+                compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+                compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
+
+                compile NLOPT_NLPSolver    "-j1"
+                compile pyNLOPT            "-j1"
+                
+                #if [ ${PLATFORM} = "Linux" ]; then
+                #  compile LA_Intel_MKL     "-j1"
+                #  compile pyIntelPardiso   "-j1"
+                #fi
+                ;;
         
-        #if [ ${PLATFORM} = "Linux" ]; then
-        #  compile LA_Intel_MKL     "-j1"
-        #  compile pyIntelPardiso   "-j1"
-        #fi
-        ;;
+        core)  compile Core   "-j5"
+               compile pyCore "-j1"
+               ;;
+        
+        activity) compile Activity   "-j5"
+                  compile pyActivity "-j1"
+                  ;;
+                  
+        data_reporting) compile DataReporting   "-j5"
+                        compile pyDataReporting "-j1"
+                        ;;
+                        
+        idas)   compile IDAS_DAESolver "-j5"
+                compile pyIDAS         "-j1"
+                ;;
+        
+        units)  compile Units   "-j5"
+                compile pyUnits "-j1"
+                ;;
 
-  core)  echo [core] ...
-         compile dae "-j$Ncpu"
-        ;;
+        dae)    compile dae "-j$Ncpu"
+                ;;
 
-  pydae) echo [pydae] ...
-         compile pyCore           "-j1"
-         compile pyActivity       "-j1"
-         compile pyDataReporting  "-j1"
-         compile pyIDAS           "-j1"
-         compile pyUnits          "-j1"
-         ;;
+        pydae)  compile pyCore           "-j1"
+                compile pyActivity       "-j1"
+                compile pyDataReporting  "-j1"
+                compile pyIDAS           "-j1"
+                compile pyUnits          "-j1"
+                ;;
 
-  solvers)  echo [solvers]
-            compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
-            compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
+        solvers)    compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
+                    compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
 
-            compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
-            compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
+                    compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
+                    compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
 
-            compile LA_Trilinos_Amesos "-j1"
-            compile pyTrilinos         "-j1"
-            
-            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
-            compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
+                    compile LA_Trilinos_Amesos "-j1"
+                    compile pyTrilinos         "-j1"
+                    
+                    compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+                    compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
 
-            compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
-            compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
+                    compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+                    compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
 
-            compile NLOPT_NLPSolver    "-j1"
-            compile pyNLOPT            "-j1"
+                    compile NLOPT_NLPSolver    "-j1"
+                    compile pyNLOPT            "-j1"
 
-            #if [ ${PLATFORM} = "Linux" ]; then
-            #  compile LA_Intel_MKL     "-j1"
-            #  compile pyIntelPardiso   "-j1"
-            #fi
-        ;;
+                    #if [ ${PLATFORM} = "Linux" ]; then
+                    #  compile LA_Intel_MKL     "-j1"
+                    #  compile pyIntelPardiso   "-j1"
+                    #fi
+                    ;;
 
-  superlu) echo [superlu]
-           compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU"
-           compile pySuperLU  "-j1" "CONFIG+=shellSuperLU"
-        ;;
+        superlu)    compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU"
+                    compile pySuperLU  "-j1" "CONFIG+=shellSuperLU"
+                    ;;
 
-  superlu_mt) echo [superlu_mt]
-              compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU_MT"
-              compile pySuperLU  "-j1" "CONFIG+=shellSuperLU_MT"
-        ;;
+        superlu_mt) compile LA_SuperLU "-j1" "CONFIG+=shellSuperLU_MT"
+                    compile pySuperLU  "-j1" "CONFIG+=shellSuperLU_MT"
+                    ;;
+  
+        superlu_cuda) compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
+                      compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
+                      ;;
 
-  superlu_cuda) echo [superlu_cuda]
-                compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
-                compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
-        ;;
+        cusp) compile LA_CUSP "-j1 --file=cudaMakefile"
+              ;;
 
-  cusp) echo [cusp]
-        compile LA_CUSP "-j1 --file=cudaMakefile"
-        ;;
+        trilinos) compile LA_Trilinos_Amesos "-j1"
+                  compile pyTrilinos         "-j1"
+                  ;;
 
-  trilinos) echo [trilinos]
-            compile LA_Trilinos_Amesos "-j1"
-            compile pyTrilinos         "-j1"
-        ;;
+        intel_pardiso) compile LA_Intel_MKL   "-j1"
+                       compile pyIntelPardiso "-j1"
+                       ;;
 
-  intel_pardiso) echo [intel_pardiso]
-                      compile LA_Intel_MKL   "-j1"
-                      compile pyIntelPardiso "-j1"
-        ;;
+        bonmin) compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
+                compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
+                ;;
 
-  bonmin) echo [bonmin]
-          compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"
-          compile pyBONMIN           "-j1" "CONFIG+=shellBONMIN"
-        ;;
+        ipopt) compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
+               compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
+               ;;
 
-  ipopt) echo [ipopt]
-         compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellIPOPT"
-         compile pyBONMIN           "-j1" "CONFIG+=shellIPOPT"
-        ;;
+        nlopt) compile NLOPT_NLPSolver "-j1"
+               compile pyNLOPT         "-j1"
+               ;;
 
-  nlopt) echo [nlopt]
-         compile NLOPT_NLPSolver "-j1"
-         compile pyNLOPT         "-j1"
-        ;;
-
-  *) echo "Unrecognized project: [$*]"
-     ;;
-esac
+        *) echo "??????????????????????"
+           echo Unrecognized project: "$project"
+           echo "??????????????????????"
+           ;;
+    esac
+done
 
 cd ${TRUNK}
 

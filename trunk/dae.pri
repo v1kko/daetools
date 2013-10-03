@@ -65,7 +65,15 @@ COPY_FILES = cp -fa
 #####################################################################################
 #                           System + Machine + Python info
 #####################################################################################
-PYTHON       = python
+# If compiling from the shell compile_linux.sh script specify the python binary
+shellCompile {
+PYTHON = $$customPython
+}
+# If compiling from the GUI use system's default python version
+!shellCompile {
+PYTHON = python
+}
+
 PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
 PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
 
@@ -103,7 +111,6 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 # If compiling from the compile_linux.sh shell script supress all warnings
 shellCompile {
-
 unix::QMAKE_CXXFLAGS_WARN_ON = -w
 unix::QMAKE_CFLAGS_WARN_ON   = -w
 }
@@ -164,7 +171,9 @@ PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; 
 unix::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
 win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
 
-message(python$${PYTHON_MAJOR}.$${PYTHON_MINOR}: $${PYTHON_LIB_DIR})
+!shellCompile {
+message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR})
+}
 
 win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
                                $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy

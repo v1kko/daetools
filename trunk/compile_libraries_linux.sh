@@ -1,7 +1,85 @@
-#!/bin/sh
+#!/bin/bash
 # -*- coding: utf-8 -*-
 
 set -e
+usage()
+{
+cat << EOF
+usage: $0 [options] libs/solvers
+
+This script compiles third party libraries/solvers necessary to build daetools.
+Typical usage (configure and build all libraries/solvers):
+    sh compile_libraries_linux.sh -cb all
+
+OPTIONS:
+   -h | --help                      Show this message.
+   -c | --configure                 Configure library/solver.
+   -b | --build                     Build library/solver.
+   -e | --clean                     Clean library/solver.
+   One of the following:
+        --with-python-binary        Path to python binary to use.
+        --with-python-version       Version of the system's python.
+                                    Format: major.minor (i.e 2.7).
+
+SOLVERS:
+    all              All libraries and solvers.
+                     Equivalent to: boost ref_blas_lapack umfpack idas trilinos superlu superlu_mt bonmin nlopt
+    
+    Individual libraries/solvers:
+    boost            Boost libraries (system, thread, python)
+    ref_blas_lapack  reference BLAS and Lapack libraries
+    openblas         OpenBLAS library
+    umfpack          Umfpack solver
+    idas             IDAS solver
+    trilinos         Trilinos Amesos and AztecOO solvers
+    superlu          SuperLU solver
+    superlu_mt       SuperLU solver
+    
+    bonmin           Bonmin solver
+    nlopt            NLopt solver 
+EOF
+}
+
+# Default python binary:
+PYTHON=`python -c "import sys; print sys.executable"`
+
+args=`getopt -a -o "hcbe" -l "help,with-python-binary:,with-python-version:,configure:build:clean:" -n "compile_libraries_linux" -- $*`
+
+DO_CONFIGURE="no"
+DO_BUILD="no"
+DO_CLEAN="no"
+
+# Process options
+for i; do
+  case "$i" in
+    -h|--help)  usage
+                exit 1
+                ;;
+                  
+    --with-python-binary)  PYTHON=`$2 -c "import sys; print sys.executable"`
+                           shift ; shift 
+                           ;;
+                            
+    --with-python-version )  PYTHON=`python$2 -c "import sys; print sys.executable"`
+                             shift ; shift 
+                             ;;
+                                    
+    -c|--configure) DO_CONFIGURE="yes"
+                    shift
+                    ;;
+                         
+    -b|--build) DO_BUILD="yes"
+                shift
+                ;;
+
+    -e|--clean) DO_CLEAN="yes"
+                shift
+                ;;
+
+    --) shift; break 
+       ;;
+  esac
+done
 
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
@@ -13,15 +91,12 @@ else
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 fi
 
-PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
-PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
+PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
-PYTHON_INCLUDE_DIR=`python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
-PYTHON_SITE_PACKAGES_DIR=`python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())"`
-PYTHON_LIB_DIR=`python -c "import sys; print(sys.prefix)"`/lib
-echo $PYTHON_INCLUDE_DIR
-echo $PYTHON_SITE_PACKAGES_DIR
-echo $PYTHON_LIB_DIR
+PYTHON_INCLUDE_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
+PYTHON_SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())"`
+PYTHON_LIB_DIR=`${PYTHON} -c "import sys; print(sys.prefix)"`/lib
 
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
@@ -59,7 +134,9 @@ if [ ${Ncpu} -gt 1 ]; then
 fi
 
 export DAE_COMPILER_FLAGS
-echo $DAE_COMPILER_FLAGS
+
+DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
+export DAE_UMFPACK_INSTALL_DIR
 
 vBOOST=1.52.0
 vBOOST_=1_52_0
@@ -100,14 +177,65 @@ COLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/colamd
 CCOLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/ccolamd
 SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
 
+# Check if any solver is specified
+if [ -z "$@" ]; then
+  usage
+  exit
+fi
+
+# Check if requested solver exist
+for solver in "$@"
+do
+  case "$solver" in
+    all)              ;;
+    boost)            ;;
+    ref_blas_lapack)  ;;
+    openblas)         ;;
+    umfpack)          ;;
+    idas)             ;;
+    trilinos)         ;;
+    superlu)          ;;
+    superlu_mt)       ;;
+    bonmin)           ;;
+    nlopt)            ;; 
+    *) echo Unrecognized solver: "$solver"
+       exit
+       ;;
+  esac
+done
+
+echo ""
+echo "###############################################################################"
+echo "Proceed with the following options:"
+echo "  - Python:                       ${PYTHON}"
+echo "  - Python include dir:           ${PYTHON_INCLUDE_DIR}"
+echo "  - Python site-packages dir:     ${PYTHON_SITE_PACKAGES_DIR}"
+echo "  - Python lib dir:               ${PYTHON_LIB_DIR}"
+echo "  - Platform:                     $PLATFORM"
+echo "  - Archicteture:                 $HOST_ARCH"
+echo "  - Additional compiler flags:    ${DAE_COMPILER_FLAGS}"
+echo "  - Number of threads:            ${Ncpu}"
+echo "  - Projects to compile:          $@"
+echo "    + Configure:                  $DO_CONFIGURE"
+echo "    + Build:                      $DO_BUILD"
+echo "    + Clean:                      $DO_CLEAN"
+echo "###############################################################################"
+echo ""
+
 # ACHTUNG! cd to TRUNK (in case the script is called from some other folder)
-cd ${TRUNK}
+cd "${TRUNK}"
 
 #######################################################
 #                       BOOST                         #
 #######################################################
-if [ ! -e boost ]; then
-  echo "Setting-up BOOST..."
+configure_boost() 
+{
+  if [ -e boost ]; then
+    rm -r boost
+  fi
+  echo ""
+  echo "[*] Setting-up BOOST..."
+  echo ""
   if [ ! -e boost_${vBOOST_}.tar.gz ]; then
     wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
   fi
@@ -115,63 +243,126 @@ if [ ! -e boost ]; then
   mv boost_${vBOOST_} boost
   cd boost
   sh bootstrap.sh
-  cd ${TRUNK}
-fi
-cd boost
-if [ ! -e stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}.so ]; then
-  echo "Building BOOST..."
-  
-  if [ -e build ]; then
-    rm -r build
-  fi
-  
-  echo "using python : ${PYTHON_MAJOR}.${PYTHON_MINOR} : python${PYTHON_MAJOR}.${PYTHON_MINOR} ;" > user-config.jam
 
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_boost() 
+{
+  cd boost
+  echo ""
+  echo "[*] Building BOOST..."
+  echo ""
+  
+  BOOST_USER_CONFIG=~/user-config.jam
+  echo "using python"                           >  ${BOOST_USER_CONFIG}
+  echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
+  echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
+  echo "    : ${PYTHON_INCLUDE_DIR}"            >> ${BOOST_USER_CONFIG}
+  echo "    : ${PYTHON_LIB_DIR}"                >> ${BOOST_USER_CONFIG}
+  echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
+  echo "    ;"                                  >> ${BOOST_USER_CONFIG}
+  
   ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
-         --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python python=${PYTHON_VERSION} \
+         --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python \
          variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
   cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
-fi
-cd ${TRUNK}
+  
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_boost()
+{
+  echo ""
+  echo "[*] Cleaning boost..."
+  echo ""
+  cd boost
+  ./bjam --clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                   OpenBLAS                          #
 #######################################################
-# if [ ! -e openblas ]; then
-#   echo "Setting-up openblas..."
-#   if [ ! -e openblas-${vOPENBLAS}.tar.gz ]; then
-#     wget ${DAETOOLS_HTTP}/openblas-${vOPENBLAS}.tar.gz
-#   fi
-#   if [ ! -e Makefile-openblas.rule ]; then
-#     wget ${DAETOOLS_HTTP}/Makefile-openblas.rule
-#   fi
-#   tar -xzf openblas-${vOPENBLAS}.tar.gz
-#   cp Makefile-openblas.rule openblas/Makefile.rule
-#   cd openblas
-#   mkdir build
-#   cd ${TRUNK}
-# fi
-# cd openblas
-# if [ ! -e libopenblas.so ]; then
-#   echo "Building openblas..."
-#   make -j${Ncpu} libs
-#   make 
-#   make prefix=build install
-#   cp -a libopenblas_daetools* ../daetools-package/solibs
-#   make clean
-# else
-#   echo "   openblas library already built"
-# fi
-# cd ${TRUNK}
+configure_openblas() 
+{
+  if [ -e openblas ]; then
+    rm -r openblas
+  fi
+  
+  echo ""
+  echo "Setting-up openblas..."
+  echo ""
+  if [ ! -e openblas-${vOPENBLAS}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/openblas-${vOPENBLAS}.tar.gz
+  fi
+  if [ ! -e Makefile-openblas.rule ]; then
+    wget ${DAETOOLS_HTTP}/Makefile-openblas.rule
+  fi
+  tar -xzf openblas-${vOPENBLAS}.tar.gz
+  cp Makefile-openblas.rule openblas/Makefile.rule
+  cd openblas
+  mkdir build
+  cd "${TRUNK}"
+  
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_openblas() 
+{
+  cd openblas
+  echo ""
+  echo "[*] Building openblas..."
+  echo ""
+  make -j${Ncpu} libs
+  make 
+  make prefix=build install
+  cp -a libopenblas_daetools* ../daetools-package/solibs
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_openblas()
+{
+  echo ""
+  echo "[*] Cleaning openblas..."
+  echo ""
+  cd openblas
+  make clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
-#                   LAPACK + BLAS                     #
+#            Reference BLAS and LAPACK                #
 #######################################################
-if [ ! -e lapack ]; then
-  echo "Setting-up lapack..."
+configure_ref_blas_lapack() 
+{
+  if [ -e lapack ]; then
+    rm -r lapack
+  fi
+  
+  echo ""
+  echo "[*] Setting-up reference blas & lapack..."
+  echo ""
   if [ ! -e lapack-${vLAPACK}.tgz ]; then
     wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
   fi
@@ -181,27 +372,51 @@ if [ ! -e lapack ]; then
   tar -xzf lapack-${vLAPACK}.tgz
   mv lapack-${vLAPACK} lapack
   cp daetools_lapack_make.inc lapack/make.inc
-  cd ${TRUNK}
-fi
-cd lapack
-if [ ! -e liblapack.a ]; then
-  echo "Building lapack..."
+  cd "${TRUNK}"
+  
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_ref_blas_lapack() 
+{
+  cd lapack
+  echo ""
+  echo "[*] Building reference blas & lapack..."
+  echo ""
   make -j${Ncpu} lapacklib
   make -j${Ncpu} blaslib
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_lapack()
+{
+  echo ""
+  echo "[*] Cleaning reference blas & lapack..."
+  echo ""
+  cd lapack
   make clean
-else
-  echo "   lapack library already built"
-fi
-cd ${TRUNK}
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                      UMFPACK                        #
 #######################################################
-if [ ! -e umfpack ]; then
-  echo "Setting-up umfpack and friends..."
-  #if [ ! -e metis-${vMETIS}.tar.gz ]; then
-  #  wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
-  #fi
+configure_umfpack() 
+{
+  if [ -e umfpack ]; then
+    rm -rf umfpack
+  fi
+  echo ""
+  echo "[*] Setting-up umfpack and friends..."
+  echo ""
   if [ ! -e SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz ]; then
     wget ${SUITESPARSE_CONFIG_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   fi 
@@ -226,6 +441,9 @@ if [ ! -e umfpack ]; then
   if [ ! -e SuiteSparse_config.mk ]; then
     wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
   fi
+  #if [ ! -e metis-${vMETIS}.tar.gz ]; then
+  #  wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
+  #fi
   #if [ ! -e metis.h ]; then
   #  wget ${DAETOOLS_HTTP}/metis.h
   #fi
@@ -235,8 +453,6 @@ if [ ! -e umfpack ]; then
   
   mkdir umfpack
   cd umfpack
-  #tar -xzf ../metis-${vMETIS}.tar.gz
-  #cp ../metis.h metis-${vMETIS}/include
   tar -xzf ../SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   tar -xzf ../CHOLMOD-${vCHOLMOD}.tar.gz
   tar -xzf ../AMD-${vAMD}.tar.gz
@@ -246,6 +462,8 @@ if [ ! -e umfpack ]; then
   tar -xzf ../UMFPACK-${vUMFPACK}.tar.gz
   cp ../SuiteSparse_config.mk SuiteSparse_config
 
+  #tar -xzf ../metis-${vMETIS}.tar.gz
+  #cp ../metis.h metis-${vMETIS}/include
   # Apply Metis 5.1.0 patch for CHOLMOD
   #cd CHOLMOD/Lib
   #patch < ../../../Makefile-CHOLMOD.patch
@@ -253,115 +471,162 @@ if [ ! -e umfpack ]; then
   mkdir build
   mkdir build/lib
   mkdir build/include
-  cd ${TRUNK}
-fi
+  cd "${TRUNK}"
+  
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
-DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
-export DAE_UMFPACK_INSTALL_DIR
+compile_umfpack() 
+{
+#  cd umfpack/metis-${vMETIS}
+#  echo "[*] Building metis..."
+#  echo "make config prefix=${DAE_UMFPACK_INSTALL_DIR} shared=0 -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
+#  make config prefix=${DAE_UMFPACK_INSTALL_DIR} -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
+#  make install
+#  echo ""
+#  echo "[*] Done!"
+#  echo ""
+#  cd "${TRUNK}"
 
-# cd ${TRUNK}
-# cd umfpack/metis-${vMETIS}
-# if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libmetis.a ]; then
-#   echo "Building metis..."
-#   echo "make config prefix=${DAE_UMFPACK_INSTALL_DIR} shared=0 -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}""
-#   make config prefix=${DAE_UMFPACK_INSTALL_DIR} -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
-#   make install
-#   make clean
-# else
-#   echo "   metis library already built"
-# fi
-
-cd ${TRUNK}
-cd umfpack/SuiteSparse_config
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libsuitesparseconfig.a ]; then
-  echo "Building suitesparseconfig..."
-  echo "make cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/SuiteSparse_config
+  echo ""
+  echo "[*] Building suitesparseconfig..."
+  echo ""
+  #echo "make cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   make clean
-else
-  echo "   suitesparseconfig library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/AMD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libamd.a ]; then
-  echo "Building amd..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/AMD
+  echo ""
+  echo "[*] Building amd..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   amd library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/CAMD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcamd.a ]; then
-  echo "Building camd..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/CAMD
+  echo ""
+  echo "[*] Building camd..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   camd library already built"
-fi
+  echo "[*] Done!"
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/COLAMD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcolamd.a ]; then
-  echo "Building colamd..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/COLAMD
+  echo ""
+  echo "[*] Building colamd..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   colamd library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/CCOLAMD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libccolamd.a ]; then
-  echo "Building ccolamd..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/CCOLAMD
+  echo ""
+  echo "[*] Building ccolamd..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   ccolamd library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/CHOLMOD
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libcholmod.a ]; then
-  echo "Building cholmod..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/CHOLMOD
+  echo ""
+  echo "[*] Building cholmod..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   cholmod library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
 
-cd ${TRUNK}
-cd umfpack/UMFPACK
-if [ ! -e ${DAE_UMFPACK_INSTALL_DIR}/lib/libumfpack.${vUMFPACK}.a ]; then
-  echo "Building umfpack..."
-  echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  cd umfpack/UMFPACK
+  echo ""
+  echo "[*] Building umfpack..."
+  echo ""
+  #echo "make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make -j${Ncpu} cc=gcc F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
-  make clean
-else
-  echo "   umfpack library already built"
-fi
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
 
-cd ${TRUNK}
+clean_umfpack()
+{
+  echo ""
+  echo "[*] Cleaning umfpack..."
+  echo ""
+  #cd umfpack/metis-${vMETIS}
+  #make clean
+  #cd "${TRUNK}"
+  
+  cd umfpack/SuiteSparse_config
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/AMD
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/CAMD
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/COLAMD
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/CCOLAMD
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/CHOLMOD
+  make clean
+  cd "${TRUNK}"
+  
+  cd umfpack/UMFPACK
+  make clean
+  cd "${TRUNK}"
+  
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                       IDAS                          #
 #######################################################
-if [ ! -e idas ]; then
+configure_idas() 
+{
+  if [ -e idas ]; then
+    rm -r idas
+  fi
+  echo ""
   echo "[*] Setting-up idas..."
+  echo ""
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
     wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
   fi
@@ -374,24 +639,50 @@ if [ ! -e idas ]; then
   patch < ../idasMakefile.in.patch
   mkdir build
   ./configure --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-examples --enable-static=yes --enable-shared=no --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
-  cd ${TRUNK}
-fi
-cd idas
-if [ ! -e build/lib/libsundials_idas.a ]; then
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_idas() 
+{
+  cd idas
+  echo ""
   echo "[*] Building idas..."
+  echo ""
   make 
   make install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_idas()
+{
+  echo ""
+  echo "[*] Cleaning idas..."
+  echo ""
+  cd idas
   make clean
-else
-  echo "[*] idas library already built"
-fi
-cd ${TRUNK}
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                     SUPERLU                         #
 #######################################################
-if [ ! -e superlu ]; then
+configure_superlu() 
+{
+  if [ -e superlu ]; then
+    rm -r superlu
+  fi
+  echo ""
   echo "[*] Setting-up superlu..."
+  echo ""
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
@@ -402,22 +693,49 @@ if [ ! -e superlu ]; then
   mv SuperLU_${vSUPERLU} superlu
   cd superlu
   tar -xzf ../superlu_makefiles.tar.gz
-  cd ${TRUNK}
-fi
-cd superlu
-if [ ! -e lib/libsuperlu_${vSUPERLU}.a ]; then
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_superlu() 
+{
+  cd superlu
+  echo ""
   echo "[*] Building superlu..."
+  echo ""
   make superlulib
-else
-  echo "[*] superlu library already built"
-fi
-cd ${TRUNK}
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_superlu()
+{
+  echo ""
+  echo "[*] Cleaning superlu..."
+  echo ""
+  cd superlu
+  make cleanlib
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                    SUPERLU_MT                       #
 #######################################################
-if [ ! -e superlu_mt ]; then
+configure_superlu_mt() 
+{
+  if [ -e superlu_mt ]; then
+    rm -r superlu_mt
+  fi
+  echo ""
   echo "[*] Setting-up superlu_mt..."
+  echo ""
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
@@ -428,22 +746,49 @@ if [ ! -e superlu_mt ]; then
   mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
   cd superlu_mt
   tar -xzf ../superlu_mt_makefiles.tar.gz
-  cd ${TRUNK}
-fi
-cd superlu_mt
-if [ ! -e lib/libsuperlu_mt_${vSUPERLU_MT}.a ]; then
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_superlu_mt() 
+{
+  cd superlu_mt
+  echo ""
   echo "[*] Building superlu_mt..."
+  echo ""
   make lib
-else
-  echo "[*] superlu_mt library already built"
-fi
-cd ${TRUNK}
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_superlu_mt()
+{
+  echo ""
+  echo "[*] Cleaning superlu_mt..."
+  echo ""
+  cd superlu_mt
+  make cleanlib
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                      BONMIN                         #
 #######################################################
-if [ ! -e bonmin ]; then
+configure_bonmin() 
+{
+  if [ -e bonmin ]; then
+    rm -r bonmin
+  fi
+  echo ""
   echo "[*] Setting-up bonmin..."
+  echo ""
   if [ ! -e Bonmin-${vBONMIN}.zip ]; then
     wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
   fi
@@ -456,25 +801,49 @@ if [ ! -e bonmin ]; then
   mkdir -p build
   cd build
   ../configure --disable-dependency-tracking --enable-shared=no --enable-static=yes ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS="${DAE_COMPILER_FLAGS}"
-  cd ${TRUNK}
-fi
-cd bonmin/build
-if [ ! -e lib/libbonmin.a ]; then
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_bonmin() 
+{
+  cd bonmin/build
   echo "[*] Building bonmin..."
   make -j${Ncpu}
   make test
   make install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_bonmin()
+{
+  echo ""
+  echo "[*] Cleaning bonmin..."
+  echo ""
+  cd bonmin/build
   make clean
-else
-  echo "[*] bonmin library already built"
-fi
-cd ${TRUNK}
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                      NLOPT                          #
 #######################################################
-if [ ! -e nlopt ]; then
+configure_nlopt() 
+{
+  if [ -e nlopt ]; then
+    rm -r nlopt
+  fi
+  echo ""
   echo "[*] Setting-up nlopt..."
+  echo ""
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
     wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
@@ -484,23 +853,46 @@ if [ ! -e nlopt ]; then
   mkdir build
   cd build
   ../configure --disable-dependency-tracking -prefix=${TRUNK}/nlopt/build CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
-  cd ${TRUNK}
-fi
-cd nlopt/build
-if [ ! -e lib/libnlopt.a ]; then
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_nlopt() 
+{
+  cd nlopt/build
   echo "[*] Building nlopt..."
   make
   make install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_nlopt()
+{
+  echo ""
+  echo "[*] Cleaning nlopt..."
+  echo ""
+  cd nlopt/build
   make clean
-else
-  echo "[*] nlopt library already built"
-fi
-cd ${TRUNK}
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                   TRILINOS                          #
 #######################################################
-if [ ! -e trilinos ]; then
+configure_trilinos() 
+{
+  if [ -e trilinos ]; then
+    rm -r trilinos
+  fi
+  
   echo "[*] Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
@@ -547,18 +939,218 @@ if [ ! -e trilinos ]; then
     $EXTRA_ARGS \
     ${TRILINOS_HOME}
   
-  cd ${TRUNK}
-fi
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
-cd trilinos/build
-if [ ! -e lib/libamesos.a ]; then
+compile_trilinos() 
+{
+  cd trilinos/build
   echo "[*] Building trilinos..."
   make -j${Ncpu}
   make install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_trilinos()
+{
+  echo ""
+  echo "[*] Cleaning trilinos..."
+  echo ""
+  cd trilinos/build
   make clean
-else
-  echo "[*] trilinos library already built"
-fi
-cd ${TRUNK}
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 
+#######################################################
+#                Actual work                          #
+#######################################################
+for solver in "$@"
+do
+  case "$solver" in
+    all)              if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_boost
+                        configure_ref_blas_lapack
+                        #configure_openblas
+                        configure_umfpack
+                        configure_idas
+                        configure_superlu
+                        configure_superlu_mt
+                        configure_trilinos
+                        configure_bonmin
+                        configure_nlopt
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_boost
+                        compile_ref_blas_lapack
+                        #compile_openblas
+                        compile_umfpack
+                        compile_idas
+                        compile_superlu
+                        compile_superlu_mt
+                        compile_trilinos
+                        compile_bonmin
+                        compile_nlopt
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_boost
+                        clean_ref_blas_lapack
+                        #clean_openblas
+                        clean_umfpack
+                        clean_idas
+                        clean_superlu
+                        clean_superlu_mt
+                        clean_trilinos
+                        clean_bonmin
+                        clean_nlopt
+                      fi
+                      ;;
+    
+    boost)            if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_boost
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_boost
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_boost
+                      fi
+                      ;;
+                      
+    ref_blas_lapack)  if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_ref_blas_lapack
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_ref_blas_lapack
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_ref_blas_lapack
+                      fi
+                      ;;
+                      
+    openblas)         if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_openblas
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_openblas
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_openblas
+                      fi
+                      ;;
+                      
+    umfpack)          if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_umfpack
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_umfpack
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_umfpack
+                      fi
+                      ;;
+                      
+    idas)             if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_idas
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_idas
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_idas
+                      fi
+                      ;;
+                      
+    trilinos)         if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_trilinos
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_trilinos
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_trilinos
+                      fi
+                      ;;
+                      
+    superlu)          if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_superlu
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_superlu
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_superlu
+                      fi
+                      ;;
+                      
+    superlu_mt)       if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_superlu_mt
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_superlu_mt
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_superlu_mt
+                      fi
+                      ;;
+                      
+    bonmin)           if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_bonmin
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_bonmin
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_bonmin
+                      fi
+                      ;;
+                      
+    nlopt)            if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_nlopt
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_nlopt
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_nlopt
+                      fi
+                      ;; 
+                      
+    *) echo Unrecognized solver: "$solver"
+       exit
+       ;;
+  esac
+done
+
+cd "${TRUNK}"

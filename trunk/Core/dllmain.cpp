@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "coreimpl.h"
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
