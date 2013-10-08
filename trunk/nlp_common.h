@@ -1,6 +1,7 @@
 #ifndef NLPSOLVER_COMMON_H
 #define NLPSOLVER_COMMON_H
 
+#include <iostream>
 #include "../Core/optimization.h"
 #include "../Core/helpers.h"
 #include <boost/functional/hash.hpp>
@@ -34,10 +35,7 @@ public:
 		m_pLog			= NULL;
 		m_iRunCounter	= 0;
 		m_bPrintInfo	= false;
-
-        char buffer[L_tmpnam];
-        tmpnam(buffer);
-        m_strReinitializationFileName = buffer;
+        m_bInitializationFileProvided = false;
 	}
 	
 	virtual ~daeNLPCommon(void)
@@ -49,7 +47,8 @@ public:
               daeSimulation_t*   pSimulation, 
 			  daeDAESolver_t*    pDAESolver, 
 			  daeDataReporter_t* pDataReporter, 
-			  daeLog_t*          pLog)
+              daeLog_t*          pLog,
+              const std::string& initializationFile = std::string(""))
 	{
         if(!pOptimization)
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -70,6 +69,41 @@ public:
 			throw e;
 		}
 	
+        if(initializationFile.empty())
+        {
+        // Ask libc to create a temporary filename
+            char buffer[L_tmpnam];
+            tmpnam(buffer);
+
+            m_bInitializationFileProvided = false;
+            m_InitializationFile          = buffer;
+
+        // Check if file can be opened for both for reading and writing
+            std::ofstream file(m_InitializationFile.c_str());
+            if(!file.good())
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot open initialization file for optimization: " << m_InitializationFile;
+                throw e;
+            }
+            file.close();
+        }
+        else
+        {
+            m_bInitializationFileProvided = true;
+            m_InitializationFile          = initializationFile;
+
+        // Check if file can be opened for reading
+            std::ifstream file(m_InitializationFile.c_str());
+            if(!file.good())
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot open initialization file for optimization: " << m_InitializationFile;
+                throw e;
+            }
+            file.close();
+        }
+
         m_pOptimization = pOptimization;
 		m_pSimulation   = pSimulation;
 		m_pDAESolver    = pDAESolver;
@@ -252,68 +286,90 @@ protected:
 		m_pLog->IncreaseIndent(1);
 		m_pLog->Message(string("Starting the run No. ") + toString(m_iRunCounter + 1) + string(" ..."), 0);
 		
-		m_pSimulation->RegisterData((boost::format("Iter_%05d") % m_iRunCounter).str());
+        try
+        {
+            m_pSimulation->RegisterData((boost::format("Iter_%05d") % m_iRunCounter).str());
 
-        m_pOptimization->StartIterationRun(m_iRunCounter+1);
-        
-		if(m_iRunCounter == 0)
-		{
-		// 1. Re-assign the optimization variables
-			for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-			{
-				pOptVariable = m_ptrarrOptVariables[i];
-				pOptVariable->SetValue(x[i]);
-			}
-			
-        // 2a. Calculate initial conditions
-			m_pSimulation->SolveInitial();
+            m_pOptimization->StartIterationRun(m_iRunCounter+1);
 
-        // 2b. Save initialization values in a temp file
-            m_pSimulation->StoreInitializationValues(m_strReinitializationFileName);
-			
-		// 3. Run the simulation
-			m_pSimulation->Run();
-		}
-		else
-		{		
-        // 1a. Set again the initial conditions, values, tolerances, active states etc
-			m_pSimulation->SetUpVariables();
+            if(m_iRunCounter == 0)
+            {
+            // 1a. Re-assign the optimization variables
+                for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+                {
+                    pOptVariable = m_ptrarrOptVariables[i];
+                    pOptVariable->SetValue(x[i]);
+                }
 
-        // 1b. Save initialization values in a temp file
-            m_pSimulation->LoadInitializationValues(m_strReinitializationFileName);
+            // 1b. Load initialization values (if provided)
+                if(m_bInitializationFileProvided)
+                    m_pSimulation->LoadInitializationValues(m_InitializationFile);
 
-		// 2. Re-assign the optimization variables
-			for(i = 0; i < m_ptrarrOptVariables.size(); i++)
-			{
-				pOptVariable = m_ptrarrOptVariables[i];
-				pOptVariable->SetValue(x[i]);
-			}
-				
-        // 3. Reset simulation and DAE solver (will reset sensitivities to zero)
-			m_pSimulation->Reset();
-		
-        // 4. Reinitialize the system and report the results
-            m_pSimulation->Reinitialize();
-            m_pSimulation->ReportData(m_pSimulation->GetCurrentTime());
+            // 2a. Calculate initial conditions
+                m_pSimulation->SolveInitial();
 
-		// 5. Run the simulation
-			m_pSimulation->Run();
-		}
-        
-        m_pOptimization->EndIterationRun(m_iRunCounter+1);
-		
-		m_iRunCounter++;
-		
-	// Print After Run
-		if(m_bPrintInfo) 
-		{
-			m_pLog->Message("Values after Run", 0);
-			PrintObjectiveFunction();
-			PrintOptimizationVariables();
-			PrintConstraints();
-		}
-		
-		m_pLog->Message(string(" "), 0);
+            // 2b. Save initialization values (if not provided - to avoid overwriting it)
+                if(!m_bInitializationFileProvided)
+                    m_pSimulation->StoreInitializationValues(m_InitializationFile);
+
+            // 3. Run the simulation
+                m_pSimulation->Run();
+            }
+            else
+            {
+            // 1a. Set again the initial conditions, values, tolerances, active states etc
+                m_pSimulation->SetUpVariables();
+
+            // 1b. Load initialization values in a temp file
+                m_pSimulation->LoadInitializationValues(m_InitializationFile);
+
+            // 2. Re-assign the optimization variables
+                for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+                {
+                    pOptVariable = m_ptrarrOptVariables[i];
+                    pOptVariable->SetValue(x[i]);
+                }
+
+            // 3. Reset simulation and DAE solver (will reset sensitivities to zero)
+                m_pSimulation->Reset();
+
+            // 4. Reinitialize the system and report the results
+                m_pSimulation->Reinitialize();
+                m_pSimulation->ReportData(m_pSimulation->GetCurrentTime());
+
+            // 5. Run the simulation
+                m_pSimulation->Run();
+            }
+
+            m_pOptimization->EndIterationRun(m_iRunCounter+1);
+
+            m_iRunCounter++;
+
+        // Print After Run
+            if(m_bPrintInfo)
+            {
+                m_pLog->Message("Values after Run", 0);
+                PrintObjectiveFunction();
+                PrintOptimizationVariables();
+                PrintConstraints();
+            }
+        }
+        catch(std::exception& exc)
+        {
+        // Restore the indent back
+            m_pLog->Message(string(" "), 0);
+            m_pLog->DecreaseIndent(1);
+            throw;
+        }
+        catch(...)
+        {
+         // Restore the indent back
+            m_pLog->Message(string(" "), 0);
+            m_pLog->DecreaseIndent(1);
+        }
+
+        // Restore the indent back
+        m_pLog->Message(string(" "), 0);
 		m_pLog->DecreaseIndent(1);
 	}
 	
@@ -501,7 +557,8 @@ public:
 	
     int         m_iRunCounter;
     bool        m_bPrintInfo;
-    std::string m_strReinitializationFileName;
+    bool        m_bInitializationFileProvided;
+    std::string m_InitializationFile;
 };
 
 }

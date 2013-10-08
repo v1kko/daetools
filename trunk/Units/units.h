@@ -28,7 +28,7 @@ public:
 /**************************************************************
 		base_unit
 **************************************************************/
-const std::string __string_unit_delimiter__  = " ";
+const std::string __string_unit_delimiter__  = " * ";
 
 class base_unit
 {

@@ -1038,7 +1038,7 @@ void daeSimulation::LoadInitializationValues(const std::string& strFileName) con
         daeDeclareAndThrowException(exInvalidPointer);
 	
 // Load values into the m_pDataProxy->m_pdarrValuesReferences
-	m_pModel->LoadInitializationValues(strFileName);
+    m_pModel->LoadInitializationValues(strFileName);
 }
 
 void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)

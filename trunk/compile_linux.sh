@@ -8,6 +8,7 @@ cat << EOF
 usage: $0 [options] projects
 
 This script compiles specified daetools libraries and python extension modules.
+
 Typical use (compiles all daetools libraries and python extension modules):
     sh compile_linux.sh all
 
@@ -178,7 +179,7 @@ echo "Proceed with the following options:"
 echo "  - Qmake-spec:           ${SPEC}"
 echo "  - Python:               ${PYTHON}"
 echo "  - Platform:             $PLATFORM"
-echo "  - Archicteture:         $HOST_ARCH"
+echo "  - Architecture:         $HOST_ARCH"
 echo "  - Number of threads:    ${Ncpu}"
 echo "  - Projects to compile:  $@"
 echo "###############################################################################"

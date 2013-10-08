@@ -124,8 +124,16 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def(double() >= self)
 		;
 	
+
+    boost::python::dict all_si_and_derived_units;
+
     std::map<std::string, base_unit>& bu = unit::get_base_units();
 	for(std::map<std::string, base_unit>::iterator iter = bu.begin(); iter != bu.end(); iter++)
-		scope().attr((*iter).first.c_str()) = unit((*iter).first, 1.0);
+    {
+        all_si_and_derived_units[(*iter).first] = unit((*iter).first, 1.0);
+        scope().attr((*iter).first.c_str()) = unit((*iter).first, 1.0);
+    }
+
+    scope().attr("all_si_and_derived_units") = all_si_and_derived_units;
 }
 

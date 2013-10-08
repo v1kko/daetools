@@ -87,9 +87,10 @@ void daeNLOPTSolver::Initialize(daeOptimization_t* pOptimization,
                                 daeSimulation_t* pSimulation, 
 								daeDAESolver_t* pDAESolver, 
 								daeDataReporter_t* pDataReporter, 
-								daeLog_t* pLog)
+                                daeLog_t* pLog,
+                                const std::string& initializationFile)
 {
-	daeNLPCommon::Init(pOptimization, pSimulation, pDAESolver, pDataReporter, pLog);
+    daeNLPCommon::Init(pOptimization, pSimulation, pDAESolver, pDataReporter, pLog, initializationFile);
 	
 	daeNLPCommon::CheckProblem(m_ptrarrOptVariables);
 
@@ -413,16 +414,23 @@ void daeNLOPTSolver::CheckAndRun(const double* x)
 		}
 	}
 
-	if(!bPreviousRun)
-	{
-		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+    try
+    {
+        if(!bPreviousRun)
+        {
+            daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 
-		for(size_t i = 0; i < m_ptrarrOptVariables.size(); i++)
-		{
-			pOptVariable = m_ptrarrOptVariables[i];
-			pOptVariable->SetValue(x[i]);
-		}
-	}
+            for(size_t i = 0; i < m_ptrarrOptVariables.size(); i++)
+            {
+                pOptVariable = m_ptrarrOptVariables[i];
+                pOptVariable->SetValue(x[i]);
+            }
+        }
+    }
+    catch(std::exception& e)
+    {
+        m_pLog->Message(string("Exception occurred: ") + e.what(), 0);
+    }
 }
 
 string daeNLOPTSolver::CreateNLOPTErrorMessage(nlopt_result status)

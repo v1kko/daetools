@@ -1,7 +1,10 @@
-"""********************************************************************************
-                             daeSimulator.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+***********************************************************************************
+                               simulator.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2013
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -10,7 +13,8 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FO
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+***********************************************************************************
+"""
 import os, platform, sys, tempfile, traceback, webbrowser, math
 from os.path import join, realpath, dirname
 from daetools.pyDAE import *

@@ -29,7 +29,8 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 								 daeNLPSolver_t*    pNLPSolver, 
 								 daeDAESolver_t*    pDAESolver, 
 								 daeDataReporter_t* pDataReporter, 
-								 daeLog_t*          pLog)
+                                 daeLog_t*          pLog,
+                                 const std::string& initializationFile)
 {
 	if(m_bIsInitialized)
 	{
@@ -65,11 +66,12 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 	m_pNLPSolver	     = pNLPSolver;
 	m_pDAESolver		 = pDAESolver;
 	m_pDataReporter		 = pDataReporter;
-	m_pLog			     = pLog;
-	
+	m_pLog			     = pLog;	
+    m_InitializationFile = initializationFile;
+
 	m_pSimulation->SetSimulationMode(eOptimization);
 	m_pSimulation->Initialize(m_pDAESolver, m_pDataReporter, m_pLog, true);
-	m_pNLPSolver->Initialize(this, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
+    m_pNLPSolver->Initialize(this, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog, m_InitializationFile);
 
 	m_bIsInitialized = true;
 	

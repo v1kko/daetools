@@ -688,86 +688,87 @@ public:
 	void Load(const std::string& strFileName)
 	{
 		double dValue;
-		boost::uint32_t nTotalNumberOfVariables, nFloatTypeSize;
+        boost::uint32_t nTotalNumberOfVariables;
 		size_t counter, nFileSize, nRequiredFileSize;
 		std::ifstream file;
 		
-		try
-		{
-			if(!m_pLog)
-				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
-			
-            if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
-			{
-				m_pLog->Message(string("Simulation has not been initialized"), 0);
-				return;
-			}
-            if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
-			{
-				m_pLog->Message(string("Invalid number of variables"), 0);
-				return;
-			}
+        if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot load initialization file: " << strFileName << ": simulation has not been initialized";
+            throw e;
+        }
+        if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot load initialization file: " << strFileName << ": invalid number of variables";
+            throw e;
+        }
 
-			file.open(strFileName.c_str(), std::ios_base::in | std::ios_base::binary);
-			if(!file.is_open())
-			{
-				m_pLog->Message(string("Cannot open the initialization file: ") + strFileName, 0);
-				return;
-			}
-			
-			file.seekg(0, std::ifstream::end);
-			nFileSize = file.tellg();
-			file.seekg(0);
-			
-			nRequiredFileSize = sizeof(boost::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
-			if(nFileSize != nRequiredFileSize)
-			{
-				m_pLog->Message(string("The file size of the initialization file ") + 
-						        strFileName + string(" does not match; required: ") + 
-						        toString<size_t>(nRequiredFileSize) + string(", but available: ") + 
-								toString<size_t>(nFileSize), 0);
-				return;
-			}
-			
-			file.read((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
-			if(m_nTotalNumberOfVariables != nTotalNumberOfVariables)
-			{
-				m_pLog->Message(string("The number of variables in the initialization file ") + 
-								strFileName + string(": ") + toString<size_t>(nTotalNumberOfVariables) + 
-								string(" does not match the number of variables in the simulation: ") + 
-								toString<size_t>(m_nTotalNumberOfVariables), 0);
-				return;
-			}
+        try
+        {
+            file.open(strFileName.c_str(), std::ios_base::in | std::ios_base::binary);
+            file.seekg(0, std::ifstream::end);
+            nFileSize = file.tellg();
+            file.seekg(0);
+            file.read((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
+        }
+        catch(std::exception& exc)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "An error occured while loading the initialization file: " <<
+                 strFileName << "; " << exc.what();
+            throw e;
+        }
 
-			counter = 0;
-			while(file.good() && counter < m_nTotalNumberOfVariables)
-			{
-				file.read((char*)(&dValue), sizeof(double));
+        nRequiredFileSize = sizeof(boost::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
+        if(nFileSize != nRequiredFileSize)
+        {
+            daeDeclareException(exInvalidCall);
+            e << string("The file size of the initialization file ") <<
+                 strFileName + string(" does not match; required: ") <<
+                 toString<size_t>(nRequiredFileSize) + string(", but available: ") <<
+                 toString<size_t>(nFileSize);
+            throw e;
+        }
+
+        if(m_nTotalNumberOfVariables != nTotalNumberOfVariables)
+        {
+            daeDeclareException(exInvalidCall);
+            e << string("The number of variables in the initialization file ") <<
+                 strFileName + string(": ") << toString<size_t>(nTotalNumberOfVariables) <<
+                 string(" does not match the number of variables in the simulation: ") <<
+                 toString<size_t>(m_nTotalNumberOfVariables);
+            throw e;
+        }
+
+        try
+        {
+            counter = 0;
+            while(file.good() && counter < m_nTotalNumberOfVariables)
+            {
+                file.read((char*)(&dValue), sizeof(double));
                 *(m_pdarrValuesReferences[counter]) = static_cast<real_t>(dValue);
-				counter++;
-			}
-			
-			if(counter < m_nTotalNumberOfVariables)
-			{
-				m_pLog->Message(string("The initialization file does not contain: ") + 
-								toString<size_t>(m_nTotalNumberOfVariables) + 
-								string(" variables; found: ") + 
-								toString<size_t>(counter), 0);
-				return;
-			}
-			
-			file.close();
-			m_pLog->Message(string("The initialization file: ") + 
-							strFileName + 
-							string(" loaded successfuly!"), 0);
-		}
-		catch(std::exception& e)
-		{
-			m_pLog->Message(string("An error occured while loading the initialization file: ") + 
-							strFileName + 
-							string("; ") + 
-							e.what(), 0);
-		}
+                counter++;
+            }
+            file.close();
+        }
+        catch(std::exception& exc)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "An error occured while loading the initialization file: " <<
+                 strFileName << "; " << exc.what();
+            throw e;
+        }
+
+        if(counter < m_nTotalNumberOfVariables)
+        {
+            daeDeclareException(exInvalidCall);
+            e << string("The initialization file does not contain: ") <<
+                 toString<size_t>(m_nTotalNumberOfVariables) <<
+                 string(" variables; found: ") << toString<size_t>(counter);
+            throw e;
+        }
 	}
 
 	void Store(const std::string& strFileName) const
@@ -775,53 +776,43 @@ public:
 		double dValue;
 		std::ofstream file;
 		boost::uint32_t nTotalNumberOfVariables;
-		
-		try
-		{
-			if(!m_pLog)
-				std::cout << "Invalid Log in daeDataProxy_t" << std::endl;
-			
-			if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
-			{
-				m_pLog->Message(string("Simulation has not been initialized"), 0);
-				return;
-			}
-            if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
-			{
-				m_pLog->Message(string("Invalid number of variables"), 0);
-				return;
-			}
-			
-			file.open(strFileName.c_str(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
-			if(!file.is_open())
-			{
-				m_pLog->Message(string("Cannot open the initialization file: ") + strFileName, 0);
-				return;
-			}
-	
-			nTotalNumberOfVariables = static_cast<boost::uint32_t>(m_nTotalNumberOfVariables);
-			file.write((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
-			
-			for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
-			{
-				dValue = *(m_pdarrValuesReferences[i]);
-				file.write((char*)(&dValue), sizeof(double));
-			}
-			
-			file.flush();
-			file.close();
 
-			m_pLog->Message(string("The initialization file: ") + 
-							strFileName + 
-							string(" stored successfuly!"), 0);
-		}
-		catch(std::exception& e)
-		{
-			m_pLog->Message(string("An error occured while storing the initialization file: ") + 
-							strFileName + 
-							string("; ") + 
-							e.what(), 0);
-		}
+        if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot store initialization file: " << strFileName << ": simulation has not been initialized";
+            throw e;
+        }
+        if(m_nTotalNumberOfVariables != m_pdarrValuesReferences.size())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot store initialization file: " << strFileName << ": invalid number of variables";
+            throw e;
+        }
+
+        try
+        {
+            file.open(strFileName.c_str(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+
+            nTotalNumberOfVariables = static_cast<boost::uint32_t>(m_nTotalNumberOfVariables);
+            file.write((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
+
+            for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
+            {
+                dValue = *(m_pdarrValuesReferences[i]);
+                file.write((char*)(&dValue), sizeof(double));
+            }
+
+            file.flush();
+            file.close();
+        }
+        catch(std::exception& exc)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "An error occured while storing the initialization file: " <<
+                 strFileName << "; " << exc.what();
+            throw e;
+        }
 	}
 
 	size_t GetTotalNumberOfVariables(void) const

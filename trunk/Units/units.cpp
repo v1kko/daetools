@@ -13,9 +13,9 @@ inline std::string to_string(const std::string& name, double exponent)
 	if(exponent == 1)
 		return name;
 	if((int)exponent == exponent)
-		return (boost::format("%1%^%2%") % name % (int)exponent).str();
+        return (boost::format("%1%**%2%") % name % (int)exponent).str();
 	else	
-		return (boost::format("%1%^%2%") % name % exponent).str();
+        return (boost::format("%1%**%2%") % name % exponent).str();
 }
 
 inline void to_string_and_add(const std::string& name, double exponent, std::vector<std::string>& arrUnits)
@@ -350,7 +350,7 @@ const unit unit::operator^(double exponent) const
 
 const unit unit::operator^(const unit& other) const
 {
-	throw units_error((boost::format("Invalid operation: %1% ^ %2%") % *this % other).str());
+    throw units_error((boost::format("Invalid operation: %1% ** %2%") % *this % other).str());
 	return unit();	
 }
 
@@ -429,9 +429,9 @@ std::string unit::toString(void) const
 		strPositive = "1"; 
 
 	if(arrNegative.size() == 0)
-		return (boost::format("[%1%]") % strPositive).str();
+        return (boost::format("%1%") % strPositive).str();
 	else
-		return (boost::format("[%1%/%2%]") % strPositive % strNegative).str();
+        return (boost::format("%1%/%2%") % strPositive % strNegative).str();
 }
 
 std::string unit::toLatex(void) const

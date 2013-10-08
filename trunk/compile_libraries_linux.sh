@@ -8,15 +8,19 @@ cat << EOF
 usage: $0 [options] libs/solvers
 
 This script compiles third party libraries/solvers necessary to build daetools.
-Typical usage (configure and build all libraries/solvers):
-    sh compile_libraries_linux.sh -cb all
+
+Typical usage (configure and then build all libraries/solvers):
+    ./compile_libraries_linux.sh all
 
 OPTIONS:
    -h | --help                      Show this message.
+   
+   Control options (if not set default is: -c -b):
    -c | --configure                 Configure library/solver.
    -b | --build                     Build library/solver.
    -e | --clean                     Clean library/solver.
-   One of the following:
+   
+   Python options (if not set use system's default python). One of the following:
         --with-python-binary        Path to python binary to use.
         --with-python-version       Version of the system's python.
                                     Format: major.minor (i.e 2.7).
@@ -177,33 +181,39 @@ COLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/colamd
 CCOLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/ccolamd
 SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
 
-# Check if any solver is specified
-if [ -z "$@" ]; then
-  usage
-  exit
+# If no option is set use defaults
+if [ "${DO_CONFIGURE}" = "no" -a "${DO_BUILD}" = "no" -a "${DO_CLEAN}" = "no" ]; then
+    DO_CONFIGURE="yes"
+    DO_BUILD="yes"
+    DO_CLEAN="no"
 fi
 
-# Check if requested solver exist
-for solver in "$@"
-do
-  case "$solver" in
-    all)              ;;
-    boost)            ;;
-    ref_blas_lapack)  ;;
-    openblas)         ;;
-    umfpack)          ;;
-    idas)             ;;
-    trilinos)         ;;
-    superlu)          ;;
-    superlu_mt)       ;;
-    bonmin)           ;;
-    nlopt)            ;; 
-    *) echo Unrecognized solver: "$solver"
-       exit
-       ;;
-  esac
-done
-
+if [ -z "$@" ]; then
+    # If no project is specified compile all
+    usage
+    exit
+else
+    # Check if requested solver exist
+    for solver in "$@"
+    do
+    case "$solver" in
+        all)              ;;
+        boost)            ;;
+        ref_blas_lapack)  ;;
+        openblas)         ;;
+        umfpack)          ;;
+        idas)             ;;
+        trilinos)         ;;
+        superlu)          ;;
+        superlu_mt)       ;;
+        bonmin)           ;;
+        nlopt)            ;; 
+        *) echo Unrecognized solver: "$solver"
+        exit
+        ;;
+    esac
+    done
+fi
 echo ""
 echo "###############################################################################"
 echo "Proceed with the following options:"
@@ -212,13 +222,13 @@ echo "  - Python include dir:           ${PYTHON_INCLUDE_DIR}"
 echo "  - Python site-packages dir:     ${PYTHON_SITE_PACKAGES_DIR}"
 echo "  - Python lib dir:               ${PYTHON_LIB_DIR}"
 echo "  - Platform:                     $PLATFORM"
-echo "  - Archicteture:                 $HOST_ARCH"
+echo "  - Architecture:                 $HOST_ARCH"
 echo "  - Additional compiler flags:    ${DAE_COMPILER_FLAGS}"
 echo "  - Number of threads:            ${Ncpu}"
 echo "  - Projects to compile:          $@"
-echo "    + Configure:                  $DO_CONFIGURE"
-echo "    + Build:                      $DO_BUILD"
-echo "    + Clean:                      $DO_CLEAN"
+echo "     + Configure:  [$DO_CONFIGURE]"
+echo "     + Build:      [$DO_BUILD]"
+echo "     + Clean:      [$DO_CLEAN]"
 echo "###############################################################################"
 echo ""
 

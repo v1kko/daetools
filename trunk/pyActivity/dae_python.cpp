@@ -219,7 +219,8 @@ BOOST_PYTHON_MODULE(pyActivity)
                                                                        arg("nlpSolver"), 
                                                                        arg("daeSolver"),
                                                                        arg("dataReporter"),
-                                                                       arg("log")
+                                                                       arg("log"),
+                                                                       arg("initializationFile") = std::string("")
                                                                      ), DOCSTR_daeOptimization_Initialize)
 		.def("Run",                    &daeOptimization::Run,        ( arg("self") ), DOCSTR_daeOptimization_Run)
 		.def("Finalize",               &daeOptimization::Finalize,   ( arg("self") ), DOCSTR_daeOptimization_Finalize)

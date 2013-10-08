@@ -187,7 +187,8 @@ public:
 					        daeNLPSolver_t*    pNLPSolver, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog);
+                            daeLog_t*          pLog,
+                            const std::string& initializationFile = std::string(""));
 	virtual void Run(void);
 	virtual void Finalize(void);
 	
@@ -195,14 +196,15 @@ public:
     virtual void EndIterationRun(int iteration);
     
 protected:
-	daeSimulation_t*			m_pSimulation;
-	daeLog_t*					m_pLog;
-	daeNLPSolver_t*				m_pNLPSolver;
-	daeDataReporter_t*			m_pDataReporter;
-	daeDAESolver_t*				m_pDAESolver;
-	bool						m_bIsInitialized;
-	double						m_Initialization;
-	double						m_Optimization;
+    daeSimulation_t*	m_pSimulation;
+    daeLog_t*			m_pLog;
+    daeNLPSolver_t*		m_pNLPSolver;
+    daeDataReporter_t*	m_pDataReporter;
+    daeDAESolver_t*		m_pDAESolver;
+    std::string         m_InitializationFile;
+    bool				m_bIsInitialized;
+    double				m_Initialization;
+    double				m_Optimization;
 };
 
 

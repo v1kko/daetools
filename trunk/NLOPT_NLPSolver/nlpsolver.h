@@ -46,7 +46,8 @@ public:
                             daeSimulation_t*   pSimulation, 
 							daeDAESolver_t*    pDAESolver, 
 							daeDataReporter_t* pDataReporter, 
-							daeLog_t*          pLog);
+                            daeLog_t*          pLog,
+                            const std::string& initializationFile = std::string(""));
 	virtual void Solve(void);
 	virtual string GetName(void) const;
 	

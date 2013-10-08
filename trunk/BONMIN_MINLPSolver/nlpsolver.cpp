@@ -30,9 +30,10 @@ daeMINLP::daeMINLP(daeOptimization_t* pOptimization,
                    daeSimulation_t*   pSimulation, 
 			       daeDAESolver_t*    pDAESolver, 
 			       daeDataReporter_t* pDataReporter, 
-			       daeLog_t*          pLog)
+                   daeLog_t*          pLog,
+                   const std::string& initializationFile)
 {
-	daeNLPCommon::Init(pOptimization, pSimulation, pDAESolver, pDataReporter, pLog);
+    daeNLPCommon::Init(pOptimization, pSimulation, pDAESolver, pDataReporter, pLog, initializationFile);
 
 #ifdef daeIPOPT	
 	daeNLPCommon::CheckProblem(m_ptrarrOptVariables);
@@ -271,13 +272,13 @@ bool daeMINLP::eval_f(Index n,
 			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 		
 		daeNLPCommon::Calculate_fobj(obj_value);	
-	}
+    }
 	catch(std::exception& e) 	 
 	{ 	 
 		m_pLog->Message(string("Exception occurred: ") + e.what(), 0); 	 
 		return false;
 	}
-	return true;
+    return true;
 }
 
 bool daeMINLP::eval_grad_f(Index n, 
@@ -285,11 +286,19 @@ bool daeMINLP::eval_grad_f(Index n,
 						   bool new_x, 
 						   Number* grad_f)
 {
-	if(new_x)
-		daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+    try
+    {
+        if(new_x)
+            daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 
-	daeNLPCommon::Calculate_fobj_gradient(grad_f);
-	return true;
+        daeNLPCommon::Calculate_fobj_gradient(grad_f);
+    }
+    catch(std::exception& e)
+    {
+        m_pLog->Message(string("Exception occurred: ") + e.what(), 0);
+        return false;
+    }
+    return true;
 }
 
 bool daeMINLP::eval_g(Index n, 
@@ -715,7 +724,8 @@ void daeBONMINSolver::Initialize(daeOptimization_t* pOptimization,
                                  daeSimulation_t* pSimulation, 
                                  daeDAESolver_t* pDAESolver, 
                                  daeDataReporter_t* pDataReporter, 
-                                 daeLog_t* pLog)
+                                 daeLog_t* pLog,
+                                 const std::string& initializationFile)
 {
 	time_t start, end;
 
@@ -745,11 +755,11 @@ void daeBONMINSolver::Initialize(daeOptimization_t* pOptimization,
 	m_pLog			= pLog;
 	
 #ifdef daeBONMIN
-	m_MINLP = new daeMINLP(m_pOptimization, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
+    m_MINLP = new daeMINLP(m_pOptimization, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog, initializationFile);
 	m_Bonmin.initialize(GetRawPtr(m_MINLP));	
 #endif
 #ifdef daeIPOPT
-	m_NLP = new daeMINLP(m_pOptimization, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog);
+    m_NLP = new daeMINLP(m_pOptimization, m_pSimulation, m_pDAESolver, m_pDataReporter, m_pLog, initializationFile);
 #endif
 }
 
