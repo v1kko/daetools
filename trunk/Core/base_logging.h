@@ -36,6 +36,7 @@ class daeBaseLog : public daeLog_t
 public:
 	daeBaseLog(void)
 	{
+        m_strName        = "BaseLog";
 		m_bEnabled       = true;
 		m_bPrintProgress = true;
 		m_nIndent        = 0;
@@ -50,7 +51,12 @@ public:
 	}
 
 public:
-	virtual void Message(const string& strMessage, size_t nSeverity)
+    virtual std::string	GetName(void) const
+    {
+        return m_strName;
+    }
+
+    virtual void Message(const string& strMessage, size_t nSeverity)
 	{
 		if(strMessage.empty())
 			return;
@@ -168,6 +174,7 @@ public:
 	}
 
 protected:
+    std::string         m_strName;
 	std::vector<string> m_strarrMessages;
 	bool				m_bEnabled;
 	bool				m_bPrintProgress;
@@ -186,7 +193,8 @@ class daeStdOutLog : public daeBaseLog
 public:
 	daeStdOutLog()
 	{
-	}
+        m_strName = "StdOutLog";
+    }
 
 	virtual ~daeStdOutLog(void)
 	{
@@ -224,7 +232,8 @@ class daeDelegateLog : public daeBaseLog
 public:
 	daeDelegateLog()
 	{
-	}
+        m_strName = "DelegateLog";
+    }
 
 	virtual ~daeDelegateLog(void)
 	{
@@ -297,8 +306,21 @@ class daeFileLog : public daeBaseLog
 public:
 	daeFileLog(const string& strFileName)
 	{
-		file.open(strFileName.c_str());
-	}
+        m_strName = "FileLog";
+
+        if(strFileName.empty())
+        {
+            char buffer[L_tmpnam];
+            tmpnam(buffer);
+            m_strFilename = buffer;
+        }
+        else
+        {
+            m_strFilename = strFileName;
+        }
+
+        file.open(m_strFilename.c_str());
+    }
 
 	virtual ~daeFileLog(void)
 	{
@@ -319,8 +341,14 @@ public:
 		}
 	}
 
+    std::string GetFilename() const
+    {
+        return m_strFilename;
+    }
+
 protected:
 	std::ofstream file;
+    std::string   m_strFilename;
 };
 
 

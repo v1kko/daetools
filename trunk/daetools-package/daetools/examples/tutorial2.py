@@ -27,7 +27,7 @@ Here we introduce:
 - Initial guess of the variables
 """
 
-import sys
+import sys, numpy
 from daetools.pyDAE import *
 from time import localtime, strftime
 
@@ -130,13 +130,39 @@ class simTutorial(daeSimulation):
         self.m.Q.SetValue(0, 1e6 * W/(m**2))
         self.m.Q.SetValue(1, 0.0 * W/(m**2))
 
+        # There are several ways to set a value of distributed parameters:
+        #  a) Call SetValues(list-of-floats-or-quantities) once to set the corresponding values
+        #  b) Call SetValues(float/quantity) once to set all to the same value
+        #  c) In a loop call SetValue([index1, index2], float/quantity) to set a value for individual points
+        #  d) In a loop call SetValue(index1, index2, float/quantity) to set a value for individual points
+        #
+        # All the following ways are equivalent:
+        # a) Use a list of float/quantity objects:
+        #     - Create a two-dimensional numpy array with datatype=object
+        #     - Set all values to 401 W/(m*K)
+        #     - Flatten and convert to python list. 
+        #       Achtung: Arrays must be flattened using row-major order (c-style) which is by default
+        #k = numpy.zeros((self.m.x.NumberOfPoints, self.m.y.NumberOfPoints), dtype=object)
+        #k[:] = 401 * W/(m*K)
+        #k = k.ravel(order='C').tolist() 
+        #self.m.k.SetValues(k)
+        
+        # b) Use a single float value for all points (the units are implicitly W/(m*K)):
+        #self.m.k.SetValues(401)
+        
+        # c) Iterate over domains and use a list of indexes to set the value for every point:
+        #for x in range(0, self.m.x.NumberOfPoints):
+        #    for y in range(0, self.m.y.NumberOfPoints):
+        #        self.m.k.SetValue([x,y], 401 * W/(m*K))
+
+        # d) Simply loop over over domains and set the value for every point:
         for x in range(0, self.m.x.NumberOfPoints):
             for y in range(0, self.m.y.NumberOfPoints):
                 self.m.k.SetValue(x, y, 401 * W/(m*K))
-
+        
     def SetUpVariables(self):
         # In the above model we defined 2*N*N+1 variables and 2*N*N equations,
-        # meaning that the number of degrees of freedom (NDoF) is equal to: 2*N*N+1 - 2*N*N = 1
+        # meaning that the number of degrees of freedom (DOF) is equal to: 2*N*N+1 - 2*N*N = 1
         # Therefore, we have to assign a value of one of the variables.
         # This variable cannot be chosen randomly, but must be chosen so that the combination
         # of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).
@@ -147,16 +173,47 @@ class simTutorial(daeSimulation):
         # To help the DAE solver it is possible to set initial guesses of of the variables.
         # Closer the initial guess is to the solution - faster the solver will converge to the solution
         # Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.
-        # Despite that, the solver will successfully initialize the system!
+        # Despite that, the solver will successfully initialize the system! 
+        # There are several ways to do it:
+        #  a) SetInitialGuesses(float/quantity) - in a single call sets all to the same value:
+        #          self.m.T.SetInitialGuesses(1000*K)
+        #  b) SetInitialGuesses(list-of-floats-or-quantities) - in a single call sets individual values (list must be flattened):
+        #          self.m.T.SetInitialGuesses([1000, 1001, ...])
+        #  c) SetInitialGuess(index1, index2, ..., float/quantity) - sets an individual value:
+        #          self.m.T.SetInitialGuess(1, 3, 1000*K)
+        #  d) SetInitialGuess(list-of-indexes, float/quantity) - sets an individual value:
+        #          self.m.T.SetInitialGuess([1, 3], 1000*K)
+        # The following daeVariable functions can be called in a similar fashion: 
+        #  - AssignValue(s) and ReAssignValue(s)
+        #  - SetInitialCondition(s) and ReSetInitialCondition(s)
+        #  - SetInitialGuess(es)
+        # and the following daeParameter functions:
+        #  - SetValue(s) and GetValue
+        #
+        # All the following calls are equivalent:
+        # a) Use a single value
         self.m.T.SetInitialGuesses(1000 * K)
+        
+        # b) Use a list of quantity objects:
+        #     - Create a two-dimensional numpy array with datatype=object
+        #     - Set all values to 1000 K
+        #     - Flatten and convert to python list. 
+        #       Achtung: Arrays must be flattened using row-major order (c-style) which is by default
+        #init_guesses = numpy.zeros((self.m.x.NumberOfPoints, self.m.y.NumberOfPoints), dtype=object)
+        #init_guesses[:] = 1000 * K 
+        #init_guesses = init_guesses.ravel(order='C').tolist() 
+        #self.m.T.SetInitialGuesses(init_guesses)        
+        
+        # c) Loop over domains to set an initial guess for individual points
         for x in range(self.m.x.NumberOfPoints):
             for y in range(self.m.y.NumberOfPoints):
                 self.m.cp.SetInitialGuess(x, y, 1000 * J/(kg*K))
 
+        # Initial condtions can be set in all four above-mentioned ways
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300 * K)
-
+                self.m.T.SetInitialCondition([x, y], 300 * K)
+                
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()

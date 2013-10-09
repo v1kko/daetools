@@ -58,6 +58,7 @@ public:
     std::vector<real_t> GetEstLocalErrors();
     std::vector<real_t> GetErrWeights();
 
+    daeIDALASolver_t* GetLASolver() const;
     void SetLASolver(daeeIDALASolverType eLASolverType);
 	void SetLASolver(daeIDALASolver_t* pLASolver);
 

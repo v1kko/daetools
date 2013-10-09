@@ -33,8 +33,9 @@ public:
 	virtual ~daeLog_t(void){}
 
 public:
-	virtual void		Message(const string& strMessage, size_t nSeverity)		= 0;
-	virtual string		JoinMessages(const string& join = string("\n")) const	= 0;
+    virtual std::string	GetName(void) const										= 0;
+    virtual void		Message(const string& strMessage, size_t nSeverity)		= 0;
+    virtual std::string	JoinMessages(const string& join = string("\n")) const	= 0;
 	virtual std::string	GetIndentString(void) const								= 0;
 	virtual void		SetEnabled(bool bEnabled)								= 0;
 	virtual bool		GetEnabled(void) const									= 0;

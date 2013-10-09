@@ -104,7 +104,12 @@ public:
 		daeIDASolver::Initialize(pBlock, pLog, pSimulation, eMode, bCalculateSensitivities, narrParametersIndexes);
 	}
 
-	void SetLASolver1(daeeIDALASolverType eLASolverType)
+    daeIDALASolver_t* GetLASolver(void)
+    {
+        return daeIDASolver::GetLASolver();
+    }
+
+    void SetLASolver1(daeeIDALASolverType eLASolverType)
 	{
 		daeIDASolver::SetLASolver(eLASolverType);
 	}

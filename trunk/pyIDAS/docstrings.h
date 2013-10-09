@@ -20,9 +20,9 @@ const char* DOCSTR_daeIDAS = "";
     const char* DOCSTR_daeIDAS_SetLASolver1 = "";
     const char* DOCSTR_daeIDAS_SetLASolver2 = "";
     const char* DOCSTR_daeIDAS_SaveMatrixAsXPM = "";
-    const char* DOCSTR_daeDAESolver_EstLocalErrors = "";
-    const char* DOCSTR_daeDAESolver_ErrWeights = "";
-
+    const char* DOCSTR_daeIDAS_LASolver = "";
+    const char* DOCSTR_daeIDAS_EstLocalErrors = "";
+    const char* DOCSTR_daeIDAS_ErrWeights = "";
     const char* DOCSTR_daeIDAS_OnCalculateResiduals = "";
     const char* DOCSTR_daeIDAS_OnCalculateConditions = "";
     const char* DOCSTR_daeIDAS_OnCalculateJacobian = "";

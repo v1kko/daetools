@@ -126,6 +126,11 @@ daeIDASolver::~daeIDASolver(void)
 		IDAFree(&m_pIDA);		
 }
 
+daeIDALASolver_t* daeIDASolver::GetLASolver() const
+{
+    return m_pLASolver;
+}
+
 void daeIDASolver::SetLASolver(daeIDALASolver_t* pLASolver)
 {
 	m_eLASolver = eThirdParty;

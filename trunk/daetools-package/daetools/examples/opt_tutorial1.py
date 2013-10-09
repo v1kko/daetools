@@ -143,7 +143,7 @@ def consoleRun():
     if(datareporter.Connect("", simName) == False):
         sys.exit()
 
-    # Initialize the simulation
+    # Initialize the optimization
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()

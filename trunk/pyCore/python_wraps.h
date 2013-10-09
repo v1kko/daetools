@@ -368,6 +368,50 @@ public:
         return d;        
     }
 
+    real_t lGetParameterValue(boost::python::list indexes)
+    {
+        std::vector<size_t> narrIndexes;
+        boost::python::ssize_t n = boost::python::len(indexes);
+        narrIndexes.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            boost::python::extract<size_t> index(indexes[i]);
+
+            if(index.check())
+                narrIndexes[i] = index();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of index [" << i << "] in the list of indexes in GetValue for parameter " << GetCanonicalName();
+                throw e;
+            }
+        }
+        return GetValue(narrIndexes);
+    }
+
+    quantity lGetParameterQuantity(boost::python::list indexes)
+    {
+        std::vector<size_t> narrIndexes;
+        boost::python::ssize_t n = boost::python::len(indexes);
+        narrIndexes.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            boost::python::extract<size_t> index(indexes[i]);
+
+            if(index.check())
+                narrIndexes[i] = index();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of index [" << i << "] in the list of indexes in GetQuantity for parameter " << GetCanonicalName();
+                throw e;
+            }
+        }
+        return GetQuantity(narrIndexes);
+    }
+
 	real_t GetParameterValue0()
 	{
 		return GetValue();
@@ -471,6 +515,8 @@ adouble FunctionCallParameter6(daeParameter& param, boost::python::object o1, bo
 adouble FunctionCallParameter7(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7);
 adouble FunctionCallParameter8(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
 
+void lSetParameterValue(daeParameter& param, boost::python::list indexes, real_t value);
+void lSetParameterQuantity(daeParameter& param, boost::python::list indexes, const quantity& value);
 void SetParameterValue0(daeParameter& param, real_t value);
 void SetParameterValue1(daeParameter& param, size_t n1, real_t value);
 void SetParameterValue2(daeParameter& param, size_t n1, size_t n2, real_t value);
@@ -493,6 +539,7 @@ void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3,
 
 void SetParameterValues(daeParameter& param, real_t values);
 void qSetParameterValues(daeParameter& param, const quantity& q);
+void lSetParameterValues(daeParameter& param, boost::python::list values);
 
 adouble_array ParameterArray1(daeParameter& param, boost::python::object o1);
 adouble_array ParameterArray2(daeParameter& param, boost::python::object o1, boost::python::object o2);
@@ -551,7 +598,51 @@ public:
 		return &this->m_VariableType;
 	}
 
-	real_t GetVariableValue0(void)
+    real_t lGetVariableValue(boost::python::list indexes)
+    {
+        std::vector<size_t> narrIndexes;
+        boost::python::ssize_t n = boost::python::len(indexes);
+        narrIndexes.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            boost::python::extract<size_t> index(indexes[i]);
+
+            if(index.check())
+                narrIndexes[i] = index();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of index [" << i << "] in the list of indexes in GetValue for variable " << GetCanonicalName();
+                throw e;
+            }
+        }
+        return GetValue(narrIndexes);
+    }
+
+    quantity lGetVariableQuantity(boost::python::list indexes)
+    {
+        std::vector<size_t> narrIndexes;
+        boost::python::ssize_t n = boost::python::len(indexes);
+        narrIndexes.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            boost::python::extract<size_t> index(indexes[i]);
+
+            if(index.check())
+                narrIndexes[i] = index();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of index [" << i << "] in the list of indexes in GetQuantity for variable " << GetCanonicalName();
+                throw e;
+            }
+        }
+        return GetQuantity(narrIndexes);
+    }
+
+    real_t GetVariableValue0(void)
 	{
 		return GetValue();
 	}
@@ -736,6 +827,8 @@ adouble_array Get_d2_array6(daeVariable& var, daeDomain& d, boost::python::objec
 adouble_array Get_d2_array7(daeVariable& var, daeDomain& d, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7);
 adouble_array Get_d2_array8(daeVariable& var, daeDomain& d, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
 
+void lSetVariableValue1(daeVariable& var, boost::python::list indexes, real_t value);
+void lSetVariableValue2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void SetVariableValue0(daeVariable& var, real_t value);
 void SetVariableValue1(daeVariable& var, size_t n1, real_t value);
 void SetVariableValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -746,6 +839,8 @@ void SetVariableValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void SetVariableValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void lAssignValue1(daeVariable& var, boost::python::list indexes, real_t value);
+void lAssignValue2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void AssignValue0(daeVariable& var, real_t value);
 void AssignValue1(daeVariable& var, size_t n1, real_t value);
 void AssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -756,6 +851,8 @@ void AssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, 
 void AssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void AssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void lReAssignValue1(daeVariable& var, boost::python::list indexes, real_t value);
+void lReAssignValue2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void ReAssignValue0(daeVariable& var, real_t value);
 void ReAssignValue1(daeVariable& var, size_t n1, real_t value);
 void ReAssignValue2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -766,6 +863,8 @@ void ReAssignValue6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4
 void ReAssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void ReAssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void lSetInitialCondition1(daeVariable& var, boost::python::list indexes, real_t value);
+void lSetInitialCondition2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void SetInitialCondition0(daeVariable& var, real_t value);
 void SetInitialCondition1(daeVariable& var, size_t n1, real_t value);
 void SetInitialCondition2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -776,6 +875,8 @@ void SetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, siz
 void SetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void SetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void lReSetInitialCondition1(daeVariable& var, boost::python::list indexes, real_t value);
+void lReSetInitialCondition2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void ReSetInitialCondition0(daeVariable& var, real_t value);
 void ReSetInitialCondition1(daeVariable& var, size_t n1, real_t value);
 void ReSetInitialCondition2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -786,6 +887,8 @@ void ReSetInitialCondition6(daeVariable& var, size_t n1, size_t n2, size_t n3, s
 void ReSetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, real_t value);
 void ReSetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value);
 
+void lSetInitialGuess1(daeVariable& var, boost::python::list indexes, real_t value);
+void lSetInitialGuess2(daeVariable& var, boost::python::list indexes, const quantity& value);
 void SetInitialGuess0(daeVariable& var, real_t value);
 void SetInitialGuess1(daeVariable& var, size_t n1, real_t value);
 void SetInitialGuess2(daeVariable& var, size_t n1, size_t n2, real_t value);
@@ -857,18 +960,23 @@ void qSetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void qSetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
 void AssignValues(daeVariable& var, real_t values);
+void AssignValues2(daeVariable& var, boost::python::list values);
 void qAssignValues(daeVariable& var, const quantity& q);
 
 void ReAssignValues(daeVariable& var, real_t values);
+void ReAssignValues2(daeVariable& var, boost::python::list values);
 void qReAssignValues(daeVariable& var, const quantity& q);
 
 void SetInitialConditions(daeVariable& var, real_t values);
+void SetInitialConditions2(daeVariable& var, boost::python::list values);
 void qSetInitialConditions(daeVariable& var, const quantity& q);
 
 void ReSetInitialConditions(daeVariable& var, real_t values);
+void ReSetInitialConditions2(daeVariable& var, boost::python::list values);
 void qReSetInitialConditions(daeVariable& var, const quantity& q);
 
 void SetInitialGuesses(daeVariable& var, real_t values);
+void SetInitialGuesses2(daeVariable& var, boost::python::list values);
 void qSetInitialGuesses(daeVariable& var, const quantity& q);
 
 /*******************************************************

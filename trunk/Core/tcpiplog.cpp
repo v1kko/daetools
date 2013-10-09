@@ -10,6 +10,7 @@ namespace logging
 *********************************************************************/
 daeTCPIPLog::daeTCPIPLog(void)
 {
+    m_strName = "TCPIPLog";
 }
 
 daeTCPIPLog::~daeTCPIPLog(void)

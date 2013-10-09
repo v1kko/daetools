@@ -18,6 +18,10 @@ class daePythonStdOutLog(daeStdOutLog):
     def __init__(self):
         daeStdOutLog.__init__(self)
 
+    @property
+    def Name(self):
+        return 'PythonStdOutLog'
+        
     def Message(self, message, severity):
         if self.Enabled:
             if self.PrintProgress:

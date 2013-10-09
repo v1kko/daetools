@@ -67,41 +67,24 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="testNameLineEdit">
-           <property name="text">
-            <string>Simulation</string>
+          <widget class="QLineEdit" name="simulationNameEdit">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="testDescriptionLabel">
-           <property name="minimumSize">
-            <size>
-             <width>200</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Simulation description</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="testDescriptionLineEdit">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="timeHorizonLabel">
            <property name="text">
             <string>Time horizon, s</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="timeHorizonSLineEdit">
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="timeHorizonEdit">
            <property name="inputMask">
             <string/>
            </property>
@@ -110,71 +93,31 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="reportingIntervalLabel">
            <property name="text">
             <string>Reporting interval, s</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="reportingIntervalSLineEdit">
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="reportingIntervalEdit">
            <property name="text">
             <string>0.0</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="daesolverLabel">
-           <property name="text">
-            <string>DAE Solver</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QComboBox" name="daesolverComboBox"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="lasolverLabel">
-           <property name="text">
-            <string>LA Solver</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QComboBox" name="lasolverComboBox"/>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="dataReporterLabel">
-           <property name="text">
-            <string>Data Reporter</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QComboBox" name="dataReporterComboBox"/>
-         </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="logLabel">
-           <property name="text">
-            <string>Log</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QComboBox" name="logComboBox"/>
-         </item>
-         <item row="4" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="relativeToleranceLabel">
            <property name="text">
             <string>Relative Tolerance</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="relativeToleranceLineEdit"/>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="relativeToleranceEdit"/>
          </item>
-         <item row="5" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="initialConditionsLabel">
            <property name="minimumSize">
             <size>
@@ -183,12 +126,52 @@
             </size>
            </property>
            <property name="text">
-            <string>Quazy Steady State InitialConditions</string>
+            <string>Quazy Steady State InitialConditions?</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QCheckBox" name="quazySteadyStateCheckBox"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="daesolverLabel">
+           <property name="text">
+            <string>DAE Solver</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QCheckBox" name="quazySteadyStateInitialConditionsCheckBox"/>
+          <widget class="QComboBox" name="daesolverComboBox"/>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lasolverLabel">
+           <property name="text">
+            <string>LA Solver</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QComboBox" name="lasolverComboBox"/>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="dataReporterLabel">
+           <property name="text">
+            <string>Data Reporter</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QComboBox" name="datareporterComboBox"/>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="logLabel">
+           <property name="text">
+            <string>Log</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QComboBox" name="logComboBox"/>
          </item>
         </layout>
        </item>
@@ -318,8 +301,6 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <zorder>label_2</zorder>
-         <zorder>treeParameters</zorder>
         </widget>
        </item>
       </layout>
@@ -568,9 +549,31 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOk">
+      <widget class="QPushButton" name="buttonCancel">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Run</string>
+        <string>Cancel</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOk">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>OK</string>
        </property>
        <property name="default">
         <bool>true</bool>
@@ -580,10 +583,6 @@
     </layout>
    </item>
   </layout>
-  <zorder>tabWidget</zorder>
-  <zorder>horizontalLayoutWidget</zorder>
-  <zorder>frameDomains</zorder>
-  <zorder>treeDomains</zorder>
  </widget>
  <resources/>
  <connections/>

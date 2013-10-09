@@ -575,8 +575,8 @@ size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
 	if(m_ptrDomains.size() != N)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains, parameter " << GetCanonicalName();
-		throw e;
+        e << "Illegal number of domains (" << N << ") in parameter " << GetCanonicalName() << " (must be " << m_ptrDomains.size() << ")";
+        throw e;
 	}
 
 // Check the pointers and the bounds first
@@ -585,9 +585,14 @@ size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
 		pDomain = m_ptrDomains[i];
 		if(!pDomain)
 			daeDeclareAndThrowException(exInvalidPointer);
-		if(indexes[i] >= pDomain->GetNumberOfPoints())
-			daeDeclareAndThrowException(exOutOfBounds);
-	}
+        if(indexes[i] >= pDomain->GetNumberOfPoints())
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in parameter " << GetCanonicalName() << "; index = " << indexes[i]
+              << " while number of points in domain " << pDomain->GetCanonicalName() << " is " << pDomain->GetNumberOfPoints();
+            throw e;
+        }
+    }
 
 // Calculate the index
 	nIndex = 0;
@@ -830,6 +835,96 @@ void daeParameter::SetValues(real_t values)
 		Initialize();
 
 	m_darrValues.assign(m_darrValues.size(), values);
+}
+
+void daeParameter::SetValues(const std::vector<real_t>& values)
+{
+// If not previously initialized, do it now
+    if(m_darrValues.size() == 0)
+        Initialize();
+
+    size_t nTotalNumberOfVariables = GetNumberOfPoints();
+    if(values.size() != nTotalNumberOfVariables)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+        m_darrValues[i] = values[i];
+}
+
+void daeParameter::SetValue(const std::vector<size_t>& narrDomainIndexes, real_t value)
+{
+// If not previously initialized, do it now
+    if(m_darrValues.size() == 0)
+        Initialize();
+
+    size_t nIndex = CalculateIndex(&narrDomainIndexes[0], narrDomainIndexes.size());
+    m_darrValues[nIndex] = value;
+}
+
+void daeParameter::SetValues(const std::vector<quantity>& values)
+{
+// If not previously initialized, do it now
+    if(m_darrValues.size() == 0)
+        Initialize();
+
+    size_t nTotalNumberOfVariables = GetNumberOfPoints();
+    if(values.size() != nTotalNumberOfVariables)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+        m_darrValues[i] = values[i].scaleTo(m_Unit).getValue();
+}
+
+void daeParameter::SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& q)
+{
+// If not previously initialized, do it now
+    if(m_darrValues.size() == 0)
+        Initialize();
+
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(narrDomainIndexes, value);
+}
+
+real_t daeParameter::GetValue(const std::vector<size_t>& narrDomainIndexes)
+{
+    if(m_ptrDomains.size() != narrDomainIndexes.size())
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
+        e << (boost::format(msg) % GetCanonicalName() % narrDomainIndexes.size() % m_ptrDomains.size()).str();
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+        throw e;
+    }
+
+    size_t nIndex = CalculateIndex(&narrDomainIndexes[0], narrDomainIndexes.size());
+    return m_darrValues[nIndex];
+}
+
+quantity daeParameter::GetQuantity(const std::vector<size_t>& narrDomainIndexes)
+{
+    if(m_ptrDomains.size() != narrDomainIndexes.size())
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Invalid GetQuantity call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
+        e << (boost::format(msg) % GetCanonicalName() % narrDomainIndexes.size() % m_ptrDomains.size()).str();
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        string msg = "Invalid GetQuantity call of the parameter [%s]: the parameter value(s) has not been set";
+        e << (boost::format(msg) % GetCanonicalName()).str();
+        throw e;
+    }
+
+    size_t nIndex = CalculateIndex(&narrDomainIndexes[0], narrDomainIndexes.size());
+    return quantity(m_darrValues[nIndex], m_Unit);
 }
 
 void daeParameter::SetValue(real_t value)

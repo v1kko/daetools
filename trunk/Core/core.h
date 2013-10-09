@@ -420,6 +420,7 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value) = 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value) = 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value) = 0;
+    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, real_t value) = 0;
 
 	virtual real_t	GetValue(void) = 0;
 	virtual real_t	GetValue(size_t nD1) = 0;
@@ -430,6 +431,7 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6) = 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7) = 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8) = 0;
+    virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes) = 0;
 
 	virtual void	AssignValue(real_t value) = 0;
 	virtual void	AssignValue(size_t nD1, real_t value) = 0;
@@ -440,6 +442,9 @@ public:
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value) = 0;
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value) = 0;
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value) = 0;
+    virtual void    AssignValue(const std::vector<size_t>& narrDomainIndexes, real_t value) = 0;
+    virtual void	AssignValues(real_t values) = 0;
+    virtual void	AssignValues(const std::vector<real_t>& values) = 0;
 
 	virtual void	ReAssignValue(real_t value) = 0;
 	virtual void	ReAssignValue(size_t nD1, real_t value) = 0;
@@ -450,6 +455,9 @@ public:
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value) = 0;
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value) = 0;
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value) = 0;
+    virtual void    ReAssignValue(const std::vector<size_t>& narrDomainIndexes, real_t value) = 0;
+    virtual void	ReAssignValues(real_t values) = 0;
+    virtual void	ReAssignValues(const std::vector<real_t>& values) = 0;
 
 	virtual void	SetInitialGuess(real_t dInitialGuess) = 0;
 	virtual void	SetInitialGuess(size_t nD1, real_t dInitialGuesses) = 0;
@@ -460,8 +468,9 @@ public:
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialGuesses) = 0;
-// Set them for all indexes
-	virtual void	SetInitialGuesses(real_t dInitialGuesses) = 0;
+    virtual void    SetInitialGuess(const std::vector<size_t>& narrDomainIndexes, real_t dInitialGuess) = 0;
+    virtual void	SetInitialGuesses(real_t dInitialGuesses) = 0;
+    virtual void	SetInitialGuesses(const std::vector<real_t>& initialGuesses) = 0;
 
 	virtual void	SetInitialCondition(real_t dInitialCondition)	= 0;
 	virtual void	SetInitialCondition(size_t nD1, real_t dInitialCondition)	= 0;
@@ -472,6 +481,9 @@ public:
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialCondition) = 0;
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition) = 0;
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition) = 0;
+    virtual void    SetInitialCondition(const std::vector<size_t>& narrDomainIndexes, real_t dInitialCondition) = 0;
+    virtual void	SetInitialConditions(real_t dInitialConditions) = 0;
+    virtual void	SetInitialConditions(const std::vector<real_t>& initialConditions) = 0;
 
 	virtual void	ReSetInitialCondition(real_t dInitialCondition)	= 0;
 	virtual void	ReSetInitialCondition(size_t nD1, real_t dInitialCondition)	= 0;
@@ -482,6 +494,9 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t dInitialCondition) = 0;
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t dInitialCondition) = 0;
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t dInitialCondition) = 0;
+    virtual void    ReSetInitialCondition(const std::vector<size_t>& narrDomainIndexes, real_t dInitialCondition) = 0;
+    virtual void	ReSetInitialConditions(real_t dInitialConditions) = 0;
+    virtual void	ReSetInitialConditions(const std::vector<real_t>& initialConditions) = 0;
 
 	virtual void	SetValue(const quantity& value)																									= 0;
 	virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
@@ -492,6 +507,7 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value)                                                   = 0;
 
 	virtual quantity	GetQuantity(void)																							= 0;
 	virtual quantity	GetQuantity(size_t nD1)																						= 0;
@@ -501,6 +517,7 @@ public:
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) 									= 0;
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
+    virtual quantity    GetQuantity(const std::vector<size_t>& narrDomainIndexes)                                                   = 0;
 
 	virtual void	AssignValue(const quantity& value) = 0;
 	virtual void	AssignValue(size_t nD1, const quantity& value) = 0;
@@ -511,6 +528,9 @@ public:
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value) = 0;
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value) = 0;
 	virtual void	AssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value) = 0;
+    virtual void    AssignValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value) = 0;
+    virtual void	AssignValues(const quantity& values) = 0;
+    virtual void	AssignValues(const std::vector<quantity>& values) = 0;
 
 	virtual void	ReAssignValue(const quantity& value) = 0;
 	virtual void	ReAssignValue(size_t nD1, const quantity& value) = 0;
@@ -521,6 +541,9 @@ public:
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value) = 0;
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value) = 0;
 	virtual void	ReAssignValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value) = 0;
+    virtual void    ReAssignValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value) = 0;
+    virtual void	ReAssignValues(const quantity& values) = 0;
+    virtual void	ReAssignValues(const std::vector<quantity>& values) = 0;
 
 	virtual void	SetInitialGuess(const quantity& dInitialGuess) = 0;
 	virtual void	SetInitialGuess(size_t nD1, const quantity& dInitialGuesses) = 0;
@@ -531,8 +554,9 @@ public:
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialGuesses) = 0;
 	virtual void	SetInitialGuess(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialGuesses) = 0;
-	// Set them for all indexes
-	virtual void	SetInitialGuesses(const quantity& dInitialGuesses) = 0;
+    virtual void    SetInitialGuess(const std::vector<size_t>& narrDomainIndexes, const quantity& dInitialGuesses) = 0;
+    virtual void	SetInitialGuesses(const quantity& dInitialGuesses) = 0;
+    virtual void	SetInitialGuesses(const std::vector<quantity>& initialGuesses) = 0;
 
 	virtual void	SetInitialCondition(const quantity& dInitialCondition)	= 0;
 	virtual void	SetInitialCondition(size_t nD1, const quantity& dInitialCondition)	= 0;
@@ -543,6 +567,9 @@ public:
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition) = 0;
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition) = 0;
 	virtual void	SetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition) = 0;
+    virtual void    SetInitialCondition(const std::vector<size_t>& narrDomainIndexes, const quantity& dInitialCondition) = 0;
+    virtual void	SetInitialConditions(const quantity& dInitialConditions) = 0;
+    virtual void	SetInitialConditions(const std::vector<quantity>& initialConditions) = 0;
 
 	virtual void	ReSetInitialCondition(const quantity& dInitialCondition)	= 0;
 	virtual void	ReSetInitialCondition(size_t nD1, const quantity& dInitialCondition)	= 0;
@@ -553,6 +580,9 @@ public:
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& dInitialCondition) = 0;
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& dInitialCondition) = 0;
 	virtual void	ReSetInitialCondition(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& dInitialCondition) = 0;
+    virtual void    ReSetInitialCondition(const std::vector<size_t>& narrDomainIndexes, const quantity& dInitialCondition) = 0;
+    virtual void	ReSetInitialConditions(const quantity& dInitialConditions) = 0;
+    virtual void	ReSetInitialConditions(const std::vector<quantity>& initialConditions) = 0;
 
 	virtual void	SetAbsoluteTolerances(real_t dAbsTolerances) = 0;
 };	

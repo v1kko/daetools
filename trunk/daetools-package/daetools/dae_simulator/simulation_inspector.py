@@ -26,21 +26,29 @@ def _collectParameters(nodeItem, model, dictParameters):
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.Parameters:
-        if obj.NumberOfPoints == 1:
-            value = float(obj.npyValues)
-        else:
-            value = obj.npyValues.tolist()
-        units = obj.Units
-        item = treeItem_Parameter(nodeItem, obj, value, units)
+        item = treeItem_Parameter(nodeItem, obj)
         dictParameters[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
         _collectParameters(componentItem, component, dictParameters)
 
+def _collectDomains(nodeItem, model, dictDomains):
+    """
+    Recursively looks for domains in the 'model' and all its child-models and
+    adds a new treeItem object to the parent item 'nodeItem'.
+    """
+    for obj in model.Domains:
+        item = treeItem_Domain(nodeItem, obj)
+        dictDomains[obj.CanonicalName] = (obj, item)
+
+    for component in model.Components:
+        componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
+        _collectDomains(componentItem, component, dictDomains)
+
 def _collectOutputVariables(nodeItem, model, dictOutputVariables):
     """
-    Recursively looks for parameters in the 'model' and all its child-models and
+    Recursively looks for variables in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.Variables:
@@ -90,7 +98,7 @@ class daeSimulationInspector(object):
         self.treeOutputVariables    = None
         
         self.treeDomains = treeItem(None, self.simulation.m, treeItem.typeNone)
-        #_collectDomains(self.treeDomains, self.simulation.m, self.domains)
+        _collectDomains(self.treeDomains, self.simulation.m, self.domains)
         
         self.treeParameters = treeItem(None, self.simulation.m, treeItem.typeNone)
         _collectParameters(self.treeParameters, self.simulation.m, self.parameters)

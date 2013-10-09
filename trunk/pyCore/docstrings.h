@@ -371,6 +371,7 @@ const char* DOCSTR_daeVectorExternalFunction = "";
 
 const char* DOCSTR_daeLog_t = "";  
     const char* DOCSTR_daeLog_t_init = "";
+    const char* DOCSTR_daeLog_t_Name = "";
     const char* DOCSTR_daeLog_t_Enabled = "";  
     const char* DOCSTR_daeLog_t_PrintProgress = "";  
     const char* DOCSTR_daeLog_t_Indent = "";  
@@ -398,6 +399,7 @@ const char* DOCSTR_daeDelegateLog = "";
     
 const char* DOCSTR_daeFileLog = "";  
     const char* DOCSTR_daeFileLog_init = "";  
+    const char* DOCSTR_daeFileLog_Filename = "";
     const char* DOCSTR_daeFileLog_Message = "";  
 
 const char* DOCSTR_daeStdOutLog = "";  

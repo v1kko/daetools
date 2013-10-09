@@ -1512,6 +1512,34 @@ adouble FunctionCallParameter8(daeParameter& param, object o1, object o2, object
 	return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
 }
 
+void lSetParameterValue(daeParameter& param, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in SetValue for parameter " << param.GetCanonicalName();
+            throw e;
+        }
+    }
+    param.SetValue(narrIndexes, value);
+}
+
+void lSetParameterQuantity(daeParameter& param, boost::python::list indexes, const quantity& value)
+{
+    real_t val = value.scaleTo(param.GetUnits()).getValue();
+    lSetParameterValue(param, indexes, val);
+}
+
 void SetParameterValue0(daeParameter& param, real_t value)
 {
 	param.SetValue(value);
@@ -1610,6 +1638,47 @@ void SetParameterValues(daeParameter& param, real_t values)
 void qSetParameterValues(daeParameter& param, const quantity& q)
 {
 	param.SetValues(q);
+}
+
+void lSetParameterValues(daeParameter& param, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in SetValues for parameter " << param.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in SetValues for parameter " << param.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = param.GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in SetValues for parameter " << param.GetCanonicalName();
+            throw e;
+        }
+    }
+    param.SetValues(q_values);
 }
 
 adouble_array ParameterArray1(daeParameter& param, object o1)
@@ -1816,6 +1885,35 @@ adouble VariableFunctionCall8(daeVariable& var, object o1, object o2, object o3,
 	return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
 }
 
+void lAssignValue1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in AssignValue for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.AssignValue(narrIndexes, value);
+}
+
+void lAssignValue2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lAssignValue1(var, indexes, val);
+}
+
 void AssignValue0(daeVariable& var, real_t value)
 {
 	var.AssignValue(value);
@@ -1859,6 +1957,35 @@ void AssignValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, 
 void AssignValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value)
 {
 	var.AssignValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
+void lReAssignValue1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in ReAssignValue for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.ReAssignValue(narrIndexes, value);
+}
+
+void lReAssignValue2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lReAssignValue1(var, indexes, val);
 }
 
 void ReAssignValue0(daeVariable& var, real_t value)
@@ -2282,6 +2409,35 @@ adouble_array Get_d2_array8(daeVariable& var, daeDomain& d, object o1, object o2
 	return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
+void lSetVariableValue1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in SetValue for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetValue(narrIndexes, value);
+}
+
+void lSetVariableValue2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lSetVariableValue1(var, indexes, val);
+}
+
 void SetVariableValue0(daeVariable& var, real_t value)
 {
 	var.SetValue(value);
@@ -2325,6 +2481,35 @@ void SetVariableValue7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void SetVariableValue8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value)
 {
 	var.SetValue(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
+void lSetInitialGuess1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in SetInitialGuess for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetInitialGuess(narrIndexes, value);
+}
+
+void lSetInitialGuess2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lSetInitialGuess1(var, indexes, val);
 }
 
 void SetInitialGuess0(daeVariable& var, real_t value)
@@ -2372,6 +2557,35 @@ void SetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t 
 	var.SetInitialGuess(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
+void lSetInitialCondition1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in SetInitialCondition for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetInitialCondition(narrIndexes, value);
+}
+
+void lSetInitialCondition2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lSetInitialCondition1(var, indexes, val);
+}
+
 void SetInitialCondition0(daeVariable& var, real_t value)
 {
 	var.SetInitialCondition(value);
@@ -2415,6 +2629,35 @@ void SetInitialCondition7(daeVariable& var, size_t n1, size_t n2, size_t n3, siz
 void SetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, real_t value)
 {
 	var.SetInitialCondition(n1, n2, n3, n4, n5, n6, n7, n8, value);
+}
+
+void lReSetInitialCondition1(daeVariable& var, boost::python::list indexes, real_t value)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in ReSetInitialCondition for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.ReSetInitialCondition(narrIndexes, value);
+}
+
+void lReSetInitialCondition2(daeVariable& var, boost::python::list indexes, const quantity& value)
+{
+    const daeVariableType* varType = dynamic_cast<const daeVariableType*>(var.GetVariableType());
+    real_t val = value.scaleTo(varType->GetUnits()).getValue();
+    lReSetInitialCondition1(var, indexes, val);
 }
 
 void ReSetInitialCondition0(daeVariable& var, real_t value)
@@ -2649,6 +2892,47 @@ void AssignValues(daeVariable& var, real_t values)
 	var.AssignValues(values);
 }
 
+void AssignValues2(daeVariable& var, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in AssignValues for variable " << var.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in AssignValues for variable " << var.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = var.GetVariableType()->GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in AssignValues for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.AssignValues(q_values);
+}
+
 void qAssignValues(daeVariable& var, const quantity& q)
 {
     var.AssignValues(q);
@@ -2657,6 +2941,47 @@ void qAssignValues(daeVariable& var, const quantity& q)
 void ReAssignValues(daeVariable& var, real_t values)
 {
 	var.ReAssignValues(values);
+}
+
+void ReAssignValues2(daeVariable& var, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in ReAssignValues for variable " << var.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in ReAssignValues for variable " << var.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = var.GetVariableType()->GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in ReAssignValues for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.ReAssignValues(q_values);
 }
 
 void qReAssignValues(daeVariable& var, const quantity& q)
@@ -2669,6 +2994,47 @@ void SetInitialConditions(daeVariable& var, real_t values)
 	var.SetInitialConditions(values);
 }
 
+void SetInitialConditions2(daeVariable& var, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in SetInitialConditions for variable " << var.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in SetInitialConditions for variable " << var.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = var.GetVariableType()->GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in SetInitialConditions for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetInitialConditions(q_values);
+}
+
 void qSetInitialConditions(daeVariable& var, const quantity& q)
 {
     var.SetInitialConditions(q);
@@ -2679,6 +3045,47 @@ void ReSetInitialConditions(daeVariable& var, real_t values)
 	var.ReSetInitialConditions(values);
 }
 
+void ReSetInitialConditions2(daeVariable& var, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in ReSetInitialConditions for variable " << var.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in ReSetInitialConditions for variable " << var.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = var.GetVariableType()->GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in ReSetInitialConditions for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.ReSetInitialConditions(q_values);
+}
+
 void qReSetInitialConditions(daeVariable& var, const quantity& q)
 {
     var.ReSetInitialConditions(q);
@@ -2687,6 +3094,47 @@ void qReSetInitialConditions(daeVariable& var, const quantity& q)
 void SetInitialGuesses(daeVariable& var, real_t values)
 {
 	var.SetInitialGuesses(values);
+}
+
+void SetInitialGuesses2(daeVariable& var, boost::python::list values)
+{
+    boost::python::ssize_t n = boost::python::len(values);
+    if(n == 0)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Zero size of the list of values in SetInitialGuesses for variable " << var.GetCanonicalName();
+        throw e;
+    }
+    boost::python::extract<boost::python::list> lValue(values[0]);
+    if(lValue.check())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Multidimensional lists must be flattened before using in SetInitialGuesses for variable " << var.GetCanonicalName();
+        throw e;
+    }
+
+    std::vector<quantity> q_values;
+    q_values.resize(n);
+
+    unit u = var.GetVariableType()->GetUnits();
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<real_t>   rValue(values[i]);
+        boost::python::extract<quantity> qValue(values[i]);
+
+        if(rValue.check())
+            q_values[i] = quantity(rValue(), u);
+        else if(qValue.check())
+            q_values[i] = qValue;
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in SetInitialGuesses for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetInitialGuesses(q_values);
 }
 
 void qSetInitialGuesses(daeVariable& var, const quantity& q)
