@@ -553,6 +553,7 @@ adouble_array ParameterArray8(daeParameter& param, boost::python::object o1, boo
 /*******************************************************
 	daeVariable_Wrapper
 *******************************************************/
+/*
 class daeVariable_Wrapper : public daeVariable,
 	                        public boost::python::wrapper<daeVariable>
 {
@@ -732,26 +733,39 @@ public:
 		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
     
-    boost::python::dict GetDomainsIndexesMap1(size_t nIndexBase)
-    {
-       // Returns dictionary {integer : [list of integers]}
-        boost::python::dict d;
-        std::map<size_t, std::vector<size_t> > mapIndexes;
-        typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
-
-        daeVariable::GetDomainsIndexesMap(mapIndexes, nIndexBase);
-        
-        for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
-            d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
-    
-        return d;        
-    }
-    
 };
+*/
+daeVariable* daeVariable_init1(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list());
+daeVariable* daeVariable_init2(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list());
+
+
+boost::python::list daeVariable_GetDomains(daeVariable& self);
+daeVariableType* daeVariable_GetVariableType(daeVariable& self);
+real_t daeVariable_lGetVariableValue(daeVariable& self, boost::python::list indexes);
+quantity daeVariable_lGetVariableQuantity(daeVariable& self, boost::python::list indexes);
+real_t daeVariable_GetVariableValue0(daeVariable& self);
+real_t daeVariable_GetVariableValue1(daeVariable& self, size_t n1);
+real_t daeVariable_GetVariableValue2(daeVariable& self, size_t n1, size_t n2);
+real_t daeVariable_GetVariableValue3(daeVariable& self, size_t n1, size_t n2, size_t n3);
+real_t daeVariable_GetVariableValue4(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4);
+real_t daeVariable_GetVariableValue5(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
+real_t daeVariable_GetVariableValue6(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6);
+real_t daeVariable_GetVariableValue7(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
+real_t daeVariable_GetVariableValue8(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
+quantity daeVariable_GetVariableQuantity0(daeVariable& self);
+quantity daeVariable_GetVariableQuantity1(daeVariable& self, size_t n1);
+quantity daeVariable_GetVariableQuantity2(daeVariable& self, size_t n1, size_t n2);
+quantity daeVariable_GetVariableQuantity3(daeVariable& self, size_t n1, size_t n2, size_t n3);
+quantity daeVariable_GetVariableQuantity4(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4);
+quantity daeVariable_GetVariableQuantity5(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
+quantity daeVariable_GetVariableQuantity6(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6);
+quantity daeVariable_GetVariableQuantity7(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
+quantity daeVariable_GetVariableQuantity8(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
 
 boost::python::object daeVariable_Values(daeVariable& var);
 boost::python::object daeVariable_TimeDerivatives(daeVariable& var);
 boost::python::object daeVariable_IDs(daeVariable& var);
+boost::python::dict   daeVariable_GetDomainsIndexesMap(daeVariable& self, size_t nIndexBase);
 
 adouble VariableFunctionCall0(daeVariable& var);
 adouble VariableFunctionCall1(daeVariable& var, boost::python::object o1);

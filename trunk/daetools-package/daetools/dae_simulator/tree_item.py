@@ -200,7 +200,11 @@ class treeItem_Quantity(treeItem):
         
         if isinstance(value[1], basestring):
             try:
-                units = eval(value[1], {}, pyUnits.all_si_and_derived_units)
+                unit_expr = value[1].strip()
+                if unit_expr == '':
+                    units = pyUnits.unit()
+                else:
+                    units = eval(unit_expr, {}, pyUnits.all_si_and_derived_units)
             except SyntaxError as e:
                 errorMsg = 'Cannot set units for the tree item: %s\nSyntax error at position %d in %s' % (self.name, e.offset, e.text)
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
@@ -406,7 +410,8 @@ class treeItem_Domain(treeItem):
         if self.isArray:
             return 'Array(%d)' % self._value
         else:
-            return 'Distributed(%s, %d, %d, %f, %f, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, self._value[3], self._value[4], str(self.units))
+            return 'Distributed(%s, %d, %d, %f, %f, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, 
+                                                            self._value[3], self._value[4], str(self.units) if str(self.units) != '' else '-')
         
     def show(self, parent):
         self._editor.setParent(parent)

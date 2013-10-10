@@ -416,18 +416,23 @@ std::string unit::toString(void) const
 		else
 			to_string_and_add(name, ::abs(exp), arrNegative);
 	}
-	
+
+// If it is an empty unit return an empty string
+    if(arrPositive.size() == 0 && arrNegative.size() == 0)
+        return std::string("");
+
 	strPositive = boost::algorithm::join(arrPositive, __string_unit_delimiter__);
 	strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
 	
 // If there are multiple units with negative exponents wrap them into ()
 	if(arrNegative.size() > 1)
 		strNegative = "(" + strNegative + ")"; 
-	
+
 // If there are no units with positive exponents set the positive part to 1
 	if(arrPositive.size() == 0)
 		strPositive = "1"; 
 
+// If there is positive but not negative return only positive; otherwise pos/neg
 	if(arrNegative.size() == 0)
         return (boost::format("%1%") % strPositive).str();
 	else

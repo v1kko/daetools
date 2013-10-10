@@ -877,24 +877,36 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("array", &daepython::ParameterArray8)
     ;
 
-	class_<daepython::daeVariable_Wrapper, bases<daeObject>, boost::noncopyable>("daeVariable", DOCSTR_daeVariable, no_init)  
-		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >(( arg("self"), 
-                                                                                                       arg("name"), 
-                                                                                                       arg("variableType"), 
-                                                                                                       arg("parentPort"),  
-                                                                                                       arg("description") = "", 
-                                                                                                       arg("domains") =  boost::python::list()
-                                                                                                      ), DOCSTR_daeVariable_init1))
-		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >(( arg("self"), 
-                                                                                                      arg("name"), 
-                                                                                                      arg("variableType"), 
-                                                                                                      arg("parentModel"),  
-                                                                                                      arg("description") = "", 
-                                                                                                      arg("domains") =  boost::python::list()
-                                                                                                    ), DOCSTR_daeVariable_init2))
-		
-        .add_property("Domains",            &daepython::daeVariable_Wrapper::GetDomains, DOCSTR_daeVariable_Domains)
-		.add_property("VariableType",       make_function(&daepython::daeVariable_Wrapper::GetVariableType, return_internal_reference<>()),
+    class_<daeVariable, bases<daeObject>, boost::noncopyable>("daeVariable", DOCSTR_daeVariable, no_init)
+//		.def(init<string, const daeVariableType&, daeModel*, optional<string, boost::python::list> >(( arg("self"),
+//                                                                                                       arg("name"),
+//                                                                                                       arg("variableType"),
+//                                                                                                       arg("parentPort"),
+//                                                                                                       arg("description") = "",
+//                                                                                                       arg("domains") =  boost::python::list()
+//                                                                                                      ), DOCSTR_daeVariable_init1))
+//		.def(init<string, const daeVariableType&, daePort*, optional<string, boost::python::list> >(( arg("self"),
+//                                                                                                      arg("name"),
+//                                                                                                      arg("variableType"),
+//                                                                                                      arg("parentModel"),
+//                                                                                                      arg("description") = "",
+//                                                                                                      arg("domains") =  boost::python::list()
+//                                                                                                    ), DOCSTR_daeVariable_init2))
+        .def("__init__", make_constructor(&daepython::daeVariable_init1, default_call_policies(), ( arg("name"),
+                                                                                                    arg("variableType"),
+                                                                                                    arg("parentModel"),
+                                                                                                    arg("description") = "",
+                                                                                                    arg("domains") =  boost::python::list()
+                                                                                                  ) ), DOCSTR_daeVariable_init1)
+        .def("__init__", make_constructor(&daepython::daeVariable_init2, default_call_policies(), ( arg("name"),
+                                                                                                    arg("variableType"),
+                                                                                                    arg("parentPort"),
+                                                                                                    arg("description") = "",
+                                                                                                    arg("domains") =  boost::python::list()
+                                                                                                  ) ), DOCSTR_daeVariable_init2)
+
+        .add_property("Domains",            &daepython::daeVariable_GetDomains, DOCSTR_daeVariable_Domains)
+        .add_property("VariableType",       make_function(&daepython::daeVariable_GetVariableType, return_internal_reference<>()),
                                             DOCSTR_daeVariable_VariabeType)
 		.add_property("ReportingOn",        &daeVariable::GetReportingOn,
                                             &daeVariable::SetReportingOn,             DOCSTR_daeVariable_ReportingOn)
@@ -931,16 +943,16 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("SetValue", &daepython::SetVariableValue7)
 		.def("SetValue", &daepython::SetVariableValue8)
 
-        .def("GetValue", &daepython::daeVariable_Wrapper::lGetVariableValue)
-        .def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue0)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue1)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue2)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue3)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue4)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue5)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue6)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue7)
-		.def("GetValue", &daepython::daeVariable_Wrapper::GetVariableValue8)
+        .def("GetValue", &daepython::daeVariable_lGetVariableValue)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue0)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue1)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue2)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue3)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue4)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue5)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue6)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue7)
+        .def("GetValue", &daepython::daeVariable_GetVariableValue8)
 
         .def("AssignValue", &daepython::lAssignValue1)
         .def("AssignValue", &daepython::lAssignValue2)
@@ -1012,16 +1024,16 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("SetValue", &daepython::qSetVariableValue7)
         .def("SetValue", &daepython::qSetVariableValue8)
 
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::lGetVariableQuantity)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity0)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity1)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity2)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity3)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity4)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity5)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity6)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity7)
-        .def("GetQuantity", &daepython::daeVariable_Wrapper::GetVariableQuantity8)
+        .def("GetQuantity", &daepython::daeVariable_lGetVariableQuantity)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity0)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity1)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity2)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity3)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity4)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity5)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity6)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity7)
+        .def("GetQuantity", &daepython::daeVariable_GetVariableQuantity8)
 
         .def("AssignValue", &daepython::qAssignValue0)
         .def("AssignValue", &daepython::qAssignValue1)
@@ -1093,7 +1105,8 @@ BOOST_PYTHON_MODULE(pyCore)
 		
 	    .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
          
-        .def("GetDomainsIndexesMap",    &daepython::daeVariable_Wrapper::GetDomainsIndexesMap1, ( arg("self"), arg("indexBase") ), DOCSTR_daeVariable_GetDomainIndexesMap)
+        .def("GetDomainsIndexesMap",    &daepython::daeVariable_GetDomainsIndexesMap,
+                                        ( arg("self"), arg("indexBase") ), DOCSTR_daeVariable_GetDomainIndexesMap)
 
 		.def("dt", &daepython::Get_dt0)
 		.def("dt", &daepython::Get_dt1)
