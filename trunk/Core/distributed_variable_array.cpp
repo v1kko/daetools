@@ -33,7 +33,7 @@ size_t daeVariable::GetNumberOfPoints() const
 		if(pDomain->m_nNumberOfPoints == 0)
 		{	
 			daeDeclareException(exInvalidCall); 
-			e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in variable [" << GetCanonicalName() << "] must not be zero; did you forget to initialize it?";
+            e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in variable [" << GetCanonicalName() << "] is zero; did you forget to initialize it?";
 			throw e;
 		}
 		nTotalNumberOfVariables *= pDomain->m_nNumberOfPoints;

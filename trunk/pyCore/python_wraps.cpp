@@ -6,6 +6,7 @@ using namespace std;
 using namespace boost::python;
 #include <boost/property_tree/json_parser.hpp>
 #include "../Core/units_io.h"
+#include <limits>
 
 namespace daepython
 {
@@ -1640,23 +1641,36 @@ void qSetParameterValues(daeParameter& param, const quantity& q)
 	param.SetValues(q);
 }
 
-void lSetParameterValues(daeParameter& param, boost::python::list values)
+void lSetParameterValues(daeParameter& param, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != param.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in SetValues for parameter " << param.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in SetValues for parameter " << param.GetCanonicalName()
+          << "; the required number of dimensions is " << param.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in SetValues for parameter " << param.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = param.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in SetValues for parameter " << param.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -2892,23 +2906,36 @@ void AssignValues(daeVariable& var, real_t values)
 	var.AssignValues(values);
 }
 
-void AssignValues2(daeVariable& var, boost::python::list values)
+void AssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in AssignValues for variable " << var.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in AssignValues for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in AssignValues for variable " << var.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in AssignValues for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -2916,18 +2943,27 @@ void AssignValues2(daeVariable& var, boost::python::list values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
-
-        if(rValue.check())
-            q_values[i] = quantity(rValue(), u);
-        else if(qValue.check())
-            q_values[i] = qValue;
+        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        boost::python::object obj = values[i];
+        if(obj.is_none())
+        {
+            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+        }
         else
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid type of item [" << i << "] in the list of values in AssignValues for variable " << var.GetCanonicalName();
-            throw e;
+            boost::python::extract<real_t>   rValue(obj);
+            boost::python::extract<quantity> qValue(obj);
+
+            if(rValue.check())
+                q_values[i] = quantity(rValue(), u);
+            else if(qValue.check())
+                q_values[i] = qValue();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of item [" << i << "] in the list of values in AssignValues for variable " << var.GetCanonicalName();
+                throw e;
+            }
         }
     }
     var.AssignValues(q_values);
@@ -2943,23 +2979,36 @@ void ReAssignValues(daeVariable& var, real_t values)
 	var.ReAssignValues(values);
 }
 
-void ReAssignValues2(daeVariable& var, boost::python::list values)
+void ReAssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in ReAssignValues for variable " << var.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in ReAssignValues for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in ReAssignValues for variable " << var.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in ReAssignValues for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -2967,18 +3016,27 @@ void ReAssignValues2(daeVariable& var, boost::python::list values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
-
-        if(rValue.check())
-            q_values[i] = quantity(rValue(), u);
-        else if(qValue.check())
-            q_values[i] = qValue;
+        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        boost::python::object obj = values[i];
+        if(obj.is_none())
+        {
+            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+        }
         else
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid type of item [" << i << "] in the list of values in ReAssignValues for variable " << var.GetCanonicalName();
-            throw e;
+            boost::python::extract<real_t>   rValue(obj);
+            boost::python::extract<quantity> qValue(obj);
+
+            if(rValue.check())
+                q_values[i] = quantity(rValue(), u);
+            else if(qValue.check())
+                q_values[i] = qValue();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of item [" << i << "] in the list of values in ReAssignValues for variable " << var.GetCanonicalName();
+                throw e;
+            }
         }
     }
     var.ReAssignValues(q_values);
@@ -2994,23 +3052,36 @@ void SetInitialConditions(daeVariable& var, real_t values)
 	var.SetInitialConditions(values);
 }
 
-void SetInitialConditions2(daeVariable& var, boost::python::list values)
+void SetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in SetInitialConditions for variable " << var.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in SetInitialConditions for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in SetInitialConditions for variable " << var.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in SetInitialConditions for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3018,18 +3089,27 @@ void SetInitialConditions2(daeVariable& var, boost::python::list values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
-
-        if(rValue.check())
-            q_values[i] = quantity(rValue(), u);
-        else if(qValue.check())
-            q_values[i] = qValue;
+        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        boost::python::object obj = values[i];
+        if(obj.is_none())
+        {
+            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+        }
         else
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid type of item [" << i << "] in the list of values in SetInitialConditions for variable " << var.GetCanonicalName();
-            throw e;
+            boost::python::extract<real_t>   rValue(obj);
+            boost::python::extract<quantity> qValue(obj);
+
+            if(rValue.check())
+                q_values[i] = quantity(rValue(), u);
+            else if(qValue.check())
+                q_values[i] = qValue();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of item [" << i << "] in the list of values in SetInitialConditions for variable " << var.GetCanonicalName();
+                throw e;
+            }
         }
     }
     var.SetInitialConditions(q_values);
@@ -3045,23 +3125,36 @@ void ReSetInitialConditions(daeVariable& var, real_t values)
 	var.ReSetInitialConditions(values);
 }
 
-void ReSetInitialConditions2(daeVariable& var, boost::python::list values)
+void ReSetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in ReSetInitialConditions for variable " << var.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in ReSetInitialConditions for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in ReSetInitialConditions for variable " << var.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in ReSetInitialConditions for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3069,18 +3162,27 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::list values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
-
-        if(rValue.check())
-            q_values[i] = quantity(rValue(), u);
-        else if(qValue.check())
-            q_values[i] = qValue;
+        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        boost::python::object obj = values[i];
+        if(obj.is_none())
+        {
+            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+        }
         else
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid type of item [" << i << "] in the list of values in ReSetInitialConditions for variable " << var.GetCanonicalName();
-            throw e;
+            boost::python::extract<real_t>   rValue(obj);
+            boost::python::extract<quantity> qValue(obj);
+
+            if(rValue.check())
+                q_values[i] = quantity(rValue(), u);
+            else if(qValue.check())
+                q_values[i] = qValue();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of item [" << i << "] in the list of values in ReSetInitialConditions for variable " << var.GetCanonicalName();
+                throw e;
+            }
         }
     }
     var.ReSetInitialConditions(q_values);
@@ -3096,23 +3198,35 @@ void SetInitialGuesses(daeVariable& var, real_t values)
 	var.SetInitialGuesses(values);
 }
 
-void SetInitialGuesses2(daeVariable& var, boost::python::list values)
+void SetInitialGuesses2(daeVariable& var, boost::python::numeric::array nd_values)
 {
-    boost::python::ssize_t n = boost::python::len(values);
-    if(n == 0)
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
     {
         daeDeclareException(exInvalidCall);
-        e << "Zero size of the list of values in SetInitialGuesses for variable " << var.GetCanonicalName();
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in SetInitialGuesses for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
         throw e;
     }
-    boost::python::extract<boost::python::list> lValue(values[0]);
-    if(lValue.check())
+    for(size_t k = 0; k < len(shape); k++)
     {
-        daeDeclareException(exInvalidCall);
-        e << "Multidimensional lists must be flattened before using in SetInitialGuesses for variable " << var.GetCanonicalName();
-        throw e;
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in SetInitialGuesses for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
     }
 
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object res = nd_values.attr("ravel")(arg);
+    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
+
+    boost::python::ssize_t n = boost::python::len(values);
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3120,18 +3234,27 @@ void SetInitialGuesses2(daeVariable& var, boost::python::list values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
-
-        if(rValue.check())
-            q_values[i] = quantity(rValue(), u);
-        else if(qValue.check())
-            q_values[i] = qValue;
+        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        boost::python::object obj = values[i];
+        if(obj.is_none())
+        {
+            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+        }
         else
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid type of item [" << i << "] in the list of values in SetInitialGuesses for variable " << var.GetCanonicalName();
-            throw e;
+            boost::python::extract<real_t>   rValue(obj);
+            boost::python::extract<quantity> qValue(obj);
+
+            if(rValue.check())
+                q_values[i] = quantity(rValue(), u);
+            else if(qValue.check())
+                q_values[i] = qValue();
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid type of item [" << i << "] in the list of values in SetInitialGuesses for variable " << var.GetCanonicalName();
+                throw e;
+            }
         }
     }
     var.SetInitialGuesses(q_values);

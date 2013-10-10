@@ -857,12 +857,12 @@ class daeCodeGenerator_ANSI_C(object):
         absTolerances        = Neq * [1E-5]
         blockInitDerivatives = Neq * [0.0]
         for oi, bi in indexMappings.items():
-            if IDs[oi] == 0:
-               blockIDs[bi] = 0 
-            elif IDs[oi] == 1:
-               blockIDs[bi] = 1
+            if IDs[oi] == cnAlgebraic:
+               blockIDs[bi] = cnAlgebraic
+            elif IDs[oi] == cnDifferential:
+               blockIDs[bi] = cnDifferential
 
-            if IDs[oi] != 2:
+            if IDs[oi] != cnAssigned:
                 blockInitValues[bi]      = initValues[oi]
                 blockInitDerivatives[bi] = initDerivatives[oi]
                 absTolerances[bi]        = absoluteTolerances[oi]

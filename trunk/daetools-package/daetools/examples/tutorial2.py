@@ -32,7 +32,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime
 
 # Standard variable types are defined in variable_types.py
-from pyUnits import m, kg, s, K, Pa, mol, J, W
+from pyUnits import m, kg, s, K, Pa, mol, J, W, kW
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -116,7 +116,7 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 25
+        n = 10
 
         self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
@@ -130,37 +130,42 @@ class simTutorial(daeSimulation):
         self.m.Q.SetValue(0, 1e6 * W/(m**2))
         self.m.Q.SetValue(1, 0.0 * W/(m**2))
 
+        Nx = self.m.x.NumberOfPoints
+        Ny = self.m.y.NumberOfPoints
+        
         # There are several ways to set a value of distributed parameters:
-        #  a) Call SetValues(list-of-floats-or-quantities) once to set the corresponding values
+        #  a) Call SetValues(ndarray-of-floats-or-quantities) once to set the corresponding values
         #  b) Call SetValues(float/quantity) once to set all to the same value
         #  c) In a loop call SetValue([index1, index2], float/quantity) to set a value for individual points
         #  d) In a loop call SetValue(index1, index2, float/quantity) to set a value for individual points
-        #
-        # All the following ways are equivalent:
-        # a) Use a list of float/quantity objects:
-        #     - Create a two-dimensional numpy array with datatype=object
-        #     - Set all values to 401 W/(m*K)
-        #     - Flatten and convert to python list. 
-        #       Achtung: Arrays must be flattened using row-major order (c-style) which is by default
-        #k = numpy.zeros((self.m.x.NumberOfPoints, self.m.y.NumberOfPoints), dtype=object)
-        #k[:] = 401 * W/(m*K)
-        #k = k.ravel(order='C').tolist() 
-        #self.m.k.SetValues(k)
+        
+        # All the following four ways are equivalent:
+        # a) Use an array of quantity objects
+        #    Use numpy to create an empty two-dimensional numpy array with datatype=object and set all values to 0.401 kW/(m*K).
+        #    The values will be converted to the units in the parameter 'k': W/(m*K) thus the value will be 401 W/(m*K).
+        k = numpy.empty((Nx,Ny), dtype=object)
+        k[:] = 0.401 * kW/(m*K)
+        print 'Parameter lambda values:'
+        print k
+        self.m.k.SetValues(k)
         
         # b) Use a single float value for all points (the units are implicitly W/(m*K)):
         #self.m.k.SetValues(401)
         
-        # c) Iterate over domains and use a list of indexes to set the value for every point:
-        #for x in range(0, self.m.x.NumberOfPoints):
-        #    for y in range(0, self.m.y.NumberOfPoints):
+        # c) Iterate over domains and use a list of indexes to set values for individual points:
+        #for x in range(Nx):
+        #    for y in range(Ny):
         #        self.m.k.SetValue([x,y], 401 * W/(m*K))
 
-        # d) Simply loop over over domains and set the value for every point:
-        for x in range(0, self.m.x.NumberOfPoints):
-            for y in range(0, self.m.y.NumberOfPoints):
-                self.m.k.SetValue(x, y, 401 * W/(m*K))
+        # d) Iterate over domains and set values for individual points:
+        #for x in range(Nx):
+        #    for y in range(Ny):
+        #        self.m.k.SetValue(x, y, 401 * W/(m*K))
         
     def SetUpVariables(self):
+        Nx = self.m.x.NumberOfPoints
+        Ny = self.m.y.NumberOfPoints
+        
         # In the above model we defined 2*N*N+1 variables and 2*N*N equations,
         # meaning that the number of degrees of freedom (DOF) is equal to: 2*N*N+1 - 2*N*N = 1
         # Therefore, we have to assign a value of one of the variables.
@@ -177,7 +182,7 @@ class simTutorial(daeSimulation):
         # There are several ways to do it:
         #  a) SetInitialGuesses(float/quantity) - in a single call sets all to the same value:
         #          self.m.T.SetInitialGuesses(1000*K)
-        #  b) SetInitialGuesses(list-of-floats-or-quantities) - in a single call sets individual values (list must be flattened):
+        #  b) SetInitialGuesses(ndarray-of-floats-or-quantities) - in a single call sets individual values:
         #          self.m.T.SetInitialGuesses([1000, 1001, ...])
         #  c) SetInitialGuess(index1, index2, ..., float/quantity) - sets an individual value:
         #          self.m.T.SetInitialGuess(1, 3, 1000*K)
@@ -194,25 +199,33 @@ class simTutorial(daeSimulation):
         # a) Use a single value
         self.m.T.SetInitialGuesses(1000 * K)
         
-        # b) Use a list of quantity objects:
-        #     - Create a two-dimensional numpy array with datatype=object
-        #     - Set all values to 1000 K
-        #     - Flatten and convert to python list. 
-        #       Achtung: Arrays must be flattened using row-major order (c-style) which is by default
-        #init_guesses = numpy.zeros((self.m.x.NumberOfPoints, self.m.y.NumberOfPoints), dtype=object)
+        # b) Use an array of quantity objects:
+        #    Again, use numpy to create an empty two-dimensional numpy array with datatype=object and set all values to 1000 K.
+        #init_guesses = numpy.empty((Nx,Ny), dtype=object)
         #init_guesses[:] = 1000 * K 
-        #init_guesses = init_guesses.ravel(order='C').tolist() 
         #self.m.T.SetInitialGuesses(init_guesses)        
         
         # c) Loop over domains to set an initial guess for individual points
-        for x in range(self.m.x.NumberOfPoints):
-            for y in range(self.m.y.NumberOfPoints):
+        for x in range(Nx):
+            for y in range(Ny):
                 self.m.cp.SetInitialGuess(x, y, 1000 * J/(kg*K))
 
-        # Initial condtions can be set in all four above-mentioned ways
-        for x in range(1, self.m.x.NumberOfPoints - 1):
-            for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition([x, y], 300 * K)
+        # Initial conditions can be set in all four above-mentioned ways.
+        # Note: In this case init. conditions must be set for open-ended domains (excluding boundary points).
+        # a) Use an array of quantity objects:
+        #    Again, use numpy to create an empty two-dimensional numpy array with datatype=object.
+        #    However we do not set ALL values to 300 K but only those that correspond to the points in the domain interior,
+        #    thus leaving points at the boundaries to None (which by design means they will be excluded).
+        ic = numpy.empty((Nx,Ny), dtype=object)
+        ic[1:Nx-1, 1:Ny-1] = 300 * K
+        print 'Initial conditions for T:'
+        print ic
+        self.m.T.SetInitialConditions(ic)        
+        
+        # b) Loop over domains to set initial conditions for individual points
+        #for x in range(1, Nx-1):
+        #    for y in range(1, Ny-1):
+        #        self.m.T.SetInitialCondition([x,y], 300 * K)
                 
 # Use daeSimulator class
 def guiRun(app):

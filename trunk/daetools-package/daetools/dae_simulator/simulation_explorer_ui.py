@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Tue Oct  8 20:16:10 2013
+# Created: Thu Oct 10 01:40:49 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -266,7 +266,8 @@ class Ui_SimulationExplorer(object):
         self.horizontalLayout_2.addWidget(self.buttonCancel)
         self.buttonOk = QtGui.QPushButton(SimulationExplorer)
         self.buttonOk.setMinimumSize(QtCore.QSize(100, 0))
-        self.buttonOk.setDefault(True)
+        self.buttonOk.setAutoDefault(False)
+        self.buttonOk.setDefault(False)
         self.buttonOk.setObjectName(_fromUtf8("buttonOk"))
         self.horizontalLayout_2.addWidget(self.buttonOk)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)

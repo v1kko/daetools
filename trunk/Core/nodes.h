@@ -759,15 +759,15 @@ public:
 /*********************************************************************************************
 	daeFPUCommand
 **********************************************************************************************/
-class DAE_CORE_API daeFPU
-{
-public:
-	static void	CreateCommandStack(adNode* node, std::vector<daeFPUCommand*>& ptrarrCommands);
-	static void	fpuResidual(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
-	static void	fpuJacobian(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
-};
+//class DAE_CORE_API daeFPU
+//{
+//public:
+//	static void	CreateCommandStack(adNode* node, std::vector<daeFPUCommand*>& ptrarrCommands);
+//	static void	fpuResidual(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
+//	static void	fpuJacobian(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
+//};
 
-DAE_CORE_API std::ostream& operator<<(std::ostream& os, const daeFPUCommand& cmd);
+//DAE_CORE_API std::ostream& operator<<(std::ostream& os, const daeFPUCommand& cmd);
 
 	
 inline void FillDomains(const std::vector<daeDomainIndex>& arrDomains, std::vector<string>& strarrDomains)

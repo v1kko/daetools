@@ -2,6 +2,44 @@
 
 set -e
 
+usage()
+{
+cat << EOF
+usage: $0 [options]
+
+This script detects the system and installs packages required to compile 
+daetools libraries and python extension modules. Currently supported:
+    - Debian GNU/Linux
+    - Ubuntu
+    - Fedora
+    - CentOS
+    - Linux Mint
+    - Suse Linux
+    - Arch Linux
+
+NOTE: If the script fails check whether 'lsb_release' package is installed
+      and whether your GNU/Linux distribution is recognized.
+
+Typical use:
+    sh install_dependencies_linux.sh
+
+OPTIONS:
+   -h | --help  Show this message.
+EOF
+}
+
+args=`getopt -a -o "h" -l "help" -n "install_dependencies_linux" -- $*`
+
+# Process options
+for i; do
+  case "$i" in
+    -h|--help)  usage
+                exit 1
+                ;;
+                  
+  esac
+done
+
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s | tr "[:upper:]" "[:lower:]"`
 DISTRIBUTOR_ID=`echo $(lsb_release -si) | tr "[:upper:]" "[:lower:]"`

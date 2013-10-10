@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EditorParameterArray</class>
- <widget class="QFrame" name="EditorParameterArray">
+ <class>EditorQuantityArray</class>
+ <widget class="QFrame" name="EditorQuantityArray">
   <property name="geometry">
    <rect>
     <x>0</x>

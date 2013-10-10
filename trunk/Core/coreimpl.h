@@ -865,7 +865,7 @@ public:
 	{
 	/*
 	  Here we have to be able to set initial conditions repeatedly (during optimization).
-	  However, after the first solve initial the initialization data might be deleted.
+      However, after the first solve_initial the initialization data might be deleted.
 	  Therefore, the first thing that has to be done is checking if m_pdarrValuesReferences
 	  has already been initialized. If so, use it. If not use m_pdInitialValues.
 	*/
@@ -877,7 +877,7 @@ public:
 			}
 			else
 			{
-				daeDeclareAndThrowException(exNotImplemented);
+                daeDeclareAndThrowException(exInvalidCall);
 			}
 		}
 		else if(m_pdInitialValues)
@@ -888,7 +888,7 @@ public:
 			}
 			else
 			{
-				daeDeclareAndThrowException(exNotImplemented);
+                daeDeclareAndThrowException(exInvalidCall);
 			}
 		}
 		else
@@ -1575,7 +1575,7 @@ public:
 public:	
 	virtual string	GetCanonicalName(void) const;
 	virtual unit	GetUnits(void) const;
-	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
+    virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 	
 	virtual bool	GetReportingOn(void) const;
 	virtual void	SetReportingOn(bool bOn);
@@ -1643,7 +1643,8 @@ public:
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
-	void DistributeOnDomain(daeDomain& rDomain);
+    size_t GetNumberOfDomains() const;
+    void DistributeOnDomain(daeDomain& rDomain);
     
     daePort* GetParentPort(void) const;
     const std::vector<daeDomain*>& Domains(void) const;
@@ -1926,7 +1927,8 @@ public:
 
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	
-	void DistributeOnDomain(daeDomain& rDomain);
+    size_t GetNumberOfDomains() const;
+    void DistributeOnDomain(daeDomain& rDomain);
 	
 	size_t GetOverallIndex(void) const;
 	daeDomain* GetDomain(size_t nIndex) const;

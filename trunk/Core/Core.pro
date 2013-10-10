@@ -32,7 +32,6 @@ SOURCES += xmlreadstream.cpp \
     model_port_arrays.cpp \
     model.cpp \
     helpers.cpp \
-    fpu_commands.cpp \
     equation.cpp \
     domain.cpp \
     dllmain.cpp \

@@ -539,6 +539,11 @@ void daeParameter::SetUnits(const unit& units)
 	m_Unit = units;
 }
 
+size_t daeParameter::GetNumberOfDomains() const
+{
+    return m_ptrDomains.size();
+}
+
 void daeParameter::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 {
 	ptrarrDomains.clear();
@@ -558,13 +563,23 @@ real_t* daeParameter::GetValuePointer(void)
 
 size_t daeParameter::GetNumberOfPoints(void) const
 {
-	if(m_darrValues.empty())
-	{	
-		daeDeclareException(exInvalidCall); 
-		e << "Number of points in the parameter [" << GetCanonicalName() << "] must not be zero; did you forget to initialize it?";
-		throw e;
-	}
-	return m_darrValues.size();
+    daeDomain* pDomain;
+    size_t n = 1;
+    for(size_t i = 0; i < m_ptrDomains.size(); i++)
+    {
+        pDomain = m_ptrDomains[i];
+        if(!pDomain)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(pDomain->m_nNumberOfPoints == 0)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Number of points in domain [" << pDomain->GetCanonicalName() << "] in parameter [" << GetCanonicalName() << "] is zero; did you forget to initialize it?";
+            throw e;
+        }
+
+        n *= pDomain->m_nNumberOfPoints;
+    }
+    return n;
 }
 
 size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const

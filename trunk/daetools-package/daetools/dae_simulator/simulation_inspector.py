@@ -26,11 +26,17 @@ def _collectParameters(nodeItem, model, dictParameters):
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.Parameters:
-        item = treeItem_Parameter(nodeItem, obj)
+        name = obj.GetStrippedName()
+        if obj.NumberOfPoints == 1:
+            value = float(obj.GetValue())
+        else:
+            value = obj.npyValues.tolist()
+        units = obj.Units
+        item = treeItem_Quantity(nodeItem, name, value, units)
         dictParameters[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
-        componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
         _collectParameters(componentItem, component, dictParameters)
 
 def _collectDomains(nodeItem, model, dictDomains):
@@ -39,11 +45,28 @@ def _collectDomains(nodeItem, model, dictDomains):
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.Domains:
-        item = treeItem_Domain(nodeItem, obj)
+        name  = obj.GetStrippedName()
+        units = obj.Units
+        if obj.Type == eArray:
+            numberOfPoints = obj.NumberOfPoints
+            item = treeItem_Domain(nodeItem, name, numberOfPoints=numberOfPoints, 
+                                                   units=units)
+        else:
+            discrMethod        = obj.DiscretizationMethod # not edited
+            order              = obj.DiscretizationOrder  # not edited
+            numberOfIntervals  = obj.NumberOfIntervals    # not edited
+            lowerBound         = obj.LowerBound
+            upperBound         = obj.UpperBound
+            item = treeItem_Domain(nodeItem, name, discrMethod = discrMethod, 
+                                                   order = order, 
+                                                   numberOfIntervals = numberOfIntervals, 
+                                                   lowerBound = lowerBound, 
+                                                   upperBound = upperBound, 
+                                                   units = units)
         dictDomains[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
-        componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
         _collectDomains(componentItem, component, dictDomains)
 
 def _collectOutputVariables(nodeItem, model, dictOutputVariables):
@@ -52,32 +75,81 @@ def _collectOutputVariables(nodeItem, model, dictOutputVariables):
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.Variables:
+        name  = obj.GetStrippedName()
         value = obj.ReportingOn
-        item = treeItem_OutputVariable(nodeItem, obj, value)
+        item = treeItem_OutputVariable(nodeItem, name, value)
         dictOutputVariables[obj.CanonicalName] = (obj, item)
     
     for obj in model.Parameters:
+        name  = obj.GetStrippedName()
         value = obj.ReportingOn
-        item = treeItem_OutputVariable(nodeItem, obj, value)
+        item = treeItem_OutputVariable(nodeItem, name, value)
         dictOutputVariables[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
-        componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
         _collectOutputVariables(componentItem, component, dictOutputVariables)
 
 def _collectStateTransitions(nodeItem, model, dictSTNs):
     """
-    Recursively looks for parameters in the 'model' and all its child-models and
+    Recursively looks for STNs in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.STNs:
-        item = treeItem_StateTransition(nodeItem, obj)
+        name = obj.GetStrippedName()
+        states = [state.Name for state in obj.States]
+        item = treeItem_StateTransition(nodeItem, name, states, obj.ActiveState)
         dictSTNs[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
-        componentItem = treeItem(nodeItem, component, None, treeItem.typeNone)
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
         _collectStateTransitions(componentItem, component, dictSTNs)
 
+def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
+    """
+    Recursively looks for variables in the 'model' and all its child-models and
+    adds a new treeItem object to the parent item 'nodeItem' for all those
+    who are differential and need an initial conditions to be set.
+    """
+    for var in model.Variables:
+        domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
+        units             = var.VariableType.Units
+        for var_index, domainIndexes in domainsIndexesMap.iteritems():
+            if IDs[var.OverallIndex + var_index] == cnDifferential:
+                if var.NumberOfPoints == 1:
+                    name  = var.GetStrippedName()
+                else:
+                    name  = '%s(%s)' % (var.GetStrippedName(), ','.join([str(ind) for ind in domainIndexes]))
+                value = var.GetValue(domainIndexes)
+                item = treeItem_Quantity(nodeItem, name, value, units)
+                dictInitialConditions[name] = (name, domainIndexes, item)
+
+    for component in model.Components:
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
+        _collectInitialConditions(componentItem, component, dictInitialConditions, IDs)
+    
+def _collectDOFs(nodeItem, model, dictDOFs, IDs):
+    """
+    Recursively looks for variables in the 'model' and all its child-models and
+    adds a new treeItem object to the parent item 'nodeItem' for all those
+    who are differential and need an initial conditions to be set.
+    """
+    for var in model.Variables:
+        domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
+        units             = var.VariableType.Units
+        for var_index, domainIndexes in domainsIndexesMap.iteritems():
+            if IDs[var.OverallIndex + var_index] == cnAssigned:
+                if var.NumberOfPoints == 1:
+                    name  = var.GetStrippedName()
+                else:
+                    name  = '%s(%s)' % (var.GetStrippedName(), ','.join([str(ind) for ind in domainIndexes]))
+                value = var.GetValue(domainIndexes)
+                item = treeItem_Quantity(nodeItem, name, value, units)
+                dictDOFs[name] = (name, domainIndexes, item)
+
+    for component in model.Components:
+        componentItem = treeItem(nodeItem, component.GetStrippedName(), treeItem.typeNone)
+        _collectDOFs(componentItem, component, dictDOFs, IDs)
         
 class daeSimulationInspector(object):
     def __init__(self, simulation):
@@ -97,20 +169,26 @@ class daeSimulationInspector(object):
         self.treeStateTransitions   = None
         self.treeOutputVariables    = None
         
-        self.treeDomains = treeItem(None, self.simulation.m, treeItem.typeNone)
+        IDs = self.simulation.VariableTypes
+
+        self.treeDomains = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
         _collectDomains(self.treeDomains, self.simulation.m, self.domains)
         
-        self.treeParameters = treeItem(None, self.simulation.m, treeItem.typeNone)
+        self.treeParameters = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
         _collectParameters(self.treeParameters, self.simulation.m, self.parameters)
 
-        self.treeInitialConditions = treeItem(None, self.simulation.m, treeItem.typeNone)
-        #_collectInitialConditions(self.treeInitialConditions, self.simulation.m, self.initial_conditions)
+        self.treeInitialConditions = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
+        _collectInitialConditions(self.treeInitialConditions, self.simulation.m, self.initial_conditions, IDs)
+        #import pprint
+        #pprint.pprint(self.initial_conditions, indent = 2)
 
-        self.treeDOFs = treeItem(None, self.simulation.m, treeItem.typeNone)
-        #_collectDOFs(self.treeDOFs, self.simulation.m, self.dofs)
+        self.treeDOFs = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
+        _collectDOFs(self.treeDOFs, self.simulation.m, self.dofs, IDs)
+        #import pprint
+        #pprint.pprint(self.dofs, indent = 2)
 
-        self.treeStateTransitions = treeItem(None, self.simulation.m, treeItem.typeNone)
+        self.treeStateTransitions = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
         _collectStateTransitions(self.treeStateTransitions, self.simulation.m, self.state_transitions)
 
-        self.treeOutputVariables = treeItem(None, self.simulation.m, treeItem.typeNone)
+        self.treeOutputVariables = treeItem(None, self.simulation.m.GetStrippedName(), treeItem.typeNone)
         _collectOutputVariables(self.treeOutputVariables, self.simulation.m, self.output_variables)
