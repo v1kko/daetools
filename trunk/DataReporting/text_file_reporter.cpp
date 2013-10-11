@@ -8,6 +8,7 @@ namespace datareporting
 {
 daeTEXTFileDataReporter::daeTEXTFileDataReporter()
 {
+    m_strName = "TEXTFileDataReporter";
 }
 
 daeTEXTFileDataReporter::~daeTEXTFileDataReporter()

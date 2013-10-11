@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_quantity.ui'
 #
-# Created: Fri Oct 11 01:38:30 2013
+# Created: Fri Oct 11 16:06:22 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_EditorQuantity(object):
     def setupUi(self, EditorQuantity):
         EditorQuantity.setObjectName(_fromUtf8("EditorQuantity"))
-        EditorQuantity.resize(250, 300)
+        EditorQuantity.resize(250, 292)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -71,6 +71,31 @@ class Ui_EditorQuantity(object):
         self.unitsEdit.setObjectName(_fromUtf8("unitsEdit"))
         self.horizontalLayout_3.addWidget(self.unitsEdit)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.verticalLayout_2.setSpacing(1)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.label_3 = QtGui.QLabel(EditorQuantity)
+        self.label_3.setMinimumSize(QtCore.QSize(80, 0))
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.verticalLayout_2.addWidget(self.label_3)
+        self.descriptionEdit = QtGui.QTextEdit(EditorQuantity)
+        self.descriptionEdit.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.descriptionEdit.sizePolicy().hasHeightForWidth())
+        self.descriptionEdit.setSizePolicy(sizePolicy)
+        self.descriptionEdit.setMinimumSize(QtCore.QSize(100, 50))
+        self.descriptionEdit.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.descriptionEdit.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.descriptionEdit.setReadOnly(False)
+        self.descriptionEdit.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
+        self.descriptionEdit.setObjectName(_fromUtf8("descriptionEdit"))
+        self.verticalLayout_2.addWidget(self.descriptionEdit)
+        self.horizontalLayout_4.addLayout(self.verticalLayout_2)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -81,7 +106,7 @@ class Ui_EditorQuantity(object):
         self.updateButton.setObjectName(_fromUtf8("updateButton"))
         self.horizontalLayout_2.addWidget(self.updateButton)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
 
         self.retranslateUi(EditorQuantity)
@@ -92,6 +117,8 @@ class Ui_EditorQuantity(object):
         self.valueEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert the value (float).The format can be scientific. Examples:</p><pre style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">1.02</span></pre><pre style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">5.032E-3</span></pre></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("EditorQuantity", "Units", None, QtGui.QApplication.UnicodeUTF8))
         self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: </p><p>km/kg (kilometres per kilogram)<br/>um / ns**2 (micrometres per nanoseconds squared) <br/>kJ / (kg*K) (kiloJoules per kilogram and Kelvin)<br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("EditorQuantity", "Description", None, QtGui.QApplication.UnicodeUTF8))
+        self.descriptionEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Description of the object.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Update the value and units.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorQuantity", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

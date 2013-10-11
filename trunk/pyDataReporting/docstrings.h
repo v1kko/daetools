@@ -2,6 +2,7 @@
 #define DAE_DOCSTRINGS_H
 
 const char* DOCSTR_daeDataReporter_t = "";
+    const char* DOCSTR_daeDataReporter_t_Name = "";
     const char* DOCSTR_daeDataReporter_t_Connect = "";
     const char* DOCSTR_daeDataReporter_t_Disconnect = "";
     const char* DOCSTR_daeDataReporter_t_IsConnected = "";

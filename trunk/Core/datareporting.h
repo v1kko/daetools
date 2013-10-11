@@ -284,6 +284,7 @@ public:
 	virtual ~daeDataReporter_t(void){}
 
 public:
+    virtual std::string GetName() const                                                 = 0;
 	virtual bool Connect(const string& strConnectString, const string& strProcessName)	= 0;
 	virtual bool Disconnect(void)														= 0;
 	virtual bool IsConnected(void)														= 0;

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Fri Oct 11 02:11:48 2013
+# Created: Fri Oct 11 18:21:12 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,25 +67,18 @@ class Ui_SimulationExplorer(object):
         self.relativeToleranceEdit = QtGui.QLineEdit(self.tab_Runtume)
         self.relativeToleranceEdit.setObjectName(_fromUtf8("relativeToleranceEdit"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.relativeToleranceEdit)
-        self.initialConditionsLabel = QtGui.QLabel(self.tab_Runtume)
-        self.initialConditionsLabel.setMinimumSize(QtCore.QSize(300, 0))
-        self.initialConditionsLabel.setObjectName(_fromUtf8("initialConditionsLabel"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.initialConditionsLabel)
-        self.quazySteadyStateCheckBox = QtGui.QCheckBox(self.tab_Runtume)
-        self.quazySteadyStateCheckBox.setObjectName(_fromUtf8("quazySteadyStateCheckBox"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.quazySteadyStateCheckBox)
         self.daesolverLabel = QtGui.QLabel(self.tab_Runtume)
         self.daesolverLabel.setObjectName(_fromUtf8("daesolverLabel"))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.daesolverLabel)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.daesolverLabel)
         self.daesolverComboBox = QtGui.QComboBox(self.tab_Runtume)
         self.daesolverComboBox.setObjectName(_fromUtf8("daesolverComboBox"))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.daesolverComboBox)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.daesolverComboBox)
         self.lasolverLabel = QtGui.QLabel(self.tab_Runtume)
         self.lasolverLabel.setObjectName(_fromUtf8("lasolverLabel"))
-        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.lasolverLabel)
+        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.lasolverLabel)
         self.lasolverComboBox = QtGui.QComboBox(self.tab_Runtume)
         self.lasolverComboBox.setObjectName(_fromUtf8("lasolverComboBox"))
-        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.lasolverComboBox)
+        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.lasolverComboBox)
         self.dataReporterLabel = QtGui.QLabel(self.tab_Runtume)
         self.dataReporterLabel.setObjectName(_fromUtf8("dataReporterLabel"))
         self.formLayout.setWidget(7, QtGui.QFormLayout.LabelRole, self.dataReporterLabel)
@@ -98,6 +91,12 @@ class Ui_SimulationExplorer(object):
         self.logComboBox = QtGui.QComboBox(self.tab_Runtume)
         self.logComboBox.setObjectName(_fromUtf8("logComboBox"))
         self.formLayout.setWidget(8, QtGui.QFormLayout.FieldRole, self.logComboBox)
+        self.minlpSolverLabel = QtGui.QLabel(self.tab_Runtume)
+        self.minlpSolverLabel.setObjectName(_fromUtf8("minlpSolverLabel"))
+        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.minlpSolverLabel)
+        self.minlpsolverComboBox = QtGui.QComboBox(self.tab_Runtume)
+        self.minlpsolverComboBox.setObjectName(_fromUtf8("minlpsolverComboBox"))
+        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.minlpsolverComboBox)
         self.verticalLayout_6.addLayout(self.formLayout)
         self.tabWidget.addTab(self.tab_Runtume, _fromUtf8(""))
         self.tab_Domains = QtGui.QWidget()
@@ -139,6 +138,32 @@ class Ui_SimulationExplorer(object):
         sizePolicy.setHeightForWidth(self.treeParameters.sizePolicy().hasHeightForWidth())
         self.treeParameters.setSizePolicy(sizePolicy)
         self.treeParameters.setMinimumSize(QtCore.QSize(100, 200))
+        self.treeParameters.setStyleSheet(_fromUtf8(" /*\n"
+"QTreeWidget::branch:has-siblings:!adjoins-item {\n"
+"     border-image: url(images/vline.png) 0;\n"
+" }\n"
+"\n"
+" QTreeWidget::branch:has-siblings:adjoins-item {\n"
+"     border-image: url(images/branch-more.png) 0;\n"
+" }\n"
+"\n"
+" QTreeWidget::branch:!has-children:!has-siblings:adjoins-item {\n"
+"     border-image: url(images/branch-end.png) 0;\n"
+" }\n"
+"\n"
+" QTreeWidget::branch:has-children:!has-siblings:closed,\n"
+" QTreeWidget::branch:closed:has-children:has-siblings {\n"
+"         border-image: none;\n"
+"         image: url(images/branch-closed.png);\n"
+" }\n"
+"\n"
+" QTreeWidget::branch:open:has-children:!has-siblings,\n"
+" QTreeWidget::branch:open:has-children:has-siblings  {\n"
+"         border-image: none;\n"
+"         image: url(images/branch-open.png);\n"
+" }\n"
+"*/\n"
+""))
         self.treeParameters.setAlternatingRowColors(True)
         self.treeParameters.setObjectName(_fromUtf8("treeParameters"))
         self.treeParameters.header().setDefaultSectionSize(300)
@@ -158,8 +183,29 @@ class Ui_SimulationExplorer(object):
         self.tabWidget.addTab(self.tab_Parameters, _fromUtf8(""))
         self.tab_InitialConditions = QtGui.QWidget()
         self.tab_InitialConditions.setObjectName(_fromUtf8("tab_InitialConditions"))
-        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.tab_InitialConditions)
+        self.verticalLayout = QtGui.QVBoxLayout(self.tab_InitialConditions)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.quazySteadyStateCheckBox = QtGui.QCheckBox(self.tab_InitialConditions)
+        self.quazySteadyStateCheckBox.setEnabled(False)
+        self.quazySteadyStateCheckBox.setObjectName(_fromUtf8("quazySteadyStateCheckBox"))
+        self.horizontalLayout_4.addWidget(self.quazySteadyStateCheckBox)
+        self.initialConditionsLabel = QtGui.QLabel(self.tab_InitialConditions)
+        self.initialConditionsLabel.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.initialConditionsLabel.sizePolicy().hasHeightForWidth())
+        self.initialConditionsLabel.setSizePolicy(sizePolicy)
+        self.initialConditionsLabel.setMinimumSize(QtCore.QSize(0, 0))
+        self.initialConditionsLabel.setObjectName(_fromUtf8("initialConditionsLabel"))
+        self.horizontalLayout_4.addWidget(self.initialConditionsLabel)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+        self.horizontalLayout_7 = QtGui.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.treeInitialConditions = QtGui.QTreeWidget(self.tab_InitialConditions)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
@@ -171,7 +217,7 @@ class Ui_SimulationExplorer(object):
         self.treeInitialConditions.setObjectName(_fromUtf8("treeInitialConditions"))
         self.treeInitialConditions.header().setDefaultSectionSize(300)
         self.treeInitialConditions.header().setMinimumSectionSize(100)
-        self.horizontalLayout_4.addWidget(self.treeInitialConditions)
+        self.horizontalLayout_7.addWidget(self.treeInitialConditions)
         self.frameInitialConditions = QtGui.QFrame(self.tab_InitialConditions)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -182,7 +228,8 @@ class Ui_SimulationExplorer(object):
         self.frameInitialConditions.setFrameShape(QtGui.QFrame.NoFrame)
         self.frameInitialConditions.setFrameShadow(QtGui.QFrame.Raised)
         self.frameInitialConditions.setObjectName(_fromUtf8("frameInitialConditions"))
-        self.horizontalLayout_4.addWidget(self.frameInitialConditions)
+        self.horizontalLayout_7.addWidget(self.frameInitialConditions)
+        self.verticalLayout.addLayout(self.horizontalLayout_7)
         self.tabWidget.addTab(self.tab_InitialConditions, _fromUtf8(""))
         self.tab_DOFs = QtGui.QWidget()
         self.tab_DOFs.setObjectName(_fromUtf8("tab_DOFs"))
@@ -257,8 +304,8 @@ class Ui_SimulationExplorer(object):
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonCancel = QtGui.QPushButton(SimulationExplorer)
         self.buttonCancel.setMinimumSize(QtCore.QSize(100, 0))
         self.buttonCancel.setAutoDefault(False)
@@ -284,11 +331,11 @@ class Ui_SimulationExplorer(object):
         self.reportingIntervalLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Reporting interval, s", None, QtGui.QApplication.UnicodeUTF8))
         self.reportingIntervalEdit.setText(QtGui.QApplication.translate("SimulationExplorer", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.relativeToleranceLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Relative Tolerance", None, QtGui.QApplication.UnicodeUTF8))
-        self.initialConditionsLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Quazy Steady State InitialConditions?", None, QtGui.QApplication.UnicodeUTF8))
         self.daesolverLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "DAE Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.lasolverLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.dataReporterLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Data Reporter", None, QtGui.QApplication.UnicodeUTF8))
         self.logLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Log", None, QtGui.QApplication.UnicodeUTF8))
+        self.minlpSolverLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "(MI)NLP Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "Runtime", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the runtime data.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDomains.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
@@ -299,6 +346,7 @@ class Ui_SimulationExplorer(object):
         self.treeParameters.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Parameters), QtGui.QApplication.translate("SimulationExplorer", "Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Parameters), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the data related to parameters.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.initialConditionsLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Quazy Steady State InitialConditions", None, QtGui.QApplication.UnicodeUTF8))
         self.treeInitialConditions.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeInitialConditions.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_InitialConditions), QtGui.QApplication.translate("SimulationExplorer", "InitialConditions", None, QtGui.QApplication.UnicodeUTF8))

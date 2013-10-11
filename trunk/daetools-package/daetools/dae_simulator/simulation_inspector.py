@@ -32,7 +32,8 @@ def _collectParameters(nodeItem, model, dictParameters):
         else:
             value = obj.npyValues.tolist()
         units = obj.Units
-        item = treeItem_Quantity(nodeItem, name, value, units)
+        description = obj.Description
+        item = treeItem_Quantity(nodeItem, name, description, value, units)
         dictParameters[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
@@ -47,22 +48,23 @@ def _collectDomains(nodeItem, model, dictDomains):
     for obj in model.Domains:
         name  = obj.GetStrippedName()
         units = obj.Units
+        description = obj.Description
         if obj.Type == eArray:
             numberOfPoints = obj.NumberOfPoints
-            item = treeItem_Domain(nodeItem, name, numberOfPoints=numberOfPoints, 
-                                                   units=units)
+            item = treeItem_Domain(nodeItem, name, description, numberOfPoints=numberOfPoints, 
+                                                                units=units)
         else:
             discrMethod        = obj.DiscretizationMethod # not edited
             order              = obj.DiscretizationOrder  # not edited
             numberOfIntervals  = obj.NumberOfIntervals    # not edited
             lowerBound         = obj.LowerBound
             upperBound         = obj.UpperBound
-            item = treeItem_Domain(nodeItem, name, discrMethod = discrMethod, 
-                                                   order = order, 
-                                                   numberOfIntervals = numberOfIntervals, 
-                                                   lowerBound = lowerBound, 
-                                                   upperBound = upperBound, 
-                                                   units = units)
+            item = treeItem_Domain(nodeItem, name, description, discrMethod = discrMethod, 
+                                                                order = order, 
+                                                                numberOfIntervals = numberOfIntervals, 
+                                                                lowerBound = lowerBound, 
+                                                                upperBound = upperBound, 
+                                                                units = units)
         dictDomains[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
@@ -97,8 +99,9 @@ def _collectStateTransitions(nodeItem, model, dictSTNs):
     """
     for obj in model.STNs:
         name = obj.GetStrippedName()
+        description = obj.Description
         states = [state.Name for state in obj.States]
-        item = treeItem_StateTransition(nodeItem, name, states, obj.ActiveState)
+        item = treeItem_StateTransition(nodeItem, name, description, states, obj.ActiveState)
         dictSTNs[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
@@ -114,6 +117,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
     for var in model.Variables:
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
+        description       = var.Description
         for var_index, domainIndexes in domainsIndexesMap.iteritems():
             if IDs[var.OverallIndex + var_index] == cnDifferential:
                 if var.NumberOfPoints == 1:
@@ -121,7 +125,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
                 else:
                     name  = '%s(%s)' % (var.GetStrippedName(), ','.join([str(ind) for ind in domainIndexes]))
                 value = var.GetValue(domainIndexes)
-                item = treeItem_Quantity(nodeItem, name, value, units)
+                item = treeItem_Quantity(nodeItem, name, description, value, units)
                 dictInitialConditions[name] = (name, domainIndexes, item)
 
     for component in model.Components:
@@ -137,6 +141,7 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
     for var in model.Variables:
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
+        description       = var.Description
         for var_index, domainIndexes in domainsIndexesMap.iteritems():
             if IDs[var.OverallIndex + var_index] == cnAssigned:
                 if var.NumberOfPoints == 1:
@@ -144,7 +149,7 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
                 else:
                     name  = '%s(%s)' % (var.GetStrippedName(), ','.join([str(ind) for ind in domainIndexes]))
                 value = var.GetValue(domainIndexes)
-                item = treeItem_Quantity(nodeItem, name, value, units)
+                item = treeItem_Quantity(nodeItem, name, description, value, units)
                 dictDOFs[name] = (name, domainIndexes, item)
 
     for component in model.Components:

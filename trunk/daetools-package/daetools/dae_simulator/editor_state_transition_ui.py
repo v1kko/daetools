@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_state_transition.ui'
 #
-# Created: Fri Oct 11 01:56:04 2013
+# Created: Fri Oct 11 16:06:36 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_EditorStateTransition(object):
     def setupUi(self, EditorStateTransition):
         EditorStateTransition.setObjectName(_fromUtf8("EditorStateTransition"))
-        EditorStateTransition.resize(250, 300)
+        EditorStateTransition.resize(250, 247)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -46,12 +46,34 @@ class Ui_EditorStateTransition(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.activeStateComboBox.sizePolicy().hasHeightForWidth())
         self.activeStateComboBox.setSizePolicy(sizePolicy)
+        self.activeStateComboBox.setMinimumSize(QtCore.QSize(100, 0))
         self.activeStateComboBox.setObjectName(_fromUtf8("activeStateComboBox"))
         self.horizontalLayout.addWidget(self.activeStateComboBox)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.horizontalLayout_3 = QtGui.QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.horizontalLayout_6 = QtGui.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout()
+        self.verticalLayout_4.setSpacing(1)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.label_5 = QtGui.QLabel(EditorStateTransition)
+        self.label_5.setMinimumSize(QtCore.QSize(80, 0))
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.verticalLayout_4.addWidget(self.label_5)
+        self.descriptionEdit = QtGui.QTextEdit(EditorStateTransition)
+        self.descriptionEdit.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.descriptionEdit.sizePolicy().hasHeightForWidth())
+        self.descriptionEdit.setSizePolicy(sizePolicy)
+        self.descriptionEdit.setMinimumSize(QtCore.QSize(100, 50))
+        self.descriptionEdit.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.descriptionEdit.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.descriptionEdit.setReadOnly(False)
+        self.descriptionEdit.setObjectName(_fromUtf8("descriptionEdit"))
+        self.verticalLayout_4.addWidget(self.descriptionEdit)
+        self.horizontalLayout_6.addLayout(self.verticalLayout_4)
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -62,7 +84,7 @@ class Ui_EditorStateTransition(object):
         self.updateButton.setObjectName(_fromUtf8("updateButton"))
         self.horizontalLayout_2.addWidget(self.updateButton)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
 
         self.retranslateUi(EditorStateTransition)
@@ -71,6 +93,8 @@ class Ui_EditorStateTransition(object):
     def retranslateUi(self, EditorStateTransition):
         self.label.setText(QtGui.QApplication.translate("EditorStateTransition", "Active State", None, QtGui.QApplication.UnicodeUTF8))
         self.activeStateComboBox.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Select the active state from the list of available states (string).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("EditorStateTransition", "Description", None, QtGui.QApplication.UnicodeUTF8))
+        self.descriptionEdit.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Description of the object.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Update the active state.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorStateTransition", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

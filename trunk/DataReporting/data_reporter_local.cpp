@@ -10,13 +10,19 @@ namespace datareporting
 *********************************************************************/
 daeDataReporterLocal::daeDataReporterLocal()
 {
+    m_strName = "DataReporterLocal";
 	m_dCurrentTime = -1;
 }
 
 daeDataReporterLocal::~daeDataReporterLocal()
 {
 }
-	
+
+std::string daeDataReporterLocal::GetName() const
+{
+    return m_strName;
+}
+
 bool daeDataReporterLocal::StartRegistration(void)
 {
 	return true;
@@ -133,6 +139,7 @@ daeDataReceiverProcess* daeDataReporterLocal::GetProcess(void)
 *********************************************************************/
 daeNoOpDataReporter::daeNoOpDataReporter()
 {
+    m_strName = "NoOpDataReporter";
 }
 
 daeNoOpDataReporter::~daeNoOpDataReporter()

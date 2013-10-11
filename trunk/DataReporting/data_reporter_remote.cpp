@@ -7,11 +7,17 @@ namespace datareporting
 {
 daeDataReporterRemote::daeDataReporterRemote()
 {
+    m_strName = "DataReporterRemote";
 }
 
 daeDataReporterRemote::~daeDataReporterRemote()
 {
 	Disconnect();
+}
+
+std::string daeDataReporterRemote::GetName() const
+{
+    return m_strName;
 }
 
 bool daeDataReporterRemote::SendProcessName(const string& strProcessName)

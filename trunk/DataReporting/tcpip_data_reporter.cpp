@@ -15,6 +15,7 @@ namespace datareporting
 
 daeTCPIPDataReporter::daeTCPIPDataReporter()
 {
+    m_strName = "TCPIPDataReporter";
 }
 
 daeTCPIPDataReporter::~daeTCPIPDataReporter()

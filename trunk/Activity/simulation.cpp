@@ -104,8 +104,6 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pDAESolver)
 		daeDeclareAndThrowException(exInvalidPointer);
-	if(!pDataReporter)
-		daeDeclareAndThrowException(exInvalidPointer);
 	if(!pLog)
 		daeDeclareAndThrowException(exInvalidPointer);
 	
@@ -118,13 +116,6 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 	
 	m_bCalculateSensitivities     = bCalculateSensitivities;
 	m_nNumberOfObjectiveFunctions = 0;
-	
-	if(!pDataReporter->IsConnected())
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Simulation ignobly refused to initialize: the data reporter is not connected";
-		throw e;
-	}
 
 	m_pDAESolver    = pDAESolver;
 	m_pDataReporter	= pDataReporter;
@@ -257,14 +248,12 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     if(bPrintInfo)
         m_pLog->Message(string("    Setup DAE Solver"), 0);
     SetupSolver();
-	
-// Register model if in simulation mode; otherwise it will be done later by the optimization/param.estimation
+
+// Collect variables to report
     if(bPrintInfo)
-        m_pLog->Message(string("    RegisterData"), 0);
+        m_pLog->Message(string("    Collect variables to report"), 0);
     m_dCurrentTime = 0;
 	CollectVariables(m_pModel);
-	if(m_eSimulationMode == eSimulation)
-		RegisterData("");
 	
 // Set the IsInitialized flag to true
 	m_bIsInitialized = true;
@@ -481,11 +470,28 @@ void daeSimulation::SolveInitial(void)
 	m_IntegrationStart    = dae::GetTimeInSeconds();
 	m_IntegrationEnd      = dae::GetTimeInSeconds();
 
+    daeConfig& cfg = daeConfig::GetConfig();
+    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+
+// Register model if in simulation mode; otherwise it will be done later by the optimization/param.estimation
+    if(!m_pDataReporter->IsConnected())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Simulation cowardly refused to solve initial: the data reporter is not connected";
+        throw e;
+    }
+    if(m_eSimulationMode == eSimulation)
+        RegisterData("");
+
 // Ask DAE solver to initialize the system
-	m_pDAESolver->SolveInitial();
+    if(bPrintInfo)
+        m_pLog->Message(string("    Trying to solve the system initially"), 0);
+    m_pDAESolver->SolveInitial();
 
 // Report data at TIME=0
-	ReportData(m_dCurrentTime);
+    if(bPrintInfo)
+        m_pLog->Message(string("    Report data at the initial time"), 0);
+    ReportData(m_dCurrentTime);
 
 // Set the SolveInitial flag to true
 	m_bIsSolveInitial = true;
@@ -1267,7 +1273,7 @@ void daeSimulation::CollectVariables(daeModel* pModel)
 	if(!pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeCollectObject<daeParameter*> regParameter(*this);
+    daeCollectObject<daeParameter*> regParameter(*this);
 	daeCollectObject<daeVariable*>  regVariable(*this);
 	daeCollectObject<daePort*>      regPort(*this);
 	daeCollectObject<daeModel*>     regModel(*this);

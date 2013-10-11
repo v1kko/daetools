@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
+import sys
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 from daetools.pyDAE.logs import daePythonStdOutLog 
@@ -26,30 +27,35 @@ from daetools.pyDAE.data_reporters import daePlotDataReporter, daeMatlabMATFileD
 
 (nlpIPOPT, nlpNLOPT, nlpBONMIN) = range(0, 3)
 
-(BaseLog, FileLog, DelegateLog, StdOutLog, TCPIPLog) = range(0, 5)
-(PythonStdOutLog) = range(5, 6)
+(TCPIPLog, PythonStdOutLog, StdOutLog, BaseLog, FileLog, DelegateLog) = range(0, 6)
 
-(BlackHoleDataReporter, DelegateDataReporter, NoOpDataReporter, TEXTFileDataReporter, TCPIPDataReporter) = range(0, 5)
-(PlotDataReporter, MatlabMATFileDataReporter) = range(5, 7)
-
+(TCPIPDataReporter, NoOpDataReporter, DelegateDataReporter, TEXTFileDataReporter, PlotDataReporter) = range(0, 5)
+(MatlabMATFileDataReporter, BlackHoleDataReporter) = range(5, 7)
+    
 def getAvailableNLPSolvers():
     available_nlp_solvers = []
     
     try:
         from daetools.solvers.ipopt import pyIPOPT
         available_nlp_solvers.append(("IPOPT NLP", nlpIPOPT))
+        if 'daetools.solvers.ipopt' in sys.modules:
+            del sys.modules['daetools.solvers.ipopt']
     except Exception as e:
         pass
     
     try:
         from daetools.solvers.nlopt import pyNLOPT
         available_nlp_solvers.append(("NLOPT NLP", nlpNLOPT))
+        if 'daetools.solvers.nlopt' in sys.modules:
+            del sys.modules['daetools.solvers.nlopt']
     except Exception as e:
         pass
     
     try:
         from daetools.solvers.bonmin import pyBONMIN
         available_nlp_solvers.append(("BONMIN MINLP", nlpBONMIN))
+        if 'daetools.solvers.bonmin' in sys.modules:
+            del sys.modules['daetools.solvers.bonmin']
     except Exception as e:
         pass
     
@@ -62,12 +68,16 @@ def getAvailableLASolvers():
     try:
         from daetools.solvers.superlu import pySuperLU
         available_la_solvers.append(("SuperLU (sparse, sequential, direct)", laSuperLU))
+        if 'daetools.solvers.superlu' in sys.modules:
+            del sys.modules['daetools.solvers.superlu']
     except Exception as e:
-        pass
+        print str(e)
 
     try:
         from daetools.solvers.superlu_mt import pySuperLU_MT
         available_la_solvers.append(("SuperLU_MT (sparse, pthreads, direct)", laSuperLU_MT))
+        if 'daetools.solvers.superlu_mt' in sys.modules:
+            del sys.modules['daetools.solvers.superlu_mt']
     except Exception as e:
         pass
 
@@ -84,14 +94,18 @@ def getAvailableLASolvers():
             available_la_solvers.append(("Trilinos Amesos - Lapack (dense, sequential, direct)", laAmesos_Lapack))
         if 'AztecOO' in suppSolvers:
             available_la_solvers.append(("Trilinos AztecOO - Krylov (sparse, sequential, iterative)", laAztecOO))
+        if 'daetools.solvers.trilinos' in sys.modules:
+            del sys.modules['daetools.solvers.trilinos']
     except Exception as e:
         pass
 
     try:
         from daetools.solvers.intel_pardiso import pyIntelPardiso
         available_la_solvers.append(("Intel Pardiso (sparse, OpenMP, direct)", laIntelPardiso))
+        if 'daetools.solvers.intel_pardiso' in sys.modules:
+            del sys.modules['daetools.solvers.intel_pardiso']
     except Exception as e:
-        pass
+        print e
     
     return available_la_solvers
 
@@ -135,7 +149,7 @@ def createDataReporter(datareporterIndex):
     else:
         raise RuntimeError("Unsupported Log selected")
     
-    return log
+    return datareporter
 
 def getAvailableLogs():
     available_logs = []

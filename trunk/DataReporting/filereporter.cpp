@@ -7,6 +7,7 @@ namespace datareporting
 {
 daeFileDataReporter::daeFileDataReporter()
 {
+    m_strName = "FileDataReporter";
 }
 
 daeFileDataReporter::~daeFileDataReporter()

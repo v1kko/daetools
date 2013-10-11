@@ -11,6 +11,7 @@ namespace datareporting
 {
 daeHTMLFileDataReporter::daeHTMLFileDataReporter()
 {
+    m_strName = "HTMLFileDataReporter";
 }
 
 daeHTMLFileDataReporter::~daeHTMLFileDataReporter()

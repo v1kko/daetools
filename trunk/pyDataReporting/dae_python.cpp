@@ -68,7 +68,8 @@ BOOST_PYTHON_MODULE(pyDataReporting)
     daeDataReporter_xxx
 ***************************************************************/
 	class_<daepython::daeDataReporterWrapper, boost::noncopyable>("daeDataReporter_t", DOCSTR_daeDataReporter_t, no_init)
-		.def("Connect",				pure_virtual(&daeDataReporter_t::Connect),           ( arg("self"), 
+        .add_property("Name",		&daeDataReporter_t::GetName, DOCSTR_daeDataReporter_t_Name)
+        .def("Connect",				pure_virtual(&daeDataReporter_t::Connect),           ( arg("self"),
                                                                                            arg("connectionString"), 
                                                                                            arg("processName") 
                                                                                          ), DOCSTR_daeDataReporter_t_Connect)

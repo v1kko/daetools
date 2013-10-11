@@ -22,7 +22,8 @@ public:
 	virtual ~daeBlackHoleDataReporter(void){}
 
 public:
-	virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
+    virtual std::string GetName() const {return "BlackHoleDataReporter";}
+    virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
 	virtual bool Disconnect(void){return true;}
 	virtual bool IsConnected(void){return true;}
 	virtual bool StartRegistration(void){return true;}
@@ -44,7 +45,8 @@ public:
 	virtual ~daeDataReporterLocal(void);
 
 public:
-	virtual bool StartRegistration(void);
+    virtual std::string GetName() const;
+    virtual bool StartRegistration(void);
 	virtual bool RegisterDomain(const daeDataReporterDomain* pDomain);
 	virtual bool RegisterVariable(const daeDataReporterVariable* pVariable);
 	virtual bool EndRegistration(void);
@@ -55,6 +57,7 @@ public:
 	daeDataReceiverProcess*	GetProcess(void);
 
 public:
+    std::string                 m_strName;
 	real_t						m_dCurrentTime;
 	daeDataReceiverProcess		m_drProcess;
 };
@@ -145,7 +148,8 @@ public:
 	virtual ~daeDelegateDataReporter(void);
 
 public:
-	virtual bool Connect(const string& strConnectString, const string& strProcessName);
+    virtual std::string GetName() const;
+    virtual bool Connect(const string& strConnectString, const string& strProcessName);
 	virtual bool Disconnect(void);
 	virtual bool IsConnected(void);
 	virtual bool StartRegistration(void);
@@ -653,7 +657,8 @@ public:
 	virtual ~daeDataReporterRemote(void);
 
 public:
-	bool Connect(const string& strConnectString, const string& strProcessName);
+    std::string GetName() const;
+    bool Connect(const string& strConnectString, const string& strProcessName);
 	bool Disconnect(void);
 	bool IsConnected(void);
 	bool StartRegistration(void);
@@ -670,7 +675,8 @@ public:
 	virtual bool SendMessage(const string& strMessage);
 	
 protected:
-	string					 m_strConnectionString;
+    std::string              m_strName;
+    string					 m_strConnectionString;
 	string					 m_strProcessName;
 	real_t                   m_dCurrentTime;
 	daeMessageFormatter		 m_msgFormatter;

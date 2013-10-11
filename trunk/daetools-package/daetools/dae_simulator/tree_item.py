@@ -106,7 +106,7 @@ class treeItem(object):
         return res
 
 class editor_Quantity(QtGui.QFrame):
-    def __init__(self, treeItem, value, units):
+    def __init__(self, treeItem, description, value, units):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorQuantity()
         self.ui.setupUi(self)
@@ -116,6 +116,7 @@ class editor_Quantity(QtGui.QFrame):
         d_validator = QtGui.QDoubleValidator(self)
         self.ui.valueEdit.setValidator(d_validator)
         
+        self.ui.descriptionEdit.setHtml(description)
         self.ui.valueEdit.setText(value)
         self.ui.unitsEdit.setText(units)
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
@@ -124,13 +125,14 @@ class editor_Quantity(QtGui.QFrame):
         self.treeItem.setValue( (str(self.ui.valueEdit.text()), str(self.ui.unitsEdit.text())) )
 
 class editor_QuantityArray(QtGui.QFrame):
-    def __init__(self, treeItem, value, units):
+    def __init__(self, treeItem, description, value, units):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorQuantityArray()
         self.ui.setupUi(self)
         
         self.treeItem = treeItem
         
+        self.ui.descriptionEdit.setHtml(description)
         self.ui.valueEdit.setPlainText(value)
         self.ui.unitsEdit.setText(units)
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
@@ -143,16 +145,16 @@ def flatten(lst):
     return sum( ([x] if not isinstance(x, list) else flatten(x) for x in lst), [] )
   
 class treeItem_Quantity(treeItem):
-    def __init__(self, parent, name, value, units):
+    def __init__(self, parent, name, description, value, units):
         treeItem.__init__(self, parent, name, treeItem.typeQuantity)
         
         self.units = units
         self.setValue((value, units))
         
         if isinstance(value, float):
-            self._editor = editor_Quantity(self, str(value), str(units))
+            self._editor = editor_Quantity(self, description, str(value), str(units))
         else:
-            self._editor = editor_QuantityArray(self, str(value), str(units))
+            self._editor = editor_QuantityArray(self, description, str(value), str(units))
             
         self._layout = QtGui.QHBoxLayout()
         self._layout.setObjectName("paramLayout")
@@ -272,13 +274,14 @@ class treeItem_OutputVariable(treeItem):
         
 
 class editor_StateTransition(QtGui.QFrame):
-    def __init__(self, treeItem, states, activeState):
+    def __init__(self, treeItem, description, states, activeState):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorStateTransition()
         self.ui.setupUi(self)
         
         self.treeItem = treeItem
         
+        self.ui.descriptionEdit.setHtml(description)
         for i, state in enumerate(states):
             self.ui.activeStateComboBox.addItem(state)
             if activeState == state:
@@ -291,11 +294,11 @@ class editor_StateTransition(QtGui.QFrame):
         self.treeItem.setValue( str(self.ui.activeStateComboBox.currentText()) )
 
 class treeItem_StateTransition(treeItem):
-    def __init__(self, parent, name, states, active_state):
+    def __init__(self, parent, name, description, states, active_state):
         treeItem.__init__(self, parent, name, treeItem.typeStateTransition)
 
         self.setValue(active_state)
-        self._editor = editor_StateTransition(self, states, active_state)
+        self._editor = editor_StateTransition(self, description, states, active_state)
             
         self._layout = QtGui.QHBoxLayout()
         self._layout.setObjectName("stnLayout")
@@ -321,7 +324,7 @@ class treeItem_StateTransition(treeItem):
         
 
 class editor_ArrayDomain(QtGui.QFrame):
-    def __init__(self, treeItem, numberOfPoints):
+    def __init__(self, treeItem, description, numberOfPoints):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorArrayDomain()
         self.ui.setupUi(self)
@@ -332,6 +335,7 @@ class editor_ArrayDomain(QtGui.QFrame):
         self.ui.numberOfPointsEdit.setValidator(i_validator)
         
         self.ui.numberOfPointsEdit.setText(str(numberOfPoints))
+        self.ui.descriptionEdit.setHtml(description)
         
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
         
@@ -339,8 +343,8 @@ class editor_ArrayDomain(QtGui.QFrame):
         #self.treeItem.setValue( str(self.ui.numberOfPointsEdit.text()) )
         pass # Nothing is edited
 
-class editor_DistibutedDomain(QtGui.QFrame):
-    def __init__(self, treeItem, discrMethod, order, numberOfIntervals, lowerBound, upperBound, units):
+class editor_DistributedDomain(QtGui.QFrame):
+    def __init__(self, treeItem, description, discrMethod, order, numberOfIntervals, lowerBound, upperBound, units):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorDistributedDomain()
         self.ui.setupUi(self)
@@ -357,6 +361,7 @@ class editor_DistibutedDomain(QtGui.QFrame):
         self.ui.lowerBoundEdit.setText(str(lowerBound))
         self.ui.upperBoundEdit.setText(str(upperBound))
         self.ui.unitsEdit.setText(str(units))
+        self.ui.descriptionEdit.setHtml(description)
         
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
         
@@ -364,14 +369,14 @@ class editor_DistibutedDomain(QtGui.QFrame):
         self.treeItem.setValue( (None, None, None, str(self.ui.lowerBoundEdit.text()), str(self.ui.upperBoundEdit.text()), None) )
 
 class treeItem_Domain(treeItem):
-    def __init__(self, parent, name, **kwargs):
+    def __init__(self, parent, name, description, **kwargs):
         treeItem.__init__(self, parent, name, treeItem.typeStateTransition)
 
         if 'numberOfPoints' in kwargs:
             self.isArray = True
             numberOfPoints = kwargs['numberOfPoints']
             self.setValue(numberOfPoints)
-            self._editor = editor_ArrayDomain(self, numberOfPoints)
+            self._editor = editor_ArrayDomain(self, description, numberOfPoints)
         else:
             self.isArray = False
             self.discrMethod        = kwargs['discrMethod']       # not edited
@@ -381,7 +386,7 @@ class treeItem_Domain(treeItem):
             lowerBound              = kwargs['lowerBound']
             upperBound              = kwargs['upperBound']
             self.setValue((self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units))
-            self._editor = editor_DistibutedDomain(self, self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units)
+            self._editor = editor_DistributedDomain(self, description, self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units)
             
         self._layout = QtGui.QHBoxLayout()
         self._layout.setObjectName("domainLayout")
@@ -430,7 +435,17 @@ class treeItem_Domain(treeItem):
     def hide(self):
         self._editor.hide()
         
-        
+def areAllChildrenEmpty(tree_item):
+    for child in tree_item.children:
+        if not areAllChildrenEmpty(child):
+            return False
+
+    # If all children are empty and the type is typeNone then the whole branch from this point is empty
+    if tree_item.itemType == treeItem.typeNone:
+        return True
+    else:
+        return False
+    
 def addItem(treeWidget, parent, item):
     widgetItem = QtGui.QTreeWidgetItem(parent, [item.name, ''])
     
@@ -446,10 +461,10 @@ def addItem(treeWidget, parent, item):
     # Depending on the type set the text(0) or something else
     if item.itemType == treeItem.typeNone:
         font  = widgetItem.font(0)
-        #font.setBold(True)
+        font.setBold(True)
         brush = QtGui.QBrush(Qt.blue)
         widgetItem.setFont(0, font)
-        widgetItem.setForeground(0, brush)
+        #widgetItem.setForeground(0, brush)
     
     elif item.itemType == treeItem.typeOutputVariable:
         widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsUserCheckable)
@@ -468,6 +483,9 @@ def addItemsToTree(treeWidget, parent, tree_item):
     """
     Recursively adds the whole tree of treeItems to QTreeWidget tree.
     """
+    if areAllChildrenEmpty(tree_item):
+        return
+        
     new_parent = addItem(treeWidget, parent, tree_item)
     for child in tree_item.children:
         addItemsToTree(treeWidget, new_parent, child)

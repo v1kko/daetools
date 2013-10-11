@@ -16,6 +16,11 @@ daeDelegateDataReporter::~daeDelegateDataReporter(void)
 {
 }
 
+std::string daeDelegateDataReporter::GetName() const
+{
+    return "DelegateDataReporter";
+}
+
 void daeDelegateDataReporter::AddDataReporter(daeDataReporter_t* pDataReporter)
 {
 	if(!pDataReporter)

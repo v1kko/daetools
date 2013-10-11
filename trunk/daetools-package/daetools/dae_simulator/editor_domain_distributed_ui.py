@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_domain_distributed.ui'
 #
-# Created: Fri Oct 11 01:37:41 2013
+# Created: Fri Oct 11 16:06:32 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_EditorDistributedDomain(object):
     def setupUi(self, EditorDistributedDomain):
         EditorDistributedDomain.setObjectName(_fromUtf8("EditorDistributedDomain"))
-        EditorDistributedDomain.resize(250, 300)
+        EditorDistributedDomain.resize(250, 426)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -160,6 +160,31 @@ class Ui_EditorDistributedDomain(object):
         self.unitsEdit.setObjectName(_fromUtf8("unitsEdit"))
         self.horizontalLayout_7.addWidget(self.unitsEdit)
         self.verticalLayout.addLayout(self.horizontalLayout_7)
+        self.horizontalLayout_8 = QtGui.QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.verticalLayout_2.setSpacing(1)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.label_7 = QtGui.QLabel(EditorDistributedDomain)
+        self.label_7.setMinimumSize(QtCore.QSize(80, 0))
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.verticalLayout_2.addWidget(self.label_7)
+        self.descriptionEdit = QtGui.QTextEdit(EditorDistributedDomain)
+        self.descriptionEdit.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.descriptionEdit.sizePolicy().hasHeightForWidth())
+        self.descriptionEdit.setSizePolicy(sizePolicy)
+        self.descriptionEdit.setMinimumSize(QtCore.QSize(100, 50))
+        self.descriptionEdit.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.descriptionEdit.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.descriptionEdit.setFrameShadow(QtGui.QFrame.Sunken)
+        self.descriptionEdit.setReadOnly(False)
+        self.descriptionEdit.setObjectName(_fromUtf8("descriptionEdit"))
+        self.verticalLayout_2.addWidget(self.descriptionEdit)
+        self.horizontalLayout_8.addLayout(self.verticalLayout_2)
+        self.verticalLayout.addLayout(self.horizontalLayout_8)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -170,7 +195,7 @@ class Ui_EditorDistributedDomain(object):
         self.updateButton.setObjectName(_fromUtf8("updateButton"))
         self.horizontalLayout_2.addWidget(self.updateButton)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
 
         self.retranslateUi(EditorDistributedDomain)
@@ -178,7 +203,7 @@ class Ui_EditorDistributedDomain(object):
 
     def retranslateUi(self, EditorDistributedDomain):
         self.label.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Discr. Method", None, QtGui.QApplication.UnicodeUTF8))
-        self.discrMethodEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Select the discretization method (a string from the list of available methods, currently eCFDM, eBFDM and eFFDM).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.discrMethodEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Select the discretization method from the list of available methods (currently eCFDM, eBFDM and eFFDM).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Order", None, QtGui.QApplication.UnicodeUTF8))
         self.orderEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the discretization order (integer).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("EditorDistributedDomain", "No. Intervals", None, QtGui.QApplication.UnicodeUTF8))
@@ -189,6 +214,8 @@ class Ui_EditorDistributedDomain(object):
         self.upperBoundEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the upper bound in units specified below (float).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Units", None, QtGui.QApplication.UnicodeUTF8))
         self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: </p><p>km/kg (kilometres per kilogram)<br/>um / ns**2 (micrometres per nanoseconds squared) <br/>kJ / (kg*K) (kiloJoules per kilogram and Kelvin)<br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Description", None, QtGui.QApplication.UnicodeUTF8))
+        self.descriptionEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Description of the object.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Update the lower and upper bounds.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Update", None, QtGui.QApplication.UnicodeUTF8))
 
