@@ -71,10 +71,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the floating point value.The acceptable value is a valid Python float expression. Examples:&lt;/p&gt;
-&lt;pre&gt;1.02&lt;/pre&gt;
-&lt;pre&gt;5.032E-3&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the discretization method from the list of available methods (currently eCFDM, eBFDM and eFFDM).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -119,11 +116,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the discretization order (integer).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -168,11 +161,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the number of intervals in the domain (integer). The actual number of points within the domain depends on the discretization method and order.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -217,11 +206,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the lower bound in units specified below (float).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -263,11 +248,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the upper bound in units specified below (float).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -312,11 +293,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: &lt;/p&gt;&lt;p&gt;km/kg (kilometres per kilogram)&lt;br/&gt;um / ns**2 (micrometres per nanoseconds squared) &lt;br/&gt;kJ / (kg*K) (kiloJoules per kilogram and Kelvin)&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -340,7 +317,7 @@
      <item>
       <widget class="QPushButton" name="updateButton">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update the value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update the lower and upper bounds.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Update</string>

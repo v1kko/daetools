@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_domain_array.ui'
 #
-# Created: Tue Oct  8 16:44:11 2013
+# Created: Fri Oct 11 01:43:39 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -70,11 +70,7 @@ class Ui_EditorArrayDomain(object):
 
     def retranslateUi(self, EditorArrayDomain):
         self.label_3.setText(QtGui.QApplication.translate("EditorArrayDomain", "No. Points", None, QtGui.QApplication.UnicodeUTF8))
-        self.numberOfPointsEdit.setToolTip(QtGui.QApplication.translate("EditorArrayDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorArrayDomain", "<html><head/><body><p>Update the value.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.numberOfPointsEdit.setToolTip(QtGui.QApplication.translate("EditorArrayDomain", "<html><head/><body>Insert the number of points in the domain (integer).</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorArrayDomain", "<html><head/><body><p>Update the number of points.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorArrayDomain", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

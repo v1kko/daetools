@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_state_transition.ui'
 #
-# Created: Tue Oct  8 02:17:59 2013
+# Created: Fri Oct 11 01:56:04 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -70,6 +70,7 @@ class Ui_EditorStateTransition(object):
 
     def retranslateUi(self, EditorStateTransition):
         self.label.setText(QtGui.QApplication.translate("EditorStateTransition", "Active State", None, QtGui.QApplication.UnicodeUTF8))
-        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Update the value.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.activeStateComboBox.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Select the active state from the list of available states (string).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorStateTransition", "<html><head/><body><p>Update the active state.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorStateTransition", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

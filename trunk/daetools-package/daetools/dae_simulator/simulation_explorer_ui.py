@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Thu Oct 10 01:40:49 2013
+# Created: Fri Oct 11 02:11:48 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -241,11 +241,11 @@ class Ui_SimulationExplorer(object):
         self.frameStateTransitions.setObjectName(_fromUtf8("frameStateTransitions"))
         self.horizontalLayout_5.addWidget(self.frameStateTransitions)
         self.tabWidget.addTab(self.tab_StateTransitions, _fromUtf8(""))
-        self.tab_Outputs = QtGui.QWidget()
-        self.tab_Outputs.setObjectName(_fromUtf8("tab_Outputs"))
-        self.verticalLayout_8 = QtGui.QVBoxLayout(self.tab_Outputs)
+        self.tab_Results = QtGui.QWidget()
+        self.tab_Results.setObjectName(_fromUtf8("tab_Results"))
+        self.verticalLayout_8 = QtGui.QVBoxLayout(self.tab_Results)
         self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
-        self.treeOutputVariables = QtGui.QTreeWidget(self.tab_Outputs)
+        self.treeOutputVariables = QtGui.QTreeWidget(self.tab_Results)
         self.treeOutputVariables.setAlternatingRowColors(True)
         self.treeOutputVariables.setColumnCount(1)
         self.treeOutputVariables.setObjectName(_fromUtf8("treeOutputVariables"))
@@ -253,7 +253,7 @@ class Ui_SimulationExplorer(object):
         self.treeOutputVariables.header().setDefaultSectionSize(300)
         self.treeOutputVariables.header().setMinimumSectionSize(100)
         self.verticalLayout_8.addWidget(self.treeOutputVariables)
-        self.tabWidget.addTab(self.tab_Outputs, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_Results, _fromUtf8(""))
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -290,23 +290,30 @@ class Ui_SimulationExplorer(object):
         self.dataReporterLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Data Reporter", None, QtGui.QApplication.UnicodeUTF8))
         self.logLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Log", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "Runtime", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the runtime data.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDomains.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDomains.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Domains), QtGui.QApplication.translate("SimulationExplorer", "Domains", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Domains), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the data related to domains.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeParameters.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Parameters), QtGui.QApplication.translate("SimulationExplorer", "Parameters", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Parameters), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the data related to parameters.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeInitialConditions.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeInitialConditions.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_InitialConditions), QtGui.QApplication.translate("SimulationExplorer", "Initial Conditions", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_InitialConditions), QtGui.QApplication.translate("SimulationExplorer", "InitialConditions", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_InitialConditions), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the initial conditions for differential variables.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDOFs.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDOFs.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_DOFs), QtGui.QApplication.translate("SimulationExplorer", "DOFs", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_DOFs), QtGui.QApplication.translate("SimulationExplorer", "DoFs", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_DOFs), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the values of assigned variables (Degrees of Freedom).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeStateTransitions.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.treeStateTransitions.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_StateTransitions), QtGui.QApplication.translate("SimulationExplorer", "State Transitions", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_StateTransitions), QtGui.QApplication.translate("SimulationExplorer", "STNs", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_StateTransitions), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the data related to State Transition Networks.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeOutputVariables.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Outputs), QtGui.QApplication.translate("SimulationExplorer", "Outputs", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "Results", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Select variables to appear in the output.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setText(QtGui.QApplication.translate("SimulationExplorer", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonOk.setText(QtGui.QApplication.translate("SimulationExplorer", "OK", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_quantity.ui'
 #
-# Created: Thu Oct 10 01:19:34 2013
+# Created: Fri Oct 11 01:38:30 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -89,16 +89,9 @@ class Ui_EditorQuantity(object):
 
     def retranslateUi(self, EditorQuantity):
         self.label.setText(QtGui.QApplication.translate("EditorQuantity", "Value", None, QtGui.QApplication.UnicodeUTF8))
-        self.valueEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert the floating point value.The acceptable value is a valid Python float expression. Examples:</p>\n"
-"<pre>1.02</pre>\n"
-"<pre>5.032E-3</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.valueEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert the value (float).The format can be scientific. Examples:</p><pre style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">1.02</span></pre><pre style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">5.032E-3</span></pre></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("EditorQuantity", "Units", None, QtGui.QApplication.UnicodeUTF8))
-        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Update the value.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: </p><p>km/kg (kilometres per kilogram)<br/>um / ns**2 (micrometres per nanoseconds squared) <br/>kJ / (kg*K) (kiloJoules per kilogram and Kelvin)<br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorQuantity", "<html><head/><body><p>Update the value and units.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorQuantity", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

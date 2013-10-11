@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_domain_distributed.ui'
 #
-# Created: Tue Oct  8 16:25:30 2013
+# Created: Fri Oct 11 01:37:41 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -178,40 +178,17 @@ class Ui_EditorDistributedDomain(object):
 
     def retranslateUi(self, EditorDistributedDomain):
         self.label.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Discr. Method", None, QtGui.QApplication.UnicodeUTF8))
-        self.discrMethodEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the floating point value.The acceptable value is a valid Python float expression. Examples:</p>\n"
-"<pre>1.02</pre>\n"
-"<pre>5.032E-3</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.discrMethodEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Select the discretization method (a string from the list of available methods, currently eCFDM, eBFDM and eFFDM).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Order", None, QtGui.QApplication.UnicodeUTF8))
-        self.orderEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.orderEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the discretization order (integer).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("EditorDistributedDomain", "No. Intervals", None, QtGui.QApplication.UnicodeUTF8))
-        self.numberOfIntervalsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.numberOfIntervalsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the number of intervals in the domain (integer). The actual number of points within the domain depends on the discretization method and order.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Lower Bound", None, QtGui.QApplication.UnicodeUTF8))
-        self.lowerBoundEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.lowerBoundEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the lower bound in units specified below (float).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Upper Bound", None, QtGui.QApplication.UnicodeUTF8))
-        self.upperBoundEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.upperBoundEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the upper bound in units specified below (float).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Units", None, QtGui.QApplication.UnicodeUTF8))
-        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Update the value.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: </p><p>km/kg (kilometres per kilogram)<br/>um / ns**2 (micrometres per nanoseconds squared) <br/>kJ / (kg*K) (kiloJoules per kilogram and Kelvin)<br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Update the lower and upper bounds.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Update", None, QtGui.QApplication.UnicodeUTF8))
 

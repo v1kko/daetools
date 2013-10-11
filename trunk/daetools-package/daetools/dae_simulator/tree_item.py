@@ -37,12 +37,9 @@ class runtimeInformation(object):
 class treeItem(object):
     typeNone             = -1
     typeDomain           =  0
-    typeParameter        =  1
-    typeInitialCondition =  2
-    typeDOF              =  3
-    typeStateTransition  =  4
-    typeOutputVariable   =  5
-    typeQuantity         =  6
+    typeQuantity         =  1
+    typeStateTransition  =  2
+    typeOutputVariable   =  3
 
     def __init__(self, parent, name, itemType = typeNone):
         self.parent         = parent
@@ -147,8 +144,9 @@ def flatten(lst):
   
 class treeItem_Quantity(treeItem):
     def __init__(self, parent, name, value, units):
-        treeItem.__init__(self, parent, name, treeItem.typeParameter)
+        treeItem.__init__(self, parent, name, treeItem.typeQuantity)
         
+        self.units = units
         self.setValue((value, units))
         
         if isinstance(value, float):
@@ -200,6 +198,7 @@ class treeItem_Quantity(treeItem):
         
         if isinstance(value[1], basestring):
             try:
+                # First try to evaluate the expression
                 unit_expr = value[1].strip()
                 if unit_expr == '':
                     units = pyUnits.unit()
@@ -214,11 +213,20 @@ class treeItem_Quantity(treeItem):
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
             
+            # If successful, check if the result is puUnits.unit object
             if not isinstance(units, pyUnits.unit):
                 errorMsg = 'Cannot set units for the tree item: %s\nInvalid units specified: %s' % (self.name, value[1])
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
                 
+            # Finally, try to scale the units to the objects units. If succesful the units are consistent.
+            try:
+                quantity(1.0, self.units).scaleTo(units)
+            except Exception as e:
+                errorMsg = 'Cannot set units for the tree item: %s\nNew units %s not consistent with objects units %s' % (self.name, value[1], self.units)
+                QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                return
+
         elif isinstance(value[1], pyUnits.unit):
             units = value[1]
             
@@ -437,7 +445,11 @@ def addItem(treeWidget, parent, item):
 
     # Depending on the type set the text(0) or something else
     if item.itemType == treeItem.typeNone:
-        pass
+        font  = widgetItem.font(0)
+        #font.setBold(True)
+        brush = QtGui.QBrush(Qt.blue)
+        widgetItem.setFont(0, font)
+        widgetItem.setForeground(0, brush)
     
     elif item.itemType == treeItem.typeOutputVariable:
         widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsUserCheckable)

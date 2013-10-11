@@ -71,11 +71,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at &lt;a href=&quot;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes&lt;/span&gt;&lt;/a&gt;). The expression entered is a valid Python code. Examples:&lt;/p&gt;
-&lt;pre&gt;m/kg&lt;/pre&gt;
-&lt;pre&gt;m / s**2&lt;/pre&gt;
-&lt;pre&gt;J / (kg*K)&lt;/pre&gt;
-&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Insert the number of points in the domain (integer).&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -102,7 +98,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update the value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update the number of points.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Update</string>

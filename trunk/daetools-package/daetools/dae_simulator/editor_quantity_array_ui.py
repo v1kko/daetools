@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_quantity_array.ui'
 #
-# Created: Thu Oct 10 01:19:39 2013
+# Created: Fri Oct 11 01:38:20 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -90,20 +90,9 @@ class Ui_EditorQuantityArray(object):
 
     def retranslateUi(self, EditorQuantityArray):
         self.label.setText(QtGui.QApplication.translate("EditorQuantityArray", "Values", None, QtGui.QApplication.UnicodeUTF8))
-        self.valueEdit.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Insert an array of values. The acceptable values are valid Python list expressions. Examples:</p>\n"
-"<pre>[0.0, 0.1, 0.2, 0.3]</pre>\n"
-"<pre>[ [0.0, 0.1, 0.2, 0.3],\n"
-"  [0.0, 0.1, 0.2, 0.3], \n"
-"  [0.0, 0.1, 0.2, 0.3] ]\n"
-"</pre>\n"
-"<p>etc.</p>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.valueEdit.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Insert an array of values (floats). The actual number of dimensions depends on the number of dimansions in the object. The format can be scientific. Acceptable values represent valid Python list expressions. Examples:</p><pre style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">[0.0, 0.1, 0.2, 0.3]</span></pre><pre style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">[ [0.0, 0.1, 0.2, 0.3],</span></pre><pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">  [0.0, 0.1, 0.2, 0.3], </span></pre><pre style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">  [0.0, 0.1, 0.2, 0.3] ]</span></pre><pre style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\';\">[1.2E-3, 3.5E+7]</span></pre><p>etc.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("EditorQuantityArray", "Units", None, QtGui.QApplication.UnicodeUTF8))
-        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Insert the unit expressions using daetools.pyUnits.unit objects using mathematical operators *, / and **. All base and derived SI units are allowed including the common prefixes (more information at <a href=\"https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes\"><span style=\" text-decoration: underline; color:#0000ff;\">https://en.wikipedia.org/wiki/International_System_of_Units#Units_and_prefixes</span></a>). The expression entered is a valid Python code. Examples:</p>\n"
-"<pre>m/kg</pre>\n"
-"<pre>m / s**2</pre>\n"
-"<pre>J / (kg*K)</pre>\n"
-"</body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Update the value.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.unitsEdit.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Insert an expression using daetools.pyUnits.unit objects and mathematical operators *, / and **. All base (m, kg, s, cd, A, K, mol) and derived (g, t, rad, sr, min, hour, day, Hz, N, J, W, C, Ohm, V, F, T, H, S, Wb, Pa, P, St, Bq, Gy, Sv, lx, lm, kat, knot, bar, b, Ci, R, rd, rem) SI units are allowed including the common prefixes (Y, Z, E, P, T, G, M, k, h, da, d, c, m, u, n, p, f, a, z, y). The expression should be a valid Python code. Examples: </p><p>km/kg (kilometres per kilogram)<br/>um / ns**2 (micrometres per nanoseconds squared) <br/>kJ / (kg*K) (kiloJoules per kilogram and Kelvin)<br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.updateButton.setToolTip(QtGui.QApplication.translate("EditorQuantityArray", "<html><head/><body><p>Update the value and units.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.updateButton.setText(QtGui.QApplication.translate("EditorQuantityArray", "Update", None, QtGui.QApplication.UnicodeUTF8))
 
