@@ -111,11 +111,8 @@ class treeItem(object):
                 d['Shape'] = [s for s in a.shape] # Shape
                 d['Value'] = self._value[0]       # List of values
             else:
-                d['Value'] = self._value[0] # Float
-                
-            d['Units'] = self._value[1].toDict() # units
-            # string representation of the units object
-            #d['Units'] = str(self._value[1])
+                d['Value'] = self._value[0]       # Float                
+            d['Units'] = self._value[1].toDict()  # units
             dictItems[self.canonicalName] = d
         
         elif self.itemType == treeItem.typeSTN:
@@ -178,9 +175,10 @@ def flatten(lst):
     return sum( ([x] if not isinstance(x, list) else flatten(x) for x in lst), [] )
   
 class treeItem_Quantity(treeItem):
-    def __init__(self, parent, name, description, value, units):
+    def __init__(self, parent, name, description, value, units, checkIfItemsAreFloats):
         treeItem.__init__(self, parent, name, treeItem.typeQuantity)
         
+        self.checkIfItemsAreFloats = checkIfItemsAreFloats
         self.units = units
         self.setValue((value, units))
         
@@ -217,28 +215,30 @@ class treeItem_Quantity(treeItem):
                 return
             
             if isinstance(val, list):
-                flat_val = flatten(val)
-                for v in flat_val:
-                    if isinstance(v, (float, int, long)):
-                        v = float(v)
-                    else:
-                        errorMsg = 'Not all items are floats in the list of values for the tree item: %s' % daeGetStrippedName(self.name)
-                        QtGui.QMessageBox.critical(None, "Error", errorMsg)
-                        return
+                if self.checkIfItemsAreFloats:
+                    flat_val = flatten(val)
+                    for v in flat_val:
+                        if isinstance(v, (float, int, long)):
+                            v = float(v)
+                        else:
+                            errorMsg = 'Not all items are floats in the list of values for the tree item: %s' % daeGetStrippedName(self.name)
+                            QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                            return
             elif isinstance(val, (float, int, long)):
                 val = float(val)
         
         elif isinstance(value[0], (float, int, long, list)):
             if isinstance(value[0], list):
                 val = value[0]
-                flat_val = flatten(val)
-                for v in flat_val:
-                    if isinstance(v, (float, int, long)):
-                        v = float(v)
-                    else:
-                        errorMsg = 'Not all items are floats in the list of values for the tree item: %s' % daeGetStrippedName(self.name)
-                        QtGui.QMessageBox.critical(None, "Error", errorMsg)
-                        return
+                if self.checkIfItemsAreFloats:
+                    flat_val = flatten(val)
+                    for v in flat_val:
+                        if isinstance(v, (float, int, long)):
+                            v = float(v)
+                        else:
+                            errorMsg = 'Not all items are floats in the list of values for the tree item: %s' % daeGetStrippedName(self.name)
+                            QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                            return
             elif isinstance(value[0], (float, int, long)):
                 val = float(value[0])
             

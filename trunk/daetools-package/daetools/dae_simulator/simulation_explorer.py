@@ -262,14 +262,6 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._runtimeSettings['STNs']                  = self._inspector.treeSTNs.toDictionary()
         self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
         
-        #import pprint
-        #pprint.pprint(self._runtimeSettings, indent = 2)
-        
-        import json
-        f = open('simulation.json', 'w')
-        f.write( json.dumps(self._runtimeSettings, indent = 4) )
-        f.close()
-        
     def _slotOK(self):
         self._processInputs()
         self.done(QtGui.QDialog.Accepted)

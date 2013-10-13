@@ -33,7 +33,7 @@ def _collectParameters(nodeItem, model, dictParameters):
             value = obj.npyValues.tolist()
         units = obj.Units
         description = obj.Description
-        item = treeItem_Quantity(nodeItem, name, description, value, units)
+        item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = True)
         dictParameters[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
@@ -113,18 +113,29 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
     who are differential and need an initial conditions to be set.
     """
     for var in model.Variables:
+        name              = var.Name
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
         description       = var.Description
-        for var_index, domainIndexes in domainsIndexesMap.iteritems():
-            if IDs[var.OverallIndex + var_index] == cnDifferential:
-                if var.NumberOfPoints == 1:
-                    name  = var.Name
-                else:
-                    name  = '%s(%s)' % (var.Name, ','.join([str(ind) for ind in domainIndexes]))
-                value = var.GetValue(domainIndexes)
-                item = treeItem_Quantity(nodeItem, name, description, value, units)
-                dictInitialConditions[name] = (name, domainIndexes, item)
+        
+        # Check if there is diff. flag set for any point in the variable
+        # If there is not then skip the variable
+        if not cnDifferential in IDs[var.OverallIndex : var.OverallIndex + var.NumberOfPoints]:
+            continue
+        
+        if var.NumberOfPoints == 1:
+            value = var.GetValue()
+        else:
+            values = numpy.array(var.npyValues, dtype=object)
+            # Iterate over points and set None for the points which are *not* differential
+            for var_index, domainIndexes in domainsIndexesMap.iteritems():
+                #print var_index, domainIndexes, values[tuple(domainIndexes)]
+                if IDs[var.OverallIndex + var_index] != cnDifferential:
+                    values[tuple(domainIndexes)] = None
+            value = values.tolist()
+        
+        item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
+        dictInitialConditions[name] = (name, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
@@ -137,18 +148,29 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
     who are differential and need an initial conditions to be set.
     """
     for var in model.Variables:
+        name              = var.Name
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
         description       = var.Description
-        for var_index, domainIndexes in domainsIndexesMap.iteritems():
-            if IDs[var.OverallIndex + var_index] == cnAssigned:
-                if var.NumberOfPoints == 1:
-                    name  = var.Name
-                else:
-                    name  = '%s(%s)' % (var.Name, ','.join([str(ind) for ind in domainIndexes]))
-                value = var.GetValue(domainIndexes)
-                item = treeItem_Quantity(nodeItem, name, description, value, units)
-                dictDOFs[name] = (name, domainIndexes, item)
+        
+        # Check if there is assigned flag set for any point in the variable
+        # If there is not then skip the variable
+        if not cnAssigned in IDs[var.OverallIndex : var.OverallIndex + var.NumberOfPoints]:
+            continue
+        
+        if var.NumberOfPoints == 1:
+            value = var.GetValue()
+        else:
+            values = numpy.array(var.npyValues, dtype=object)
+            # Iterate over points and set None for the points which are *not* differential
+            for var_index, domainIndexes in domainsIndexesMap.iteritems():
+                print var_index, domainIndexes, values[tuple(domainIndexes)]
+                if IDs[var.OverallIndex + var_index] != cnAssigned:
+                    values[tuple(domainIndexes)] = None
+            value = values.tolist()
+
+        item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
+        dictDOFs[name] = (name, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)

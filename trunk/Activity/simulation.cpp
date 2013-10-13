@@ -5,6 +5,7 @@
 #include <time.h>
 #include <algorithm>
 #include <math.h>
+#include <limits>
 #include <boost/foreach.hpp>
 
 namespace dae
@@ -1220,7 +1221,7 @@ void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomain
 void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& mapParameters);
 void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVariables);
 void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs);
-void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension);
+void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension, bool allowNULL);
 
 void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains)
 {
@@ -1278,7 +1279,7 @@ void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs)
 // Iterates over property_tree:
 //   - If it finds an empty item it adds a value to the array
 //   - Otherwise calls ParseList for each child
-void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension)
+void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension, bool allowNULL)
 {
     if(pt.size() != Shape[currentDimension])
     {
@@ -1287,17 +1288,34 @@ void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, u
         throw std::runtime_error(msg);
     }
 
+    real_t Value;
     BOOST_FOREACH(boost::property_tree::ptree::value_type& pt_child, pt)
     {
-        //std::cout << pt_child.first << ".size = " << pt_child.second.size() << std::endl;
         if(pt_child.second.size() == 0)
         {
-            values.push_back( quantity(boost::lexical_cast<real_t>(pt_child.second.data()), Units) );
-            //std::cout << "Adding value " << boost::lexical_cast<real_t>(pt_child.second.data()) << std::endl;
+            // If it is empty - the value is 'null' meaning unset (by design should be set to DOUBLE_MAX)
+            if(boost::lexical_cast<string>(pt_child.second.data()) == "null")
+            {
+                // If null value is not allowed throw an exception, otherwise set it to DOUBLE_MAX
+                if(!allowNULL)
+                {
+                    string msg = "Invalid values found (null)";
+                    throw std::runtime_error(msg);
+                }
+
+                Value = std::numeric_limits<real_t>::max();
+                std::cout << "          null data found" << std::endl;
+            }
+            else
+            {
+                Value = boost::lexical_cast<real_t>(pt_child.second.data());
+            }
+
+            values.push_back(quantity(Value, Units));
         }
         else
         {
-            ParseList(pt_child.second, values, Units, Shape, currentDimension + 1);
+            ParseList(pt_child.second, values, Units, Shape, currentDimension + 1, allowNULL);
         }
     }
 }
@@ -1496,7 +1514,7 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
 
                 // Parse the array into a flat (1-D) array of quantity objects
                 std::vector<quantity> values;
-                ParseList(v_parameter.second.get_child("Value"), values, Units, Shape, 0);
+                ParseList(v_parameter.second.get_child("Value"), values, Units, Shape, 0, false);
 
                 if(bPrintInfo)
                 {
@@ -1535,8 +1553,6 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
 
     CollectAllVariables(m_pModel, mapVariables);
     CollectAllSTNs(m_pModel, mapSTNs);
-
-    std::cout << toString(mapVariables) << std::endl;
 
     BOOST_FOREACH(boost::property_tree::ptree::value_type& v_variable, m_ptreeRuntimeSettings.get_child("DOFs"))
     {
