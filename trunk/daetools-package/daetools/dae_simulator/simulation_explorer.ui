@@ -227,7 +227,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>260</width>
+           <width>250</width>
            <height>200</height>
           </size>
          </property>
@@ -322,7 +322,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
          </property>
          <property name="minimumSize">
           <size>
-           <width>260</width>
+           <width>250</width>
            <height>200</height>
           </size>
          </property>
@@ -437,7 +437,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
            </property>
            <property name="minimumSize">
             <size>
-             <width>260</width>
+             <width>250</width>
              <height>200</height>
             </size>
            </property>
@@ -509,7 +509,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
          </property>
          <property name="minimumSize">
           <size>
-           <width>260</width>
+           <width>250</width>
            <height>200</height>
           </size>
          </property>
@@ -532,7 +532,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
-        <widget class="QTreeWidget" name="treeStateTransitions">
+        <widget class="QTreeWidget" name="treeSTNs">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>1</horstretch>
@@ -579,7 +579,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
          </property>
          <property name="minimumSize">
           <size>
-           <width>260</width>
+           <width>250</width>
            <height>200</height>
           </size>
          </property>

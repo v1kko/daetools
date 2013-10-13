@@ -5,6 +5,8 @@
 #include "../Core/coreimpl.h"
 #include "../config.h"
 #include "../Core/optimization.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #if defined(DAE_MPI)
 #include <boost/mpi.hpp>
@@ -38,6 +40,8 @@ public:
 	virtual void				ReportData(real_t dCurrentTime);
 	virtual void				StoreInitializationValues(const std::string& strFileName) const;
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
+    virtual void                SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings);
+    virtual std::string         GetJSONRuntimeSettings() const;
 
 	virtual real_t				GetCurrentTime(void) const;
 	virtual real_t				GetNextReportingTime(void) const;
@@ -57,7 +61,8 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog, 
-										   bool bCalculateSensitivities = false);
+                                           bool bCalculateSensitivities = false,
+                                           const std::string& strJSONRuntimeSettings = "");
 	virtual void				CleanUpSetupData(void);
 	
 	virtual void				Reinitialize(void);
@@ -135,6 +140,9 @@ protected:
 	void	EnterConditionalIntegrationMode(void);
 	real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
 	
+    void    SetUpParametersAndDomains_RuntimeSettings();
+    void    SetUpVariables_RuntimeSettings();
+
 protected:
 	std::string					m_strIteration;
 	real_t						m_dCurrentTime;
@@ -157,7 +165,9 @@ protected:
 	bool						m_bConditionalIntegrationMode;
 	bool						m_bIsInitialized;
 	bool						m_bIsSolveInitial;
-	
+    std::string                 m_strJSONRuntimeSettings;
+    boost::property_tree::ptree m_ptreeRuntimeSettings;
+
 	std::vector<daeVariable*>	m_ptrarrReportVariables;
 	std::vector<daeParameter*>	m_ptrarrReportParameters;
 

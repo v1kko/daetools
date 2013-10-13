@@ -225,6 +225,7 @@ protected:
 bool   daeIsValidObjectName(const string& strName);
 string daeGetRelativeName(const daeObject* parent, const daeObject* child);
 string daeGetRelativeName(const string& strParent, const string& strChild);
+string daeGetStrippedName(const string& strName);
 string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child);
 
 /******************************************************************

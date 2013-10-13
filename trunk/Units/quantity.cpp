@@ -264,6 +264,15 @@ std::string quantity::toLatex(void) const
 	return (boost::format("{%.10g %s}") % _value % _units.toLatex()).str();
 }
 
+std::string quantity::toJSON(void) const
+{
+    std::string strJSON = "{ ";
+    strJSON += ( boost::format("\"Units\" : %s,") % getUnits().toJSON() ).str();
+    strJSON += ( boost::format("\"Value\" : %f")  % getValue() ).str();
+    strJSON += " }";
+    return strJSON;
+}
+
 std::ostream& operator<<(std::ostream& out, const quantity& q)
 {
 	out << q.toString();

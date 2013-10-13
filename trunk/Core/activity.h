@@ -47,23 +47,25 @@ enum daeeSimulationMode
 class daeSimulation_t
 {
 public:
-	virtual daeModel_t*			GetModel(void) const											= 0;
-	virtual void				SetModel(daeModel_t* pModel)									= 0;
-	virtual daeDataReporter_t*	GetDataReporter(void) const										= 0;
-	virtual daeLog_t*			GetLog(void) const												= 0;
-	virtual void				SetUpParametersAndDomains(void)									= 0;
-	virtual void				SetUpVariables(void)											= 0;
-	virtual void				SetUpOptimization(void)											= 0;
-	virtual void				SetUpParameterEstimation(void)									= 0;
-	virtual void				SetUpSensitivityAnalysis(void)									= 0;
-	virtual void				Run(void)														= 0;
-	virtual void				Finalize(void)													= 0;
-	virtual void				ReRun(void)													    = 0;
-	virtual void				Reset(void)														= 0;
-	virtual void				RegisterData(const std::string& strIteration)					= 0;
-	virtual void				ReportData(real_t dCurrentTime)									= 0;
-	virtual void				StoreInitializationValues(const std::string& strFileName) const	= 0;
-	virtual void				LoadInitializationValues(const std::string& strFileName) const	= 0;
+    virtual daeModel_t*			GetModel(void) const                                                = 0;
+    virtual void				SetModel(daeModel_t* pModel)        								= 0;
+    virtual daeDataReporter_t*	GetDataReporter(void) const             							= 0;
+    virtual daeLog_t*			GetLog(void) const                          						= 0;
+    virtual void				SetUpParametersAndDomains(void)                 					= 0;
+    virtual void				SetUpVariables(void)                                				= 0;
+    virtual void				SetUpOptimization(void)                                 			= 0;
+    virtual void				SetUpParameterEstimation(void)                              		= 0;
+    virtual void				SetUpSensitivityAnalysis(void)                                  	= 0;
+    virtual void				Run(void)                                                           = 0;
+    virtual void				Finalize(void)                                          			= 0;
+    virtual void				ReRun(void)                                                 	    = 0;
+    virtual void				Reset(void)                                                     	= 0;
+    virtual void				RegisterData(const std::string& strIteration)                       = 0;
+    virtual void				ReportData(real_t dCurrentTime)                                     = 0;
+    virtual void				StoreInitializationValues(const std::string& strFileName) const     = 0;
+    virtual void				LoadInitializationValues(const std::string& strFileName) const      = 0;
+    virtual void                SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings)   = 0;
+    virtual std::string         GetJSONRuntimeSettings() const                                      = 0;
 
 	virtual real_t				GetCurrentTime(void) const											= 0;
 	virtual void				SetTimeHorizon(real_t dTimeHorizon)									= 0;
@@ -84,11 +86,12 @@ public:
 	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
 										   daeDataReporter_t* pDataReporter, 
 										   daeLog_t* pLog,
-										   bool bCalculateSensitivities = false)	   	= 0;
-	virtual void				Reinitialize(void)										= 0;
-	virtual void				CleanUpSetupData(void)									= 0;
-	virtual void				SolveInitial(void)										= 0;
-	virtual daeDAESolver_t*		GetDAESolver(void) const								= 0;
+                                           bool bCalculateSensitivities = false,
+                                           const std::string& strJSONRuntimeSettings = "")	= 0;
+    virtual void				Reinitialize(void)                                          = 0;
+    virtual void				CleanUpSetupData(void)                                      = 0;
+    virtual void				SolveInitial(void)                                          = 0;
+    virtual daeDAESolver_t*		GetDAESolver(void) const                                    = 0;
 	
 	virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
 										  bool bReportDataAroundDiscontinuities = true)					= 0;

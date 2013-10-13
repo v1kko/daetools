@@ -58,7 +58,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       pure_virtual(&daeSimulation_t::Pause))
         .def("Resume",                      pure_virtual(&daeSimulation_t::Resume))
         
-        .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize), ( boost::python::arg("CalculateSensitivities") = false ) )
+        .def("Initialize",                  pure_virtual(&daeSimulation_t::Initialize))
         .def("Reinitialize",                pure_virtual(&daeSimulation_t::Reinitialize))
         .def("SolveInitial",                pure_virtual(&daeSimulation_t::SolveInitial))
         .def("Integrate",                   pure_virtual(&daeSimulation_t::Integrate))
@@ -88,7 +88,12 @@ BOOST_PYTHON_MODULE(pyActivity)
             
         .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()),
                                                                                                             DOCSTR_daeSimulation_LastSatisfiedCondition)
-            
+
+
+        .add_property("JSONRuntimeSettings",    &daeSimulation::GetJSONRuntimeSettings,
+                                                &daeSimulation::SetJSONRuntimeSettings,                     DOCSTR_daeSimulation_JSONRuntimeSettings)
+
+
         .add_property("DataReporter",			&daepython::daeDefaultSimulationWrapper::GetDataReporter_,  DOCSTR_daeSimulation_DataReporter)
         .add_property("Log",					&daepython::daeDefaultSimulationWrapper::GetLog_,           DOCSTR_daeSimulation_Log)
         .add_property("DAESolver",				&daepython::daeDefaultSimulationWrapper::GetDAESolver_,     DOCSTR_daeSimulation_DAESolver)
@@ -149,7 +154,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Resume",                      &daeSimulation::Resume, ( arg("self") ), DOCSTR_daeSimulation_Resume)
    
         .def("Initialize",					&daeSimulation::Initialize,
-                                            ( arg("self"), arg("daeSolver"), arg("dataReporter"), arg("log"), arg("calculateSensitivities") = false ), DOCSTR_daeSimulation_Initialize)
+                                            ( arg("self"), arg("daeSolver"), arg("dataReporter"), arg("log"), arg("calculateSensitivities") = false, arg("jsonRuntimeSettings") = "" ), DOCSTR_daeSimulation_Initialize)
         .def("Reinitialize",                &daeSimulation::Reinitialize, 
                                             ( arg("self") ), DOCSTR_daeSimulation_Reinitialize)  
         .def("SolveInitial",                &daeSimulation::SolveInitial, 

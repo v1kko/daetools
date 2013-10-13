@@ -455,6 +455,15 @@ std::string unit::toLatex(void) const
 	return "{" + strResult + "}"; 
 }
 
+std::string unit::toJSON(void) const
+{
+    std::string strJSON = "{ ";
+    for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
+        strJSON += ( boost::format("%s\"%s\" : %f") % (iter == units.begin() ? "" : ", ") % iter->first % iter->second ).str();
+    strJSON += " }";
+    return strJSON;
+}
+
 std::ostream& operator<<(std::ostream& out, const unit& u)
 {
 	out << u.toString();

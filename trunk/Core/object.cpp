@@ -194,6 +194,14 @@ string daeGetRelativeName(const string& strParent, const string& strChild)
 	return strName;
 }
 
+string daeGetStrippedName(const string& strName)
+{
+    string strStrippedName = strName;
+    dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
+    return strStrippedName;
+}
+
+
 string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child)
 {
 	string strStrippedName = dae::core::daeGetRelativeName(parent, child);

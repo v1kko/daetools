@@ -117,7 +117,8 @@ public:
 
 	std::string toString(void) const;
 	std::string toLatex(void) const;
-	friend std::ostream& operator<<(std::ostream& out, const unit& u);
+    std::string toJSON(void) const;
+    friend std::ostream& operator<<(std::ostream& out, const unit& u);
 	
 public:
 	std::map<std::string, double> units;
@@ -164,7 +165,8 @@ public:
 	
 	std::string toString(void) const;
 	std::string toLatex(void) const;
-	friend std::ostream& operator<<(std::ostream& out, const quantity& q);
+    std::string toJSON(void) const;
+    friend std::ostream& operator<<(std::ostream& out, const quantity& q);
 	
 	bool operator==(const quantity& other) const;
 	bool operator==(double value) const;

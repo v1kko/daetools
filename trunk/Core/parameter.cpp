@@ -884,7 +884,12 @@ void daeParameter::SetValues(const std::vector<quantity>& values)
 
     size_t nTotalNumberOfVariables = GetNumberOfPoints();
     if(values.size() != nTotalNumberOfVariables)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid size of array of values (" << values.size() << ") in function SetValues for parameter " << GetCanonicalName()
+          << " (required " << nTotalNumberOfVariables << ")";
+        throw e;
+    }
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
         m_darrValues[i] = values[i].scaleTo(m_Unit).getValue();

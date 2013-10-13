@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
 
-import sys, tempfile, numpy
+import sys, tempfile, numpy, json
 from time import localtime, strftime
 from os.path import join, dirname
 from daetools.pyDAE import *
@@ -34,6 +34,7 @@ def simulate(simulation, **kwargs):
         qt_app = QtGui.QApplication(sys.argv)
     explorer = daeSimulationExplorer(qt_app, simulation = simulation, **kwargs)
     explorer.exec_()
+    return explorer
 
 def optimize(optimization, **kwargs):
     qt_app = kwargs.get('qt_app', None)
@@ -41,210 +42,254 @@ def optimize(optimization, **kwargs):
         qt_app = QtGui.QApplication(sys.argv)
     explorer = daeSimulationExplorer(qt_app, simulation = simulation, optimization = optimization, **kwargs)
     explorer.exec_()
+    return explorer
 
 class daeSimulationExplorer(QtGui.QDialog):
     def __init__(self, qt_app, **kwargs):
         QtGui.QDialog.__init__(self)
-        self.ui = Ui_SimulationExplorer()
-        self.ui.setupUi(self)
+        self._ui = Ui_SimulationExplorer()
+        self._ui.setupUi(self)
         
         self.setWindowTitle("DAE Tools Simulation Explorer v" + daeVersion(True))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
-        self.connect(self.ui.buttonOk,                  QtCore.SIGNAL('clicked()'),                          self.slotOK)
-        self.connect(self.ui.buttonCancel,              QtCore.SIGNAL('clicked()'),                          self.slotCancel)
-        self.connect(self.ui.treeParameters,            QtCore.SIGNAL("itemSelectionChanged()"),             self.slotParameterTreeItemSelectionChanged)
-        self.connect(self.ui.treeOutputVariables,       QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self.slotOutputVariablesTreeItemChanged)
-        self.connect(self.ui.treeStateTransitions,      QtCore.SIGNAL("itemSelectionChanged()"),             self.slotStateTransitionsTreeItemChanged)
-        self.connect(self.ui.treeDomains,               QtCore.SIGNAL("itemSelectionChanged()"),             self.slotDomainsTreeItemChanged)
-        self.connect(self.ui.treeDOFs,                  QtCore.SIGNAL("itemSelectionChanged()"),             self.slotDOFsTreeItemChanged)
-        self.connect(self.ui.treeInitialConditions,     QtCore.SIGNAL("itemSelectionChanged()"),             self.slotInitialConditionsTreeItemChanged)
+        self._qt_app                      = qt_app
+        self._simulation                  = kwargs.get('simulation',                 None)
+        self._optimization                = kwargs.get('optimization',               None)
+        self._datareporter                = kwargs.get('datareporter',               None)
+        self._lasolver                    = kwargs.get('lasolver',                   None)
+        self._nlpsolver                   = kwargs.get('nlpsolver',                  None)
+        #self._log                         = kwargs.get('log',                        None)
+        #self._nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
+        #self._lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
+        #self._run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
 
-        self.qt_app                      = qt_app
-        self.simulation                  = kwargs.get('simulation',                 None)
-        self.optimization                = kwargs.get('optimization',               None)
-        self.datareporter                = kwargs.get('datareporter',               None)
-        #self.log                         = kwargs.get('log',                        None)
-        self.lasolver                    = kwargs.get('lasolver',                   None)
-        self.nlpsolver                   = kwargs.get('nlpsolver',                  None)
-        #self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
-        #self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
-        #self.run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
-
-        if not self.qt_app:
+        if not self._qt_app:
             raise RuntimeError('qt_app object must not be None')
-        if not self.simulation:
+        if not self._simulation:
             raise RuntimeError('simulation object must not be None')
         
-        self.inspector = daeSimulationInspector(self.simulation)
-        
-        self.simulationName     = self.simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-        self.timeHorizon        = self.simulation.TimeHorizon
-        self.reportingInterval  = self.simulation.ReportingInterval
-        self.relativeTolerance  = self.simulation.DAESolver.RelativeTolerance
-        if self.simulation.InitialConditionMode == eQuasySteadyState:
-            self.quazySteadyState = True
+        self._inspector          = daeSimulationInspector(self._simulation)
+        self._runtimeSettings   = {}
+        self._simulationName     = daeGetStrippedName(self._simulation.m.Name) + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        self._timeHorizon        = self._simulation.TimeHorizon
+        self._reportingInterval  = self._simulation.ReportingInterval
+        self._relativeTolerance  = self._simulation.DAESolver.RelativeTolerance
+        if self._simulation.InitialConditionMode == eQuasySteadyState:
+            self._quazySteadyState = True
         else:
-            self.quazySteadyState = False
+            self._quazySteadyState = False
         
-        self.daesolver = self.simulation.DAESolver
-        self.log       = self.simulation.Log
+        self._daesolver = self._simulation.DAESolver
+        self._log       = self._simulation.Log
         
         d_validator = QtGui.QDoubleValidator(self)
 
-        self.ui.simulationNameEdit.setText(self.simulationName)
-        self.ui.timeHorizonEdit.setValidator(d_validator)
-        self.ui.timeHorizonEdit.setText(str(self.timeHorizon))
-        self.ui.reportingIntervalEdit.setValidator(d_validator)
-        self.ui.reportingIntervalEdit.setText(str(self.reportingInterval))
-        self.ui.relativeToleranceEdit.setValidator(d_validator)
-        self.ui.relativeToleranceEdit.setText(str(self.relativeTolerance))
-        if self.quazySteadyState:
-            self.ui.quazySteadyStateCheckBox.setCheckState(Qt.Checked)
-            self.ui.tab_InitialConditions.setEnabled(False)
+        self._ui.simulationNameEdit.setText(self._simulationName)
+        self._ui.timeHorizonEdit.setValidator(d_validator)
+        self._ui.timeHorizonEdit.setText(str(self._timeHorizon))
+        self._ui.reportingIntervalEdit.setValidator(d_validator)
+        self._ui.reportingIntervalEdit.setText(str(self._reportingInterval))
+        self._ui.relativeToleranceEdit.setValidator(d_validator)
+        self._ui.relativeToleranceEdit.setText(str(self._relativeTolerance))
+        if self._quazySteadyState:
+            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Checked)
+            self._ui.tab_InitialConditions.setEnabled(False)
         else:
-            self.ui.quazySteadyStateCheckBox.setCheckState(Qt.Unchecked)
-            self.ui.tab_InitialConditions.setEnabled(True)
+            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Unchecked)
+            self._ui.tab_InitialConditions.setEnabled(True)
 
-        self.available_la_solvers     = aux.getAvailableLASolvers()
-        self.available_nlp_solvers    = aux.getAvailableNLPSolvers()
-        self.available_data_reporters = aux.getAvailableDataReporters()
-        self.available_logs           = aux.getAvailableLogs()
+        self._available_la_solvers     = aux.getAvailableLASolvers()
+        self._available_nlp_solvers    = aux.getAvailableNLPSolvers()
+        self._available_data_reporters = aux.getAvailableDataReporters()
+        self._available_logs           = aux.getAvailableLogs()
 
-        self.ui.daesolverComboBox.addItem("Sundials IDAS")
-        for la in self.available_la_solvers:
-            self.ui.lasolverComboBox.addItem(la[0], userData = QtCore.QVariant(la[1]))
-        for nlp in self.available_nlp_solvers:
-            self.ui.minlpsolverComboBox.addItem(nlp[0], userData = QtCore.QVariant(nlp[1]))
-        for dr in self.available_data_reporters:
-            self.ui.datareporterComboBox.addItem(dr[0], userData = QtCore.QVariant(dr[1]))
-        for log in self.available_logs:
-            self.ui.logComboBox.addItem(log[0], userData = QtCore.QVariant(log[1]))
+        self._ui.daesolverComboBox.addItem("Sundials IDAS")
+        for la in self._available_la_solvers:
+            self._ui.lasolverComboBox.addItem(la[0], userData = QtCore.QVariant(la[1]))
+        for nlp in self._available_nlp_solvers:
+            self._ui.minlpsolverComboBox.addItem(nlp[0], userData = QtCore.QVariant(nlp[1]))
+        for dr in self._available_data_reporters:
+            self._ui.datareporterComboBox.addItem(dr[0], userData = QtCore.QVariant(dr[1]))
+        for log in self._available_logs:
+            self._ui.logComboBox.addItem(log[0], userData = QtCore.QVariant(log[1]))
         
         # DAE Solvers
-        self.ui.daesolverComboBox.setEnabled(False)
+        self._ui.daesolverComboBox.setEnabled(False)
 
         # LA Solvers
-        if not self.lasolver:
-            self.ui.lasolverComboBox.setEnabled(True)
+        if not self._lasolver:
+            self._ui.lasolverComboBox.setEnabled(True)
         else:
             # If LA solver has been sent then clear and disable LASolver combo box
-            self.ui.lasolverComboBox.clear()
-            self.ui.lasolverComboBox.addItem(self.lasolver.Name)
-            self.ui.lasolverComboBox.setEnabled(False)
+            self._ui.lasolverComboBox.clear()
+            self._ui.lasolverComboBox.addItem(self._lasolver.Name)
+            self._ui.lasolverComboBox.setEnabled(False)
 
         # MINLP Solvers
-        if not self.optimization:
+        if not self._optimization:
             # If we are simulating then clear and disable MINLPSolver combo box
-            #self.ui.simulationLabel.setText('Simulation')
-            self.ui.minlpsolverComboBox.clear()
-            self.ui.minlpsolverComboBox.setEnabled(False)
+            #self._ui.simulationLabel.setText('Simulation')
+            self._ui.minlpsolverComboBox.clear()
+            self._ui.minlpsolverComboBox.setEnabled(False)
         else:
-            #self.ui.simulationLabel.setText('Optimization')
-            if not self.nlpsolver:
-                self.ui.minlpsolverComboBox.setEnabled(True)
+            #self._ui.simulationLabel.setText('Optimization')
+            if not self._nlpsolver:
+                self._ui.minlpsolverComboBox.setEnabled(True)
             else:
                 # If nlpsolver has been sent then clear and disable MINLPSolver combo box
-                self.ui.minlpsolverComboBox.clear()
-                self.ui.minlpsolverComboBox.addItem(self.nlpsolver.Name)
-                self.ui.minlpsolverComboBox.setEnabled(False)
+                self._ui.minlpsolverComboBox.clear()
+                self._ui.minlpsolverComboBox.addItem(self._nlpsolver.Name)
+                self._ui.minlpsolverComboBox.setEnabled(False)
                 
         # Logs
-        if not self.log:
-            self.ui.logComboBox.setEnabled(True)
+        if not self._log:
+            self._ui.logComboBox.setEnabled(True)
         else:
             # If LA solver has been sent then clear and disable LASolver combo box
-            self.ui.logComboBox.clear()
-            self.ui.logComboBox.addItem(self.log.Name)
-            self.ui.logComboBox.setEnabled(False)
+            self._ui.logComboBox.clear()
+            self._ui.logComboBox.addItem(self._log.Name)
+            self._ui.logComboBox.setEnabled(False)
                 
         # DataReporters
-        if not self.datareporter:
-            self.ui.datareporterComboBox.setEnabled(True)
+        if not self._datareporter:
+            self._ui.datareporterComboBox.setEnabled(True)
         else:
             # If LA solver has been sent then clear and disable LASolver combo box
-            self.ui.datareporterComboBox.clear()
-            self.ui.datareporterComboBox.addItem(self.log.Name)
-            self.ui.datareporterComboBox.setEnabled(False)
+            self._ui.datareporterComboBox.clear()
+            self._ui.datareporterComboBox.addItem(self._log.Name)
+            self._ui.datareporterComboBox.setEnabled(False)
         
-        self.currentParameterItem        = None
-        self.currentStateTransitionItem  = None
-        self.currentDomainItem           = None
-        self.currentDOFItem              = None
-        self.currentInitialConditionItem = None
+        self._currentParameterItem        = None
+        self._currentStateTransitionItem  = None
+        self._currentDomainItem           = None
+        self._currentDOFItem              = None
+        self._currentInitialConditionItem = None
         
-        addItemsToTree(self.ui.treeParameters,        self.ui.treeParameters,        self.inspector.treeParameters)
-        addItemsToTree(self.ui.treeOutputVariables,   self.ui.treeOutputVariables,   self.inspector.treeOutputVariables)
-        addItemsToTree(self.ui.treeStateTransitions,  self.ui.treeStateTransitions,  self.inspector.treeStateTransitions)
-        addItemsToTree(self.ui.treeDomains,           self.ui.treeDomains,           self.inspector.treeDomains)
-        addItemsToTree(self.ui.treeDOFs,              self.ui.treeDOFs,              self.inspector.treeDOFs)
-        addItemsToTree(self.ui.treeInitialConditions, self.ui.treeInitialConditions, self.inspector.treeInitialConditions)
+        addItemsToTree(self._ui.treeParameters,        self._ui.treeParameters,        self._inspector.treeParameters)
+        addItemsToTree(self._ui.treeOutputVariables,   self._ui.treeOutputVariables,   self._inspector.treeOutputVariables)
+        addItemsToTree(self._ui.treeSTNs,              self._ui.treeSTNs,              self._inspector.treeSTNs)
+        addItemsToTree(self._ui.treeDomains,           self._ui.treeDomains,           self._inspector.treeDomains)
+        addItemsToTree(self._ui.treeDOFs,              self._ui.treeDOFs,              self._inspector.treeDOFs)
+        addItemsToTree(self._ui.treeInitialConditions, self._ui.treeInitialConditions, self._inspector.treeInitialConditions)
         
-        self.ui.treeDomains.expandAll()
-        self.ui.treeDomains.resizeColumnToContents(0)
+        self._ui.treeDomains.expandAll()
+        self._ui.treeDomains.resizeColumnToContents(0)
         
-        self.ui.treeParameters.expandAll()
-        self.ui.treeParameters.resizeColumnToContents(0)
+        self._ui.treeParameters.expandAll()
+        self._ui.treeParameters.resizeColumnToContents(0)
         
-        self.ui.treeInitialConditions.expandAll()
-        self.ui.treeInitialConditions.resizeColumnToContents(0)
+        self._ui.treeInitialConditions.expandAll()
+        self._ui.treeInitialConditions.resizeColumnToContents(0)
         
-        self.ui.treeDOFs.expandAll()
-        self.ui.treeDOFs.resizeColumnToContents(0)
+        self._ui.treeDOFs.expandAll()
+        self._ui.treeDOFs.resizeColumnToContents(0)
         
-        self.ui.treeStateTransitions.expandAll()
-        self.ui.treeStateTransitions.resizeColumnToContents(0)
+        self._ui.treeSTNs.expandAll()
+        self._ui.treeSTNs.resizeColumnToContents(0)
         
-        self.ui.treeOutputVariables.expandAll()
-        self.ui.treeOutputVariables.resizeColumnToContents(0)
+        self._ui.treeOutputVariables.expandAll()
+        self._ui.treeOutputVariables.resizeColumnToContents(0)
 
-    def processInputs(self):
-        self.simulationName    = self.ui.simulationNameEdit.text()
-        self.timeHorizon       = float(self.ui.timeHorizonEdit.text())
-        self.reportingInterval = float(self.ui.reportingIntervalEdit.text())
-        self.relativeTolerance = float(self.ui.relativeToleranceEdit.text())
+        # First populate trees and set values. Only after that connect signals to slots (otherwise the event handlers might be triggered in the process)
+        self.connect(self._ui.buttonOk,                  QtCore.SIGNAL('clicked()'),                          self._slotOK)
+        self.connect(self._ui.buttonCancel,              QtCore.SIGNAL('clicked()'),                          self._slotCancel)
+        self.connect(self._ui.treeParameters,            QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
+        self.connect(self._ui.treeOutputVariables,       QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
+        self.connect(self._ui.treeSTNs,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
+        self.connect(self._ui.treeDomains,               QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
+        self.connect(self._ui.treeDOFs,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
+        self.connect(self._ui.treeInitialConditions,     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
+
+    def updateSimulation(self):
+        pass
+    
+    @property
+    def jsonRuntimeSettings(self):
+        return json.dumps(self._runtimeSettings, indent = 4)
+    
+    @property
+    def runtimeSettings(self):
+        return self._runtimeSettings
+    
+    ############################################################################
+    #                   Imlementation (private methods)
+    ############################################################################
+    def _processInputs(self):
+        self._simulationName    = str(self._ui.simulationNameEdit.text())
+        self._timeHorizon       = float(self._ui.timeHorizonEdit.text())
+        self._reportingInterval = float(self._ui.reportingIntervalEdit.text())
+        self._relativeTolerance = float(self._ui.relativeToleranceEdit.text())
         
-        if not self.daesolver:
-            self.daesolver = daeIDAS()
+        if not self._daesolver:
+            self._daesolver = daeIDAS()
         
         # If in optimization mode and nlpsolver is not sent then choose it from the selection
-        if self.optimization and not self.nlpsolver and len(self.available_nlp_solvers) > 0:
-            minlpsolverIndex = self.ui.minlpsolverComboBox.itemData(self.ui.minlpsolverComboBox.currentIndex()).toInt()[0]
-            self.nlpsolver = aux.createNLPSolver(minlpsolverIndex)
+        if self._optimization and not self._nlpsolver and len(self._available_nlp_solvers) > 0:
+            minlpsolverIndex = self._ui.minlpsolverComboBox.itemData(self._ui.minlpsolverComboBox.currentIndex()).toInt()[0]
+            self._nlpsolver  = aux.createNLPSolver(minlpsolverIndex)
 
         # If lasolver is not sent then create it based on the selection
-        if self.lasolver == None and len(self.available_la_solvers) > 0:
-            lasolverIndex = self.ui.lasolverComboBox.itemData(self.ui.lasolverComboBox.currentIndex()).toInt()[0]
-            self.lasolver = aux.createLASolver(lasolverIndex)
-            self.daesolver.SetLASolver(self.lasolver)
+        if self._lasolver == None and len(self._available_la_solvers) > 0:
+            lasolverIndex  = self._ui.lasolverComboBox.itemData(self._ui.lasolverComboBox.currentIndex()).toInt()[0]
+            self._lasolver = aux.createLASolver(lasolverIndex)
+            self._daesolver.SetLASolver(self._lasolver)
 
-        if not self.datareporter:
-            drIndex = self.ui.datareporterComboBox.itemData(self.ui.datareporterComboBox.currentIndex()).toInt()[0]
-            self.datareporter = aux.createDataReporter(drIndex)
+        if not self._datareporter:
+            drIndex            = self._ui.datareporterComboBox.itemData(self._ui.datareporterComboBox.currentIndex()).toInt()[0]
+            self._datareporter = aux.createDataReporter(drIndex)
             
-        if not self.log:
-            logIndex = self.ui.logComboBox.itemData(self.ui.logComboBox.currentIndex()).toInt()[0]
-            self.log = aux.createLog(logIndex)
-            
-    def slotOK(self):
+        if not self._log:
+            logIndex  = self._ui.logComboBox.itemData(self._ui.logComboBox.currentIndex()).toInt()[0]
+            self._log = aux.createLog(logIndex)
+        
+        self._runtimeSettings = {}
+        self._runtimeSettings['Name']                  = self._simulationName
+        self._runtimeSettings['TimeHorizon']           = self._timeHorizon
+        self._runtimeSettings['ReportingInterval']     = self._reportingInterval
+        self._runtimeSettings['RelativeTolerance']     = self._relativeTolerance
+        self._runtimeSettings['DAESolver']             = self._simulation.DAESolver.Name          if self._simulation.DAESolver          else ''
+        self._runtimeSettings['LASolver']              = self._simulation.DAESolver.LASolver.Name if self._simulation.DAESolver.LASolver else ''
+        self._runtimeSettings['DataReporter']          = self._simulation.DataReporter.Name       if self._simulation.DataReporter       else ''
+        self._runtimeSettings['Log']                   = self._simulation.Log.Name                if self._simulation.Log                else ''
+        self._runtimeSettings['QuazySteadyState']      = self._quazySteadyState
+        
+        self._runtimeSettings['Parameters']            = self._inspector.treeParameters.toDictionary()
+        self._runtimeSettings['Domains']               = self._inspector.treeDomains.toDictionary()
+        if not self._quazySteadyState:
+            self._runtimeSettings['InitialConditions'] = self._inspector.treeInitialConditions.toDictionary()
+        self._runtimeSettings['DOFs']                  = self._inspector.treeDOFs.toDictionary()
+        self._runtimeSettings['STNs']                  = self._inspector.treeSTNs.toDictionary()
+        self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
+        
+        #import pprint
+        #pprint.pprint(self._runtimeSettings, indent = 2)
+        
+        import json
+        f = open('simulation.json', 'w')
+        f.write( json.dumps(self._runtimeSettings, indent = 4) )
+        f.close()
+        
+    def _slotOK(self):
+        self._processInputs()
         self.done(QtGui.QDialog.Accepted)
 
-    def slotCancel(self):
+    def _slotCancel(self):
         self.done(QtGui.QDialog.Rejected)
 
-    def slotParameterTreeItemSelectionChanged(self):
-        currentItem = self.ui.treeParameters.selectedItems()[0]
+    def _slotParameterTreeItemSelectionChanged(self):
+        currentItem = self._ui.treeParameters.selectedItems()[0]
         data = currentItem.data(1, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
-        if self.currentParameterItem:
-            self.currentParameterItem.hide()
+        if self._currentParameterItem:
+            self._currentParameterItem.hide()
         
         if item.editor:
-            self.currentParameterItem = item
-            self.currentParameterItem.show(self.ui.frameParameters)
+            self._currentParameterItem = item
+            self._currentParameterItem.show(self._ui.frameParameters)
 
-    def slotOutputVariablesTreeItemChanged(self, treeWidgetItem, column):
+    def _slotOutputVariablesTreeItemChanged(self, treeWidgetItem, column):
         if column == 0:
             data = treeWidgetItem.data(1, QtCore.Qt.UserRole)
             if not data:
@@ -256,52 +301,52 @@ class daeSimulationExplorer(QtGui.QDialog):
                 else:
                     item.setValue(False)
 
-    def slotStateTransitionsTreeItemChanged(self):
-        currentItem = self.ui.treeStateTransitions.selectedItems()[0]
+    def _slotSTNsTreeItemChanged(self):
+        currentItem = self._ui.treeSTNs.selectedItems()[0]
         data = currentItem.data(1, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
-        if self.currentStateTransitionItem:
-            self.currentStateTransitionItem.hide()
+        if self._currentStateTransitionItem:
+            self._currentStateTransitionItem.hide()
         
         if item.editor:
-            self.currentStateTransitionItem = item
-            self.currentStateTransitionItem.show(self.ui.frameStateTransitions)
+            self._currentStateTransitionItem = item
+            self._currentStateTransitionItem.show(self._ui.frameStateTransitions)
 
 
-    def slotDomainsTreeItemChanged(self):
-        currentItem = self.ui.treeDomains.selectedItems()[0]
+    def _slotDomainsTreeItemChanged(self):
+        currentItem = self._ui.treeDomains.selectedItems()[0]
         data = currentItem.data(1, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
-        if self.currentDomainItem:
-            self.currentDomainItem.hide()
+        if self._currentDomainItem:
+            self._currentDomainItem.hide()
         
         if item.editor:
-            self.currentDomainItem = item
-            self.currentDomainItem.show(self.ui.frameDomains)
+            self._currentDomainItem = item
+            self._currentDomainItem.show(self._ui.frameDomains)
 
-    def slotDOFsTreeItemChanged(self):
-        currentItem = self.ui.treeDOFs.selectedItems()[0]
+    def _slotDOFsTreeItemChanged(self):
+        currentItem = self._ui.treeDOFs.selectedItems()[0]
         data = currentItem.data(1, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
-        if self.currentDOFItem:
-            self.currentDOFItem.hide()
+        if self._currentDOFItem:
+            self._currentDOFItem.hide()
         
         if item.editor:
-            self.currentDOFItem = item
-            self.currentDOFItem.show(self.ui.frameDOFs)
+            self._currentDOFItem = item
+            self._currentDOFItem.show(self._ui.frameDOFs)
 
-    def slotInitialConditionsTreeItemChanged(self):
-        currentItem = self.ui.treeInitialConditions.selectedItems()[0]
+    def _slotInitialConditionsTreeItemChanged(self):
+        currentItem = self._ui.treeInitialConditions.selectedItems()[0]
         data = currentItem.data(1, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
-        if self.currentInitialConditionItem:
-            self.currentInitialConditionItem.hide()
+        if self._currentInitialConditionItem:
+            self._currentInitialConditionItem.hide()
         
         if item.editor:
-            self.currentInitialConditionItem = item
-            self.currentInitialConditionItem.show(self.ui.frameInitialConditions)
+            self._currentInitialConditionItem = item
+            self._currentInitialConditionItem.show(self._ui.frameInitialConditions)
             

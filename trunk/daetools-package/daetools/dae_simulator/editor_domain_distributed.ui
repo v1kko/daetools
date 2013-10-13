@@ -322,7 +322,7 @@
        <item>
         <widget class="QTextEdit" name="descriptionEdit">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -352,7 +352,7 @@
           <enum>QFrame::Sunken</enum>
          </property>
          <property name="readOnly">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>

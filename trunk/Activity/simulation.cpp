@@ -5,6 +5,7 @@
 #include <time.h>
 #include <algorithm>
 #include <math.h>
+#include <boost/foreach.hpp>
 
 namespace dae
 {
@@ -98,7 +99,8 @@ void daeSimulation::Pause(void)
 void daeSimulation::Initialize(daeDAESolver_t* pDAESolver, 
 							   daeDataReporter_t* pDataReporter, 
 							   daeLog_t* pLog, 
-							   bool bCalculateSensitivities)
+                               bool bCalculateSensitivities,
+                               const std::string& strJSONRuntimeSettings)
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -114,7 +116,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 		throw e;
 	}
 	
-	m_bCalculateSensitivities     = bCalculateSensitivities;
+    SetJSONRuntimeSettings(strJSONRuntimeSettings);
+    m_bCalculateSensitivities     = bCalculateSensitivities;
 	m_nNumberOfObjectiveFunctions = 0;
 
 	m_pDAESolver    = pDAESolver;
@@ -164,7 +167,11 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Initialize params and domains
     if(bPrintInfo)
         m_pLog->Message(string("    SetUpParametersAndDomains"), 0);
-    SetUpParametersAndDomains();
+
+    if(m_strJSONRuntimeSettings.empty())
+        SetUpParametersAndDomains();
+    else
+        SetUpParametersAndDomains_RuntimeSettings();
 
 // Define the optimization problem: objective function and constraints
     if(bPrintInfo)
@@ -226,8 +233,12 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Set initial values, initial conditions, fix variables, set initial guesses, abs tolerances, etc
     if(bPrintInfo)
         m_pLog->Message(string("    SetUpVariables"), 0);
-    SetUpVariables();
-	
+
+    if(m_strJSONRuntimeSettings.empty())
+        SetUpVariables();
+    else
+        SetUpVariables_RuntimeSettings();
+
 // Create equation execution infos in models and stns
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage4"), 0);
@@ -1154,6 +1165,7 @@ void daeSimulation::Reinitialize(void)
     m_pDAESolver->Reinitialize(true, false);
 }
 
+
 void daeSimulation::EnterConditionalIntegrationMode(void)
 {
 /**************************************************************/
@@ -1202,6 +1214,424 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 	pModel->ResetGlobalCondition();
 */	
 	return m_dCurrentTime;
+}
+
+void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains);
+void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& mapParameters);
+void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVariables);
+void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs);
+void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension);
+
+void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains)
+{
+    // Insert objects from the model
+    for(std::vector<daeDomain*>::const_iterator iter = pModel->Domains().begin(); iter != pModel->Domains().end(); iter++)
+        mapDomains[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = pModel->Ports().begin(); piter != pModel->Ports().end(); piter++)
+        for(std::vector<daeDomain*>::const_iterator citer = (*piter)->Domains().begin(); citer != (*piter)->Domains().end(); citer++)
+            mapDomains[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
+        CollectAllDomains(*miter, mapDomains);
+}
+
+void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& mapParameters)
+{
+    // Insert objects from the model
+    for(std::vector<daeParameter*>::const_iterator iter = pModel->Parameters().begin(); iter != pModel->Parameters().end(); iter++)
+        mapParameters[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = pModel->Ports().begin(); piter != pModel->Ports().end(); piter++)
+        for(std::vector<daeParameter*>::const_iterator citer = (*piter)->Parameters().begin(); citer != (*piter)->Parameters().end(); citer++)
+            mapParameters[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
+        CollectAllParameters(*miter, mapParameters);
+}
+
+void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVariables)
+{
+    // Insert objects from the model
+    for(std::vector<daeVariable*>::const_iterator iter = pModel->Variables().begin(); iter != pModel->Variables().end(); iter++)
+        mapVariables[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = pModel->Ports().begin(); piter != pModel->Ports().end(); piter++)
+        for(std::vector<daeVariable*>::const_iterator citer = (*piter)->Variables().begin(); citer != (*piter)->Variables().end(); citer++)
+            mapVariables[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
+        CollectAllVariables(*miter, mapVariables);
+}
+
+void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs)
+{
+
+}
+
+// Iterates over property_tree:
+//   - If it finds an empty item it adds a value to the array
+//   - Otherwise calls ParseList for each child
+void ParseList(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape, int currentDimension)
+{
+    if(pt.size() != Shape[currentDimension])
+    {
+        string msg = "Invalid number of values (" + toString(pt.size()) + ") in dimension " + toString(currentDimension) +
+                     " (required is " + toString(Shape[currentDimension]) + ")";
+        throw std::runtime_error(msg);
+    }
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type& pt_child, pt)
+    {
+        //std::cout << pt_child.first << ".size = " << pt_child.second.size() << std::endl;
+        if(pt_child.second.size() == 0)
+        {
+            values.push_back( quantity(boost::lexical_cast<real_t>(pt_child.second.data()), Units) );
+            //std::cout << "Adding value " << boost::lexical_cast<real_t>(pt_child.second.data()) << std::endl;
+        }
+        else
+        {
+            ParseList(pt_child.second, values, Units, Shape, currentDimension + 1);
+        }
+    }
+}
+
+void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
+{
+    std::map<string, daeDomain*> mapDomains;
+    std::map<string, daeParameter*> mapParameters;
+    std::map<string, daeDomain*>::iterator domain_iter;
+    std::map<string, daeParameter*>::iterator param_iter;
+
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+
+    if(bPrintInfo)
+        std::cout << "      SetUpParametersAndDomains for RuntimeSettings" << std::endl;
+
+    CollectAllDomains(m_pModel, mapDomains);
+    CollectAllParameters(m_pModel, mapParameters);
+
+    // v.first is the name of the child.
+    // v.second is the child tree
+    BOOST_FOREACH(boost::property_tree::ptree::value_type& v_domain, m_ptreeRuntimeSettings.get_child("Domains"))
+    {
+        // Get the domain name
+        string strDomainName = v_domain.first;
+        if(bPrintInfo)
+            std::cout << "      Processing domain " << strDomainName << " ..." << std::endl;
+
+        // Find the domain in the map of all domains in the simulation
+        domain_iter = mapDomains.find(strDomainName);
+        if(domain_iter == mapDomains.end())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot find domain " << strDomainName << " while setting the runtime settings";
+            throw e;
+        }
+        daeDomain* pDomain = domain_iter->second;
+
+        // Get the domain type
+        string strType;
+        try
+        {
+            strType = v_domain.second.get<string>("Type");
+        }
+        catch(std::exception& ex)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot find domain Type in domain " << strDomainName << " in the runtime settings";
+            throw e;
+        }
+
+        if(strType == "eArray")
+        {
+            try
+            {
+                size_t NumberOfPoints = v_domain.second.get<size_t>("NumberOfPoints");
+                if(bPrintInfo)
+                {
+                    std::cout << "          Type           = " << strType << std::endl;
+                    std::cout << "          NumberOfPoints = " << NumberOfPoints << std::endl;
+                }
+
+                pDomain->CreateArray(NumberOfPoints);
+            }
+            catch(std::exception& ex)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot find NumberOfPoints in domain " << strDomainName << " in the runtime settings";
+                throw e;
+            }
+        }
+        else if(strType == "eDistributed")
+        {
+            try
+            {
+                string method               = v_domain.second.get<string>("DiscretizationMethod");
+                size_t DiscretizationOrder  = v_domain.second.get<size_t>("DiscretizationOrder");
+                size_t NumberOfIntervals    = v_domain.second.get<size_t>("NumberOfIntervals");
+                real_t LowerBound           = v_domain.second.get<real_t>("LowerBound");
+                real_t UpperBound           = v_domain.second.get<real_t>("UpperBound");
+
+                daeeDiscretizationMethod DiscretizationMethod;
+                if(method == "eCFDM")
+                    DiscretizationMethod = eCFDM;
+                else if(method == "eFFDM")
+                    DiscretizationMethod = eFFDM;
+                else if(method == "eBFDM")
+                    DiscretizationMethod = eBFDM;
+                else if(method == "eCustomDM")
+                    DiscretizationMethod = eCustomDM;
+                else
+                    DiscretizationMethod = eDMUnknown;
+
+                if(bPrintInfo)
+                {
+                    std::cout << "          Type                  = " << strType << std::endl;
+                    std::cout << "          DiscretizationMethod  = " << method << std::endl;
+                    std::cout << "          DiscretizationOrder   = " << DiscretizationOrder << std::endl;
+                    std::cout << "          NumberOfIntervals     = " << NumberOfIntervals << std::endl;
+                    std::cout << "          LowerBound            = " << LowerBound << std::endl;
+                    std::cout << "          UpperBound            = " << UpperBound << std::endl;
+                }
+
+                pDomain->CreateDistributed(DiscretizationMethod, DiscretizationOrder, NumberOfIntervals, LowerBound, UpperBound);
+            }
+            catch(std::exception& ex)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot process distributed domain " << strDomainName << " in the runtime settings: " << ex.what();
+                throw e;
+            }
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid domain type " << strType << " in domain " << strDomainName << " in the runtime settings";
+            throw e;
+        }
+    }
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type& v_parameter, m_ptreeRuntimeSettings.get_child("Parameters"))
+    {
+        // Get the domain name
+        string strParameterName = v_parameter.first;
+        if(bPrintInfo)
+            std::cout << "      Processing parameter " << strParameterName << " ..." << std::endl;
+
+        // Find the domain in the map of all domains in the simulation
+        param_iter = mapParameters.find(strParameterName);
+        if(param_iter == mapParameters.end())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot find parameter " << strParameterName << " while setting the runtime settings";
+            throw e;
+        }
+        daeParameter* pParameter = param_iter->second;
+
+        try
+        {
+            std::map<std::string, double> mapUnits;
+            // Get units and their exponents
+            BOOST_FOREACH(boost::property_tree::ptree::value_type& v_units, v_parameter.second.get_child("Units"))
+            {
+                string u    = v_units.first;
+                real_t exp  = boost::lexical_cast<real_t>(v_units.second.data());
+                mapUnits[u] = exp;
+            }
+
+            // Create unit object from the map {"unit" : exponent}
+            unit Units = unit(mapUnits);
+
+            // Look for the Shape; if missing it has only a single value
+            if(v_parameter.second.find("Shape") == v_parameter.second.not_found())
+            {
+            // Single value
+                real_t Value = v_parameter.second.get<real_t>("Value");
+
+                if(bPrintInfo)
+                    std::cout << "          Value = " << quantity(Value, Units) << std::endl;
+
+                // Use SetValues because the intention was to use a single value for all points
+                pParameter->SetValues(quantity(Value, Units));
+            }
+            else
+            {
+            // List of values
+                std::vector<size_t> Shape;
+
+                // Get the shape of the array
+                BOOST_FOREACH(boost::property_tree::ptree::value_type& v_shape, v_parameter.second.get_child("Shape"))
+                {
+                    Shape.push_back(boost::lexical_cast<size_t>(v_shape.second.data()));
+                }
+
+                // Check if the shape matches the shape in the parameter
+                if(Shape.size() != pParameter->GetNumberOfDomains())
+                {
+                    string msg = "Invalid number of dimensions (" + toString(Shape.size()) + ") of the array of values (required is " +
+                                 toString(pParameter->GetNumberOfDomains()) + ")";
+                    throw std::runtime_error(msg);
+                }
+                for(size_t k = 0; k < Shape.size(); k++)
+                {
+                    size_t dim_avail = Shape[k];
+                    size_t dim_req   = pParameter->GetDomain(k)->GetNumberOfPoints();
+                    if(dim_req != dim_avail)
+                    {
+                        string msg = "Dimension " + toString(k) + " of the array of values has " + toString(dim_avail) + " points (required is " + toString(dim_req) + ")";
+                        throw std::runtime_error(msg);
+                    }
+                }
+
+                // Parse the array into a flat (1-D) array of quantity objects
+                std::vector<quantity> values;
+                ParseList(v_parameter.second.get_child("Value"), values, Units, Shape, 0);
+
+                if(bPrintInfo)
+                {
+                    std::cout << "          Shape  = (" << toString(Shape) << ")" << std::endl;
+                    std::cout << "          Values = [" << toString(values) << "]" << std::endl;
+                }
+
+                // Finally set the values
+                pParameter->SetValues(values);
+            }
+        }
+        catch(std::exception& ex)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot process parameter " << strParameterName << " in the runtime settings: " << ex.what();
+            throw e;
+        }
+    }
+}
+
+void daeSimulation::SetUpVariables_RuntimeSettings()
+{
+    std::map<string, daeVariable*> mapVariables;
+    std::map<string, daeSTN*> mapSTNs;
+    std::map<string, daeVariable*>::iterator var_iter;
+    std::map<string, daeSTN*>::iterator stn_iter;
+
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+
+    if(bPrintInfo)
+        std::cout << "      SetUpVariables for RuntimeSettings" << std::endl;
+
+    CollectAllVariables(m_pModel, mapVariables);
+    CollectAllSTNs(m_pModel, mapSTNs);
+
+    std::cout << toString(mapVariables) << std::endl;
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type& v_variable, m_ptreeRuntimeSettings.get_child("DOFs"))
+    {
+        // Get the domain name
+        string strVariableName = v_variable.first;
+        if(bPrintInfo)
+            std::cout << "      Processing DOF " << strVariableName << " ..." << std::endl;
+
+        // Find the domain in the map of all domains in the simulation
+        var_iter = mapVariables.find(strVariableName);
+        if(var_iter == mapVariables.end())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot find variable " << strVariableName << " while setting the runtime settings";
+            throw e;
+        }
+        daeVariable* pVariable = var_iter->second;
+
+        try
+        {
+            std::map<std::string, double> mapUnits;
+            // Get units and their exponents
+            BOOST_FOREACH(boost::property_tree::ptree::value_type& v_units, v_variable.second.get_child("Units"))
+            {
+                string u    = v_units.first;
+                real_t exp  = boost::lexical_cast<real_t>(v_units.second.data());
+                mapUnits[u] = exp;
+            }
+
+            // Create unit object from the map {"unit" : exponent}
+            unit Units = unit(mapUnits);
+
+            // Single value
+            real_t Value = v_variable.second.get<real_t>("Value");
+
+            if(bPrintInfo)
+                std::cout << "          Value = " << quantity(Value, Units) << std::endl;
+
+            // Use SetValues because the intention was to use a single value for all points
+            //pVariable->SetValue(quantity(Value, Units));
+        }
+        catch(std::exception& ex)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot process variable " << strVariableName << " in the runtime settings: " << ex.what();
+            throw e;
+        }
+    }
+}
+
+/*
+self._runtimeSettings['Name']                  = self._simulationName
+self._runtimeSettings['TimeHorizon']           = self._timeHorizon
+self._runtimeSettings['ReportingInterval']     = self._reportingInterval
+self._runtimeSettings['RelativeTolerance']     = self._relativeTolerance
+self._runtimeSettings['DAESolver']             = self._simulation.DAESolver.Name          if self._simulation.DAESolver          else ''
+self._runtimeSettings['LASolver']              = self._simulation.DAESolver.LASolver.Name if self._simulation.DAESolver.LASolver else ''
+self._runtimeSettings['DataReporter']          = self._simulation.DataReporter.Name       if self._simulation.DataReporter       else ''
+self._runtimeSettings['Log']                   = self._simulation.Log.Name                if self._simulation.Log                else ''
+self._runtimeSettings['QuazySteadyState']      = self._quazySteadyState
+
+self._runtimeSettings['Parameters']            = self._inspector.treeParameters.toDictionary()
+self._runtimeSettings['Domains']               = self._inspector.treeDomains.toDictionary()
+if not self._quazySteadyState:
+    self._runtimeSettings['InitialConditions'] = self._inspector.treeInitialConditions.toDictionary()
+self._runtimeSettings['DOFs']                  = self._inspector.treeDOFs.toDictionary()
+self._runtimeSettings['STNs']                  = self._inspector.treeSTNs.toDictionary()
+self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
+*/
+
+void daeSimulation::SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings)
+{
+    if(strJSONRuntimeSettings.empty())
+        return;
+
+    try
+    {
+        std::stringstream ss(strJSONRuntimeSettings);
+        boost::property_tree::json_parser::read_json(ss, m_ptreeRuntimeSettings);
+        //boost::property_tree::json_parser::write_json("runtimeSettings.json", m_ptreeRuntimeSettings);
+
+        // Only at the end of parsing set the m_strJSONRuntimeSettings
+        m_strJSONRuntimeSettings = strJSONRuntimeSettings;
+    }
+    catch(std::exception& ex)
+    {
+        daeDeclareException(exRuntimeCheck);
+        e << "Invalid JSON Runtime Settings specified; Error: " << ex.what();
+        throw e;
+    }
+}
+
+std::string daeSimulation::GetJSONRuntimeSettings() const
+{
+    return m_strJSONRuntimeSettings;
 }
 
 template<class T>

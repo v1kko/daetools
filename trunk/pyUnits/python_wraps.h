@@ -15,7 +15,7 @@ using namespace units;
 namespace daepython
 {
 template<typename KEY, typename VALUE>
-boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+boost::python::dict getDictFromMapByValue(const std::map<KEY,VALUE>& mapItems)
 {
     typedef typename std::map<KEY,VALUE>::const_iterator c_iterator;
 
@@ -86,13 +86,13 @@ string unit__repr__(unit& self)
 {
     string strMap = "{";
     for(std::map<std::string, double>::const_iterator iter = self.units.begin(); iter != self.units.end(); iter++)
-        strMap += (boost::format("%s:%f, ") % iter->first % iter->second).str();
+        strMap += (boost::format("%s%s:%f") % (iter == self.units.begin() ? "" : ", ") % iter->first % iter->second).str();
     strMap += "}";
     
     return (boost::format("unit(%1%)") % strMap).str();
 }
 
-boost::python::dict unit_get_units_dict(unit& self)
+boost::python::dict unit_toDict(const unit& self)
 {
     return getDictFromMapByValue(self.units);
 }
@@ -129,6 +129,14 @@ string quantity__str__(quantity& self)
 string quantity__repr__(quantity& self)
 {
 	return (boost::format("quantity(%17.10e, %s)") % self.getValue() % self.getUnits()).str();
+}
+
+boost::python::dict quantity_toDict(const quantity& self)
+{
+    boost::python::dict d;
+    d["Value"] = self.getValue();
+    d["Units"] = unit_toDict(self.getUnits());
+    return d;
 }
 
 void quantity_setValue(quantity& self, boost::python::object o)

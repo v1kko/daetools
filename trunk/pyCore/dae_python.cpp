@@ -673,7 +673,8 @@ BOOST_PYTHON_MODULE(pyCore)
     def("daeIsValidObjectName",          &daeIsValidObjectName,            (arg("name")),                 DOCSTR_global_daeIsValidObjectName);
     def("daeGetRelativeName",            &daepython::daeGetRelativeName_1, (arg("parent"), arg("child")), DOCSTR_global_daeGetRelativeName1);
 	def("daeGetRelativeName",            &daepython::daeGetRelativeName_2, (arg("parent"), arg("child")), DOCSTR_global_daeGetRelativeName2);
-	def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName,      (arg("parent"), arg("child")), DOCSTR_global_daeGetStrippedRelativeName);
+    def("daeGetStrippedName",            &daeGetStrippedName,              (arg("name")),                 DOCSTR_global_daeGetStrippedRelativeName);
+    def("daeGetStrippedRelativeName",    &daeGetStrippedRelativeName,      (arg("parent"), arg("child")), DOCSTR_global_daeGetStrippedRelativeName);
 
 	class_<daeDomainIndex>("daeDomainIndex", DOCSTR_daeDomainIndex, no_init)
 		.def(init<size_t>(( arg("self"), arg("index") ), DOCSTR_daeDomainIndex_init1))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_domain_array.ui'
 #
-# Created: Fri Oct 11 16:06:29 2013
+# Created: Sat Oct 12 17:37:46 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -61,7 +61,7 @@ class Ui_EditorArrayDomain(object):
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.verticalLayout_2.addWidget(self.label_4)
         self.descriptionEdit = QtGui.QTextEdit(EditorArrayDomain)
-        self.descriptionEdit.setEnabled(False)
+        self.descriptionEdit.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -71,7 +71,7 @@ class Ui_EditorArrayDomain(object):
         self.descriptionEdit.setMaximumSize(QtCore.QSize(16777215, 100))
         self.descriptionEdit.setFrameShape(QtGui.QFrame.StyledPanel)
         self.descriptionEdit.setFrameShadow(QtGui.QFrame.Sunken)
-        self.descriptionEdit.setReadOnly(False)
+        self.descriptionEdit.setReadOnly(True)
         self.descriptionEdit.setObjectName(_fromUtf8("descriptionEdit"))
         self.verticalLayout_2.addWidget(self.descriptionEdit)
         self.horizontalLayout_5.addLayout(self.verticalLayout_2)

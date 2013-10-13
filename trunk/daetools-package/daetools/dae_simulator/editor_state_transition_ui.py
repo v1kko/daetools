@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_state_transition.ui'
 #
-# Created: Fri Oct 11 16:06:36 2013
+# Created: Sat Oct 12 17:37:57 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,7 +60,7 @@ class Ui_EditorStateTransition(object):
         self.label_5.setObjectName(_fromUtf8("label_5"))
         self.verticalLayout_4.addWidget(self.label_5)
         self.descriptionEdit = QtGui.QTextEdit(EditorStateTransition)
-        self.descriptionEdit.setEnabled(False)
+        self.descriptionEdit.setEnabled(True)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -69,7 +69,7 @@ class Ui_EditorStateTransition(object):
         self.descriptionEdit.setMinimumSize(QtCore.QSize(100, 50))
         self.descriptionEdit.setMaximumSize(QtCore.QSize(16777215, 100))
         self.descriptionEdit.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.descriptionEdit.setReadOnly(False)
+        self.descriptionEdit.setReadOnly(True)
         self.descriptionEdit.setObjectName(_fromUtf8("descriptionEdit"))
         self.verticalLayout_4.addWidget(self.descriptionEdit)
         self.horizontalLayout_6.addLayout(self.verticalLayout_4)

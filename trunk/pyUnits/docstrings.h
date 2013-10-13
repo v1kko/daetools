@@ -14,7 +14,8 @@ const char* DOCSTR_base_unit = "";
 const char* DOCSTR_unit = "";
     const char* DOCSTR_unit_init = "";
     const char* DOCSTR_unit_baseUnit = "";
-    const char* DOCSTR_unit_unitDictionary = "";
+    const char* DOCSTR_unit_toDictionary = "";
+    const char* DOCSTR_unit_toJSON = "";
 
 const char* DOCSTR_quantity = "";
     const char* DOCSTR_quantity_init = "";
@@ -22,4 +23,6 @@ const char* DOCSTR_quantity = "";
     const char* DOCSTR_quantity_value = "";
     const char* DOCSTR_quantity_units = "";
     const char* DOCSTR_quantity_scaleTo = "";
+    const char* DOCSTR_quantity_toDictionary = "";
+    const char* DOCSTR_quantity_toJSON = "";
 #endif

@@ -50,12 +50,14 @@ BOOST_PYTHON_MODULE(pyUnits)
     class_<unit>("unit", DOCSTR_unit)
         .def("__init__",	make_constructor(daepython::__init__unit), DOCSTR_unit_init)
 
-        .def("__str__",		&daepython::unit__str__)
+        .def("__str__",		&daepython::unit__str__)  // represents a valid python expression (using operators *, /, **)
 		.def("__repr__",	&daepython::unit__repr__)
 
-        .add_property("baseUnit",	    &unit::getBaseUnit,              DOCSTR_unit_baseUnit)
-        .add_property("unitDictionary",	&daepython::unit_get_units_dict, DOCSTR_unit_unitDictionary)
-        
+        .add_property("baseUnit",	    &unit::getBaseUnit,   DOCSTR_unit_baseUnit)
+
+        .def("toDict",  &daepython::unit_toDict, DOCSTR_unit_toDictionary)
+        .def("toJSON",  &unit::toJSON,            DOCSTR_unit_toJSON)
+
 		.def(self * self)
 		.def(self / self)
 		
@@ -80,7 +82,10 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def("__str__",		&daepython::quantity__str__)
 		.def("__repr__",	&daepython::quantity__repr__)
         .def("scaleTo",		&daepython::quantity_scaleTo, ( arg("self"), arg("referrer") ), DOCSTR_quantity_scaleTo)
-        
+
+        .def("toDict",  &daepython::quantity_toDict, DOCSTR_quantity_toDictionary)
+        .def("toJSON",  &quantity::toJSON,           DOCSTR_quantity_toJSON)
+
 		.def(- self)
 		.def(+ self)
 
