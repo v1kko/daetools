@@ -90,21 +90,22 @@ def _collectOutputVariables(nodeItem, model, dictOutputVariables):
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
         _collectOutputVariables(componentItem, component, dictOutputVariables)
 
-def _collectStateTransitions(nodeItem, model, dictSTNs):
+def _collectSTNs(nodeItem, model, dictSTNs):
     """
-    Recursively looks for STNs in the 'model' and all its child-models and
+    Recursively looks for STNs (excluding IFs) in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
     for obj in model.STNs:
-        name        = obj.Name
-        description = obj.Description
-        states      = [state.Name for state in obj.States]
-        item = treeItem_StateTransition(nodeItem, name, description, states, obj.ActiveState)
-        dictSTNs[obj.CanonicalName] = (obj, item)
+        if obj.Type == eSTN:
+            name        = obj.Name
+            description = obj.Description
+            states      = [state.Name for state in obj.States]
+            item = treeItem_StateTransition(nodeItem, name, description, states, obj.ActiveState)
+            dictSTNs[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectStateTransitions(componentItem, component, dictSTNs)
+        _collectSTNs(componentItem, component, dictSTNs)
 
 def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
     """
@@ -135,7 +136,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
             value = values.tolist()
         
         item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
-        dictInitialConditions[name] = (name, item)
+        dictInitialConditions[name] = (var, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
@@ -164,13 +165,12 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
             values = numpy.array(var.npyValues, dtype=object)
             # Iterate over points and set None for the points which are *not* differential
             for var_index, domainIndexes in domainsIndexesMap.iteritems():
-                print var_index, domainIndexes, values[tuple(domainIndexes)]
                 if IDs[var.OverallIndex + var_index] != cnAssigned:
                     values[tuple(domainIndexes)] = None
             value = values.tolist()
 
         item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
-        dictDOFs[name] = (name, item)
+        dictDOFs[name] = (var, item)
 
     for component in model.Components:
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
@@ -184,7 +184,7 @@ class daeSimulationInspector(object):
         self.parameters         = {}
         self.initial_conditions = {}
         self.dofs               = {}
-        self.state_transitions  = {}
+        self.stns               = {}
         self.output_variables   = {}
         
         self.treeDomains            = None
@@ -209,7 +209,7 @@ class daeSimulationInspector(object):
         _collectDOFs(self.treeDOFs, self.simulation.m, self.dofs, IDs)
 
         self.treeSTNs = treeItem(None, self.simulation.m.Name, treeItem.typeNone)
-        _collectStateTransitions(self.treeSTNs, self.simulation.m, self.state_transitions)
+        _collectSTNs(self.treeSTNs, self.simulation.m, self.stns)
 
         self.treeOutputVariables = treeItem(None, self.simulation.m.Name, treeItem.typeNone)
         _collectOutputVariables(self.treeOutputVariables, self.simulation.m, self.output_variables)

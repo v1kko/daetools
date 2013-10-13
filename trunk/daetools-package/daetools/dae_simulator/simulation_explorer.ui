@@ -632,19 +632,6 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QPushButton" name="buttonCancel">
        <property name="minimumSize">
         <size>
@@ -658,23 +645,50 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
        <property name="autoDefault">
         <bool>false</bool>
        </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOk">
-       <property name="minimumSize">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
         <size>
-         <width>100</width>
-         <height>0</height>
+         <width>40</width>
+         <height>20</height>
         </size>
        </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonSaveRuntimeSettingsAsJSON">
        <property name="text">
-        <string>OK</string>
+        <string>Save Settings as JSON...</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
-       <property name="default">
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonGenerateCode">
+       <property name="text">
+        <string>Generate code...</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonUpdateSimulationAndClose">
+       <property name="text">
+        <string>Update and close</string>
+       </property>
+       <property name="autoDefault">
         <bool>false</bool>
        </property>
       </widget>

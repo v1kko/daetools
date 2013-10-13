@@ -353,6 +353,7 @@ const char* DOCSTR_daeSTN = "";
     const char* DOCSTR_daeSTN_init = "";  
     const char* DOCSTR_daeSTN_ActiveState = "";  
     const char* DOCSTR_daeSTN_States = "";  
+    const char* DOCSTR_daeSTN_Type = "";
 
 const char* DOCSTR_daeIF = "";  
     const char* DOCSTR_daeIF_init = "";  

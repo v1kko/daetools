@@ -12,10 +12,24 @@ inline std::string to_string(const std::string& name, double exponent)
 		return std::string();
 	if(exponent == 1)
 		return name;
-	if((int)exponent == exponent)
-        return (boost::format("%1%**%2%") % name % (int)exponent).str();
-	else	
-        return (boost::format("%1%**%2%") % name % exponent).str();
+
+    std::string strExponent;
+    if((int)exponent == exponent)
+    {
+        if(exponent < 0)
+            strExponent = (boost::format("(%1%)") % (int)exponent).str();
+        else
+            strExponent = (boost::format("%1%") % (int)exponent).str();
+    }
+    else
+    {
+        if(exponent < 0)
+            strExponent = (boost::format("(%1%)") % exponent).str();
+        else
+            strExponent = (boost::format("%1%") % exponent).str();
+    }
+
+    return (boost::format("%1%%2%%3%") % name % __string_unit_power__ % strExponent).str();
 }
 
 inline void to_string_and_add(const std::string& name, double exponent, std::vector<std::string>& arrUnits)
@@ -390,53 +404,71 @@ const unit unit::operator-(void) const
 	return unit();	
 }
 
-//std::string unit::toString(void) const
-//{
-//	std::vector<std::string> arrUnits;
-//	for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
-//	{
-//		std::string name = (*iter).first;
-//		double      exp  = (*iter).second;
-//		to_string_and_add(name, exp, arrUnits);
-//	}
-//	return boost::algorithm::join(arrUnits, __string_unit_delimiter__);
-//}
-
 std::string unit::toString(void) const
 {
-	std::string strPositive, strNegative;
-	std::vector<std::string> arrPositive, arrNegative;
-	
-	for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
-	{
-		std::string name = (*iter).first;
-		double      exp  = (*iter).second;
-		if(exp > 0)
-			to_string_and_add(name, exp, arrPositive);
-		else
-			to_string_and_add(name, ::abs(exp), arrNegative);
-	}
+    int noNegative, noPositive;
+    std::map<std::string, double>::const_iterator iter;
 
-// If it is an empty unit return an empty string
-    if(arrPositive.size() == 0 && arrNegative.size() == 0)
+    // If it is an empty return an empty string
+    if(units.empty())
         return std::string("");
 
-	strPositive = boost::algorithm::join(arrPositive, __string_unit_delimiter__);
-	strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
-	
-// If there are multiple units with negative exponents wrap them into ()
-	if(arrNegative.size() > 1)
-		strNegative = "(" + strNegative + ")"; 
+    noNegative = 0;
+    noPositive = 0;
+    for(iter = units.begin(); iter != units.end(); iter++)
+	{
+        if((*iter).second > 0)
+            noPositive += 1;
+		else
+            noNegative += 1;
+    }
 
-// If there are no units with positive exponents set the positive part to 1
-	if(arrPositive.size() == 0)
-		strPositive = "1"; 
+    if(noPositive == 0 && noNegative == 0)
+    {
+        // If all are zero return an empty string
+        return std::string("");
+    }
+    else if(noPositive == 0 && noNegative > 0)
+    {
+        // All exponents are negative
+        std::vector<std::string> arrNegative;
+        for(iter = units.begin(); iter != units.end(); iter++)
+        {
+            std::string name = (*iter).first;
+            double      exp  = (*iter).second;
+            to_string_and_add(name, exp, arrNegative);
+        }
+        return boost::algorithm::join(arrNegative, __string_unit_delimiter__);
+    }
+    else
+    {
+        // There are positive and (perhaps) negative exponents
+        std::string strPositive, strNegative;
+        std::vector<std::string> arrPositive, arrNegative;
 
-// If there is positive but not negative return only positive; otherwise pos/neg
-	if(arrNegative.size() == 0)
-        return (boost::format("%1%") % strPositive).str();
-	else
-        return (boost::format("%1%/%2%") % strPositive % strNegative).str();
+        for(iter = units.begin(); iter != units.end(); iter++)
+        {
+            std::string name = (*iter).first;
+            double      exp  = (*iter).second;
+            if(exp > 0)
+                to_string_and_add(name, exp, arrPositive);
+            else
+                to_string_and_add(name, ::abs(exp), arrNegative);
+        }
+
+        strPositive = boost::algorithm::join(arrPositive, __string_unit_delimiter__);
+        strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
+
+    // If there are multiple units with negative exponents wrap them into ()
+        if(arrNegative.size() > 1)
+            strNegative = "(" + strNegative + ")";
+
+    // If there is positive but not negative return only positive; otherwise pos/neg
+        if(arrNegative.size() == 0)
+            return (boost::format("%1%") % strPositive).str();
+        else
+            return (boost::format("%1%/%2%") % strPositive % strNegative).str();
+    }
 }
 
 std::string unit::toLatex(void) const
@@ -472,8 +504,6 @@ std::ostream& operator<<(std::ostream& out, const unit& u)
 
 std::map<std::string, base_unit>& unit::get_base_units(void)
 {
-//	static std::map<std::string, base_unit>* __base_units__ = create_base_units();
-//	return *__base_units__;
 	static create_base_units cbu;
 	return cbu.__base_units__;
 }

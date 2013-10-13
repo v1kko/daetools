@@ -3096,7 +3096,10 @@ public:
     
 	daeState*		GetParentState(void) const;
 	void			SetParentState(daeState* pParentState);
-	
+
+    daeeSTNType		GetType(void) const;
+    void			SetType(daeeSTNType eType);
+
 	daeState*		FindState(long nID);
 	daeState*		FindState(const string& strName);
 	

@@ -64,7 +64,14 @@ BOOST_PYTHON_MODULE(pyCore)
 		.export_values()
 	;
 
-	enum_<daeeDomainIndexType>("daeeDomainIndexType")
+    enum_<daeeSTNType>("daeeSTNType")
+        .value("eSTNTUnknown",	dae::core::eSTNTUnknown)
+        .value("eSTN",          dae::core::eSTN)
+        .value("eIF",			dae::core::eIF)
+        .export_values()
+    ;
+
+    enum_<daeeDomainIndexType>("daeeDomainIndexType")
 		.value("eDITUnknown",					dae::core::eDITUnknown)
 		.value("eConstantIndex",				dae::core::eConstantIndex)
 		.value("eDomainIterator",				dae::core::eDomainIterator)
@@ -1474,9 +1481,10 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN", DOCSTR_daeSTN, no_init)
-        .add_property("ActiveState",	&daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
-        .add_property("States",			&daepython::GetStatesSTN, DOCSTR_daeSTN_States)
-        
+        .add_property("ActiveState", &daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
+        .add_property("States",      &daepython::GetStatesSTN,                           DOCSTR_daeSTN_States)
+        .add_property("Type",	     &daeSTN::GetType, &daeSTN::SetType,                 DOCSTR_daeSTN_Type)
+
         .def("__str__",				&daepython::daeSTN__str__)
         .def("__repr__",			&daepython::daeSTN__repr__)
     ;

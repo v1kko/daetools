@@ -104,7 +104,7 @@ class daeExpressionFormatter(object):
         # Format: m kg^2/(s^2) meaning m * kg**2 / s**2
         positive = []
         negative = []
-        for u, exp in units.unitDictionary.items():
+        for u, exp in units.toDict().items():
             if exp >= 0:
                 if exp == 1:
                     positive.append('{0}'.format(u))
@@ -113,7 +113,7 @@ class daeExpressionFormatter(object):
                 else:
                     positive.append('{0}^{1}'.format(u, exp))
 
-        for u, exp in units.unitDictionary.items():
+        for u, exp in units.toDict().items():
             if exp < 0:
                 if exp == -1:
                     negative.append('{0}'.format(u))

@@ -829,6 +829,16 @@ void daeSTN::SetParentState(daeState* pParentState)
 	m_pParentState = pParentState;
 }
 
+daeeSTNType daeSTN::GetType(void) const
+{
+    return m_eSTNType;
+}
+
+void daeSTN::SetType(daeeSTNType eType)
+{
+    m_eSTNType = eType;
+}
+
 daeState* daeSTN::AddState(string strName)
 {
 // Instantiate a new state and add it to this STN

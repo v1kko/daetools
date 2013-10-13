@@ -29,6 +29,7 @@ public:
 		base_unit
 **************************************************************/
 const std::string __string_unit_delimiter__  = " * ";
+const std::string __string_unit_power__      = "**";
 
 class base_unit
 {

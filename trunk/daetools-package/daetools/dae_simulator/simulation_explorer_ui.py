@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Sat Oct 12 17:43:58 2013
+# Created: Sun Oct 13 23:44:03 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -304,19 +304,26 @@ class Ui_SimulationExplorer(object):
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonCancel = QtGui.QPushButton(SimulationExplorer)
         self.buttonCancel.setMinimumSize(QtCore.QSize(100, 0))
         self.buttonCancel.setAutoDefault(False)
+        self.buttonCancel.setDefault(False)
         self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
         self.horizontalLayout_2.addWidget(self.buttonCancel)
-        self.buttonOk = QtGui.QPushButton(SimulationExplorer)
-        self.buttonOk.setMinimumSize(QtCore.QSize(100, 0))
-        self.buttonOk.setAutoDefault(False)
-        self.buttonOk.setDefault(False)
-        self.buttonOk.setObjectName(_fromUtf8("buttonOk"))
-        self.horizontalLayout_2.addWidget(self.buttonOk)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem1)
+        self.buttonSaveRuntimeSettingsAsJSON = QtGui.QPushButton(SimulationExplorer)
+        self.buttonSaveRuntimeSettingsAsJSON.setAutoDefault(False)
+        self.buttonSaveRuntimeSettingsAsJSON.setObjectName(_fromUtf8("buttonSaveRuntimeSettingsAsJSON"))
+        self.horizontalLayout_2.addWidget(self.buttonSaveRuntimeSettingsAsJSON)
+        self.buttonGenerateCode = QtGui.QPushButton(SimulationExplorer)
+        self.buttonGenerateCode.setAutoDefault(False)
+        self.buttonGenerateCode.setObjectName(_fromUtf8("buttonGenerateCode"))
+        self.horizontalLayout_2.addWidget(self.buttonGenerateCode)
+        self.buttonUpdateSimulationAndClose = QtGui.QPushButton(SimulationExplorer)
+        self.buttonUpdateSimulationAndClose.setAutoDefault(False)
+        self.buttonUpdateSimulationAndClose.setObjectName(_fromUtf8("buttonUpdateSimulationAndClose"))
+        self.horizontalLayout_2.addWidget(self.buttonUpdateSimulationAndClose)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(SimulationExplorer)
@@ -363,5 +370,7 @@ class Ui_SimulationExplorer(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "Results", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Select variables to appear in the output.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setText(QtGui.QApplication.translate("SimulationExplorer", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonOk.setText(QtGui.QApplication.translate("SimulationExplorer", "OK", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSaveRuntimeSettingsAsJSON.setText(QtGui.QApplication.translate("SimulationExplorer", "Save Settings as JSON...", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonGenerateCode.setText(QtGui.QApplication.translate("SimulationExplorer", "Generate code...", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonUpdateSimulationAndClose.setText(QtGui.QApplication.translate("SimulationExplorer", "Update and close", None, QtGui.QApplication.UnicodeUTF8))
 

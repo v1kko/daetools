@@ -120,8 +120,7 @@ class treeItem(object):
             dictItems[self.canonicalName] = d
         
         elif self.itemType == treeItem.typeOutputVariable:
-            d[self.canonicalName] = bool(self._value)
-            dictItems[self.canonicalName] = d
+            dictItems[self.canonicalName] = bool(self._value)
         
         for child in self.children:
             dictItems = dict(dictItems.items() + child.toDictionary().items())
@@ -149,6 +148,9 @@ class editor_Quantity(QtGui.QFrame):
         self.ui.descriptionEdit.setHtml(description)
         self.ui.valueEdit.setText(value)
         self.ui.unitsEdit.setText(units)
+        
+        self.ui.descriptionEdit.setAutoFillBackground(False)
+        self.ui.descriptionEdit.setBackgroundRole(QtGui.QPalette.NoRole)
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
         
     def slotUpdate(self):

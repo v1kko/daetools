@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
 
-import sys, tempfile, numpy, json
+import sys, tempfile, numpy, json, traceback
 from time import localtime, strftime
 from os.path import join, dirname
 from daetools.pyDAE import *
@@ -70,7 +70,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             raise RuntimeError('simulation object must not be None')
         
         self._inspector          = daeSimulationInspector(self._simulation)
-        self._runtimeSettings   = {}
+        self._runtimeSettings    = None
         self._simulationName     = daeGetStrippedName(self._simulation.m.Name) + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
         self._timeHorizon        = self._simulation.TimeHorizon
         self._reportingInterval  = self._simulation.ReportingInterval
@@ -192,24 +192,182 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._ui.treeOutputVariables.resizeColumnToContents(0)
 
         # First populate trees and set values. Only after that connect signals to slots (otherwise the event handlers might be triggered in the process)
-        self.connect(self._ui.buttonOk,                  QtCore.SIGNAL('clicked()'),                          self._slotOK)
-        self.connect(self._ui.buttonCancel,              QtCore.SIGNAL('clicked()'),                          self._slotCancel)
-        self.connect(self._ui.treeParameters,            QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
-        self.connect(self._ui.treeOutputVariables,       QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
-        self.connect(self._ui.treeSTNs,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
-        self.connect(self._ui.treeDomains,               QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
-        self.connect(self._ui.treeDOFs,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
-        self.connect(self._ui.treeInitialConditions,     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
+        self.connect(self._ui.buttonCancel,                    QtCore.SIGNAL('clicked()'),                          self._slotCancel)
+        self.connect(self._ui.buttonUpdateSimulationAndClose,  QtCore.SIGNAL('clicked()'),                          self._slotUpdateSimulationAndClose)
+        self.connect(self._ui.buttonGenerateCode,              QtCore.SIGNAL('clicked()'),                          self._slotGenerateCode)
+        self.connect(self._ui.buttonSaveRuntimeSettingsAsJSON, QtCore.SIGNAL('clicked()'),                          self._slotSaveRuntimeSettingsAsJSON)        
+        self.connect(self._ui.treeParameters,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
+        self.connect(self._ui.treeOutputVariables,             QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
+        self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
+        self.connect(self._ui.treeDomains,                     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
+        self.connect(self._ui.treeDOFs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
+        self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
 
     def updateSimulation(self):
-        pass
+        cfg = daeGetConfig()
+        printInfo = cfg.GetBoolean('daetools.core.printInfo', False)
+        
+        # Update Domains
+        if printInfo:
+            print 'Update Domains...'
+        for canonicalName, (domain, item) in self._inspector.domains.iteritems():
+            val_ = item.getValue()
+            if item.type == eDistributed:                
+                pass
+            elif item.type == eArray:
+                pass
+                
+        # Update Parameters
+        if printInfo:
+            print 'Update Parameters...'
+        for canonicalName, (parameter, item) in self._inspector.parameters.iteritems():
+            val_, units_ = item.getValue()
+            if isinstance(val_, list):
+                q = numpy.array(val_, dtype = object)
+                q = q * units_
+                if printInfo:
+                    print '    Updating parameter %s ...' % canonicalName
+                    print '        from: %s %s' % (parameter.npyValues, parameter.Units)
+                    print '          to: %s' % q
+                parameter.SetValues(q)
+            else:
+                q = val_ * units_
+                if printInfo:
+                    print '    Updating parameter %s ...' % canonicalName
+                    print '        from: %s' % parameter.GetQuantity()
+                    print '          to: %s' % q
+                parameter.SetValue(q)
+                
+        # Update DegreesOfFreedom
+        if printInfo:
+            print 'Update DegreesOfFreedom...'
+        for canonicalName, (variable, item) in self._inspector.dofs.iteritems():
+            val_, units_ = item.getValue()
+            if isinstance(val_, list):
+                q = numpy.array(val_, dtype = object)
+                # Some items may be None and the operator * will not work, therefore first create a flat view 
+                # and then multiply each non-null item by units to get a quantity
+                c = q.view()
+                c.shape = q.size
+                for i in xrange(c.size):
+                    if c[i] != None:
+                        c[i] *= units_
+                if printInfo:
+                    print '    Reassigning %s ...' % canonicalName
+                    print '        from: %s %s' % (variable.npyValues, variable.VariableType.Units)
+                    print '          to: %s' % q
+                variable.ReAssignValues(q)
+            else:
+                q = val_ * units_
+                if printInfo:
+                    print '    Reassigning %s ...' % canonicalName
+                    print '        from: %s' % variable.GetQuantity()
+                    print '          to: %s' % q
+                variable.ReAssignValue(q)
+                
+        # Update InitialConditions
+        if printInfo:
+            print 'Update InitialConditions...'
+        for canonicalName, (variable, item) in self._inspector.initial_conditions.iteritems():
+            val_, units_ = item.getValue()
+            if isinstance(val_, list):
+                q = numpy.array(val_, dtype = object)
+                # Some items may be None and the operator * will not work, therefore first create a flat view 
+                # and then multiply each non-null item by units to get a quantity
+                c = q.view()
+                c.shape = q.size
+                for i in xrange(c.size):
+                    if c[i] != None:
+                        c[i] *= units_
+                if printInfo:
+                    print '    Resetting initial conditions for %s ...' % canonicalName
+                    print '        from: %s %s' % (variable.npyValues, variable.VariableType.Units)
+                    print '          to: %s' % q
+                variable.ReSetInitialConditions(q)
+            else:
+                q = val_ * units_
+                if printInfo:
+                    print '    Resetting initial conditions for %s ...' % canonicalName
+                    print '        from: %s' % variable.GetQuantity()
+                    print '          to: %s' % q
+                variable.ReSetInitialCondition(q)
+            
+        # Update Outputs
+        if printInfo:
+            print 'Update Outputs...'
+        for canonicalName, (variable, item) in self._inspector.output_variables.iteritems():
+            if printInfo:
+                print '    Updating the ReportingOn flag for %s ...' % canonicalName
+                print '        from: %s' % variable.ReportingOn
+                print '          to: %s' % item.getValue()
+            if item.getValue():
+                variable.ReportingOn = True
+            else:
+                variable.ReportingOn = False
+                
+        # Update STNs
+        if printInfo:
+            print 'Update STNs...'
+        for canonicalName, (stn, item) in self._inspector.stns.iteritems():
+            if printInfo:
+                print '    Changing the active state for %s:' % canonicalName
+                print '        from: %s' % stn.ActiveState
+                print '          to: %s' % item.getValue()
+            stn.ActiveState = item.getValue()
+                
     
+    def generateCode(self, language):
+        if not language in ['ANSI C','Modelica','FMI']:
+            return
+        #QtGui.QMessageBox.warning(self, "Code generator", 'Selected language: %s\nDirectory: %s' % (language, directory))
+        try:
+            if language == 'ANSI C':
+                from daetools.code_generators.ansi_c import daeCodeGenerator_ANSI_C
+                directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
+                                                                             '', 
+                                                                             QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+                if directory == '':
+                    return
+                cg = daeCodeGenerator_ANSI_C()
+                cg.generateSimulation(self._simulation, projectDirectory = directory)
+            
+            elif language == 'Modelica':
+                from daetools.code_generators.modelica import daeCodeGenerator_Modelica
+                name = self._simulation.m.GetStrippedName() + ".mo"
+                filename = str(QtGui.QFileDialog.getSaveFileName(self, "Choose File", name, "Modelica Files (*.mo)"))
+                if filename == '':
+                    return
+                cg = daeCodeGenerator_Modelica()
+                cg.generateSimulation(self._simulation, filename = filename)
+            
+            elif language == 'FMI':
+                from daetools.code_generators.fmi import daeCodeGenerator_FMI
+                directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
+                                                                             '', 
+                                                                             QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+                if directory == '':
+                    return
+                cg = daeCodeGenerator_FMI()
+                cg.generateSimulation(self._simulation, projectDirectory = directory)
+                
+            QtGui.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
+            
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            messages = traceback.format_tb(exc_traceback)
+            msg = '\n'.join(messages)
+            print msg
+            QtGui.QMessageBox.critical(self, "Code Generator: %s" % language, 'Error:\n%s' % str(e))
+            
     @property
     def jsonRuntimeSettings(self):
-        return json.dumps(self._runtimeSettings, indent = 4)
+        #import pprint, inspect
+        #pprint.pprint(inspect.stack())
+        return json.dumps(self.runtimeSettings, indent = 4)
     
     @property
     def runtimeSettings(self):
+        self._processInputs()
         return self._runtimeSettings
     
     ############################################################################
@@ -262,12 +420,38 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._runtimeSettings['STNs']                  = self._inspector.treeSTNs.toDictionary()
         self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
         
-    def _slotOK(self):
-        self._processInputs()
-        self.done(QtGui.QDialog.Accepted)
-
     def _slotCancel(self):
         self.done(QtGui.QDialog.Rejected)
+
+    def reject(self):
+        QtGui.QDialog.reject(self)
+        
+    def _slotUpdateSimulationAndClose(self):
+        self.updateSimulation()
+        self.done(QtGui.QDialog.Accepted)
+
+    def _slotSaveRuntimeSettingsAsJSON(self):
+        try:
+            name = self._simulation.m.GetStrippedName() + ".json"
+            jsonFilename = str(QtGui.QFileDialog.getSaveFileName(self, "Save Runtime Settings As JSON File", name, "JSON Files (*.json)"))
+            if jsonFilename == '':
+                return
+            
+            self._processInputs()
+            f = open(jsonFilename, 'w')
+            f.write(self.jsonRuntimeSettings)
+            f.close()
+        
+        except Exception as e:
+            QtGui.QMessageBox.critical(self, "Save RuntimeSettings As JSON", 'Error:\n%s' % str(e))
+            
+    def _slotGenerateCode(self):
+        languages = ['ANSI C','Modelica','FMI']
+        language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
+        if not ok:
+            return
+        
+        self.generateCode(language)
 
     def _slotParameterTreeItemSelectionChanged(self):
         currentItem = self._ui.treeParameters.selectedItems()[0]
