@@ -159,6 +159,17 @@ size_t daeIDASolver::GetNumberOfVariables(void) const
 void daeIDASolver::SetRelativeTolerance(real_t relTol)
 {
 	m_dRelTolerance = relTol;
+
+    if(m_pIDA)
+    {
+        int retval = IDASVtolerances(m_pIDA, m_dRelTolerance, m_pIDASolverData->m_vectorAbsTolerances);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Sundials IDAS solver cowardly refused to set the relative tolerance; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+    }
 }
 
 real_t daeIDASolver::GetRelativeTolerance(void) const
@@ -299,7 +310,7 @@ void daeIDASolver::CreateIDA(void)
 		throw e;
 	}
 	
-	retval = IDASVtolerances(m_pIDA, m_dRelTolerance, m_pIDASolverData->m_vectorAbsTolerances);
+    retval = IDASVtolerances(m_pIDA, m_dRelTolerance, m_pIDASolverData->m_vectorAbsTolerances);
 	if(!CheckFlag(retval)) 
 	{
 		daeDeclareException(exMiscellanous);
@@ -343,7 +354,7 @@ void daeIDASolver::CreateIDA(void)
     IDASetErrHandlerFn(m_pIDA, error_function, this);
 
 // After a successful initialization we do not need some data; therefore free whatever is possible
-// Clear vectors of abs. tolerances and variable ids since they are not needed anymore (their copies are kept in the IDA structure).
+// Clear vectors of variable ids since they are not needed anymore (their copies are kept in the IDA structure).
 // Here it does not matter who owns the data in the vectors; IDA keeps track of it and wont free the data it does not own
 	m_pIDASolverData->CleanUpSetupData();
 }

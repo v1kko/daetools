@@ -50,9 +50,6 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._ui = Ui_SimulationExplorer()
         self._ui.setupUi(self)
         
-        self.setWindowTitle("DAE Tools Simulation Explorer v" + daeVersion(True))
-        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
-
         self._qt_app                      = qt_app
         self._simulation                  = kwargs.get('simulation',                 None)
         self._optimization                = kwargs.get('optimization',               None)
@@ -69,6 +66,9 @@ class daeSimulationExplorer(QtGui.QDialog):
         if not self._simulation:
             raise RuntimeError('simulation object must not be None')
         
+        self.setWindowTitle("DAE Tools Simulation Explorer v%s - [%s]" % (daeVersion(True), self._simulation.m.GetStrippedName()))
+        self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
+
         self._inspector          = daeSimulationInspector(self._simulation)
         self._runtimeSettings    = None
         self._simulationName     = daeGetStrippedName(self._simulation.m.Name) + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -220,43 +220,46 @@ class daeSimulationExplorer(QtGui.QDialog):
         self.connect(self._ui.treeDOFs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
         self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
 
-    def updateSimulation(self):
-        cfg = daeGetConfig()
-        printInfo = cfg.GetBoolean('daetools.core.printInfo', False)
-        
+    def updateSimulation(self, verbose = False):
         # Update Domains
-        if printInfo:
+        if verbose:
             print 'Update Domains...'
         for canonicalName, (domain, item) in self._inspector.domains.iteritems():
             val_ = item.getValue()
             if item.type == eDistributed:                
-                pass
+                points = item.getValue()
+                if verbose:
+                    print '    Updating domain %s points ...' % canonicalName
+                    print '        from: %s' % domain.Points
+                    print '          to: %s' % points
+                domain.Points = points
+            
             elif item.type == eArray:
                 pass
                 
         # Update Parameters
-        if printInfo:
+        if verbose:
             print 'Update Parameters...'
         for canonicalName, (parameter, item) in self._inspector.parameters.iteritems():
             val_, units_ = item.getValue()
             if isinstance(val_, list):
                 q = numpy.array(val_, dtype = object)
                 q = q * units_
-                if printInfo:
+                if verbose:
                     print '    Updating parameter %s ...' % canonicalName
                     print '        from: %s %s' % (parameter.npyValues, parameter.Units)
                     print '          to: %s' % q
                 parameter.SetValues(q)
             else:
                 q = val_ * units_
-                if printInfo:
+                if verbose:
                     print '    Updating parameter %s ...' % canonicalName
                     print '        from: %s' % parameter.GetQuantity()
                     print '          to: %s' % q
                 parameter.SetValue(q)
                 
         # Update DegreesOfFreedom
-        if printInfo:
+        if verbose:
             print 'Update DegreesOfFreedom...'
         for canonicalName, (variable, item) in self._inspector.dofs.iteritems():
             val_, units_ = item.getValue()
@@ -269,21 +272,21 @@ class daeSimulationExplorer(QtGui.QDialog):
                 for i in xrange(c.size):
                     if c[i] != None:
                         c[i] *= units_
-                if printInfo:
+                if verbose:
                     print '    Reassigning %s ...' % canonicalName
                     print '        from: %s %s' % (variable.npyValues, variable.VariableType.Units)
                     print '          to: %s' % q
                 variable.ReAssignValues(q)
             else:
                 q = val_ * units_
-                if printInfo:
+                if verbose:
                     print '    Reassigning %s ...' % canonicalName
                     print '        from: %s' % variable.GetQuantity()
                     print '          to: %s' % q
                 variable.ReAssignValue(q)
                 
         # Update InitialConditions
-        if printInfo:
+        if verbose:
             print 'Update InitialConditions...'
         for canonicalName, (variable, item) in self._inspector.initial_conditions.iteritems():
             val_, units_ = item.getValue()
@@ -296,24 +299,24 @@ class daeSimulationExplorer(QtGui.QDialog):
                 for i in xrange(c.size):
                     if c[i] != None:
                         c[i] *= units_
-                if printInfo:
+                if verbose:
                     print '    Resetting initial conditions for %s ...' % canonicalName
                     print '        from: %s %s' % (variable.npyValues, variable.VariableType.Units)
                     print '          to: %s' % q
                 variable.ReSetInitialConditions(q)
             else:
                 q = val_ * units_
-                if printInfo:
+                if verbose:
                     print '    Resetting initial conditions for %s ...' % canonicalName
                     print '        from: %s' % variable.GetQuantity()
                     print '          to: %s' % q
                 variable.ReSetInitialCondition(q)
             
         # Update Outputs
-        if printInfo:
+        if verbose:
             print 'Update Outputs...'
         for canonicalName, (variable, item) in self._inspector.output_variables.iteritems():
-            if printInfo:
+            if verbose:
                 print '    Updating the ReportingOn flag for %s ...' % canonicalName
                 print '        from: %s' % variable.ReportingOn
                 print '          to: %s' % item.getValue()
@@ -323,22 +326,25 @@ class daeSimulationExplorer(QtGui.QDialog):
                 variable.ReportingOn = False
                 
         # Update STNs
-        if printInfo:
+        if verbose:
             print 'Update STNs...'
         for canonicalName, (stn, lstates) in self._inspector.stns.iteritems():
             # Iterate over states and detect which of them is checked
             for state, item in lstates:
                 if item.getValue():
-                    print 'state %s is active' % state.CanonicalName
                     activeState = state.Name
-                    if True:
+                    if verbose:
                         print '    Changing the active state for %s:' % canonicalName
                         print '        from: %s' % stn.ActiveState
                         print '          to: %s' % activeState
                     stn.ActiveState = activeState
                     break
         
+        if verbose:
+            print 'Reinitializing the simulation...'
         self._simulation.Reinitialize()
+        if verbose:
+            print 'Done!'
         
     def generateCode(self, language):
         if not language in ['ANSI C','Modelica','FMI']:
@@ -449,7 +455,9 @@ class daeSimulationExplorer(QtGui.QDialog):
         QtGui.QDialog.reject(self)
         
     def _slotUpdateSimulationAndClose(self):
-        self.updateSimulation()
+        cfg = daeGetConfig()
+        printInfo = cfg.GetBoolean('daetools.core.printInfo', False)
+        self.updateSimulation(verbose = True)
         self.done(QtGui.QDialog.Accepted)
 
     def _slotSaveRuntimeSettingsAsJSON(self):
@@ -467,6 +475,10 @@ class daeSimulationExplorer(QtGui.QDialog):
             QtGui.QMessageBox.information(self, "Save Runtime Settings As JSON File", 'JSON file successfuly saved!')
         
         except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            messages = traceback.format_tb(exc_traceback)
+            msg = '\n'.join(messages)
+            print msg
             QtGui.QMessageBox.critical(self, "Save RuntimeSettings As JSON", 'Error:\n%s' % str(e))
             
     def _slotGenerateCode(self):

@@ -1223,6 +1223,7 @@ void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVa
 void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs);
 void ProcessListOfValues(boost::property_tree::ptree& pt, std::vector<quantity>& values, unit& Units, std::vector<size_t>& Shape,
                          int currentDimension, bool allowNULL, bool bPrintInfo);
+void ProcessSTN(daeSTN* pSTN, std::map<string, daeSTN*>& mapSTNs);
 
 void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains)
 {
@@ -1238,6 +1239,17 @@ void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomain
     // Insert objects from the child models (units)
     for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
         CollectAllDomains(*miter, mapDomains);
+
+    if(pModel->ModelArrays().size() > 0)
+    {
+        string msg = "Number of model arrays is not zero (collect domains from them too)";
+        throw std::runtime_error(msg);
+    }
+    if(pModel->PortArrays().size() > 0)
+    {
+        string msg = "Number of ports arrays is not zero (collect domains from them too)";
+        throw std::runtime_error(msg);
+    }
 }
 
 void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& mapParameters)
@@ -1254,6 +1266,17 @@ void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& map
     // Insert objects from the child models (units)
     for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
         CollectAllParameters(*miter, mapParameters);
+
+    if(pModel->ModelArrays().size() > 0)
+    {
+        string msg = "Number of model arrays is not zero (collect parameters from them too)";
+        throw std::runtime_error(msg);
+    }
+    if(pModel->PortArrays().size() > 0)
+    {
+        string msg = "Number of ports arrays is not zero (collect parameters from them too)";
+        throw std::runtime_error(msg);
+    }
 }
 
 void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVariables)
@@ -1270,18 +1293,51 @@ void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVa
     // Insert objects from the child models (units)
     for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
         CollectAllVariables(*miter, mapVariables);
+
+    if(pModel->ModelArrays().size() > 0)
+    {
+        string msg = "Number of model arrays is not zero (collect variables from them too)";
+        throw std::runtime_error(msg);
+    }
+    if(pModel->PortArrays().size() > 0)
+    {
+        string msg = "Number of ports arrays is not zero (collect variables from them too)";
+        throw std::runtime_error(msg);
+    }
+}
+
+void ProcessSTN(daeSTN* pSTN, std::map<string, daeSTN*>& mapSTNs)
+{
+    // Add only daeSTN type of STN
+    if(pSTN->GetType() == eSTN)
+        mapSTNs[pSTN->GetCanonicalName()] = pSTN;
+
+    // Iterate over states and then over nested STNs within each state and recursively process nested STNs
+    for(std::vector<daeState*>::const_iterator siter = pSTN->States().begin(); siter != pSTN->States().end(); siter++)
+        for(std::vector<daeSTN*>::const_iterator iter = (*siter)->NestedSTNs().begin(); iter != (*siter)->NestedSTNs().end(); iter++)
+            ProcessSTN(*iter, mapSTNs);
 }
 
 void CollectAllSTNs(daeModel* pModel, std::map<string, daeSTN*>& mapSTNs)
 {
-    // Insert objects from the model (skip daeIFs)
+    // Recursively process STNs from the model
     for(std::vector<daeSTN*>::const_iterator iter = pModel->STNs().begin(); iter != pModel->STNs().end(); iter++)
-        if((*iter)->GetType() == eSTN && dynamic_cast<daeIF*>(*iter) == NULL)
-            mapSTNs[(*iter)->GetCanonicalName()] = *iter;
+        ProcessSTN(*iter, mapSTNs);
 
     // Insert objects from the child models (units)
     for(std::vector<daeModel*>::const_iterator miter = pModel->Models().begin(); miter != pModel->Models().end(); miter++)
         CollectAllSTNs(*miter, mapSTNs);
+
+    if(pModel->ModelArrays().size() > 0)
+    {
+        string msg = "Number of model arrays is not zero (collect STNs from them too)";
+        throw std::runtime_error(msg);
+    }
+    if(pModel->PortArrays().size() > 0)
+    {
+        string msg = "Number of ports arrays is not zero (collect STNs from them too)";
+        throw std::runtime_error(msg);
+    }
 }
 
 // Iterates over property_tree that represents a (multi-dimensional) array of floats (may contain null values, though):
@@ -1964,6 +2020,17 @@ void daeSimulation::CollectVariables(daeModel* pModel)
 	std::for_each(pModel->Variables().begin(),  pModel->Variables().end(),  regVariable);
 	std::for_each(pModel->Ports().begin(),      pModel->Ports().end(),      regPort);
 	std::for_each(pModel->Models().begin(),     pModel->Models().end(),     regModel);
+
+    if(pModel->ModelArrays().size() > 0)
+    {
+        string msg = "Number of model arrays is not zero (collect parameters/variables from them too)";
+        throw std::runtime_error(msg);
+    }
+    if(pModel->PortArrays().size() > 0)
+    {
+        string msg = "Number of ports arrays is not zero (collect parametersvariables from them too)";
+        throw std::runtime_error(msg);
+    }
 }
 
 void daeSimulation::CollectVariables(daePort* pPort)

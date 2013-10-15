@@ -58,11 +58,10 @@ def _collectDomains(nodeItem, model, dictDomains):
             discrMethod        = obj.DiscretizationMethod # not edited
             order              = obj.DiscretizationOrder  # not edited
             numberOfIntervals  = obj.NumberOfIntervals    # not edited
-            lowerBound         = obj.LowerBound
-            upperBound         = obj.UpperBound
+            points             = obj.Points
             item = treeItem_Domain(nodeItem, type, name, description, discrMethod = discrMethod, 
                                                    order = order, numberOfIntervals = numberOfIntervals, 
-                                                   lowerBound = lowerBound, upperBound = upperBound, units = units)
+                                                   points = points, units = units)
         dictDomains[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:

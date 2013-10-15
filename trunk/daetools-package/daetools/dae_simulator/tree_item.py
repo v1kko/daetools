@@ -98,12 +98,11 @@ class treeItem(object):
                 d['NumberOfPoints']       = int(self._value)
             else:
                 d['Type']                 = str(self.type)
-                d['DiscretizationMethod'] = str(self._value[0])
-                d['DiscretizationOrder']  = int(self._value[1])
-                d['NumberOfIntervals']    = int(self._value[2])
-                d['LowerBound']           = float(self._value[3])
-                d['UpperBound']           = float(self._value[4])
-                d['Units']                = self._value[5].toDict()
+                d['DiscretizationMethod'] = str(self.discrMethod)
+                d['DiscretizationOrder']  = int(self.order)
+                d['NumberOfIntervals']    = int(self.numberOfIntervals)
+                d['Points']               = list(self._value)
+                d['Units']                = self.units.toDict()
             dictItems[self.canonicalName] = d
         
         elif self.itemType == treeItem.typeQuantity:
@@ -440,29 +439,24 @@ class editor_ArrayDomain(QtGui.QFrame):
         pass # Nothing is edited
 
 class editor_DistributedDomain(QtGui.QFrame):
-    def __init__(self, treeItem, description, discrMethod, order, numberOfIntervals, lowerBound, upperBound, units):
+    def __init__(self, treeItem, description, discrMethod, order, numberOfIntervals, points, units):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorDistributedDomain()
         self.ui.setupUi(self)
         
         self.treeItem = treeItem
         
-        d_validator = QtGui.QDoubleValidator(self)
-        self.ui.lowerBoundEdit.setValidator(d_validator)
-        self.ui.upperBoundEdit.setValidator(d_validator)
-        
         self.ui.discrMethodEdit.setText(str(discrMethod))
         self.ui.orderEdit.setText(str(order))
         self.ui.numberOfIntervalsEdit.setText(str(numberOfIntervals))
-        self.ui.lowerBoundEdit.setText(str(lowerBound))
-        self.ui.upperBoundEdit.setText(str(upperBound))
+        self.ui.pointsEdit.setPlainText(str(points))
         self.ui.unitsEdit.setText(str(units))
         self.ui.descriptionEdit.setHtml(description)
         
         self.connect(self.ui.updateButton, QtCore.SIGNAL('clicked()'), self.slotUpdate)
         
     def slotUpdate(self):
-        self.treeItem.setValue( (None, None, None, str(self.ui.lowerBoundEdit.text()), str(self.ui.upperBoundEdit.text()), None) )
+        self.treeItem.setValue(str(self.ui.pointsEdit.toPlainText()))
 
 class treeItem_Domain(treeItem):
     def __init__(self, parent, type, name, description, **kwargs):
@@ -478,10 +472,9 @@ class treeItem_Domain(treeItem):
             self.order              = kwargs['order']             # not edited
             self.numberOfIntervals  = kwargs['numberOfIntervals'] # not edited
             self.units              = kwargs['units']             # not edited
-            lowerBound              = kwargs['lowerBound']
-            upperBound              = kwargs['upperBound']
-            self.setValue((self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units))
-            self._editor = editor_DistributedDomain(self, description, self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units)
+            points                  = kwargs['points']
+            self.setValue(points)
+            self._editor = editor_DistributedDomain(self, description, self.discrMethod, self.order, self.numberOfIntervals, points, self.units)
             
         self._layout = QtGui.QHBoxLayout()
         self._layout.setObjectName("domainLayout")
@@ -493,23 +486,45 @@ class treeItem_Domain(treeItem):
             try:
                 self._value = int(value)
             except Exception as e:
-                errorMsg = 'Cannot get value for the domain tree item: %s\nError: Invalid value specified' % (daeGetStrippedName(self.name))
+                errorMsg = 'Cannot set value for the domain tree item: %s\nError: Invalid value specified' % (daeGetStrippedName(self.name))
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
 
         else:
-            if not len(value) == 6:
-                errorMsg = 'Invalid size of the value for the distributed domain tree item: %s\nIt must be 6 (%d sent)' % (daeGetStrippedName(self.name). len(value))
-                QtGui.QMessageBox.critical(None, "Error", errorMsg)
-                return
-            try:
-                lowerBound =  float(value[3])
-                upperBound =  float(value[4])
-                self._value = (self.discrMethod, self.order, self.numberOfIntervals, lowerBound, upperBound, self.units)
-            except Exception as e:
-                errorMsg = 'Cannot get value for the domain tree item: %s\nInvalid lower/upper bounds (must be floats)' % daeGetStrippedName(self.name)
-                QtGui.QMessageBox.critical(None, "Error", errorMsg)
-                return
+            if isinstance(value, basestring):
+                try:
+                    val = eval(value)
+                except Exception as e:
+                    errorMsg = 'Cannot set points for the tree item: %s\nError: Invalid value specified' % daeGetStrippedName(self.name)
+                    QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                    return
+
+                if not isinstance(val, list):
+                    errorMsg = 'Cannot set points for the tree item: %s\nIt must be a list of floats' % daeGetStrippedName(self.name)
+                    QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                    return
+                
+                flat_val = flatten(val)
+                for v in flat_val:
+                    if isinstance(v, (float, int, long)):
+                        v = float(v)
+                    else:
+                        errorMsg = 'Not all items are floats in the list of points for the tree item: %s' % daeGetStrippedName(self.name)
+                        QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                        return
+                
+                if len(self._value) != len(val):
+                    errorMsg = 'Cannot set points for the tree item: %s\nInvalid number of points (%s) (required is %d)' % (daeGetStrippedName(self.name), len(val), len(self._value))
+                    QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                    return
+            
+            elif isinstance(value, list):
+                val = value
+            
+            else:
+                raise RuntimeError('Invalid value: %s for the tree item: %s (must be a string or a list)' % (str(value), daeGetStrippedName(self.name)))
+                
+            self._value = val
             
         if self.treeWidgetItem:
             self.treeWidgetItem.setText(1, self.getValueAsText())
@@ -518,8 +533,8 @@ class treeItem_Domain(treeItem):
         if self.type == eArray:
             return 'Array(%d)' % self._value
         else:
-            return 'Distributed(%s, %d, %d, %f, %f, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, 
-                                                            self._value[3], self._value[4], str(self.units) if str(self.units) != '' else '-')
+            return 'Distributed(%s, %d, %d, %s, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, 
+                                                        self._value, str(self.units) if str(self.units) != '' else '-')
         
     def show(self, parent):
         self._editor.setParent(parent)

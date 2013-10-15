@@ -62,6 +62,17 @@ public:
 		if(ppdSensResiduals)
 			delete[] ppdSensResiduals;
 		
+        m_vectorVariables				= NULL;
+        m_vectorTimeDerivatives			= NULL;
+        m_vectorAbsTolerances			= NULL;
+        m_vectorInitialConditionsTypes	= NULL;
+
+        m_pvectorSVariables				= NULL;
+        m_pvectorSTimeDerivatives		= NULL;
+        ppdSValues						= NULL;
+        ppdSDValues						= NULL;
+        ppdSensResiduals				= NULL;
+
 //		if(m_vectorPivot)
 //			free(m_vectorPivot);
 //		if(m_vectorInvMaxElements)
@@ -162,16 +173,11 @@ public:
 	
 	void CleanUpSetupData()
 	{
+        // Do not destroy m_vectorAbsTolerances for they may be needed to change the relative tolerance during the simulation
 		if(m_vectorInitialConditionsTypes)
 		{
 			N_VDestroy_Serial(m_vectorInitialConditionsTypes);
 			m_vectorInitialConditionsTypes = NULL;
-		}
-		
-		if(m_vectorAbsTolerances)
-		{
-			N_VDestroy_Serial(m_vectorAbsTolerances);
-			m_vectorAbsTolerances = NULL;
 		}
 	}
 	

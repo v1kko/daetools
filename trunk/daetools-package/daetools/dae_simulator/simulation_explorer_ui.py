@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Tue Oct 15 01:36:00 2013
+# Created: Tue Oct 15 03:47:20 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -359,8 +359,12 @@ class Ui_SimulationExplorer(object):
         self.treeOutputVariables.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "Results", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Select variables to appear in the output.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Close this form without updating the simulation.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setText(QtGui.QApplication.translate("SimulationExplorer", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSaveRuntimeSettingsAsJSON.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Save runtime settings in JSON format to the specified file.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSaveRuntimeSettingsAsJSON.setText(QtGui.QApplication.translate("SimulationExplorer", "Save Settings as JSON...", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonGenerateCode.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Generate the code for a selected language (ANSI C, Modelica, FMI).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonGenerateCode.setText(QtGui.QApplication.translate("SimulationExplorer", "Generate code...", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonUpdateSimulationAndClose.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Update the simulation with the new values, call <span style=\" font-family:\'Courier New,courier\';\">simulation.Reinitialize()</span> and close this form.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonUpdateSimulationAndClose.setText(QtGui.QApplication.translate("SimulationExplorer", "Update and close", None, QtGui.QApplication.UnicodeUTF8))
 
